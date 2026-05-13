@@ -2,6 +2,8 @@ __pycache__
 local_*
 inpainted
 mask
+decensored
+decensor_mask
 result
 upscaled
 data/models

@@ -409,6 +409,7 @@ class ConfigPanel(Widget):
         label_startup = self.tr('Startup')
         label_upscaling = self.tr('Upscaling')
         label_post_merge = self.tr('Post-merge')
+        label_decensor = self.tr('Decensor')
         label_typesetting = self.tr('Typesetting')
         label_save = self.tr('Save')
         label_saladict = self.tr('SalaDict')
@@ -423,6 +424,7 @@ class ConfigPanel(Widget):
         generalTableItem.appendRows([
             TableItem(label_upscaling, CONFIG_FONTSIZE_TABLE),
             TableItem(label_post_merge, CONFIG_FONTSIZE_TABLE),
+            TableItem(label_decensor, CONFIG_FONTSIZE_TABLE),
             TableItem(label_settings_presets, CONFIG_FONTSIZE_TABLE),
             TableItem(label_startup, CONFIG_FONTSIZE_TABLE),
             TableItem(label_typesetting, CONFIG_FONTSIZE_TABLE),
@@ -532,6 +534,35 @@ class ConfigPanel(Widget):
             self._labeled_compact_widget(self.tr('Vertical overlap %'), self.post_merge_hoverlap_edit, post_merge_hoverlap_tip),
         )
         generalConfigPanel.addBlockWidget(post_merge_row)
+
+        generalConfigPanel.addTextLabel(label_decensor)
+        self.decensor_after_pipeline_checker, _ = generalConfigPanel.addCheckBox(
+            self.tr('Run decensor pass after pipeline'),
+            discription=self.tr('After the normal run finishes, detect censor masks and inpaint them with the currently selected inpainter.'))
+        self.decensor_after_pipeline_checker.stateChanged.connect(self.on_decensor_after_pipeline_changed)
+        self.decensor_mode_combobox, _ = generalConfigPanel.addCombobox(
+            [
+                self.tr('Auto'),
+                self.tr('Green mask'),
+                self.tr('Censor bars'),
+                self.tr('Mosaic'),
+            ],
+            self.tr('Mask mode'),
+            discription=self.tr('Which censorship mask detector to use for the decensor pass. Auto combines green masks, censor bars, and mosaic heuristics.'))
+        self.decensor_mode_combobox.activated.connect(self.on_decensor_mode_changed)
+        decensor_dilate_tip = self.tr('Grow the detected mask by this many pixels before inpainting, so censor edges are covered.')
+        decensor_area_tip = self.tr('Minimum connected mask area as a fraction of the page. Lower values keep smaller detections.')
+        self.decensor_dilate_edit = self._compact_line_edit(decensor_dilate_tip, placeholder='8')
+        self.decensor_dilate_edit.setValidator(CustomIntValidator(0, 256, 3))
+        self.decensor_min_area_edit = self._compact_line_edit(decensor_area_tip, placeholder='0.00005')
+        self.decensor_min_area_edit.setValidator(QDoubleValidator(0.0, 1.0, 8, self.decensor_min_area_edit))
+        self.decensor_dilate_edit.editingFinished.connect(self.on_decensor_numeric_changed)
+        self.decensor_min_area_edit.editingFinished.connect(self.on_decensor_numeric_changed)
+        decensor_row = self._compact_settings_row(
+            self._labeled_compact_widget(self.tr('Mask dilation'), self.decensor_dilate_edit, decensor_dilate_tip),
+            self._labeled_compact_widget(self.tr('Min area ratio'), self.decensor_min_area_edit, decensor_area_tip),
+        )
+        generalConfigPanel.addBlockWidget(decensor_row)
 
         generalConfigPanel.addTextLabel(label_settings_presets)
         self.settings_preset_combobox, preset_sublock = generalConfigPanel.addCombobox(
@@ -899,6 +930,28 @@ class ConfigPanel(Widget):
         pcfg.module.post_merge_min_width_overlap_ratio = read_int(self.post_merge_woverlap_edit, 50)
         pcfg.module.post_merge_min_height_overlap_ratio = read_int(self.post_merge_hoverlap_edit, 50)
 
+    def on_decensor_after_pipeline_changed(self):
+        pcfg.decensor_after_pipeline = self.decensor_after_pipeline_checker.isChecked()
+
+    def on_decensor_mode_changed(self):
+        mode_map = ['auto', 'green', 'bars', 'mosaic']
+        pcfg.decensor_mask_mode = mode_map[self.decensor_mode_combobox.currentIndex()]
+
+    def on_decensor_numeric_changed(self):
+        text = self.decensor_dilate_edit.text().strip()
+        if not text.isnumeric():
+            text = '8'
+            self.decensor_dilate_edit.setText(text)
+        pcfg.decensor_mask_dilate = max(0, int(text))
+
+        try:
+            min_area = float(self.decensor_min_area_edit.text().strip())
+        except ValueError:
+            min_area = 0.00005
+        min_area = max(0.0, min(min_area, 1.0))
+        self.decensor_min_area_edit.setText(f'{min_area:.8f}'.rstrip('0').rstrip('.') or '0')
+        pcfg.decensor_min_area_ratio = min_area
+
     def on_uppercase_changed(self):
         pcfg.let_uppercase_flag = self.let_uppercase_checker.isChecked()
 
@@ -1007,6 +1060,14 @@ class ConfigPanel(Widget):
         self.post_merge_hgap_edit.setText(str(pcfg.module.post_merge_max_horizontal_gap))
         self.post_merge_woverlap_edit.setText(str(pcfg.module.post_merge_min_width_overlap_ratio))
         self.post_merge_hoverlap_edit.setText(str(pcfg.module.post_merge_min_height_overlap_ratio))
+        self.decensor_after_pipeline_checker.setChecked(pcfg.decensor_after_pipeline)
+        decensor_modes = ['auto', 'green', 'bars', 'mosaic']
+        self.decensor_mode_combobox.setCurrentIndex(
+            decensor_modes.index(pcfg.decensor_mask_mode)
+            if pcfg.decensor_mask_mode in decensor_modes else 0
+        )
+        self.decensor_dilate_edit.setText(str(pcfg.decensor_mask_dilate))
+        self.decensor_min_area_edit.setText(f'{pcfg.decensor_min_area_ratio:.8f}'.rstrip('0').rstrip('.') or '0')
         self.selectext_minimenu_checker.setChecked(pcfg.textselect_mini_menu)
         self.let_uppercase_checker.setChecked(pcfg.let_uppercase_flag)
         self.let_textstyle_indep_checker.setChecked(pcfg.let_textstyle_indep_flag)

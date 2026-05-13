@@ -426,7 +426,7 @@ class TitleBar(Widget):
 
         self.runToolBtn = TitleBarToolBtn(self)
         self.runToolBtn.setText(self.tr('Run'))
-        self.runToolBtn.setToolTip(self.tr('Run menu: choose enabled stages, presets, and translation commands.'))
+        self.runToolBtn.setToolTip(self.tr('Run menu: choose enabled stages, presets, translation commands, and decensor actions.'))
 
         self.stageActions = stageActions = [
             QAction(self.tr('Enable Text Detection'), self),
@@ -462,17 +462,25 @@ class TitleBar(Widget):
         runAction = QAction(self.tr('Run'), self)
         runWoUpdateTextStyle = QAction(self.tr('Run without updating text style'), self)
         translatePageAction = QAction(self.tr('Translate Page'), self)
+        decensorCurrentAction = QAction(self.tr('Decensor Current Page'), self)
+        decensorAllAction = QAction(self.tr('Decensor All Pages'), self)
+        decensorCurrentAction.setToolTip(self.tr('Run the decensor pass on the current page with the selected inpainter.'))
+        decensorAllAction.setToolTip(self.tr('Run the decensor pass on all project pages with the selected inpainter.'))
         runMenu = QMenu(self.runToolBtn)
         runMenu.addActions(stageActions)
         runMenu.addSeparator()
         runMenu.addActions(list(self.runPresetActions.keys()))
         runMenu.addSeparator()
         runMenu.addActions([runAction, runWoUpdateTextStyle, translatePageAction])
+        runMenu.addSeparator()
+        runMenu.addActions([decensorCurrentAction, decensorAllAction])
         self.runToolBtn.setMenu(runMenu)
         self.runToolBtn.setPopupMode(QToolButton.InstantPopup)
         self.run_trigger = runAction.triggered
         self.run_woupdate_textstyle_trigger = runWoUpdateTextStyle.triggered
         self.translate_page_trigger = translatePageAction.triggered
+        self.decensor_current_trigger = decensorCurrentAction.triggered
+        self.decensor_all_trigger = decensorAllAction.triggered
 
         self.iconLabel = QLabel(self)
         if not C.ON_MACOS:

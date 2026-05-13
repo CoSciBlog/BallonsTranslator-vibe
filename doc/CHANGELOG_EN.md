@@ -1,6 +1,14 @@
 # Changelogs
 
 ### 2026-05-14
+[v1.4.0-vibe.12] decensor pipeline pass
+1. Added a `Decensor` settings section with automatic, green-mask, censor-bar, and mosaic mask modes plus mask dilation and minimum area controls.
+2. Added `Decensor Current Page` and `Decensor All Pages` actions to the Run menu.
+3. Added an optional `Run decensor pass after pipeline` setting so decensoring can run after normal detection, OCR, translation, and inpainting.
+4. Saved generated masks and preview outputs in project-local `decensor_mask` and `decensored` folders, while updating `inpainted` so export uses the decensored image.
+5. Reused the selected inpainter for reconstruction, allowing `flux2-klein` to act as an optional decensor/inpainting backend when selected.
+6. Updated README documentation and bumped the fork runtime version string to `1.4.0-vibe.12`.
+
 [v1.4.0-vibe.11] prioritized General settings labels
 1. Moved the `Upscaling` and `Post-merge` settings sections to the top of General settings before `Settings presets`.
 2. Restored concise visible labels for the upscale factor, maximum long edge, skip threshold, quality preset, and post-merge gap/overlap input fields.
