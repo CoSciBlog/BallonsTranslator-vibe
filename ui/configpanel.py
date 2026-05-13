@@ -378,6 +378,18 @@ class ConfigPanel(Widget):
             layout.addWidget(widget)
         layout.addStretch(1)
         return row
+
+    def _labeled_compact_widget(self, label: str, widget: QWidget, tooltip: str) -> QWidget:
+        container = QWidget()
+        layout = QVBoxLayout(container)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(3)
+        label_widget = ConfigTextLabel(label, CONFIG_FONTSIZE_CONTENT - 1)
+        label_widget.setToolTip(tooltip)
+        widget.setToolTip(tooltip)
+        layout.addWidget(label_widget)
+        layout.addWidget(widget)
+        return container
     reload_textstyle = Signal(bool)
     show_only_custom_font = Signal(bool)
 
@@ -396,6 +408,7 @@ class ConfigPanel(Widget):
         label_translator = self.tr('Translator')
         label_startup = self.tr('Startup')
         label_upscaling = self.tr('Upscaling')
+        label_post_merge = self.tr('Post-merge')
         label_typesetting = self.tr('Typesetting')
         label_save = self.tr('Save')
         label_saladict = self.tr('SalaDict')
@@ -408,9 +421,10 @@ class ConfigPanel(Widget):
             TableItem(label_translator, CONFIG_FONTSIZE_TABLE),
         ])
         generalTableItem.appendRows([
+            TableItem(label_upscaling, CONFIG_FONTSIZE_TABLE),
+            TableItem(label_post_merge, CONFIG_FONTSIZE_TABLE),
             TableItem(label_settings_presets, CONFIG_FONTSIZE_TABLE),
             TableItem(label_startup, CONFIG_FONTSIZE_TABLE),
-            TableItem(label_upscaling, CONFIG_FONTSIZE_TABLE),
             TableItem(label_typesetting, CONFIG_FONTSIZE_TABLE),
             TableItem(label_save, CONFIG_FONTSIZE_TABLE),
             TableItem(label_saladict, CONFIG_FONTSIZE_TABLE),
@@ -445,6 +459,79 @@ class ConfigPanel(Widget):
         dlConfigPanel.addTextLabel(label_translator)
         self.trans_config_panel = TranslatorConfigPanel(label_translator, scrollWidget=self)
         self.trans_sub_block = dlConfigPanel.addBlockWidget(self.trans_config_panel)
+
+        generalConfigPanel.addTextLabel(label_upscaling)
+        self.upscale_before_detection_checker, _ = generalConfigPanel.addCheckBox(
+            self.tr('Upscale pages before detection'),
+            discription=self.tr('Create a high-resolution working copy before text detection. Detection, OCR, masks, inpainting, and export then use that upscaled image.'))
+        self.upscale_before_detection_checker.stateChanged.connect(self.on_upscale_before_detection_changed)
+        upscale_factor_tip = self.tr('Resolution multiplier for pages that pass the size limits. Example: 2.0 for 2x.')
+        upscale_max_edge_tip = self.tr('Maximum long-edge resolution after upscaling. The factor is capped so the result does not exceed this value.')
+        upscale_skip_edge_tip = self.tr('Pages whose original long edge is already above this value are not upscaled. Use 0 to always allow upscaling.')
+        upscale_quality_tip = self.tr('Quality/speed preset for OpenCV upscaling. AnimeSharp adds stronger manga-style sharpening inspired by 2x-AnimeSharpV4.')
+        self.upscale_factor_edit = self._compact_line_edit(upscale_factor_tip, placeholder='2.0')
+        self.upscale_factor_edit.setValidator(QDoubleValidator(1.0, 8.0, 2, self.upscale_factor_edit))
+        self.upscale_factor_edit.editingFinished.connect(self.on_upscale_numeric_changed)
+        self.upscale_max_edge_edit = self._compact_line_edit(upscale_max_edge_tip, placeholder='4096')
+        self.upscale_skip_edge_edit = self._compact_line_edit(upscale_skip_edge_tip, placeholder='2500')
+        for editor in [self.upscale_max_edge_edit, self.upscale_skip_edge_edit]:
+            editor.setValidator(CustomIntValidator(0, 99999, 5))
+            editor.editingFinished.connect(self.on_upscale_numeric_changed)
+        self.upscale_quality_combobox = ConfigComboBox(scrollWidget=generalConfigPanel)
+        self.upscale_quality_combobox.addItems([
+            self.tr('Fast'),
+            self.tr('Balanced'),
+            self.tr('Quality'),
+            self.tr('AnimeSharp'),
+        ])
+        self.upscale_quality_combobox.setFixedHeight(CONFIG_COMBOBOX_HEIGHT)
+        self.upscale_quality_combobox.activated.connect(self.on_upscale_quality_changed)
+        upscale_row = self._compact_settings_row(
+            self._labeled_compact_widget(self.tr('Factor'), self.upscale_factor_edit, upscale_factor_tip),
+            self._labeled_compact_widget(self.tr('Max long edge'), self.upscale_max_edge_edit, upscale_max_edge_tip),
+            self._labeled_compact_widget(self.tr('Skip above'), self.upscale_skip_edge_edit, upscale_skip_edge_tip),
+            self._labeled_compact_widget(self.tr('Quality'), self.upscale_quality_combobox, upscale_quality_tip),
+        )
+        generalConfigPanel.addBlockWidget(upscale_row)
+
+        generalConfigPanel.addTextLabel(label_post_merge)
+        self.post_merge_checker, _ = generalConfigPanel.addCheckBox(
+            self.tr('Merge nearby text boxes after pipeline'),
+            discription=self.tr('After translation, merge nearby text boxes using the Region Merge Tool rules to reduce overlapping rendered text.'))
+        self.post_merge_checker.stateChanged.connect(self.on_post_merge_changed)
+        self.post_merge_mode_combobox, _ = generalConfigPanel.addCombobox(
+            [
+                self.tr('Vertical Merge'),
+                self.tr('Horizontal Merge'),
+                self.tr('Vertical then Horizontal'),
+                self.tr('Horizontal then Vertical'),
+            ],
+            self.tr('Post-pipeline merge mode'),
+            discription=self.tr('Direction used when automatically merging translated text boxes after the pipeline finishes.'))
+        self.post_merge_mode_combobox.activated.connect(self.on_post_merge_mode_changed)
+        post_merge_vgap_tip = self.tr('Maximum pixel distance between stacked boxes for automatic vertical merging.')
+        post_merge_hgap_tip = self.tr('Maximum pixel distance between side-by-side boxes for automatic horizontal merging.')
+        post_merge_woverlap_tip = self.tr('Minimum horizontal overlap required when merging boxes above or below each other.')
+        post_merge_hoverlap_tip = self.tr('Minimum vertical overlap required when merging boxes next to each other.')
+        self.post_merge_vgap_edit = self._compact_line_edit(post_merge_vgap_tip, placeholder='30')
+        self.post_merge_hgap_edit = self._compact_line_edit(post_merge_hgap_tip, placeholder='30')
+        self.post_merge_woverlap_edit = self._compact_line_edit(post_merge_woverlap_tip, placeholder='50')
+        self.post_merge_hoverlap_edit = self._compact_line_edit(post_merge_hoverlap_tip, placeholder='50')
+        for editor in [
+            self.post_merge_vgap_edit,
+            self.post_merge_hgap_edit,
+            self.post_merge_woverlap_edit,
+            self.post_merge_hoverlap_edit,
+        ]:
+            editor.setValidator(CustomIntValidator(0, 1000, 4))
+            editor.editingFinished.connect(self.on_post_merge_numeric_changed)
+        post_merge_row = self._compact_settings_row(
+            self._labeled_compact_widget(self.tr('Vertical gap'), self.post_merge_vgap_edit, post_merge_vgap_tip),
+            self._labeled_compact_widget(self.tr('Horizontal gap'), self.post_merge_hgap_edit, post_merge_hgap_tip),
+            self._labeled_compact_widget(self.tr('Horizontal overlap %'), self.post_merge_woverlap_edit, post_merge_woverlap_tip),
+            self._labeled_compact_widget(self.tr('Vertical overlap %'), self.post_merge_hoverlap_edit, post_merge_hoverlap_tip),
+        )
+        generalConfigPanel.addBlockWidget(post_merge_row)
 
         generalConfigPanel.addTextLabel(label_settings_presets)
         self.settings_preset_combobox, preset_sublock = generalConfigPanel.addCombobox(
@@ -496,41 +583,6 @@ class ConfigPanel(Widget):
             self.tr('Prevent mouse wheel changes on input fields'),
             discription=self.tr('Ignore mouse wheel changes on combo boxes and spin boxes so scrolling settings does not accidentally change values.'))
         self.prevent_input_wheel_checker.stateChanged.connect(self.on_prevent_input_wheel_changed)
-
-        generalConfigPanel.addTextLabel(label_upscaling)
-        self.upscale_before_detection_checker, _ = generalConfigPanel.addCheckBox(
-            self.tr('Upscale pages before detection'),
-            discription=self.tr('Create a high-resolution working copy before text detection. Detection, OCR, masks, inpainting, and export then use that upscaled image.'))
-        self.upscale_before_detection_checker.stateChanged.connect(self.on_upscale_before_detection_changed)
-        upscale_factor_tip = self.tr('Upscale factor: resolution multiplier for pages that pass the size limits. Example: 2.0 for 2x.')
-        upscale_max_edge_tip = self.tr('Upscale max long edge: maximum long-edge resolution after upscaling. The factor is capped so the result does not exceed this value.')
-        upscale_skip_edge_tip = self.tr('Skip upscale above long edge: pages whose original long edge is already above this value are not upscaled. Use 0 to always allow upscaling.')
-        upscale_quality_tip = self.tr('Upscale quality: quality/speed preset for OpenCV upscaling. AnimeSharp adds stronger manga-style sharpening inspired by 2x-AnimeSharpV4.')
-        self.upscale_factor_edit = self._compact_line_edit(upscale_factor_tip, placeholder='2.0')
-        self.upscale_factor_edit.setValidator(QDoubleValidator(1.0, 8.0, 2, self.upscale_factor_edit))
-        self.upscale_factor_edit.editingFinished.connect(self.on_upscale_numeric_changed)
-        self.upscale_max_edge_edit = self._compact_line_edit(upscale_max_edge_tip, placeholder='4096')
-        self.upscale_skip_edge_edit = self._compact_line_edit(upscale_skip_edge_tip, placeholder='2500')
-        for editor in [self.upscale_max_edge_edit, self.upscale_skip_edge_edit]:
-            editor.setValidator(CustomIntValidator(0, 99999, 5))
-            editor.editingFinished.connect(self.on_upscale_numeric_changed)
-        self.upscale_quality_combobox = ConfigComboBox(scrollWidget=generalConfigPanel)
-        self.upscale_quality_combobox.addItems([
-            self.tr('Fast'),
-            self.tr('Balanced'),
-            self.tr('Quality'),
-            self.tr('AnimeSharp'),
-        ])
-        self.upscale_quality_combobox.setFixedHeight(CONFIG_COMBOBOX_HEIGHT)
-        self.upscale_quality_combobox.setToolTip(upscale_quality_tip)
-        self.upscale_quality_combobox.activated.connect(self.on_upscale_quality_changed)
-        upscale_row = self._compact_settings_row(
-            self.upscale_factor_edit,
-            self.upscale_max_edge_edit,
-            self.upscale_skip_edge_edit,
-            self.upscale_quality_combobox,
-        )
-        generalConfigPanel.addBlockWidget(upscale_row)
 
         generalConfigPanel.addTextLabel(label_typesetting)
         dec_program_str = self.tr('decide by program')
@@ -612,43 +664,6 @@ class ConfigPanel(Widget):
                 discription=self.tr('Split translation into multi-lines according to the extracted balloon region.'))
 
         self.let_autolayout_checker.stateChanged.connect(self.on_autolayout_changed)
-        self.post_merge_checker, _ = generalConfigPanel.addCheckBox(
-            self.tr('Merge nearby text boxes after pipeline'),
-            discription=self.tr('After translation, merge nearby text boxes using the Region Merge Tool rules to reduce overlapping rendered text.'))
-        self.post_merge_checker.stateChanged.connect(self.on_post_merge_changed)
-        self.post_merge_mode_combobox, _ = generalConfigPanel.addCombobox(
-            [
-                self.tr('Vertical Merge'),
-                self.tr('Horizontal Merge'),
-                self.tr('Vertical then Horizontal'),
-                self.tr('Horizontal then Vertical'),
-            ],
-            self.tr('Post-pipeline merge mode'),
-            discription=self.tr('Direction used when automatically merging translated text boxes after the pipeline finishes.'))
-        self.post_merge_mode_combobox.activated.connect(self.on_post_merge_mode_changed)
-        post_merge_vgap_tip = self.tr('Post-merge vertical gap: maximum pixel distance between stacked boxes for automatic vertical merging.')
-        post_merge_hgap_tip = self.tr('Post-merge horizontal gap: maximum pixel distance between side-by-side boxes for automatic horizontal merging.')
-        post_merge_woverlap_tip = self.tr('Post-merge horizontal overlap %: minimum horizontal overlap required when merging boxes above or below each other.')
-        post_merge_hoverlap_tip = self.tr('Post-merge vertical overlap %: minimum vertical overlap required when merging boxes next to each other.')
-        self.post_merge_vgap_edit = self._compact_line_edit(post_merge_vgap_tip, placeholder='30')
-        self.post_merge_hgap_edit = self._compact_line_edit(post_merge_hgap_tip, placeholder='30')
-        self.post_merge_woverlap_edit = self._compact_line_edit(post_merge_woverlap_tip, placeholder='50')
-        self.post_merge_hoverlap_edit = self._compact_line_edit(post_merge_hoverlap_tip, placeholder='50')
-        for editor in [
-            self.post_merge_vgap_edit,
-            self.post_merge_hgap_edit,
-            self.post_merge_woverlap_edit,
-            self.post_merge_hoverlap_edit,
-        ]:
-            editor.setValidator(CustomIntValidator(0, 1000, 4))
-            editor.editingFinished.connect(self.on_post_merge_numeric_changed)
-        post_merge_row = self._compact_settings_row(
-            self.post_merge_vgap_edit,
-            self.post_merge_hgap_edit,
-            self.post_merge_woverlap_edit,
-            self.post_merge_hoverlap_edit,
-        )
-        generalConfigPanel.addBlockWidget(post_merge_row)
         self.let_uppercase_checker, _ = generalConfigPanel.addCheckBox(self.tr('To uppercase'))
         self.let_uppercase_checker.stateChanged.connect(self.on_uppercase_changed)
 
