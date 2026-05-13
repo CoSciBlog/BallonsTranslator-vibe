@@ -89,6 +89,11 @@ class TextBlkEncoder(NumpyEncoder):
 
 
 class ProjImgTrans:
+    DEFAULT_GLOSSARY_PROMPT = (
+        "Use the glossary only as translation guidance. Apply preferred target "
+        "terms naturally, but never copy glossary categories, notes, or bracketed "
+        "metadata such as [CHARACTER] or [PLACE] into the translated text."
+    )
 
     def __init__(self, directory: str = None):
         self.type = 'imgtrans'
@@ -103,6 +108,7 @@ class ProjImgTrans:
         self.not_found_pages: Dict[str, List[TextBlock]] = {}
         self.new_pages: List[str] = []
         self.proj_path: str = None
+        self.glossary: Dict[str, str] = self.default_glossary()
 
         self.current_img: str = None
         self.img_array: np.ndarray = None
@@ -121,6 +127,26 @@ class ProjImgTrans:
 
     def proj_name(self) -> str:
         return self.type+'_'+osp.basename(self.directory)
+
+    @classmethod
+    def default_glossary(cls) -> Dict[str, str]:
+        return {
+            'entries': '',
+            'prompt': cls.DEFAULT_GLOSSARY_PROMPT,
+        }
+
+    @classmethod
+    def normalize_glossary(cls, glossary) -> Dict[str, str]:
+        default = cls.default_glossary()
+        if isinstance(glossary, str):
+            default['entries'] = glossary
+            return default
+        if isinstance(glossary, dict):
+            entries = glossary.get('entries', glossary.get('text', glossary.get('glossary', '')))
+            prompt = glossary.get('prompt', default['prompt'])
+            default['entries'] = entries if isinstance(entries, str) else ''
+            default['prompt'] = prompt if isinstance(prompt, str) else cls.DEFAULT_GLOSSARY_PROMPT
+        return default
 
     def load(self, directory: str, json_path: str = None) -> bool:
         self.directory = directory
@@ -183,6 +209,8 @@ class ProjImgTrans:
             self._image_info = proj_dict['image_info']
         else:
             self._image_info = {}
+
+        self.glossary = self.normalize_glossary(proj_dict.get('glossary', {}))
 
         for p in self.pages:
             if p not in self._image_info:
@@ -315,6 +343,7 @@ class ProjImgTrans:
         if not osp.exists(self.directory):
             raise ProjectDirNotExistException
         self.set_current_img(None)
+        self.glossary = self.default_glossary()
         imglist = find_all_imgs(self.directory, abs_path=False, sort=True)
         self.pages = {}
         self._pagename2idx = {}
@@ -353,6 +382,7 @@ class ProjImgTrans:
             'pages': pages,
             'current_img': self.current_img,
             'image_info': image_info,
+            'glossary': self.glossary,
         }
 
     def read_img(self, imgname: str) -> np.ndarray:

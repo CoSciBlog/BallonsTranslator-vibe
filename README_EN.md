@@ -7,8 +7,8 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.6`  
-Upstream base: `BallonsTranslator 1.4.0`  
+Fork release: `1.4.0-vibe.7`
+Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
 BallonsTranslator is a desktop tool for comic and manga translation with OCR, text detection, inpainting, translation, and interactive text editing.
@@ -24,6 +24,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Replaced the mixed-language root `README.md` with the English documentation and refreshed the English README for this fork.
 - Documented that translated output and some documentation assets are machine-translated and should be disclosed as such when redistributed.
 - Fixed `manga_ocr` startup with current Transformers releases by using the image processor API required by the local `manga-ocr-base` vision model.
+- Added a project glossary window, project-level glossary persistence in `imgtrans` JSON, and a custom glossary prompt for LLM translation guidance.
 
 ## Features
 
@@ -68,6 +69,10 @@ The launcher update flow tracks `https://github.com/CoSciBlog/BallonsTranslator-
 ## OCR notes
 
 `manga_ocr` uses the local model in `data/models/manga-ocr-base`. Current Transformers versions load this vision model through `AutoImageProcessor`; older `AutoFeatureExtractor` loading can fail with `Unrecognized feature extractor` even when `preprocessor_config.json` is present.
+
+## Project glossary
+
+The left sidebar includes a `Gloss` button that opens the current project's glossary window. Entries and the glossary prompt are saved inside the project's `imgtrans_*.json` file under `glossary`, so each manga/comic project can keep its own terminology. LLM translators use those entries for consistency, but category labels and notes such as `[CHARACTER]` or `[PLACE]` are treated as metadata and are not included in translation output.
 
 ## Programmatic use
 

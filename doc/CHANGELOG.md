@@ -1,6 +1,13 @@
 # Changelogs
 
 ### 2026-05-13
+[v1.4.0-vibe.7] project glossary UI and persistence
+1. Added a left-sidebar `Gloss` button that opens a project glossary window.
+2. Saved glossary entries and the custom glossary prompt in each project's `imgtrans_*.json` file.
+3. Passed project glossary data into LLM translators and synchronized automatically extracted entries back to the project.
+4. Added a custom `glossary prompt` setting and prompt rules that keep metadata such as `[CHARACTER]` or `[PLACE]` out of translated text.
+5. Added missing tooltips for common sidebar, title bar, and module selector controls.
+
 [v1.4.0-vibe.6] manga_ocr Transformers compatibility
 1. Switched `manga_ocr` from `AutoFeatureExtractor` to `AutoImageProcessor` so the local `data/models/manga-ocr-base` vision model loads under current Transformers releases.
 2. Updated the README OCR notes to explain the `Unrecognized feature extractor` failure and the supported image processor path.

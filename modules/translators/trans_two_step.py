@@ -306,7 +306,9 @@ class TwoStepTranslator(LLM_API_Translator):
         prompt = self._assemble_refinement_prompt(src_list, draft_list, to_lang)
 
         try:
-            parsed_response = self._request_translation(prompt, is_reflection=True)
+            parsed_response = self._clean_translation_response(
+                self._request_translation(prompt, is_reflection=True)
+            )
             if parsed_response and len(parsed_response.translations) == len(src_list):
                 translations_by_id = {
                     item.id: item.translation for item in parsed_response.translations
