@@ -65,6 +65,7 @@ class LeftBar(Widget):
     save_proj = Signal()
     save_config = Signal()
     glossary_clicked = Signal()
+    run_translate_clicked = Signal()
     def __init__(self, mainwindow, *args, **kwargs) -> None:
         super().__init__(mainwindow, *args, **kwargs)
         self.mainwindow: QMainWindow = mainwindow
@@ -155,9 +156,23 @@ class LeftBar(Widget):
         self.run_imgtrans_clicked = self.runImgtransBtn.clicked
         self.runImgtransBtn.setFixedSize(LEFTBTN_WIDTH, LEFTBTN_WIDTH)
 
+        self.runTranslateBtn = QPushButton()
+        self.runTranslateBtn.setObjectName('RunButton')
+        self.runTranslateBtn.setText(self.tr('Trans'))
+        self.runTranslateBtn.setToolTip(self.tr('Translate only: run translation on existing text boxes without text detection, OCR, or inpainting.'))
+        self.runTranslateBtn.setIcon(QIcon('icons/bottombar_translate.svg'))
+        self.runTranslateBtn.setIconSize(QSize(17, 17))
+        font = self.runTranslateBtn.font()
+        font.setPixelSize(9)
+        self.runTranslateBtn.setFont(font)
+        self.runTranslateBtn.setFixedSize(LEFTBTN_WIDTH, LEFTBTN_WIDTH)
+        self.runTranslateBtn.clicked.connect(self.run_translate_clicked)
+
         self.glossaryBtn = QPushButton()
         self.glossaryBtn.setText(self.tr('Gloss'))
         self.glossaryBtn.setToolTip(self.tr('Glossary: open the current project glossary.'))
+        self.glossaryBtn.setIcon(QIcon('icons/leftbar_glossary.svg'))
+        self.glossaryBtn.setIconSize(QSize(17, 17))
         font = self.glossaryBtn.font()
         font.setPixelSize(9)
         self.glossaryBtn.setFont(font)
@@ -173,9 +188,10 @@ class LeftBar(Widget):
         vlayout.addItem(QSpacerItem(0, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
         vlayout.addWidget(self.configChecker)
         vlayout.addWidget(self.runImgtransBtn)
+        vlayout.addWidget(self.runTranslateBtn)
         vlayout.setContentsMargins(padding, LEFTBTN_WIDTH // 2, padding, LEFTBTN_WIDTH // 2)
         vlayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        vlayout.setSpacing(LEFTBTN_WIDTH * 3 // 4)
+        vlayout.setSpacing(LEFTBTN_WIDTH // 2)
         self.setGeometry(0, 0, 300, 500)
         self.setMouseTracking(True)
 

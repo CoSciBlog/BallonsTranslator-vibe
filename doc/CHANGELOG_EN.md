@@ -1,6 +1,13 @@
 # Changelogs
 
 ### 2026-05-13
+[v1.4.0-vibe.10] settings polish and translation-only sidebar run
+1. Removed visible labels from the upscale factor, upscale max long edge, skip upscale, upscale quality, and post-merge gap/overlap controls, moving their explanatory text to hover tooltips.
+2. Tightened spacing, field height, and margins in the General > Typesetting settings so related controls take less vertical space.
+3. Added a glossary icon to the left-sidebar `Gloss` button.
+4. Added a second left-sidebar run button, `Trans`, that runs only translation on existing text boxes and skips text detection, OCR, and inpainting.
+5. Bumped the fork runtime version string to `1.4.0-vibe.10`.
+
 [v1.4.0-vibe.9] pre-detection page upscaling
 1. Added an optional `Upscale pages before detection` setting so projects can create high-resolution working images before text detection runs.
 2. Added upscale factor, maximum long-edge resolution, skip-threshold, and speed/quality presets including an `AnimeSharp`-style sharpening mode inspired by 2x-AnimeSharpV4 workflows.

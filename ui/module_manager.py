@@ -329,6 +329,8 @@ class ImgtransThread(QThread):
         self.stop_requested = False
         self.pages_to_process = None  # 需要处理的页面列表（用于继续运行模式）
 
+        self.translation_only = False
+
     def on_module_thread_stopped(self):
         while True:
             # might freeze UI
@@ -360,9 +362,20 @@ class ImgtransThread(QThread):
         self.pages_to_process = pages_to_process  # 保存需要处理的页面列表
         self.num_pages = len(self.imgtrans_proj.pages)
         self.stop_requested = False
+        self.translation_only = False
         # 创建处理索引到实际页面索引的映射
         self.process_idx_to_page_idx = {}
         self.job = self._imgtrans_pipeline
+        self.start()
+
+    def runTranslateOnlyPipeline(self, imgtrans_proj: ProjImgTrans, pages_to_process=None):
+        self.imgtrans_proj = imgtrans_proj
+        self.pages_to_process = pages_to_process
+        self.num_pages = len(self.imgtrans_proj.pages)
+        self.stop_requested = False
+        self.translation_only = True
+        self.process_idx_to_page_idx = {}
+        self.job = self._translate_only_pipeline
         self.start()
     
     def requestStop(self):
@@ -597,6 +610,40 @@ class ImgtransThread(QThread):
         if self.stop_requested and (not cfg_module.enable_translate or not self.parallel_trans):
             self.pipeline_stopped.emit()
 
+    def _translate_only_pipeline(self):
+        self.detect_counter = 0
+        self.ocr_counter = 0
+        self.translate_counter = 0
+        self.inpaint_counter = 0
+
+        all_pages = list(self.imgtrans_proj.pages.keys())
+        if self.pages_to_process is not None and len(self.pages_to_process) > 0:
+            pages_to_iterate = [page for page in self.pages_to_process if page in self.imgtrans_proj.pages]
+        else:
+            pages_to_iterate = all_pages
+
+        self.num_pages = max(1, len(pages_to_iterate))
+        for process_idx, page_name in enumerate(pages_to_iterate):
+            self.process_idx_to_page_idx[process_idx] = all_pages.index(page_name)
+
+        self.translate_thread.num_process_pages = self.num_pages
+        LOGGER.info(f'Running translation only for {len(pages_to_iterate)} pages')
+
+        for imgname in pages_to_iterate:
+            if self.stop_requested:
+                LOGGER.info('Translation-only pipeline stopped by user')
+                break
+
+            blk_list = self.imgtrans_proj.pages.get(imgname, [])
+            if len(blk_list) > 0:
+                self.translator.translate_textblk_lst(blk_list)
+            self.translate_counter += 1
+            self.imgtrans_proj.update_page_progress(imgname, RunStatus.FIN_TRANSLATE)
+            self.update_translate_progress.emit(self.translate_counter)
+
+        if self.stop_requested:
+            self.pipeline_stopped.emit()
+
     def detect_finished(self) -> bool:
         if self.imgtrans_proj is None:
             return True
@@ -608,6 +655,8 @@ class ImgtransThread(QThread):
         return self.ocr_counter == self.num_pages or not cfg_module.enable_ocr
 
     def translate_finished(self) -> bool:
+        if self.translation_only:
+            return self.translate_counter == self.num_pages
         if self.imgtrans_proj is None \
             or not cfg_module.enable_ocr \
             or not cfg_module.enable_translate:
@@ -628,6 +677,11 @@ class ImgtransThread(QThread):
         self.job = None
 
     def recent_finished_index(self, ref_counter: int) -> int:
+        if self.translation_only:
+            process_idx = ref_counter - 1
+            if hasattr(self, 'process_idx_to_page_idx') and process_idx in self.process_idx_to_page_idx:
+                return self.process_idx_to_page_idx[process_idx]
+            return process_idx
         if cfg_module.enable_detect:
             ref_counter = min(ref_counter, self.detect_counter)
         if cfg_module.enable_ocr:
@@ -817,6 +871,24 @@ class ModuleManager(QObject):
         self.progress_msgbox.zero_progress()
         self.progress_msgbox.show()
         self.imgtrans_thread.runImgtransPipeline(self.imgtrans_proj, pages_to_process)
+
+    def runTranslateOnlyPipeline(self, pages_to_process=None):
+        if self.imgtrans_proj.is_empty:
+            LOGGER.info('proj file is empty, nothing to translate')
+            self.progress_msgbox.hide()
+            return
+        self.last_finished_index = -1
+        self.pipeline_pages_to_process = pages_to_process
+        self.post_pipeline_merge_done = False
+        self.terminateRunningThread()
+
+        self.progress_msgbox.detect_bar.setVisible(False)
+        self.progress_msgbox.ocr_bar.setVisible(False)
+        self.progress_msgbox.translate_bar.setVisible(True)
+        self.progress_msgbox.inpaint_bar.setVisible(False)
+        self.progress_msgbox.zero_progress()
+        self.progress_msgbox.show()
+        self.imgtrans_thread.runTranslateOnlyPipeline(self.imgtrans_proj, pages_to_process)
     
     def stopImgtransPipeline(self):
         """停止图像翻译流程"""
@@ -912,6 +984,8 @@ class ModuleManager(QObject):
         return progress
 
     def proj_finished(self):
+        if self.imgtrans_thread.translation_only:
+            return self.imgtrans_thread.translate_finished()
         if self.imgtrans_thread.detect_finished() \
             and self.imgtrans_thread.ocr_finished() \
                 and self.imgtrans_thread.translate_finished() \
@@ -1008,15 +1082,18 @@ class ModuleManager(QObject):
 
     def finishImgtransPipeline(self):
         if self.proj_finished():
-            self.apply_post_pipeline_textbox_merge()
+            if not self.imgtrans_thread.translation_only:
+                self.apply_post_pipeline_textbox_merge()
             self.progress_msgbox.hide()
             self.imgtrans_pipeline_finished.emit()
+            self.imgtrans_thread.translation_only = False
     
     def on_imgtrans_thread_stopped(self):
         """线程完成时确保关闭进度对话框"""
         # 线程完成了，直接关闭窗口
         self.progress_msgbox.hide()
         self.imgtrans_pipeline_finished.emit()
+        self.imgtrans_thread.translation_only = False
 
     def setTranslator(self, translator: str = None):
         if translator is None:

@@ -385,6 +385,7 @@ class MainWindow(mainwindow_cls):
         module_manager.setInpainter()
 
         self.leftBar.run_imgtrans_clicked.connect(self.run_imgtrans)
+        self.leftBar.run_translate_clicked.connect(self.run_translate_only)
 
         self.titleBar.darkModeAction.setChecked(pcfg.darkmode)
 
@@ -1546,6 +1547,26 @@ class MainWindow(mainwindow_cls):
     def run_imgtrans_wo_textstyle_update(self):
         self._run_imgtrans_wo_textstyle_update = True
         self.run_imgtrans()
+
+    def run_translate_only(self):
+        if self.imgtrans_proj.is_empty:
+            return
+        self.backup_blkstyles.clear()
+        if self.bottomBar.textblockChecker.isChecked():
+            self.bottomBar.textblockChecker.click()
+        self.postprocess_mt_toggle = False
+        self.st_manager.updateTextBlkList()
+
+        for page_name, blklist in self.imgtrans_proj.pages.items():
+            self.imgtrans_proj.set_page_progress(page_name, 0)
+            ffmt_list = []
+            self.backup_blkstyles.append(ffmt_list)
+            for textblk in blklist:
+                ffmt_list.append(textblk.fontformat.deepcopy())
+                textblk.rich_text = ''
+                textblk.vertical = textblk.src_is_vertical
+
+        self.module_manager.runTranslateOnlyPipeline()
 
     def on_run_imgtrans(self, continue_mode=False):
         self.backup_blkstyles.clear()
