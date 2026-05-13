@@ -1,5 +1,12 @@
 # Changelogs
 
+### 2026-05-14
+[v1.4.0-vibe.11] prioritized General settings labels
+1. Moved the `Upscaling` and `Post-merge` settings sections to the top of General settings before `Settings presets`.
+2. Restored concise visible labels for the upscale factor, maximum long edge, skip threshold, quality preset, and post-merge gap/overlap input fields.
+3. Kept the longer field explanations as hover tooltips on both labels and controls.
+4. Updated README documentation and bumped the fork runtime version string to `1.4.0-vibe.11`.
+
 ### 2026-05-13
 [v1.4.0-vibe.10] settings polish and translation-only sidebar run
 1. Removed visible labels from the upscale factor, upscale max long edge, skip upscale, upscale quality, and post-merge gap/overlap controls, moving their explanatory text to hover tooltips.

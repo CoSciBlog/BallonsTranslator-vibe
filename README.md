@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README_EN.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.10`
+Fork release: `1.4.0-vibe.11`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -28,6 +28,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Added an optional settings safety switch that prevents mouse wheel changes on combo boxes and spin boxes, plus wider input fields for long API keys, URLs, and prompts.
 - Added optional pre-detection page upscaling with factor, quality, maximum size, and skip-threshold settings.
 - Refined the General settings layout, added a glossary icon, and added a sidebar translation-only run button.
+- Moved Upscaling and Post-merge settings to the top of General settings, with visible field labels and detailed hover tooltips.
 
 ## Features
 
@@ -83,7 +84,11 @@ The General settings page includes `Prevent mouse wheel changes on input fields`
 
 ## Pre-detection upscaling
 
-The General settings page includes an `Upscaling` section. When `Upscale pages before detection` is enabled, each page can be upscaled into the project-local `upscaled` folder before text detection. Detection, OCR, mask creation, inpainting, canvas display, and export then use that high-resolution working image. The settings include an upscale factor, maximum long-edge resolution, a long-edge threshold above which images are skipped, and speed/quality presets from `Fast` through `AnimeSharp`.
+The General settings page starts with an `Upscaling` section. When `Upscale pages before detection` is enabled, each page can be upscaled into the project-local `upscaled` folder before text detection. Detection, OCR, mask creation, inpainting, canvas display, and export then use that high-resolution working image. The settings include labeled fields for upscale factor, maximum long-edge resolution, a long-edge threshold above which images are skipped, and speed/quality presets from `Fast` through `AnimeSharp`; detailed explanations remain available as hover tooltips.
+
+## Post-merge settings
+
+The General settings page also places `Post-merge` near the top, before settings presets. It keeps concise labels for vertical gap, horizontal gap, and overlap thresholds while retaining the longer behavior descriptions in hover tooltips.
 
 ## Translation-only run
 
