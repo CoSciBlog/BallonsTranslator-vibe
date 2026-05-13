@@ -9,6 +9,7 @@ from PIL import Image
 
 from .logger import logger as LOGGER
 from .io_utils import find_all_imgs, imread, imwrite, NumpyEncoder
+from .upscale import effective_upscale_factor, upscale_image
 from .textblock import TextBlock, FontFormat
 from .config import pcfg, RunStatus
 from . import shared
@@ -169,6 +170,8 @@ class ProjImgTrans:
             os.makedirs(self.inpainted_dir())
         if not osp.exists(self.mask_dir()):
             os.makedirs(self.mask_dir())
+        if not osp.exists(self.upscaled_dir()):
+            os.makedirs(self.upscaled_dir())
 
         return new_proj
 
@@ -177,6 +180,9 @@ class ProjImgTrans:
 
     def inpainted_dir(self):
         return osp.join(self.directory, 'inpainted')
+
+    def upscaled_dir(self):
+        return osp.join(self.directory, 'upscaled')
 
     def result_dir(self):
         return osp.join(self.directory, 'result')
@@ -297,9 +303,8 @@ class ProjImgTrans:
             if imgname not in self.pages:
                 raise ImgnameNotInProjectException
             self.current_img = imgname
-            img_path = self.current_img_path()
             mask_path = self.get_mask_path(get_last_modified=True)
-            self.img_array = imread(img_path)
+            self.img_array = self.read_img(imgname)
             im_h, im_w = self.img_array.shape[:2]
             if osp.exists(mask_path):
                 self.mask_array = imread(mask_path, cv2.IMREAD_GRAYSCALE)
@@ -388,11 +393,63 @@ class ProjImgTrans:
     def read_img(self, imgname: str) -> np.ndarray:
         if imgname not in self.pages:
             raise ImgnameNotInProjectException
+        img_info = self._image_info.setdefault(imgname, {})
+        upscaled_path = self.get_upscaled_path(imgname)
+        if pcfg.upscale_before_detection and osp.exists(upscaled_path):
+            img = imread(upscaled_path)
+            h, w = img.shape[:2]
+            img_info.update({'width': w, 'height': h, 'upscaled': True})
+            return img
         img_path = osp.join(self.directory, imgname)
         img = imread(img_path)
         h, w = img.shape[:2]
-        self._image_info[imgname].update({'width': w, 'height': h})
+        img_info.update({'width': w, 'height': h, 'upscaled': False})
         return img
+
+    def get_upscaled_path(self, imgname: str = None) -> str:
+        if imgname is None:
+            imgname = self.current_img
+        return osp.join(self.upscaled_dir(), osp.splitext(imgname)[0] + '.png')
+
+    def ensure_upscaled_img(self, imgname: str) -> np.ndarray:
+        if not pcfg.upscale_before_detection:
+            return self.read_img(imgname)
+
+        target_path = self.get_upscaled_path(imgname)
+        if osp.exists(target_path):
+            return self.read_img(imgname)
+
+        original_path = osp.join(self.directory, imgname)
+        img = imread(original_path)
+        h, w = img.shape[:2]
+        factor = effective_upscale_factor(
+            w,
+            h,
+            float(pcfg.upscale_factor),
+            int(pcfg.upscale_skip_if_long_edge_above),
+            int(pcfg.upscale_max_long_edge),
+        )
+        if factor <= 1:
+            self._image_info.setdefault(imgname, {}).update({
+                'width': w,
+                'height': h,
+                'upscaled': False,
+                'upscale_factor': 1.0,
+            })
+            return img
+
+        upscaled, used_factor = upscale_image(img, factor, pcfg.upscale_quality)
+        imwrite(target_path, upscaled, ext='.png')
+        uh, uw = upscaled.shape[:2]
+        self._image_info.setdefault(imgname, {}).update({
+            'width': uw,
+            'height': uh,
+            'upscaled': True,
+            'upscale_factor': used_factor,
+            'original_width': w,
+            'original_height': h,
+        })
+        return upscaled
 
     def save_mask(self, img_name, mask: np.ndarray):
         imwrite(self.get_mask_path(img_name), mask, ext=pcfg.intermediate_imgsave_ext)
@@ -453,8 +510,8 @@ class ProjImgTrans:
             if imgname == self.current_img and self.img_array is not None:
                 h, w = self.img_array.shape[:2]
             else:
-                i = Image.open(osp.join(self.directory, imgname))
-                h, w = i.height, i.width
+                i = self.read_img(imgname)
+                h, w = i.shape[:2]
             ih, iw = inpainted.shape[:2]
             if ih != h or iw != w:
                 inpainted = Image.fromarray(inpainted).resize((w, h), resample=Image.Resampling.LANCZOS)

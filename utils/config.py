@@ -168,6 +168,11 @@ class ProgramConfig(Config):
     pre_mt_sublist: List = field(default_factory=lambda: list())
     mt_sublist: List = field(default_factory=lambda: list())
     display_lang: str = field(default_factory=lambda: shared.DEFAULT_DISPLAY_LANG) # to always apply shared.DEFAULT_DISPLAY_LANG
+    upscale_before_detection: bool = False
+    upscale_factor: float = 2.0
+    upscale_max_long_edge: int = 4096
+    upscale_skip_if_long_edge_above: int = 2500
+    upscale_quality: str = 'balanced'
     imgsave_quality: int = 100
     imgsave_ext: str = '.png'
     intermediate_imgsave_ext: str = '.png'

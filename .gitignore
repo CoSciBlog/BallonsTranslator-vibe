@@ -3,6 +3,7 @@ local_*
 inpainted
 mask
 result
+upscaled
 data/models
 data/testpacks/eng_dontupload
 data/testpacks/testpacks

@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README_EN.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.8`
+Fork release: `1.4.0-vibe.9`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -26,6 +26,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Fixed `manga_ocr` startup with current Transformers releases by using the image processor API required by the local `manga-ocr-base` vision model.
 - Added a project glossary window, project-level glossary persistence in `imgtrans` JSON, and a custom glossary prompt for LLM translation guidance.
 - Added an optional settings safety switch that prevents mouse wheel changes on combo boxes and spin boxes, plus wider input fields for long API keys, URLs, and prompts.
+- Added optional pre-detection page upscaling with factor, quality, maximum size, and skip-threshold settings.
 
 ## Features
 
@@ -78,6 +79,10 @@ The left sidebar includes a `Gloss` button that opens the current project's glos
 ## Settings input safety
 
 The General settings page includes `Prevent mouse wheel changes on input fields`. When enabled, mouse wheel events over combo boxes and spin boxes are blocked or forwarded to the surrounding scroll area, so scrolling the settings page does not accidentally change values. Long text fields such as API keys, URLs, proxies, glossary prompts, and LLM prompt templates are wider or taller so more content remains visible while editing.
+
+## Pre-detection upscaling
+
+The General settings page includes an `Upscaling` section. When `Upscale pages before detection` is enabled, each page can be upscaled into the project-local `upscaled` folder before text detection. Detection, OCR, mask creation, inpainting, canvas display, and export then use that high-resolution working image. The settings include an upscale factor, maximum long-edge resolution, a long-edge threshold above which images are skipped, and speed/quality presets from `Fast` through `AnimeSharp`.
 
 ## Programmatic use
 

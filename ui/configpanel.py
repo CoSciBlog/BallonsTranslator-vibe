@@ -2,7 +2,7 @@ from typing import List, Union, Tuple
 
 from qtpy.QtWidgets import QPushButton, QKeySequenceEdit, QLayout, QGridLayout, QHBoxLayout, QVBoxLayout, QTreeView, QWidget, QLabel, QSizePolicy, QSpacerItem, QCheckBox, QSplitter, QScrollArea, QLineEdit, QFileDialog, QInputDialog, QMessageBox
 from qtpy.QtCore import Qt, Signal, QSize, QEvent, QItemSelection
-from qtpy.QtGui import QStandardItem, QStandardItemModel, QMouseEvent, QFont, QIntValidator, QValidator, QFocusEvent
+from qtpy.QtGui import QStandardItem, QStandardItemModel, QMouseEvent, QFont, QIntValidator, QDoubleValidator, QValidator, QFocusEvent
 
 from .custom_widget import ConfigComboBox, Widget
 from utils.config import (
@@ -376,6 +376,7 @@ class ConfigPanel(Widget):
         label_inpaint = self.tr('Inpaint')
         label_translator = self.tr('Translator')
         label_startup = self.tr('Startup')
+        label_upscaling = self.tr('Upscaling')
         label_typesetting = self.tr('Typesetting')
         label_save = self.tr('Save')
         label_saladict = self.tr('SalaDict')
@@ -390,6 +391,7 @@ class ConfigPanel(Widget):
         generalTableItem.appendRows([
             TableItem(label_settings_presets, CONFIG_FONTSIZE_TABLE),
             TableItem(label_startup, CONFIG_FONTSIZE_TABLE),
+            TableItem(label_upscaling, CONFIG_FONTSIZE_TABLE),
             TableItem(label_typesetting, CONFIG_FONTSIZE_TABLE),
             TableItem(label_save, CONFIG_FONTSIZE_TABLE),
             TableItem(label_saladict, CONFIG_FONTSIZE_TABLE),
@@ -475,6 +477,36 @@ class ConfigPanel(Widget):
             self.tr('Prevent mouse wheel changes on input fields'),
             discription=self.tr('Ignore mouse wheel changes on combo boxes and spin boxes so scrolling settings does not accidentally change values.'))
         self.prevent_input_wheel_checker.stateChanged.connect(self.on_prevent_input_wheel_changed)
+
+        generalConfigPanel.addTextLabel(label_upscaling)
+        self.upscale_before_detection_checker, _ = generalConfigPanel.addCheckBox(
+            self.tr('Upscale pages before detection'),
+            discription=self.tr('Create a high-resolution working copy before text detection. Detection, OCR, masks, inpainting, and export then use that upscaled image.'))
+        self.upscale_before_detection_checker.stateChanged.connect(self.on_upscale_before_detection_changed)
+        self.upscale_factor_edit, _ = generalConfigPanel.addLineEdit(
+            self.tr('Upscale factor'),
+            discription=self.tr('Resolution multiplier for pages that pass the size limits. Example: 2.0 for 2x.'))
+        self.upscale_factor_edit.setValidator(QDoubleValidator(1.0, 8.0, 2, self.upscale_factor_edit))
+        self.upscale_factor_edit.editingFinished.connect(self.on_upscale_numeric_changed)
+        self.upscale_max_edge_edit, _ = generalConfigPanel.addLineEdit(
+            self.tr('Upscale max long edge'),
+            discription=self.tr('Maximum long-edge resolution after upscaling. The factor is capped so the result does not exceed this value.'))
+        self.upscale_skip_edge_edit, _ = generalConfigPanel.addLineEdit(
+            self.tr('Skip upscale above long edge'),
+            discription=self.tr('Pages whose original long edge is already above this value are not upscaled. Use 0 to always allow upscaling.'))
+        for editor in [self.upscale_max_edge_edit, self.upscale_skip_edge_edit]:
+            editor.setValidator(CustomIntValidator(0, 99999, 5))
+            editor.editingFinished.connect(self.on_upscale_numeric_changed)
+        self.upscale_quality_combobox, _ = generalConfigPanel.addCombobox(
+            [
+                self.tr('Fast'),
+                self.tr('Balanced'),
+                self.tr('Quality'),
+                self.tr('AnimeSharp'),
+            ],
+            self.tr('Upscale quality'),
+            discription=self.tr('Quality/speed preset for OpenCV upscaling. AnimeSharp adds stronger manga-style sharpening inspired by 2x-AnimeSharpV4.'))
+        self.upscale_quality_combobox.activated.connect(self.on_upscale_quality_changed)
 
         generalConfigPanel.addTextLabel(label_typesetting)
         dec_program_str = self.tr('decide by program')
@@ -756,6 +788,32 @@ class ConfigPanel(Widget):
     def on_prevent_input_wheel_changed(self):
         pcfg.prevent_input_wheel_changes = self.prevent_input_wheel_checker.isChecked()
 
+    def on_upscale_before_detection_changed(self):
+        pcfg.upscale_before_detection = self.upscale_before_detection_checker.isChecked()
+
+    def on_upscale_quality_changed(self):
+        quality_map = ['fast', 'balanced', 'quality', 'animesharp']
+        pcfg.upscale_quality = quality_map[self.upscale_quality_combobox.currentIndex()]
+
+    def on_upscale_numeric_changed(self):
+        try:
+            factor = float(self.upscale_factor_edit.text().strip())
+        except ValueError:
+            factor = 2.0
+        factor = max(1.0, min(factor, 8.0))
+        self.upscale_factor_edit.setText(str(factor))
+        pcfg.upscale_factor = factor
+
+        def read_int(editor: QLineEdit, default: int) -> int:
+            text = editor.text().strip()
+            if not text.isnumeric():
+                editor.setText(str(default))
+                return default
+            return int(text)
+
+        pcfg.upscale_max_long_edge = read_int(self.upscale_max_edge_edit, 4096)
+        pcfg.upscale_skip_if_long_edge_above = read_int(self.upscale_skip_edge_edit, 2500)
+
     def on_fntsize_flag_changed(self):
         pcfg.let_fntsize_flag = self.let_fntsize_combox.currentIndex()
 
@@ -870,6 +928,15 @@ class ConfigPanel(Widget):
         if pcfg.open_recent_on_startup:
             self.open_on_startup_checker.setChecked(True)
         self.prevent_input_wheel_checker.setChecked(pcfg.prevent_input_wheel_changes)
+        self.upscale_before_detection_checker.setChecked(pcfg.upscale_before_detection)
+        self.upscale_factor_edit.setText(str(pcfg.upscale_factor))
+        self.upscale_max_edge_edit.setText(str(pcfg.upscale_max_long_edge))
+        self.upscale_skip_edge_edit.setText(str(pcfg.upscale_skip_if_long_edge_above))
+        upscale_qualities = ['fast', 'balanced', 'quality', 'animesharp']
+        self.upscale_quality_combobox.setCurrentIndex(
+            upscale_qualities.index(pcfg.upscale_quality)
+            if pcfg.upscale_quality in upscale_qualities else 1
+        )
 
         self.detect_config_panel.keep_existing_checker.setChecked(pcfg.module.keep_exist_textlines)
         self.let_effect_combox.setCurrentIndex(pcfg.let_fnteffect_flag)

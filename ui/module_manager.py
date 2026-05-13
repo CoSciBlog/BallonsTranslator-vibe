@@ -465,7 +465,7 @@ class ImgtransThread(QThread):
                 LOGGER.info('Image translation pipeline stopped by user')
                 break
                 
-            img = self.imgtrans_proj.read_img(imgname)
+            img = self.imgtrans_proj.ensure_upscaled_img(imgname)
             mask = blk_list = None
             need_save_mask = False
             blk_removed: List[TextBlock] = []

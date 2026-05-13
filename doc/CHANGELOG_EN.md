@@ -1,6 +1,12 @@
 # Changelogs
 
 ### 2026-05-13
+[v1.4.0-vibe.9] pre-detection page upscaling
+1. Added an optional `Upscale pages before detection` setting so projects can create high-resolution working images before text detection runs.
+2. Added upscale factor, maximum long-edge resolution, skip-threshold, and speed/quality presets including an `AnimeSharp`-style sharpening mode inspired by 2x-AnimeSharpV4 workflows.
+3. Stored upscaled working images in a project-local `upscaled` folder and routed detection, OCR, masks, inpainting, canvas display, and export through those images when present.
+4. Ignored generated `upscaled` folders in Git and bumped the fork runtime version string to `1.4.0-vibe.9`.
+
 [v1.4.0-vibe.8] settings input wheel guard and wider fields
 1. Added a `Prevent mouse wheel changes on input fields` checkbox in General settings.
 2. Added a global UI guard that blocks accidental mouse wheel changes on combo boxes and spin boxes, while forwarding wheel movement to a parent scroll area when possible.
