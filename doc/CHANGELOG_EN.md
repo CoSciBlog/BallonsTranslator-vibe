@@ -1,6 +1,32 @@
 # Changelogs
 
 ### 2026-05-13
+[v1.4.0-vibe.10] settings polish and translation-only sidebar run
+1. Removed visible labels from the upscale factor, upscale max long edge, skip upscale, upscale quality, and post-merge gap/overlap controls, moving their explanatory text to hover tooltips.
+2. Tightened spacing, field height, and margins in the General > Typesetting settings so related controls take less vertical space.
+3. Added a glossary icon to the left-sidebar `Gloss` button.
+4. Added a second left-sidebar run button, `Trans`, that runs only translation on existing text boxes and skips text detection, OCR, and inpainting.
+5. Bumped the fork runtime version string to `1.4.0-vibe.10`.
+
+[v1.4.0-vibe.9] pre-detection page upscaling
+1. Added an optional `Upscale pages before detection` setting so projects can create high-resolution working images before text detection runs.
+2. Added upscale factor, maximum long-edge resolution, skip-threshold, and speed/quality presets including an `AnimeSharp`-style sharpening mode inspired by 2x-AnimeSharpV4 workflows.
+3. Stored upscaled working images in a project-local `upscaled` folder and routed detection, OCR, masks, inpainting, canvas display, and export through those images when present.
+4. Ignored generated `upscaled` folders in Git and bumped the fork runtime version string to `1.4.0-vibe.9`.
+
+[v1.4.0-vibe.8] settings input wheel guard and wider fields
+1. Added a `Prevent mouse wheel changes on input fields` checkbox in General settings.
+2. Added a global UI guard that blocks accidental mouse wheel changes on combo boxes and spin boxes, while forwarding wheel movement to a parent scroll area when possible.
+3. Enlarged long parameter fields such as API keys, endpoint URLs, proxy values, glossary prompts, and LLM prompt templates so more text is visible while editing.
+4. Bumped the fork runtime version string to `1.4.0-vibe.8`.
+
+[v1.4.0-vibe.7] project glossary UI and persistence
+1. Added a left-sidebar `Gloss` button that opens a project glossary window.
+2. Saved glossary entries and the custom glossary prompt in each project's `imgtrans_*.json` file.
+3. Passed project glossary data into LLM translators and synchronized automatically extracted entries back to the project.
+4. Added a custom `glossary prompt` setting and prompt rules that keep metadata such as `[CHARACTER]` or `[PLACE]` out of translated text.
+5. Added missing tooltips for common sidebar, title bar, and module selector controls.
+
 [v1.4.0-vibe.6] manga_ocr Transformers compatibility
 1. Switched `manga_ocr` from `AutoFeatureExtractor` to `AutoImageProcessor` so the local `data/models/manga-ocr-base` vision model loads under current Transformers releases.
 2. Updated the README OCR notes to explain the `Unrecognized feature extractor` failure and the supported image processor path.

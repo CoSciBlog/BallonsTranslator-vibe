@@ -9,6 +9,7 @@ from PIL import Image
 
 from .logger import logger as LOGGER
 from .io_utils import find_all_imgs, imread, imwrite, NumpyEncoder
+from .upscale import effective_upscale_factor, upscale_image
 from .textblock import TextBlock, FontFormat
 from .config import pcfg, RunStatus
 from . import shared
@@ -89,6 +90,11 @@ class TextBlkEncoder(NumpyEncoder):
 
 
 class ProjImgTrans:
+    DEFAULT_GLOSSARY_PROMPT = (
+        "Use the glossary only as translation guidance. Apply preferred target "
+        "terms naturally, but never copy glossary categories, notes, or bracketed "
+        "metadata such as [CHARACTER] or [PLACE] into the translated text."
+    )
 
     def __init__(self, directory: str = None):
         self.type = 'imgtrans'
@@ -103,6 +109,7 @@ class ProjImgTrans:
         self.not_found_pages: Dict[str, List[TextBlock]] = {}
         self.new_pages: List[str] = []
         self.proj_path: str = None
+        self.glossary: Dict[str, str] = self.default_glossary()
 
         self.current_img: str = None
         self.img_array: np.ndarray = None
@@ -121,6 +128,26 @@ class ProjImgTrans:
 
     def proj_name(self) -> str:
         return self.type+'_'+osp.basename(self.directory)
+
+    @classmethod
+    def default_glossary(cls) -> Dict[str, str]:
+        return {
+            'entries': '',
+            'prompt': cls.DEFAULT_GLOSSARY_PROMPT,
+        }
+
+    @classmethod
+    def normalize_glossary(cls, glossary) -> Dict[str, str]:
+        default = cls.default_glossary()
+        if isinstance(glossary, str):
+            default['entries'] = glossary
+            return default
+        if isinstance(glossary, dict):
+            entries = glossary.get('entries', glossary.get('text', glossary.get('glossary', '')))
+            prompt = glossary.get('prompt', default['prompt'])
+            default['entries'] = entries if isinstance(entries, str) else ''
+            default['prompt'] = prompt if isinstance(prompt, str) else cls.DEFAULT_GLOSSARY_PROMPT
+        return default
 
     def load(self, directory: str, json_path: str = None) -> bool:
         self.directory = directory
@@ -143,6 +170,8 @@ class ProjImgTrans:
             os.makedirs(self.inpainted_dir())
         if not osp.exists(self.mask_dir()):
             os.makedirs(self.mask_dir())
+        if not osp.exists(self.upscaled_dir()):
+            os.makedirs(self.upscaled_dir())
 
         return new_proj
 
@@ -151,6 +180,9 @@ class ProjImgTrans:
 
     def inpainted_dir(self):
         return osp.join(self.directory, 'inpainted')
+
+    def upscaled_dir(self):
+        return osp.join(self.directory, 'upscaled')
 
     def result_dir(self):
         return osp.join(self.directory, 'result')
@@ -183,6 +215,8 @@ class ProjImgTrans:
             self._image_info = proj_dict['image_info']
         else:
             self._image_info = {}
+
+        self.glossary = self.normalize_glossary(proj_dict.get('glossary', {}))
 
         for p in self.pages:
             if p not in self._image_info:
@@ -269,9 +303,8 @@ class ProjImgTrans:
             if imgname not in self.pages:
                 raise ImgnameNotInProjectException
             self.current_img = imgname
-            img_path = self.current_img_path()
             mask_path = self.get_mask_path(get_last_modified=True)
-            self.img_array = imread(img_path)
+            self.img_array = self.read_img(imgname)
             im_h, im_w = self.img_array.shape[:2]
             if osp.exists(mask_path):
                 self.mask_array = imread(mask_path, cv2.IMREAD_GRAYSCALE)
@@ -315,6 +348,7 @@ class ProjImgTrans:
         if not osp.exists(self.directory):
             raise ProjectDirNotExistException
         self.set_current_img(None)
+        self.glossary = self.default_glossary()
         imglist = find_all_imgs(self.directory, abs_path=False, sort=True)
         self.pages = {}
         self._pagename2idx = {}
@@ -353,16 +387,69 @@ class ProjImgTrans:
             'pages': pages,
             'current_img': self.current_img,
             'image_info': image_info,
+            'glossary': self.glossary,
         }
 
     def read_img(self, imgname: str) -> np.ndarray:
         if imgname not in self.pages:
             raise ImgnameNotInProjectException
+        img_info = self._image_info.setdefault(imgname, {})
+        upscaled_path = self.get_upscaled_path(imgname)
+        if pcfg.upscale_before_detection and osp.exists(upscaled_path):
+            img = imread(upscaled_path)
+            h, w = img.shape[:2]
+            img_info.update({'width': w, 'height': h, 'upscaled': True})
+            return img
         img_path = osp.join(self.directory, imgname)
         img = imread(img_path)
         h, w = img.shape[:2]
-        self._image_info[imgname].update({'width': w, 'height': h})
+        img_info.update({'width': w, 'height': h, 'upscaled': False})
         return img
+
+    def get_upscaled_path(self, imgname: str = None) -> str:
+        if imgname is None:
+            imgname = self.current_img
+        return osp.join(self.upscaled_dir(), osp.splitext(imgname)[0] + '.png')
+
+    def ensure_upscaled_img(self, imgname: str) -> np.ndarray:
+        if not pcfg.upscale_before_detection:
+            return self.read_img(imgname)
+
+        target_path = self.get_upscaled_path(imgname)
+        if osp.exists(target_path):
+            return self.read_img(imgname)
+
+        original_path = osp.join(self.directory, imgname)
+        img = imread(original_path)
+        h, w = img.shape[:2]
+        factor = effective_upscale_factor(
+            w,
+            h,
+            float(pcfg.upscale_factor),
+            int(pcfg.upscale_skip_if_long_edge_above),
+            int(pcfg.upscale_max_long_edge),
+        )
+        if factor <= 1:
+            self._image_info.setdefault(imgname, {}).update({
+                'width': w,
+                'height': h,
+                'upscaled': False,
+                'upscale_factor': 1.0,
+            })
+            return img
+
+        upscaled, used_factor = upscale_image(img, factor, pcfg.upscale_quality)
+        imwrite(target_path, upscaled, ext='.png')
+        uh, uw = upscaled.shape[:2]
+        self._image_info.setdefault(imgname, {}).update({
+            'width': uw,
+            'height': uh,
+            'upscaled': True,
+            'upscale_factor': used_factor,
+            'original_width': w,
+            'original_height': h,
+        })
+        return upscaled
 
     def save_mask(self, img_name, mask: np.ndarray):
         imwrite(self.get_mask_path(img_name), mask, ext=pcfg.intermediate_imgsave_ext)
@@ -423,8 +510,8 @@ class ProjImgTrans:
             if imgname == self.current_img and self.img_array is not None:
                 h, w = self.img_array.shape[:2]
             else:
-                i = Image.open(osp.join(self.directory, imgname))
-                h, w = i.height, i.width
+                i = self.read_img(imgname)
+                h, w = i.shape[:2]
             ih, iw = inpainted.shape[:2]
             if ih != h or iw != w:
                 inpainted = Image.fromarray(inpainted).resize((w, h), resample=Image.Resampling.LANCZOS)

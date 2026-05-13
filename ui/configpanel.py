@@ -2,7 +2,7 @@ from typing import List, Union, Tuple
 
 from qtpy.QtWidgets import QPushButton, QKeySequenceEdit, QLayout, QGridLayout, QHBoxLayout, QVBoxLayout, QTreeView, QWidget, QLabel, QSizePolicy, QSpacerItem, QCheckBox, QSplitter, QScrollArea, QLineEdit, QFileDialog, QInputDialog, QMessageBox
 from qtpy.QtCore import Qt, Signal, QSize, QEvent, QItemSelection
-from qtpy.QtGui import QStandardItem, QStandardItemModel, QMouseEvent, QFont, QIntValidator, QValidator, QFocusEvent
+from qtpy.QtGui import QStandardItem, QStandardItemModel, QMouseEvent, QFont, QIntValidator, QDoubleValidator, QValidator, QFocusEvent
 
 from .custom_widget import ConfigComboBox, Widget
 from utils.config import (
@@ -18,7 +18,7 @@ from utils.config import (
     CONFIG_PRESET_DIR,
 )
 from utils import shared as C
-from utils.shared import CONFIG_FONTSIZE_CONTENT, CONFIG_FONTSIZE_HEADER, CONFIG_FONTSIZE_TABLE, CONFIG_COMBOBOX_SHORT, CONFIG_COMBOBOX_LONG, CONFIG_COMBOBOX_MIDEAN
+from utils.shared import CONFIG_FONTSIZE_CONTENT, CONFIG_FONTSIZE_HEADER, CONFIG_FONTSIZE_TABLE, CONFIG_COMBOBOX_SHORT, CONFIG_COMBOBOX_LONG, CONFIG_COMBOBOX_MIDEAN, CONFIG_COMBOBOX_HEIGHT
 from .module_parse_widgets import InpaintConfigPanel, TextDetectConfigPanel, TranslatorConfigPanel, OCRConfigPanel
 
 class CustomIntValidator(QIntValidator):
@@ -359,6 +359,25 @@ class ConfigPanel(Widget):
     save_config = Signal()
     settings_imported = Signal()
     unload_models = Signal()
+
+    def _compact_line_edit(self, tooltip: str, width: int = CONFIG_COMBOBOX_SHORT, placeholder: str = '') -> QLineEdit:
+        editor = QLineEdit()
+        editor.setFixedWidth(width)
+        editor.setFixedHeight(CONFIG_COMBOBOX_HEIGHT)
+        editor.setToolTip(tooltip)
+        if placeholder:
+            editor.setPlaceholderText(placeholder)
+        return editor
+
+    def _compact_settings_row(self, *widgets: QWidget) -> QWidget:
+        row = QWidget()
+        layout = QHBoxLayout(row)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(8)
+        for widget in widgets:
+            layout.addWidget(widget)
+        layout.addStretch(1)
+        return row
     reload_textstyle = Signal(bool)
     show_only_custom_font = Signal(bool)
 
@@ -376,6 +395,7 @@ class ConfigPanel(Widget):
         label_inpaint = self.tr('Inpaint')
         label_translator = self.tr('Translator')
         label_startup = self.tr('Startup')
+        label_upscaling = self.tr('Upscaling')
         label_typesetting = self.tr('Typesetting')
         label_save = self.tr('Save')
         label_saladict = self.tr('SalaDict')
@@ -390,6 +410,7 @@ class ConfigPanel(Widget):
         generalTableItem.appendRows([
             TableItem(label_settings_presets, CONFIG_FONTSIZE_TABLE),
             TableItem(label_startup, CONFIG_FONTSIZE_TABLE),
+            TableItem(label_upscaling, CONFIG_FONTSIZE_TABLE),
             TableItem(label_typesetting, CONFIG_FONTSIZE_TABLE),
             TableItem(label_save, CONFIG_FONTSIZE_TABLE),
             TableItem(label_saladict, CONFIG_FONTSIZE_TABLE),
@@ -471,6 +492,45 @@ class ConfigPanel(Widget):
         self.open_on_startup_checker, _ = generalConfigPanel.addCheckBox(self.tr('Reopen last project on startup'))
         self.open_on_startup_checker.setToolTip(self.tr('Open the most recently used project automatically when the application starts.'))
         self.open_on_startup_checker.stateChanged.connect(self.on_open_onstartup_changed)
+        self.prevent_input_wheel_checker, _ = generalConfigPanel.addCheckBox(
+            self.tr('Prevent mouse wheel changes on input fields'),
+            discription=self.tr('Ignore mouse wheel changes on combo boxes and spin boxes so scrolling settings does not accidentally change values.'))
+        self.prevent_input_wheel_checker.stateChanged.connect(self.on_prevent_input_wheel_changed)
+
+        generalConfigPanel.addTextLabel(label_upscaling)
+        self.upscale_before_detection_checker, _ = generalConfigPanel.addCheckBox(
+            self.tr('Upscale pages before detection'),
+            discription=self.tr('Create a high-resolution working copy before text detection. Detection, OCR, masks, inpainting, and export then use that upscaled image.'))
+        self.upscale_before_detection_checker.stateChanged.connect(self.on_upscale_before_detection_changed)
+        upscale_factor_tip = self.tr('Upscale factor: resolution multiplier for pages that pass the size limits. Example: 2.0 for 2x.')
+        upscale_max_edge_tip = self.tr('Upscale max long edge: maximum long-edge resolution after upscaling. The factor is capped so the result does not exceed this value.')
+        upscale_skip_edge_tip = self.tr('Skip upscale above long edge: pages whose original long edge is already above this value are not upscaled. Use 0 to always allow upscaling.')
+        upscale_quality_tip = self.tr('Upscale quality: quality/speed preset for OpenCV upscaling. AnimeSharp adds stronger manga-style sharpening inspired by 2x-AnimeSharpV4.')
+        self.upscale_factor_edit = self._compact_line_edit(upscale_factor_tip, placeholder='2.0')
+        self.upscale_factor_edit.setValidator(QDoubleValidator(1.0, 8.0, 2, self.upscale_factor_edit))
+        self.upscale_factor_edit.editingFinished.connect(self.on_upscale_numeric_changed)
+        self.upscale_max_edge_edit = self._compact_line_edit(upscale_max_edge_tip, placeholder='4096')
+        self.upscale_skip_edge_edit = self._compact_line_edit(upscale_skip_edge_tip, placeholder='2500')
+        for editor in [self.upscale_max_edge_edit, self.upscale_skip_edge_edit]:
+            editor.setValidator(CustomIntValidator(0, 99999, 5))
+            editor.editingFinished.connect(self.on_upscale_numeric_changed)
+        self.upscale_quality_combobox = ConfigComboBox(scrollWidget=generalConfigPanel)
+        self.upscale_quality_combobox.addItems([
+            self.tr('Fast'),
+            self.tr('Balanced'),
+            self.tr('Quality'),
+            self.tr('AnimeSharp'),
+        ])
+        self.upscale_quality_combobox.setFixedHeight(CONFIG_COMBOBOX_HEIGHT)
+        self.upscale_quality_combobox.setToolTip(upscale_quality_tip)
+        self.upscale_quality_combobox.activated.connect(self.on_upscale_quality_changed)
+        upscale_row = self._compact_settings_row(
+            self.upscale_factor_edit,
+            self.upscale_max_edge_edit,
+            self.upscale_skip_edge_edit,
+            self.upscale_quality_combobox,
+        )
+        generalConfigPanel.addBlockWidget(upscale_row)
 
         generalConfigPanel.addTextLabel(label_typesetting)
         dec_program_str = self.tr('decide by program')
@@ -478,7 +538,8 @@ class ConfigPanel(Widget):
 
         global_fntfmt_widget = QWidget()
         global_fntfmt_layout = QGridLayout(global_fntfmt_widget)
-        global_fntfmt_layout.setSpacing(0)
+        global_fntfmt_layout.setHorizontalSpacing(8)
+        global_fntfmt_layout.setVerticalSpacing(6)
         global_fntfmt_widget.setContentsMargins(0, 0, 0, 0)
 
         b = generalConfigPanel.addBlockWidget(global_fntfmt_widget)
@@ -488,6 +549,7 @@ class ConfigPanel(Widget):
             [dec_program_str, use_global_str], self.tr('Font Size'),
             discription=self.tr('Choose whether translated text keeps the detected size or always uses the global font size.'),
             parent=self, insert_stretch=True)
+        sublock.setContentsMargins(0, 2, 12, 2)
         global_fntfmt_layout.addWidget(sublock, 0, 0)
 
         self.let_fntsize_combox.activated.connect(self.on_fntsize_flag_changed)
@@ -495,6 +557,7 @@ class ConfigPanel(Widget):
             [dec_program_str, use_global_str], self.tr('Stroke Size'),
             discription=self.tr('Choose whether stroke width is detected per region or taken from the global text style.'),
             parent=self, insert_stretch=True)
+        sublock.setContentsMargins(0, 2, 12, 2)
         self.let_fntstroke_combox.activated.connect(self.on_fntstroke_flag_changed)
         global_fntfmt_layout.addWidget(sublock, 0, 1)
         
@@ -502,12 +565,14 @@ class ConfigPanel(Widget):
             [dec_program_str, use_global_str], self.tr('Font Color'),
             discription=self.tr('Choose whether text color is detected from the image or forced to the global color.'),
             parent=self, insert_stretch=True)
+        sublock.setContentsMargins(0, 2, 12, 2)
         self.let_fntcolor_combox.activated.connect(self.on_fontcolor_flag_changed)
         global_fntfmt_layout.addWidget(sublock, 1, 0)
         self.let_fnt_scolor_combox, sublock = combobox_with_label(
             [dec_program_str, use_global_str], self.tr('Stroke Color'),
             discription=self.tr('Choose whether stroke color is detected from the image or forced to the global stroke color.'),
             parent=self, insert_stretch=True)
+        sublock.setContentsMargins(0, 2, 12, 2)
         self.let_fnt_scolor_combox.activated.connect(self.on_font_scolor_flag_changed)
         global_fntfmt_layout.addWidget(sublock, 1, 1)
 
@@ -515,12 +580,14 @@ class ConfigPanel(Widget):
             [dec_program_str, use_global_str], self.tr('Effect'),
             discription=self.tr('Choose whether text effects are detected per region or forced to the global effect settings.'),
             parent=self, insert_stretch=True)
+        sublock.setContentsMargins(0, 2, 12, 2)
         self.let_effect_combox.activated.connect(self.on_effect_flag_changed)
         global_fntfmt_layout.addWidget(sublock, 2, 0)
         self.let_alignment_combox, sublock = combobox_with_label(
             [dec_program_str, use_global_str], self.tr('Alignment'),
             discription=self.tr('Choose whether paragraph alignment is detected per region or forced to the global alignment.'),
             parent=self, insert_stretch=True)
+        sublock.setContentsMargins(0, 2, 12, 2)
         self.let_alignment_combox.activated.connect(self.on_alignment_flag_changed)
         global_fntfmt_layout.addWidget(sublock, 2, 1)
 
@@ -528,12 +595,14 @@ class ConfigPanel(Widget):
             [dec_program_str, use_global_str], self.tr('Writing-mode'),
             discription=self.tr('Choose whether horizontal or vertical writing direction is detected per region or forced globally.'),
             parent=self, insert_stretch=True)
+        sublock.setContentsMargins(0, 2, 12, 2)
         self.let_writing_mode_combox.activated.connect(self.on_writing_mode_flag_changed)
         global_fntfmt_layout.addWidget(sublock, 3, 0)
         self.let_family_combox, sublock = combobox_with_label(
             [self.tr('Keep existing'), self.tr('Always use global setting')], self.tr('Font Family'),
             discription=self.tr('Choose whether existing region fonts are preserved or replaced by the global font family.'),
             parent=self, insert_stretch=True)
+        sublock.setContentsMargins(0, 2, 12, 2)
         self.let_family_combox.activated.connect(self.on_family_flag_changed)
         global_fntfmt_layout.addWidget(sublock, 3, 1)
 
@@ -557,18 +626,14 @@ class ConfigPanel(Widget):
             self.tr('Post-pipeline merge mode'),
             discription=self.tr('Direction used when automatically merging translated text boxes after the pipeline finishes.'))
         self.post_merge_mode_combobox.activated.connect(self.on_post_merge_mode_changed)
-        self.post_merge_vgap_edit, _ = generalConfigPanel.addLineEdit(
-            self.tr('Post-merge vertical gap'),
-            discription=self.tr('Maximum pixel distance between stacked boxes for automatic vertical merging.'))
-        self.post_merge_hgap_edit, _ = generalConfigPanel.addLineEdit(
-            self.tr('Post-merge horizontal gap'),
-            discription=self.tr('Maximum pixel distance between side-by-side boxes for automatic horizontal merging.'))
-        self.post_merge_woverlap_edit, _ = generalConfigPanel.addLineEdit(
-            self.tr('Post-merge horizontal overlap %'),
-            discription=self.tr('Minimum horizontal overlap required when merging boxes above or below each other.'))
-        self.post_merge_hoverlap_edit, _ = generalConfigPanel.addLineEdit(
-            self.tr('Post-merge vertical overlap %'),
-            discription=self.tr('Minimum vertical overlap required when merging boxes next to each other.'))
+        post_merge_vgap_tip = self.tr('Post-merge vertical gap: maximum pixel distance between stacked boxes for automatic vertical merging.')
+        post_merge_hgap_tip = self.tr('Post-merge horizontal gap: maximum pixel distance between side-by-side boxes for automatic horizontal merging.')
+        post_merge_woverlap_tip = self.tr('Post-merge horizontal overlap %: minimum horizontal overlap required when merging boxes above or below each other.')
+        post_merge_hoverlap_tip = self.tr('Post-merge vertical overlap %: minimum vertical overlap required when merging boxes next to each other.')
+        self.post_merge_vgap_edit = self._compact_line_edit(post_merge_vgap_tip, placeholder='30')
+        self.post_merge_hgap_edit = self._compact_line_edit(post_merge_hgap_tip, placeholder='30')
+        self.post_merge_woverlap_edit = self._compact_line_edit(post_merge_woverlap_tip, placeholder='50')
+        self.post_merge_hoverlap_edit = self._compact_line_edit(post_merge_hoverlap_tip, placeholder='50')
         for editor in [
             self.post_merge_vgap_edit,
             self.post_merge_hgap_edit,
@@ -577,6 +642,13 @@ class ConfigPanel(Widget):
         ]:
             editor.setValidator(CustomIntValidator(0, 1000, 4))
             editor.editingFinished.connect(self.on_post_merge_numeric_changed)
+        post_merge_row = self._compact_settings_row(
+            self.post_merge_vgap_edit,
+            self.post_merge_hgap_edit,
+            self.post_merge_woverlap_edit,
+            self.post_merge_hoverlap_edit,
+        )
+        generalConfigPanel.addBlockWidget(post_merge_row)
         self.let_uppercase_checker, _ = generalConfigPanel.addCheckBox(self.tr('To uppercase'))
         self.let_uppercase_checker.stateChanged.connect(self.on_uppercase_changed)
 
@@ -749,6 +821,35 @@ class ConfigPanel(Widget):
     def on_open_onstartup_changed(self):
         pcfg.open_recent_on_startup = self.open_on_startup_checker.isChecked()
 
+    def on_prevent_input_wheel_changed(self):
+        pcfg.prevent_input_wheel_changes = self.prevent_input_wheel_checker.isChecked()
+
+    def on_upscale_before_detection_changed(self):
+        pcfg.upscale_before_detection = self.upscale_before_detection_checker.isChecked()
+
+    def on_upscale_quality_changed(self):
+        quality_map = ['fast', 'balanced', 'quality', 'animesharp']
+        pcfg.upscale_quality = quality_map[self.upscale_quality_combobox.currentIndex()]
+
+    def on_upscale_numeric_changed(self):
+        try:
+            factor = float(self.upscale_factor_edit.text().strip())
+        except ValueError:
+            factor = 2.0
+        factor = max(1.0, min(factor, 8.0))
+        self.upscale_factor_edit.setText(str(factor))
+        pcfg.upscale_factor = factor
+
+        def read_int(editor: QLineEdit, default: int) -> int:
+            text = editor.text().strip()
+            if not text.isnumeric():
+                editor.setText(str(default))
+                return default
+            return int(text)
+
+        pcfg.upscale_max_long_edge = read_int(self.upscale_max_edge_edit, 4096)
+        pcfg.upscale_skip_if_long_edge_above = read_int(self.upscale_skip_edge_edit, 2500)
+
     def on_fntsize_flag_changed(self):
         pcfg.let_fntsize_flag = self.let_fntsize_combox.currentIndex()
 
@@ -862,6 +963,16 @@ class ConfigPanel(Widget):
 
         if pcfg.open_recent_on_startup:
             self.open_on_startup_checker.setChecked(True)
+        self.prevent_input_wheel_checker.setChecked(pcfg.prevent_input_wheel_changes)
+        self.upscale_before_detection_checker.setChecked(pcfg.upscale_before_detection)
+        self.upscale_factor_edit.setText(str(pcfg.upscale_factor))
+        self.upscale_max_edge_edit.setText(str(pcfg.upscale_max_long_edge))
+        self.upscale_skip_edge_edit.setText(str(pcfg.upscale_skip_if_long_edge_above))
+        upscale_qualities = ['fast', 'balanced', 'quality', 'animesharp']
+        self.upscale_quality_combobox.setCurrentIndex(
+            upscale_qualities.index(pcfg.upscale_quality)
+            if pcfg.upscale_quality in upscale_qualities else 1
+        )
 
         self.detect_config_panel.keep_existing_checker.setChecked(pcfg.module.keep_exist_textlines)
         self.let_effect_combox.setCurrentIndex(pcfg.let_fnteffect_flag)

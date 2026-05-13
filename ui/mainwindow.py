@@ -32,6 +32,8 @@ from .mainwindowbars import TitleBar, LeftBar, BottomBar
 from .io_thread import ImgSaveThread, ImportDocThread, ExportDocThread
 from .custom_widget import Widget, ViewWidget
 from .global_search_widget import GlobalSearchWidget
+from .glossary_widget import GlossaryWindow
+from .input_wheel_guard import InputWheelGuard
 from .textedit_commands import GlobalRepalceAllCommand
 from .framelesswindow import FramelessWindow, FramelessMoveResize
 from .drawing_commands import RunBlkTransCommand
@@ -82,6 +84,8 @@ class MainWindow(mainwindow_cls):
         shared.register_view_widget = self.register_view_widget
 
         self.app = app
+        self.input_wheel_guard = InputWheelGuard(self)
+        self.app.installEventFilter(self.input_wheel_guard)
         self.backup_blkstyles = []
         self._run_imgtrans_wo_textstyle_update = False
 
@@ -140,6 +144,7 @@ class MainWindow(mainwindow_cls):
         self.leftBar.imgTransChecked.connect(self.setupImgTransUI)
         self.leftBar.configChecked.connect(self.setupConfigUI)
         self.leftBar.globalSearchChecker.clicked.connect(self.on_set_gsearch_widget)
+        self.leftBar.glossary_clicked.connect(self.show_project_glossary_window)
         self.leftBar.open_dir.connect(self.OpenProj)
         self.leftBar.open_json_proj.connect(self.openJsonProj)
         self.leftBar.save_proj.connect(self.manual_save)
@@ -219,6 +224,10 @@ class MainWindow(mainwindow_cls):
         self.mtSubWidget.setWindowFlags(Qt.WindowType.Window)
         self.mtSubWidget.hide()
 
+        self.glossaryWindow = GlossaryWindow(self)
+        self.glossaryWindow.saved.connect(self.on_project_glossary_saved)
+        self.glossaryWindow.hide()
+
         SW.st_manager = self.st_manager = SceneTextManager(self.app, self, self.canvas, self.textPanel)
         self.st_manager.new_textblk.connect(self.canvas.search_widget.on_new_textblk)
         self.canvas.search_widget.pairwidget_list = self.st_manager.pairwidget_list
@@ -295,6 +304,7 @@ class MainWindow(mainwindow_cls):
             pcfg.module.translator = name
             self.bottomBar.trans_selector.finishSetTranslator(translator)
             self.configPanel.trans_config_panel.finishSetTranslator(translator)
+            self.sync_project_glossary_to_translator(translator)
             LOGGER.info('Translator set to {}'.format(name))
         else:
             LOGGER.error('invalid translator')
@@ -375,6 +385,7 @@ class MainWindow(mainwindow_cls):
         module_manager.setInpainter()
 
         self.leftBar.run_imgtrans_clicked.connect(self.run_imgtrans)
+        self.leftBar.run_translate_clicked.connect(self.run_translate_only)
 
         self.titleBar.darkModeAction.setChecked(pcfg.darkmode)
 
@@ -487,6 +498,7 @@ class MainWindow(mainwindow_cls):
             self.st_manager.clearSceneTextitems()
             self.titleBar.setTitleContent(osp.basename(directory))
             self.updatePageList()
+            self.sync_project_glossary_to_ui()
             self.opening_dir = False
         except Exception as e:
             self.opening_dir = False
@@ -528,6 +540,7 @@ class MainWindow(mainwindow_cls):
             self.st_manager.clearSceneTextitems()
             self.leftBar.updateRecentProjList(self.imgtrans_proj.proj_path)
             self.updatePageList()
+            self.sync_project_glossary_to_ui()
             self.titleBar.setTitleContent(osp.basename(self.imgtrans_proj.proj_path))
             self.opening_dir = False
         except Exception as e:
@@ -560,6 +573,42 @@ class MainWindow(mainwindow_cls):
             self.leftStackWidget.hide()
         pcfg.show_page_list = setup
         save_config()
+
+    def sync_project_glossary_to_ui(self):
+        if hasattr(self, 'glossaryWindow') and self.imgtrans_proj is not None:
+            self.glossaryWindow.load_glossary(self.imgtrans_proj.glossary)
+
+    def sync_project_glossary_to_translator(self, translator=None):
+        translator = translator or getattr(self.module_manager, 'translator', None)
+        if translator is not None and hasattr(translator, 'set_project_glossary'):
+            translator.set_project_glossary(self.imgtrans_proj.glossary)
+
+    def sync_translator_glossary_to_project(self, translator=None):
+        translator = translator or getattr(self.module_manager, 'translator', None)
+        if translator is not None and hasattr(translator, 'get_project_glossary'):
+            glossary = translator.get_project_glossary()
+            if isinstance(glossary, dict):
+                self.imgtrans_proj.glossary = self.imgtrans_proj.normalize_glossary(glossary)
+                self.sync_project_glossary_to_ui()
+
+    def show_project_glossary_window(self):
+        if self.imgtrans_proj is None or self.imgtrans_proj.directory is None:
+            create_info_dialog(self.tr('Open a project before editing the glossary.'))
+            return
+        self.sync_translator_glossary_to_project()
+        self.sync_project_glossary_to_ui()
+        self.glossaryWindow.show()
+        self.glossaryWindow.raise_()
+        self.glossaryWindow.activateWindow()
+
+    def on_project_glossary_saved(self, glossary: dict):
+        self.imgtrans_proj.glossary = self.imgtrans_proj.normalize_glossary(glossary)
+        self.sync_project_glossary_to_translator()
+        try:
+            self.imgtrans_proj.save()
+            self.canvas.setProjSaveState(False)
+        except Exception as e:
+            create_error_dialog(e, self.tr('Failed to save project glossary'))
 
     def closeEvent(self, event: QCloseEvent) -> None:
         if not self.imgtrans_proj.is_empty:
@@ -1499,6 +1548,26 @@ class MainWindow(mainwindow_cls):
         self._run_imgtrans_wo_textstyle_update = True
         self.run_imgtrans()
 
+    def run_translate_only(self):
+        if self.imgtrans_proj.is_empty:
+            return
+        self.backup_blkstyles.clear()
+        if self.bottomBar.textblockChecker.isChecked():
+            self.bottomBar.textblockChecker.click()
+        self.postprocess_mt_toggle = False
+        self.st_manager.updateTextBlkList()
+
+        for page_name, blklist in self.imgtrans_proj.pages.items():
+            self.imgtrans_proj.set_page_progress(page_name, 0)
+            ffmt_list = []
+            self.backup_blkstyles.append(ffmt_list)
+            for textblk in blklist:
+                ffmt_list.append(textblk.fontformat.deepcopy())
+                textblk.rich_text = ''
+                textblk.vertical = textblk.src_is_vertical
+
+        self.module_manager.runTranslateOnlyPipeline()
+
     def on_run_imgtrans(self, continue_mode=False):
         self.backup_blkstyles.clear()
 
@@ -1728,10 +1797,12 @@ class MainWindow(mainwindow_cls):
             pass
 
     def translate_preprocess(self, translations: List[str] = None, textblocks: List[TextBlock] = None, translator = None, source_text:list = []):
+        self.sync_project_glossary_to_translator(translator)
         for i in range(len(source_text)):
             source_text[i] = self.mtPreSubWidget.sub_text(source_text[i])
 
     def translate_postprocess(self, translations: List[str] = None, textblocks: List[TextBlock] = None, translator = None):
+        self.sync_translator_glossary_to_project(translator)
         if not self.postprocess_mt_toggle:
             return
         

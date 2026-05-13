@@ -163,6 +163,11 @@ class LLM_API_Translator(BaseTranslator):
             "value": 200,
             "description": "Maximum number of glossary entries kept in the translator settings. Higher values preserve more terms but increase prompt size and cost.",
         },
+        "glossary prompt": {
+            "type": "editor",
+            "value": "Use glossary entries as terminology guidance only. Apply preferred target terms naturally in the target language. Never include category labels, notes, comments, or bracketed metadata such as [CHARACTER], [PLACE], [ORGANIZATION], [TITLE], or [TERM] in the translation output.",
+            "description": "Custom instructions inserted before glossary entries in translation and glossary refinement prompts.",
+        },
         "glossary": {
             "type": "editor",
             "value": "",
@@ -234,6 +239,8 @@ class LLM_API_Translator(BaseTranslator):
         self.minute_start_time = time.time()
         self.key_usage = {}
         self.client = None
+        self.project_glossary_text = ""
+        self.project_glossary_prompt = ""
 
     def _initialize_client(self, api_key_to_use: str) -> bool:
         endpoint = self.endpoint
@@ -365,7 +372,17 @@ class LLM_API_Translator(BaseTranslator):
 
     @property
     def glossary_text(self) -> str:
+        project_glossary = getattr(self, "project_glossary_text", "")
+        if project_glossary.strip():
+            return project_glossary
         return self.get_param_value("glossary") or ""
+
+    @property
+    def glossary_prompt(self) -> str:
+        project_prompt = getattr(self, "project_glossary_prompt", "")
+        if project_prompt.strip():
+            return project_prompt.strip()
+        return self.get_param_value("glossary prompt") or ""
 
     @property
     def retry_attempts(self) -> int:
@@ -427,14 +444,29 @@ class LLM_API_Translator(BaseTranslator):
         glossary = self.glossary_text.strip()
         if not glossary:
             return ""
+        prompt = self.glossary_prompt.strip()
         return (
             "GLOSSARY:\n"
-            "Use these preferred translations consistently for names, places, "
-            "characters, organizations, titles, and recurring terms. Keep the "
-            "natural grammar of the target language, but do not rename these "
-            "entries unless the source clearly requires it.\n"
+            f"{prompt}\n"
             f"{glossary}\n\n"
         )
+
+    def set_project_glossary(self, glossary):
+        if isinstance(glossary, dict):
+            self.project_glossary_text = glossary.get("entries", "") or ""
+            self.project_glossary_prompt = glossary.get("prompt", "") or ""
+        elif isinstance(glossary, str):
+            self.project_glossary_text = glossary
+            self.project_glossary_prompt = ""
+        else:
+            self.project_glossary_text = ""
+            self.project_glossary_prompt = ""
+
+    def get_project_glossary(self) -> Dict[str, str]:
+        return {
+            "entries": self.glossary_text,
+            "prompt": self.glossary_prompt,
+        }
 
     def _system_prompt_with_reasoning_policy(self) -> str:
         prompt = self.system_prompt
@@ -523,6 +555,7 @@ class LLM_API_Translator(BaseTranslator):
 
         limited_lines = list(glossary_lines.values())[-self.glossary_max_entries :]
         self.set_param_value("glossary", "\n".join(limited_lines), convert_dtype=False)
+        self.project_glossary_text = "\n".join(limited_lines)
 
     def _build_glossary_extraction_prompt(
         self, src_list: List[str], translations: List[str], to_lang: str
@@ -540,7 +573,8 @@ class LLM_API_Translator(BaseTranslator):
             "recurring special terms, honorifics, and catchphrases. Do not add "
             "generic words or full sentences unless they are fixed terms.\n\n"
             "Return JSON with key 'entries'. Each entry must contain source, target, "
-            "category, and optional note.\n\n"
+            "category, and optional note. Category and note are metadata for the "
+            "glossary only; they must never be copied into translations.\n\n"
             f"EXISTING GLOSSARY:\n{existing_glossary}\n\n"
             f"TRANSLATION PAIRS:\n{json.dumps(pairs, ensure_ascii=False, indent=2)}"
         )
@@ -583,10 +617,37 @@ class LLM_API_Translator(BaseTranslator):
             "Only change text where the glossary improves consistency for names, "
             "places, characters, organizations, titles, or recurring terms. Preserve "
             "meaning, tone, line count, ids, and natural target-language grammar. "
+            "Do not insert glossary category labels, notes, comments, or bracketed "
+            "metadata into the translation text. "
             "Return only JSON in the required translation schema.\n\n"
             f"{self._glossary_prompt_section()}"
             f"TRANSLATIONS TO REVIEW:\n{json.dumps(items, ensure_ascii=False, indent=2)}"
         )
+
+    def _clean_glossary_metadata_from_translation(self, text: str) -> str:
+        if not isinstance(text, str) or "[" not in text:
+            return text
+        categories = (
+            "character",
+            "place",
+            "organization",
+            "organisation",
+            "title",
+            "term",
+            "name",
+            "item",
+            "honorific",
+            "catchphrase",
+        )
+        pattern = r"\s*\[(?:" + "|".join(categories) + r")\]\s*"
+        return re.sub(pattern, " ", text, flags=re.IGNORECASE).strip()
+
+    def _clean_translation_response(self, response: Optional[TranslationResponse]) -> Optional[TranslationResponse]:
+        if response is None:
+            return None
+        for item in response.translations:
+            item.translation = self._clean_glossary_metadata_from_translation(item.translation)
+        return response
 
     def _refine_translations_with_glossary(
         self, src_list: List[str], translations: List[str], to_lang: str
@@ -603,6 +664,7 @@ class LLM_API_Translator(BaseTranslator):
         try:
             response = self._request_translation(prompt, is_reflection=True)
             if response and len(response.translations) == len(src_list):
+                response = self._clean_translation_response(response)
                 translations_by_id = {
                     item.id: item.translation for item in response.translations
                 }
@@ -982,7 +1044,7 @@ class LLM_API_Translator(BaseTranslator):
 
             while True:
                 try:
-                    parsed_response = self._request_translation(prompt)
+                    parsed_response = self._clean_translation_response(self._request_translation(prompt))
 
                     if not parsed_response or not parsed_response.translations:
                         raise ValueError(

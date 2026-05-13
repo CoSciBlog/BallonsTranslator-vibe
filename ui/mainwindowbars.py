@@ -64,6 +64,8 @@ class LeftBar(Widget):
     open_json_proj = Signal(str)
     save_proj = Signal()
     save_config = Signal()
+    glossary_clicked = Signal()
+    run_translate_clicked = Signal()
     def __init__(self, mainwindow, *args, **kwargs) -> None:
         super().__init__(mainwindow, *args, **kwargs)
         self.mainwindow: QMainWindow = mainwindow
@@ -71,17 +73,20 @@ class LeftBar(Widget):
         padding = (LEFTBAR_WIDTH - LEFTBTN_WIDTH) // 2
         self.setFixedWidth(LEFTBAR_WIDTH)
         self.showPageListLabel = ShowPageListChecker()
+        self.showPageListLabel.setToolTip(self.tr('Pages: show or hide the project page list.'))
 
         self.globalSearchChecker = QCheckBox()
         self.globalSearchChecker.setObjectName('GlobalSearchChecker')
-        self.globalSearchChecker.setToolTip(self.tr('Global Search (Ctrl+G)'))
+        self.globalSearchChecker.setToolTip(self.tr('Search/Replace: find and replace text across the project (Ctrl+G).'))
 
         self.imgTransChecker = StateChecker('imgtrans')
         self.imgTransChecker.setObjectName('ImgTransChecker')
+        self.imgTransChecker.setToolTip(self.tr('Translation workspace: show the canvas, page list, and editing panels.'))
         self.imgTransChecker.checked.connect(self.stateCheckerChanged)
         
         self.configChecker = StateChecker('config', uncheckable=True)
         self.configChecker.setObjectName('ConfigChecker')
+        self.configChecker.setToolTip(self.tr('Settings: configure OCR, translation, inpainting, text detection, and app options.'))
         self.configChecker.checked.connect(self.stateCheckerChanged)
         self.configChecker.unchecked.connect(self.stateCheckerChanged)
 
@@ -132,6 +137,7 @@ class LeftBar(Widget):
         ])
         self.openBtn = OpenBtn()
         self.openBtn.setFixedSize(LEFTBTN_WIDTH, LEFTBTN_WIDTH)
+        self.openBtn.setToolTip(self.tr('Menu: open, save, import, and export projects.'))
         self.openBtn.setMenu(openMenu)
         self.openBtn.setPopupMode(QToolButton.InstantPopup)
     
@@ -146,20 +152,46 @@ class LeftBar(Widget):
         font.setPixelSize(10)
         self.runImgtransBtn.setFont(font)
         self.runImgtransBtn.setFixedSize(LEFTBTN_WIDTH, LEFTBTN_WIDTH)
+        self.runImgtransBtn.setToolTip(self.tr('Run: process the project with the enabled detection, OCR, translation, and inpainting stages.'))
         self.run_imgtrans_clicked = self.runImgtransBtn.clicked
         self.runImgtransBtn.setFixedSize(LEFTBTN_WIDTH, LEFTBTN_WIDTH)
+
+        self.runTranslateBtn = QPushButton()
+        self.runTranslateBtn.setObjectName('RunButton')
+        self.runTranslateBtn.setText(self.tr('Trans'))
+        self.runTranslateBtn.setToolTip(self.tr('Translate only: run translation on existing text boxes without text detection, OCR, or inpainting.'))
+        self.runTranslateBtn.setIcon(QIcon('icons/bottombar_translate.svg'))
+        self.runTranslateBtn.setIconSize(QSize(17, 17))
+        font = self.runTranslateBtn.font()
+        font.setPixelSize(9)
+        self.runTranslateBtn.setFont(font)
+        self.runTranslateBtn.setFixedSize(LEFTBTN_WIDTH, LEFTBTN_WIDTH)
+        self.runTranslateBtn.clicked.connect(self.run_translate_clicked)
+
+        self.glossaryBtn = QPushButton()
+        self.glossaryBtn.setText(self.tr('Gloss'))
+        self.glossaryBtn.setToolTip(self.tr('Glossary: open the current project glossary.'))
+        self.glossaryBtn.setIcon(QIcon('icons/leftbar_glossary.svg'))
+        self.glossaryBtn.setIconSize(QSize(17, 17))
+        font = self.glossaryBtn.font()
+        font.setPixelSize(9)
+        self.glossaryBtn.setFont(font)
+        self.glossaryBtn.setFixedSize(LEFTBTN_WIDTH, LEFTBTN_WIDTH)
+        self.glossaryBtn.clicked.connect(self.glossary_clicked)
         
         vlayout = QVBoxLayout(self)
         vlayout.addWidget(openBtnToolBar)
         vlayout.addWidget(self.showPageListLabel)
         vlayout.addWidget(self.globalSearchChecker)
+        vlayout.addWidget(self.glossaryBtn)
         vlayout.addWidget(self.imgTransChecker)
         vlayout.addItem(QSpacerItem(0, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
         vlayout.addWidget(self.configChecker)
         vlayout.addWidget(self.runImgtransBtn)
+        vlayout.addWidget(self.runTranslateBtn)
         vlayout.setContentsMargins(padding, LEFTBTN_WIDTH // 2, padding, LEFTBTN_WIDTH // 2)
         vlayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        vlayout.setSpacing(LEFTBTN_WIDTH * 3 // 4)
+        vlayout.setSpacing(LEFTBTN_WIDTH // 2)
         self.setGeometry(0, 0, 300, 500)
         self.setMouseTracking(True)
 
@@ -293,6 +325,7 @@ class TitleBar(Widget):
 
         self.editToolBtn = TitleBarToolBtn(self)
         self.editToolBtn.setText(self.tr('Edit'))
+        self.editToolBtn.setToolTip(self.tr('Edit menu: undo, redo, search, and keyword substitution.'))
 
         undoAction = QAction(self.tr('Undo'), self)
         self.undo_trigger = undoAction.triggered
@@ -323,6 +356,7 @@ class TitleBar(Widget):
 
         self.viewToolBtn = TitleBarToolBtn(self)
         self.viewToolBtn.setText(self.tr('View'))
+        self.viewToolBtn.setToolTip(self.tr('View menu: display language, panels, text styles, and theme.'))
 
         self.displayLanguageMenu = QMenu(self.tr("Display Language"), self)
         self.lang_ac_group = lang_ac_group = QActionGroup(self)
@@ -365,6 +399,7 @@ class TitleBar(Widget):
 
         self.goToolBtn = TitleBarToolBtn(self)
         self.goToolBtn.setText(self.tr('Go'))
+        self.goToolBtn.setToolTip(self.tr('Go menu: move between project pages.'))
         prevPageAction = QAction(self.tr('Previous Page'), self)
         # prevPageAction.setShortcuts([QKeySequence.StandardKey.MoveToPreviousPage, QKeySequence('A')])
         nextPageAction = QAction(self.tr('Next Page'), self)
@@ -378,6 +413,7 @@ class TitleBar(Widget):
 
         self.toolsToolBtn = TitleBarToolBtn(self)
         self.toolsToolBtn.setText(self.tr('Tools'))
+        self.toolsToolBtn.setToolTip(self.tr('Tools menu: utilities for project editing.'))
         
         mergeToolAction = QAction(self.tr('Region Merge Tool'), self)
         mergeToolAction.setShortcut(QKeySequence('Ctrl+Shift+M'))
@@ -390,6 +426,7 @@ class TitleBar(Widget):
 
         self.runToolBtn = TitleBarToolBtn(self)
         self.runToolBtn.setText(self.tr('Run'))
+        self.runToolBtn.setToolTip(self.tr('Run menu: choose enabled stages, presets, and translation commands.'))
 
         self.stageActions = stageActions = [
             QAction(self.tr('Enable Text Detection'), self),
@@ -463,13 +500,16 @@ class TitleBar(Widget):
         if not C.ON_MACOS:
             self.minBtn = QPushButton()
             self.minBtn.setObjectName('minBtn')
+            self.minBtn.setToolTip(self.tr('Minimize window'))
             self.minBtn.clicked.connect(self.onMinBtnClicked)
             self.maxBtn = QCheckBox()
             self.maxBtn.setObjectName('maxBtn')
+            self.maxBtn.setToolTip(self.tr('Maximize or restore window'))
             self.maxBtn.clicked.connect(self.onMaxBtnClicked)
             self.maxBtn.setFixedSize(48, 27)
             self.closeBtn = QPushButton()
             self.closeBtn.setObjectName('closeBtn')
+            self.closeBtn.setToolTip(self.tr('Close window'))
             self.closeBtn.clicked.connect(self.closebtn_clicked)
             hlayout.addWidget(self.minBtn)
             hlayout.addWidget(self.maxBtn)
@@ -586,13 +626,16 @@ class SelectionWithConfigWidget(Widget):
     def __init__(self, selector_name: str, add_cfg_btn=True, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         label = ConfigClickableLabel(text=selector_name)
+        label.setToolTip(self.tr('Open settings for ') + selector_name)
         label.clicked.connect(self.cfg_clicked)
         
         self.selector = SmallComboBox()
+        self.selector.setToolTip(self.tr('Select ') + selector_name)
 
         self.cfg_btn = None
         if add_cfg_btn:
             self.cfg_btn = SmallConfigPutton()
+            self.cfg_btn.setToolTip(self.tr('Configure ') + selector_name)
             self.cfg_btn.clicked.connect(self.cfg_clicked)
 
         layout = QHBoxLayout(self)
@@ -635,16 +678,23 @@ class TranslatorSelectionWidget(Widget):
     def __init__(self) -> None:
         super().__init__()
         label = ConfigClickableLabel(text=self.tr('Translate'))
+        label.setToolTip(self.tr('Open translator settings.'))
         label.clicked.connect(self.cfg_clicked)
         label_src = ConfigClickableLabel(text=self.tr('Source'))
+        label_src.setToolTip(self.tr('Open source language settings.'))
         label_src.clicked.connect(self.cfg_clicked)
         label_tgt = ConfigClickableLabel(text=self.tr('Target'))
+        label_tgt.setToolTip(self.tr('Open target language settings.'))
         label_tgt.clicked.connect(self.cfg_clicked)
         
         self.selector = SmallComboBox()
+        self.selector.setToolTip(self.tr('Select translator module.'))
         self.src_selector = SmallComboBox()
+        self.src_selector.setToolTip(self.tr('Source language.'))
         self.tgt_selector = SmallComboBox()
+        self.tgt_selector.setToolTip(self.tr('Target language.'))
         self.cfg_btn = SmallConfigPutton()
+        self.cfg_btn.setToolTip(self.tr('Configure translator module.'))
         self.cfg_btn.clicked.connect(self.cfg_clicked)
 
         layout = QHBoxLayout(self)
@@ -715,6 +765,7 @@ class BottomBar(Widget):
         self.texteditChecker.clicked.connect(self.onTextEditCheckerPressed)
         self.textblockChecker = QCheckBox()
         self.textblockChecker.setObjectName('TextblockChecker')
+        self.textblockChecker.setToolTip(self.tr('Show and edit text block bounding boxes.'))
         self.textblockChecker.clicked.connect(self.onTextblockCheckerClicked)
         
         self.originalSlider = PaintQSlider(self.tr("Original image opacity"), Qt.Orientation.Horizontal, self)
