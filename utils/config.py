@@ -173,6 +173,10 @@ class ProgramConfig(Config):
     upscale_max_long_edge: int = 4096
     upscale_skip_if_long_edge_above: int = 2500
     upscale_quality: str = 'balanced'
+    decensor_after_pipeline: bool = False
+    decensor_mask_mode: str = 'auto'
+    decensor_mask_dilate: int = 8
+    decensor_min_area_ratio: float = 0.00005
     imgsave_quality: int = 100
     imgsave_ext: str = '.png'
     intermediate_imgsave_ext: str = '.png'

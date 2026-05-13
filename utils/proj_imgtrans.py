@@ -172,6 +172,10 @@ class ProjImgTrans:
             os.makedirs(self.mask_dir())
         if not osp.exists(self.upscaled_dir()):
             os.makedirs(self.upscaled_dir())
+        if not osp.exists(self.decensor_mask_dir()):
+            os.makedirs(self.decensor_mask_dir())
+        if not osp.exists(self.decensored_dir()):
+            os.makedirs(self.decensored_dir())
 
         return new_proj
 
@@ -183,6 +187,12 @@ class ProjImgTrans:
 
     def upscaled_dir(self):
         return osp.join(self.directory, 'upscaled')
+
+    def decensor_mask_dir(self):
+        return osp.join(self.directory, 'decensor_mask')
+
+    def decensored_dir(self):
+        return osp.join(self.directory, 'decensored')
 
     def result_dir(self):
         return osp.join(self.directory, 'result')
@@ -457,6 +467,12 @@ class ProjImgTrans:
     def save_inpainted(self, img_name, inpainted: np.ndarray):
         imwrite(self.get_inpainted_path(img_name), inpainted, ext=pcfg.intermediate_imgsave_ext)
 
+    def save_decensor_mask(self, img_name, mask: np.ndarray):
+        imwrite(self.get_decensor_mask_path(img_name), mask, ext=pcfg.intermediate_imgsave_ext)
+
+    def save_decensored(self, img_name, decensored: np.ndarray):
+        imwrite(self.get_decensored_path(img_name), decensored, ext=pcfg.intermediate_imgsave_ext)
+
     def current_img_path(self) -> str:
         if self.current_img is None:
             return None
@@ -477,6 +493,25 @@ class ProjImgTrans:
     def load_mask_by_imgname(self, imgname: str) -> np.ndarray:
         mask = None
         mp = self.get_mask_path(imgname, get_last_modified=True)
+        if osp.exists(mp):
+            mask = imread(mp, cv2.IMREAD_GRAYSCALE)
+        return mask
+
+    def get_decensor_mask_path(self, imgname: str = None, get_last_modified=False) -> str:
+        if imgname is None:
+            imgname = self.current_img
+
+        fileprefix = osp.join(self.decensor_mask_dir(), osp.splitext(imgname)[0])
+        if get_last_modified:
+            p = get_last_modified_file(fileprefix, ['.jxl', '.png'], ext_fallback=pcfg.intermediate_imgsave_ext)
+        else:
+            p = fileprefix+pcfg.intermediate_imgsave_ext
+
+        return p
+
+    def load_decensor_mask_by_imgname(self, imgname: str) -> np.ndarray:
+        mask = None
+        mp = self.get_decensor_mask_path(imgname, get_last_modified=True)
         if osp.exists(mp):
             mask = imread(mp, cv2.IMREAD_GRAYSCALE)
         return mask
@@ -517,6 +552,18 @@ class ProjImgTrans:
                 inpainted = Image.fromarray(inpainted).resize((w, h), resample=Image.Resampling.LANCZOS)
                 inpainted = np.array(inpainted)
         return inpainted
+
+    def get_decensored_path(self, imgname: str = None, get_last_modified=False) -> str:
+        if imgname is None:
+            imgname = self.current_img
+
+        fileprefix = osp.join(self.decensored_dir(), osp.splitext(imgname)[0])
+        if get_last_modified:
+            p = get_last_modified_file(fileprefix, ['.jxl', '.png'], ext_fallback=pcfg.intermediate_imgsave_ext)
+        else:
+            p = fileprefix+pcfg.intermediate_imgsave_ext
+
+        return p
 
     def get_result_path(self, imgname: str) -> str:
         ext = '.png'

@@ -371,6 +371,7 @@ class MainWindow(mainwindow_cls):
         module_manager.finish_translate_page.connect(self.finishTranslatePage)
         module_manager.imgtrans_pipeline_finished.connect(self.on_imgtrans_pipeline_finished)
         module_manager.page_trans_finished.connect(self.on_pagtrans_finished)
+        module_manager.page_decensor_finished.connect(self.on_page_decensor_finished)
         module_manager.setupThread(self.configPanel, self.imgtrans_progress_msgbox, self.ocr_postprocess, self.translate_preprocess, self.translate_postprocess)
         module_manager.progress_msgbox.showed.connect(self.on_imgtrans_progressbox_showed)
         module_manager.blktrans_pipeline_finished.connect(self.on_blktrans_finished)
@@ -714,6 +715,8 @@ class MainWindow(mainwindow_cls):
         self.titleBar.run_trigger.connect(self.leftBar.runImgtransBtn.click)
         self.titleBar.run_woupdate_textstyle_trigger.connect(self.run_imgtrans_wo_textstyle_update)
         self.titleBar.translate_page_trigger.connect(self.on_transpagebtn_pressed)
+        self.titleBar.decensor_current_trigger.connect(self.run_decensor_current_page)
+        self.titleBar.decensor_all_trigger.connect(self.run_decensor_all_pages)
         self.titleBar.enable_module.connect(self.on_enable_module)
         self.titleBar.importtstyle_trigger.connect(self.import_tstyles)
         self.titleBar.exporttstyle_trigger.connect(self.export_tstyles)
@@ -1472,6 +1475,16 @@ class MainWindow(mainwindow_cls):
 
         self.saveCurrentPage(False, False)
 
+    def on_page_decensor_finished(self, page_index: int):
+        if page_index < 0 or page_index >= self.imgtrans_proj.num_pages:
+            return
+        if page_index == self.pageList.currentIndex().row():
+            self.imgtrans_proj.set_current_img_byidx(page_index)
+            self.canvas.updateCanvas()
+        self.imgtrans_proj.save()
+        if page_index == self.pageList.currentIndex().row():
+            self.saveCurrentPage(False, False)
+
     def on_savestate_changed(self, unsaved: bool):
         save_state = self.tr('unsaved') if unsaved else self.tr('saved')
         self.titleBar.setTitleContent(save_state=save_state)
@@ -1568,6 +1581,16 @@ class MainWindow(mainwindow_cls):
 
         self.module_manager.runTranslateOnlyPipeline()
 
+    def run_decensor_current_page(self):
+        if self.imgtrans_proj.is_empty or self.imgtrans_proj.current_img is None:
+            return
+        self.module_manager.runDecensorPipeline([self.imgtrans_proj.current_img])
+
+    def run_decensor_all_pages(self):
+        if self.imgtrans_proj.is_empty:
+            return
+        self.module_manager.runDecensorPipeline()
+
     def on_run_imgtrans(self, continue_mode=False):
         self.backup_blkstyles.clear()
 
@@ -1575,7 +1598,7 @@ class MainWindow(mainwindow_cls):
             self.bottomBar.textblockChecker.click()
         self.postprocess_mt_toggle = False
 
-        all_disabled = pcfg.module.all_stages_disabled()
+        all_disabled = pcfg.module.all_stages_disabled() and not pcfg.decensor_after_pipeline
         
         pages_to_process = []
         
