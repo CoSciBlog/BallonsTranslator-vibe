@@ -145,6 +145,7 @@ class MainWindow(mainwindow_cls):
         self.leftBar.configChecked.connect(self.setupConfigUI)
         self.leftBar.globalSearchChecker.clicked.connect(self.on_set_gsearch_widget)
         self.leftBar.glossary_clicked.connect(self.show_project_glossary_window)
+        self.leftBar.decensor_current_clicked.connect(self.run_decensor_current_page)
         self.leftBar.open_dir.connect(self.OpenProj)
         self.leftBar.open_json_proj.connect(self.openJsonProj)
         self.leftBar.save_proj.connect(self.manual_save)

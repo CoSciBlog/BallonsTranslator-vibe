@@ -1,6 +1,11 @@
 # Changelogs
 
 ### 2026-05-14
+[v1.4.0-vibe.13] sidebar decensor current page button
+1. Added a left-sidebar `Decens` button below Pages, Search/Replace, and Glossary.
+2. Wired the button to the existing current-page decensor pass so only the active page is processed.
+3. Updated README documentation and bumped the fork runtime version string to `1.4.0-vibe.13`.
+
 [v1.4.0-vibe.12] decensor pipeline pass
 1. Added a `Decensor` settings section with automatic, green-mask, censor-bar, and mosaic mask modes plus mask dilation and minimum area controls.
 2. Added `Decensor Current Page` and `Decensor All Pages` actions to the Run menu.

@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README_EN.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.12`
+Fork release: `1.4.0-vibe.13`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -30,6 +30,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Refined the General settings layout, added a glossary icon, and added a sidebar translation-only run button.
 - Moved Upscaling and Post-merge settings to the top of General settings, with visible field labels and detailed hover tooltips.
 - Added an optional decensor pass that detects censorship masks and inpaints them through the selected inpainting backend, including `flux2-klein` when selected.
+- Added a left-sidebar `Decens` button for decensoring the current page directly.
 
 ## Features
 
@@ -94,7 +95,7 @@ The General settings page also places `Post-merge` near the top, before settings
 
 ## Decensor pass
 
-The Run menu includes `Decensor Current Page` and `Decensor All Pages`. General settings also include a `Decensor` section with an optional `Run decensor pass after pipeline` checkbox. The pass creates project-local `decensor_mask` and `decensored` outputs, then updates the normal `inpainted` working image so export uses the decensored result.
+The left sidebar includes a `Decens` button below Pages, Search/Replace, and Glossary. It runs the decensor pass on the current page directly. The Run menu also includes `Decensor Current Page` and `Decensor All Pages`. General settings include a `Decensor` section with an optional `Run decensor pass after pipeline` checkbox. The pass creates project-local `decensor_mask` and `decensored` outputs, then updates the normal `inpainted` working image so export uses the decensored result.
 
 Mask detection is intentionally conservative and supports automatic mode, DeepCreamPy-style green masks, censor bars, and mosaic-like regions. The actual reconstruction is handled by the currently selected inpainter, so existing models such as `lama_large_512px` and optional `flux2-klein` can be used without adding a separate model selector.
 
