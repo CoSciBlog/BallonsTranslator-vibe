@@ -33,6 +33,7 @@ from .io_thread import ImgSaveThread, ImportDocThread, ExportDocThread
 from .custom_widget import Widget, ViewWidget
 from .global_search_widget import GlobalSearchWidget
 from .glossary_widget import GlossaryWindow
+from .input_wheel_guard import InputWheelGuard
 from .textedit_commands import GlobalRepalceAllCommand
 from .framelesswindow import FramelessWindow, FramelessMoveResize
 from .drawing_commands import RunBlkTransCommand
@@ -83,6 +84,8 @@ class MainWindow(mainwindow_cls):
         shared.register_view_widget = self.register_view_widget
 
         self.app = app
+        self.input_wheel_guard = InputWheelGuard(self)
+        self.app.installEventFilter(self.input_wheel_guard)
         self.backup_blkstyles = []
         self._run_imgtrans_wo_textstyle_update = False
 

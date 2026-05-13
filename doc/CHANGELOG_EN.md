@@ -1,6 +1,12 @@
 # Changelogs
 
 ### 2026-05-13
+[v1.4.0-vibe.8] settings input wheel guard and wider fields
+1. Added a `Prevent mouse wheel changes on input fields` checkbox in General settings.
+2. Added a global UI guard that blocks accidental mouse wheel changes on combo boxes and spin boxes, while forwarding wheel movement to a parent scroll area when possible.
+3. Enlarged long parameter fields such as API keys, endpoint URLs, proxy values, glossary prompts, and LLM prompt templates so more text is visible while editing.
+4. Bumped the fork runtime version string to `1.4.0-vibe.8`.
+
 [v1.4.0-vibe.7] project glossary UI and persistence
 1. Added a left-sidebar `Gloss` button that opens a project glossary window.
 2. Saved glossary entries and the custom glossary prompt in each project's `imgtrans_*.json` file.

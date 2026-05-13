@@ -471,6 +471,10 @@ class ConfigPanel(Widget):
         self.open_on_startup_checker, _ = generalConfigPanel.addCheckBox(self.tr('Reopen last project on startup'))
         self.open_on_startup_checker.setToolTip(self.tr('Open the most recently used project automatically when the application starts.'))
         self.open_on_startup_checker.stateChanged.connect(self.on_open_onstartup_changed)
+        self.prevent_input_wheel_checker, _ = generalConfigPanel.addCheckBox(
+            self.tr('Prevent mouse wheel changes on input fields'),
+            discription=self.tr('Ignore mouse wheel changes on combo boxes and spin boxes so scrolling settings does not accidentally change values.'))
+        self.prevent_input_wheel_checker.stateChanged.connect(self.on_prevent_input_wheel_changed)
 
         generalConfigPanel.addTextLabel(label_typesetting)
         dec_program_str = self.tr('decide by program')
@@ -749,6 +753,9 @@ class ConfigPanel(Widget):
     def on_open_onstartup_changed(self):
         pcfg.open_recent_on_startup = self.open_on_startup_checker.isChecked()
 
+    def on_prevent_input_wheel_changed(self):
+        pcfg.prevent_input_wheel_changes = self.prevent_input_wheel_checker.isChecked()
+
     def on_fntsize_flag_changed(self):
         pcfg.let_fntsize_flag = self.let_fntsize_combox.currentIndex()
 
@@ -862,6 +869,7 @@ class ConfigPanel(Widget):
 
         if pcfg.open_recent_on_startup:
             self.open_on_startup_checker.setChecked(True)
+        self.prevent_input_wheel_checker.setChecked(pcfg.prevent_input_wheel_changes)
 
         self.detect_config_panel.keep_existing_checker.setChecked(pcfg.module.keep_exist_textlines)
         self.let_effect_combox.setCurrentIndex(pcfg.let_fnteffect_flag)

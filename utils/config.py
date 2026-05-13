@@ -157,6 +157,7 @@ class ProgramConfig(Config):
 
     darkmode: bool = False
     textselect_mini_menu: bool = True
+    prevent_input_wheel_changes: bool = True
     fold_textarea: bool = False
     show_source_text: bool = True
     show_trans_text: bool = True

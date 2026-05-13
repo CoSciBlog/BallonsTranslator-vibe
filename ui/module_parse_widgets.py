@@ -12,6 +12,24 @@ from qtpy.QtCore import Qt, Signal
 from qtpy.QtGui import QDoubleValidator
 
 
+WIDE_PARAM_KEYWORDS = (
+    'api key', 'apikey', 'token', 'secret', 'password',
+    'endpoint', 'url', 'proxy', 'prompt', 'template', 'glossary', 'sample',
+)
+EDITOR_PARAM_KEYWORDS = ('prompt', 'template', 'glossary', 'sample')
+CONFIG_FIELD_WIDE = int(CONFIG_COMBOBOX_LONG * 1.45)
+
+
+def param_key_uses_wide_field(param_key: str) -> bool:
+    key = param_key.lower()
+    return any(keyword in key for keyword in WIDE_PARAM_KEYWORDS)
+
+
+def param_key_uses_tall_editor(param_key: str) -> bool:
+    key = param_key.lower()
+    return any(keyword in key for keyword in EDITOR_PARAM_KEYWORDS)
+
+
 class ParamCheckGroup(QWidget):
 
     paramwidget_edited = Signal(str, dict)
@@ -42,8 +60,11 @@ class ParamLineEditor(QLineEdit):
     def __init__(self, param_key: str, force_digital, size='short', *args, **kwargs) -> None:
         super().__init__( *args, **kwargs)
         self.param_key = param_key
-        self.setFixedWidth(size2width(size))
-        self.setFixedHeight(CONFIG_COMBOBOX_HEIGHT)
+        width = size2width(size)
+        if not force_digital and param_key_uses_wide_field(param_key):
+            width = max(width, CONFIG_FIELD_WIDE)
+        self.setFixedWidth(width)
+        self.setFixedHeight(max(CONFIG_COMBOBOX_HEIGHT, 34))
         self.textChanged.connect(self.on_text_changed)
 
         if force_digital:
@@ -61,8 +82,11 @@ class ParamEditor(QPlainTextEdit):
         self.param_key = param_key
 
         if param_key == 'chat sample':
-            self.setFixedWidth(int(CONFIG_COMBOBOX_LONG * 1.2))
-            self.setFixedHeight(200)
+            self.setFixedWidth(CONFIG_FIELD_WIDE)
+            self.setFixedHeight(240)
+        elif param_key_uses_tall_editor(param_key):
+            self.setFixedWidth(CONFIG_FIELD_WIDE)
+            self.setFixedHeight(180)
         else:
             self.setFixedWidth(CONFIG_COMBOBOX_LONG)
             self.setFixedHeight(100)
@@ -184,7 +208,7 @@ class ParamWidget(QWidget):
                 param_size = param_dict.get('size', 'short')
                 if param_type == 'selector':
                     if 'url' in param_key:
-                        size = size2width('median')
+                        size = CONFIG_FIELD_WIDE
                     else:
                         size = size2width(param_size)
 
