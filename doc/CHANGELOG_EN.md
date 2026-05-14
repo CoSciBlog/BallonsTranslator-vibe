@@ -2,6 +2,9 @@
 
 ### 2026-05-14
 [Unreleased] robustness fixes
+Changed:
+1. Default page zoom now fits the current page into the visible canvas when opening a project.
+
 Fixed:
 1. Improved handling of malformed or empty LLM JSON responses.
 2. Added fallback to first-step draft translations when LLM refinement fails.
