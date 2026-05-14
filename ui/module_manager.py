@@ -693,16 +693,6 @@ class ImgtransThread(QThread):
                 self.imgtrans_proj.update_page_progress(imgname, RunStatus.FIN_TRANSLATE)
                 self.update_translate_progress.emit(self.translate_counter)
 
-        if pcfg.decensor_after_pipeline and self.parallel_trans and cfg_module.enable_translate:
-            while self.translate_thread.isRunning():
-                if self.stop_requested:
-                    self.translate_thread.requestStop()
-                    LOGGER.info('Waiting for parallel translation to stop before decensor')
-                time.sleep(0.05)
-
-        if pcfg.decensor_after_pipeline and not self.stop_requested:
-            self._run_decensor_pages(pages_to_iterate)
-
         if self.stop_requested and (not cfg_module.enable_translate or not self.parallel_trans):
             self.pipeline_stopped.emit()
 
@@ -782,7 +772,7 @@ class ImgtransThread(QThread):
     def decensor_finished(self) -> bool:
         if self.imgtrans_proj is None:
             return True
-        if self.decensor_only or pcfg.decensor_after_pipeline:
+        if self.decensor_only:
             return self.decensor_counter == self.num_pages
         return True
 
@@ -808,9 +798,6 @@ class ImgtransThread(QThread):
                 ref_counter = min(ref_counter, self.translate_thread.finished_counter)
             else:
                 ref_counter = min(ref_counter, self.translate_counter)
-        if pcfg.decensor_after_pipeline and self.decensor_counter > 0:
-            ref_counter = min(ref_counter, self.decensor_counter)
-
         process_idx = ref_counter - 1
         # 将处理索引转换为实际页面索引
         if hasattr(self, 'process_idx_to_page_idx') and process_idx in self.process_idx_to_page_idx:
@@ -984,7 +971,7 @@ class ModuleManager(QObject):
         self.post_pipeline_merge_done = False
         self.terminateRunningThread()
         
-        if cfg_module.all_stages_disabled() and not pcfg.decensor_after_pipeline and self.imgtrans_proj is not None and self.imgtrans_proj.num_pages > 0:
+        if cfg_module.all_stages_disabled() and self.imgtrans_proj is not None and self.imgtrans_proj.num_pages > 0:
             for page_name in process_pages:
                 self.page_trans_finished.emit(self.imgtrans_proj.pagename2idx(page_name))
             self.imgtrans_pipeline_finished.emit()
@@ -994,7 +981,7 @@ class ModuleManager(QObject):
         self.progress_msgbox.ocr_bar.setVisible(cfg_module.enable_ocr)
         self.progress_msgbox.translate_bar.setVisible(cfg_module.enable_translate)
         self.progress_msgbox.inpaint_bar.setVisible(cfg_module.enable_inpaint)
-        self.progress_msgbox.decensor_bar.setVisible(pcfg.decensor_after_pipeline)
+        self.progress_msgbox.decensor_bar.setVisible(False)
         self.progress_msgbox.zero_progress()
         self.progress_msgbox.show()
         self.imgtrans_thread.runImgtransPipeline(self.imgtrans_proj, pages_to_process)
@@ -1196,7 +1183,7 @@ class ModuleManager(QObject):
             progress['inpaint'] = self.imgtrans_thread.inpaint_counter / num_pages
         if cfg_module.enable_translate:
             progress['translate'] = self.imgtrans_thread.translate_counter / num_pages
-        if self.imgtrans_thread.decensor_only or pcfg.decensor_after_pipeline:
+        if self.imgtrans_thread.decensor_only:
             progress['decensor'] = self.imgtrans_thread.decensor_counter / num_pages
         return progress
 

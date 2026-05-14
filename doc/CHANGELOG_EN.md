@@ -1,6 +1,12 @@
 # Changelogs
 
 ### 2026-05-14
+[v1.4.0-vibe.22] remove decensor UI controls
+1. Removed the Decensor section from General settings.
+2. Removed the left-sidebar `Decens` button and the Run menu decensor actions.
+3. Disabled automatic decensor-after-pipeline triggering during normal runs.
+4. Updated README documentation and bumped the fork runtime version string to `1.4.0-vibe.22`.
+
 [v1.4.0-vibe.21] intermediate image formats and quality
 1. Added `JPG` and `WEBP` to the `Intermediate image format` setting.
 2. Added a separate intermediate image quality setting independent of final result image quality.

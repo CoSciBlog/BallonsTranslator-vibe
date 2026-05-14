@@ -159,7 +159,6 @@ class MainWindow(mainwindow_cls):
         self.leftBar.configChecked.connect(self.setupConfigUI)
         self.leftBar.globalSearchChecker.clicked.connect(self.on_set_gsearch_widget)
         self.leftBar.glossary_clicked.connect(self.show_project_glossary_window)
-        self.leftBar.decensor_current_clicked.connect(self.run_decensor_current_page)
         self.leftBar.open_dir.connect(self.OpenProj)
         self.leftBar.open_json_proj.connect(self.openJsonProj)
         self.leftBar.save_proj.connect(self.manual_save)
@@ -749,8 +748,6 @@ class MainWindow(mainwindow_cls):
         self.titleBar.run_trigger.connect(self.leftBar.runImgtransBtn.click)
         self.titleBar.run_woupdate_textstyle_trigger.connect(self.run_imgtrans_wo_textstyle_update)
         self.titleBar.translate_page_trigger.connect(self.on_transpagebtn_pressed)
-        self.titleBar.decensor_current_trigger.connect(self.run_decensor_current_page)
-        self.titleBar.decensor_all_trigger.connect(self.run_decensor_all_pages)
         self.titleBar.enable_module.connect(self.on_enable_module)
         self.titleBar.importtstyle_trigger.connect(self.import_tstyles)
         self.titleBar.exporttstyle_trigger.connect(self.export_tstyles)
@@ -1620,16 +1617,6 @@ class MainWindow(mainwindow_cls):
 
         self.module_manager.runTranslateOnlyPipeline()
 
-    def run_decensor_current_page(self):
-        if self.imgtrans_proj.is_empty or self.imgtrans_proj.current_img is None:
-            return
-        self.module_manager.runDecensorPipeline([self.imgtrans_proj.current_img])
-
-    def run_decensor_all_pages(self):
-        if self.imgtrans_proj.is_empty:
-            return
-        self.module_manager.runDecensorPipeline()
-
     def on_run_imgtrans(self, continue_mode=False):
         self.backup_blkstyles.clear()
 
@@ -1637,7 +1624,7 @@ class MainWindow(mainwindow_cls):
             self.bottomBar.textblockChecker.click()
         self.postprocess_mt_toggle = False
 
-        all_disabled = pcfg.module.all_stages_disabled() and not pcfg.decensor_after_pipeline
+        all_disabled = pcfg.module.all_stages_disabled()
         
         pages_to_process = []
         processable_pages = self.imgtrans_proj.pipeline_pages(skip_ignored=True)

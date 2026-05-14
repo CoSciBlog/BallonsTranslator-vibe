@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README_EN.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.21`
+Fork release: `1.4.0-vibe.22`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -29,15 +29,12 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Added optional pre-detection page upscaling with factor, quality, maximum size, and skip-threshold settings.
 - Refined the General settings layout, added a glossary icon, and added a sidebar translation-only run button.
 - Moved Upscaling and Post-merge settings to the top of General settings, with visible field labels and detailed hover tooltips.
-- Added an optional decensor pass that detects censorship masks and inpaints them through the selected inpainting backend, including `flux2-klein` when selected.
-- Added a left-sidebar `Decens` button for decensoring the current page directly.
 - Added page-list previews, a page context-menu toggle for ignoring pages in pipeline runs, and project JSON persistence for ignored pages.
 - Added LLM project-context settings for previous pages, optional next-page context, capped document context, and narrower automatic glossary category extraction.
 - Added a `Force Stop` control to the run progress dialog for terminating stuck pipeline or translation threads.
-- Prevented the current-page decensor action from overlapping an active pipeline or LLM translation worker.
 - Added the missing `accelerate>=0.26.0` dependency required by `flux2-klein` GGUF loading.
-- Reworked decensor mask detection so `decensor_mask` stores real censor candidates instead of copied text/inpaint masks.
 - Expanded intermediate image saving to `PNG`, `JPG`, `WEBP`, and `JXL` with a separate quality setting.
+- Removed the decensor controls from General settings, the left sidebar, and the Run menu.
 
 ## Features
 
@@ -55,7 +52,6 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Image editing workflow:
   - mask editing
   - inpainting brush style cleanup
-  - optional censorship mask detection and decensor inpainting
   - support for long-strip and webtoon-style pages
 - Headless automation for batch processing from the command line
 - Multiple OCR, translator, and inpainting backends already wired into the desktop app
@@ -103,14 +99,6 @@ The General settings page also places `Post-merge` near the top, before settings
 ## Intermediate image saving
 
 The General settings page lets you choose the intermediate image format for project-local masks, inpainted pages, and other working images. Supported formats are `PNG`, `JPG`, `WEBP`, and `JXL`. Intermediate images have their own quality field, separate from the final result image quality, so cache size and working-image fidelity can be tuned independently.
-
-## Decensor pass
-
-The left sidebar includes a `Decens` button below Pages, Search/Replace, and Glossary. It runs the decensor pass on the current page directly. The Run menu also includes `Decensor Current Page` and `Decensor All Pages`. General settings include a `Decensor` section with an optional `Run decensor pass after pipeline` checkbox. The pass creates project-local `decensor_mask` and `decensored` outputs, then updates the normal `inpainted` working image so export uses the decensored result.
-
-Mask detection follows the same high-level workflow as hent-AI and DeepCreamPy-style tools: detect censor bars, green overlay masks, and mosaic-like regions first, save that result as a dedicated `decensor_mask`, then hand the mask to the selected inpainter. The mask generator no longer copies normal text/inpaint masks into `decensor_mask`, so the folder only contains decensor candidates. The actual reconstruction is handled by the currently selected inpainter, so existing models such as `lama_large_512px` and optional `flux2-klein` can be used without adding a separate model selector.
-
-Starting a current-page or all-pages decensor run now first force-stops any active pipeline or translation worker. This prevents stuck LLM/background translation work from overlapping the decensor worker and touching project/UI state from the wrong thread.
 
 ## Page pipeline ignore
 

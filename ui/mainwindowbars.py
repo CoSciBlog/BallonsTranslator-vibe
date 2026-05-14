@@ -65,7 +65,6 @@ class LeftBar(Widget):
     save_proj = Signal()
     save_config = Signal()
     glossary_clicked = Signal()
-    decensor_current_clicked = Signal()
     run_translate_clicked = Signal()
     def __init__(self, mainwindow, *args, **kwargs) -> None:
         super().__init__(mainwindow, *args, **kwargs)
@@ -180,23 +179,11 @@ class LeftBar(Widget):
         self.glossaryBtn.setFixedSize(LEFTBTN_WIDTH, LEFTBTN_WIDTH)
         self.glossaryBtn.clicked.connect(self.glossary_clicked)
 
-        self.decensorBtn = QPushButton()
-        self.decensorBtn.setText(self.tr('Decens'))
-        self.decensorBtn.setToolTip(self.tr('Decensor current page: detect censorship masks on the current page and inpaint them with the selected inpainter.'))
-        self.decensorBtn.setIcon(QIcon('icons/drawingtools_inpaint.svg'))
-        self.decensorBtn.setIconSize(QSize(17, 17))
-        font = self.decensorBtn.font()
-        font.setPixelSize(8)
-        self.decensorBtn.setFont(font)
-        self.decensorBtn.setFixedSize(LEFTBTN_WIDTH, LEFTBTN_WIDTH)
-        self.decensorBtn.clicked.connect(self.decensor_current_clicked)
-        
         vlayout = QVBoxLayout(self)
         vlayout.addWidget(openBtnToolBar)
         vlayout.addWidget(self.showPageListLabel)
         vlayout.addWidget(self.globalSearchChecker)
         vlayout.addWidget(self.glossaryBtn)
-        vlayout.addWidget(self.decensorBtn)
         vlayout.addWidget(self.imgTransChecker)
         vlayout.addItem(QSpacerItem(0, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
         vlayout.addWidget(self.configChecker)
@@ -439,7 +426,7 @@ class TitleBar(Widget):
 
         self.runToolBtn = TitleBarToolBtn(self)
         self.runToolBtn.setText(self.tr('Run'))
-        self.runToolBtn.setToolTip(self.tr('Run menu: choose enabled stages, presets, translation commands, and decensor actions.'))
+        self.runToolBtn.setToolTip(self.tr('Run menu: choose enabled stages, presets, and translation commands.'))
 
         self.stageActions = stageActions = [
             QAction(self.tr('Enable Text Detection'), self),
@@ -475,25 +462,17 @@ class TitleBar(Widget):
         runAction = QAction(self.tr('Run'), self)
         runWoUpdateTextStyle = QAction(self.tr('Run without updating text style'), self)
         translatePageAction = QAction(self.tr('Translate Page'), self)
-        decensorCurrentAction = QAction(self.tr('Decensor Current Page'), self)
-        decensorAllAction = QAction(self.tr('Decensor All Pages'), self)
-        decensorCurrentAction.setToolTip(self.tr('Run the decensor pass on the current page with the selected inpainter.'))
-        decensorAllAction.setToolTip(self.tr('Run the decensor pass on all project pages with the selected inpainter.'))
         runMenu = QMenu(self.runToolBtn)
         runMenu.addActions(stageActions)
         runMenu.addSeparator()
         runMenu.addActions(list(self.runPresetActions.keys()))
         runMenu.addSeparator()
         runMenu.addActions([runAction, runWoUpdateTextStyle, translatePageAction])
-        runMenu.addSeparator()
-        runMenu.addActions([decensorCurrentAction, decensorAllAction])
         self.runToolBtn.setMenu(runMenu)
         self.runToolBtn.setPopupMode(QToolButton.InstantPopup)
         self.run_trigger = runAction.triggered
         self.run_woupdate_textstyle_trigger = runWoUpdateTextStyle.triggered
         self.translate_page_trigger = translatePageAction.triggered
-        self.decensor_current_trigger = decensorCurrentAction.triggered
-        self.decensor_all_trigger = decensorAllAction.triggered
 
         self.iconLabel = QLabel(self)
         if not C.ON_MACOS:
