@@ -1,6 +1,11 @@
 # Changelogs
 
 ### 2026-05-14
+[v1.4.0-vibe.27] page panel context menu delete data
+1. Added a `Delete Page Data` context menu action to the left-sidebar page list.
+2. Wired the action to safely delete textboxes, working masks, and inpainting outputs for the selected page.
+3. Updated README documentation and bumped the fork runtime version string to `1.4.0-vibe.27`.
+
 [v1.4.0-vibe.26] typesetting ui cleanups
 1. Removed separate description labels from typesetting settings to reduce clutter.
 2. Expanded typesetting configuration descriptions and added them as tooltips to the remaining labels and input fields.

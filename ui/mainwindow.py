@@ -9,7 +9,7 @@ import cv2
 
 from tqdm import tqdm
 from qtpy.QtWidgets import QAction, QFileDialog, QMenu, QHBoxLayout, QVBoxLayout, QApplication, QStackedWidget, QSplitter, QListWidget, QShortcut, QListWidgetItem, QMessageBox, QTextEdit, QPlainTextEdit
-from qtpy.QtCore import Qt, QPoint, QSize, QEvent, Signal
+from qtpy.QtCore import Qt, QPoint, QSize, QEvent, Signal, QThread
 from qtpy.QtGui import QContextMenuEvent, QTextCursor, QGuiApplication, QIcon, QCloseEvent, QKeySequence, QKeyEvent, QPainter, QClipboard, QImage, QColor, QBrush
 
 from utils.logger import logger as LOGGER
@@ -47,6 +47,7 @@ class PageListView(QListWidget):
 
     reveal_file = Signal(str)
     toggle_ignore_page = Signal(str)
+    delete_page_data = Signal(str)
     PAGE_NAME_ROLE = Qt.ItemDataRole.UserRole
     PAGE_IGNORED_ROLE = Qt.ItemDataRole.UserRole + 1
 
@@ -64,16 +65,22 @@ class PageListView(QListWidget):
         ignored = bool(item.data(self.PAGE_IGNORED_ROLE))
         menu = QMenu()
         reveal_act = menu.addAction(self.tr('Reveal in File Explorer'))
-        menu.addSeparator()
+        
         ignore_label = self.tr('Include Page in Pipeline') if ignored else self.tr('Ignore Page in Pipeline')
         ignore_act = menu.addAction(ignore_label)
         ignore_act.setToolTip(self.tr('Skip this page during text detection, OCR, translation, and inpainting pipeline runs.'))
+        
+        delete_data_act = menu.addAction(self.tr('Delete Page Data'))
+        delete_data_act.setToolTip(self.tr('Delete textboxes, masks, and inpainting for this page.'))
+        
         rst = menu.exec_(e.globalPos())
 
         if rst == reveal_act:
             self.reveal_file.emit(page_name)
         elif rst == ignore_act:
             self.toggle_ignore_page.emit(page_name)
+        elif rst == delete_data_act:
+            self.delete_page_data.emit(page_name)
 
 mainwindow_cls = Widget if (shared.HEADLESS or shared.HEADLESS_CONTINUOUS) else FramelessWindow
 class MainWindow(mainwindow_cls):
@@ -175,6 +182,7 @@ class MainWindow(mainwindow_cls):
         self.pageList = PageListView()
         self.pageList.reveal_file.connect(self.on_reveal_file)
         self.pageList.toggle_ignore_page.connect(self.on_toggle_page_ignore)
+        self.pageList.delete_page_data.connect(self.on_delete_page_data)
         self.pageList.setHidden(True)
         self.pageList.currentItemChanged.connect(self.pageListCurrentItemChanged)
 
@@ -619,13 +627,14 @@ class MainWindow(mainwindow_cls):
         if translator is not None and hasattr(translator, 'set_project_glossary'):
             translator.set_project_glossary(self.imgtrans_proj.glossary)
 
-    def sync_translator_glossary_to_project(self, translator=None):
+    def sync_translator_glossary_to_project(self, translator=None, update_ui: bool = True):
         translator = translator or getattr(self.module_manager, 'translator', None)
         if translator is not None and hasattr(translator, 'get_project_glossary'):
             glossary = translator.get_project_glossary()
             if isinstance(glossary, dict):
                 self.imgtrans_proj.glossary = self.imgtrans_proj.normalize_glossary(glossary)
-                self.sync_project_glossary_to_ui()
+                if update_ui and QThread.currentThread() == self.thread():
+                    self.sync_project_glossary_to_ui()
 
     def show_project_glossary_window(self):
         if self.imgtrans_proj is None or self.imgtrans_proj.directory is None:
@@ -1427,6 +1436,7 @@ class MainWindow(mainwindow_cls):
         self.backup_blkstyles.clear()
         self._run_imgtrans_wo_textstyle_update = False
         self.postprocess_mt_toggle = True
+        self.sync_translator_glossary_to_project(update_ui=True)
         if pcfg.module.empty_runcache and not (shared.HEADLESS or shared.HEADLESS_CONTINUOUS):
             self.module_manager.unload_all_models()
         if shared.args.export_translation_txt:
@@ -1836,6 +1846,41 @@ class MainWindow(mainwindow_cls):
         except Exception as e:
             create_error_dialog(e, self.tr('Failed to save ignored page state'))
 
+    def on_delete_page_data(self, page_name: str):
+        if not page_name or page_name not in self.imgtrans_proj.pages:
+            return
+            
+        reply = QMessageBox.question(self, self.tr('Delete Page Data'),
+                                     self.tr('Are you sure you want to delete textboxes, masks, and inpainting for this page?'),
+                                     QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        if reply == QMessageBox.StandardButton.No:
+            return
+
+        self.imgtrans_proj.pages[page_name] = []
+
+        def _del(path):
+            if path and osp.exists(path):
+                os.remove(path)
+                
+        _del(self.imgtrans_proj.get_mask_path(page_name, get_last_modified=True))
+        _del(self.imgtrans_proj.get_inpainted_path(page_name, get_last_modified=True))
+        _del(self.imgtrans_proj.get_upscaled_path(page_name, get_last_modified=True))
+        _del(self.imgtrans_proj.get_decensor_mask_path(page_name, get_last_modified=True))
+        _del(self.imgtrans_proj.get_decensored_path(page_name, get_last_modified=True))
+        
+        if self.imgtrans_proj.current_img == page_name:
+            self.imgtrans_proj.mask_array = None
+            self.imgtrans_proj.inpainted_array = None
+            self.canvas.clear_undostack(update_saved_step=True)
+            self.st_manager.updateSceneTextitems()
+            self.canvas.updateCanvas()
+            
+        try:
+            self.imgtrans_proj.save()
+            self.canvas.setProjSaveState(False)
+        except Exception as e:
+            create_error_dialog(e, self.tr('Failed to save state after deleting page data'))
+
     def on_reveal_file(self, page_name: str = None):
         if page_name and page_name in self.imgtrans_proj.pages:
             current_img_path = osp.join(self.imgtrans_proj.directory, page_name)
@@ -1913,7 +1958,7 @@ class MainWindow(mainwindow_cls):
             source_text[i] = self.mtPreSubWidget.sub_text(source_text[i])
 
     def translate_postprocess(self, translations: List[str] = None, textblocks: List[TextBlock] = None, translator = None):
-        self.sync_translator_glossary_to_project(translator)
+        self.sync_translator_glossary_to_project(translator, update_ui=False)
         if not self.postprocess_mt_toggle:
             return
         
