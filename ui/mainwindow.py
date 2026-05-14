@@ -10,7 +10,7 @@ import cv2
 from tqdm import tqdm
 from qtpy.QtWidgets import QAction, QFileDialog, QMenu, QHBoxLayout, QVBoxLayout, QApplication, QStackedWidget, QSplitter, QListWidget, QShortcut, QListWidgetItem, QMessageBox, QTextEdit, QPlainTextEdit
 from qtpy.QtCore import Qt, QPoint, QSize, QEvent, Signal
-from qtpy.QtGui import QContextMenuEvent, QTextCursor, QGuiApplication, QIcon, QCloseEvent, QKeySequence, QKeyEvent, QPainter, QClipboard, QImage
+from qtpy.QtGui import QContextMenuEvent, QTextCursor, QGuiApplication, QIcon, QCloseEvent, QKeySequence, QKeyEvent, QPainter, QClipboard, QImage, QColor, QBrush
 
 from utils.logger import logger as LOGGER
 from utils.text_processing import is_cjk, full_len, half_len
@@ -43,21 +43,35 @@ from .custom_widget import MessageBox, FrameLessMessageBox, ImgtransProgressMess
 
 class PageListView(QListWidget):
 
-    reveal_file = Signal()
+    reveal_file = Signal(str)
+    toggle_ignore_page = Signal(str)
+    PAGE_NAME_ROLE = Qt.ItemDataRole.UserRole
+    PAGE_IGNORED_ROLE = Qt.ItemDataRole.UserRole + 1
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.setIconSize(QSize(shared.PAGELIST_THUMBNAIL_SIZE, shared.PAGELIST_THUMBNAIL_SIZE))
+        self.setSpacing(4)
 
     def contextMenuEvent(self, e: QContextMenuEvent):
+        item = self.itemAt(e.pos())
+        if item is None:
+            return super().contextMenuEvent(e)
+        self.setCurrentItem(item)
+        page_name = item.data(self.PAGE_NAME_ROLE) or item.text()
+        ignored = bool(item.data(self.PAGE_IGNORED_ROLE))
         menu = QMenu()
         reveal_act = menu.addAction(self.tr('Reveal in File Explorer'))
+        menu.addSeparator()
+        ignore_label = self.tr('Include Page in Pipeline') if ignored else self.tr('Ignore Page in Pipeline')
+        ignore_act = menu.addAction(ignore_label)
+        ignore_act.setToolTip(self.tr('Skip this page during text detection, OCR, translation, and inpainting pipeline runs.'))
         rst = menu.exec_(e.globalPos())
 
         if rst == reveal_act:
-            self.reveal_file.emit()
-
-        return super().contextMenuEvent(e)
+            self.reveal_file.emit(page_name)
+        elif rst == ignore_act:
+            self.toggle_ignore_page.emit(page_name)
 
 mainwindow_cls = Widget if (shared.HEADLESS or shared.HEADLESS_CONTINUOUS) else FramelessWindow
 class MainWindow(mainwindow_cls):
@@ -159,6 +173,7 @@ class MainWindow(mainwindow_cls):
 
         self.pageList = PageListView()
         self.pageList.reveal_file.connect(self.on_reveal_file)
+        self.pageList.toggle_ignore_page.connect(self.on_toggle_page_ignore)
         self.pageList.setHidden(True)
         self.pageList.currentItemChanged.connect(self.pageListCurrentItemChanged)
 
@@ -552,16 +567,34 @@ class MainWindow(mainwindow_cls):
     def updatePageList(self):
         if self.pageList.count() != 0:
             self.pageList.clear()
-        if len(self.imgtrans_proj.pages) >= shared.PAGELIST_THUMBNAIL_MAXNUM:
-            item_func = lambda imgname: QListWidgetItem(imgname)
-        else:
-            item_func = lambda imgname:\
-                QListWidgetItem(QIcon(osp.join(self.imgtrans_proj.directory, imgname)), imgname)
         for imgname in self.imgtrans_proj.pages:
-            lstitem =  item_func(imgname)
+            img_path = osp.join(self.imgtrans_proj.directory, imgname)
+            lstitem = QListWidgetItem(QIcon(img_path), imgname)
+            lstitem.setData(PageListView.PAGE_NAME_ROLE, imgname)
+            self.apply_page_list_item_state(lstitem, imgname)
             self.pageList.addItem(lstitem)
             if imgname == self.imgtrans_proj.current_img:
                 self.pageList.setCurrentItem(lstitem)
+
+    def apply_page_list_item_state(self, item: QListWidgetItem, imgname: str):
+        ignored = self.imgtrans_proj.is_page_ignored(imgname)
+        item.setData(PageListView.PAGE_IGNORED_ROLE, ignored)
+        font = item.font()
+        font.setItalic(ignored)
+        item.setFont(font)
+        if ignored:
+            item.setBackground(QBrush(QColor(255, 214, 92, 72)))
+            item.setToolTip(self.tr('Ignored in pipeline runs: text detection, OCR, translation, and inpainting are skipped for this page.'))
+        else:
+            item.setBackground(QBrush())
+            item.setToolTip(self.tr('Page preview'))
+
+    def refresh_page_list_item(self, imgname: str):
+        for ii in range(self.pageList.count()):
+            item = self.pageList.item(ii)
+            if item.data(PageListView.PAGE_NAME_ROLE) == imgname:
+                self.apply_page_list_item_state(item, imgname)
+                break
 
     def pageLabelStateChanged(self):
         setup = self.leftBar.showPageListLabel.isChecked()
@@ -1571,10 +1604,15 @@ class MainWindow(mainwindow_cls):
         self.postprocess_mt_toggle = False
         self.st_manager.updateTextBlkList()
 
-        for page_name, blklist in self.imgtrans_proj.pages.items():
+        page_names = self.imgtrans_proj.pipeline_pages(skip_ignored=True)
+        if len(page_names) == 0:
+            return
+        self.backup_blkstyles = [[] for _ in range(self.imgtrans_proj.num_pages)]
+        for page_name in page_names:
+            blklist = self.imgtrans_proj.pages[page_name]
             self.imgtrans_proj.set_page_progress(page_name, 0)
             ffmt_list = []
-            self.backup_blkstyles.append(ffmt_list)
+            self.backup_blkstyles[self.imgtrans_proj.pagename2idx(page_name)] = ffmt_list
             for textblk in blklist:
                 ffmt_list.append(textblk.fontformat.deepcopy())
                 textblk.rich_text = ''
@@ -1602,20 +1640,24 @@ class MainWindow(mainwindow_cls):
         all_disabled = pcfg.module.all_stages_disabled() and not pcfg.decensor_after_pipeline
         
         pages_to_process = []
+        processable_pages = self.imgtrans_proj.pipeline_pages(skip_ignored=True)
+        if len(processable_pages) == 0:
+            create_info_dialog(self.tr('All pages are ignored for pipeline runs.'))
+            return
         
         # 继续模式：先检查哪些页面需要处理
         if continue_mode:
-            for page_name in self.imgtrans_proj.pages:
+            for page_name in processable_pages:
                 if not self.imgtrans_proj.get_page_progress(page_name):
                     pages_to_process.append(page_name)
             if len(pages_to_process) == 0:
                 return
         else:
-            for page_name in self.imgtrans_proj.pages:
+            for page_name in processable_pages:
                 self.imgtrans_proj.set_page_progress(page_name, 0)
         
         if pcfg.module.enable_detect:
-            for page in self.imgtrans_proj.pages:
+            for page in processable_pages:
                 if not pcfg.module.keep_exist_textlines:
                     if not pages_to_process:
                         # 没有指定pages_to_process，清空所有页面
@@ -1623,13 +1665,15 @@ class MainWindow(mainwindow_cls):
         else:
             self.st_manager.updateTextBlkList()
             textblk: TextBlock = None
-            for page_name, blklist in self.imgtrans_proj.pages.items():
+            self.backup_blkstyles = [[] for _ in range(self.imgtrans_proj.num_pages)]
+            for page_name in processable_pages:
+                blklist = self.imgtrans_proj.pages[page_name]
                 # 如果指定了pages_to_process，跳过不需要处理的页面
                 if pages_to_process and page_name not in pages_to_process:
                     continue
                     
                 ffmt_list = []
-                self.backup_blkstyles.append(ffmt_list)
+                self.backup_blkstyles[self.imgtrans_proj.pagename2idx(page_name)] = ffmt_list
                 for textblk in blklist:
                     if not pcfg.module.enable_detect:
                         ffmt_list.append(textblk.fontformat.deepcopy())
@@ -1754,8 +1798,24 @@ class MainWindow(mainwindow_cls):
         except Exception as e:
             create_error_dialog(e, self.tr('Failed to import translation from ') + selected_file)
 
-    def on_reveal_file(self):
-        current_img_path = self.imgtrans_proj.current_img_path()
+    def on_toggle_page_ignore(self, page_name: str):
+        if not page_name or page_name not in self.imgtrans_proj.pages:
+            return
+        self.imgtrans_proj.toggle_page_ignored(page_name)
+        self.refresh_page_list_item(page_name)
+        try:
+            self.imgtrans_proj.save()
+            self.canvas.setProjSaveState(False)
+        except Exception as e:
+            create_error_dialog(e, self.tr('Failed to save ignored page state'))
+
+    def on_reveal_file(self, page_name: str = None):
+        if page_name and page_name in self.imgtrans_proj.pages:
+            current_img_path = osp.join(self.imgtrans_proj.directory, page_name)
+        else:
+            current_img_path = self.imgtrans_proj.current_img_path()
+        if current_img_path is None:
+            return
         if sys.platform == 'win32':
             # qprocess seems to fuck up with "\""
             p = "\""+str(Path(current_img_path))+"\""

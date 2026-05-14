@@ -110,6 +110,7 @@ class ProjImgTrans:
         self.new_pages: List[str] = []
         self.proj_path: str = None
         self.glossary: Dict[str, str] = self.default_glossary()
+        self.ignored_pages = set()
 
         self.current_img: str = None
         self.img_array: np.ndarray = None
@@ -227,6 +228,15 @@ class ProjImgTrans:
             self._image_info = {}
 
         self.glossary = self.normalize_glossary(proj_dict.get('glossary', {}))
+        ignored_pages = proj_dict.get('ignored_pages', [])
+        if isinstance(ignored_pages, list):
+            self.ignored_pages = {p for p in ignored_pages if isinstance(p, str)}
+        else:
+            self.ignored_pages = set()
+        self.ignored_pages = {
+            p for p in self.ignored_pages
+            if p in self.pages or p in self.not_found_pages
+        }
 
         for p in self.pages:
             if p not in self._image_info:
@@ -258,6 +268,31 @@ class ProjImgTrans:
     def get_page_progress(self, pagename: str):
         fin_code = self._image_info[pagename]['finish_code']
         return (fin_code & pcfg.module.finish_code) == pcfg.module.finish_code
+
+    def is_page_ignored(self, pagename: str) -> bool:
+        return pagename in self.ignored_pages
+
+    def set_page_ignored(self, pagename: str, ignored: bool):
+        if pagename not in self.pages:
+            raise ImgnameNotInProjectException
+        if ignored:
+            self.ignored_pages.add(pagename)
+        else:
+            self.ignored_pages.discard(pagename)
+
+    def toggle_page_ignored(self, pagename: str) -> bool:
+        ignored = not self.is_page_ignored(pagename)
+        self.set_page_ignored(pagename, ignored)
+        return ignored
+
+    def pipeline_pages(self, pages_to_process=None, skip_ignored: bool = True) -> List[str]:
+        if pages_to_process is not None and len(pages_to_process) > 0:
+            page_names = [page for page in pages_to_process if page in self.pages]
+        else:
+            page_names = list(self.pages.keys())
+        if skip_ignored:
+            page_names = [page for page in page_names if page not in self.ignored_pages]
+        return page_names
 
     def set_page_progress(self, pagename, code):
         self._image_info[pagename]['finish_code'] = code 
@@ -359,6 +394,7 @@ class ProjImgTrans:
             raise ProjectDirNotExistException
         self.set_current_img(None)
         self.glossary = self.default_glossary()
+        self.ignored_pages = set()
         imglist = find_all_imgs(self.directory, abs_path=False, sort=True)
         self.pages = {}
         self._pagename2idx = {}
@@ -398,6 +434,7 @@ class ProjImgTrans:
             'current_img': self.current_img,
             'image_info': image_info,
             'glossary': self.glossary,
+            'ignored_pages': sorted([page for page in self.ignored_pages if page in pages]),
         }
 
     def read_img(self, imgname: str) -> np.ndarray:
