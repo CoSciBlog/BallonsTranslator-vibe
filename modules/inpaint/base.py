@@ -81,6 +81,45 @@ class InpainterBase(BaseModule):
             else:
                 raise e
 
+    def inpaint_enlarge_ratio(self) -> float:
+        if self.params is None or 'inpaint_enlarge_ratio' not in self.params:
+            return 1.7
+        try:
+            return max(1.0, float(self.get_param_value('inpaint_enlarge_ratio')))
+        except Exception:
+            return 1.7
+
+    def mask_dilation_size(self) -> int:
+        if self.params is None or 'mask_dilation_size' not in self.params:
+            return 0
+        try:
+            return max(0, int(float(self.get_param_value('mask_dilation_size'))))
+        except Exception:
+            return 0
+
+    def mask_dilation_kernel(self) -> int:
+        if self.params is None or 'mask_dilation_kernel' not in self.params:
+            return cv2.MORPH_ELLIPSE
+        kernel_name = str(self.get_param_value('mask_dilation_kernel')).lower()
+        if kernel_name in {'rect', 'rectangle', 'square'}:
+            return cv2.MORPH_RECT
+        if kernel_name in {'cross', 'plus'}:
+            return cv2.MORPH_CROSS
+        return cv2.MORPH_ELLIPSE
+
+    def prepare_inpaint_mask(self, mask: np.ndarray) -> np.ndarray:
+        mask = mask.copy()
+        dilation_size = self.mask_dilation_size()
+        if dilation_size <= 0:
+            return mask
+        if dilation_size % 2 == 0:
+            dilation_size += 1
+        kernel = cv2.getStructuringElement(
+            self.mask_dilation_kernel(),
+            (dilation_size, dilation_size),
+        )
+        return cv2.dilate(mask, kernel, iterations=1)
+
     def inpaint(self, img: np.ndarray, mask: np.ndarray, textblock_list: List[TextBlock] = None, check_need_inpaint: bool = False) -> np.ndarray:
         
         if not self.all_model_loaded():
@@ -93,6 +132,8 @@ class InpainterBase(BaseModule):
             img_rgb = img[:, :, :3]  # Use only RGB for inpainting
         else:
             img_rgb = img
+
+        mask = self.prepare_inpaint_mask(mask)
         
         if not self.inpaint_by_block or textblock_list is None:
             if check_need_inpaint:
@@ -126,7 +167,7 @@ class InpainterBase(BaseModule):
             
             for blk in textblock_list:
                 xyxy = blk.xyxy
-                xyxy_e = enlarge_window(xyxy, im_w, im_h, ratio=1.7)
+                xyxy_e = enlarge_window(xyxy, im_w, im_h, ratio=self.inpaint_enlarge_ratio())
                 im = inpainted[xyxy_e[1]:xyxy_e[3], xyxy_e[0]:xyxy_e[2]]
                 msk = mask[xyxy_e[1]:xyxy_e[3], xyxy_e[0]:xyxy_e[2]]
                 need_inpaint = True
@@ -473,7 +514,30 @@ class LamaLarge(LamaInpainterMPE):
                 'fp32',
                 'bf16'
             ], 
-            'value': 'bf16' if BF16_SUPPORTED == 'cuda' else 'fp32'
+            'value': 'bf16' if BF16_SUPPORTED == 'cuda' else 'fp32',
+            'description': 'Inference precision. bf16 is faster on supported CUDA GPUs; fp32 is more compatible.'
+        },
+        'mask_dilation_size': {
+            'value': 0,
+            'data_type': int,
+            'display_name': 'mask_dilation_size',
+            'description': 'Dilates the inpainting mask before LaMa runs. Use 0 to disable. Increase this if text edges or white halos remain after inpainting.'
+        },
+        'mask_dilation_kernel': {
+            'type': 'selector',
+            'options': [
+                'ellipse',
+                'rectangle',
+                'cross'
+            ],
+            'value': 'ellipse',
+            'description': 'Shape of the dilation kernel used for mask_dilation_size. Ellipse is usually safest for speech bubbles; rectangle expands more aggressively.'
+        },
+        'inpaint_enlarge_ratio': {
+            'value': 1.7,
+            'data_type': float,
+            'display_name': 'inpaint_enlarge_ratio',
+            'description': 'Expands each text-block crop before block-based inpainting. Higher values give LaMa more surrounding context but use more memory.'
         }, 
     }
 

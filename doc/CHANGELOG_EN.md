@@ -1,6 +1,12 @@
 # Changelogs
 
 ### 2026-05-14
+[v1.4.0-vibe.25] lama large inpaint mask controls
+1. Added `mask_dilation_size`, `mask_dilation_kernel`, and `inpaint_enlarge_ratio` to the `lama_large_512px` Inpainter settings UI.
+2. Added hover descriptions for the new LaMa Large mask and crop-context controls.
+3. Applied mask dilation and configurable block crop enlargement in the inpainting runtime path.
+4. Updated README documentation and bumped the fork runtime version string to `1.4.0-vibe.25`.
+
 [v1.4.0-vibe.24] translation benchmark and lazy working folders
 1. Added a Translation Benchmark window from the Run menu to compare current-page outputs from multiple translators or LLM configurations in a side-by-side table.
 2. Kept benchmark translations read-only so comparing outputs does not modify project page text or saved translations.
