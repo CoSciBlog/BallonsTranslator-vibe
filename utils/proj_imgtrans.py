@@ -446,10 +446,14 @@ class ProjImgTrans:
         img_info.update({'width': w, 'height': h, 'upscaled': False})
         return img
 
-    def get_upscaled_path(self, imgname: str = None) -> str:
+    def get_upscaled_path(self, imgname: str = None, get_last_modified=False) -> str:
         if imgname is None:
             imgname = self.current_img
-        return osp.join(self.upscaled_dir(), osp.splitext(imgname)[0] + '.png')
+
+        fileprefix = osp.join(self.upscaled_dir(), osp.splitext(imgname)[0])
+        if get_last_modified:
+            return get_last_modified_file(fileprefix, ['.png'], ext_fallback='.png')
+        return fileprefix + '.png'
 
     def ensure_upscaled_img(self, imgname: str) -> np.ndarray:
         if not pcfg.upscale_before_detection:
