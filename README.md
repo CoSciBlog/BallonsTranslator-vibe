@@ -34,7 +34,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Added a `Force Stop` control to the run progress dialog for terminating stuck pipeline or translation threads.
 - Added the missing `accelerate>=0.26.0` dependency required by `flux2-klein` GGUF loading.
 - Expanded intermediate image saving to `PNG`, `JPG`, `WEBP`, and `JXL` with a separate quality setting.
-- Removed the decensor controls from General settings, the left sidebar, and the Run menu.
+- Reintroduced Censor Restoration / Decensor Inpaint controls in General settings and added a current-page sidebar action.
 - Added readable English names to source-language selectors, for example `日本語 (Japanese)`, `Deutsch (German)`, and `Polski (Polish)`, while keeping the original internal language values.
 - Added a Translation Benchmark window from the Run menu to compare current-page translations from multiple translators or LLM configurations side by side.
 - Changed project working folders so `mask`, `inpainted`, `upscaled`, `decensor_mask`, and `decensored` are created only when an output is actually written. Upscaling output is no longer created while upscaling is disabled.
@@ -66,7 +66,9 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 
 ## Censor Restoration / Decensor Inpaint
 
-Censor Restoration / Decensor Inpaint works on the currently opened page. It automatically creates a mask for simple black or white censor bars and block-like censor regions, then repairs that masked area with the existing inpainting backend. The result is a plausible inpaint reconstruction and does not recreate source data.
+Censor Restoration / Decensor Inpaint works on the currently opened page from the left sidebar `Dc` button. It automatically creates a mask for simple black or white censor bars and block-like censor regions, then repairs that masked area with the existing inpainting backend. The result is a plausible inpaint reconstruction and does not recreate source data.
+
+The detection settings are available under `Settings -> General -> Censor Restoration`. You can choose the mask mode, adjust mask padding, and tune the minimum detected area ratio.
 
 Use this feature only for material where you have the necessary rights. Do not use it for real people, minors, or misleading reconstructions. Output quality depends on the image, detected mask, and selected inpainting backend.
 

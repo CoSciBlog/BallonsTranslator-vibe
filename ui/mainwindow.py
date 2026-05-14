@@ -252,6 +252,7 @@ class MainWindow(mainwindow_cls):
         self.glossaryWindow = GlossaryWindow(self)
         self.glossaryWindow.saved.connect(self.on_project_glossary_saved)
         self.glossaryWindow.hide()
+        self._decensor_current_page_request = None
 
         SW.st_manager = self.st_manager = SceneTextManager(self.app, self, self.canvas, self.textPanel)
         self.st_manager.new_textblk.connect(self.canvas.search_widget.on_new_textblk)
@@ -411,6 +412,7 @@ class MainWindow(mainwindow_cls):
         module_manager.setInpainter()
 
         self.leftBar.run_imgtrans_clicked.connect(self.run_imgtrans)
+        self.leftBar.run_decensor_clicked.connect(self.run_decensor_current_page)
         self.leftBar.run_translate_clicked.connect(self.run_translate_only)
 
         self.titleBar.darkModeAction.setChecked(pcfg.darkmode)
@@ -1559,12 +1561,23 @@ class MainWindow(mainwindow_cls):
     def on_page_decensor_finished(self, page_index: int):
         if page_index < 0 or page_index >= self.imgtrans_proj.num_pages:
             return
+        page_name = self.imgtrans_proj.idx2pagename(page_index)
         if page_index == self.pageList.currentIndex().row():
             self.imgtrans_proj.set_current_img_byidx(page_index)
             self.canvas.updateCanvas()
         self.imgtrans_proj.save()
         if page_index == self.pageList.currentIndex().row():
             self.saveCurrentPage(False, False)
+        if self._decensor_current_page_request == page_name:
+            self._decensor_current_page_request = None
+            try:
+                mask = self.imgtrans_proj.load_decensor_mask_by_imgname(page_name)
+                if mask is None or not (mask > 0).any():
+                    create_info_dialog(self.tr('Censor Restoration found no repair mask on the current page.'))
+                else:
+                    create_info_dialog(self.tr('Censor Restoration finished for the current page.'))
+            except Exception as e:
+                LOGGER.warning(f'Could not inspect Censor Restoration mask for {page_name}: {e}')
 
     def on_savestate_changed(self, unsaved: bool):
         save_state = self.tr('unsaved') if unsaved else self.tr('saved')
@@ -1666,6 +1679,25 @@ class MainWindow(mainwindow_cls):
                 textblk.vertical = textblk.src_is_vertical
 
         self.module_manager.runTranslateOnlyPipeline()
+
+    def run_decensor_current_page(self):
+        if self.imgtrans_proj.is_empty or not self.imgtrans_proj.current_img:
+            create_info_dialog(self.tr('Open a project page before running Censor Restoration.'))
+            return
+
+        page_name = self.imgtrans_proj.current_img
+        if page_name not in self.imgtrans_proj.pages:
+            create_info_dialog(self.tr('The current page is not available in the project.'))
+            return
+
+        if self.module_manager.inpainter is None:
+            create_info_dialog(self.tr('Select an inpainter before running Censor Restoration.'))
+            return
+
+        if self.bottomBar.textblockChecker.isChecked():
+            self.bottomBar.textblockChecker.click()
+        self._decensor_current_page_request = page_name
+        self.module_manager.runDecensorPipeline([page_name])
 
     def on_run_imgtrans(self, continue_mode=False):
         self.backup_blkstyles.clear()
