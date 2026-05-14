@@ -1613,8 +1613,8 @@ class MainWindow(mainwindow_cls):
                 if mask is None or not (mask > 0).any():
                     create_info_dialog(self.tr(
                         'No censor mask was detected. You can draw/select a repair mask manually and run Censor Restoration again. '
-                        'No censor mask found. The text inpaint mask will not be used automatically. '
-                        'Try enabling debug masks or adjust detector thresholds.'
+                        'No censor mask found. Try debug masks or adjust gray/banded censor detection settings. '
+                        'The text inpaint mask will not be used automatically.'
                     ))
                 else:
                     create_info_dialog(self.tr('Censor Restoration finished for the current page.'))

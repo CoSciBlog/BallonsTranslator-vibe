@@ -1,4 +1,6 @@
 from typing import Any, Dict, Tuple
+import json
+import os
 import os.path as osp
 
 import cv2
@@ -72,6 +74,18 @@ def _mask_stats(mask: np.ndarray) -> Dict[str, float]:
         "mask_pixel_count": pixels,
         "mask_coverage_ratio": pixels / max(1, mask.shape[0] * mask.shape[1]),
     }
+
+
+def _json_safe(value: Any) -> Any:
+    if isinstance(value, np.ndarray):
+        return None
+    if isinstance(value, dict):
+        return {key: _json_safe(val) for key, val in value.items() if not isinstance(val, np.ndarray)}
+    if isinstance(value, (list, tuple)):
+        return [_json_safe(item) for item in value if not isinstance(item, np.ndarray)]
+    if isinstance(value, (np.integer, np.floating)):
+        return value.item()
+    return value
 
 
 def looks_like_binary_mask_image(img: np.ndarray) -> bool:
@@ -152,6 +166,99 @@ def _merge_close_components(mask: np.ndarray, kernels) -> np.ndarray:
     return merged
 
 
+def _gray_censor_candidate_mask(gray: np.ndarray, saturation: np.ndarray) -> np.ndarray:
+    candidate = ((gray >= 70) & (gray <= 230) & (saturation <= 35)).astype(np.uint8) * 255
+    candidate = cv2.morphologyEx(
+        candidate,
+        cv2.MORPH_OPEN,
+        cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3)),
+        iterations=1,
+    )
+    return _merge_close_components(candidate, [(9, 9), (15, 15)])
+
+
+def _banded_censor_candidate_mask(gray: np.ndarray, saturation: np.ndarray) -> np.ndarray:
+    gray_f = gray.astype(np.float32)
+    grad_x = np.abs(cv2.Sobel(gray_f, cv2.CV_32F, 1, 0, ksize=3))
+    grad_y = np.abs(cv2.Sobel(gray_f, cv2.CV_32F, 0, 1, ksize=3))
+    local_mean = cv2.blur(gray_f, (9, 9))
+    local_std = np.sqrt(np.maximum(cv2.blur(gray_f * gray_f, (9, 9)) - local_mean * local_mean, 0))
+    candidate = (
+        (saturation <= 45)
+        & (gray >= 70)
+        & (gray <= 230)
+        & (np.maximum(grad_x, grad_y) >= 6.0)
+        & (local_std >= 3.2)
+    ).astype(np.uint8) * 255
+    return _merge_close_components(candidate, [(7, 7), (13, 13), (19, 19)])
+
+
+def _candidate_mask_overlay(image: np.ndarray, mask: np.ndarray, color: Tuple[int, int, int]) -> np.ndarray:
+    rgb = _rgb(image).copy()
+    active = mask > 0
+    rgb[active] = (0.55 * rgb[active] + 0.45 * np.array(color)).astype(np.uint8)
+    return rgb
+
+
+def _box_overlay(image: np.ndarray, mask: np.ndarray, color: Tuple[int, int, int]) -> np.ndarray:
+    overlay = _candidate_mask_overlay(image, mask, color)
+    contours, _ = cv2.findContours((mask > 0).astype(np.uint8) * 255, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    for contour in contours:
+        x, y, w, h = cv2.boundingRect(contour)
+        cv2.rectangle(overlay, (x, y), (x + w, y + h), color, 2)
+    return overlay
+
+
+def _write_debug_image(path: str, image: np.ndarray) -> None:
+    output = image
+    if image.ndim == 3 and image.shape[2] == 3:
+        output = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+    if not cv2.imwrite(path, output):
+        raise OSError(f"Failed to write debug image: {path}")
+
+
+def write_decensor_debug_outputs(
+    output_dir: str,
+    image: np.ndarray,
+    mask: np.ndarray,
+    debug: Dict[str, Any],
+    input_source: str,
+) -> Dict[str, str]:
+    os.makedirs(output_dir, exist_ok=True)
+    debug_masks = debug.get("debug_masks", {})
+    gray_candidates = debug_masks.get("gray_candidates", np.zeros(mask.shape, dtype=np.uint8))
+    banded_candidates = debug_masks.get("banded_candidates", np.zeros(mask.shape, dtype=np.uint8))
+    accepted_mask = (mask > 0).astype(np.uint8) * 255
+    rejected_mask = cv2.bitwise_and(
+        cv2.bitwise_or(gray_candidates, banded_candidates),
+        cv2.bitwise_not(accepted_mask),
+    )
+
+    paths = {
+        "input_source": osp.join(output_dir, "input_source.png"),
+        "gray_candidates": osp.join(output_dir, "gray_candidates.png"),
+        "banded_candidates": osp.join(output_dir, "banded_candidates.png"),
+        "accepted_censor_mask": osp.join(output_dir, "accepted_censor_mask.png"),
+        "accepted_boxes_overlay": osp.join(output_dir, "accepted_boxes_overlay.png"),
+        "rejected_boxes_overlay": osp.join(output_dir, "rejected_boxes_overlay.png"),
+        "detection_report": osp.join(output_dir, "detection_report.json"),
+    }
+    _write_debug_image(paths["input_source"], _rgb(image))
+    _write_debug_image(paths["gray_candidates"], gray_candidates)
+    _write_debug_image(paths["banded_candidates"], banded_candidates)
+    _write_debug_image(paths["accepted_censor_mask"], accepted_mask)
+    _write_debug_image(paths["accepted_boxes_overlay"], _box_overlay(image, accepted_mask, (255, 0, 0)))
+    _write_debug_image(paths["rejected_boxes_overlay"], _box_overlay(image, rejected_mask, (255, 160, 0)))
+
+    report = _json_safe(debug)
+    report["input_source"] = input_source
+    report["mask_pixel_count"] = int(np.count_nonzero(mask))
+    report["mask_coverage_ratio"] = int(np.count_nonzero(mask)) / max(1, mask.size)
+    with open(paths["detection_report"], "w", encoding="utf8") as f:
+        json.dump(report, f, indent=2)
+    return paths
+
+
 def green_mask(img: np.ndarray, min_area_ratio: float = 0.00005) -> np.ndarray:
     rgb = _rgb(img)
     r, g, b = rgb[:, :, 0], rgb[:, :, 1], rgb[:, :, 2]
@@ -230,14 +337,7 @@ def bar_mask(img: np.ndarray, min_area_ratio: float = 0.00005) -> np.ndarray:
         )
         combined = cv2.bitwise_or(combined, cv2.bitwise_or(raw_candidates, cv2.bitwise_or(cv2.bitwise_or(horizontal, vertical), blocky)))
 
-    gray_candidate = ((gray >= 70) & (gray <= 230) & (saturation <= 35)).astype(np.uint8) * 255
-    gray_candidate = cv2.morphologyEx(
-        gray_candidate,
-        cv2.MORPH_OPEN,
-        cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3)),
-        iterations=1,
-    )
-    gray_candidate = _merge_close_components(gray_candidate, [(9, 9), (15, 15)])
+    gray_candidate = _gray_censor_candidate_mask(gray, saturation)
     gray_regions = _candidate_components(
         gray_candidate,
         min_area_ratio=max(min_area_ratio, 0.00003),
@@ -249,19 +349,7 @@ def bar_mask(img: np.ndarray, min_area_ratio: float = 0.00005) -> np.ndarray:
         fill_rect=True,
     )
 
-    gray_f = gray.astype(np.float32)
-    grad_x = np.abs(cv2.Sobel(gray_f, cv2.CV_32F, 1, 0, ksize=3))
-    grad_y = np.abs(cv2.Sobel(gray_f, cv2.CV_32F, 0, 1, ksize=3))
-    local_mean = cv2.blur(gray_f, (9, 9))
-    local_std = np.sqrt(np.maximum(cv2.blur(gray_f * gray_f, (9, 9)) - local_mean * local_mean, 0))
-    banded_candidate = (
-        (saturation <= 45)
-        & (gray >= 70)
-        & (gray <= 230)
-        & (np.maximum(grad_x, grad_y) >= 6.0)
-        & (local_std >= 3.2)
-    ).astype(np.uint8) * 255
-    banded_candidate = _merge_close_components(banded_candidate, [(7, 7), (13, 13), (19, 19)])
+    banded_candidate = _banded_censor_candidate_mask(gray, saturation)
     banded_regions = _candidate_components(
         banded_candidate,
         min_area_ratio=max(min_area_ratio, 0.00003),
@@ -342,6 +430,16 @@ def build_decensor_mask(
     if mode in {"auto", "bars"}:
         bars = bar_mask(img, min_area_ratio)
         debug["components"]["bars"] = _mask_stats(bars)
+        rgb = _rgb(img)
+        gray = cv2.cvtColor(rgb, cv2.COLOR_RGB2GRAY)
+        saturation = cv2.cvtColor(rgb, cv2.COLOR_RGB2HSV)[:, :, 1]
+        gray_candidates = _gray_censor_candidate_mask(gray, saturation)
+        banded_candidates = _banded_censor_candidate_mask(gray, saturation)
+        debug.setdefault("debug_masks", {})
+        debug["debug_masks"]["gray_candidates"] = gray_candidates
+        debug["debug_masks"]["banded_candidates"] = banded_candidates
+        debug["components"]["gray_candidates"] = _mask_stats(gray_candidates)
+        debug["components"]["banded_candidates"] = _mask_stats(banded_candidates)
         mask = cv2.bitwise_or(mask, bars)
     if mode in {"auto", "mosaic"}:
         mosaic = mosaic_mask(img, max(min_area_ratio, 0.0001))
@@ -355,6 +453,8 @@ def build_decensor_mask(
         mask = cv2.dilate(mask, kernel, iterations=1)
 
     mask = (mask > 0).astype(np.uint8) * 255
+    debug.setdefault("debug_masks", {})
+    debug["debug_masks"]["accepted_censor_mask"] = mask
     debug.update(_mask_stats(mask))
     if return_debug:
         return mask, mode, debug

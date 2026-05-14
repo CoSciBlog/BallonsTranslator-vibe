@@ -177,6 +177,7 @@ class ProgramConfig(Config):
     decensor_mask_mode: str = 'auto'
     decensor_mask_dilate: int = 8
     decensor_min_area_ratio: float = 0.00005
+    decensor_save_debug_masks: bool = False
     imgsave_quality: int = 100
     imgsave_ext: str = '.png'
     intermediate_imgsave_ext: str = '.png'

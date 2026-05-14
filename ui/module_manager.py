@@ -12,7 +12,7 @@ from utils.logger import logger as LOGGER
 from utils.registry import Registry
 from utils.imgproc_utils import enlarge_window, get_block_mask
 from utils.io_utils import imread, text_is_empty
-from utils.decensor import build_decensor_mask, select_decensor_input_image
+from utils.decensor import build_decensor_mask, select_decensor_input_image, write_decensor_debug_outputs
 from modules.translators import MissingTranslatorParams
 from modules.base import BaseModule, soft_empty_cache
 from modules import INPAINTERS, TRANSLATORS, TEXTDETECTORS, OCR, \
@@ -498,6 +498,22 @@ class ImgtransThread(QThread):
         )
         debug["input_source"] = input_source
         debug["mask_source"] = "censor_restoration_detector"
+        mask_pixel_count = int(np.count_nonzero(censor_mask))
+        mask_coverage = mask_pixel_count / max(1, censor_mask.size)
+        decensor_box_count = self._count_mask_boxes(censor_mask)
+        LOGGER.info(
+            f'Censor Restoration detected {decensor_box_count} decensor boxes on {imgname}; '
+            f'mask coverage={mask_coverage:.2%}; input_source={input_source}.'
+        )
+        if pcfg.decensor_save_debug_masks:
+            debug_dir = osp.join(
+                self.imgtrans_proj.directory,
+                'debug',
+                'censor_restoration',
+                osp.splitext(osp.basename(imgname))[0],
+            )
+            debug_paths = write_decensor_debug_outputs(debug_dir, img, censor_mask, debug, input_source)
+            LOGGER.info(f'Censor Restoration debug overlays saved to {debug_dir}: {debug_paths}')
 
         self.imgtrans_proj.save_decensor_mask(imgname, censor_mask)
 
@@ -509,11 +525,20 @@ class ImgtransThread(QThread):
             LOGGER.info(
                 f'No decensor mask found for {imgname}. '
                 f'The text inpaint mask will not be used automatically. '
-                f'debug={debug}. Try enabling debug masks or adjust detector thresholds.'
+                f'debug={debug}. No censor mask found. '
+                f'Try debug masks or adjust gray/banded censor detection settings.'
             )
 
         self.imgtrans_proj.save_decensored(imgname, decensored)
         self.imgtrans_proj.save_inpainted(imgname, decensored)
+
+    def _count_mask_boxes(self, mask: np.ndarray) -> int:
+        try:
+            import cv2
+            contours, _ = cv2.findContours((mask > 0).astype(np.uint8) * 255, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            return len(contours)
+        except Exception:
+            return 1 if np.any(mask > 0) else 0
 
     def _run_decensor_pages(self, pages_to_iterate):
         for imgname in pages_to_iterate:

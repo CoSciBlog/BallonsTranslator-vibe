@@ -539,6 +539,7 @@ class ConfigPanel(Widget):
         decensor_mode_tip = self.tr('Mask detector used by Censor Restoration / Decensor Inpaint. Auto combines supported simple detectors.')
         decensor_dilate_tip = self.tr('Pixels added around detected censor regions before inpainting. Higher values repair more surrounding edge artifacts.')
         decensor_min_area_tip = self.tr('Minimum detected region size relative to the page area. Increase it to ignore small false positives.')
+        decensor_debug_tip = self.tr('Save Censor Restoration input, candidate masks, overlays, and a detection report under debug/censor_restoration for troubleshooting.')
         self.decensor_mask_mode_combobox = ConfigComboBox(scrollWidget=generalConfigPanel)
         self.decensor_mask_mode_combobox.addItems([
             self.tr('Auto'),
@@ -560,6 +561,11 @@ class ConfigPanel(Widget):
             self._labeled_compact_widget(self.tr('Min area ratio'), self.decensor_min_area_edit, decensor_min_area_tip),
         )
         generalConfigPanel.addBlockWidget(decensor_row)
+        self.decensor_save_debug_checker, _ = generalConfigPanel.addCheckBox(
+            self.tr('Save Censor Restoration debug masks'),
+            discription=decensor_debug_tip,
+        )
+        self.decensor_save_debug_checker.stateChanged.connect(self.on_decensor_debug_changed)
 
         generalConfigPanel.addTextLabel(label_settings_presets)
         preset_tip = self.tr('Saved settings snapshots. Applying one replaces the current application settings.')
@@ -990,6 +996,9 @@ class ConfigPanel(Widget):
         self.decensor_min_area_edit.setText(f'{min_area:.6g}')
         pcfg.decensor_min_area_ratio = min_area
 
+    def on_decensor_debug_changed(self):
+        pcfg.decensor_save_debug_masks = self.decensor_save_debug_checker.isChecked()
+
     def on_uppercase_changed(self):
         pcfg.let_uppercase_flag = self.let_uppercase_checker.isChecked()
 
@@ -1108,6 +1117,7 @@ class ConfigPanel(Widget):
         )
         self.decensor_mask_dilate_edit.setText(str(pcfg.decensor_mask_dilate))
         self.decensor_min_area_edit.setText(f'{pcfg.decensor_min_area_ratio:.6g}')
+        self.decensor_save_debug_checker.setChecked(pcfg.decensor_save_debug_masks)
         self.selectext_minimenu_checker.setChecked(pcfg.textselect_mini_menu)
         self.let_uppercase_checker.setChecked(pcfg.let_uppercase_flag)
         self.let_textstyle_indep_checker.setChecked(pcfg.let_textstyle_indep_flag)
