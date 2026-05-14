@@ -1,6 +1,12 @@
 # Changelogs
 
 ### 2026-05-14
+[v1.4.0-vibe.20] real decensor mask detection
+1. Removed the fallback that copied normal text/inpaint masks into the `decensor_mask` folder.
+2. Expanded automatic decensor mask detection with multi-scale censor-bar detection and more tolerant mosaic-region candidates.
+3. Verified the new detector creates non-empty, non-text-mask decensor masks on the reported `holo` sample pages.
+4. Updated README documentation and bumped the fork runtime version string to `1.4.0-vibe.20`.
+
 [v1.4.0-vibe.19] flux2-klein accelerate dependency
 1. Added the missing `accelerate>=0.26.0` requirement needed by Diffusers when loading `flux2-klein` GGUF model parameters.
 2. Added an early `flux2-klein` dependency check so old environments show a direct update/install hint instead of failing deeper inside Diffusers.

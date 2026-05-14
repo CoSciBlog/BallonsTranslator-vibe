@@ -26,6 +26,52 @@ def _filter_components(mask: np.ndarray, min_area_ratio: float) -> np.ndarray:
     return filtered
 
 
+def _candidate_components(
+    mask: np.ndarray,
+    min_area_ratio: float,
+    max_area_ratio: float = 0.18,
+    min_fill: float = 0.25,
+    min_size: int = 8,
+    aspect_min: float = 0.0,
+    aspect_max: float = 999.0,
+    fill_rect: bool = False,
+) -> np.ndarray:
+    h, w = mask.shape[:2]
+    min_area = max(16, int(h * w * max(min_area_ratio, 0.0)))
+    max_area = max(min_area, int(h * w * max_area_ratio))
+    contours, _ = cv2.findContours((mask > 0).astype(np.uint8) * 255, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    filtered = np.zeros_like(mask, dtype=np.uint8)
+
+    for contour in contours:
+        x, y, bw, bh = cv2.boundingRect(contour)
+        area = cv2.contourArea(contour)
+        if area < min_area or area > max_area or bw < min_size or bh < min_size:
+            continue
+        if x <= 1 or y <= 1 or x + bw >= w - 2 or y + bh >= h - 2:
+            continue
+
+        fill = area / max(bw * bh, 1)
+        aspect = bw / max(bh, 1)
+        if fill < min_fill or aspect < aspect_min or aspect > aspect_max:
+            continue
+
+        if fill_rect:
+            cv2.rectangle(filtered, (x, y), (x + bw, y + bh), 255, thickness=cv2.FILLED)
+        else:
+            cv2.drawContours(filtered, [contour], -1, 255, thickness=cv2.FILLED)
+
+    return filtered
+
+
+def _merge_close_components(mask: np.ndarray, kernels) -> np.ndarray:
+    merged = np.zeros_like(mask, dtype=np.uint8)
+    for ksize in kernels:
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, ksize)
+        closed = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel, iterations=1)
+        merged = cv2.bitwise_or(merged, closed)
+    return merged
+
+
 def green_mask(img: np.ndarray, min_area_ratio: float = 0.00005) -> np.ndarray:
     rgb = _rgb(img)
     r, g, b = rgb[:, :, 0], rgb[:, :, 1], rgb[:, :, 2]
@@ -44,28 +90,43 @@ def bar_mask(img: np.ndarray, min_area_ratio: float = 0.00005) -> np.ndarray:
     gray = cv2.cvtColor(rgb, cv2.COLOR_RGB2GRAY)
     hsv = cv2.cvtColor(rgb, cv2.COLOR_RGB2HSV)
     saturation = hsv[:, :, 1]
-    dark = (gray < 45) & (saturation < 90)
-    light = (gray > 230) & (saturation < 45)
-    mask = (dark | light).astype(np.uint8) * 255
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (7, 3))
-    mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel, iterations=2)
-
-    h, w = mask.shape[:2]
-    min_area = max(16, int(h * w * max(min_area_ratio, 0.0)))
-    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    filtered = np.zeros_like(mask, dtype=np.uint8)
-    for contour in contours:
-        x, y, bw, bh = cv2.boundingRect(contour)
-        area = cv2.contourArea(contour)
-        if area < min_area or bw < 4 or bh < 4:
-            continue
-        if x <= 1 or y <= 1 or x + bw >= w - 2 or y + bh >= h - 2:
-            continue
-        aspect = bw / max(bh, 1)
-        fill = area / max(bw * bh, 1)
-        if fill >= 0.55 and (aspect >= 3.0 or aspect <= 0.33):
-            cv2.drawContours(filtered, [contour], -1, 255, thickness=cv2.FILLED)
-    return filtered
+    dark = (gray < 70) & (saturation < 140)
+    light = (gray > 222) & (saturation < 70)
+    h, w = gray.shape[:2]
+    h_kernel = max(21, min(121, w // 35))
+    v_kernel = max(21, min(121, h // 35))
+    kernels = [
+        (31, 5),
+        (51, 7),
+        (h_kernel, 9),
+        (5, 31),
+        (7, 51),
+        (9, v_kernel),
+    ]
+    combined = np.zeros_like(gray, dtype=np.uint8)
+    for raw_mask in (dark.astype(np.uint8) * 255, light.astype(np.uint8) * 255):
+        merged = _merge_close_components(raw_mask, kernels)
+        merged = cv2.morphologyEx(merged, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3)), iterations=1)
+        horizontal = _candidate_components(
+            merged,
+            min_area_ratio,
+            max_area_ratio=0.08,
+            min_fill=0.40,
+            min_size=10,
+            aspect_min=1.8,
+            fill_rect=True,
+        )
+        vertical = _candidate_components(
+            merged,
+            min_area_ratio,
+            max_area_ratio=0.08,
+            min_fill=0.40,
+            min_size=10,
+            aspect_max=0.55,
+            fill_rect=True,
+        )
+        combined = cv2.bitwise_or(combined, cv2.bitwise_or(horizontal, vertical))
+    return combined
 
 
 def mosaic_mask(img: np.ndarray, min_area_ratio: float = 0.0001) -> np.ndarray:
@@ -76,22 +137,31 @@ def mosaic_mask(img: np.ndarray, min_area_ratio: float = 0.0001) -> np.ndarray:
         return np.zeros((h, w), dtype=np.uint8)
 
     accum = np.zeros((h, w), dtype=np.uint8)
-    for block in (6, 8, 10, 12, 16):
+    rgb_f = rgb.astype(np.float32)
+    for block in (4, 6, 8, 10, 12, 16, 20, 24, 32):
         small_w = max(1, w // block)
         small_h = max(1, h // block)
-        coarse = cv2.resize(gray, (small_w, small_h), interpolation=cv2.INTER_AREA)
+        coarse = cv2.resize(rgb, (small_w, small_h), interpolation=cv2.INTER_AREA)
         restored = cv2.resize(coarse, (w, h), interpolation=cv2.INTER_NEAREST)
-        diff = cv2.absdiff(gray, restored)
+        diff = np.mean(np.abs(rgb_f - restored.astype(np.float32)), axis=2)
         local_mean = cv2.blur(gray.astype(np.float32), (block, block))
         local_sq_mean = cv2.blur((gray.astype(np.float32) ** 2), (block, block))
         local_std = np.sqrt(np.maximum(local_sq_mean - local_mean ** 2, 0))
-        candidate = ((diff < 4) & (local_std > 10)).astype(np.uint8) * 255
+        candidate = ((diff < max(6, block * 0.75)) & (local_std > 5)).astype(np.uint8) * 255
         accum = cv2.bitwise_or(accum, candidate)
 
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (9, 9))
-    accum = cv2.morphologyEx(accum, cv2.MORPH_OPEN, kernel, iterations=1)
-    accum = cv2.morphologyEx(accum, cv2.MORPH_CLOSE, kernel, iterations=2)
-    return _filter_components(accum, min_area_ratio)
+    accum = cv2.morphologyEx(accum, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3)), iterations=1)
+    accum = _merge_close_components(accum, [(9, 9), (15, 15), (21, 21)])
+    return _candidate_components(
+        accum,
+        min_area_ratio,
+        max_area_ratio=0.16,
+        min_fill=0.20,
+        min_size=12,
+        aspect_min=0.25,
+        aspect_max=4.0,
+        fill_rect=False,
+    )
 
 
 def build_decensor_mask(
