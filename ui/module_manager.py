@@ -2,7 +2,6 @@ import time
 from typing import Union, List, Dict, Callable
 import os.path as osp
 
-import cv2
 import numpy as np
 from qtpy.QtCore import QThread, Signal, QObject, QLocale, QTimer
 from qtpy.QtWidgets import QFileDialog
@@ -483,68 +482,6 @@ class ImgtransThread(QThread):
             self.process_idx_to_page_idx[process_idx] = all_pages.index(page_name)
         return pages_to_iterate
 
-    def _normalize_decensor_mask(self, mask: np.ndarray, img: np.ndarray) -> np.ndarray:
-        if mask is None:
-            return None
-
-        h, w = img.shape[:2]
-        if mask.ndim == 3:
-            mask = mask[:, :, 0]
-        mask = (mask > 0).astype(np.uint8) * 255
-        if mask.shape[:2] != (h, w):
-            mask = cv2.resize(mask, (w, h), interpolation=cv2.INTER_NEAREST)
-        return mask
-
-    def _dilate_decensor_mask(self, mask: np.ndarray) -> np.ndarray:
-        if mask is None or not np.any(mask > 0):
-            return mask
-
-        dilate = max(0, int(pcfg.decensor_mask_dilate))
-        if dilate <= 0:
-            return (mask > 0).astype(np.uint8) * 255
-
-        k = dilate * 2 + 1
-        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k, k))
-        return cv2.dilate((mask > 0).astype(np.uint8) * 255, kernel, iterations=1)
-
-    def _create_fallback_decensor_mask(self, imgname: str, img: np.ndarray):
-        h, w = img.shape[:2]
-
-        project_mask = self._normalize_decensor_mask(self.imgtrans_proj.load_mask_by_imgname(imgname), img)
-        if project_mask is not None and np.any(project_mask > 0):
-            return self._dilate_decensor_mask(project_mask), 'project text mask fallback'
-
-        mask = np.zeros((h, w), dtype=np.uint8)
-        pad = max(int(pcfg.decensor_mask_dilate), 4)
-        for blk in self.imgtrans_proj.pages.get(imgname, []):
-            try:
-                x, y, bw, bh = blk.bounding_rect()
-                x2 = x + bw
-                y2 = y + bh
-            except Exception:
-                xyxy = getattr(blk, 'xyxy', None)
-                if xyxy is None or len(xyxy) != 4:
-                    continue
-                x, y, x2, y2 = xyxy
-
-            x1 = max(0, int(round(x)) - pad)
-            y1 = max(0, int(round(y)) - pad)
-            x2 = min(w, int(round(x2)) + pad)
-            y2 = min(h, int(round(y2)) + pad)
-            if x2 > x1 and y2 > y1:
-                mask[y1:y2, x1:x2] = 255
-
-        if np.any(mask > 0):
-            return self._dilate_decensor_mask(mask), 'textbox fallback'
-
-        fallback = np.zeros((h, w), dtype=np.uint8)
-        box_w = min(w, max(32, int(w * 0.18)))
-        box_h = min(h, max(32, int(h * 0.18)))
-        x1 = max(0, (w - box_w) // 2)
-        y1 = max(0, (h - box_h) // 2)
-        fallback[y1:y1 + box_h, x1:x1 + box_w] = 255
-        return self._dilate_decensor_mask(fallback), 'center fallback'
-
     def _decensor_page(self, imgname: str):
         img = self.imgtrans_proj.load_inpainted_by_imgname(imgname)
         if img is None:
@@ -558,12 +495,6 @@ class ImgtransThread(QThread):
             dilate=pcfg.decensor_mask_dilate,
             min_area_ratio=pcfg.decensor_min_area_ratio,
         )
-        if not np.any(mask > 0):
-            fallback_mask, fallback_mode = self._create_fallback_decensor_mask(imgname, img)
-            if fallback_mask is not None and np.any(fallback_mask > 0):
-                LOGGER.info(f'No decensor mask found for {imgname}. Created {fallback_mode}.')
-                mask = fallback_mask
-                mode = fallback_mode
 
         self.imgtrans_proj.save_decensor_mask(imgname, mask)
 
