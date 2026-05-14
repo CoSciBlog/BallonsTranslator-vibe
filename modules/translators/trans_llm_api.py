@@ -827,6 +827,39 @@ class LLM_API_Translator(BaseTranslator):
 
         return data
 
+    @classmethod
+    def _normalize_glossary_response_data(cls, data: Any, logger=None) -> Any:
+        if isinstance(data, dict) and not data:
+            if logger is not None:
+                logger.warning("LLM returned empty glossary JSON object; no glossary entries were extracted.")
+            return {"entries": []}
+
+        if isinstance(data, list):
+            return {"entries": data}
+
+        if not isinstance(data, dict):
+            return data
+
+        if "entries" in data:
+            entries = data.get("entries")
+            if entries is None:
+                entries = []
+            elif isinstance(entries, dict):
+                entries = [entries]
+            normalized = dict(data)
+            normalized["entries"] = entries
+            return normalized
+
+        for key in ("glossary", "terms", "items"):
+            entries = data.get(key)
+            if isinstance(entries, list):
+                return {"entries": entries}
+
+        if "source" in data and "target" in data:
+            return {"entries": [data]}
+
+        return data
+
     def _build_reflection_prompt(
         self, original_prompt: str, draft_response: TranslationResponse
     ) -> str:
@@ -1143,8 +1176,18 @@ class LLM_API_Translator(BaseTranslator):
         end = json_to_parse.rfind("}")
         if start != -1 and end != -1 and end > start:
             json_to_parse = json_to_parse[start : end + 1]
+        else:
+            start = json_to_parse.find("[")
+            end = json_to_parse.rfind("]")
+            if start != -1 and end != -1 and end > start:
+                json_to_parse = json_to_parse[start : end + 1]
 
-        return response_model.model_validate(json.loads(json_to_parse))
+        raw_data = json.loads(json_to_parse)
+        self.logger.debug(f"Raw JSON content from API: {raw_content}")
+        if response_model is GlossaryResponse:
+            raw_data = self._normalize_glossary_response_data(raw_data, self.logger)
+            self.logger.debug(f"Normalized glossary JSON content from API: {raw_data}")
+        return response_model.model_validate(raw_data)
 
     def _create_completion(self, api_args: Dict):
         try:
