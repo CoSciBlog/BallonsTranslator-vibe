@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Dict, Tuple
 
 import cv2
 import numpy as np
@@ -63,6 +63,14 @@ def _candidate_components(
     return filtered
 
 
+def _mask_stats(mask: np.ndarray) -> Dict[str, float]:
+    pixels = int(np.count_nonzero(mask))
+    return {
+        "mask_pixel_count": pixels,
+        "mask_coverage_ratio": pixels / max(1, mask.shape[0] * mask.shape[1]),
+    }
+
+
 def _merge_close_components(mask: np.ndarray, kernels) -> np.ndarray:
     merged = np.zeros_like(mask, dtype=np.uint8)
     for ksize in kernels:
@@ -92,6 +100,9 @@ def bar_mask(img: np.ndarray, min_area_ratio: float = 0.00005) -> np.ndarray:
     saturation = hsv[:, :, 1]
     dark = (gray < 70) & (saturation < 140)
     light = (gray > 222) & (saturation < 70)
+    local = cv2.blur(gray.astype(np.float32), (31, 31))
+    dark = dark | (gray.astype(np.float32) < (local - 42))
+    light = light | (gray.astype(np.float32) > (local + 42))
     h, w = gray.shape[:2]
     h_kernel = max(21, min(121, w // 35))
     v_kernel = max(21, min(121, h // 35))
@@ -105,13 +116,23 @@ def bar_mask(img: np.ndarray, min_area_ratio: float = 0.00005) -> np.ndarray:
     ]
     combined = np.zeros_like(gray, dtype=np.uint8)
     for raw_mask in (dark.astype(np.uint8) * 255, light.astype(np.uint8) * 255):
+        raw_candidates = _candidate_components(
+            raw_mask,
+            min_area_ratio,
+            max_area_ratio=0.08,
+            min_fill=0.50,
+            min_size=8,
+            aspect_min=0.35,
+            aspect_max=999.0,
+            fill_rect=True,
+        )
         merged = _merge_close_components(raw_mask, kernels)
         merged = cv2.morphologyEx(merged, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3)), iterations=1)
         horizontal = _candidate_components(
             merged,
             min_area_ratio,
             max_area_ratio=0.08,
-            min_fill=0.40,
+            min_fill=0.35,
             min_size=10,
             aspect_min=1.8,
             fill_rect=True,
@@ -120,12 +141,22 @@ def bar_mask(img: np.ndarray, min_area_ratio: float = 0.00005) -> np.ndarray:
             merged,
             min_area_ratio,
             max_area_ratio=0.08,
-            min_fill=0.40,
+            min_fill=0.35,
             min_size=10,
             aspect_max=0.55,
             fill_rect=True,
         )
-        combined = cv2.bitwise_or(combined, cv2.bitwise_or(horizontal, vertical))
+        blocky = _candidate_components(
+            merged,
+            min_area_ratio=max(min_area_ratio, 0.00005),
+            max_area_ratio=0.03,
+            min_fill=0.50,
+            min_size=8,
+            aspect_min=0.35,
+            aspect_max=3.0,
+            fill_rect=True,
+        )
+        combined = cv2.bitwise_or(combined, cv2.bitwise_or(raw_candidates, cv2.bitwise_or(cv2.bitwise_or(horizontal, vertical), blocky)))
     return combined
 
 
@@ -169,19 +200,37 @@ def build_decensor_mask(
     mode: str = "auto",
     dilate: int = 8,
     min_area_ratio: float = 0.00005,
+    return_debug: bool = False,
 ) -> Tuple[np.ndarray, str]:
     mode = (mode or "auto").lower()
     if mode not in {"auto", "green", "bars", "mosaic"}:
         mode = "auto"
     h, w = img.shape[:2]
     mask = np.zeros((h, w), dtype=np.uint8)
+    debug = {
+        "mode": mode,
+        "thresholds": {
+            "bar_dark_fixed": 70,
+            "bar_light_fixed": 222,
+            "adaptive_delta": 42,
+            "min_area_ratio": min_area_ratio,
+            "dilate": dilate,
+        },
+        "components": {},
+    }
 
     if mode in {"auto", "green"}:
-        mask = cv2.bitwise_or(mask, green_mask(img, min_area_ratio))
+        green = green_mask(img, min_area_ratio)
+        debug["components"]["green"] = _mask_stats(green)
+        mask = cv2.bitwise_or(mask, green)
     if mode in {"auto", "bars"}:
-        mask = cv2.bitwise_or(mask, bar_mask(img, min_area_ratio))
+        bars = bar_mask(img, min_area_ratio)
+        debug["components"]["bars"] = _mask_stats(bars)
+        mask = cv2.bitwise_or(mask, bars)
     if mode in {"auto", "mosaic"}:
-        mask = cv2.bitwise_or(mask, mosaic_mask(img, max(min_area_ratio, 0.0001)))
+        mosaic = mosaic_mask(img, max(min_area_ratio, 0.0001))
+        debug["components"]["mosaic"] = _mask_stats(mosaic)
+        mask = cv2.bitwise_or(mask, mosaic)
 
     dilate = max(0, int(dilate))
     if dilate > 0 and np.any(mask > 0):
@@ -189,4 +238,8 @@ def build_decensor_mask(
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k, k))
         mask = cv2.dilate(mask, kernel, iterations=1)
 
-    return (mask > 0).astype(np.uint8) * 255, mode
+    mask = (mask > 0).astype(np.uint8) * 255
+    debug.update(_mask_stats(mask))
+    if return_debug:
+        return mask, mode, debug
+    return mask, mode

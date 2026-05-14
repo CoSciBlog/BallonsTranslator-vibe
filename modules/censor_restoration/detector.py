@@ -39,22 +39,41 @@ class CensorMaskDetector:
 
         height, width = arr.shape[:2]
         gray = self._to_gray(arr)
-        debug: Dict[str, Any] = {}
+        debug: Dict[str, Any] = {
+            "dark_contours": 0,
+            "light_contours": 0,
+            "rejected": {
+                "too_small": 0,
+                "too_large": 0,
+                "aspect_ratio": 0,
+                "rectangularity": 0,
+                "min_width_height": 0,
+                "border": 0,
+                "very_thin_line": 0,
+            },
+            "thresholds": {
+                "dark_threshold": self.config.dark_threshold,
+                "light_threshold": self.config.light_threshold,
+                "adaptive_threshold_enabled": self.config.adaptive_threshold_enabled,
+            },
+        }
         boxes: List[CensorBox] = []
 
         if self.config.enable_dark_bar_detection:
-            dark_mask = (gray < self.config.dark_threshold).astype(np.uint8) * 255
+            dark_mask = self._dark_candidate_mask(gray)
             dark_mask = self._morph(dark_mask)
-            boxes.extend(self._boxes_from_mask(dark_mask, "dark", width, height))
-            if self.config.save_debug_masks:
-                debug["dark_candidates"] = dark_mask
+            dark_boxes, dark_stats = self._boxes_from_mask(dark_mask, "dark", width, height)
+            boxes.extend(dark_boxes)
+            self._merge_debug_stats(debug, dark_stats)
+            debug["dark_candidates"] = dark_mask
 
         if self.config.enable_light_bar_detection:
-            light_mask = (gray > self.config.light_threshold).astype(np.uint8) * 255
+            light_mask = self._light_candidate_mask(gray)
             light_mask = self._morph(light_mask)
-            boxes.extend(self._boxes_from_mask(light_mask, "light", width, height))
-            if self.config.save_debug_masks:
-                debug["light_candidates"] = light_mask
+            light_boxes, light_stats = self._boxes_from_mask(light_mask, "light", width, height)
+            boxes.extend(light_boxes)
+            self._merge_debug_stats(debug, light_stats)
+            debug["light_candidates"] = light_mask
 
         if self.config.merge_nearby_boxes:
             boxes = self._merge_boxes(boxes, width, height)
@@ -64,7 +83,20 @@ class CensorMaskDetector:
         for box in padded_boxes:
             final_mask[box.y:box.y + box.height, box.x:box.x + box.width] = 255
 
+        debug["final_box_count"] = len(padded_boxes)
+        debug["mask_pixel_count"] = int(np.count_nonzero(final_mask))
+        debug["mask_coverage_ratio"] = debug["mask_pixel_count"] / max(1, width * height)
+        debug["final_mask"] = final_mask
+        if self.config.save_debug_masks:
+            debug["gray"] = gray
+
         return DetectionResult(mask=final_mask, boxes=padded_boxes, debug=debug)
+
+    def _merge_debug_stats(self, debug: Dict[str, Any], stats: Dict[str, Any]) -> None:
+        debug["dark_contours"] += int(stats.get("dark_contours", 0))
+        debug["light_contours"] += int(stats.get("light_contours", 0))
+        for key, value in stats.get("rejected", {}).items():
+            debug["rejected"][key] = debug["rejected"].get(key, 0) + int(value)
 
     def _to_numpy(self, image: Any) -> np.ndarray:
         if isinstance(image, np.ndarray):
@@ -106,7 +138,36 @@ class CensorMaskDetector:
 
         return mask
 
-    def _boxes_from_mask(self, mask: np.ndarray, kind: str, width: int, height: int) -> List[CensorBox]:
+    def _dark_candidate_mask(self, gray: np.ndarray) -> np.ndarray:
+        fixed = gray < self.config.dark_threshold
+        if not self.config.adaptive_threshold_enabled or cv2 is None:
+            return fixed.astype(np.uint8) * 255
+        local = cv2.blur(gray.astype(np.float32), (31, 31))
+        adaptive = gray.astype(np.float32) < (local - 42)
+        return (fixed | adaptive).astype(np.uint8) * 255
+
+    def _light_candidate_mask(self, gray: np.ndarray) -> np.ndarray:
+        fixed = gray > self.config.light_threshold
+        if not self.config.adaptive_threshold_enabled or cv2 is None:
+            return fixed.astype(np.uint8) * 255
+        local = cv2.blur(gray.astype(np.float32), (31, 31))
+        adaptive = gray.astype(np.float32) > (local + 42)
+        return (fixed | adaptive).astype(np.uint8) * 255
+
+    def _boxes_from_mask(self, mask: np.ndarray, kind: str, width: int, height: int) -> Tuple[List[CensorBox], Dict[str, Any]]:
+        stats: Dict[str, Any] = {
+            "dark_contours": 0,
+            "light_contours": 0,
+            "rejected": {
+                "too_small": 0,
+                "too_large": 0,
+                "aspect_ratio": 0,
+                "rectangularity": 0,
+                "min_width_height": 0,
+                "border": 0,
+                "very_thin_line": 0,
+            },
+        }
         if cv2 is not None:
             contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             raw_boxes = []
@@ -117,13 +178,15 @@ class CensorMaskDetector:
         else:
             raw_boxes = self._connected_component_boxes(mask)
 
-        return [
-            box for box in (
-                self._candidate_box(raw_box, kind, width, height)
-                for raw_box in raw_boxes
-            )
-            if box is not None
-        ]
+        stats[f"{kind}_contours"] = len(raw_boxes)
+        boxes: List[CensorBox] = []
+        for raw_box in raw_boxes:
+            box, reject_reason = self._candidate_box(raw_box, kind, width, height)
+            if box is not None:
+                boxes.append(box)
+            elif reject_reason:
+                stats["rejected"][reject_reason] = stats["rejected"].get(reject_reason, 0) + 1
+        return boxes, stats
 
     def _connected_component_boxes(self, mask: np.ndarray) -> List[Tuple[int, int, int, int, float]]:
         visited = np.zeros(mask.shape, dtype=bool)
@@ -160,28 +223,44 @@ class CensorMaskDetector:
         kind: str,
         image_width: int,
         image_height: int,
-    ) -> Optional[CensorBox]:
+    ) -> Tuple[Optional[CensorBox], Optional[str]]:
         x, y, width, height, area = raw_box
         if width < self.config.min_width or height < self.config.min_height:
-            return None
+            return None, "min_width_height"
+
+        margin = max(0, int(self.config.ignore_page_border_margin))
+        if margin > 0 and (x <= margin or y <= margin or x + width >= image_width - margin or y + height >= image_height - margin):
+            if width > image_width * 0.35 or height > image_height * 0.35:
+                return None, "border"
+
+        if self.config.ignore_very_thin_lines and min(width, height) <= 2 and max(width, height) > min(image_width, image_height) * 0.35:
+            return None, "very_thin_line"
 
         image_area = max(1, image_width * image_height)
         area_ratio = area / image_area
-        if area_ratio < self.config.min_area_ratio or area_ratio > self.config.max_area_ratio:
-            return None
+        if area_ratio < self.config.min_area_ratio:
+            return None, "too_small"
+        if area_ratio > self.config.max_area_ratio:
+            return None, "too_large"
 
         aspect_ratio = max(width / max(1, height), height / max(1, width))
-        if aspect_ratio < self.config.min_aspect_ratio:
-            return None
-
         extent = area / max(1, width * height)
         if extent < 0.55:
-            return None
+            return None, "rectangularity"
 
-        return CensorBox(x=x, y=y, width=width, height=height, score=extent, kind=kind)
+        is_bar = aspect_ratio >= self.config.min_aspect_ratio
+        is_block = (
+            self.config.allow_blocky_regions
+            and self.config.min_block_area_ratio <= area_ratio <= self.config.max_block_area_ratio
+        )
+        if not is_bar and not is_block:
+            return None, "aspect_ratio"
+
+        return CensorBox(x=x, y=y, width=width, height=height, score=extent, kind=kind), None
 
     def _pad_box(self, box: CensorBox, image_width: int, image_height: int) -> CensorBox:
-        padding = max(0, int(self.config.mask_padding))
+        proportional = int(round(min(image_width, image_height) * 0.006))
+        padding = max(0, int(self.config.mask_padding), proportional)
         x1 = max(0, box.x - padding)
         y1 = max(0, box.y - padding)
         x2 = min(image_width, box.x + box.width + padding)
@@ -214,7 +293,7 @@ class CensorMaskDetector:
         return merged
 
     def _boxes_close(self, first: CensorBox, second: CensorBox) -> bool:
-        padding = max(0, int(self.config.mask_padding))
+        padding = max(0, int(self.config.merge_distance))
         ax1, ay1 = first.x - padding, first.y - padding
         ax2, ay2 = first.x + first.width + padding, first.y + first.height + padding
         bx1, by1 = second.x, second.y

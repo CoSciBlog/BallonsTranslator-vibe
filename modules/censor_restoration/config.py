@@ -16,3 +16,11 @@ class CensorRestorationConfig:
     enable_light_bar_detection: bool = True
     merge_nearby_boxes: bool = True
     save_debug_masks: bool = False
+    debug_output_dir: str = ""
+    allow_blocky_regions: bool = True
+    min_block_area_ratio: float = 0.00005
+    max_block_area_ratio: float = 0.03
+    adaptive_threshold_enabled: bool = True
+    merge_distance: int = 12
+    ignore_page_border_margin: int = 4
+    ignore_very_thin_lines: bool = True

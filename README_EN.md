@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.27`
+Fork release: `1.4.0-vibe.28`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -34,7 +34,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Added a `Force Stop` control to the run progress dialog for terminating stuck pipeline or translation threads.
 - Added the missing `accelerate>=0.26.0` dependency required by `flux2-klein` GGUF loading.
 - Expanded intermediate image saving to `PNG`, `JPG`, `WEBP`, and `JXL` with a separate quality setting.
-- Removed the decensor controls from General settings, the left sidebar, and the Run menu.
+- Reintroduced Censor Restoration / Decensor Inpaint controls in General settings and added a current-page sidebar action.
 - Added readable English names to source-language selectors, for example `日本語 (Japanese)`, `Deutsch (German)`, and `Polski (Polish)`, while keeping the original internal language values.
 - Added a Translation Benchmark window from the Run menu to compare current-page translations from multiple translators or LLM configurations side by side.
 - Changed project working folders so `mask`, `inpainted`, `upscaled`, `decensor_mask`, and `decensored` are created only when an output is actually written. Upscaling output is no longer created while upscaling is disabled.
@@ -57,8 +57,29 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
   - mask editing
   - inpainting brush style cleanup
   - support for long-strip and webtoon-style pages
+- Censor Restoration / Decensor Inpaint workflow:
+  - works on the currently selected page when invoked by the app workflow
+  - automatically builds masks for simple black or white censor bars and block-like censor regions
+  - repairs the mask with the configured inpainting backend as a plausible inpaint reconstruction
 - Headless automation for batch processing from the command line
 - Multiple OCR, translator, and inpainting backends already wired into the desktop app
+
+## Censor Restoration / Decensor Inpaint
+
+Censor Restoration / Decensor Inpaint works on the currently opened page from the left sidebar `Dc` button. It automatically creates a mask for simple black or white censor bars and block-like censor regions, then repairs that masked area with the existing inpainting backend. The result is a plausible inpaint reconstruction and does not recreate source data.
+
+The detection settings are available under `Settings -> General -> Censor Restoration`. You can choose the mask mode, adjust mask padding, and tune the minimum detected area ratio.
+
+If the app reports `No repair mask found`, enable debug mask output when developing or tune the detector thresholds and area settings. The Censor Restoration pipeline also exposes a manual-mask entry point so an existing repair mask can be used by integration code without relying on automatic detection.
+
+Use this feature only for material where you have the necessary rights. Do not use it for real people, minors, or misleading reconstructions. Output quality depends on the image, detected mask, and selected inpainting backend.
+
+Known limitations:
+
+- Complex mosaic censorship is not detected reliably yet.
+- Automatic detection can produce false positives or false negatives.
+- Difficult structures can create visible inpainting artifacts.
+- Semantic or prompt-based inpainting is not a standard part of this MVP.
 
 ## Pinokio launcher
 

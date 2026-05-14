@@ -2,9 +2,11 @@ import json
 import threading
 import time
 from copy import deepcopy
+from json import JSONDecodeError
 from typing import Dict, List, Tuple
 
 import requests
+from pydantic import ValidationError
 
 from .base import register_translator
 from .trans_google import GoogleTranslateProviderPython, ProviderError
@@ -60,8 +62,9 @@ class TwoStepTranslator(LLM_API_Translator):
     ] = (
         "You are a translation editor. Improve draft machine translations by "
         "checking meaning, terminology, tone, fluency, punctuation, and line "
-        "count. Return strictly valid JSON with one key 'translations', a list "
-        "of objects with 'id' and 'translation'. Do not include explanations."
+        "count. Return only valid JSON in this exact shape: "
+        "{\"translations\":[{\"id\":1,\"translation\":\"...\"}]}. "
+        "Do not include explanations."
     )
 
     def _setup_translator(self):
@@ -69,6 +72,7 @@ class TwoStepTranslator(LLM_API_Translator):
         self.google_translator = GoogleTranslateProviderPython()
         self._draft_cache: Dict[Tuple[str, str, str, Tuple[str, ...]], List[str]] = {}
         self._draft_cache_lock = threading.RLock()
+        self.last_refinement_used_draft_fallback = False
 
     @property
     def first_step_translator(self) -> str:
@@ -270,6 +274,9 @@ class TwoStepTranslator(LLM_API_Translator):
             refined = self.translate(text_list)
             for ii, idx in enumerate(non_empty_ids):
                 translations[idx] = refined[ii]
+                textblk_lst[idx].translation_draft_fallback = bool(
+                    getattr(self, "last_refinement_used_draft_fallback", False)
+                )
 
         for callback in self._postprocess_hooks.values():
             callback(
@@ -305,6 +312,7 @@ class TwoStepTranslator(LLM_API_Translator):
         draft_list = self._first_step_translate(src_list)
         to_lang = self.lang_map.get(self.lang_target, self.lang_target)
         prompt = self._assemble_refinement_prompt(src_list, draft_list, to_lang)
+        self.last_refinement_used_draft_fallback = False
 
         try:
             parsed_response = self._clean_translation_response(
@@ -322,10 +330,29 @@ class TwoStepTranslator(LLM_API_Translator):
                 return self._refine_translations_with_glossary(
                     src_list, translations, to_lang
                 )
-            self.logger.error("LLM refinement returned an invalid translation count.")
+            raise ValueError(
+                f"LLM refinement returned an invalid translation count: "
+                f"{len(parsed_response.translations) if parsed_response else 0} != {len(src_list)}"
+            )
+        except (ValidationError, JSONDecodeError, TimeoutError, requests.RequestException, ValueError) as e:
+            self.logger.warning(
+                "LLM refinement failed; using first-step draft translations for this page/block."
+            )
+            self.logger.debug(f"LLM refinement fallback details: {type(e).__name__}: {e}")
         except Exception as e:
-            self.logger.error(f"LLM refinement failed: {type(e).__name__}: {e}")
+            self.logger.warning(
+                "LLM refinement failed; using first-step draft translations for this page/block."
+            )
+            self.logger.debug(f"LLM refinement unexpected fallback details: {type(e).__name__}: {e}")
 
         if self.fallback_to_first_step:
-            return draft_list
+            self.last_refinement_used_draft_fallback = True
+            if not any(draft_list):
+                self.logger.warning(
+                    "LLM refinement failed and no first-step draft translations were available."
+                )
+            return [
+                draft if draft else src
+                for src, draft in zip(src_list, draft_list)
+            ]
         return [""] * len(src_list)

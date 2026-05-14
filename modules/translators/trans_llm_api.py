@@ -2,7 +2,7 @@ import re
 import time
 import json
 import traceback
-from typing import List, Dict, Optional, Type
+from typing import Any, List, Dict, Optional, Type
 
 import httpx
 import openai
@@ -147,7 +147,7 @@ class LLM_API_Translator(BaseTranslator):
         },
         "system_prompt": {
             "type": "editor",
-            "value": 'You are an expert translator. Your task is to accurately translate the given text snippets. You MUST provide the output strictly in the specified JSON format, without any additional explanations or markdown formatting. The JSON object must have a single key \'translations\', which is a list of objects, each with an \'id\' (integer) and a \'translation\' (string).\n\nExample Output Schema:\n{"translations": [{"id": 1, "translation": "Translated text here."}]}',
+            "value": 'You are an expert translator. Your task is to accurately translate the given text snippets. You MUST provide the output strictly in the specified JSON format, without any additional explanations or markdown formatting. Return only valid JSON in this exact shape: {"translations":[{"id":1,"translation":"Translated text here."}]}. The JSON object must have a single key \'translations\', which is a list of objects, each with an \'id\' (integer) and a \'translation\' (string).\n\nExample Output Schema:\n{"translations": [{"id": 1, "translation": "Translated text here."}]}',
             "description": "System message to instruct the LLM on its role and required output format.",
         },
         "invalid repeat count": {
@@ -757,12 +757,75 @@ class LLM_API_Translator(BaseTranslator):
     def _strip_reasoning_markup(self, content: str) -> str:
         cleaned = re.sub(r"<think>.*?</think>", "", content, flags=re.DOTALL | re.IGNORECASE)
         cleaned = re.sub(
-            r"```(?:json)?\s*(\{.*?\})\s*```",
+            r"```(?:json)?\s*([\[{].*?[\]}])\s*```",
             lambda match: match.group(1),
             cleaned,
             flags=re.DOTALL,
         )
         return cleaned.strip()
+
+    @staticmethod
+    def _normalize_translation_entry(entry: Any, fallback_id: int) -> Any:
+        if not isinstance(entry, dict):
+            return {"id": fallback_id, "translation": str(entry)}
+
+        normalized = dict(entry)
+        if "id" not in normalized:
+            normalized["id"] = fallback_id
+        if "translation" not in normalized and "draft_translation" in normalized:
+            normalized["translation"] = normalized.get("draft_translation") or ""
+        return normalized
+
+    @classmethod
+    def _normalize_translation_response_data(cls, data: Any, logger=None) -> Any:
+        if isinstance(data, dict) and not data:
+            if logger is not None:
+                logger.warning(
+                    "LLM returned empty JSON object; falling back to draft translations where possible."
+                )
+            return {"translations": []}
+
+        if isinstance(data, list):
+            return {
+                "translations": [
+                    cls._normalize_translation_entry(item, idx + 1)
+                    for idx, item in enumerate(data)
+                ]
+            }
+
+        if not isinstance(data, dict):
+            return data
+
+        if "translations" in data:
+            translations = data.get("translations")
+            if translations is None:
+                translations = []
+            elif isinstance(translations, dict):
+                translations = [translations]
+            elif not isinstance(translations, list):
+                return data
+            normalized = dict(data)
+            normalized["translations"] = [
+                cls._normalize_translation_entry(item, idx + 1)
+                for idx, item in enumerate(translations)
+            ]
+            return normalized
+
+        if all(isinstance(key, str) and key.isdigit() for key in data.keys()):
+            return {
+                "translations": [
+                    {"id": int(key), "translation": value}
+                    for key, value in data.items()
+                ]
+            }
+
+        if "id" in data and (
+            "translation" in data
+            or "draft_translation" in data
+        ):
+            return {"translations": [cls._normalize_translation_entry(data, 1)]}
+
+        return data
 
     def _build_reflection_prompt(
         self, original_prompt: str, draft_response: TranslationResponse
@@ -1267,7 +1330,7 @@ class LLM_API_Translator(BaseTranslator):
             json_to_parse = self._strip_reasoning_markup(raw_content)
 
             match = re.search(
-                r"```(?:json)?\s*(\{.*?\})\s*```", json_to_parse, re.DOTALL
+                r"```(?:json)?\s*([\[{].*?[\]}])\s*```", json_to_parse, re.DOTALL
             )
             if match:
                 self.logger.debug(
@@ -1279,8 +1342,19 @@ class LLM_API_Translator(BaseTranslator):
                 end = json_to_parse.rfind("}")
                 if start != -1 and end != -1 and end > start:
                     json_to_parse = json_to_parse[start : end + 1]
+                else:
+                    start = json_to_parse.find("[")
+                    end = json_to_parse.rfind("]")
+                    if start != -1 and end != -1 and end > start:
+                        json_to_parse = json_to_parse[start : end + 1]
             try:
                 data_to_validate = json.loads(json_to_parse)
+                self.logger.debug(f"Raw JSON content from API: {raw_content}")
+                data_to_validate = self._normalize_translation_response_data(
+                    data_to_validate,
+                    self.logger,
+                )
+                self.logger.debug(f"Normalized JSON content from API: {data_to_validate}")
                 validated_response = TranslationResponse.model_validate(
                     data_to_validate
                 )

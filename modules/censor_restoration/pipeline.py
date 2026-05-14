@@ -25,6 +25,7 @@ class PipelineResult:
     boxes: List[CensorBox] = field(default_factory=list)
     error_message: Optional[str] = None
     debug_paths: Dict[str, str] = field(default_factory=dict)
+    debug: Dict[str, Any] = field(default_factory=dict)
 
 
 class CensorRestorationPipeline:
@@ -53,6 +54,7 @@ class CensorRestorationPipeline:
                 mask,
                 detection.boxes,
                 debug_output_dir,
+                detection.debug,
             )
 
             if int(mask.sum()) == 0:
@@ -63,6 +65,7 @@ class CensorRestorationPipeline:
                     mask=mask,
                     boxes=[],
                     debug_paths=debug_paths,
+                    debug=detection.debug,
                 )
 
             backend = inpainter or self.inpainter
@@ -75,6 +78,7 @@ class CensorRestorationPipeline:
                     boxes=detection.boxes,
                     error_message="No inpainter is configured for censor restoration.",
                     debug_paths=debug_paths,
+                    debug=detection.debug,
                 )
 
             result_image = self._run_inpainter(backend, original_image.copy(), mask)
@@ -85,9 +89,74 @@ class CensorRestorationPipeline:
                 mask=mask,
                 boxes=detection.boxes,
                 debug_paths=debug_paths,
+                debug=detection.debug,
             )
         except Exception as exc:
             LOGGER.exception("Censor restoration pipeline failed")
+            return PipelineResult(
+                status="error",
+                original_image=original_image,
+                result_image=original_image.copy() if original_image is not None else None,
+                error_message=f"{type(exc).__name__}: {exc}",
+            )
+
+    def run_with_mask(
+        self,
+        image: Any,
+        mask: Any,
+        inpainter: Optional[Any] = None,
+        debug_output_dir: Optional[str] = None,
+    ) -> PipelineResult:
+        original_image: Optional[np.ndarray] = None
+        try:
+            original_image = self._to_numpy(image)
+            normalized_mask = self._normalize_external_mask(mask, original_image.shape[:2])
+            debug = {
+                "manual_mask": True,
+                "mask_pixel_count": int(np.count_nonzero(normalized_mask)),
+                "mask_coverage_ratio": int(np.count_nonzero(normalized_mask)) / max(1, normalized_mask.size),
+            }
+            if int(normalized_mask.sum()) == 0:
+                return PipelineResult(
+                    status="no_mask_found",
+                    original_image=original_image,
+                    result_image=original_image.copy(),
+                    mask=normalized_mask,
+                    boxes=[],
+                    debug=debug,
+                )
+
+            backend = inpainter or self.inpainter
+            if backend is None:
+                return PipelineResult(
+                    status="error",
+                    original_image=original_image,
+                    result_image=original_image.copy(),
+                    mask=normalized_mask,
+                    boxes=[],
+                    error_message="No inpainter is configured for censor restoration.",
+                    debug=debug,
+                )
+
+            debug_paths = self._write_debug_outputs(
+                original_image,
+                normalized_mask,
+                [],
+                debug_output_dir,
+                debug,
+            )
+            result_image = self._run_inpainter(backend, original_image.copy(), normalized_mask)
+            return PipelineResult(
+                status="success",
+                original_image=original_image,
+                result_image=result_image,
+                mask=normalized_mask,
+                boxes=[],
+                debug_paths=debug_paths,
+                debug=debug,
+            )
+        except Exception as exc:
+            LOGGER.exception("Censor restoration manual-mask pipeline failed")
             return PipelineResult(
                 status="error",
                 original_image=original_image,
@@ -119,31 +188,66 @@ class CensorRestorationPipeline:
     def _binary_mask(self, mask: np.ndarray) -> np.ndarray:
         return np.where(mask > 0, 255, 0).astype(np.uint8)
 
+    def _normalize_external_mask(self, mask: Any, image_shape: tuple) -> np.ndarray:
+        mask_arr = self._to_numpy(mask)
+        if mask_arr.ndim == 3:
+            mask_arr = mask_arr[:, :, 0]
+        if mask_arr.shape[:2] != image_shape:
+            raise ValueError(
+                f"mask shape {mask_arr.shape[:2]} does not match image shape {image_shape}"
+            )
+        return self._binary_mask(mask_arr)
+
     def _write_debug_outputs(
         self,
         image: np.ndarray,
         mask: np.ndarray,
         boxes: List[CensorBox],
         debug_output_dir: Optional[str],
+        debug: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, str]:
         if not self.detector.config.save_debug_masks or not debug_output_dir:
             return {}
 
         os.makedirs(debug_output_dir, exist_ok=True)
-        mask_path = osp.join(debug_output_dir, "censor_mask.png")
-        overlay_path = osp.join(debug_output_dir, "censor_mask_overlay.png")
-        boxes_path = osp.join(debug_output_dir, "censor_detected_boxes.json")
+        mask_path = osp.join(debug_output_dir, "_final_mask.png")
+        overlay_path = osp.join(debug_output_dir, "_boxes_overlay.png")
+        boxes_path = osp.join(debug_output_dir, "_detection.json")
 
         self._write_png(mask_path, mask)
         self._write_png(overlay_path, self._mask_overlay(image, mask))
+        debug_payload = self._json_safe_debug(debug or {})
+        debug_payload["boxes"] = [asdict(box) for box in boxes]
         with open(boxes_path, "w", encoding="utf8") as f:
-            json.dump([asdict(box) for box in boxes], f, indent=2)
+            json.dump(debug_payload, f, indent=2)
 
-        return {
+        paths = {
             "mask": mask_path,
             "overlay": overlay_path,
-            "boxes": boxes_path,
+            "detection": boxes_path,
         }
+
+        if debug:
+            for key, filename in (
+                ("gray", "_gray.png"),
+                ("dark_candidates", "_dark_candidates.png"),
+                ("light_candidates", "_light_candidates.png"),
+            ):
+                image_data = debug.get(key)
+                if isinstance(image_data, np.ndarray):
+                    path = osp.join(debug_output_dir, filename)
+                    self._write_png(path, image_data)
+                    paths[key] = path
+
+        return paths
+
+    def _json_safe_debug(self, debug: Dict[str, Any]) -> Dict[str, Any]:
+        safe: Dict[str, Any] = {}
+        for key, value in debug.items():
+            if isinstance(value, np.ndarray):
+                continue
+            safe[key] = value
+        return safe
 
     def _mask_overlay(self, image: np.ndarray, mask: np.ndarray) -> np.ndarray:
         if image.ndim == 2:

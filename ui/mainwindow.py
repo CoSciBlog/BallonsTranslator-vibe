@@ -178,6 +178,7 @@ class MainWindow(mainwindow_cls):
         self.leftBar.export_src_md.connect(lambda : self.on_export_txt(dump_target='source', suffix='.md'))
         self.leftBar.export_trans_md.connect(lambda : self.on_export_txt(dump_target='translation', suffix='.md'))
         self.leftBar.import_trans_txt.connect(self.on_import_trans_txt)
+        self._project_save_error_notified = False
 
         self.pageList = PageListView()
         self.pageList.reveal_file.connect(self.on_reveal_file)
@@ -651,11 +652,8 @@ class MainWindow(mainwindow_cls):
     def on_project_glossary_saved(self, glossary: dict):
         self.imgtrans_proj.glossary = self.imgtrans_proj.normalize_glossary(glossary)
         self.sync_project_glossary_to_translator()
-        try:
-            self.imgtrans_proj.save()
+        if self.save_project_safely(self.tr('saving project glossary'), notify_user=True):
             self.canvas.setProjSaveState(False)
-        except Exception as e:
-            create_error_dialog(e, self.tr('Failed to save project glossary'))
 
     def closeEvent(self, event: QCloseEvent) -> None:
         if not self.imgtrans_proj.is_empty:
@@ -729,6 +727,40 @@ class MainWindow(mainwindow_cls):
                 save_proj = True
             
             self.saveCurrentPage(update_scene_text, save_proj, restore_interface=True, save_rst_only=save_rst_only, keep_exist_as_backup=keep_exist_as_backup)
+
+    def save_project_safely(self, reason: str = '', keep_exist_as_backup=False, notify_user: bool = False) -> bool:
+        try:
+            self.imgtrans_proj.save(keep_exist_as_backup=keep_exist_as_backup)
+            self._project_save_error_notified = False
+            return True
+        except (PermissionError, OSError) as e:
+            LOGGER.exception(f'Failed to save project file during {reason or "project save"}')
+            self.canvas.setProjSaveState(True)
+            tmp_path = getattr(self.imgtrans_proj, 'proj_path', '') + '.tmp'
+            tmp_msg = ''
+            if tmp_path and osp.exists(tmp_path):
+                tmp_msg = self.tr('\nA temporary project file was kept at:\n{path}').format(path=tmp_path)
+            msg = self.tr(
+                'Project changes could not be saved right now. '
+                'The project is still marked as unsaved; please try saving again.'
+            ) + tmp_msg
+            if notify_user and not self._project_save_error_notified:
+                QMessageBox.warning(self, self.tr('Project Save Failed'), msg)
+                self._project_save_error_notified = True
+            else:
+                LOGGER.warning(msg)
+            return False
+        except Exception as e:
+            LOGGER.exception(f'Unexpected project save failure during {reason or "project save"}')
+            self.canvas.setProjSaveState(True)
+            if notify_user and not self._project_save_error_notified:
+                QMessageBox.warning(
+                    self,
+                    self.tr('Project Save Failed'),
+                    self.tr('Project changes could not be saved. The project remains unsaved.'),
+                )
+                self._project_save_error_notified = True
+            return False
 
     def pageListCurrentItemChanged(self):
         item = self.pageList.currentItem()
@@ -1229,9 +1261,14 @@ class MainWindow(mainwindow_cls):
         if not osp.exists(self.imgtrans_proj.result_dir()):
             os.makedirs(self.imgtrans_proj.result_dir())
 
+        project_saved = True
         if save_proj:
-            try:
-                self.imgtrans_proj.save(keep_exist_as_backup=keep_exist_as_backup)
+            project_saved = self.save_project_safely(
+                self.tr('saving current page'),
+                keep_exist_as_backup=keep_exist_as_backup,
+                notify_user=True,
+            )
+            if project_saved:
                 if not save_rst_only:
                     mask_path = self.imgtrans_proj.get_mask_path()
                     mask_array = self.imgtrans_proj.mask_array
@@ -1247,16 +1284,15 @@ class MainWindow(mainwindow_cls):
                         inpainted = self.imgtrans_proj.inpainted_array
                     if inpainted is not None:
                         self.imsave_thread.saveImg(inpainted_path, inpainted, save_params={'ext': pcfg.intermediate_imgsave_ext, 'quality': pcfg.intermediate_imgsave_quality}, keep_alpha=self.imgtrans_proj.current_has_alpha())
-            except Exception as e:
-                LOGGER.error(f"Failed to save project files: {e}")
 
         # Render the final result image properly
         try:
             img = self.canvas.render_result_img()
             imsave_path = self.imgtrans_proj.get_result_path(self.imgtrans_proj.current_img)
             self.imsave_thread.saveImg(imsave_path, img, self.imgtrans_proj.current_img, save_params={'ext': pcfg.imgsave_ext, 'quality': pcfg.imgsave_quality}, keep_alpha=self.imgtrans_proj.current_has_alpha())
-            self.canvas.setProjSaveState(False)
-            self.canvas.update_saved_undostep()
+            if project_saved and save_proj:
+                self.canvas.setProjSaveState(False)
+                self.canvas.update_saved_undostep()
         
         except Exception as e:
             LOGGER.error(f"Failed to render and save result image: {e}")
@@ -1554,7 +1590,7 @@ class MainWindow(mainwindow_cls):
             self.st_manager.auto_textlayout_flag = False
 
         # save proj file on page trans finished
-        self.imgtrans_proj.save()
+        self.save_project_safely(self.tr('page translation finish'), notify_user=False)
 
         self.saveCurrentPage(False, False)
 
@@ -1565,7 +1601,7 @@ class MainWindow(mainwindow_cls):
         if page_index == self.pageList.currentIndex().row():
             self.imgtrans_proj.set_current_img_byidx(page_index)
             self.canvas.updateCanvas()
-        self.imgtrans_proj.save()
+        self.save_project_safely(self.tr('page decensor finish'), notify_user=False)
         if page_index == self.pageList.currentIndex().row():
             self.saveCurrentPage(False, False)
         if self._decensor_current_page_request == page_name:
@@ -1573,7 +1609,10 @@ class MainWindow(mainwindow_cls):
             try:
                 mask = self.imgtrans_proj.load_decensor_mask_by_imgname(page_name)
                 if mask is None or not (mask > 0).any():
-                    create_info_dialog(self.tr('Censor Restoration found no repair mask on the current page.'))
+                    create_info_dialog(self.tr(
+                        'No censor mask was detected. You can draw/select a repair mask manually and run Censor Restoration again. '
+                        'No repair mask found. Try enabling debug masks or adjust detector thresholds.'
+                    ))
                 else:
                     create_info_dialog(self.tr('Censor Restoration finished for the current page.'))
             except Exception as e:
@@ -1872,11 +1911,8 @@ class MainWindow(mainwindow_cls):
             return
         self.imgtrans_proj.toggle_page_ignored(page_name)
         self.refresh_page_list_item(page_name)
-        try:
-            self.imgtrans_proj.save()
+        if self.save_project_safely(self.tr('saving ignored page state'), notify_user=True):
             self.canvas.setProjSaveState(False)
-        except Exception as e:
-            create_error_dialog(e, self.tr('Failed to save ignored page state'))
 
     def on_delete_page_data(self, page_name: str):
         if not page_name or page_name not in self.imgtrans_proj.pages:
@@ -1907,11 +1943,8 @@ class MainWindow(mainwindow_cls):
             self.st_manager.updateSceneTextitems()
             self.canvas.updateCanvas()
             
-        try:
-            self.imgtrans_proj.save()
+        if self.save_project_safely(self.tr('saving deleted page data state'), notify_user=True):
             self.canvas.setProjSaveState(False)
-        except Exception as e:
-            create_error_dialog(e, self.tr('Failed to save state after deleting page data'))
 
     def on_reveal_file(self, page_name: str = None):
         if page_name and page_name in self.imgtrans_proj.pages:

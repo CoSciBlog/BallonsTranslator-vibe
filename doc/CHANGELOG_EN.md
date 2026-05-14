@@ -1,6 +1,18 @@
 # Changelogs
 
 ### 2026-05-14
+[Unreleased] robustness fixes
+Fixed:
+1. Improved handling of malformed or empty LLM JSON responses.
+2. Added fallback to first-step draft translations when LLM refinement fails.
+3. Improved Windows robustness for atomic project saving and UI save-error handling.
+4. Added diagnostics for Censor Restoration mask detection.
+5. Improved simple censor bar and block mask detection.
+
+Added:
+1. Optional debug output for Censor Restoration masks and overlays.
+2. Manual-mask pipeline fallback support for Censor Restoration integration code.
+
 [v1.4.0-vibe.28] ui translations and german language
 1. Extracted all new strings from recent UI updates and recompiled all `.qm` translation files.
 2. Auto-translated missing UI strings for all supported languages using Google Translate.
