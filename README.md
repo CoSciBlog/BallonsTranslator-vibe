@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README_EN.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.15`
+Fork release: `1.4.0-vibe.16`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -33,6 +33,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Added a left-sidebar `Decens` button for decensoring the current page directly.
 - Added page-list previews, a page context-menu toggle for ignoring pages in pipeline runs, and project JSON persistence for ignored pages.
 - Added LLM project-context settings for previous pages, optional next-page context, capped document context, and narrower automatic glossary category extraction.
+- Added a `Force Stop` control to the run progress dialog for terminating stuck pipeline or translation threads.
 
 ## Features
 
@@ -108,6 +109,10 @@ The Pages sidebar now shows page previews for the project list. Right-click a pa
 ## Translation-only run
 
 The left sidebar includes a second run button labeled `Trans`. It runs only machine translation on the current project text boxes and skips text detection, OCR, and inpainting. This is useful after editing source text or switching translator settings when existing text boxes should be reused.
+
+## Run stop controls
+
+The run progress dialog now has both `Stop` and `Force Stop`. `Stop` requests a graceful stop after the current pipeline step. `Force Stop` terminates the active pipeline, translation, OCR, detection, and inpainting threads and closes the progress dialog when a backend or LLM request does not return to the normal stop path.
 
 ## LLM context translation
 

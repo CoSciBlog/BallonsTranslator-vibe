@@ -165,6 +165,7 @@ class ProgressMessageBox(QDialog):
 
 class ImgtransProgressMessageBox(ProgressMessageBox):
     stop_clicked = Signal()
+    force_stop_clicked = Signal()
     
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(None, *args, **kwargs)
@@ -184,10 +185,15 @@ class ImgtransProgressMessageBox(ProgressMessageBox):
         
         # 添加停止按钮
         self.stop_button = QPushButton(self.tr('Stop'), self)
+        self.stop_button.setToolTip(self.tr('Request a graceful stop after the current pipeline step.'))
         self.stop_button.clicked.connect(self.on_stop_clicked)
+        self.force_stop_button = QPushButton(self.tr('Force Stop'), self)
+        self.force_stop_button.setToolTip(self.tr('Forcefully terminate the running pipeline and translation threads if normal Stop is stuck.'))
+        self.force_stop_button.clicked.connect(self.on_force_stop_clicked)
         button_layout = QHBoxLayout()
         button_layout.addStretch()
         button_layout.addWidget(self.stop_button)
+        button_layout.addWidget(self.force_stop_button)
         button_layout.addStretch()
         layout.addLayout(button_layout)
 
@@ -198,6 +204,12 @@ class ImgtransProgressMessageBox(ProgressMessageBox):
         # 重置按钮状态（为下次使用准备）
         self.stop_button.setEnabled(False)
         self.stop_button.setText(self.tr('trying to stop...'))
+
+    def on_force_stop_clicked(self):
+        self.force_stop_clicked.emit()
+        self.stop_button.setEnabled(False)
+        self.force_stop_button.setEnabled(False)
+        self.force_stop_button.setText(self.tr('force stopping...'))
 
 
     def updateDetectProgress(self, value: int, msg: str = ''):
@@ -224,6 +236,8 @@ class ImgtransProgressMessageBox(ProgressMessageBox):
         # 重置停止按钮状态
         self.stop_button.setEnabled(True)
         self.stop_button.setText(self.tr('Stop'))
+        self.force_stop_button.setEnabled(True)
+        self.force_stop_button.setText(self.tr('Force Stop'))
 
     def show_all_bars(self):
         self.detect_bar.show()
