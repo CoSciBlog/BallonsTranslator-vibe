@@ -60,8 +60,9 @@ class TwoStepTranslator(LLM_API_Translator):
     ] = (
         "You are a translation editor. Improve draft machine translations by "
         "checking meaning, terminology, tone, fluency, punctuation, and line "
-        "count. Return strictly valid JSON with one key 'translations', a list "
-        "of objects with 'id' and 'translation'. Do not include explanations."
+        "count. Return only valid JSON in this exact shape: "
+        "{\"translations\":[{\"id\":1,\"translation\":\"...\"}]}. "
+        "Do not include explanations."
     )
 
     def _setup_translator(self):
