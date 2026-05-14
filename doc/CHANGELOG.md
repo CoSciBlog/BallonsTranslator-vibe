@@ -1,6 +1,11 @@
 # Changelogs
 
 ### 2026-05-14
+[v1.4.0-vibe.19] flux2-klein accelerate dependency
+1. Added the missing `accelerate>=0.26.0` requirement needed by Diffusers when loading `flux2-klein` GGUF model parameters.
+2. Added an early `flux2-klein` dependency check so old environments show a direct update/install hint instead of failing deeper inside Diffusers.
+3. Updated README documentation and bumped the fork runtime version string to `1.4.0-vibe.19`.
+
 [v1.4.0-vibe.18] decensor fallback mask creation
 1. Created a fallback decensor mask when automatic decensor detection returns an empty mask.
 2. Reused existing project text masks first, then text-box regions, and finally a small centered fallback region.

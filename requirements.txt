@@ -55,5 +55,6 @@ pyobjc-framework-quartz; sys_platform == 'darwin'
 pyobjc-framework-vision; sys_platform == 'darwin'
 betterproto
 diffusers>=0.38.0
+accelerate>=0.26.0
 gguf>=0.10.0
 hf_transfer

@@ -566,7 +566,14 @@ class Flux2Klein(InpainterBase):
         super().__init__(**params)
 
     def _load_model(self):
-        
+        from importlib.util import find_spec
+
+        if find_spec('accelerate') is None:
+            raise RuntimeError(
+                'flux2-klein requires accelerate>=0.26.0 to load GGUF model parameters. '
+                'Run Update/Install again so requirements.txt installs accelerate.'
+            )
+
         from modules.inpaint.flux_inpaint_pipeline import Flux2KleinInpaintPipeline, Flux2Transformer2DModel, AutoencoderKLFlux2
         from safetensors.torch import load_file
         from diffusers import GGUFQuantizationConfig

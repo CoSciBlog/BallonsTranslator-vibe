@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.17`
+Fork release: `1.4.0-vibe.19`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -35,6 +35,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Added LLM project-context settings for previous pages, optional next-page context, capped document context, and narrower automatic glossary category extraction.
 - Added a `Force Stop` control to the run progress dialog for terminating stuck pipeline or translation threads.
 - Prevented the current-page decensor action from overlapping an active pipeline or LLM translation worker.
+- Added the missing `accelerate>=0.26.0` dependency required by `flux2-klein` GGUF loading.
 
 ## Features
 
