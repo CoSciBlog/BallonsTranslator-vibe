@@ -1225,7 +1225,7 @@ class MainWindow(mainwindow_cls):
                     mask_path = self.imgtrans_proj.get_mask_path()
                     mask_array = self.imgtrans_proj.mask_array
                     if mask_array is not None:
-                        self.imsave_thread.saveImg(mask_path, mask_array, save_params={'ext': pcfg.intermediate_imgsave_ext})
+                        self.imsave_thread.saveImg(mask_path, mask_array, save_params={'ext': pcfg.intermediate_imgsave_ext, 'quality': pcfg.intermediate_imgsave_quality})
                     inpainted_path = self.imgtrans_proj.get_inpainted_path()
                     if self.canvas.drawingLayer.drawed():
                         inpainted = self.canvas.base_pixmap.copy()
@@ -1235,7 +1235,7 @@ class MainWindow(mainwindow_cls):
                     else:
                         inpainted = self.imgtrans_proj.inpainted_array
                     if inpainted is not None:
-                        self.imsave_thread.saveImg(inpainted_path, inpainted, save_params={'ext': pcfg.intermediate_imgsave_ext}, keep_alpha=self.imgtrans_proj.current_has_alpha())
+                        self.imsave_thread.saveImg(inpainted_path, inpainted, save_params={'ext': pcfg.intermediate_imgsave_ext, 'quality': pcfg.intermediate_imgsave_quality}, keep_alpha=self.imgtrans_proj.current_has_alpha())
             except Exception as e:
                 LOGGER.error(f"Failed to save project files: {e}")
 

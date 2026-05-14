@@ -222,7 +222,10 @@ def imwrite(img_path, img, ext='.png', quality=100, jxl_encode_effort=3):
             if img.shape[-1] == 3:
                 img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
             elif img.shape[-1] == 4:
-                img = cv2.cvtColor(img, cv2.COLOR_RGBA2BGRA)
+                if ext in {'.jpg', '.jpeg'}:
+                    img = cv2.cvtColor(img, cv2.COLOR_RGBA2BGR)
+                else:
+                    img = cv2.cvtColor(img, cv2.COLOR_RGBA2BGRA)
         cv2.imencode(ext, img, encode_param)[1].tofile(img_path)
 
 

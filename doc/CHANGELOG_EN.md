@@ -1,6 +1,13 @@
 # Changelogs
 
 ### 2026-05-14
+[v1.4.0-vibe.21] intermediate image formats and quality
+1. Added `JPG` and `WEBP` to the `Intermediate image format` setting.
+2. Added a separate intermediate image quality setting independent of final result image quality.
+3. Applied intermediate quality to saved masks, inpainted pages, decensor masks, and decensored working images.
+4. Updated intermediate image lookup to read existing `JPG`, `JPEG`, and `WEBP` working files.
+5. Updated README documentation and bumped the fork runtime version string to `1.4.0-vibe.21`.
+
 [v1.4.0-vibe.20] real decensor mask detection
 1. Removed the fallback that copied normal text/inpaint masks into the `decensor_mask` folder.
 2. Expanded automatic decensor mask detection with multi-scale censor-bar detection and more tolerant mosaic-region candidates.
