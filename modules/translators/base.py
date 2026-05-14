@@ -46,6 +46,48 @@ LANGMAP_GLOBAL = {
     'Tamil': '',
 }
 
+LANGUAGE_ENGLISH_NAMES = {
+    'Auto': 'auto detect',
+    '\u7b80\u4f53\u4e2d\u6587': 'Simplified Chinese',
+    '\u7e41\u9ad4\u4e2d\u6587': 'Traditional Chinese',
+    '\u65e5\u672c\u8a9e': 'Japanese',
+    '\ud55c\uad6d\uc5b4': 'Korean',
+    'Ti\u1ebfng Vi\u1ec7t': 'Vietnamese',
+    '\u010de\u0161tina': 'Czech',
+    'Nederlands': 'Dutch',
+    'Fran\u00e7ais': 'French',
+    'Deutsch': 'German',
+    'magyar nyelv': 'Hungarian',
+    'Italiano': 'Italian',
+    'Polski': 'Polish',
+    'Portugu\u00eas': 'Portuguese',
+    'limba rom\u00e2n\u0103': 'Romanian',
+    '\u0440\u0443\u0441\u0441\u043a\u0438\u0439 \u044f\u0437\u044b\u043a': 'Russian',
+    'Espa\u00f1ol': 'Spanish',
+    'T\u00fcrk dili': 'Turkish',
+    '\u0443\u043a\u0440\u0430\u0457\u0301\u043d\u0441\u044c\u043a\u0430 \u043c\u043e\u0301\u0432\u0430': 'Ukrainian',
+    'Thai': 'Thai',
+    'Arabic': 'Arabic',
+    'Hindi': 'Hindi',
+    'Malayalam': 'Malayalam',
+    'Tamil': 'Tamil',
+}
+
+
+def lang_display_label(lang: str) -> str:
+    english_name = LANGUAGE_ENGLISH_NAMES.get(lang)
+    if not english_name or english_name.lower() == str(lang).lower():
+        return lang
+    return f'{lang} ({english_name})'
+
+
+def lang_display_to_key(display_lang: str) -> str:
+    for lang in LANGUAGE_ENGLISH_NAMES:
+        if display_lang == lang_display_label(lang):
+            return lang
+    return display_lang
+
+
 SYSTEM_LANG = ''
 SYSTEM_LANGMAP = {
     'zh-CN': '简体中文'        
