@@ -293,6 +293,7 @@ class TwoStepTranslator(LLM_API_Translator):
             f"Improve the draft translations from {from_lang} to {to_lang}. "
             "Use the source text as the authority and preserve each id exactly. "
             "Return only JSON in the required schema.\n\n"
+            f"{self._translation_context_prompt_section()}"
             f"{self._glossary_prompt_section()}"
             f"INPUT:\n{json.dumps(items, ensure_ascii=False, indent=2)}"
         )
