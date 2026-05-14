@@ -5,7 +5,7 @@ from qtpy.QtWidgets import QMainWindow, QHBoxLayout, QVBoxLayout, QFileDialog, Q
 from qtpy.QtCore import Qt, Signal, QPoint, QEvent, QSize
 from qtpy.QtGui import QMouseEvent, QKeySequence, QActionGroup, QIcon
 
-from modules.translators import BaseTranslator
+from modules.translators import BaseTranslator, lang_display_label
 from .custom_widget import Widget, PaintQSlider, SmallComboBox, ConfigClickableLabel
 from utils.shared import TITLEBAR_HEIGHT, WINDOW_BORDER_WIDTH, BOTTOMBAR_HEIGHT, LEFTBAR_WIDTH, LEFTBTN_WIDTH
 from .framelesswindow import FramelessMoveResize
@@ -728,10 +728,11 @@ class TranslatorSelectionWidget(Widget):
         self.blockSignals(True)
         self.src_selector.clear()
         self.tgt_selector.clear()
-        self.src_selector.addItems(translator.supported_src_list)
+        for lang in translator.supported_src_list:
+            self.src_selector.addItem(lang_display_label(lang), lang)
         self.tgt_selector.addItems(translator.supported_tgt_list)
         self.selector.setCurrentText(translator.name)
-        self.src_selector.setCurrentText(translator.lang_source)
+        self.src_selector.setCurrentText(lang_display_label(translator.lang_source))
         self.tgt_selector.setCurrentText(translator.lang_target)
         self.blockSignals(False)
 

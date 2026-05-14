@@ -1,6 +1,11 @@
 # Changelogs
 
 ### 2026-05-14
+[v1.4.0-vibe.23] readable source language labels
+1. Added English helper names in parentheses to source-language selectors in Settings and the bottom translator bar.
+2. Kept translator/config values mapped to the original internal language keys so existing projects and saved configs remain compatible.
+3. Updated README documentation and bumped the fork runtime version string to `1.4.0-vibe.23`.
+
 [v1.4.0-vibe.22] remove decensor UI controls
 1. Removed the Decensor section from General settings.
 2. Removed the left-sidebar `Decens` button and the Run menu decensor actions.

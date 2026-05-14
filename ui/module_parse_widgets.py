@@ -2,6 +2,7 @@ from typing import List, Callable
 
 from modules import GET_VALID_INPAINTERS, GET_VALID_TEXTDETECTORS, GET_VALID_TRANSLATORS, GET_VALID_OCR, \
     BaseTranslator, DEFAULT_DEVICE, GPUINTENSIVE_SET
+from modules.translators.base import lang_display_label
 from utils.logger import logger as LOGGER
 from .custom_widget import ConfigComboBox, ParamComboBox, NoBorderPushBtn, ParamNameLabel
 from utils.shared import CONFIG_COMBOBOX_LONG, size2width, CONFIG_COMBOBOX_SHORT, CONFIG_COMBOBOX_HEIGHT
@@ -448,10 +449,11 @@ class TranslatorConfigPanel(ModuleConfigParseWidget):
         self.source_combobox.clear()
         self.target_combobox.clear()
 
-        self.source_combobox.addItems(translator.supported_src_list)
+        for lang in translator.supported_src_list:
+            self.source_combobox.addItem(lang_display_label(lang), lang)
         self.target_combobox.addItems(translator.supported_tgt_list)
         self.module_combobox.setCurrentText(translator.name)
-        self.source_combobox.setCurrentText(translator.lang_source)
+        self.source_combobox.setCurrentText(lang_display_label(translator.lang_source))
         self.target_combobox.setCurrentText(translator.lang_target)
         self.updateModuleParamWidget()
         self.source_combobox.blockSignals(False)

@@ -18,6 +18,7 @@ from utils.textblock import TextBlock, TextAlignment
 from utils import shared
 from utils.message import create_error_dialog, create_info_dialog
 from modules.translators.trans_chatgpt import GPTTranslator
+from modules.translators import lang_display_label, lang_display_to_key
 from modules import GET_VALID_TEXTDETECTORS, GET_VALID_INPAINTERS, GET_VALID_TRANSLATORS, GET_VALID_OCR
 from .misc import parse_stylesheet, set_html_family, QKEY
 from utils.config import ProgramConfig, pcfg, save_config, text_styles, save_text_styles, load_textstyle_from, FontFormat
@@ -1299,7 +1300,9 @@ class MainWindow(mainwindow_cls):
 
     def on_trans_src_changed(self):
         sender = self.sender()
-        text = sender.currentText()
+        text = sender.currentData()
+        if text is None:
+            text = lang_display_to_key(sender.currentText())
         translator = self.module_manager.translator
         if translator is not None:
             translator.set_source(text)
@@ -1307,12 +1310,12 @@ class MainWindow(mainwindow_cls):
         combobox = self.configPanel.trans_config_panel.source_combobox
         if sender != combobox:
             combobox.blockSignals(True)
-            combobox.setCurrentText(text)
+            combobox.setCurrentText(lang_display_label(text))
             combobox.blockSignals(False)
         combobox = self.bottomBar.trans_selector.src_selector
         if sender != combobox:
             combobox.blockSignals(True)
-            combobox.setCurrentText(text)
+            combobox.setCurrentText(lang_display_label(text))
             combobox.blockSignals(False)
 
     def on_trans_tgt_changed(self):
