@@ -3,7 +3,7 @@ from typing import List, Union
 import os
 
 from qtpy.QtWidgets import QApplication, QSlider, QMenu, QGraphicsScene, QGraphicsSceneDragDropEvent , QGraphicsView, QGraphicsSceneDragDropEvent, QGraphicsRectItem, QGraphicsItem, QScrollBar, QGraphicsPixmapItem, QGraphicsSceneMouseEvent, QGraphicsSceneContextMenuEvent, QRubberBand
-from qtpy.QtCore import Qt, QDateTime, QRectF, QPointF, QPoint, Signal, QSizeF, QEvent
+from qtpy.QtCore import Qt, QDateTime, QRectF, QPointF, QPoint, Signal, QSizeF, QEvent, QTimer
 from qtpy.QtGui import QKeySequence, QPixmap, QImage, QHideEvent, QKeyEvent, QWheelEvent, QResizeEvent, QPainter, QPen, QPainterPath, QCursor, QNativeGestureEvent
 
 try:
@@ -194,6 +194,9 @@ class Canvas(QGraphicsScene):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.scale_factor = 1.
+        self.auto_fit_page_zoom = True
+        self.user_zoom_override = False
+        self._applying_auto_fit_zoom = False
         self.text_transparency = 0
         self.textblock_mode = False
         self.creating_textblock = False
@@ -342,6 +345,41 @@ class Canvas(QGraphicsScene):
         self.baseLayer.setScale(scale)
         self.setSceneRect(0, 0, self.baseLayer.sceneBoundingRect().width(), self.baseLayer.sceneBoundingRect().height())
 
+    def reset_auto_fit_zoom(self):
+        self.auto_fit_page_zoom = True
+        self.user_zoom_override = False
+
+    def _apply_canvas_scale(self, scale: float, emit_changed: bool = True):
+        scale = float(np.clip(scale, CANVAS_SCALE_MIN, CANVAS_SCALE_MAX))
+        scale_changed = self.scale_factor != scale
+        self.scale_factor = scale
+        self.baseLayer.setScale(self.scale_factor)
+        self.txtblkShapeControl.updateScale(self.scale_factor)
+        self.setSceneRect(0, 0, self.baseLayer.sceneBoundingRect().width(), self.baseLayer.sceneBoundingRect().height())
+        if scale_changed and emit_changed:
+            self.scalefactor_changed.emit()
+
+    def fitCurrentPageToView(self):
+        if not self.gv.isVisible() or not self.imgtrans_proj.img_valid or self.base_pixmap is None:
+            return
+        page_size = self.img_window_size()
+        if page_size.width() <= 0 or page_size.height() <= 0:
+            return
+        viewport_size = self.gv.viewport().size()
+        padding = 12
+        available_w = max(1, viewport_size.width() - padding * 2)
+        available_h = max(1, viewport_size.height() - padding * 2)
+        scale = min(
+            available_w / max(1, page_size.width()),
+            available_h / max(1, page_size.height()),
+        )
+        self._applying_auto_fit_zoom = True
+        try:
+            self._apply_canvas_scale(scale)
+            self.gv.centerOn(self.baseLayer)
+        finally:
+            self._applying_auto_fit_zoom = False
+
     def render_result_img(self):
 
         self.inpaintLayer.hide()
@@ -431,13 +469,15 @@ class Canvas(QGraphicsScene):
     def adjustScrollBar(self, scrollBar: QScrollBar, factor: float):
         scrollBar.setValue(int(factor * scrollBar.value() + ((factor - 1) * scrollBar.pageStep() / 2)))
 
-    def scaleImage(self, factor: float):
+    def scaleImage(self, factor: float, user_initiated: bool = True):
         if not self.gv.isVisible() or not self.imgtrans_proj.img_valid:
             return
         s_f = self.scale_factor * factor
         s_f = np.clip(s_f, CANVAS_SCALE_MIN, CANVAS_SCALE_MAX)
 
         scale_changed = self.scale_factor != s_f
+        if user_initiated and scale_changed and not self._applying_auto_fit_zoom:
+            self.user_zoom_override = True
         self.scale_factor = s_f
         self.baseLayer.setScale(self.scale_factor)
         self.txtblkShapeControl.updateScale(self.scale_factor)
@@ -461,6 +501,9 @@ class Canvas(QGraphicsScene):
         pos = self.search_widget.pos()
         pos.setX(x-30)
         self.search_widget.move(pos)
+
+        if self.auto_fit_page_zoom and not self.user_zoom_override:
+            QTimer.singleShot(0, self.fitCurrentPageToView)
         
     def onScaleFactorChanged(self):
         self.scaleFactorLabel.setText(f'{self.scale_factor*100:2.0f}%')
@@ -710,7 +753,10 @@ class Canvas(QGraphicsScene):
             self.baseLayer.setRect(QRectF(im_rect))
             if im_rect != self.sceneRect():
                 self.setSceneRect(0, 0, im_rect.width(), im_rect.height())
-            self.scaleImage(1)
+            if self.auto_fit_page_zoom and not self.user_zoom_override:
+                QTimer.singleShot(0, self.fitCurrentPageToView)
+            else:
+                self._apply_canvas_scale(self.scale_factor, emit_changed=False)
 
         self.setDrawingLayer()
 
