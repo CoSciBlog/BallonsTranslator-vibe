@@ -1,4 +1,4 @@
-import os, json, shutil, re, docx, docx2txt, piexif, cv2
+import os, json, shutil, re, time, threading, docx, docx2txt, piexif, cv2
 from docx.shared import Inches
 from docx import Document
 import piexif.helper
@@ -14,6 +14,30 @@ from .textblock import TextBlock, FontFormat
 from .config import pcfg, RunStatus
 from . import shared
 from .exceptions import ImgnameNotInProjectException, ProjectLoadFailureException, ProjectDirNotExistException, ProjectNotSupportedException
+
+
+def safe_replace_with_retries(tmp_path: str, target_path: str, retries: int = 5, delay: float = 0.15) -> None:
+    last_error = None
+    attempts = max(1, int(retries))
+    wait = max(0.0, float(delay))
+    for attempt in range(attempts):
+        try:
+            os.replace(tmp_path, target_path)
+            return
+        except PermissionError as exc:
+            last_error = exc
+            if attempt >= attempts - 1:
+                break
+            LOGGER.warning(
+                f'Could not replace project file on attempt {attempt + 1}/{attempts}: {exc}. Retrying...'
+            )
+            time.sleep(wait)
+            wait = min(wait * 1.6 if wait > 0 else 0.05, 1.0)
+    LOGGER.error(
+        f'Failed to replace project file after {attempts} attempts. '
+        f'Temporary file kept at {tmp_path}. Target file: {target_path}. Error: {last_error}'
+    )
+    raise last_error
 
 
 def get_last_modified_file(file_prefix, exts, ext_fallback=None):
@@ -111,6 +135,7 @@ class ProjImgTrans:
         self.proj_path: str = None
         self.glossary: Dict[str, str] = self.default_glossary()
         self.ignored_pages = set()
+        self._save_lock = threading.RLock()
 
         self.current_img: str = None
         self.img_array: np.ndarray = None
@@ -404,18 +429,19 @@ class ProjImgTrans:
     def save(self, keep_exist_as_backup=False):
         if not osp.exists(self.directory):
             raise ProjectDirNotExistException
-        tmp_save_tgt = self.proj_path + '.tmp'
-        try:
-            with open(tmp_save_tgt, "w", encoding="utf-8") as f:
-                f.write(json.dumps(self.to_dict(), ensure_ascii=False, cls=TextBlkEncoder))
-        except:
-            raise Exception(f'Failed to write {self.to_dict()}')
-        if osp.exists(self.proj_path) and keep_exist_as_backup:
-            os.replace(self.proj_path, self.proj_path + '.backup')
-            os.replace(tmp_save_tgt, self.proj_path)
-        else:
-            os.replace(tmp_save_tgt, self.proj_path)
-        LOGGER.debug(f'project saved to {self.proj_path}')
+        with self._save_lock:
+            tmp_save_tgt = self.proj_path + '.tmp'
+            try:
+                with open(tmp_save_tgt, "w", encoding="utf-8") as f:
+                    f.write(json.dumps(self.to_dict(), ensure_ascii=False, cls=TextBlkEncoder))
+                    f.flush()
+                    os.fsync(f.fileno())
+            except Exception as exc:
+                raise Exception(f'Failed to write project temporary file {tmp_save_tgt}: {exc}') from exc
+            if osp.exists(self.proj_path) and keep_exist_as_backup:
+                shutil.copy2(self.proj_path, self.proj_path + '.backup')
+            safe_replace_with_retries(tmp_save_tgt, self.proj_path)
+            LOGGER.debug(f'project saved to {self.proj_path}')
 
     def to_dict(self) -> Dict:
         pages = self.pages.copy()
