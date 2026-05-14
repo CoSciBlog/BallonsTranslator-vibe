@@ -1,6 +1,13 @@
 # Changelogs
 
 ### 2026-05-14
+[v1.4.0-vibe.15] LLM page context and glossary category filters
+1. Added LLM context settings for previous pages, optional next-page context, capped document context pages, and maximum context characters.
+2. Injected the context window into both `LLM_API_Translator` and the `Two-Step Translator` LLM refinement prompt.
+3. Passed current project/page context from page translation, translation-only runs, full pipeline translation, and text-box right-click translation runs.
+4. Added automatic glossary category checkboxes and changed defaults so auto extraction keeps only names and places unless more categories are enabled.
+5. Updated README documentation and bumped the fork runtime version string to `1.4.0-vibe.15`.
+
 [v1.4.0-vibe.14] page pipeline ignore toggle
 1. Added page previews to the Pages sidebar list.
 2. Added a page context-menu action next to `Reveal in File Explorer` for ignoring or including a page in pipeline runs.

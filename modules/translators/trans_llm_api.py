@@ -31,11 +31,11 @@ class TranslationResponse(BaseModel):
 
 
 class GlossaryEntry(BaseModel):
-    source: str = Field(..., description="Source term, name, place, or recurring phrase.")
+    source: str = Field(..., description="Source glossary item allowed by the enabled category filters.")
     target: str = Field(..., description="Preferred translated form.")
     category: str = Field(
         default="term",
-        description="Entry type such as character, place, organization, title, or term.",
+        description="Enabled category key such as name, place, organization, title, term, honorific, or catchphrase.",
     )
     note: str = Field(default="", description="Short optional usage note.")
 
@@ -45,6 +45,49 @@ class GlossaryResponse(BaseModel):
         default_factory=list,
         description="Reusable glossary entries extracted from translated text.",
     )
+
+
+AUTO_GLOSSARY_CATEGORY_CONFIG = {
+    "name": {
+        "param": "auto glossary names",
+        "label": "character/person names and nicknames",
+        "aliases": {"character", "person", "name", "names", "nickname", "nicknames"},
+    },
+    "place": {
+        "param": "auto glossary places",
+        "label": "place/location names",
+        "aliases": {"place", "places", "location", "locations"},
+    },
+    "organization": {
+        "param": "auto glossary organizations",
+        "label": "organization/group names",
+        "aliases": {"organization", "organisation", "group", "clan", "school", "sect"},
+    },
+    "title": {
+        "param": "auto glossary titles",
+        "label": "titles and honorific titles",
+        "aliases": {"title", "titles"},
+    },
+    "term": {
+        "param": "auto glossary terms",
+        "label": "domain terms and named items",
+        "aliases": {"term", "terms", "domain term", "special term", "named item", "item"},
+    },
+    "honorific": {
+        "param": "auto glossary honorifics",
+        "label": "honorifics and forms of address",
+        "aliases": {"honorific", "honorifics", "address", "form of address"},
+    },
+    "catchphrase": {
+        "param": "auto glossary catchphrases",
+        "label": "catchphrases and fixed phrases",
+        "aliases": {"catchphrase", "catchphrases", "phrase", "phrases", "fixed phrase"},
+    },
+}
+
+
+def _category_param_description(label: str) -> str:
+    return f"Allow automatic glossary extraction for {label}. Disable it to keep auto glossary entries narrower."
 
 
 @register_translator("LLM_API_Translator")
@@ -144,6 +187,23 @@ class LLM_API_Translator(BaseTranslator):
             "value": "Review the draft translation against the original source text. Check meaning, terminology, tone, fluency, punctuation, and whether the number of translated items matches the input. Revise only where the translation can be improved. Return only the final improved JSON object in the required schema.",
             "description": "Instructions used for the optional reflection/revision API call.",
         },
+        "previous context pages": {
+            "value": 0,
+            "description": "Number of previous project pages to include as source and existing translation context for LLM translation. 0 disables previous-page context.",
+        },
+        "include next context page": {
+            "type": "checkbox",
+            "value": False,
+            "description": "Also include the next project page as context when its text is available. This helps foreshadow names and references but increases token usage.",
+        },
+        "document context pages": {
+            "value": 0,
+            "description": "Include up to this many pages from the project as document context for each LLM batch. 0 disables document-level context; higher values cost more tokens.",
+        },
+        "context max characters": {
+            "value": 6000,
+            "description": "Maximum characters allowed for all LLM context sections combined before truncation. Lower this if the model context window is small.",
+        },
         "use glossary": {
             "type": "checkbox",
             "value": True,
@@ -153,6 +213,41 @@ class LLM_API_Translator(BaseTranslator):
             "type": "checkbox",
             "value": True,
             "description": "After each LLM translation batch, ask the model to extract reusable glossary entries from the source/translation pairs. This improves consistency but adds extra API calls.",
+        },
+        "auto glossary names": {
+            "type": "checkbox",
+            "value": True,
+            "description": _category_param_description("character/person names and nicknames"),
+        },
+        "auto glossary places": {
+            "type": "checkbox",
+            "value": True,
+            "description": _category_param_description("place/location names"),
+        },
+        "auto glossary organizations": {
+            "type": "checkbox",
+            "value": False,
+            "description": _category_param_description("organization/group names"),
+        },
+        "auto glossary titles": {
+            "type": "checkbox",
+            "value": False,
+            "description": _category_param_description("titles"),
+        },
+        "auto glossary terms": {
+            "type": "checkbox",
+            "value": False,
+            "description": _category_param_description("domain terms and named items"),
+        },
+        "auto glossary honorifics": {
+            "type": "checkbox",
+            "value": False,
+            "description": _category_param_description("honorifics and forms of address"),
+        },
+        "auto glossary catchphrases": {
+            "type": "checkbox",
+            "value": False,
+            "description": _category_param_description("catchphrases and fixed phrases"),
         },
         "glossary refinement pass": {
             "type": "checkbox",
@@ -241,6 +336,8 @@ class LLM_API_Translator(BaseTranslator):
         self.client = None
         self.project_glossary_text = ""
         self.project_glossary_prompt = ""
+        self.context_project = None
+        self.context_page_key = ""
 
     def _initialize_client(self, api_key_to_use: str) -> bool:
         endpoint = self.endpoint
@@ -366,6 +463,28 @@ class LLM_API_Translator(BaseTranslator):
     def glossary_refinement_enabled(self) -> bool:
         return bool(self.get_param_value("glossary refinement pass"))
 
+    def _param_int(self, param_key: str, default: int = 0) -> int:
+        try:
+            return max(int(float(self.get_param_value(param_key))), 0)
+        except Exception:
+            return default
+
+    @property
+    def previous_context_pages(self) -> int:
+        return self._param_int("previous context pages")
+
+    @property
+    def include_next_context_page(self) -> bool:
+        return bool(self.get_param_value("include next context page"))
+
+    @property
+    def document_context_pages(self) -> int:
+        return self._param_int("document context pages")
+
+    @property
+    def context_max_characters(self) -> int:
+        return self._param_int("context max characters", default=6000)
+
     @property
     def glossary_max_entries(self) -> int:
         return max(int(self.get_param_value("glossary max entries")), 0)
@@ -420,6 +539,141 @@ class LLM_API_Translator(BaseTranslator):
     def global_delay(self) -> float:
         return float(self.get_param_value("delay"))
 
+    def set_page_context(self, imgtrans_proj=None, page_key: str = ""):
+        self.context_project = imgtrans_proj
+        self.context_page_key = page_key or ""
+
+    def clear_page_context(self):
+        self.context_project = None
+        self.context_page_key = ""
+
+    def _page_names_for_context(self) -> List[str]:
+        project = getattr(self, "context_project", None)
+        pages = getattr(project, "pages", None)
+        if not isinstance(pages, dict):
+            return []
+        return list(pages.keys())
+
+    def _page_context_text(self, page_name: str, include_translation: bool = True) -> str:
+        project = getattr(self, "context_project", None)
+        pages = getattr(project, "pages", None)
+        if not isinstance(pages, dict) or page_name not in pages:
+            return ""
+
+        page_index = -1
+        if hasattr(project, "pagename2idx"):
+            try:
+                page_index = project.pagename2idx(page_name)
+            except Exception:
+                page_index = -1
+
+        source_lines = []
+        translation_lines = []
+        for blk in pages.get(page_name, []):
+            try:
+                source = blk.get_text().strip()
+            except Exception:
+                source = ""
+            if source:
+                source_lines.append(source)
+
+            translation = getattr(blk, "translation", "")
+            if include_translation and isinstance(translation, str) and translation.strip():
+                translation_lines.append(translation.strip())
+
+        if not source_lines and not translation_lines:
+            return ""
+
+        label = f"Page {page_index + 1}" if page_index >= 0 else "Page"
+        chunks = [f"[{label}: {page_name}]"]
+        if source_lines:
+            chunks.append("Source:\n" + "\n".join(f"- {line}" for line in source_lines))
+        if translation_lines:
+            chunks.append(
+                "Existing translation:\n"
+                + "\n".join(f"- {line}" for line in translation_lines)
+            )
+        return "\n".join(chunks)
+
+    def _select_document_context_pages(
+        self, page_names: List[str], current_index: int, max_pages: int
+    ) -> List[str]:
+        if max_pages <= 0 or not page_names:
+            return []
+        if len(page_names) <= max_pages:
+            return page_names
+
+        half = max_pages // 2
+        start = max(0, current_index - half)
+        end = start + max_pages
+        if end > len(page_names):
+            end = len(page_names)
+            start = max(0, end - max_pages)
+        return page_names[start:end]
+
+    def _truncate_context_section(self, section: str) -> str:
+        max_chars = self.context_max_characters
+        if max_chars <= 0 or len(section) <= max_chars:
+            return section
+        return section[:max_chars].rstrip() + "\n[Context truncated]"
+
+    def _translation_context_prompt_section(self) -> str:
+        page_key = getattr(self, "context_page_key", "")
+        page_names = self._page_names_for_context()
+        if not page_key or page_key not in page_names:
+            return ""
+
+        current_index = page_names.index(page_key)
+        sections = []
+        previous_count = self.previous_context_pages
+
+        if previous_count > 0:
+            previous_names = page_names[max(0, current_index - previous_count):current_index]
+            previous_blocks = [
+                self._page_context_text(name, include_translation=True)
+                for name in previous_names
+            ]
+            previous_blocks = [block for block in previous_blocks if block]
+            if previous_blocks:
+                sections.append(
+                    "PREVIOUS PAGE CONTEXT:\n" + "\n\n".join(previous_blocks)
+                )
+
+        if self.include_next_context_page and current_index + 1 < len(page_names):
+            next_block = self._page_context_text(
+                page_names[current_index + 1], include_translation=True
+            )
+            if next_block:
+                sections.append("NEXT PAGE CONTEXT:\n" + next_block)
+
+        document_count = self.document_context_pages
+        if document_count > 0:
+            document_names = self._select_document_context_pages(
+                page_names, current_index, document_count
+            )
+            document_blocks = [
+                self._page_context_text(name, include_translation=False)
+                for name in document_names
+            ]
+            document_blocks = [block for block in document_blocks if block]
+            if document_blocks:
+                sections.append(
+                    f"DOCUMENT CONTEXT (max {document_count} pages):\n"
+                    + "\n\n".join(document_blocks)
+                )
+
+        if not sections:
+            return ""
+
+        context = (
+            "PROJECT CONTEXT FOR CONSISTENCY ONLY:\n"
+            "Use this context to keep names, references, tone, and continuity "
+            "consistent. Do not translate or output these context lines unless "
+            "they are part of the INPUT items.\n\n"
+            + "\n\n".join(sections)
+        )
+        return self._truncate_context_section(context).rstrip() + "\n\n"
+
     def _assemble_prompts(self, queries: List[str], to_lang: str):
         from_lang = self.lang_map.get(self.lang_source, self.lang_source)
 
@@ -428,10 +682,12 @@ class LLM_API_Translator(BaseTranslator):
         ]
         input_json_str = json.dumps(input_elements, ensure_ascii=False, indent=2)
         glossary_section = self._glossary_prompt_section()
+        context_section = self._translation_context_prompt_section()
 
         prompt = (
             f"Please translate the following text snippets from {from_lang} to {to_lang}. "
             f"The input is provided as a JSON array. Respond with a JSON object in the specified format.\n\n"
+            f"{context_section}"
             f"{glossary_section}"
             f"INPUT:\n{input_json_str}"
         )
@@ -522,8 +778,58 @@ class LLM_API_Translator(BaseTranslator):
             "'translations' list and the same numeric ids."
         )
 
-    def _format_glossary_entry(self, entry: GlossaryEntry) -> str:
-        category = (entry.category or "term").strip()
+    def _canonical_glossary_category(self, category: str) -> str:
+        raw_category = (category or "").strip().lower()
+        raw_category = raw_category.strip("[](){}")
+        raw_category = re.sub(r"\s+", " ", raw_category)
+        raw_category = raw_category.removesuffix(" name")
+        for canonical, config in AUTO_GLOSSARY_CATEGORY_CONFIG.items():
+            if raw_category in config["aliases"]:
+                return canonical
+        return raw_category or "term"
+
+    def _enabled_auto_glossary_categories(self) -> Dict[str, str]:
+        enabled = {}
+        for category, config in AUTO_GLOSSARY_CATEGORY_CONFIG.items():
+            param_key = config["param"]
+            try:
+                if bool(self.get_param_value(param_key)):
+                    enabled[category] = config["label"]
+            except Exception:
+                continue
+        return enabled
+
+    def _auto_glossary_category_prompt(self) -> str:
+        enabled = self._enabled_auto_glossary_categories()
+        if not enabled:
+            return "No automatic glossary categories are enabled. Return an empty entries list."
+
+        category_lines = [
+            f"- {category}: {label}"
+            for category, label in enabled.items()
+        ]
+        disabled = [
+            category for category in AUTO_GLOSSARY_CATEGORY_CONFIG
+            if category not in enabled
+        ]
+        return (
+            "Only extract entries from these enabled categories:\n"
+            + "\n".join(category_lines)
+            + "\nUse the category value exactly as listed above. "
+            "If a candidate does not clearly match an enabled category, omit it."
+            + (
+                "\nDisabled categories must be ignored: "
+                + ", ".join(disabled)
+                + "."
+                if disabled
+                else ""
+            )
+        )
+
+    def _format_glossary_entry(
+        self, entry: GlossaryEntry, category: Optional[str] = None
+    ) -> str:
+        category = category or self._canonical_glossary_category(entry.category)
         note = (entry.note or "").strip()
         line = f"{entry.source.strip()} => {entry.target.strip()} [{category}]"
         if note:
@@ -541,21 +847,31 @@ class LLM_API_Translator(BaseTranslator):
                 entries[source] = clean
         return entries
 
-    def _save_glossary_entries(self, entries: List[GlossaryEntry]):
+    def _save_glossary_entries(self, entries: List[GlossaryEntry]) -> int:
         if not entries or self.glossary_max_entries == 0:
-            return
+            return 0
 
+        enabled_categories = self._enabled_auto_glossary_categories()
+        if not enabled_categories:
+            return 0
+
+        saved_count = 0
         glossary_lines = self._parse_glossary_lines()
         for entry in entries:
             source = entry.source.strip()
             target = entry.target.strip()
+            category = self._canonical_glossary_category(entry.category)
             if not source or not target:
                 continue
-            glossary_lines[source] = self._format_glossary_entry(entry)
+            if category not in enabled_categories:
+                continue
+            glossary_lines[source] = self._format_glossary_entry(entry, category=category)
+            saved_count += 1
 
         limited_lines = list(glossary_lines.values())[-self.glossary_max_entries :]
         self.set_param_value("glossary", "\n".join(limited_lines), convert_dtype=False)
         self.project_glossary_text = "\n".join(limited_lines)
+        return saved_count
 
     def _build_glossary_extraction_prompt(
         self, src_list: List[str], translations: List[str], to_lang: str
@@ -566,12 +882,13 @@ class LLM_API_Translator(BaseTranslator):
             for i, (source, translation) in enumerate(zip(src_list, translations))
         ]
         existing_glossary = self.glossary_text.strip() or "(empty)"
+        category_prompt = self._auto_glossary_category_prompt()
         return (
             f"Extract a reusable translation glossary from {from_lang} to {to_lang}.\n"
-            "Focus only on stable entries that should stay consistent across pages: "
-            "character names, place names, organizations, titles, named items, "
-            "recurring special terms, honorifics, and catchphrases. Do not add "
-            "generic words or full sentences unless they are fixed terms.\n\n"
+            f"{category_prompt}\n"
+            "Do not add generic words, full sentences, ordinary phrases, one-off "
+            "dialogue, or style notes. Metadata belongs only in the glossary entry; "
+            "it must never be copied into translated text.\n\n"
             "Return JSON with key 'entries'. Each entry must contain source, target, "
             "category, and optional note. Category and note are metadata for the "
             "glossary only; they must never be copied into translations.\n\n"
@@ -584,6 +901,8 @@ class LLM_API_Translator(BaseTranslator):
     ):
         if not self.auto_build_glossary_enabled or not src_list:
             return
+        if not self._enabled_auto_glossary_categories():
+            return
 
         system_prompt = (
             "You extract concise translation glossaries. Return only valid JSON "
@@ -594,10 +913,10 @@ class LLM_API_Translator(BaseTranslator):
         try:
             response = self._request_model_object(prompt, GlossaryResponse, system_prompt)
             if isinstance(response, GlossaryResponse):
-                self._save_glossary_entries(response.entries)
-                if response.entries:
+                saved_count = self._save_glossary_entries(response.entries)
+                if saved_count:
                     self.logger.info(
-                        f"Glossary updated with {len(response.entries)} extracted entries."
+                        f"Glossary updated with {saved_count} extracted entries."
                     )
         except Exception as e:
             self.logger.warning(
@@ -614,12 +933,12 @@ class LLM_API_Translator(BaseTranslator):
         ]
         return (
             f"Revise the translations from {from_lang} to {to_lang} using the glossary.\n"
-            "Only change text where the glossary improves consistency for names, "
-            "places, characters, organizations, titles, or recurring terms. Preserve "
+            "Only change text where the glossary improves consistency. Preserve "
             "meaning, tone, line count, ids, and natural target-language grammar. "
             "Do not insert glossary category labels, notes, comments, or bracketed "
             "metadata into the translation text. "
             "Return only JSON in the required translation schema.\n\n"
+            f"{self._translation_context_prompt_section()}"
             f"{self._glossary_prompt_section()}"
             f"TRANSLATIONS TO REVIEW:\n{json.dumps(items, ensure_ascii=False, indent=2)}"
         )
@@ -635,9 +954,13 @@ class LLM_API_Translator(BaseTranslator):
             "title",
             "term",
             "name",
+            "person",
             "item",
+            "location",
+            "nickname",
             "honorific",
             "catchphrase",
+            "phrase",
         )
         pattern = r"\s*\[(?:" + "|".join(categories) + r")\]\s*"
         return re.sub(pattern, " ", text, flags=re.IGNORECASE).strip()

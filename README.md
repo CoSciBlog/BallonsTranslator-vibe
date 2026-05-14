@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README_EN.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.14`
+Fork release: `1.4.0-vibe.15`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -32,6 +32,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Added an optional decensor pass that detects censorship masks and inpaints them through the selected inpainting backend, including `flux2-klein` when selected.
 - Added a left-sidebar `Decens` button for decensoring the current page directly.
 - Added page-list previews, a page context-menu toggle for ignoring pages in pipeline runs, and project JSON persistence for ignored pages.
+- Added LLM project-context settings for previous pages, optional next-page context, capped document context, and narrower automatic glossary category extraction.
 
 ## Features
 
@@ -80,7 +81,7 @@ The launcher update flow tracks `https://github.com/CoSciBlog/BallonsTranslator-
 
 ## Project glossary
 
-The left sidebar includes a `Gloss` button with a glossary icon that opens the current project's glossary window. Entries and the glossary prompt are saved inside the project's `imgtrans_*.json` file under `glossary`, so each manga/comic project can keep its own terminology. LLM translators use those entries for consistency, but category labels and notes such as `[CHARACTER]` or `[PLACE]` are treated as metadata and are not included in translation output.
+The left sidebar includes a `Gloss` button with a glossary icon that opens the current project's glossary window. Entries and the glossary prompt are saved inside the project's `imgtrans_*.json` file under `glossary`, so each manga/comic project can keep its own terminology. LLM translators use those entries for consistency, but category labels and notes such as `[CHARACTER]` or `[PLACE]` are treated as metadata and are not included in translation output. Automatic glossary extraction defaults to names and places only; optional translator checkboxes can enable organizations, titles, domain terms, honorifics, or catchphrases when needed.
 
 ## Settings input safety
 
@@ -107,6 +108,12 @@ The Pages sidebar now shows page previews for the project list. Right-click a pa
 ## Translation-only run
 
 The left sidebar includes a second run button labeled `Trans`. It runs only machine translation on the current project text boxes and skips text detection, OCR, and inpainting. This is useful after editing source text or switching translator settings when existing text boxes should be reused.
+
+## LLM context translation
+
+The `LLM_API_Translator` and `Two-Step Translator` can pass project context into each LLM request. `previous context pages` includes source text and existing translations from earlier pages, `include next context page` adds the next page when text is available, and `document context pages` adds a capped source-text window from the broader project. `context max characters` limits the combined context so smaller models are not overloaded.
+
+These settings improve continuity for names, tone, and references when pages are translated in reading order. They do not change the output mapping: the current page or selected text boxes are still the only items returned in the JSON translation response.
 
 ## Programmatic use
 
@@ -231,11 +238,12 @@ Use `first step delay` to throttle the Google/DeepL draft calls. Higher values r
 
 ## LLM translation glossary
 
-The `LLM_API_Translator` and `Two-Step Translator` include glossary support for names, places, characters, organizations, titles, and recurring terms.
+The `LLM_API_Translator` and `Two-Step Translator` include glossary support for names, places, and optional terminology categories.
 
 - `glossary` stores persistent entries in the format `source => target [category] # optional note`.
 - `use glossary` injects the glossary into translation prompts so known terms are reused consistently.
-- `auto build glossary` asks the LLM to extract reusable glossary entries from each translated batch and append or update them in the settings.
+- `auto build glossary` asks the LLM to extract reusable glossary entries from each translated batch and append or update them in the settings. By default, automatic extraction keeps only names and places.
+- `auto glossary names`, `auto glossary places`, and the optional organization/title/term/honorific/catchphrase checkboxes control which categories can be captured automatically.
 - `glossary refinement pass` runs a second LLM pass after translation to align the translated batch with the current glossary.
 - `glossary max entries` limits how many entries are kept so prompts do not grow without bound.
 

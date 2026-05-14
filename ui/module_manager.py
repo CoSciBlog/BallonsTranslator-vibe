@@ -207,16 +207,29 @@ class TranslateThread(ModuleThread):
             self.job = lambda : self._set_translator(translator)
             self.start()
 
+    def _set_translator_page_context(self, page_key: str):
+        if self.translator is not None and hasattr(self.translator, 'set_page_context'):
+            self.translator.set_page_context(self.imgtrans_proj, page_key)
+
+    def _clear_translator_page_context(self):
+        if self.translator is not None and hasattr(self.translator, 'clear_page_context'):
+            self.translator.clear_page_context()
+
     def _translate_page(self, page_dict, page_key: str, emit_finished=True):
         page = page_dict[page_key]
         try:
+            self._set_translator_page_context(page_key)
             self.translator.translate_textblk_lst(page)
         except Exception as e:
             create_error_dialog(e, self.tr('Translation Failed.'), 'TranslationFailed')
+        finally:
+            self._clear_translator_page_context()
         if emit_finished:
             self.finish_translate_page.emit(page_key)
 
-    def translatePage(self, page_dict, page_key: str):
+    def translatePage(self, page_dict, page_key: str, imgtrans_proj: ProjImgTrans = None):
+        if imgtrans_proj is not None:
+            self.imgtrans_proj = imgtrans_proj
         self.job = lambda: self._translate_page(page_dict, page_key)
         self.start()
 
@@ -334,6 +347,7 @@ class ImgtransThread(QThread):
 
         self.translation_only = False
         self.decensor_only = False
+        self.blktrans_page_key = None
 
     def on_module_thread_stopped(self):
         while True:
@@ -360,6 +374,22 @@ class ImgtransThread(QThread):
     @property
     def inpainter(self) -> InpainterBase:
         return self.inpaint_thread.inpainter
+
+    def _set_translator_page_context(self, page_key: str):
+        if self.translator is not None and hasattr(self.translator, 'set_page_context'):
+            self.translator.set_page_context(self.imgtrans_proj, page_key)
+
+    def _clear_translator_page_context(self):
+        if self.translator is not None and hasattr(self.translator, 'clear_page_context'):
+            self.translator.clear_page_context()
+
+    def _translate_textblocks(self, imgname: str, blk_list: List[TextBlock]):
+        try:
+            if imgname:
+                self._set_translator_page_context(imgname)
+            self.translator.translate_textblk_lst(blk_list)
+        finally:
+            self._clear_translator_page_context()
 
     def runImgtransPipeline(self, imgtrans_proj: ProjImgTrans, pages_to_process=None):
         self.imgtrans_proj = imgtrans_proj
@@ -403,7 +433,8 @@ class ImgtransThread(QThread):
         if self.translate_thread.isRunning():
             self.translate_thread.requestStop()
 
-    def runBlktransPipeline(self, blk_list: List[TextBlock], tgt_img: np.ndarray, mode: int, blk_ids: List[int], tgt_mask):
+    def runBlktransPipeline(self, blk_list: List[TextBlock], tgt_img: np.ndarray, mode: int, blk_ids: List[int], tgt_mask, page_key: str = None):
+        self.blktrans_page_key = page_key
         self.job = lambda : self._blktrans_pipeline(blk_list, tgt_img, mode, blk_ids, tgt_mask)
         self.start()
 
@@ -416,7 +447,7 @@ class ImgtransThread(QThread):
             self.finish_blktrans.emit(mode, blk_ids)
 
         if mode != 0 and mode < 3:
-            self.translate_thread.module.translate_textblk_lst(blk_list)
+            self._translate_textblocks(self.blktrans_page_key, blk_list)
             self.finish_blktrans.emit(mode, blk_ids)
         if mode > 1:
             im_h, im_w = tgt_img.shape[:2]
@@ -617,7 +648,7 @@ class ImgtransThread(QThread):
                 elif self.parallel_trans:
                     self.translate_thread.push_pagekey_queue(imgname)
                 elif not low_vram_trans:
-                    self.translator.translate_textblk_lst(blk_list)
+                    self._translate_textblocks(imgname, blk_list)
                     self.translate_counter += 1
                     self.update_translate_progress.emit(self.translate_counter)
                         
@@ -656,7 +687,7 @@ class ImgtransThread(QThread):
                     break
                     
                 blk_list = self.imgtrans_proj.pages[imgname]
-                self.translator.translate_textblk_lst(blk_list)
+                self._translate_textblocks(imgname, blk_list)
                 self.translate_counter += 1
                 self.imgtrans_proj.update_page_progress(imgname, RunStatus.FIN_TRANSLATE)
                 self.update_translate_progress.emit(self.translate_counter)
@@ -698,7 +729,7 @@ class ImgtransThread(QThread):
 
             blk_list = self.imgtrans_proj.pages.get(imgname, [])
             if len(blk_list) > 0:
-                self.translator.translate_textblk_lst(blk_list)
+                self._translate_textblocks(imgname, blk_list)
             self.translate_counter += 1
             self.imgtrans_proj.update_page_progress(imgname, RunStatus.FIN_TRANSLATE)
             self.update_translate_progress.emit(self.translate_counter)
@@ -907,7 +938,7 @@ class ModuleManager(QObject):
                 LOGGER.warning('Terminating a running translation thread.')
                 self.translate_thread.terminate()
             return
-        self.translate_thread.translatePage(self.imgtrans_proj.pages, page_key)
+        self.translate_thread.translatePage(self.imgtrans_proj.pages, page_key, self.imgtrans_proj)
 
     def inpainterBusy(self):
         return self.inpaint_thread.isRunning()
@@ -1025,7 +1056,8 @@ class ModuleManager(QObject):
             self.progress_msgbox.translate_bar.show()
         self.progress_msgbox.zero_progress()
         self.progress_msgbox.show()
-        self.imgtrans_thread.runBlktransPipeline(blk_list, tgt_img, mode, blk_ids, tgt_mask)
+        page_key = self.imgtrans_proj.current_img if self.imgtrans_proj is not None else None
+        self.imgtrans_thread.runBlktransPipeline(blk_list, tgt_img, mode, blk_ids, tgt_mask, page_key)
 
     def on_finish_blktrans_stage(self, stage: str, progress: int):
         if stage == 'ocr':
