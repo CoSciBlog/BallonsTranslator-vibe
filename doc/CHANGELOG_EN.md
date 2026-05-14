@@ -1,6 +1,13 @@
 # Changelogs
 
 ### 2026-05-14
+[v1.4.0-vibe.14] page pipeline ignore toggle
+1. Added page previews to the Pages sidebar list.
+2. Added a page context-menu action next to `Reveal in File Explorer` for ignoring or including a page in pipeline runs.
+3. Skipped ignored pages during text detection, OCR, translation, and inpainting pipeline runs while keeping manual single-page actions available.
+4. Saved ignored page names in each project's `imgtrans_*.json` file under `ignored_pages`.
+5. Highlighted ignored pages in the Pages sidebar and bumped the fork runtime version string to `1.4.0-vibe.14`.
+
 [v1.4.0-vibe.13] sidebar decensor current page button
 1. Added a left-sidebar `Decens` button below Pages, Search/Replace, and Glossary.
 2. Wired the button to the existing current-page decensor pass so only the active page is processed.
