@@ -57,8 +57,25 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
   - mask editing
   - inpainting brush style cleanup
   - support for long-strip and webtoon-style pages
+- Censor Restoration / Decensor Inpaint workflow:
+  - works on the currently selected page when invoked by the app workflow
+  - automatically builds masks for simple black or white censor bars and block-like censor regions
+  - repairs the mask with the configured inpainting backend as a plausible inpaint reconstruction
 - Headless automation for batch processing from the command line
 - Multiple OCR, translator, and inpainting backends already wired into the desktop app
+
+## Censor Restoration / Decensor Inpaint
+
+Censor Restoration / Decensor Inpaint works on the currently opened page. It automatically creates a mask for simple black or white censor bars and block-like censor regions, then repairs that masked area with the existing inpainting backend. The result is a plausible inpaint reconstruction and does not recreate source data.
+
+Use this feature only for material where you have the necessary rights. Do not use it for real people, minors, or misleading reconstructions. Output quality depends on the image, detected mask, and selected inpainting backend.
+
+Known limitations:
+
+- Complex mosaic censorship is not detected reliably yet.
+- Automatic detection can produce false positives or false negatives.
+- Difficult structures can create visible inpainting artifacts.
+- Semantic or prompt-based inpainting is not a standard part of this MVP.
 
 ## Pinokio launcher
 
