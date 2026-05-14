@@ -499,16 +499,16 @@ class ProjImgTrans:
         return upscaled
 
     def save_mask(self, img_name, mask: np.ndarray):
-        imwrite(self.get_mask_path(img_name), mask, ext=pcfg.intermediate_imgsave_ext)
+        imwrite(self.get_mask_path(img_name), mask, ext=pcfg.intermediate_imgsave_ext, quality=pcfg.intermediate_imgsave_quality)
 
     def save_inpainted(self, img_name, inpainted: np.ndarray):
-        imwrite(self.get_inpainted_path(img_name), inpainted, ext=pcfg.intermediate_imgsave_ext)
+        imwrite(self.get_inpainted_path(img_name), inpainted, ext=pcfg.intermediate_imgsave_ext, quality=pcfg.intermediate_imgsave_quality)
 
     def save_decensor_mask(self, img_name, mask: np.ndarray):
-        imwrite(self.get_decensor_mask_path(img_name), mask, ext=pcfg.intermediate_imgsave_ext)
+        imwrite(self.get_decensor_mask_path(img_name), mask, ext=pcfg.intermediate_imgsave_ext, quality=pcfg.intermediate_imgsave_quality)
 
     def save_decensored(self, img_name, decensored: np.ndarray):
-        imwrite(self.get_decensored_path(img_name), decensored, ext=pcfg.intermediate_imgsave_ext)
+        imwrite(self.get_decensored_path(img_name), decensored, ext=pcfg.intermediate_imgsave_ext, quality=pcfg.intermediate_imgsave_quality)
 
     def current_img_path(self) -> str:
         if self.current_img is None:
@@ -521,7 +521,7 @@ class ProjImgTrans:
 
         fileprefix = osp.join(self.mask_dir(), osp.splitext(imgname)[0])
         if get_last_modified:
-            p = get_last_modified_file(fileprefix, ['.jxl', '.png'], ext_fallback=pcfg.intermediate_imgsave_ext)
+            p = get_last_modified_file(fileprefix, ['.jxl', '.png', '.jpg', '.jpeg', '.webp'], ext_fallback=pcfg.intermediate_imgsave_ext)
         else:
             p = fileprefix+pcfg.intermediate_imgsave_ext
 
@@ -540,7 +540,7 @@ class ProjImgTrans:
 
         fileprefix = osp.join(self.decensor_mask_dir(), osp.splitext(imgname)[0])
         if get_last_modified:
-            p = get_last_modified_file(fileprefix, ['.jxl', '.png'], ext_fallback=pcfg.intermediate_imgsave_ext)
+            p = get_last_modified_file(fileprefix, ['.jxl', '.png', '.jpg', '.jpeg', '.webp'], ext_fallback=pcfg.intermediate_imgsave_ext)
         else:
             p = fileprefix+pcfg.intermediate_imgsave_ext
 
@@ -559,7 +559,7 @@ class ProjImgTrans:
 
         fileprefix = osp.join(self.inpainted_dir(), osp.splitext(imgname)[0])
         if get_last_modified:
-            p = get_last_modified_file(fileprefix, ['.jxl', '.png'], ext_fallback=pcfg.intermediate_imgsave_ext)
+            p = get_last_modified_file(fileprefix, ['.jxl', '.png', '.jpg', '.jpeg', '.webp'], ext_fallback=pcfg.intermediate_imgsave_ext)
         else:
             p = fileprefix+pcfg.intermediate_imgsave_ext
 
@@ -596,7 +596,7 @@ class ProjImgTrans:
 
         fileprefix = osp.join(self.decensored_dir(), osp.splitext(imgname)[0])
         if get_last_modified:
-            p = get_last_modified_file(fileprefix, ['.jxl', '.png'], ext_fallback=pcfg.intermediate_imgsave_ext)
+            p = get_last_modified_file(fileprefix, ['.jxl', '.png', '.jpg', '.jpeg', '.webp'], ext_fallback=pcfg.intermediate_imgsave_ext)
         else:
             p = fileprefix+pcfg.intermediate_imgsave_ext
 

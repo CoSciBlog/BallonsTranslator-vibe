@@ -716,8 +716,16 @@ class ConfigPanel(Widget):
         sublock.layout().insertStretch(-1)
         imsave_sublock.layout().addWidget(sublock)
 
-        self.intermediate_imgformat_combobox, intermediate_imsave_sublock = generalConfigPanel.addCombobox(['PNG', 'JXL'], self.tr('Intermediate image format'))
+        self.intermediate_imgformat_combobox, intermediate_imsave_sublock = generalConfigPanel.addCombobox(['PNG', 'JPG', 'WEBP', 'JXL'], self.tr('Intermediate image format'))
         self.intermediate_imgformat_combobox.activated.connect(self.on_intermediate_imgformat_changed)
+        self.intermediate_imgquality_edit = PercentageLineEdit('100')
+        self.intermediate_imgquality_edit.setFixedWidth(CONFIG_COMBOBOX_SHORT)
+        self.intermediate_imgquality_edit.finish_edited.connect(self.on_intermediate_quality_changed)
+
+        sublock = ConfigSubBlock(self.intermediate_imgquality_edit, self.tr('Intermediate quality'), vertical_layout=False)
+        sublock.layout().setAlignment(Qt.AlignmentFlag.AlignLeft)
+        sublock.layout().insertStretch(-1)
+        intermediate_imsave_sublock.layout().addWidget(sublock)
 
         generalConfigPanel.addTextLabel(label_saladict)
 
@@ -968,6 +976,9 @@ class ConfigPanel(Widget):
     def on_edit_quality_changed(self, value: str):
         pcfg.imgsave_quality = int(value)
 
+    def on_intermediate_quality_changed(self, value: str):
+        pcfg.intermediate_imgsave_quality = int(value)
+
     def on_selectext_minimenu_changed(self):
         pcfg.textselect_mini_menu = self.selectext_minimenu_checker.isChecked()
 
@@ -1077,6 +1088,7 @@ class ConfigPanel(Widget):
         self.rst_imgformat_combobox.setCurrentText(pcfg.imgsave_ext.replace('.', '').upper())
         self.intermediate_imgformat_combobox.setCurrentText(pcfg.intermediate_imgsave_ext.replace('.', '').upper())
         self.rst_imgquality_edit.setText(str(pcfg.imgsave_quality))
+        self.intermediate_imgquality_edit.setText(str(pcfg.intermediate_imgsave_quality))
         self.load_model_checker.setChecked(pcfg.module.load_model_on_demand)
         self.empty_runcache_checker.setChecked(pcfg.module.empty_runcache)
         self.let_show_only_custom_fonts.setChecked(pcfg.let_show_only_custom_fonts_flag)
