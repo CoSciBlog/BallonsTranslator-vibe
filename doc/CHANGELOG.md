@@ -1,6 +1,12 @@
 # Changelogs
 
 ### 2026-05-14
+[v1.4.0-vibe.16] force stop for stuck runs
+1. Added a `Force Stop` button next to the normal run progress `Stop` button.
+2. Wired force stop to terminate active pipeline, translator, OCR, text detection, and inpainting threads when a normal stop request is stuck.
+3. Reset pipeline stop flags, translation queues, inpainting state, and the progress dialog after a forced stop.
+4. Updated README documentation and bumped the fork runtime version string to `1.4.0-vibe.16`.
+
 [v1.4.0-vibe.15] LLM page context and glossary category filters
 1. Added LLM context settings for previous pages, optional next-page context, capped document context pages, and maximum context characters.
 2. Injected the context window into both `LLM_API_Translator` and the `Two-Step Translator` LLM refinement prompt.

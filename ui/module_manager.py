@@ -866,6 +866,7 @@ class ModuleManager(QObject):
 
         self.progress_msgbox = imgtrans_progress_msgbox
         self.progress_msgbox.stop_clicked.connect(self.stopImgtransPipeline)
+        self.progress_msgbox.force_stop_clicked.connect(self.forceStopImgtransPipeline)
 
         self.imgtrans_thread = ImgtransThread(self.textdetect_thread, self.ocr_thread, self.translate_thread, self.inpaint_thread)
         self.imgtrans_thread.update_detect_progress.connect(self.on_update_detect_progress)
@@ -1044,6 +1045,42 @@ class ModuleManager(QObject):
         """停止图像翻译流程"""
         LOGGER.info('Stopping image translation pipeline...')
         self.imgtrans_thread.requestStop()
+
+    def _force_terminate_thread(self, thread: QThread, thread_name: str):
+        if thread is None or not thread.isRunning():
+            return
+        LOGGER.warning(f'Force stopping {thread_name} thread.')
+        try:
+            if hasattr(thread, 'requestStop'):
+                thread.requestStop()
+        except Exception as e:
+            LOGGER.warning(f'Failed to request stop for {thread_name}: {e}')
+        thread.terminate()
+        if not thread.wait(1500):
+            LOGGER.warning(f'{thread_name} thread did not finish after force stop.')
+
+    def forceStopImgtransPipeline(self):
+        """Forcefully terminate all running pipeline and translation threads."""
+        LOGGER.warning('Force stopping image translation pipeline and translation process.')
+        for thread, name in [
+            (self.translate_thread, 'translator'),
+            (self.textdetect_thread, 'text detection'),
+            (self.ocr_thread, 'OCR'),
+            (self.inpaint_thread, 'inpainting'),
+            (self.imgtrans_thread, 'pipeline'),
+        ]:
+            self._force_terminate_thread(thread, name)
+
+        self.imgtrans_thread.stop_requested = False
+        self.translate_thread.stop_requested = False
+        self.imgtrans_thread.translation_only = False
+        self.imgtrans_thread.decensor_only = False
+        self.imgtrans_thread.pipeline_pagekey_queue.clear()
+        self.translate_thread.pipeline_pagekey_queue.clear()
+        self.inpaint_thread.inpainting = False
+        self.block_set_inpainter = False
+        self.progress_msgbox.hide()
+        self.imgtrans_pipeline_finished.emit()
 
     def runBlktransPipeline(self, blk_list: List[TextBlock], tgt_img: np.ndarray, mode: int, blk_ids: List[int], tgt_mask):
         self.terminateRunningThread()
