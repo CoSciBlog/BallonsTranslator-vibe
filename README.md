@@ -70,6 +70,8 @@ Censor Restoration / Decensor Inpaint works on the currently opened page from th
 
 The detection settings are available under `Settings -> General -> Censor Restoration`. You can choose the mask mode, adjust mask padding, and tune the minimum detected area ratio.
 
+If the app reports `No repair mask found`, enable debug mask output when developing or tune the detector thresholds and area settings. The Censor Restoration pipeline also exposes a manual-mask entry point so an existing repair mask can be used by integration code without relying on automatic detection.
+
 Use this feature only for material where you have the necessary rights. Do not use it for real people, minors, or misleading reconstructions. Output quality depends on the image, detected mask, and selected inpainting backend.
 
 Known limitations:
