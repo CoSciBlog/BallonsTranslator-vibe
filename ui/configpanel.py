@@ -599,61 +599,81 @@ class ConfigPanel(Widget):
         b.setContentsMargins(0, 0, 0, 0)
         self.let_fntsize_combox, sublock = combobox_with_label(
             [dec_program_str, use_global_str], self.tr('Font Size'),
-            discription=self.tr('Choose whether translated text keeps the detected size or always uses the global font size.'),
             parent=self, insert_stretch=True)
+        tt_fntsize = self.tr('Choose whether translated text keeps the original detected size from the image or always uses the fixed global font size defined in the text style presets.')
+        sublock.name_label.setToolTip(tt_fntsize)
+        self.let_fntsize_combox.setToolTip(tt_fntsize)
         sublock.setContentsMargins(0, 2, 12, 2)
         global_fntfmt_layout.addWidget(sublock, 0, 0)
 
         self.let_fntsize_combox.activated.connect(self.on_fntsize_flag_changed)
+        
         self.let_fntstroke_combox, sublock = combobox_with_label(
             [dec_program_str, use_global_str], self.tr('Stroke Size'),
-            discription=self.tr('Choose whether stroke width is detected per region or taken from the global text style.'),
             parent=self, insert_stretch=True)
+        tt_stroke = self.tr('Choose whether stroke width is detected dynamically per region based on the original text or taken from the fixed global text style preset.')
+        sublock.name_label.setToolTip(tt_stroke)
+        self.let_fntstroke_combox.setToolTip(tt_stroke)
         sublock.setContentsMargins(0, 2, 12, 2)
         self.let_fntstroke_combox.activated.connect(self.on_fntstroke_flag_changed)
         global_fntfmt_layout.addWidget(sublock, 0, 1)
         
         self.let_fntcolor_combox, sublock = combobox_with_label(
             [dec_program_str, use_global_str], self.tr('Font Color'),
-            discription=self.tr('Choose whether text color is detected from the image or forced to the global color.'),
             parent=self, insert_stretch=True)
+        tt_color = self.tr('Choose whether the main text color is detected from the original image or if it is forced to use the global font color setting.')
+        sublock.name_label.setToolTip(tt_color)
+        self.let_fntcolor_combox.setToolTip(tt_color)
         sublock.setContentsMargins(0, 2, 12, 2)
         self.let_fntcolor_combox.activated.connect(self.on_fontcolor_flag_changed)
         global_fntfmt_layout.addWidget(sublock, 1, 0)
+        
         self.let_fnt_scolor_combox, sublock = combobox_with_label(
             [dec_program_str, use_global_str], self.tr('Stroke Color'),
-            discription=self.tr('Choose whether stroke color is detected from the image or forced to the global stroke color.'),
             parent=self, insert_stretch=True)
+        tt_scolor = self.tr('Choose whether the text outline (stroke) color is detected from the original image or if it is forced to use the global stroke color setting.')
+        sublock.name_label.setToolTip(tt_scolor)
+        self.let_fnt_scolor_combox.setToolTip(tt_scolor)
         sublock.setContentsMargins(0, 2, 12, 2)
         self.let_fnt_scolor_combox.activated.connect(self.on_font_scolor_flag_changed)
         global_fntfmt_layout.addWidget(sublock, 1, 1)
 
         self.let_effect_combox, sublock = combobox_with_label(
             [dec_program_str, use_global_str], self.tr('Effect'),
-            discription=self.tr('Choose whether text effects are detected per region or forced to the global effect settings.'),
             parent=self, insert_stretch=True)
+        tt_effect = self.tr('Choose whether special text effects (like outlines or drop shadows) are detected per region or forced to match the global effect settings.')
+        sublock.name_label.setToolTip(tt_effect)
+        self.let_effect_combox.setToolTip(tt_effect)
         sublock.setContentsMargins(0, 2, 12, 2)
         self.let_effect_combox.activated.connect(self.on_effect_flag_changed)
         global_fntfmt_layout.addWidget(sublock, 2, 0)
+        
         self.let_alignment_combox, sublock = combobox_with_label(
             [dec_program_str, use_global_str], self.tr('Alignment'),
-            discription=self.tr('Choose whether paragraph alignment is detected per region or forced to the global alignment.'),
             parent=self, insert_stretch=True)
+        tt_align = self.tr('Choose whether paragraph text alignment (left, center, right) is detected per region or if it is forced to use the global alignment setting.')
+        sublock.name_label.setToolTip(tt_align)
+        self.let_alignment_combox.setToolTip(tt_align)
         sublock.setContentsMargins(0, 2, 12, 2)
         self.let_alignment_combox.activated.connect(self.on_alignment_flag_changed)
         global_fntfmt_layout.addWidget(sublock, 2, 1)
 
         self.let_writing_mode_combox, sublock = combobox_with_label(
             [dec_program_str, use_global_str], self.tr('Writing-mode'),
-            discription=self.tr('Choose whether horizontal or vertical writing direction is detected per region or forced globally.'),
             parent=self, insert_stretch=True)
+        tt_writing = self.tr('Choose whether the text direction (horizontal or vertical) is detected automatically per region or forced to follow the global writing direction setting.')
+        sublock.name_label.setToolTip(tt_writing)
+        self.let_writing_mode_combox.setToolTip(tt_writing)
         sublock.setContentsMargins(0, 2, 12, 2)
         self.let_writing_mode_combox.activated.connect(self.on_writing_mode_flag_changed)
         global_fntfmt_layout.addWidget(sublock, 3, 0)
+        
         self.let_family_combox, sublock = combobox_with_label(
             [self.tr('Keep existing'), self.tr('Always use global setting')], self.tr('Font Family'),
-            discription=self.tr('Choose whether existing region fonts are preserved or replaced by the global font family.'),
             parent=self, insert_stretch=True)
+        tt_family = self.tr('Choose whether the existing region fonts from the original text are preserved or if they are entirely replaced by the global font family setting.')
+        sublock.name_label.setToolTip(tt_family)
+        self.let_family_combox.setToolTip(tt_family)
         sublock.setContentsMargins(0, 2, 12, 2)
         self.let_family_combox.activated.connect(self.on_family_flag_changed)
         global_fntfmt_layout.addWidget(sublock, 3, 1)

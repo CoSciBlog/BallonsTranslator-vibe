@@ -1,6 +1,11 @@
 # Changelogs
 
 ### 2026-05-14
+[v1.4.0-vibe.26] typesetting ui cleanups
+1. Removed separate description labels from typesetting settings to reduce clutter.
+2. Expanded typesetting configuration descriptions and added them as tooltips to the remaining labels and input fields.
+3. Updated README documentation and bumped the fork runtime version string to `1.4.0-vibe.26`.
+
 [v1.4.0-vibe.25] lama large inpaint mask controls
 1. Added `mask_dilation_size`, `mask_dilation_kernel`, and `inpaint_enlarge_ratio` to the `lama_large_512px` Inpainter settings UI.
 2. Added hover descriptions for the new LaMa Large mask and crop-context controls.
