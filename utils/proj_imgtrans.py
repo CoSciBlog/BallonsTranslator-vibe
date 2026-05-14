@@ -167,18 +167,11 @@ class ProjImgTrans:
             except Exception as e:
                 raise ProjectLoadFailureException(e)
             self.load_from_dict(proj_dict)
-        if not osp.exists(self.inpainted_dir()):
-            os.makedirs(self.inpainted_dir())
-        if not osp.exists(self.mask_dir()):
-            os.makedirs(self.mask_dir())
-        if not osp.exists(self.upscaled_dir()):
-            os.makedirs(self.upscaled_dir())
-        if not osp.exists(self.decensor_mask_dir()):
-            os.makedirs(self.decensor_mask_dir())
-        if not osp.exists(self.decensored_dir()):
-            os.makedirs(self.decensored_dir())
-
         return new_proj
+
+    def ensure_dir(self, directory: str):
+        if not osp.exists(directory):
+            os.makedirs(directory)
 
     def mask_dir(self):
         return osp.join(self.directory, 'mask')
@@ -486,6 +479,7 @@ class ProjImgTrans:
             return img
 
         upscaled, used_factor = upscale_image(img, factor, pcfg.upscale_quality)
+        self.ensure_dir(self.upscaled_dir())
         imwrite(target_path, upscaled, ext='.png')
         uh, uw = upscaled.shape[:2]
         self._image_info.setdefault(imgname, {}).update({
@@ -499,15 +493,19 @@ class ProjImgTrans:
         return upscaled
 
     def save_mask(self, img_name, mask: np.ndarray):
+        self.ensure_dir(self.mask_dir())
         imwrite(self.get_mask_path(img_name), mask, ext=pcfg.intermediate_imgsave_ext, quality=pcfg.intermediate_imgsave_quality)
 
     def save_inpainted(self, img_name, inpainted: np.ndarray):
+        self.ensure_dir(self.inpainted_dir())
         imwrite(self.get_inpainted_path(img_name), inpainted, ext=pcfg.intermediate_imgsave_ext, quality=pcfg.intermediate_imgsave_quality)
 
     def save_decensor_mask(self, img_name, mask: np.ndarray):
+        self.ensure_dir(self.decensor_mask_dir())
         imwrite(self.get_decensor_mask_path(img_name), mask, ext=pcfg.intermediate_imgsave_ext, quality=pcfg.intermediate_imgsave_quality)
 
     def save_decensored(self, img_name, decensored: np.ndarray):
+        self.ensure_dir(self.decensored_dir())
         imwrite(self.get_decensored_path(img_name), decensored, ext=pcfg.intermediate_imgsave_ext, quality=pcfg.intermediate_imgsave_quality)
 
     def current_img_path(self) -> str:

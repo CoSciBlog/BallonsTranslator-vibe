@@ -1,6 +1,12 @@
 # Changelogs
 
 ### 2026-05-14
+[v1.4.0-vibe.24] translation benchmark and lazy working folders
+1. Added a Translation Benchmark window from the Run menu to compare current-page outputs from multiple translators or LLM configurations in a side-by-side table.
+2. Kept benchmark translations read-only so comparing outputs does not modify project page text or saved translations.
+3. Stopped creating empty `decensor_mask`, `decensored`, and disabled `upscaled` working folders during project load and normal pipeline setup.
+4. Updated README documentation and bumped the fork runtime version string to `1.4.0-vibe.24`.
+
 [v1.4.0-vibe.23] readable source language labels
 1. Added English helper names in parentheses to source-language selectors in Settings and the bottom translator bar.
 2. Kept translator/config values mapped to the original internal language keys so existing projects and saved configs remain compatible.

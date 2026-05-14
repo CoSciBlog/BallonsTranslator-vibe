@@ -462,17 +462,20 @@ class TitleBar(Widget):
         runAction = QAction(self.tr('Run'), self)
         runWoUpdateTextStyle = QAction(self.tr('Run without updating text style'), self)
         translatePageAction = QAction(self.tr('Translate Page'), self)
+        translationBenchmarkAction = QAction(self.tr('Translation Benchmark'), self)
+        translationBenchmarkAction.setToolTip(self.tr('Compare the current page translation with multiple translators or LLM configurations in a side-by-side table.'))
         runMenu = QMenu(self.runToolBtn)
         runMenu.addActions(stageActions)
         runMenu.addSeparator()
         runMenu.addActions(list(self.runPresetActions.keys()))
         runMenu.addSeparator()
-        runMenu.addActions([runAction, runWoUpdateTextStyle, translatePageAction])
+        runMenu.addActions([runAction, runWoUpdateTextStyle, translatePageAction, translationBenchmarkAction])
         self.runToolBtn.setMenu(runMenu)
         self.runToolBtn.setPopupMode(QToolButton.InstantPopup)
         self.run_trigger = runAction.triggered
         self.run_woupdate_textstyle_trigger = runWoUpdateTextStyle.triggered
         self.translate_page_trigger = translatePageAction.triggered
+        self.translation_benchmark_trigger = translationBenchmarkAction.triggered
 
         self.iconLabel = QLabel(self)
         if not C.ON_MACOS:

@@ -34,6 +34,7 @@ from .io_thread import ImgSaveThread, ImportDocThread, ExportDocThread
 from .custom_widget import Widget, ViewWidget
 from .global_search_widget import GlobalSearchWidget
 from .glossary_widget import GlossaryWindow
+from .translation_benchmark import TranslationBenchmarkWindow
 from .input_wheel_guard import InputWheelGuard
 from .textedit_commands import GlobalRepalceAllCommand
 from .framelesswindow import FramelessWindow, FramelessMoveResize
@@ -749,6 +750,7 @@ class MainWindow(mainwindow_cls):
         self.titleBar.run_trigger.connect(self.leftBar.runImgtransBtn.click)
         self.titleBar.run_woupdate_textstyle_trigger.connect(self.run_imgtrans_wo_textstyle_update)
         self.titleBar.translate_page_trigger.connect(self.on_transpagebtn_pressed)
+        self.titleBar.translation_benchmark_trigger.connect(self.show_translation_benchmark_window)
         self.titleBar.enable_module.connect(self.on_enable_module)
         self.titleBar.importtstyle_trigger.connect(self.import_tstyles)
         self.titleBar.exporttstyle_trigger.connect(self.export_tstyles)
@@ -1354,6 +1356,41 @@ class MainWindow(mainwindow_cls):
         
         self.translateBlkitemList(blkitem_list, -1)
 
+    def current_page_source_texts(self) -> List[str]:
+        blkitem_list = self.st_manager.textblk_item_list
+        if len(blkitem_list) > 0:
+            blkitem_list = sorted(blkitem_list, key=lambda item: item.idx)
+            texts = []
+            for blkitem in blkitem_list:
+                texts.append(self.st_manager.pairwidget_list[blkitem.idx].e_source.toPlainText())
+            return texts
+
+        page_key = self.imgtrans_proj.current_img
+        if page_key is None or page_key not in self.imgtrans_proj.pages:
+            return []
+        return [blk.get_text() for blk in self.imgtrans_proj.pages[page_key]]
+
+    def show_translation_benchmark_window(self, checked: bool = False):
+        page_key = self.imgtrans_proj.current_img
+        if page_key is None:
+            create_info_dialog(self.tr('Open a project page before running a translation benchmark.'))
+            return
+
+        source_texts = self.current_page_source_texts()
+        if len(source_texts) == 0 or not any(text.strip() for text in source_texts):
+            create_info_dialog(self.tr('The current page has no source text to benchmark.'))
+            return
+
+        self.translation_benchmark_window = TranslationBenchmarkWindow(
+            source_texts,
+            pcfg.module.translator,
+            self.imgtrans_proj,
+            page_key,
+            self,
+        )
+        self.translation_benchmark_window.show()
+        self.translation_benchmark_window.raise_()
+        self.translation_benchmark_window.activateWindow()
 
     def translateBlkitemList(self, blkitem_list: List, mode: int) -> bool:
 
