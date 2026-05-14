@@ -1,13 +1,14 @@
 import unittest
 import os.path as osp
 import sys
+import tempfile
 
 import numpy as np
 
 APP_ROOT = osp.dirname(osp.dirname(osp.abspath(__file__)))
 sys.path.append(APP_ROOT)
 
-from modules.censor_restoration import CensorRestorationPipeline
+from modules.censor_restoration import CensorMaskDetector, CensorRestorationConfig, CensorRestorationPipeline
 
 
 class FakeInpainter:
@@ -74,6 +75,53 @@ class CensorRestorationPipelineTest(unittest.TestCase):
         self.assertIsNone(result.original_image)
         self.assertIsNone(result.result_image)
         self.assertIn("TypeError", result.error_message)
+
+    def test_run_with_mask_rejects_empty_mask(self):
+        image = np.full((80, 80, 3), 128, dtype=np.uint8)
+        mask = np.zeros((80, 80), dtype=np.uint8)
+        pipeline = CensorRestorationPipeline(inpainter=FakeInpainter())
+
+        result = pipeline.run_with_mask(image, mask)
+
+        self.assertEqual(result.status, "no_mask_found")
+        self.assertEqual(int(result.mask.sum()), 0)
+
+    def test_run_with_mask_passes_non_empty_mask_to_inpainter(self):
+        image = np.full((80, 80, 3), 128, dtype=np.uint8)
+        mask = np.zeros((80, 80), dtype=np.float32)
+        mask[20:30, 20:40] = 1.0
+        inpainter = FakeInpainter()
+        pipeline = CensorRestorationPipeline(inpainter=inpainter)
+
+        result = pipeline.run_with_mask(image, mask)
+
+        self.assertEqual(result.status, "success")
+        self.assertIsNotNone(inpainter.received_mask)
+        self.assertEqual(inpainter.received_mask.dtype, np.uint8)
+        self.assertGreater(int(inpainter.received_mask.sum()), 0)
+
+    def test_run_with_mask_rejects_wrong_shape(self):
+        image = np.full((80, 80, 3), 128, dtype=np.uint8)
+        mask = np.ones((40, 40), dtype=np.uint8)
+        pipeline = CensorRestorationPipeline(inpainter=FakeInpainter())
+
+        result = pipeline.run_with_mask(image, mask)
+
+        self.assertEqual(result.status, "error")
+        self.assertIn("mask shape", result.error_message)
+
+    def test_debug_json_is_written_when_enabled(self):
+        image = np.full((80, 80, 3), 128, dtype=np.uint8)
+        detector = CensorMaskDetector(CensorRestorationConfig(save_debug_masks=True))
+        pipeline = CensorRestorationPipeline(detector=detector, inpainter=FakeInpainter())
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            result = pipeline.run(image, debug_output_dir=tmpdir)
+
+            self.assertEqual(result.status, "no_mask_found")
+            self.assertIn("detection", result.debug_paths)
+            self.assertTrue(osp.exists(result.debug_paths["detection"]))
+            self.assertTrue(osp.exists(osp.join(tmpdir, "_final_mask.png")))
 
 
 if __name__ == "__main__":

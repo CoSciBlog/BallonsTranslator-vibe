@@ -26,6 +26,8 @@ PortableGit
 test_dir
 tmp
 logs
+debug/
+**/debug/censor_restoration/
 ballontrans_pylibs_win
 config/config.json
 config/presets/*.json

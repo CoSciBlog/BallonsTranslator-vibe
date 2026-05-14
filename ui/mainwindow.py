@@ -1609,7 +1609,10 @@ class MainWindow(mainwindow_cls):
             try:
                 mask = self.imgtrans_proj.load_decensor_mask_by_imgname(page_name)
                 if mask is None or not (mask > 0).any():
-                    create_info_dialog(self.tr('Censor Restoration found no repair mask on the current page.'))
+                    create_info_dialog(self.tr(
+                        'No censor mask was detected. You can draw/select a repair mask manually and run Censor Restoration again. '
+                        'No repair mask found. Try enabling debug masks or adjust detector thresholds.'
+                    ))
                 else:
                     create_info_dialog(self.tr('Censor Restoration finished for the current page.'))
             except Exception as e:

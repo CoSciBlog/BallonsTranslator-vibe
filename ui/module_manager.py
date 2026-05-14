@@ -489,11 +489,12 @@ class ImgtransThread(QThread):
         if img is None:
             raise FileNotFoundError(imgname)
 
-        mask, mode = build_decensor_mask(
+        mask, mode, debug = build_decensor_mask(
             img,
             mode=pcfg.decensor_mask_mode,
             dilate=pcfg.decensor_mask_dilate,
             min_area_ratio=pcfg.decensor_min_area_ratio,
+            return_debug=True,
         )
 
         self.imgtrans_proj.save_decensor_mask(imgname, mask)
@@ -503,7 +504,10 @@ class ImgtransThread(QThread):
             LOGGER.info(f'Decensor mask mode "{mode}" applied to {imgname}.')
         else:
             decensored = np.copy(img)
-            LOGGER.info(f'No decensor mask found for {imgname}.')
+            LOGGER.info(
+                f'No decensor mask found for {imgname}. '
+                f'debug={debug}. Try enabling debug masks or adjust detector thresholds.'
+            )
 
         self.imgtrans_proj.save_decensored(imgname, decensored)
         self.imgtrans_proj.save_inpainted(imgname, decensored)
