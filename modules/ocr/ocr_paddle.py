@@ -3,17 +3,12 @@ from typing import List
 import os
 import logging
 
-LOGGER = logging.getLogger("BallonTranslator")
-
 try:
     from paddleocr import PaddleOCR
 
     PADDLE_OCR_AVAILABLE = True
 except ImportError:
     PADDLE_OCR_AVAILABLE = False
-    LOGGER.debug(
-        "PaddleOCR is not installed, so the module will not be initialized. \nCheck this issue https://github.com/dmMaze/BallonsTranslator/issues/835#issuecomment-2772940806"
-    )
 
 import cv2
 import re
@@ -394,5 +389,5 @@ if PADDLE_OCR_AVAILABLE:
                 self.output_format = self.params["output_format"]["value"]
 
 else:
-    # If PaddleOCR is not installed, you can define a stub or alternative module
-    logging.info("PaddleOCR module will not be loaded as the library is not installed.")
+    # PaddleOCR is optional; leave the OCR backend unregistered when it is absent.
+    pass

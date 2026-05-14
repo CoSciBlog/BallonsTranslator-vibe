@@ -562,12 +562,25 @@ class ConfigPanel(Widget):
         generalConfigPanel.addBlockWidget(decensor_row)
 
         generalConfigPanel.addTextLabel(label_settings_presets)
-        self.settings_preset_combobox, preset_sublock = generalConfigPanel.addCombobox(
-            [],
-            self.tr('Preset'),
-            discription=self.tr('Saved settings snapshots. Applying one replaces the current application settings.'),
-            fix_size=False)
+        preset_tip = self.tr('Saved settings snapshots. Applying one replaces the current application settings.')
+        preset_container = QWidget()
+        preset_layout = QVBoxLayout(preset_container)
+        preset_layout.setContentsMargins(0, 0, 0, 0)
+        preset_layout.setSpacing(8)
+        preset_container.setToolTip(preset_tip)
+
+        preset_selector_layout = QHBoxLayout()
+        preset_selector_layout.setContentsMargins(0, 0, 0, 0)
+        preset_selector_layout.setSpacing(20)
+        preset_label = ConfigTextLabel(self.tr('Preset'), CONFIG_FONTSIZE_CONTENT, QFont.Weight.Normal)
+        preset_label.setToolTip(preset_tip)
+        self.settings_preset_combobox = ConfigComboBox(fix_size=False, scrollWidget=generalConfigPanel)
+        self.settings_preset_combobox.setToolTip(preset_tip)
         self.settings_preset_combobox.setFixedWidth(CONFIG_COMBOBOX_LONG)
+        preset_selector_layout.addWidget(preset_label)
+        preset_selector_layout.addWidget(self.settings_preset_combobox)
+        preset_selector_layout.addStretch(1)
+        preset_layout.addLayout(preset_selector_layout)
 
         self.settings_apply_preset_btn = QPushButton(self.tr('Apply preset'), self)
         self.settings_apply_preset_btn.setToolTip(self.tr('Load the selected settings preset into the current session.'))
@@ -583,6 +596,8 @@ class ConfigPanel(Widget):
         self.settings_import_current_btn.setToolTip(self.tr('Load a settings JSON file immediately without first saving it as a preset.'))
 
         preset_buttons = QHBoxLayout()
+        preset_buttons.setContentsMargins(0, 0, 0, 0)
+        preset_buttons.setSpacing(8)
         for btn in [
             self.settings_apply_preset_btn,
             self.settings_save_preset_btn,
@@ -592,8 +607,9 @@ class ConfigPanel(Widget):
             self.settings_import_current_btn,
         ]:
             preset_buttons.addWidget(btn)
-        preset_buttons.addStretch(-1)
-        preset_sublock.layout().addLayout(preset_buttons)
+        preset_buttons.addStretch(1)
+        preset_layout.addLayout(preset_buttons)
+        generalConfigPanel.addBlockWidget(preset_container)
 
         self.settings_apply_preset_btn.clicked.connect(self.on_apply_settings_preset)
         self.settings_save_preset_btn.clicked.connect(self.on_save_settings_preset)
