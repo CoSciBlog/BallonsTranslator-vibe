@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="hu_HU" sourcelanguage="en_US">
+<TS version="2.1" language="de_DE">
 <context>
     <name>BottomBar</name>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="756" />
         <source>Text Detector</source>
-        <translation>SzövegFelismerő</translation>
+        <translation>Textdetektor</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="757" />
@@ -16,89 +16,89 @@
     <message>
         <location filename="..\ui\mainwindowbars.py" line="758" />
         <source>Inpaint</source>
-        <translation>Belefestés</translation>
+        <translation>Inpaint</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="764" />
         <source>Enable/disable paint mode</source>
-        <translation>Festő mód engedélyezés/tiltás</translation>
+        <translation>Malmodus aktivieren/deaktivieren</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="768" />
         <source>Enable/disable text edit mode</source>
-        <translation>Szövegszerkesztő mód engedélyezés/tiltás</translation>
+        <translation>Textbearbeitungsmodus aktivieren/deaktivieren</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="772" />
         <source>Show and edit text block bounding boxes.</source>
-        <translation>Szövegblokk-határolókeretek megjelenítése és szerkesztése.</translation>
+        <translation>Begrenzungsrahmen für Textblöcke anzeigen und bearbeiten.</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="775" />
         <source>Original image opacity</source>
-        <translation>Eredeti kép átlátszóság</translation>
+        <translation>Deckkraft des Originalbildes</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="779" />
         <source>Text layer opacity</source>
-        <translation>Szöveg réteg átlátszóság</translation>
+        <translation>Deckkraft der Textebene</translation>
     </message>
 </context><context>
     <name>Canvas</name>
     <message>
         <location filename="..\ui\canvas.py" line="761" />
         <source>Copy</source>
-        <translation>Másolás</translation>
+        <translation>Kopie</translation>
     </message>
     <message>
         <location filename="..\ui\canvas.py" line="763" />
         <source>Paste</source>
-        <translation>Beillesztés</translation>
+        <translation>Paste</translation>
     </message>
     <message>
         <location filename="..\ui\canvas.py" line="765" />
         <source>Delete</source>
-        <translation>Törlés</translation>
+        <translation>Löschen</translation>
     </message>
     <message>
         <location filename="..\ui\canvas.py" line="767" />
         <source>Copy source text</source>
-        <translation>Forrás szöveg másolása</translation>
+        <translation>Quelltext kopieren</translation>
     </message>
     <message>
         <location filename="..\ui\canvas.py" line="769" />
         <source>Paste source text</source>
-        <translation>Forrás szöveg beillesztése</translation>
+        <translation>Quelltext einfügen</translation>
     </message>
     <message>
         <location filename="..\ui\canvas.py" line="771" />
         <source>Delete and Recover removed text</source>
-        <translation>Törlés és eltávolított szöveg visszaállítása</translation>
+        <translation>Entfernten Text löschen und wiederherstellen</translation>
     </message>
     <message>
         <location filename="..\ui\canvas.py" line="776" />
         <source>Apply font formatting</source>
-        <translation>Betűformázás alkalmazása</translation>
+        <translation>Wenden Sie die Schriftartformatierung an</translation>
     </message>
     <message>
         <location filename="..\ui\canvas.py" line="777" />
         <source>Auto layout</source>
-        <translation>Automata elrendezés</translation>
+        <translation>Automatisches Layout</translation>
     </message>
     <message>
         <location filename="..\ui\canvas.py" line="778" />
         <source>Reset Angle</source>
-        <translation>Forgatás visszaállítása</translation>
+        <translation>Winkel zurücksetzen</translation>
     </message>
     <message>
         <location filename="..\ui\canvas.py" line="779" />
         <source>Squeeze</source>
-        <translation>Nyújtás</translation>
+        <translation>Quetschen</translation>
     </message>
     <message>
         <location filename="..\ui\canvas.py" line="781" />
         <source>translate</source>
-        <translation>fordítás</translation>
+        <translation>übersetzen</translation>
     </message>
     <message>
         <location filename="..\ui\canvas.py" line="782" />
@@ -108,34 +108,34 @@
     <message>
         <location filename="..\ui\canvas.py" line="783" />
         <source>OCR and translate</source>
-        <translation>OCR és fordítás</translation>
+        <translation>OCR und übersetzen</translation>
     </message>
     <message>
         <location filename="..\ui\canvas.py" line="784" />
         <source>OCR, translate and inpaint</source>
-        <translation>OCR, fordítás és belefestés</translation>
+        <translation>OCR, übersetzen und inpaint</translation>
     </message>
     <message>
         <location filename="..\ui\canvas.py" line="785" />
         <source>inpaint</source>
-        <translation>Belefestés</translation>
+        <translation>inpaint</translation>
     </message>
 </context><context>
     <name>ConfigPanel</name>
     <message>
         <location filename="..\ui\configpanel.py" line="402" />
         <source>DL Module</source>
-        <translation>DL modul</translation>
+        <translation>DL-Modul</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="403" />
         <source>General</source>
-        <translation>Általános</translation>
+        <translation>Allgemein</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="405" />
         <source>Text Detection</source>
-        <translation>Szövegfelismerés</translation>
+        <translation>Texterkennung</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="452" />
@@ -146,37 +146,37 @@
     <message>
         <location filename="..\ui\configpanel.py" line="407" />
         <source>Inpaint</source>
-        <translation>Belefestés</translation>
+        <translation>Inpaint</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="408" />
         <source>Translator</source>
-        <translation>Fordító</translation>
+        <translation>Übersetzer</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="409" />
         <source>Startup</source>
-        <translation>Indulás</translation>
+        <translation>Start-up</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="410" />
         <source>Upscaling</source>
-        <translation>Felskálázás</translation>
+        <translation>Hochskalierung</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="411" />
         <source>Post-merge</source>
-        <translation>Egyesítés után</translation>
+        <translation>Post-Merge</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="412" />
         <source>Typesetting</source>
-        <translation>Betűtípus</translation>
+        <translation>Satz</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="413" />
         <source>Save</source>
-        <translation>Mentés</translation>
+        <translation>Speichern</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="414" />
@@ -186,94 +186,94 @@
     <message>
         <location filename="..\ui\configpanel.py" line="415" />
         <source>Settings presets</source>
-        <translation>Előre beállított beállítások</translation>
+        <translation>Einstellungsvoreinstellungen</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="433" />
         <source>Load models on demand</source>
-        <translation>Modellek betöltése szükség szerint</translation>
+        <translation>Laden Sie Modelle nach Bedarf</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="433" />
         <source>Load models on demand to save memory.</source>
-        <translation>Modellek betöltése szükség szerint csökkenti a memória igényt</translation>
+        <translation>Laden Sie Modelle nach Bedarf, um Speicherplatz zu sparen.</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="436" />
         <source>Empty cache after RUN</source>
-        <translation>FUTTATÁS után cache törlése</translation>
+        <translation>Cache nach RUN leeren</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="436" />
         <source>Empty cache after RUN to save memory.</source>
-        <translation>FUTTATÁS után cache törlése csökkenti a memória igényt.</translation>
+        <translation>Leeren Sie den Cache nach RUN, um Speicherplatz zu sparen.</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="441" />
         <source>Unload All Models</source>
-        <translation>Minden modell ejtése</translation>
+        <translation>Alle Modelle entladen</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="442" />
         <source>Immediately unload loaded detection, OCR, inpaint, and translation models from memory.</source>
-        <translation>Azonnal töltse ki a betöltött észlelési, OCR-, inpaint- és fordítási modelleket a memóriából.</translation>
+        <translation>Entladen Sie geladene Erkennungs-, OCR-, Inpaint- und Übersetzungsmodelle sofort aus dem Speicher.</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="447" />
         <source>Detector</source>
-        <translation>Felismerő</translation>
+        <translation>Detektor</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="456" />
         <source>Inpainter</source>
-        <translation>Belefestő</translation>
+        <translation>Inmaler</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="465" />
         <source>Upscale pages before detection</source>
-        <translation>Előkelő oldalak az észlelés előtt</translation>
+        <translation>Hochskalieren Sie Seiten vor der Erkennung</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="466" />
         <source>Create a high-resolution working copy before text detection. Detection, OCR, masks, inpainting, and export then use that upscaled image.</source>
-        <translation>Szövegészlelés előtt készítsen nagy felbontású munkamásolatot. Az észlelés, az OCR, a maszkok, a festés és az exportálás, majd használja a felskálázott képet.</translation>
+        <translation>Erstellen Sie vor der Texterkennung eine Arbeitskopie mit hoher Auflösung. Erkennung, OCR, Masken, Inpainting und Export verwenden dann dieses hochskalierte Bild.</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="468" />
         <source>Resolution multiplier for pages that pass the size limits. Example: 2.0 for 2x.</source>
-        <translation>Felbontási szorzó olyan oldalakhoz, amelyek átlépik a méretkorlátozást. Példa: 2.0 2x-re.</translation>
+        <translation>Auflösungsmultiplikator für Seiten, die die Größenbeschränkungen überschreiten. Beispiel: 2,0 für 2x.</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="469" />
         <source>Maximum long-edge resolution after upscaling. The factor is capped so the result does not exceed this value.</source>
-        <translation>Maximális hosszú él felbontás felskálázás után. A tényező korlátozva van, így az eredmény nem haladja meg ezt az értéket.</translation>
+        <translation>Maximale Long-Edge-Auflösung nach Hochskalierung. Der Faktor ist begrenzt, sodass das Ergebnis diesen Wert nicht überschreitet.</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="470" />
         <source>Pages whose original long edge is already above this value are not upscaled. Use 0 to always allow upscaling.</source>
-        <translation>Azok az oldalak, amelyeknek az eredeti hosszú széle már meghaladja ezt az értéket, nem léptékesebbé. 0-val mindig engedélyezheti a felskálázást.</translation>
+        <translation>Seiten, deren ursprüngliche Längskante bereits über diesem Wert liegt, werden nicht hochskaliert. Verwenden Sie 0, um eine Hochskalierung immer zu ermöglichen.</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="471" />
         <source>Quality/speed preset for OpenCV upscaling. AnimeSharp adds stronger manga-style sharpening inspired by 2x-AnimeSharpV4.</source>
-        <translation>Előre beállított minőség/sebesség az OpenCV felskálázásához. Az AnimeSharp erősebb manga-stílusú élesítést ad a 2x-AnimeSharpV4 ihlette.</translation>
+        <translation>Qualitäts-/Geschwindigkeitsvoreinstellung für die OpenCV-Hochskalierung. AnimeSharp fügt eine stärkere Schärfung im Manga-Stil hinzu, inspiriert von 2x-AnimeSharpV4.</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="482" />
         <source>Fast</source>
-        <translation>Gyors</translation>
+        <translation>Schnell</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="483" />
         <source>Balanced</source>
-        <translation>Kiegyensúlyozott</translation>
+        <translation>Ausgewogen</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="703" />
         <location filename="..\ui\configpanel.py" line="493" />
         <location filename="..\ui\configpanel.py" line="484" />
         <source>Quality</source>
-        <translation>Minőség</translation>
+        <translation>Qualität</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="485" />
@@ -283,349 +283,349 @@
     <message>
         <location filename="..\ui\configpanel.py" line="490" />
         <source>Factor</source>
-        <translation>Tényező</translation>
+        <translation>Faktor</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="491" />
         <source>Max long edge</source>
-        <translation>Max hosszú él</translation>
+        <translation>Maximal lange Kante</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="492" />
         <source>Skip above</source>
-        <translation>Ugrás fent</translation>
+        <translation>Überspringen Sie oben</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="499" />
         <source>Merge nearby text boxes after pipeline</source>
-        <translation>A közeli szövegdobozok egyesítése a folyamat után</translation>
+        <translation>In der Nähe befindliche Textfelder nach der Pipeline zusammenführen</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="500" />
         <source>After translation, merge nearby text boxes using the Region Merge Tool rules to reduce overlapping rendered text.</source>
-        <translation>A fordítás után egyesítse a közeli szövegmezőket a Régió-összevonási eszköz szabályaival, hogy csökkentse az átfedő renderelt szöveget.</translation>
+        <translation>Führen Sie nach der Übersetzung benachbarte Textfelder mithilfe der Regeln des Region Merge Tool zusammen, um überlappenden gerenderten Text zu reduzieren.</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="504" />
         <source>Vertical Merge</source>
-        <translation>Függőleges összevonás</translation>
+        <translation>Vertikale Zusammenführung</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="505" />
         <source>Horizontal Merge</source>
-        <translation>Vízszintes összevonás</translation>
+        <translation>Horizontale Zusammenführung</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="506" />
         <source>Vertical then Horizontal</source>
-        <translation>Függőleges, majd vízszintes</translation>
+        <translation>Vertikal, dann horizontal</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="507" />
         <source>Horizontal then Vertical</source>
-        <translation>Vízszintes, majd függőleges</translation>
+        <translation>Horizontal, dann vertikal</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="509" />
         <source>Post-pipeline merge mode</source>
-        <translation>Csővezeték-egyesítési mód</translation>
+        <translation>Post-Pipeline-Merge-Modus</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="510" />
         <source>Direction used when automatically merging translated text boxes after the pipeline finishes.</source>
-        <translation>A lefordított szövegdobozok automatikus egyesítésére használt irány a folyamat befejezése után.</translation>
+        <translation>Richtung, die beim automatischen Zusammenführen übersetzter Textfelder nach Abschluss der Pipeline verwendet wird.</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="512" />
         <source>Maximum pixel distance between stacked boxes for automatic vertical merging.</source>
-        <translation>Maximális pixeltávolság az egymásra helyezett dobozok között az automatikus függőleges egyesítéshez.</translation>
+        <translation>Maximaler Pixelabstand zwischen gestapelten Boxen für die automatische vertikale Zusammenführung.</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="513" />
         <source>Maximum pixel distance between side-by-side boxes for automatic horizontal merging.</source>
-        <translation>Maximális pixeltávolság az egymás melletti dobozok között az automatikus vízszintes egyesítéshez.</translation>
+        <translation>Maximaler Pixelabstand zwischen nebeneinander liegenden Boxen für die automatische horizontale Zusammenführung.</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="514" />
         <source>Minimum horizontal overlap required when merging boxes above or below each other.</source>
-        <translation>Minimális vízszintes átfedés szükséges az egymás feletti vagy alatti dobozok összevonásakor.</translation>
+        <translation>Beim Zusammenführen von Boxen über- oder untereinander ist eine minimale horizontale Überlappung erforderlich.</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="515" />
         <source>Minimum vertical overlap required when merging boxes next to each other.</source>
-        <translation>Minimális függőleges átfedés szükséges a dobozok egymás melletti összevonásakor.</translation>
+        <translation>Mindestens erforderliche vertikale Überlappung beim Zusammenführen von Boxen nebeneinander.</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="529" />
         <source>Vertical gap</source>
-        <translation>Függőleges rés</translation>
+        <translation>Vertikaler Spalt</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="530" />
         <source>Horizontal gap</source>
-        <translation>Vízszintes rés</translation>
+        <translation>Horizontaler Spalt</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="531" />
         <source>Horizontal overlap %</source>
-        <translation>Vízszintes átfedés %</translation>
+        <translation>Horizontale Überlappung %</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="532" />
         <source>Vertical overlap %</source>
-        <translation>Függőleges átfedés %</translation>
+        <translation>Vertikale Überlappung %</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="539" />
         <source>Preset</source>
-        <translation>Előre beállított</translation>
+        <translation>Voreingestellt</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="540" />
         <source>Saved settings snapshots. Applying one replaces the current application settings.</source>
-        <translation>Mentett beállítások pillanatképei. Az egyik alkalmazása lecseréli a jelenlegi alkalmazásbeállításokat.</translation>
+        <translation>Schnappschüsse der gespeicherten Einstellungen. Durch die Anwendung werden die aktuellen Anwendungseinstellungen ersetzt.</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="544" />
         <source>Apply preset</source>
-        <translation>Előbeállítás alkalmazása</translation>
+        <translation>Voreinstellung anwenden</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="545" />
         <source>Load the selected settings preset into the current session.</source>
-        <translation>Töltse be a kiválasztott előre beállított beállításokat az aktuális munkamenetbe.</translation>
+        <translation>Laden Sie die ausgewählten Einstellungsvoreinstellungen in die aktuelle Sitzung.</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="546" />
         <source>Save current as preset</source>
-        <translation>Mentse az áramot előre beállított értékként</translation>
+        <translation>Aktuelles als Voreinstellung speichern</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="547" />
         <source>Save the current settings as a named reusable preset.</source>
-        <translation>Mentse el az aktuális beállításokat elnevezett újrafelhasználható készletként.</translation>
+        <translation>Speichern Sie die aktuellen Einstellungen als benannte wiederverwendbare Voreinstellung.</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="548" />
         <source>Import preset</source>
-        <translation>Előbeállítás importálása</translation>
+        <translation>Voreinstellung importieren</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="549" />
         <source>Copy a settings preset JSON file into the local preset library.</source>
-        <translation>Másoljon be egy előre beállított JSON-fájlt a helyi előre beállított könyvtárba.</translation>
+        <translation>Kopieren Sie eine JSON-Datei mit Einstellungsvoreinstellungen in die lokale Voreinstellungsbibliothek.</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="550" />
         <source>Export selected preset</source>
-        <translation>A kiválasztott készlet exportálása</translation>
+        <translation>Ausgewählte Voreinstellung exportieren</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="551" />
         <source>Export the selected preset to a JSON file.</source>
-        <translation>Exportálja a kiválasztott készletet JSON-fájlba.</translation>
+        <translation>Exportieren Sie die ausgewählte Voreinstellung in eine JSON-Datei.</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="821" />
         <location filename="..\ui\configpanel.py" line="552" />
         <source>Export current settings</source>
-        <translation>Az aktuális beállítások exportálása</translation>
+        <translation>Aktuelle Einstellungen exportieren</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="553" />
         <source>Export the current settings directly to a JSON file.</source>
-        <translation>Exportálja az aktuális beállításokat közvetlenül egy JSON-fájlba.</translation>
+        <translation>Exportieren Sie die aktuellen Einstellungen direkt in eine JSON-Datei.</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="832" />
         <location filename="..\ui\configpanel.py" line="554" />
         <source>Import settings file</source>
-        <translation>Beállítási fájl importálása</translation>
+        <translation>Einstellungsdatei importieren</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="555" />
         <source>Load a settings JSON file immediately without first saving it as a preset.</source>
-        <translation>Azonnal töltsön be egy beállítási JSON-fájlt anélkül, hogy előzetesen elmentené.</translation>
+        <translation>Laden Sie eine Einstellungs-JSON-Datei sofort, ohne sie zuerst als Voreinstellung zu speichern.</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="579" />
         <source>Reopen last project on startup</source>
-        <translation>Utolsó projekt megnyitása induláskor</translation>
+        <translation>Letztes Projekt beim Start erneut öffnen</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="580" />
         <source>Open the most recently used project automatically when the application starts.</source>
-        <translation>Az alkalmazás indításakor automatikusan nyissa meg a legutóbb használt projektet.</translation>
+        <translation>Öffnen Sie beim Start der Anwendung automatisch das zuletzt verwendete Projekt.</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="583" />
         <source>Prevent mouse wheel changes on input fields</source>
-        <translation>Megakadályozza az egérgörgő változását a beviteli mezőkben</translation>
+        <translation>Verhindern Sie Mausradänderungen in Eingabefeldern</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="584" />
         <source>Ignore mouse wheel changes on combo boxes and spin boxes so scrolling settings does not accidentally change values.</source>
-        <translation>Figyelmen kívül hagyja az egérgörgő változásait a kombinált és pörgődobozokon, így a görgetési beállítások véletlenül sem változtatják meg az értékeket.</translation>
+        <translation>Ignorieren Sie Mausradänderungen in Kombinationsfeldern und Drehfeldern, damit beim Scrollen der Einstellungen nicht versehentlich Werte geändert werden.</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="588" />
         <source>decide by program</source>
-        <translation>A program dönti el</translation>
+        <translation>nach Programm entscheiden</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="589" />
         <source>use global setting</source>
-        <translation>Globális beállítás használata</translation>
+        <translation>Verwenden Sie die globale Einstellung</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="601" />
         <source>Font Size</source>
-        <translation>Betűméret</translation>
+        <translation>Schriftgröße</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="603" />
         <source>Choose whether translated text keeps the original detected size from the image or always uses the fixed global font size defined in the text style presets.</source>
-        <translation>Válassza ki, hogy a lefordított szöveg megtartja-e a kép eredeti észlelt méretét, vagy mindig a szövegstílus-előbeállításokban meghatározott rögzített globális betűméretet használja.</translation>
+        <translation>Wählen Sie aus, ob der übersetzte Text die ursprünglich erkannte Größe des Bildes beibehält oder immer die feste globale Schriftgröße verwendet, die in den Textstilvoreinstellungen definiert ist.</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="612" />
         <source>Stroke Size</source>
-        <translation>Körvonal méret</translation>
+        <translation>Strichgröße</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="614" />
         <source>Choose whether stroke width is detected dynamically per region based on the original text or taken from the fixed global text style preset.</source>
-        <translation>Válassza ki, hogy a körvonalszélesség dinamikusan érzékelhető-e régiónként az eredeti szöveg alapján vagy a rögzített globális szövegstílus-előbeállításból.</translation>
+        <translation>Wählen Sie, ob die Strichstärke dynamisch pro Region basierend auf dem Originaltext erkannt oder aus der festen globalen Textstilvorgabe übernommen wird.</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="622" />
         <source>Font Color</source>
-        <translation>Betűszín</translation>
+        <translation>Schriftfarbe</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="624" />
         <source>Choose whether the main text color is detected from the original image or if it is forced to use the global font color setting.</source>
-        <translation>Válassza ki, hogy a fő szövegszínt az eredeti képből érzékelje-e a rendszer, vagy a globális betűszín-beállítást kell használnia.</translation>
+        <translation>Wählen Sie, ob die Haupttextfarbe aus dem Originalbild erkannt wird oder ob die Verwendung der globalen Schriftfarbeinstellung erzwungen wird.</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="632" />
         <source>Stroke Color</source>
-        <translation>Körvonal szín</translation>
+        <translation>Strichfarbe</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="634" />
         <source>Choose whether the text outline (stroke) color is detected from the original image or if it is forced to use the global stroke color setting.</source>
-        <translation>Válassza ki, hogy a rendszer érzékelje-e a szöveg körvonalának (vonásos) színét az eredeti képen, vagy a globális körvonalszín beállítást használja.</translation>
+        <translation>Wählen Sie aus, ob die Textumrissfarbe (Strichfarbe) aus dem Originalbild erkannt wird oder ob die Verwendung der globalen Strichfarbeneinstellung erzwungen wird.</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="642" />
         <source>Effect</source>
-        <translation>Effekt</translation>
+        <translation>Wirkung</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="644" />
         <source>Choose whether special text effects (like outlines or drop shadows) are detected per region or forced to match the global effect settings.</source>
-        <translation>Válassza ki, hogy a rendszer régiónként érzékeli-e a speciális szövegeffektusokat (például körvonalakat vagy vetett árnyékokat), vagy kényszeríti őket a globális hatásbeállításokhoz.</translation>
+        <translation>Wählen Sie, ob spezielle Texteffekte (wie Umrisse oder Schlagschatten) pro Region erkannt werden oder ob sie den globalen Effekteinstellungen entsprechen sollen.</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="652" />
         <source>Alignment</source>
-        <translation>Igazítás</translation>
+        <translation>Ausrichtung</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="654" />
         <source>Choose whether paragraph text alignment (left, center, right) is detected per region or if it is forced to use the global alignment setting.</source>
-        <translation>Válassza ki, hogy a rendszer érzékeli-e a bekezdésszöveg igazítását (balra, középre, jobbra) régiónként, vagy a globális igazítási beállítás használatára kényszerül.</translation>
+        <translation>Wählen Sie, ob die Absatztextausrichtung (links, zentriert, rechts) pro Region erkannt wird oder ob die Verwendung der globalen Ausrichtungseinstellung erzwungen wird.</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="662" />
         <source>Writing-mode</source>
-        <translation>Írásmód</translation>
+        <translation>Schreibmodus</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="664" />
         <source>Choose whether the text direction (horizontal or vertical) is detected automatically per region or forced to follow the global writing direction setting.</source>
-        <translation>Válassza ki, hogy a rendszer automatikusan érzékeli-e a szöveg irányát (vízszintes vagy függőleges) régiónként, vagy kénytelen követni a globális írási irány beállítását.</translation>
+        <translation>Wählen Sie, ob die Textrichtung (horizontal oder vertikal) automatisch pro Region erkannt wird oder ob sie der globalen Einstellung für die Schreibrichtung folgen muss.</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="672" />
         <source>Keep existing</source>
-        <translation>Meglévő megtartása</translation>
+        <translation>Bleiben Sie bestehen</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="672" />
         <source>Always use global setting</source>
-        <translation>Mindig a globális beállítások használata</translation>
+        <translation>Verwenden Sie immer die globale Einstellung</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="672" />
         <source>Font Family</source>
-        <translation>Betűcsalád</translation>
+        <translation>Schriftfamilie</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="674" />
         <source>Choose whether the existing region fonts from the original text are preserved or if they are entirely replaced by the global font family setting.</source>
-        <translation>Válassza ki, hogy az eredeti szöveg meglévő régió-betűkészletei megmaradjanak-e, vagy teljes egészében lecserélje őket a globális betűtípuscsalád-beállítás.</translation>
+        <translation>Wählen Sie, ob die vorhandenen Regionsschriftarten aus dem Originaltext erhalten bleiben oder vollständig durch die globale Schriftfamilieneinstellung ersetzt werden sollen.</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="683" />
         <source>Auto layout</source>
-        <translation>Automata elrendezés</translation>
+        <translation>Automatisches Layout</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="684" />
         <source>Split translation into multi-lines according to the extracted balloon region.</source>
-        <translation>A fordítás elosztása több sorra a kivont szövegbuborékrésznek megfelelően.</translation>
+        <translation>Teilen Sie die Übersetzung entsprechend der extrahierten Ballonregion in mehrere Zeilen auf.</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="687" />
         <source>To uppercase</source>
-        <translation>Nagybetűsítés</translation>
+        <translation>In Großbuchstaben</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="690" />
         <source>Independent text styles for each projects</source>
-        <translation>Eltérő szövegstílus minden egyes projektnek</translation>
+        <translation>Unabhängige Textstile für jedes Projekt</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="693" />
         <source>Show only custom fonts</source>
-        <translation>Csak egyedi betűtípusok mutatása</translation>
+        <translation>Nur benutzerdefinierte Schriftarten anzeigen</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="697" />
         <source>Result image format</source>
-        <translation>Végeredmény képformátuma</translation>
+        <translation>Ergebnisbildformat</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="708" />
         <source>Intermediate image format</source>
-        <translation>Köztes képformátum</translation>
+        <translation>Zwischenbildformat</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="714" />
         <source>Intermediate quality</source>
-        <translation>Közepes minőség</translation>
+        <translation>Mittlere Qualität</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="721" />
         <source>&lt;a href="https://github.com/dmMaze/BallonsTranslator/tree/master/doc/saladict.md"&gt;Installation guide&lt;/a&gt;</source>
-        <translation>&lt;a href="https://github.com/dmMaze/BallonsTranslator/blob/dev/doc/saladict_es.md"&gt;Guía de instalación&lt;/a&gt;</translation>
+        <translation>&lt;a href="https://github.com/dmMaze/BallonsTranslator/tree/master/doc/saladict.md"&gt;Installationsanleitung&lt;/a&gt;</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="725" />
         <source>Show mini menu when selecting text.</source>
-        <translation>Mini menü mutatása szövegkijelölés esetén</translation>
+        <translation>Beim Auswählen von Text Minimenü anzeigen.</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="731" />
         <source>Shortcut</source>
-        <translation>Gyorsbillentyű</translation>
+        <translation>Abkürzung</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="734" />
         <source>Search Engines</source>
-        <translation>Keresőmotorok</translation>
+        <translation>Suchmaschinen</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="838" />
@@ -641,42 +641,42 @@
         <location filename="..\ui\configpanel.py" line="779" />
         <location filename="..\ui\configpanel.py" line="770" />
         <source>Settings</source>
-        <translation>Beállítások elemre</translation>
+        <translation>Einstellungen</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="770" />
         <source>Settings loaded from </source>
-        <translation>Beállítások betöltve innen</translation>
+        <translation>Einstellungen geladen von</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="779" />
         <source>Failed to apply settings preset: </source>
-        <translation>Nem sikerült az előre beállított beállítások alkalmazása:</translation>
+        <translation>Die voreingestellten Einstellungen konnten nicht angewendet werden:</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="782" />
         <source>Save settings preset</source>
-        <translation>Előre beállított beállítások mentése</translation>
+        <translation>Voreingestellte Einstellungen speichern</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="782" />
         <source>Preset name:</source>
-        <translation>Előre beállított név:</translation>
+        <translation>Name der Voreinstellung:</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="788" />
         <source>Settings preset saved.</source>
-        <translation>Az előre beállított beállítások elmentve.</translation>
+        <translation>Voreingestellte Einstellungen gespeichert.</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="790" />
         <source>Failed to save settings preset: </source>
-        <translation>Nem sikerült menteni az előre beállított beállításokat:</translation>
+        <translation>Voreingestellte Einstellungen konnten nicht gespeichert werden:</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="793" />
         <source>Import settings preset</source>
-        <translation>Előre beállított beállítások importálása</translation>
+        <translation>Importeinstellungen voreingestellt</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="832" />
@@ -684,309 +684,309 @@
         <location filename="..\ui\configpanel.py" line="807" />
         <location filename="..\ui\configpanel.py" line="793" />
         <source>JSON files (*.json)</source>
-        <translation>JSON-fájlok (*.json)</translation>
+        <translation>JSON-Dateien (*.json)</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="799" />
         <source>Settings preset imported.</source>
-        <translation>Előre beállított beállítások importálva.</translation>
+        <translation>Voreingestellte Einstellungen importiert.</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="801" />
         <source>Failed to import settings preset: </source>
-        <translation>Nem sikerült importálni az előre beállított beállításokat:</translation>
+        <translation>Voreingestellte Einstellungen konnten nicht importiert werden:</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="807" />
         <source>Export settings preset</source>
-        <translation>Előre beállított beállítások exportálása</translation>
+        <translation>Exporteinstellungen voreingestellt</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="814" />
         <source>Settings preset exported.</source>
-        <translation>Előre beállított beállítások exportálva.</translation>
+        <translation>Voreingestellte Einstellungen exportiert.</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="816" />
         <source>Failed to export settings preset.</source>
-        <translation>Nem sikerült exportálni az előre beállított beállításokat.</translation>
+        <translation>Die voreingestellten Einstellungen konnten nicht exportiert werden.</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="818" />
         <source>Failed to export settings preset: </source>
-        <translation>Nem sikerült exportálni az előre beállított beállításokat:</translation>
+        <translation>Voreingestellte Einstellungen konnten nicht exportiert werden:</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="827" />
         <source>Current settings exported.</source>
-        <translation>Az aktuális beállítások exportálva.</translation>
+        <translation>Aktuelle Einstellungen exportiert.</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="829" />
         <source>Failed to export current settings.</source>
-        <translation>Nem sikerült exportálni az aktuális beállításokat.</translation>
+        <translation>Aktuelle Einstellungen konnten nicht exportiert werden.</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="838" />
         <source>Failed to import settings file: </source>
-        <translation>Nem sikerült importálni a beállításfájlt:</translation>
+        <translation>Einstellungsdatei konnte nicht importiert werden:</translation>
     </message>
 </context><context>
     <name>DrawingPanel</name>
     <message>
         <location filename="..\ui\drawingpanel.py" line="353" />
         <source>Mask Opacity</source>
-        <translation>Maszk átlátszóság</translation>
+        <translation>Deckkraft der Maske</translation>
     </message>
 </context><context>
     <name>ExportDocThread</name>
     <message>
         <location filename="..\ui\io_thread.py" line="114" />
         <source>Export as doc...</source>
-        <translation>DOC exportálása...</translation>
+        <translation>Als Dokument exportieren...</translation>
     </message>
     <message>
         <location filename="..\ui\io_thread.py" line="120" />
         <source>Overwrite </source>
-        <translation>Felülírás</translation>
+        <translation>Überschreiben</translation>
     </message>
 </context><context>
     <name>FontFormatPanel</name>
     <message>
         <location filename="..\ui\text_panel.py" line="262" />
         <source>Font Family</source>
-        <translation>Betűtípus</translation>
+        <translation>Schriftfamilie</translation>
     </message>
     <message>
         <location filename="..\ui\text_panel.py" line="267" />
         <source>Font Size</source>
-        <translation>Betűméret</translation>
+        <translation>Schriftgröße</translation>
     </message>
     <message>
         <location filename="..\ui\text_panel.py" line="269" />
         <source>Change font size</source>
-        <translation>Betűméret változtatása</translation>
+        <translation>Schriftgröße ändern</translation>
     </message>
     <message>
         <location filename="..\ui\text_panel.py" line="279" />
         <source>Change line spacing</source>
-        <translation>Sortávolság változtatása</translation>
+        <translation>Zeilenabstand ändern</translation>
     </message>
     <message>
         <location filename="..\ui\text_panel.py" line="283" />
         <source>Change font color</source>
-        <translation>Betűszín változtatása</translation>
+        <translation>Schriftfarbe ändern</translation>
     </message>
     <message>
         <location filename="..\ui\text_panel.py" line="300" />
         <source>Change stroke width</source>
-        <translation>Körvonal szélessége</translation>
+        <translation>Strichstärke ändern</translation>
     </message>
     <message>
         <location filename="..\ui\text_panel.py" line="303" />
         <source>Stroke</source>
-        <translation>Körvonal</translation>
+        <translation>Schlaganfall</translation>
     </message>
     <message>
         <location filename="..\ui\text_panel.py" line="312" />
         <source>Change stroke color</source>
-        <translation>Körvonal színe</translation>
+        <translation>Strichfarbe ändern</translation>
     </message>
     <message>
         <location filename="..\ui\text_panel.py" line="325" />
         <source>Change letter spacing</source>
-        <translation>Betűtávolság változtatása</translation>
+        <translation>Buchstabenabstand ändern</translation>
     </message>
     <message>
         <location filename="..\ui\text_panel.py" line="339" />
         <source>Global Font Format</source>
-        <translation>Globális betű formátum</translation>
+        <translation>Globales Schriftformat</translation>
     </message>
     <message>
         <location filename="..\ui\text_panel.py" line="349" />
         <source>Advanced Text Format</source>
-        <translation>Haladó szövegformázás</translation>
+        <translation>Erweitertes Textformat</translation>
     </message>
     <message>
         <location filename="..\ui\text_panel.py" line="369" />
         <source>Unfold</source>
-        <translation>Kinyit</translation>
+        <translation>Entfalten</translation>
     </message>
     <message>
         <location filename="..\ui\text_panel.py" line="369" />
         <source>Fold</source>
-        <translation>Becsuk</translation>
+        <translation>Falten</translation>
     </message>
     <message>
         <location filename="..\ui\text_panel.py" line="370" />
         <source>Source</source>
-        <translation>Eredeti</translation>
+        <translation>Quelle</translation>
     </message>
     <message>
         <location filename="..\ui\text_panel.py" line="371" />
         <source>Translation</source>
-        <translation>Fordítás</translation>
+        <translation>Übersetzung</translation>
     </message>
 </context><context>
     <name>GlobalReplaceThead</name>
     <message>
         <location filename="..\ui\global_search_widget.py" line="189" />
         <source>Replace...</source>
-        <translation>Csere...</translation>
+        <translation>Ersetzen...</translation>
     </message>
     <message>
         <location filename="..\ui\global_search_widget.py" line="195" />
         <source>Replace all occurrences?</source>
-        <translation>Mindenhol cseréljek?</translation>
+        <translation>Alle Vorkommen ersetzen?</translation>
     </message>
 </context><context>
     <name>GlobalSearchWidget</name>
     <message>
         <location filename="..\ui\global_search_widget.py" line="305" />
         <source>Find</source>
-        <translation>Keresés</translation>
+        <translation>Finden</translation>
     </message>
     <message>
         <location filename="..\ui\global_search_widget.py" line="308" />
         <source>No results found. </source>
-        <translation>Nincs találat.</translation>
+        <translation>Keine Ergebnisse gefunden.</translation>
     </message>
     <message>
         <location filename="..\ui\global_search_widget.py" line="309" />
         <source>Document changed. Press Enter to re-search.</source>
-        <translation>Dokumentum megváltozott. Nyomj Enter-t az újra kereséshez.</translation>
+        <translation>Dokument geändert. Drücken Sie die Eingabetaste, um die Suche erneut durchzuführen.</translation>
     </message>
     <message>
         <location filename="..\ui\global_search_widget.py" line="310" />
         <source>Found results: </source>
-        <translation>Találatok:</translation>
+        <translation>Gefundene Ergebnisse:</translation>
     </message>
     <message>
         <location filename="..\ui\global_search_widget.py" line="316" />
         <source>Match Case</source>
-        <translation>Kis- és nagybetű számít</translation>
+        <translation>Streichholzetui</translation>
     </message>
     <message>
         <location filename="..\ui\global_search_widget.py" line="321" />
         <source>Match Whole Word</source>
-        <translation>Teljes szóval egyező</translation>
+        <translation>Ganzes Wort abgleichen</translation>
     </message>
     <message>
         <location filename="..\ui\global_search_widget.py" line="326" />
         <source>Use Regular Expression</source>
-        <translation>Reguláris kifejezés használata</translation>
+        <translation>Verwenden Sie reguläre Ausdrücke</translation>
     </message>
     <message>
         <location filename="..\ui\global_search_widget.py" line="330" />
         <source>Translation</source>
-        <translation>Fordítás</translation>
+        <translation>Übersetzung</translation>
     </message>
     <message>
         <location filename="..\ui\global_search_widget.py" line="330" />
         <source>Source</source>
-        <translation>Eredeti</translation>
+        <translation>Quelle</translation>
     </message>
     <message>
         <location filename="..\ui\global_search_widget.py" line="330" />
         <source>All</source>
-        <translation>Mind</translation>
+        <translation>Alle</translation>
     </message>
     <message>
         <location filename="..\ui\global_search_widget.py" line="333" />
         <source> in</source>
-        <translation>benne</translation>
+        <translation>In</translation>
     </message>
     <message>
         <location filename="..\ui\global_search_widget.py" line="336" />
         <source>Replace</source>
-        <translation>Csere</translation>
+        <translation>Ersetzen</translation>
     </message>
     <message>
         <location filename="..\ui\global_search_widget.py" line="339" />
         <source>Replace All</source>
-        <translation>Összes cseréje</translation>
+        <translation>Alle ersetzen</translation>
     </message>
     <message>
         <location filename="..\ui\global_search_widget.py" line="341" />
         <source>Replace All and Re-render all pages</source>
-        <translation>Összes cseréje és minden oldal újra mentése</translation>
+        <translation>Alle ersetzen und alle Seiten neu rendern</translation>
     </message>
     <message>
         <location filename="..\ui\global_search_widget.py" line="382" />
         <source>Replace...</source>
-        <translation>Csere...</translation>
+        <translation>Ersetzen...</translation>
     </message>
     <message>
         <location filename="..\ui\global_search_widget.py" line="487" />
         <source>Replace all occurrences re-render all pages? It can't be undone.</source>
-        <translation>Összes cseréje és minden oldal újra mentése? Nem visszaállítható.</translation>
+        <translation>Alle Vorkommen ersetzen, alle Seiten neu rendern? Es kann nicht rückgängig gemacht werden.</translation>
     </message>
 </context><context>
     <name>GlossaryWindow</name>
     <message>
         <location filename="..\ui\glossary_widget.py" line="25" />
         <source>Project Glossary</source>
-        <translation>Projekt szószedet</translation>
+        <translation>Projektglossar</translation>
     </message>
     <message>
         <location filename="..\ui\glossary_widget.py" line="32" />
         <source>Glossary entries saved in the current project's imgtrans JSON.</source>
-        <translation>A szószedet az aktuális projekt imgtrans JSON-jába mentve.</translation>
+        <translation>Glossareinträge, die im imgtrans-JSON des aktuellen Projekts gespeichert sind.</translation>
     </message>
     <message>
         <location filename="..\ui\glossary_widget.py" line="35" />
         <source>These entries are passed to LLM translators for consistent names, places, titles, and recurring terms.</source>
-        <translation>Ezeket a bejegyzéseket átadjuk az LLM fordítóknak konzisztens nevek, helyek, címek és ismétlődő kifejezések érdekében.</translation>
+        <translation>Diese Einträge werden an LLM-Übersetzer weitergeleitet, um konsistente Namen, Orte, Titel und wiederkehrende Begriffe zu gewährleisten.</translation>
     </message>
     <message>
         <location filename="..\ui\glossary_widget.py" line="46" />
         <source>Project glossary entries. Format when saved: source =&gt; target [category] # note.</source>
-        <translation>Projekt szószedet bejegyzései. Formátum mentéskor: forrás =&gt; cél [kategória] # megjegyzés.</translation>
+        <translation>Projektglossareinträge. Format beim Speichern: Quelle =&gt; Ziel [Kategorie] # Notiz.</translation>
     </message>
     <message>
         <location filename="..\ui\glossary_widget.py" line="51" />
         <source>Glossary prompt</source>
-        <translation>Szószedet prompt</translation>
+        <translation>Glossar-Eingabeaufforderung</translation>
     </message>
     <message>
         <location filename="..\ui\glossary_widget.py" line="53" />
         <source>Custom instructions inserted before the project glossary in LLM translation prompts.</source>
-        <translation>Egyéni utasítások beszúrva a projektszószedet elé az LLM fordítási promptokban.</translation>
+        <translation>Benutzerdefinierte Anweisungen, die vor dem Projektglossar in LLM-Übersetzungsaufforderungen eingefügt werden.</translation>
     </message>
     <message>
         <location filename="..\ui\glossary_widget.py" line="57" />
         <source>Tell the translator how to apply glossary entries. Keep category and note metadata out of translated text.</source>
-        <translation>Mondja el a fordítónak, hogyan alkalmazza a szószedetet. Tartsa távol a kategóriák és jegyzetek metaadatait a lefordított szövegtől.</translation>
+        <translation>Teilen Sie dem Übersetzer mit, wie er Glossareinträge anwendet. Halten Sie Kategorie- und Notizmetadaten aus dem übersetzten Text fern.</translation>
     </message>
     <message>
         <location filename="..\ui\glossary_widget.py" line="62" />
         <source>New</source>
-        <translation>Új</translation>
+        <translation>Neu</translation>
     </message>
     <message>
         <location filename="..\ui\glossary_widget.py" line="63" />
         <source>Add an empty glossary entry.</source>
-        <translation>Adjon hozzá egy üres szószedetet.</translation>
+        <translation>Fügen Sie einen leeren Glossareintrag hinzu.</translation>
     </message>
     <message>
         <location filename="..\ui\glossary_widget.py" line="65" />
         <source>Delete</source>
-        <translation>Töröl</translation>
+        <translation>Löschen</translation>
     </message>
     <message>
         <location filename="..\ui\glossary_widget.py" line="66" />
         <source>Delete selected glossary entries.</source>
-        <translation>Törölje a szószedet kiválasztott bejegyzéseit.</translation>
+        <translation>Ausgewählte Glossareinträge löschen.</translation>
     </message>
     <message>
         <location filename="..\ui\glossary_widget.py" line="68" />
         <source>Save Glossary</source>
-        <translation>Szójegyzék mentése</translation>
+        <translation>Glossar speichern</translation>
     </message>
     <message>
         <location filename="..\ui\glossary_widget.py" line="69" />
         <source>Save the glossary into the current project's imgtrans JSON.</source>
-        <translation>Mentse a szószedetet az aktuális projekt imgtrans JSON-jába.</translation>
+        <translation>Speichern Sie das Glossar im imgtrans-JSON des aktuellen Projekts.</translation>
     </message>
 </context><context>
     <name>ImgtransThread</name>
@@ -994,204 +994,204 @@
         <location filename="..\ui\module_manager.py" line="601" />
         <location filename="..\ui\module_manager.py" line="446" />
         <source>OCR Failed.</source>
-        <translation>OCR nem sikerült.</translation>
+        <translation>OCR fehlgeschlagen.</translation>
     </message>
     <message>
         <location filename="..\ui\module_manager.py" line="519" />
         <source>Decensoring Failed.</source>
-        <translation>A decensoring sikertelen.</translation>
+        <translation>Dezensierung fehlgeschlagen.</translation>
     </message>
     <message>
         <location filename="..\ui\module_manager.py" line="576" />
         <source>Text Detection Failed.</source>
-        <translation>Szövegfelsimerés nem sikerült.</translation>
+        <translation>Texterkennung fehlgeschlagen.</translation>
     </message>
     <message>
         <location filename="..\ui\module_manager.py" line="665" />
         <source>Inpainting Failed.</source>
-        <translation>Belefestés nem sikerült.</translation>
+        <translation>Inpainting fehlgeschlagen.</translation>
     </message>
 </context><context>
     <name>ImportDocThread</name>
     <message>
         <location filename="..\ui\io_thread.py" line="150" />
         <source>Import doc...</source>
-        <translation>Doku importálása...</translation>
+        <translation>Dokument importieren...</translation>
     </message>
     <message>
         <location filename="..\ui\io_thread.py" line="157" />
         <source>Import *.docx</source>
-        <translation>*.docx importálása</translation>
+        <translation>*.docx importieren</translation>
     </message>
 </context><context>
     <name>InpaintConfigPanel</name>
     <message>
         <location filename="..\ui\module_parse_widgets.py" line="469" />
         <source>Let the program decide whether it is necessary to use the selected inpaint method.</source>
-        <translation>A program dönti el, hogy melyik festési módszert kell használni.</translation>
+        <translation>Lassen Sie das Programm entscheiden, ob die ausgewählte Inpaint-Methode verwendet werden muss.</translation>
     </message>
     <message>
         <location filename="..\ui\module_parse_widgets.py" line="470" />
         <source>When enabled, the app decides per region whether inpainting is needed before rendering translated text.</source>
-        <translation>Ha engedélyezve van, az alkalmazás régiónként dönti el, hogy szükség van-e festésre a lefordított szöveg megjelenítése előtt.</translation>
+        <translation>Wenn diese Option aktiviert ist, entscheidet die App pro Region, ob Inpainting erforderlich ist, bevor übersetzter Text gerendert wird.</translation>
     </message>
 </context><context>
     <name>InpaintPanel</name>
     <message>
         <location filename="..\ui\drawingpanel.py" line="74" />
         <source>Thickness</source>
-        <translation>Vastagság</translation>
+        <translation>Dicke</translation>
     </message>
     <message>
         <location filename="..\ui\drawingpanel.py" line="79" />
         <source>Shape</source>
-        <translation>Alakzat</translation>
+        <translation>Form</translation>
     </message>
     <message>
         <location filename="..\ui\drawingpanel.py" line="82" />
         <source>Circle</source>
-        <translation>Kör</translation>
+        <translation>Kreis</translation>
     </message>
     <message>
         <location filename="..\ui\drawingpanel.py" line="83" />
         <source>Rectangle</source>
-        <translation>Négyzet</translation>
+        <translation>Rechteck</translation>
     </message>
     <message>
         <location filename="..\ui\drawingpanel.py" line="92" />
         <source>Inpainter</source>
-        <translation>Belefestő</translation>
+        <translation>Inmaler</translation>
     </message>
 </context><context>
     <name>InpaintThread</name>
     <message>
         <location filename="..\ui\module_manager.py" line="130" />
         <source>Inpainting Failed.</source>
-        <translation>Belefestés nem sikerült.</translation>
+        <translation>Inpainting fehlgeschlagen.</translation>
     </message>
 </context><context>
     <name>KeywordSubWidget</name>
     <message>
         <location filename="..\ui\keywordsubwidget.py" line="25" />
         <source>Keyword</source>
-        <translation>Kulcsszó</translation>
+        <translation>Stichwort</translation>
     </message>
     <message>
         <location filename="..\ui\keywordsubwidget.py" line="26" />
         <source>Substitution</source>
-        <translation>Csere</translation>
+        <translation>Auswechslung</translation>
     </message>
     <message>
         <location filename="..\ui\keywordsubwidget.py" line="27" />
         <source>Use regex</source>
-        <translation>Regex használata</translation>
+        <translation>Verwenden Sie Regex</translation>
     </message>
     <message>
         <location filename="..\ui\keywordsubwidget.py" line="28" />
         <source>Case sensitive</source>
-        <translation>Kis- és nagybetű érzékeny</translation>
+        <translation>Groß- und Kleinschreibung beachten</translation>
     </message>
     <message>
         <location filename="..\ui\keywordsubwidget.py" line="35" />
         <source>New</source>
-        <translation>Új</translation>
+        <translation>Neu</translation>
     </message>
     <message>
         <location filename="..\ui\keywordsubwidget.py" line="37" />
         <source>Delete</source>
-        <translation>Törlés</translation>
+        <translation>Löschen</translation>
     </message>
 </context><context>
     <name>LeftBar</name>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="76" />
         <source>Pages: show or hide the project page list.</source>
-        <translation>Oldalak: a projekt oldallistájának megjelenítése vagy elrejtése.</translation>
+        <translation>Seiten: Anzeigen oder Ausblenden der Projektseitenliste.</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="80" />
         <source>Search/Replace: find and replace text across the project (Ctrl+G).</source>
-        <translation>Keresés/Csere: szöveg keresése és cseréje a projektben (Ctrl+G).</translation>
+        <translation>Suchen/Ersetzen: Text im gesamten Projekt suchen und ersetzen (Strg+G).</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="84" />
         <source>Translation workspace: show the canvas, page list, and editing panels.</source>
-        <translation>Fordítási munkaterület: a vászon, az oldallista és a szerkesztőpanelek megjelenítése.</translation>
+        <translation>Übersetzungsarbeitsbereich: Zeigt die Leinwand, die Seitenliste und die Bearbeitungsbereiche an.</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="89" />
         <source>Settings: configure OCR, translation, inpainting, text detection, and app options.</source>
-        <translation>Beállítások: OCR, fordítás, festés, szövegészlelés és alkalmazásbeállítások konfigurálása.</translation>
+        <translation>Einstellungen: Konfigurieren Sie OCR, Übersetzung, Inpainting, Texterkennung und App-Optionen.</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="93" />
         <source>Open Folder ...</source>
-        <translation>Mappa megnyitása...</translation>
+        <translation>Ordner öffnen ...</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="97" />
         <source>Open Project ... *.json</source>
-        <translation>Peojekt megnyitása ... *.json</translation>
+        <translation>Öffnen Sie das Projekt ... *.json</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="100" />
         <source>Save Project</source>
-        <translation>Projekt mentés</translation>
+        <translation>Projekt speichern</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="104" />
         <source>Export as Doc</source>
-        <translation>Doc mentése</translation>
+        <translation>Als Dokument exportieren</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="106" />
         <source>Import from Doc</source>
-        <translation>Doc miportálása</translation>
+        <translation>Aus Dokument importieren</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="109" />
         <source>Export source text as TXT</source>
-        <translation>Forrásszöveg exportálása TXT formátumban</translation>
+        <translation>Quelltext als TXT exportieren</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="111" />
         <source>Export translation as TXT</source>
-        <translation>Lefordított szöveg exportálása TXT</translation>
+        <translation>Übersetzung als TXT exportieren</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="114" />
         <source>Export source text as markdown</source>
-        <translation>Forrásszöveg exportálása leértékelésként</translation>
+        <translation>Quelltext als Markdown exportieren</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="116" />
         <source>Export translation as markdown</source>
-        <translation>Lefordított szöveg exportálása  markdown</translation>
+        <translation>Übersetzung als Markdown exportieren</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="119" />
         <source>Import translation from TXT/markdown</source>
-        <translation>Lefordított szöveg importálása TXT TXT/markdown</translation>
+        <translation>Übersetzung aus TXT/Markdown importieren</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="122" />
         <source>Open Recent</source>
-        <translation>Legutóbbi megnyitása</translation>
+        <translation>Zuletzt geöffnet</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="140" />
         <source>Menu: open, save, import, and export projects.</source>
-        <translation>Menü: projektek megnyitása, mentése, importálása és exportálása.</translation>
+        <translation>Menü: Projekte öffnen, speichern, importieren und exportieren.</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="150" />
         <source>Run</source>
-        <translation>Fut</translation>
+        <translation>Laufen</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="155" />
         <source>Run: process the project with the enabled detection, OCR, translation, and inpainting stages.</source>
-        <translation>Futtatás: a projekt feldolgozása az engedélyezett észlelési, OCR, fordítási és festési szakaszokkal.</translation>
+        <translation>Ausführen: Verarbeiten Sie das Projekt mit den aktivierten Erkennungs-, OCR-, Übersetzungs- und Inpainting-Phasen.</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="161" />
@@ -1201,96 +1201,80 @@
     <message>
         <location filename="..\ui\mainwindowbars.py" line="162" />
         <source>Translate only: run translation on existing text boxes without text detection, OCR, or inpainting.</source>
-        <translation>Csak fordítás: a fordítás futtatása meglévő szövegdobozokon szövegészlelés, OCR vagy festés nélkül.</translation>
+        <translation>Nur übersetzen: Führen Sie die Übersetzung vorhandener Textfelder ohne Texterkennung, OCR oder Inpainting aus.</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="172" />
         <source>Gloss</source>
-        <translation>Fényes</translation>
+        <translation>Glanz</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="173" />
         <source>Glossary: open the current project glossary.</source>
-        <translation>Szószedet: nyissa meg az aktuális projekt szószedet.</translation>
+        <translation>Glossar: Öffnen Sie das aktuelle Projektglossar.</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="273" />
         <source>Select Directory</source>
-        <translation>Mappa  kiválasztása</translation>
+        <translation>Wählen Sie Verzeichnis aus</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="280" />
         <source>Import *.docx</source>
-        <translation>*.docx importálás</translation>
-    </message>
-    <message>
-        <source>Global Search (Ctrl+G)</source>
-        <translation type="vanished">Keresés mindenhol (Ctrl+G)</translation>
-    </message>
-    <message>
-        <source>Export soure text as TXT</source>
-        <translation type="vanished">Eredeti szöveg exportálása TXT</translation>
-    </message>
-    <message>
-        <source>Export soure text as markdown</source>
-        <translation type="vanished">Eredeti szöveg exportálása Markdown</translation>
-    </message>
-    <message>
-        <source>RUN</source>
-        <translation type="vanished">FUTTATÁS</translation>
+        <translation>*.docx importieren</translation>
     </message>
 </context><context>
     <name>MainWindow</name>
     <message>
         <location filename="..\ui\mainwindow.py" line="239" />
         <source>Keyword substitution for source text</source>
-        <translation>Eredeti szövegben kulcsszó csere</translation>
+        <translation>Schlüsselwort-Ersetzung für Quelltext</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="243" />
         <source>Keyword substitution for machine translation source text</source>
-        <translation>Gépi fordított eredeti szövegben kulcsszó csere</translation>
+        <translation>Schlüsselwort-Ersetzung für maschinell übersetzten Quelltext</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="247" />
         <source>Keyword substitution for machine translation</source>
-        <translation>Gépi fordításban kulcsszó csere</translation>
+        <translation>Schlüsselwortsubstitution für maschinelle Übersetzung</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="531" />
         <source>Failed to load project </source>
-        <translation>Nem sikerült a projekt megnyitása</translation>
+        <translation>Projekt konnte nicht geladen werden</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="574" />
         <source>Failed to load project from</source>
-        <translation>Nem sikerült a projekt megnyitása innen</translation>
+        <translation>Projekt konnte nicht geladen werden</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="596" />
         <source>Ignored in pipeline runs: text detection, OCR, translation, and inpainting are skipped for this page.</source>
-        <translation>Figyelmen kívül hagyva a folyamat során: a szövegészlelés, az OCR, a fordítás és a befestés ezen az oldalon kimarad.</translation>
+        <translation>Wird bei Pipeline-Ausführungen ignoriert: Texterkennung, OCR, Übersetzung und Inpainting werden für diese Seite übersprungen.</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="599" />
         <source>Page preview</source>
-        <translation>Oldal előnézete</translation>
+        <translation>Seitenvorschau</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="641" />
         <source>Open a project before editing the glossary.</source>
-        <translation>Nyisson meg egy projektet a szószedet szerkesztése előtt.</translation>
+        <translation>Öffnen Sie ein Projekt, bevor Sie das Glossar bearbeiten.</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="656" />
         <source>Failed to save project glossary</source>
-        <translation>Nem sikerült menteni a projekt szószedet</translation>
+        <translation>Projektglossar konnte nicht gespeichert werden</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="685" />
         <source>Restart to apply changes? 
 </source>
-        <translation>A változások beállításához újraindítsam a programot?</translation>
+        <translation>Neu starten, um die Änderungen zu übernehmen?</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="1063" />
@@ -1299,43 +1283,43 @@
         <location filename="..\ui\mainwindow.py" line="993" />
         <location filename="..\ui\mainwindow.py" line="983" />
         <source>Warning</source>
-        <translation>Figyelmeztetés</translation>
+        <translation>Warnung</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="983" />
         <source>Please open a project first.</source>
-        <translation>Kérjük, először nyisson meg egy projektet.</translation>
+        <translation>Bitte öffnen Sie zunächst ein Projekt.</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="993" />
         <source>No current file.</source>
-        <translation>Nincs aktuális fájl.</translation>
+        <translation>Keine aktuelle Datei.</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="997" />
         <source>Current page data does not exist.</source>
-        <translation>Az aktuális oldaladatok nem léteznek.</translation>
+        <translation>Aktuelle Seitendaten sind nicht vorhanden.</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="1054" />
         <location filename="..\ui\mainwindow.py" line="1002" />
         <source>Notice</source>
-        <translation>Értesítés</translation>
+        <translation>Beachten</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="1002" />
         <source>The current page has no text boxes.</source>
-        <translation>Az aktuális oldalon nincsenek szövegdobozok.</translation>
+        <translation>Die aktuelle Seite enthält keine Textfelder.</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="1035" />
         <source>Success</source>
-        <translation>Siker</translation>
+        <translation>Erfolg</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="1036" />
         <source>Merge complete: box count {initial} -&gt; {final} ({reduced} fewer)</source>
-        <translation>Egyesítés kész: dobozok száma {initial} -&gt; {final} ({reduced} kevesebb)</translation>
+        <translation>Zusammenführung abgeschlossen: Boxanzahl {initial} -&gt; {final} ({reduced} weniger)</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="1044" />
@@ -1348,375 +1332,361 @@ Suggestions:
 2. Lower the minimum overlap ratio (for example 50-70%).
 3. Disable 'Enable labels excluded from merging'.
 4. Check whether the labels are blacklisted.</source>
-        <translation>Nem történt összevonás.
-{count} szövegmező található.
-Címketípusok: {labels}
+        <translation>Es wurde keine Zusammenführung durchgeführt.
+Es gibt {count} Textfelder.
+Etikettentypen: {labels}
 
-Javaslatok:
-1. Próbálja meg növelni a maximális hézagértéket (például 100-200).
-2. Csökkentse a minimális átfedési arányt (például 50-70%).
-3. Kapcsolja ki az "Egyesítésből kizárt címkék engedélyezése" beállítást.
-4. Ellenőrizze, hogy a címkék szerepelnek-e a feketelistán.</translation>
+Vorschläge:
+1. Versuchen Sie, den maximalen Abstandswert zu erhöhen (z. B. 100–200).
+2. Verringern Sie das Mindestüberlappungsverhältnis (z. B. 50–70 %).
+3. Deaktivieren Sie „Vom Zusammenführen ausgeschlossene Labels aktivieren“.
+4. Prüfen Sie, ob die Etiketten auf der schwarzen Liste stehen.</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="1053" />
         <source>none</source>
-        <translation>egyik sem</translation>
+        <translation>keiner</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="1058" />
         <source>The project has no images.</source>
-        <translation>A projektben nincsenek képek.</translation>
+        <translation>Das Projekt hat keine Bilder.</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="1063" />
         <source>Project JSON file not found: {path}</source>
-        <translation>A projekt JSON-fájlja nem található: {path}</translation>
+        <translation>Projekt-JSON-Datei nicht gefunden: {path}</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="1107" />
         <source>Complete</source>
-        <translation>Teljes</translation>
+        <translation>Vollständig</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="1108" />
         <source>Region merge complete
 Succeeded: {success}/{total}
 Failed: {failed}/{total}</source>
-        <translation>A régió egyesítése befejeződött
-Sikerült: {success}/{total}
-Sikertelen: {failed}/{total}</translation>
+        <translation>Regionszusammenführung abgeschlossen
+Erfolgreich: {success}/{total}
+Fehlgeschlagen: {failed}/{total}</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="1385" />
         <source>Open a project page before running a translation benchmark.</source>
-        <translation>Fordítási referenciaérték futtatása előtt nyissa meg a projekt oldalát.</translation>
+        <translation>Öffnen Sie eine Projektseite, bevor Sie einen Übersetzungs-Benchmark ausführen.</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="1390" />
         <source>The current page has no source text to benchmark.</source>
-        <translation>Az aktuális oldalon nincs összehasonlítható forrásszöveg.</translation>
+        <translation>Die aktuelle Seite enthält keinen Quelltext zum Vergleichen.</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="1570" />
         <source>unsaved</source>
-        <translation>mentetlen</translation>
+        <translation>nicht gespeichert</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="1570" />
         <source>saved</source>
-        <translation>mentett</translation>
+        <translation>gespeichert</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="1604" />
         <source>Saving image...</source>
-        <translation>Kép mentése...</translation>
+        <translation>Bild wird gespeichert...</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="1620" />
         <source>Confirmation</source>
-        <translation>Megerősítés</translation>
+        <translation>Bestätigung</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="1621" />
         <source>"Run" will clear previous results, "Continue" will try to run from previous progress</source>
-        <translation>A "Futtatás" törli a korábbi eredményeket, a "Folytatás" pedig megpróbálja futtatni a korábbi eredményeket</translation>
+        <translation>„Ausführen“ löscht vorherige Ergebnisse, „Weiter“ versucht, vom vorherigen Fortschritt aus fortzufahren</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="1624" />
         <source>Run</source>
-        <translation>Fut</translation>
+        <translation>Laufen</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="1625" />
         <source>Continue</source>
-        <translation>Folytatás</translation>
+        <translation>Weitermachen</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="1626" />
         <source>Cancel</source>
-        <translation>Mégse</translation>
+        <translation>Stornieren</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="1682" />
         <source>All pages are ignored for pipeline runs.</source>
-        <translation>A folyamat minden oldalt figyelmen kívül hagy a folyamat során.</translation>
+        <translation>Bei Pipelineausführungen werden alle Seiten ignoriert.</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="1738" />
         <source>Import Text Styles</source>
-        <translation>Szövegstílus importálása</translation>
+        <translation>Textstile importieren</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="1752" />
         <source>Save Text Styles</source>
-        <translation>Szövegstílus mentése</translation>
+        <translation>Textstile speichern</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="1795" />
         <source>Text file exported to </source>
-        <translation>Szöveges fájl mentése ide</translation>
+        <translation>Textdatei exportiert nach</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="1797" />
         <source>Failed to export as TEXT file</source>
-        <translation>Nem sikerült a TXT fájl exportálása</translation>
+        <translation>Der Export als TEXT-Datei ist fehlgeschlagen</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="1803" />
         <source>Import *.md/*.txt</source>
-        <translation>*.md/*.txt importálása</translation>
+        <translation>*.md/*.txt importieren</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="1815" />
         <source>Translation imported and matched successfully.</source>
-        <translation>Sikeres importálása és egyezése a fordításnak.</translation>
+        <translation>Übersetzung erfolgreich importiert und abgeglichen.</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="1817" />
         <source>Imported txt file not fully matched with current project, please make sure source txt file structured like results from "export TXT/markdown"</source>
-        <translation>Az importált txt fájl nem felel meg teljesen az aktuális projektnek, kérjük, győződjön meg róla, hogy a forrás txt fájl szerkezete megegyezik a „TXT/markdown exportálás” eredményével.</translation>
+        <translation>Die importierte TXT-Datei stimmt nicht vollständig mit dem aktuellen Projekt überein. Bitte stellen Sie sicher, dass die Quell-TXT-Datei wie die Ergebnisse von „TXT/Markdown exportieren“ strukturiert ist.</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="1819" />
         <source>Missing pages: </source>
-        <translation>Hiányzó oldalak: </translation>
+        <translation>Fehlende Seiten:</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="1822" />
         <source>Unexpected pages: </source>
-        <translation>Nem várt oldalak: </translation>
+        <translation>Unerwartete Seiten:</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="1825" />
         <source>Unmatched pages: </source>
-        <translation>Nem passzoló oldalak: </translation>
+        <translation>Nicht übereinstimmende Seiten:</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="1836" />
         <source>Failed to import translation from </source>
-        <translation>Nem sikerült a fordítás importálása innen </translation>
+        <translation>Die Übersetzung konnte nicht importiert werden</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="1847" />
         <source>Failed to save ignored page state</source>
-        <translation>Nem sikerült menteni a figyelmen kívül hagyott oldalállapotot</translation>
+        <translation>Der Status der ignorierten Seite konnte nicht gespeichert werden</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="1853" />
         <source>Delete Page Data</source>
-        <translation>Oldaladatok törlése</translation>
+        <translation>Seitendaten löschen</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="1854" />
         <source>Are you sure you want to delete textboxes, masks, and inpainting for this page?</source>
-        <translation>Biztos benne, hogy törölni szeretné az oldal szövegdobozait, maszkjait és festményeit?</translation>
+        <translation>Sind Sie sicher, dass Sie Textfelder, Masken und Inpainting für diese Seite löschen möchten?</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="1882" />
         <source>Failed to save state after deleting page data</source>
-        <translation>Nem sikerült menteni az állapotot az oldaladatok törlése után</translation>
+        <translation>Der Status konnte nach dem Löschen der Seitendaten nicht gespeichert werden</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="1911" />
         <source>Export to </source>
-        <translation>Exportálás ide </translation>
-    </message>
-    <message>
-        <source>Are you sure to run image translation again?
-All existing translation results will be cleared!</source>
-        <translation type="vanished">Biztos, hogy újra fusson a fordítás?
-Minden eddigi fordítás elveszik!</translation>
-    </message>
-    <message>
-        <source>Failed to load from {p}</source>
-        <translation type="vanished">Nem sikerült betölteni innen {p}</translation>
-    </message>
-    <message>
-        <source>Failed save to {savep}</source>
-        <translation type="vanished">Nem sikerült a mentés ide {savep}</translation>
+        <translation>Exportieren nach</translation>
     </message>
 </context><context>
     <name>MergeDialog</name>
     <message>
         <location filename="..\ui\merge_dialog.py" line="27" />
         <source>Region Merge Tool Settings</source>
-        <translation>Régió egyesítése eszköz beállításai</translation>
+        <translation>Einstellungen für das Tool zum Zusammenführen von Regionen</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="43" />
         <source>Vertical Merge</source>
-        <translation>Függőleges összevonás</translation>
+        <translation>Vertikale Zusammenführung</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="44" />
         <source>Horizontal Merge</source>
-        <translation>Vízszintes összevonás</translation>
+        <translation>Horizontale Zusammenführung</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="45" />
         <source>Vertical then Horizontal</source>
-        <translation>Függőleges, majd vízszintes</translation>
+        <translation>Vertikal, dann horizontal</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="46" />
         <source>Horizontal then Vertical</source>
-        <translation>Vízszintes, majd függőleges</translation>
+        <translation>Horizontal, dann vertikal</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="47" />
         <source>None</source>
-        <translation>Egyik sem</translation>
+        <translation>Keiner</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="50" />
         <source>Prefer Shorter Label</source>
-        <translation>Inkább rövidebb címke</translation>
+        <translation>Kürzeres Etikett bevorzugen</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="51" />
         <source>Use First Box Label</source>
-        <translation>Használja a First Box címkét</translation>
+        <translation>Verwenden Sie das Etikett der ersten Box</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="52" />
         <source>Combine Labels (label1+label2)</source>
-        <translation>Címkék kombinálása (label1+label2)</translation>
+        <translation>Etiketten kombinieren (label1+label2)</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="53" />
         <source>Prefer Non-default Label</source>
-        <translation>Nem alapértelmezett címke előnyben részesítése</translation>
+        <translation>Nicht-Standardbezeichnung bevorzugen</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="57" />
         <source>Main Settings</source>
-        <translation>Fő beállítások</translation>
+        <translation>Haupteinstellungen</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="61" />
         <source>Choose which neighboring text regions are combined before the result is written back.</source>
-        <translation>Válassza ki, hogy mely szomszédos szövegterületek legyenek kombinálva, mielőtt az eredmény visszaírásra kerül.</translation>
+        <translation>Wählen Sie aus, welche benachbarten Textbereiche kombiniert werden, bevor das Ergebnis zurückgeschrieben wird.</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="68" />
         <source>Controls the merge direction. Sequential modes run one direction first and then merge the result in the second direction.</source>
-        <translation>Szabályozza az egyesítés irányát. A szekvenciális módok először az egyik irányba futnak, majd az eredményt a második irányba egyesítik.</translation>
+        <translation>Steuert die Zusammenführungsrichtung. Sequentielle Modi führen zuerst eine Richtung aus und führen dann das Ergebnis in der zweiten Richtung zusammen.</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="71" />
         <source>Merge Mode:</source>
-        <translation>Egyesítési mód:</translation>
+        <translation>Zusammenführungsmodus:</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="75" />
         <source>Text Merge Order (by Label)</source>
-        <translation>Szövegegyesítési sorrend (címke szerint)</translation>
+        <translation>Reihenfolge der Textzusammenführung (nach Label)</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="79" />
         <source>Assign labels to a reading direction so merged text keeps the expected order.</source>
-        <translation>Rendeljen címkéket egy olvasási irányhoz, így az egyesített szöveg megtartja a várt sorrendet.</translation>
+        <translation>Weisen Sie Beschriftungen einer Leserichtung zu, damit der zusammengeführte Text die erwartete Reihenfolge beibehält.</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="84" />
         <source>label1,label2,...</source>
-        <translation>címke1,címke2,...</translation>
+        <translation>Etikett1, Etikett2,...</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="90" />
         <source>Comma-separated labels whose text should be ordered from left to right after merging.</source>
-        <translation>Vesszővel elválasztott címkék, amelyek szövegét egyesítés után balról jobbra kell rendezni.</translation>
+        <translation>Durch Kommas getrennte Etiketten, deren Text nach dem Zusammenführen von links nach rechts sortiert werden soll.</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="91" />
         <source>Comma-separated labels whose text should be ordered from right to left after merging.</source>
-        <translation>Vesszővel elválasztott címkék, amelyek szövegét egyesítés után jobbról balra kell rendezni.</translation>
+        <translation>Durch Kommas getrennte Etiketten, deren Text nach dem Zusammenführen von rechts nach links sortiert werden soll.</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="92" />
         <source>Comma-separated labels whose text should be ordered from top to bottom after merging.</source>
-        <translation>Vesszővel elválasztott címkék, amelyek szövegét egyesítés után felülről lefelé kell rendezni.</translation>
+        <translation>Durch Kommas getrennte Etiketten, deren Text nach dem Zusammenführen von oben nach unten sortiert werden soll.</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="97" />
         <source>Left-to-right (LTR) Labels:</source>
-        <translation>Balról jobbra haladó (LTR) címkék:</translation>
+        <translation>Beschriftungen von links nach rechts (LTR):</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="98" />
         <source>Right-to-left (RTL) Labels:</source>
-        <translation>Jobbról balra (RTL) címkék:</translation>
+        <translation>Beschriftungen von rechts nach links (RTL):</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="99" />
         <source>Top-to-bottom (TTB) Labels:</source>
-        <translation>Felülről lefelé (TTB) címkék:</translation>
+        <translation>Etiketten von oben nach unten (TTB):</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="104" />
         <source>Label Merge Rules</source>
-        <translation>Címkeegyesítési szabályok</translation>
+        <translation>Regeln zum Zusammenführen von Etiketten</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="108" />
         <source>Limit which detected region labels may merge and decide how the merged label is named.</source>
-        <translation>Korlátozza, hogy mely észlelt régiócímkék egyesülhessenek, és döntse el az egyesített címke elnevezését.</translation>
+        <translation>Beschränken Sie, welche erkannten Regionsbezeichnungen zusammengeführt werden dürfen, und legen Sie fest, wie die zusammengeführte Bezeichnung benannt wird.</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="115" />
         <source>Selects which label is kept when multiple labeled regions become one region.</source>
-        <translation>Kiválasztja, hogy melyik címke kerüljön megtartásra, ha több címkézett régió egy régióvá válik.</translation>
+        <translation>Wählt aus, welche Beschriftung beibehalten wird, wenn mehrere beschriftete Regionen zu einer Region werden.</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="117" />
         <source>Label Merge Strategy:</source>
-        <translation>Címkeegyesítési stratégia:</translation>
+        <translation>Strategie zur Etikettenzusammenführung:</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="119" />
         <source>Enable labels excluded from merging (blacklist)</source>
-        <translation>Az egyesítésből kizárt címkék engedélyezése (feketelista)</translation>
+        <translation>Von der Zusammenführung ausgeschlossene Labels aktivieren (Blacklist)</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="121" />
         <source>When enabled, regions with blacklisted labels are never merged.</source>
-        <translation>Ha engedélyezve van, a feketelistán szereplő címkékkel rendelkező régiók soha nem egyesülnek.</translation>
+        <translation>Wenn diese Option aktiviert ist, werden Regionen mit Labels auf der schwarzen Liste niemals zusammengeführt.</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="126" />
         <source>Example: label1,label2</source>
-        <translation>Példa: címke1,címke2</translation>
+        <translation>Beispiel: label1,label2</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="127" />
         <source>Comma-separated labels to leave untouched, even when their geometry matches the merge rules.</source>
-        <translation>A vesszővel elválasztott címkéket érintetlenül hagyhatja, még akkor is, ha geometriája megegyezik az egyesítési szabályokkal.</translation>
+        <translation>Durch Kommas getrennte Beschriftungen bleiben unberührt, auch wenn ihre Geometrie den Zusammenführungsregeln entspricht.</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="129" />
         <source>Blacklisted Labels:</source>
-        <translation>Feketelistán szereplő címkék:</translation>
+        <translation>Auf der schwarzen Liste stehende Labels:</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="133" />
         <source>Require exactly matching labels to merge</source>
-        <translation>Pontosan egyező címkéket kell összevonni</translation>
+        <translation>Zum Zusammenführen sind genau übereinstimmende Beschriftungen erforderlich</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="134" />
         <source>Only merge regions when their labels are identical. Disabled while specific label groups are active.</source>
-        <translation>Csak akkor egyesítse a régiókat, ha a címkéik azonosak. Letiltva, amíg adott címkecsoportok aktívak.</translation>
+        <translation>Führen Sie Regionen nur zusammen, wenn ihre Beschriftungen identisch sind. Deaktiviert, während bestimmte Etikettengruppen aktiv sind.</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="137" />
         <source>Merge only within specific label groups</source>
-        <translation>Egyesítés csak meghatározott címkecsoportokon belül</translation>
+        <translation>Nur innerhalb bestimmter Etikettengruppen zusammenführen</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="138" />
         <source>Restricts merging to labels that appear together on the same group line below.</source>
-        <translation>Az összevonást azokra a címkékre korlátozza, amelyek együtt jelennek meg ugyanazon a csoportsorban lent.</translation>
+        <translation>Beschränkt das Zusammenführen auf Beschriftungen, die zusammen in derselben Gruppenzeile unten angezeigt werden.</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="140" />
@@ -1724,147 +1694,147 @@ Minden eddigi fordítás elveszik!</translation>
 Example:
 balloon,balloon2
 qipao,qipao2</source>
-        <translation>Soronként egy csoport, a címkék vesszővel elválasztva
-Példa:
-léggömb, léggömb2
-qipao, qipao2</translation>
+        <translation>Eine Gruppe pro Zeile, Beschriftungen durch Kommas getrennt
+Beispiel:
+Ballon, Ballon2
+qipao,qipao2</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="145" />
         <source>One merge group per line. Labels on different lines will not merge with each other.</source>
-        <translation>Soronként egy összevonási csoport. A különböző sorokon lévő címkék nem egyesülnek egymással.</translation>
+        <translation>Eine Zusammenführungsgruppe pro Zeile. Beschriftungen in verschiedenen Zeilen werden nicht miteinander verschmelzen.</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="155" />
         <source>Geometric Merge Parameters</source>
-        <translation>Geometriai egyesítési paraméterek</translation>
+        <translation>Geometrische Zusammenführungsparameter</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="159" />
         <source>Geometry thresholds decide how close regions must be and how much they must overlap before merging.</source>
-        <translation>A geometriai küszöbök határozzák meg, hogy a régióknak milyen közel kell lenniük, és mennyire kell átfedniük az összevonás előtt.</translation>
+        <translation>Geometrieschwellenwerte entscheiden, wie nahe Regionen beieinander liegen und wie stark sie sich überlappen müssen, bevor sie zusammengeführt werden.</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="181" />
         <source>Maximum pixel distance between vertically stacked boxes. Lower values merge only tighter rows.</source>
-        <translation>Maximális pixeltávolság a függőlegesen egymásra helyezett dobozok között. Az alacsonyabb értékek csak szűkebb sorokat vonnak össze.</translation>
+        <translation>Maximaler Pixelabstand zwischen vertikal gestapelten Boxen. Niedrigere Werte führen nur engere Zeilen zusammen.</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="182" />
         <source>Minimum left/right overlap required for vertical merging. Higher values require better column alignment.</source>
-        <translation>A függőleges egyesítéshez minimális bal/jobb átfedés szükséges. A magasabb értékek jobb oszlopigazítást igényelnek.</translation>
+        <translation>Für die vertikale Zusammenführung ist eine minimale Überlappung links/rechts erforderlich. Höhere Werte erfordern eine bessere Spaltenausrichtung.</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="183" />
         <source>Maximum pixel distance between side-by-side boxes. Lower values merge only closer boxes.</source>
-        <translation>Maximális pixeltávolság az egymás melletti dobozok között. Az alacsonyabb értékek csak a közelebbi dobozokat egyesítik.</translation>
+        <translation>Maximaler Pixelabstand zwischen nebeneinander liegenden Boxen. Niedrigere Werte führen nur engere Kästchen zusammen.</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="184" />
         <source>Minimum top/bottom overlap required for horizontal merging. Higher values require better row alignment.</source>
-        <translation>A vízszintes egyesítéshez szükséges minimális felső/alsó átfedés. A magasabb értékek jobb sorigazítást igényelnek.</translation>
+        <translation>Für die horizontale Zusammenführung ist eine minimale Überlappung oben/unten erforderlich. Höhere Werte erfordern eine bessere Zeilenausrichtung.</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="191" />
         <source>&lt;b&gt;Vertical Merge (up/down)&lt;/b&gt;</source>
-        <translation>&lt;b&gt;Függőleges egyesítés (fel/le)&lt;/b&gt;</translation>
+        <translation>&lt;b&gt;Vertikale Zusammenführung (oben/unten)&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="192" />
         <source>Maximum Vertical Gap (pixels):</source>
-        <translation>Maximális függőleges rés (pixel):</translation>
+        <translation>Maximaler vertikaler Abstand (Pixel):</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="193" />
         <source>Minimum Horizontal Overlap Ratio:</source>
-        <translation>Minimális vízszintes átfedési arány:</translation>
+        <translation>Minimales horizontales Überlappungsverhältnis:</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="194" />
         <source>&lt;b&gt;Horizontal Merge (left/right)&lt;/b&gt;</source>
-        <translation>&lt;b&gt;Vízszintes egyesítés (bal/jobb)&lt;/b&gt;</translation>
+        <translation>&lt;b&gt;Horizontale Zusammenführung (links/rechts)&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="195" />
         <source>Maximum Horizontal Gap (pixels):</source>
-        <translation>Maximális vízszintes rés (pixel):</translation>
+        <translation>Maximaler horizontaler Abstand (Pixel):</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="196" />
         <source>Minimum Vertical Overlap Ratio:</source>
-        <translation>Minimális függőleges átfedési arány:</translation>
+        <translation>Minimales vertikales Überlappungsverhältnis:</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="201" />
         <source>Advanced Options</source>
-        <translation>Speciális beállítások</translation>
+        <translation>Erweiterte Optionen</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="205" />
         <source>Allow negative gaps (overlapping boxes)</source>
-        <translation>Negatív rések engedélyezése (átfedő dobozok)</translation>
+        <translation>Negative Lücken (überlappende Kästchen) zulassen</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="207" />
         <source>Allows already-overlapping boxes to merge. Disable this to merge only boxes separated by a positive gap.</source>
-        <translation>Lehetővé teszi a már átfedő dobozok összevonását. Kapcsolja ki ezt, ha csak a pozitív hézaggal elválasztott dobozokat szeretné egyesíteni.</translation>
+        <translation>Ermöglicht das Zusammenführen bereits überlappender Boxen. Deaktivieren Sie diese Option, um nur Kästchen zusammenzuführen, die durch eine positive Lücke getrennt sind.</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="213" />
         <source>Merge Result Type</source>
-        <translation>Eredménytípus egyesítése</translation>
+        <translation>Ergebnistyp zusammenführen</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="219" />
         <source>Merge as Axis-aligned Rectangle</source>
-        <translation>Egyesítés tengelyhez igazított téglalapként</translation>
+        <translation>Als achsenausgerichtetes Rechteck zusammenführen</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="220" />
         <source>Merge as Rotated Rectangle</source>
-        <translation>Egyesítés elforgatott téglalapként</translation>
+        <translation>Als gedrehtes Rechteck zusammenführen</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="221" />
         <source>Creates a standard rectangular text region that is aligned to the image axes.</source>
-        <translation>Szabványos téglalap alakú szövegterületet hoz létre, amely a kép tengelyeihez igazodik.</translation>
+        <translation>Erstellt einen standardmäßigen rechteckigen Textbereich, der an den Bildachsen ausgerichtet ist.</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="222" />
         <source>Keeps a rotated rectangle when the merged region should preserve angled text orientation.</source>
-        <translation>Megtartja az elforgatott téglalapot, ha az egyesített területnek meg kell őriznie a szögletes szövegtájolást.</translation>
+        <translation>Behält ein gedrehtes Rechteck bei, wenn der zusammengeführte Bereich die abgewinkelte Textausrichtung beibehalten soll.</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="236" />
         <source>Run on Current File</source>
-        <translation>Futtassa az aktuális fájlt</translation>
+        <translation>Mit aktueller Datei ausführen</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="237" />
         <source>Run on All Files</source>
-        <translation>Futtassa az összes fájlt</translation>
+        <translation>Auf allen Dateien ausführen</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="238" />
         <source>Cancel</source>
-        <translation>Mégse</translation>
+        <translation>Stornieren</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="239" />
         <source>Apply these merge settings only to the currently open file.</source>
-        <translation>Ezeket az egyesítési beállításokat csak az éppen megnyitott fájlra alkalmazza.</translation>
+        <translation>Wenden Sie diese Zusammenführungseinstellungen nur auf die aktuell geöffnete Datei an.</translation>
     </message>
     <message>
         <location filename="..\ui\merge_dialog.py" line="240" />
         <source>Apply these merge settings to every file in the current project.</source>
-        <translation>Alkalmazza ezeket az egyesítési beállításokat az aktuális projekt minden fájljára.</translation>
+        <translation>Wenden Sie diese Zusammenführungseinstellungen auf jede Datei im aktuellen Projekt an.</translation>
     </message>
 </context><context>
     <name>MergeThread</name>
     <message>
         <location filename="..\ui\io_thread.py" line="191" />
         <source>Region Merge: </source>
-        <translation>Régió egyesítése:</translation>
+        <translation>Regionszusammenführung:</translation>
     </message>
 </context><context>
     <name>ModuleConfigParseWidget</name>
@@ -1872,748 +1842,732 @@ qipao, qipao2</translation>
         <location filename="..\ui\module_parse_widgets.py" line="324" />
         <location filename="..\ui\module_parse_widgets.py" line="323" />
         <source>Select which module implementation is used for this step.</source>
-        <translation>Válassza ki, hogy melyik modul implementációt használja ehhez a lépéshez.</translation>
+        <translation>Wählen Sie aus, welche Modulimplementierung für diesen Schritt verwendet wird.</translation>
     </message>
 </context><context>
     <name>ModuleManager</name>
     <message>
         <location filename="..\ui\module_manager.py" line="1325" />
         <source>Set Inpainter...</source>
-        <translation>Belefestő motor beállítása...</translation>
+        <translation>Inpainter einstellen...</translation>
     </message>
 </context><context>
     <name>OCRConfigPanel</name>
     <message>
         <location filename="..\ui\module_parse_widgets.py" line="497" />
         <source>Delete and restore region where OCR return empty string.</source>
-        <translation>Terület törlése és visszaállítása ahol az OCR üres eredményt ad.</translation>
+        <translation>Löschen Sie den Bereich, in dem OCR eine leere Zeichenfolge zurückgibt, und stellen Sie ihn wieder her.</translation>
     </message>
     <message>
         <location filename="..\ui\module_parse_widgets.py" line="498" />
         <source>Remove OCR regions that return empty text and restore the underlying image area.</source>
-        <translation>Távolítsa el az üres szöveget visszaadó OCR-régiókat, és állítsa vissza az alatta lévő képterületet.</translation>
+        <translation>Entfernen Sie OCR-Bereiche, die leeren Text zurückgeben, und stellen Sie den darunter liegenden Bildbereich wieder her.</translation>
     </message>
     <message>
         <location filename="..\ui\module_parse_widgets.py" line="502" />
         <source>Font Detection</source>
-        <translation>Betűfelismerés</translation>
+        <translation>Schrifterkennung</translation>
     </message>
     <message>
         <location filename="..\ui\module_parse_widgets.py" line="503" />
         <source>Try to detect font properties from the source image for each OCR region.</source>
-        <translation>Próbálja meg felismerni a betűtípus tulajdonságait a forrásképből minden OCR-régióhoz.</translation>
+        <translation>Versuchen Sie, Schriftarteigenschaften für jeden OCR-Bereich aus dem Quellbild zu erkennen.</translation>
     </message>
 </context><context>
     <name>PageListView</name>
     <message>
         <location filename="..\ui\mainwindow.py" line="67" />
         <source>Reveal in File Explorer</source>
-        <translation>Megnyitás Fájlkezelőben</translation>
+        <translation>Im Datei-Explorer anzeigen</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="69" />
         <source>Include Page in Pipeline</source>
-        <translation>Oldal belefoglalása a Pipeline-ba</translation>
+        <translation>Seite in Pipeline einbinden</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="69" />
         <source>Ignore Page in Pipeline</source>
-        <translation>Oldal figyelmen kívül hagyása a Pipeline-ban</translation>
+        <translation>Seite in Pipeline ignorieren</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="71" />
         <source>Skip this page during text detection, OCR, translation, and inpainting pipeline runs.</source>
-        <translation>Hagyja ki ezt az oldalt szövegészlelés, OCR, fordítás és festési folyamat közben.</translation>
+        <translation>Überspringen Sie diese Seite während der Ausführung der Texterkennungs-, OCR-, Übersetzungs- und Inpainting-Pipeline.</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="73" />
         <source>Delete Page Data</source>
-        <translation>Oldaladatok törlése</translation>
+        <translation>Seitendaten löschen</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindow.py" line="74" />
         <source>Delete textboxes, masks, and inpainting for this page.</source>
-        <translation>Törölje az oldal szövegdobozait, maszkjait és festményeit.</translation>
+        <translation>Löschen Sie Textfelder, Masken und Inpainting für diese Seite.</translation>
     </message>
 </context><context>
     <name>PageSearchWidget</name>
     <message>
         <location filename="..\ui\page_search_widget.py" line="207" />
         <source>Find</source>
-        <translation>Keresés</translation>
+        <translation>Finden</translation>
     </message>
     <message>
         <location filename="..\ui\page_search_widget.py" line="210" />
         <source>No result</source>
-        <translation>Nincs eredmény</translation>
+        <translation>Kein Ergebnis</translation>
     </message>
     <message>
         <location filename="..\ui\page_search_widget.py" line="216" />
         <source>Previous Match (Shift+Enter)</source>
-        <translation>Előző találat (Shift+Enter)</translation>
+        <translation>Vorheriges Spiel (Umschalt+Eingabetaste)</translation>
     </message>
     <message>
         <location filename="..\ui\page_search_widget.py" line="221" />
         <source>Next Match (Enter)</source>
-        <translation>Következő találat (Enter)</translation>
+        <translation>Nächstes Spiel (Eingabe)</translation>
     </message>
     <message>
         <location filename="..\ui\page_search_widget.py" line="225" />
         <source>Match Case</source>
-        <translation>Betűméret egyezés</translation>
+        <translation>Streichholzetui</translation>
     </message>
     <message>
         <location filename="..\ui\page_search_widget.py" line="230" />
         <source>Match Whole Word</source>
-        <translation>Teljes szóval egyező</translation>
+        <translation>Ganzes Wort abgleichen</translation>
     </message>
     <message>
         <location filename="..\ui\page_search_widget.py" line="235" />
         <source>Use Regular Expression</source>
-        <translation>Regex használata</translation>
+        <translation>Verwenden Sie reguläre Ausdrücke</translation>
     </message>
     <message>
         <location filename="..\ui\page_search_widget.py" line="239" />
         <source>Translation</source>
-        <translation>Fordítás</translation>
+        <translation>Übersetzung</translation>
     </message>
     <message>
         <location filename="..\ui\page_search_widget.py" line="239" />
         <source>Source</source>
-        <translation>Eredeti</translation>
+        <translation>Quelle</translation>
     </message>
     <message>
         <location filename="..\ui\page_search_widget.py" line="239" />
         <source>All</source>
-        <translation>Mind</translation>
+        <translation>Alle</translation>
     </message>
     <message>
         <location filename="..\ui\page_search_widget.py" line="242" />
         <source>Range</source>
-        <translation>Tartomány</translation>
+        <translation>Reichweite</translation>
     </message>
     <message>
         <location filename="..\ui\page_search_widget.py" line="249" />
         <location filename="..\ui\page_search_widget.py" line="245" />
         <source>Replace</source>
-        <translation>Csere</translation>
+        <translation>Ersetzen</translation>
     </message>
     <message>
         <location filename="..\ui\page_search_widget.py" line="253" />
         <source>Replace All</source>
-        <translation>Összes cseréje</translation>
+        <translation>Alle ersetzen</translation>
     </message>
     <message>
         <location filename="..\ui\page_search_widget.py" line="290" />
         <source>Close (Escape)</source>
-        <translation>Bezárás  (Escape)</translation>
+        <translation>Schließen (Flucht)</translation>
     </message>
 </context><context>
     <name>PenConfigPanel</name>
     <message>
         <location filename="..\ui\drawingpanel.py" line="136" />
         <source>Color</source>
-        <translation>Szín</translation>
+        <translation>Farbe</translation>
     </message>
     <message>
         <location filename="..\ui\drawingpanel.py" line="137" />
         <source>Alpha</source>
-        <translation>Átlátszóság</translation>
+        <translation>Alpha</translation>
     </message>
     <message>
         <location filename="..\ui\drawingpanel.py" line="145" />
         <source>Thickness</source>
-        <translation>Vastagság</translation>
+        <translation>Dicke</translation>
     </message>
     <message>
         <location filename="..\ui\drawingpanel.py" line="150" />
         <source>Shape</source>
-        <translation>Alakzat</translation>
+        <translation>Form</translation>
     </message>
     <message>
         <location filename="..\ui\drawingpanel.py" line="153" />
         <source>Circle</source>
-        <translation>Kör</translation>
+        <translation>Kreis</translation>
     </message>
     <message>
         <location filename="..\ui\drawingpanel.py" line="154" />
         <source>Rectangle</source>
-        <translation>Négyzet</translation>
+        <translation>Rechteck</translation>
     </message>
 </context><context>
     <name>RectPanel</name>
     <message>
         <location filename="..\ui\drawingpanel.py" line="197" />
         <source>Dilate</source>
-        <translation>Tágulás</translation>
+        <translation>Erweitern</translation>
     </message>
     <message>
         <location filename="..\ui\drawingpanel.py" line="205" />
         <source>method 1</source>
-        <translation>1 módszer</translation>
+        <translation>Methode 1</translation>
     </message>
     <message>
         <location filename="..\ui\drawingpanel.py" line="206" />
         <source>method 2</source>
-        <translation>2 módszer</translation>
+        <translation>Methode 2</translation>
     </message>
     <message>
         <location filename="..\ui\drawingpanel.py" line="207" />
         <source>Use Existing Mask</source>
-        <translation>Meglévő maszk használata</translation>
+        <translation>Vorhandene Maske verwenden</translation>
     </message>
     <message>
         <location filename="..\ui\drawingpanel.py" line="210" />
         <source>Auto</source>
-        <translation>Automata</translation>
+        <translation>Auto</translation>
     </message>
     <message>
         <location filename="..\ui\drawingpanel.py" line="211" />
         <source>run inpainting automatically.</source>
-        <translation>Belefestés automata futtatása.</translation>
+        <translation>Inpainting automatisch ausführen.</translation>
     </message>
     <message>
         <location filename="..\ui\drawingpanel.py" line="213" />
         <source>Inpaint</source>
-        <translation>Belefestés</translation>
+        <translation>Inpaint</translation>
     </message>
     <message>
         <location filename="..\ui\drawingpanel.py" line="214" />
         <source>Space</source>
-        <translation>Hely</translation>
+        <translation>Raum</translation>
     </message>
     <message>
         <location filename="..\ui\drawingpanel.py" line="216" />
         <source>Delete</source>
-        <translation>Törlés</translation>
+        <translation>Löschen</translation>
     </message>
     <message>
         <location filename="..\ui\drawingpanel.py" line="217" />
         <source>Ctrl+D</source>
-        <translation>Ctrl+D</translation>
+        <translation>Strg+D</translation>
     </message>
     <message>
         <location filename="..\ui\drawingpanel.py" line="224" />
         <source>Inpainter</source>
-        <translation>Belefestő modell</translation>
+        <translation>Inmaler</translation>
     </message>
 </context><context>
     <name>SelectTextMiniMenu</name>
     <message>
         <location filename="..\ui\textedit_area.py" line="37" />
         <source>Search selected text on Internet</source>
-        <translation>Kijelölt szöveg keresése az Interneten</translation>
+        <translation>Durchsuchen Sie den ausgewählten Text im Internet</translation>
     </message>
     <message>
         <location filename="..\ui\textedit_area.py" line="43" />
         <source>Look up selected text in SalaDict, see installation guide in configpanel</source>
-        <translation>Kijelölt szöveg keresése a SalaDict-ben, lásd telepítési útmutató a beállításoknál</translation>
+        <translation>Schlagen Sie den ausgewählten Text in SalaDict nach, siehe Installationsanleitung im Configpanel</translation>
     </message>
 </context><context>
     <name>SelectionWithConfigWidget</name>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="632" />
         <source>Open settings for </source>
-        <translation>Nyissa meg a következőhöz tartozó beállításokat</translation>
+        <translation>Öffnen Sie die Einstellungen für</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="636" />
         <source>Select </source>
-        <translation>Válassza ki</translation>
+        <translation>Wählen</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="641" />
         <source>Configure </source>
-        <translation>Konfigurálás</translation>
+        <translation>Konfigurieren</translation>
     </message>
 </context><context>
     <name>TextAdvancedFormatPanel</name>
     <message>
         <location filename="..\ui\text_advanced_format.py" line="150" />
         <source>Proportional</source>
-        <translation>Arányos</translation>
+        <translation>Proportional</translation>
     </message>
     <message>
         <location filename="..\ui\text_advanced_format.py" line="151" />
         <source>Distance</source>
-        <translation>Távolság</translation>
+        <translation>Distanz</translation>
     </message>
     <message>
         <location filename="..\ui\text_advanced_format.py" line="155" />
         <source>Line Spacing Type</source>
-        <translation>Sortávolság típusa</translation>
+        <translation>Zeilenabstandstyp</translation>
     </message>
     <message>
         <location filename="..\ui\text_advanced_format.py" line="161" />
         <source>Set Text Opacity</source>
-        <translation>Szöveg átlátszóság beállítása</translation>
+        <translation>Legen Sie die Textdeckkraft fest</translation>
     </message>
     <message>
         <location filename="..\ui\text_advanced_format.py" line="163" />
         <source>Opacity</source>
-        <translation>Átlátszóság</translation>
+        <translation>Opazität</translation>
     </message>
     <message>
         <location filename="..\ui\text_advanced_format.py" line="174" />
         <source>Shadow</source>
-        <translation>Árnyék</translation>
+        <translation>Schatten</translation>
     </message>
 </context><context>
     <name>TextDetectConfigPanel</name>
     <message>
         <location filename="..\ui\module_parse_widgets.py" line="487" />
         <source>Keep Existing Lines</source>
-        <translation>Meglévő sorok megtartása</translation>
+        <translation>Bestehende Leitungen beibehalten</translation>
     </message>
     <message>
         <location filename="..\ui\module_parse_widgets.py" line="488" />
         <source>Keep manually edited or existing text lines instead of replacing them during detection.</source>
-        <translation>Tartsa meg a kézzel szerkesztett vagy meglévő szövegsorokat ahelyett, hogy az észlelés során lecserélné őket.</translation>
+        <translation>Behalten Sie manuell bearbeitete oder vorhandene Textzeilen bei, anstatt sie während der Erkennung zu ersetzen.</translation>
     </message>
 </context><context>
     <name>TextGradientGroup</name>
     <message>
         <location filename="..\ui\text_advanced_format.py" line="84" />
         <source>Gradient</source>
-        <translation>Átmenet</translation>
+        <translation>Gradient</translation>
     </message>
     <message>
         <location filename="..\ui\text_advanced_format.py" line="88" />
         <source>Start Color</source>
-        <translation>Kezdő szín</translation>
+        <translation>Starten Sie Farbe</translation>
     </message>
     <message>
         <location filename="..\ui\text_advanced_format.py" line="94" />
         <source>End Color</source>
-        <translation>Záró szín</translation>
+        <translation>Endfarbe</translation>
     </message>
     <message>
         <location filename="..\ui\text_advanced_format.py" line="99" />
         <source>Enable</source>
-        <translation>Engedélyezés</translation>
+        <translation>Aktivieren</translation>
     </message>
     <message>
         <location filename="..\ui\text_advanced_format.py" line="103" />
         <source>Set Gradient Angle</source>
-        <translation>Átmenet szöge</translation>
+        <translation>Legen Sie den Verlaufswinkel fest</translation>
     </message>
     <message>
         <location filename="..\ui\text_advanced_format.py" line="105" />
         <source>Angle</source>
-        <translation>Szög</translation>
+        <translation>Winkel</translation>
     </message>
     <message>
         <location filename="..\ui\text_advanced_format.py" line="113" />
         <source>Set Gradient Size</source>
-        <translation>Átmenet mérete</translation>
+        <translation>Legen Sie die Verlaufsgröße fest</translation>
     </message>
     <message>
         <location filename="..\ui\text_advanced_format.py" line="115" />
         <source>Size</source>
-        <translation>Méret</translation>
+        <translation>Größe</translation>
     </message>
 </context><context>
     <name>TextShadowGroup</name>
     <message>
         <location filename="..\ui\text_advanced_format.py" line="16" />
         <source>Set X offset</source>
-        <translation>X eltolás mértéke</translation>
+        <translation>X-Versatz einstellen</translation>
     </message>
     <message>
         <location filename="..\ui\text_advanced_format.py" line="26" />
         <source>Set Y offset</source>
-        <translation>Y eltolás mértéke</translation>
+        <translation>Y-Versatz einstellen</translation>
     </message>
     <message>
         <location filename="..\ui\text_advanced_format.py" line="38" />
         <source>Set Shadow Strength</source>
-        <translation>Árnyék erőssége</translation>
+        <translation>Schattenstärke einstellen</translation>
     </message>
     <message>
         <location filename="..\ui\text_advanced_format.py" line="40" />
         <source>Strength</source>
-        <translation>Erősség</translation>
+        <translation>Stärke</translation>
     </message>
     <message>
         <location filename="..\ui\text_advanced_format.py" line="48" />
         <source>Set Shadow Radius</source>
-        <translation>Árnyék rádiusza</translation>
+        <translation>Schattenradius festlegen</translation>
     </message>
     <message>
         <location filename="..\ui\text_advanced_format.py" line="50" />
         <source>Radius</source>
-        <translation>Átmérő</translation>
+        <translation>Radius</translation>
     </message>
     <message>
         <location filename="..\ui\text_advanced_format.py" line="66" />
         <source>Offset</source>
-        <translation>Eltolás</translation>
+        <translation>Versatz</translation>
     </message>
 </context><context>
     <name>TextStyleLabel</name>
     <message>
         <location filename="..\ui\text_style_presets.py" line="86" />
         <source>Click to set as Global format. Double click to edit name.</source>
-        <translation>Kattintson a gombra a Globális formátum beállításához. A név szerkesztéséhez kattintson duplán.</translation>
+        <translation>Klicken Sie hier, um das globale Format festzulegen. Doppelklicken Sie, um den Namen zu bearbeiten.</translation>
     </message>
     <message>
         <location filename="..\ui\text_style_presets.py" line="98" />
         <source>Apply Text Style</source>
-        <translation>Szövegstílus alkalmazása</translation>
+        <translation>Textstil anwenden</translation>
     </message>
     <message>
         <location filename="..\ui\text_style_presets.py" line="103" />
         <source>Update from active style</source>
-        <translation>Frissítés az aktív stílusból</translation>
+        <translation>Update vom aktiven Stil</translation>
     </message>
     <message>
         <location filename="..\ui\text_style_presets.py" line="120" />
         <source>Delete Style</source>
-        <translation>Stílus törlése</translation>
+        <translation>Stil löschen</translation>
     </message>
 </context><context>
     <name>TextStylePresetPanel</name>
     <message>
         <location filename="..\ui\text_style_presets.py" line="276" />
         <source>Style</source>
-        <translation>Stílus</translation>
+        <translation>Stil</translation>
     </message>
     <message>
         <location filename="..\ui\text_style_presets.py" line="439" />
         <location filename="..\ui\text_style_presets.py" line="280" />
         <source>New Text Style</source>
-        <translation>Új szövegstílus</translation>
+        <translation>Neuer Textstil</translation>
     </message>
     <message>
         <location filename="..\ui\text_style_presets.py" line="285" />
         <source>Remove All</source>
-        <translation>Mind törlése</translation>
+        <translation>Alle entfernen</translation>
     </message>
     <message>
         <location filename="..\ui\text_style_presets.py" line="299" />
         <source>Remove all styles?</source>
-        <translation>Minden stílus törlése?</translation>
+        <translation>Alle Stile entfernen?</translation>
     </message>
     <message>
         <location filename="..\ui\text_style_presets.py" line="440" />
         <source>Remove all</source>
-        <translation>Mind törlése</translation>
+        <translation>Alles entfernen</translation>
     </message>
     <message>
         <location filename="..\ui\text_style_presets.py" line="442" />
         <source>Import Text Styles</source>
-        <translation>Szövegstílus importálása</translation>
+        <translation>Textstile importieren</translation>
     </message>
     <message>
         <location filename="..\ui\text_style_presets.py" line="443" />
         <source>Export Text Styles</source>
-        <translation>Szövegstílus exportálása</translation>
+        <translation>Textstile exportieren</translation>
     </message>
 </context><context>
     <name>TitleBar</name>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="327" />
         <source>Edit</source>
-        <translation>Szerkesztés</translation>
+        <translation>Bearbeiten</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="328" />
         <source>Edit menu: undo, redo, search, and keyword substitution.</source>
-        <translation>Szerkesztés menü: visszavonás, újra, keresés és kulcsszócsere.</translation>
+        <translation>Menü „Bearbeiten“: Rückgängig machen, Wiederherstellen, Suchen und Schlüsselwortersetzung.</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="330" />
         <source>Undo</source>
-        <translation>Visszavonás</translation>
+        <translation>Rückgängig machen</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="333" />
         <source>Redo</source>
-        <translation>Mégis</translation>
+        <translation>Wiederholen</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="336" />
         <source>Search</source>
-        <translation>Keresés</translation>
+        <translation>Suchen</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="339" />
         <source>Global Search</source>
-        <translation>Keresés mindenhol</translation>
+        <translation>Globale Suche</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="343" />
         <source>Keyword substitution for machine translation source text</source>
-        <translation>Gépi fordított eredeti szövegben kulcsszó csere</translation>
+        <translation>Schlüsselwort-Ersetzung für maschinell übersetzten Quelltext</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="345" />
         <source>Keyword substitution for machine translation</source>
-        <translation>Gépi fordításban kulcsszó csere</translation>
+        <translation>Schlüsselwortsubstitution für maschinelle Übersetzung</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="347" />
         <source>Keyword substitution for source text</source>
-        <translation>Eredeti szövegben kulcsszó csere</translation>
+        <translation>Schlüsselwort-Ersetzung für Quelltext</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="358" />
         <source>View</source>
-        <translation>Nézet</translation>
+        <translation>Sicht</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="359" />
         <source>View menu: display language, panels, text styles, and theme.</source>
-        <translation>Nézet menü: megjelenítési nyelv, panelek, szövegstílusok és téma.</translation>
+        <translation>Menü „Ansicht“: Anzeigesprache, Bedienfelder, Textstile und Thema.</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="361" />
         <source>Display Language</source>
-        <translation>Program nyelve</translation>
+        <translation>Anzeigesprache</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="375" />
         <source>Drawing Board</source>
-        <translation>Rajztábla</translation>
+        <translation>Reißbrett</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="377" />
         <source>Text Editor</source>
-        <translation>Szövegszerkesztő</translation>
+        <translation>Texteditor</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="379" />
         <source>Import Text Styles</source>
-        <translation>Szövegstílus importálása</translation>
+        <translation>Textstile importieren</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="380" />
         <source>Export Text Styles</source>
-        <translation>Szövegstílus exportálása</translation>
+        <translation>Textstile exportieren</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="381" />
         <source>Dark Mode</source>
-        <translation>Sötét mód</translation>
+        <translation>Dunkler Modus</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="401" />
         <source>Go</source>
-        <translation>Indulás</translation>
+        <translation>Gehen</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="402" />
         <source>Go menu: move between project pages.</source>
-        <translation>Ugrás menü: váltás a projektoldalak között.</translation>
+        <translation>Gehe zu Menü: Zwischen Projektseiten wechseln.</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="403" />
         <source>Previous Page</source>
-        <translation>Előző oldal</translation>
+        <translation>Vorherige Seite</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="405" />
         <source>Next Page</source>
-        <translation>Következő oldal</translation>
+        <translation>Nächste Seite</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="415" />
         <source>Tools</source>
-        <translation>Eszközök</translation>
+        <translation>Werkzeuge</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="416" />
         <source>Tools menu: utilities for project editing.</source>
-        <translation>Eszközök menü: segédprogramok projektszerkesztéshez.</translation>
+        <translation>Menü „Extras“: Dienstprogramme zur Projektbearbeitung.</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="418" />
         <source>Region Merge Tool</source>
-        <translation>Régió egyesítő eszköz</translation>
+        <translation>Tool zum Zusammenführen von Regionen</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="462" />
         <location filename="..\ui\mainwindowbars.py" line="428" />
         <source>Run</source>
-        <translation>Futtatás</translation>
+        <translation>Laufen</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="429" />
         <source>Run menu: choose enabled stages, presets, and translation commands.</source>
-        <translation>Futtatás menü: válassza ki az engedélyezett szakaszokat, előre beállított értékeket és fordítási parancsokat.</translation>
+        <translation>Menü „Ausführen“: Wählen Sie aktivierte Stufen, Voreinstellungen und Übersetzungsbefehle aus.</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="432" />
         <source>Enable Text Detection</source>
-        <translation>Szövegészlelés engedélyezése</translation>
+        <translation>Aktivieren Sie die Texterkennung</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="433" />
         <source>Enable OCR</source>
-        <translation>OCR engedélyezése</translation>
+        <translation>OCR aktivieren</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="434" />
         <source>Enable Translation</source>
-        <translation>Fordítás engedélyezése</translation>
+        <translation>Übersetzung aktivieren</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="435" />
         <source>Enable Inpainting</source>
-        <translation>Belefestés engedélyezése</translation>
+        <translation>Aktivieren Sie Inpainting</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="442" />
         <source>Preset: Full Run</source>
-        <translation>Előre beállított: Teljes futás</translation>
+        <translation>Voreinstellung: Voller Lauf</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="443" />
         <source>Preset: Text Detection</source>
-        <translation>Előre beállított: Szövegészlelés</translation>
+        <translation>Voreinstellung: Texterkennung</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="444" />
         <source>Preset: OCR</source>
-        <translation>Előre beállított: OCR</translation>
+        <translation>Voreinstellung: OCR</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="445" />
         <source>Preset: Translation</source>
-        <translation>Előre beállított: Fordítás</translation>
+        <translation>Voreinstellung: Übersetzung</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="446" />
         <source>Preset: Inpainting</source>
-        <translation>Előre beállított: Befestés</translation>
+        <translation>Voreinstellung: Inpainting</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="454" />
         <source>Enable text detection, OCR, translation, and inpainting.</source>
-        <translation>Engedélyezze a szövegészlelést, az OCR-t, a fordítást és a befestést.</translation>
+        <translation>Aktivieren Sie Texterkennung, OCR, Übersetzung und Inpainting.</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="455" />
         <source>Enable only text detection. OCR, translation, and inpainting are disabled.</source>
-        <translation>Csak szövegészlelés engedélyezése. Az OCR, a fordítás és a befestés le van tiltva.</translation>
+        <translation>Aktivieren Sie nur die Texterkennung. OCR, Übersetzung und Inpainting sind deaktiviert.</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="456" />
         <source>Enable only OCR for existing text regions.</source>
-        <translation>Csak az OCR engedélyezése a meglévő szövegterületekhez.</translation>
+        <translation>Aktivieren Sie OCR nur für vorhandene Textbereiche.</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="457" />
         <source>Enable only translation for existing source text.</source>
-        <translation>Csak a meglévő forrásszöveg fordításának engedélyezése.</translation>
+        <translation>Aktivieren Sie nur die Übersetzung für vorhandenen Quelltext.</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="458" />
         <source>Enable only inpainting for existing regions.</source>
-        <translation>Csak a befestés engedélyezése a meglévő régiókban.</translation>
+        <translation>Aktivieren Sie Inpainting nur für vorhandene Regionen.</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="463" />
         <source>Run without updating text style</source>
-        <translation>Futtassa a szövegstílus frissítése nélkül</translation>
+        <translation>Ausführen, ohne den Textstil zu aktualisieren</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="464" />
         <source>Translate Page</source>
-        <translation>Oldal fordítása</translation>
+        <translation>Seite übersetzen</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="465" />
         <source>Translation Benchmark</source>
-        <translation>Fordítási referenciaérték</translation>
+        <translation>Übersetzungs-Benchmark</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="466" />
         <source>Compare the current page translation with multiple translators or LLM configurations in a side-by-side table.</source>
-        <translation>Hasonlítsa össze az aktuális oldalfordítást több fordítóval vagy LLM-konfigurációval egy egymás melletti táblázatban.</translation>
+        <translation>Vergleichen Sie die aktuelle Seitenübersetzung mit mehreren Übersetzern oder LLM-Konfigurationen in einer Tabelle nebeneinander.</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="506" />
         <source>Minimize window</source>
-        <translation>Az ablak kicsinyítése</translation>
+        <translation>Fenster minimieren</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="510" />
         <source>Maximize or restore window</source>
-        <translation>Az ablak maximalizálása vagy visszaállítása</translation>
+        <translation>Fenster maximieren oder wiederherstellen</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="515" />
         <source>Close window</source>
-        <translation>Zárja be az ablakot</translation>
-    </message>
-    <message>
-        <source>Enable Text Dection</source>
-        <translation type="vanished">Szövegfelismerés engedélyezése</translation>
-    </message>
-    <message>
-        <source>Run without update textstyle</source>
-        <translation type="vanished">Futtatás szövegstílus frissítése nélkül</translation>
-    </message>
-    <message>
-        <source>Translate page</source>
-        <translation type="vanished">Oldal fordítása</translation>
+        <translation>Fenster schließen</translation>
     </message>
 </context><context>
     <name>TransPairWidget</name>
     <message>
         <location filename="..\ui\textedit_area.py" line="414" />
         <source>First step draft</source>
-        <translation>Első lépés vázlat</translation>
+        <translation>Entwurf des ersten Schritts</translation>
     </message>
     <message>
         <location filename="..\ui\textedit_area.py" line="416" />
         <source>Google/DeepL first-step result before LLM refinement. Use it to compare the raw draft with the final translation.</source>
-        <translation>Google/DeepL első lépés eredménye az LLM finomítása előtt. Használja a nyers vázlat és a végleges fordítás összehasonlítására.</translation>
+        <translation>Google/DeepL-Erstergebnis vor der LLM-Verfeinerung. Vergleichen Sie damit den Rohentwurf mit der endgültigen Übersetzung.</translation>
     </message>
     <message>
         <location filename="..\ui\textedit_area.py" line="418" />
         <source>Google/DeepL first-step result before LLM refinement. This text is saved with the project and is hidden when no draft exists.</source>
-        <translation>Google/DeepL első lépés eredménye az LLM finomítása előtt. Ezt a szöveget a rendszer a projekttel együtt menti, és elrejti, ha nincs piszkozat.</translation>
+        <translation>Google/DeepL-Erstergebnis vor der LLM-Verfeinerung. Dieser Text wird mit dem Projekt gespeichert und ausgeblendet, wenn kein Entwurf vorhanden ist.</translation>
     </message>
     <message>
         <location filename="..\ui\textedit_area.py" line="419" />
         <source>No first-step draft available.</source>
-        <translation>Nem áll rendelkezésre első lépés vázlat.</translation>
+        <translation>Kein erster Entwurf verfügbar.</translation>
     </message>
 </context><context>
     <name>TranslateThread</name>
     <message>
         <location filename="..\ui\module_manager.py" line="197" />
         <source>Failed to set translator </source>
-        <translation>Fordítás beállítása nem sikerült</translation>
+        <translation>Der Übersetzer konnte nicht festgelegt werden</translation>
     </message>
     <message>
         <location filename="..\ui\module_manager.py" line="292" />
         <location filename="..\ui\module_manager.py" line="224" />
         <source>Translation Failed.</source>
-        <translation>Fordítás nem sikerült.</translation>
-    </message>
-    <message>
-        <source> is required for </source>
-        <translation type="vanished"> ez szükséges a(z) </translation>
+        <translation>Übersetzung fehlgeschlagen.</translation>
     </message>
 </context><context>
     <name>TranslationBenchmarkWindow</name>
     <message>
         <location filename="..\ui\translation_benchmark.py" line="124" />
         <source>Translation Benchmark</source>
-        <translation>Fordítási referenciaérték</translation>
+        <translation>Übersetzungs-Benchmark</translation>
     </message>
     <message>
         <location filename="..\ui\translation_benchmark.py" line="129" />
         <source>Current page: {page}</source>
-        <translation>Jelenlegi oldal: {page}</translation>
+        <translation>Aktuelle Seite: {page}</translation>
     </message>
     <message>
         <location filename="..\ui\translation_benchmark.py" line="130" />
         <source>Select translators and run the benchmark.</source>
-        <translation>Válassza ki a fordítókat, és futtassa a referenciaértéket.</translation>
+        <translation>Wählen Sie Übersetzer aus und führen Sie den Benchmark durch.</translation>
     </message>
     <message>
         <location filename="..\ui\translation_benchmark.py" line="224" />
@@ -2625,155 +2579,155 @@ qipao, qipao2</translation>
         <location filename="..\ui\translation_benchmark.py" line="224" />
         <location filename="..\ui\translation_benchmark.py" line="137" />
         <source>Source</source>
-        <translation>Forrás</translation>
+        <translation>Quelle</translation>
     </message>
     <message>
         <location filename="..\ui\translation_benchmark.py" line="152" />
         <source>Run Benchmark</source>
-        <translation>Futtassa a Benchmarkot</translation>
+        <translation>Benchmark ausführen</translation>
     </message>
     <message>
         <location filename="..\ui\translation_benchmark.py" line="153" />
         <source>Translate the current page with the selected translators and compare the results side by side.</source>
-        <translation>Fordítsa le az aktuális oldalt a kiválasztott fordítókkal, és hasonlítsa össze az eredményeket egymás mellett.</translation>
+        <translation>Übersetzen Sie die aktuelle Seite mit den ausgewählten Übersetzern und vergleichen Sie die Ergebnisse nebeneinander.</translation>
     </message>
     <message>
         <location filename="..\ui\translation_benchmark.py" line="156" />
         <source>Close</source>
-        <translation>Közeli</translation>
+        <translation>Schließen</translation>
     </message>
     <message>
         <location filename="..\ui\translation_benchmark.py" line="165" />
         <source>Translators</source>
-        <translation>Fordítók</translation>
+        <translation>Übersetzer</translation>
     </message>
     <message>
         <location filename="..\ui\translation_benchmark.py" line="220" />
         <source>Select at least one translator.</source>
-        <translation>Válasszon ki legalább egy fordítót.</translation>
+        <translation>Wählen Sie mindestens einen Übersetzer aus.</translation>
     </message>
     <message>
         <location filename="..\ui\translation_benchmark.py" line="228" />
         <source>Running ...</source>
-        <translation>Futás...</translation>
+        <translation>Läuft ...</translation>
     </message>
     <message>
         <location filename="..\ui\translation_benchmark.py" line="266" />
         <source>Benchmark is still running. Wait for it to finish before closing.</source>
-        <translation>A benchmark továbbra is fut. Bezárás előtt várja meg, amíg befejeződik.</translation>
+        <translation>Der Benchmark läuft noch. Warten Sie, bis der Vorgang abgeschlossen ist, bevor Sie ihn schließen.</translation>
     </message>
 </context><context>
     <name>TranslatorConfigPanel</name>
     <message>
         <location filename="..\ui\module_parse_widgets.py" line="412" />
         <source>Language expected in the detected source text.</source>
-        <translation>Az észlelt forrásszövegben elvárt nyelv.</translation>
+        <translation>Im erkannten Quelltext erwartete Sprache.</translation>
     </message>
     <message>
         <location filename="..\ui\module_parse_widgets.py" line="413" />
         <source>Language used for translated output.</source>
-        <translation>A fordításhoz használt nyelv.</translation>
+        <translation>Für die übersetzte Ausgabe verwendete Sprache.</translation>
     </message>
     <message>
         <location filename="..\ui\module_parse_widgets.py" line="414" />
         <source>Keyword substitution for machine translation source text</source>
-        <translation>Gépi fordított eredeti szövegben kulcsszó csere</translation>
+        <translation>Schlüsselwort-Ersetzung für maschinell übersetzten Quelltext</translation>
     </message>
     <message>
         <location filename="..\ui\module_parse_widgets.py" line="415" />
         <source>Configure replacements that run before machine translation reads the source text.</source>
-        <translation>Konfigurálja a cseréket, amelyek azelőtt futnak le, hogy a gépi fordítás beolvassa a forrásszöveget.</translation>
+        <translation>Konfigurieren Sie Ersetzungen, die ausgeführt werden, bevor die maschinelle Übersetzung den Quelltext liest.</translation>
     </message>
     <message>
         <location filename="..\ui\module_parse_widgets.py" line="418" />
         <source>Keyword substitution for machine translation</source>
-        <translation>Gépi fordításban kulcsszó csere</translation>
+        <translation>Schlüsselwortsubstitution für maschinelle Übersetzung</translation>
     </message>
     <message>
         <location filename="..\ui\module_parse_widgets.py" line="419" />
         <source>Configure replacements that run on machine translation output.</source>
-        <translation>Konfigurálja a gépi fordítási kimeneten futó cseréket.</translation>
+        <translation>Konfigurieren Sie Ersetzungen, die auf der Ausgabe der maschinellen Übersetzung ausgeführt werden.</translation>
     </message>
     <message>
         <location filename="..\ui\module_parse_widgets.py" line="422" />
         <source>Keyword substitution for source text</source>
-        <translation>Eredeti szövegben kulcsszó csere</translation>
+        <translation>Schlüsselwort-Ersetzung für Quelltext</translation>
     </message>
     <message>
         <location filename="..\ui\module_parse_widgets.py" line="423" />
         <source>Configure replacements that run on OCR/source text before translation.</source>
-        <translation>Konfigurálja azokat a helyettesítéseket, amelyek OCR-en/forrásszövegen futnak a fordítás előtt.</translation>
+        <translation>Konfigurieren Sie Ersetzungen, die vor der Übersetzung mit OCR/Quelltext ausgeführt werden.</translation>
     </message>
     <message>
         <location filename="..\ui\module_parse_widgets.py" line="426" />
         <source>Translate each text block individually</source>
-        <translation>Fordítsa le az egyes szövegblokkokat egyenként</translation>
+        <translation>Übersetzen Sie jeden Textblock einzeln</translation>
     </message>
     <message>
         <location filename="..\ui\module_parse_widgets.py" line="427" />
         <source>Translate every detected text block as a separate request instead of batching them together.</source>
-        <translation>Minden észlelt szövegblokkot külön kérésként fordítson le ahelyett, hogy kötegelt volna őket.</translation>
+        <translation>Übersetzen Sie jeden erkannten Textblock als separate Anfrage, anstatt sie zusammenzufassen.</translation>
     </message>
     <message>
         <location filename="..\ui\module_parse_widgets.py" line="433" />
         <source>Source</source>
-        <translation>Eredeti</translation>
+        <translation>Quelle</translation>
     </message>
     <message>
         <location filename="..\ui\module_parse_widgets.py" line="435" />
         <source>Target</source>
-        <translation>Cél</translation>
+        <translation>Ziel</translation>
     </message>
 </context><context>
     <name>TranslatorSelectionWidget</name>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="683" />
         <source>Translate</source>
-        <translation>fordítás</translation>
+        <translation>Übersetzen</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="684" />
         <source>Open translator settings.</source>
-        <translation>Nyissa meg a fordító beállításait.</translation>
+        <translation>Öffnen Sie die Übersetzereinstellungen.</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="686" />
         <source>Source</source>
-        <translation>Eredeti</translation>
+        <translation>Quelle</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="687" />
         <source>Open source language settings.</source>
-        <translation>Nyílt forráskódú nyelvi beállítások.</translation>
+        <translation>Open-Source-Spracheinstellungen.</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="689" />
         <source>Target</source>
-        <translation>Cél</translation>
+        <translation>Ziel</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="690" />
         <source>Open target language settings.</source>
-        <translation>Nyissa meg a célnyelvi beállításokat.</translation>
+        <translation>Öffnen Sie die Zielspracheneinstellungen.</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="694" />
         <source>Select translator module.</source>
-        <translation>Válassza ki a fordító modult.</translation>
+        <translation>Übersetzermodul auswählen.</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="696" />
         <source>Source language.</source>
-        <translation>Forrásnyelv.</translation>
+        <translation>Ausgangssprache.</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="698" />
         <source>Target language.</source>
-        <translation>Célnyelv.</translation>
+        <translation>Zielsprache.</translation>
     </message>
     <message>
         <location filename="..\ui\mainwindowbars.py" line="700" />
         <source>Configure translator module.</source>
-        <translation>Konfigurálja a fordító modult.</translation>
+        <translation>Übersetzermodul konfigurieren.</translation>
     </message>
 </context></TS>

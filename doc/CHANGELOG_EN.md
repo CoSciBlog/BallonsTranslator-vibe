@@ -1,6 +1,12 @@
 # Changelogs
 
 ### 2026-05-14
+[v1.4.0-vibe.28] ui translations and german language
+1. Extracted all new strings from recent UI updates and recompiled all `.qm` translation files.
+2. Auto-translated missing UI strings for all supported languages using Google Translate.
+3. Added German (`de_DE`) and Japanese (`ja_JP`) to the official translation files.
+4. Updated README documentation and bumped the fork runtime version string to `1.4.0-vibe.28`.
+
 [v1.4.0-vibe.27] page panel context menu delete data
 1. Added a `Delete Page Data` context menu action to the left-sidebar page list.
 2. Wired the action to safely delete textboxes, working masks, and inpainting outputs for the selected page.
