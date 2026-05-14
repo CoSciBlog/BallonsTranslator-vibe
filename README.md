@@ -103,6 +103,8 @@ The left sidebar includes a `Decens` button below Pages, Search/Replace, and Glo
 
 Mask detection is intentionally conservative and supports automatic mode, DeepCreamPy-style green masks, censor bars, and mosaic-like regions. The actual reconstruction is handled by the currently selected inpainter, so existing models such as `lama_large_512px` and optional `flux2-klein` can be used without adding a separate model selector.
 
+If the configured decensor detector finds no mask on a page, the decensor pass now creates a fallback mask before inpainting. It first reuses an existing project text mask, then falls back to text-box regions, and finally creates a small centered mask so the current-page button never silently skips the inpainting step because the heuristic detector returned an empty mask.
+
 Starting a current-page or all-pages decensor run now first force-stops any active pipeline or translation worker. This prevents stuck LLM/background translation work from overlapping the decensor worker and touching project/UI state from the wrong thread.
 
 ## Page pipeline ignore

@@ -1,6 +1,12 @@
 # Changelogs
 
 ### 2026-05-14
+[v1.4.0-vibe.18] decensor fallback mask creation
+1. Created a fallback decensor mask when automatic decensor detection returns an empty mask.
+2. Reused existing project text masks first, then text-box regions, and finally a small centered fallback region.
+3. Saved the generated fallback mask to the project `decensor_mask` output before running the selected inpainter.
+4. Updated README documentation and bumped the fork runtime version string to `1.4.0-vibe.18`.
+
 [v1.4.0-vibe.17] current-page decensor worker isolation
 1. Prevented current-page and all-pages decensor runs from starting on top of an active pipeline or translation worker.
 2. Reused the force-stop cleanup path before decensoring so stuck LLM/background translation work cannot keep touching project state from the wrong thread.
