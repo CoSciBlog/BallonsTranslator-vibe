@@ -351,8 +351,12 @@ class TwoStepTranslator(LLM_API_Translator):
                 self.logger.warning(
                     "LLM refinement failed and no first-step draft translations were available."
                 )
-            return [
+            fallback_translations = [
                 draft if draft else src
                 for src, draft in zip(src_list, draft_list)
             ]
+            self._update_glossary_from_batch(src_list, fallback_translations, to_lang)
+            return self._refine_translations_with_glossary(
+                src_list, fallback_translations, to_lang
+            )
         return [""] * len(src_list)

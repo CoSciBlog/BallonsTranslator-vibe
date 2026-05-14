@@ -32,6 +32,7 @@ class FakeTwoStepTranslator(TwoStepTranslator):
         self._drafts = drafts
         self._response = response
         self._error = error
+        self.glossary_updates = []
         self.logger = FakeLogger()
         self.lang_target = "English"
         self.lang_source = "Deutsch"
@@ -57,7 +58,7 @@ class FakeTwoStepTranslator(TwoStepTranslator):
         return self._response
 
     def _update_glossary_from_batch(self, src_list, translations, to_lang):
-        pass
+        self.glossary_updates.append((list(src_list), list(translations), to_lang))
 
     def _refine_translations_with_glossary(self, src_list, translations, to_lang):
         return translations
@@ -95,6 +96,7 @@ class TwoStepFallbackTest(unittest.TestCase):
 
         self.assertEqual(result, ["Draft"])
         self.assertTrue(translator.last_refinement_used_draft_fallback)
+        self.assertEqual(translator.glossary_updates, [(["Quelle"], ["Draft"], "English")])
 
     def test_missing_draft_keeps_source_text(self):
         translator = FakeTwoStepTranslator([""], error=ValueError("bad json"))
@@ -107,6 +109,7 @@ class TwoStepFallbackTest(unittest.TestCase):
             "LLM refinement failed and no first-step draft translations were available.",
             translator.logger.warnings,
         )
+        self.assertEqual(translator.glossary_updates, [(["Quelle"], ["Quelle"], "English")])
 
 
 if __name__ == "__main__":
