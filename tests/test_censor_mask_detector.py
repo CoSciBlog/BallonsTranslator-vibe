@@ -25,6 +25,7 @@ class CensorMaskDetectorTest(unittest.TestCase):
         self.assertEqual(result.boxes[0].kind, "dark")
         self.assertGreater(result.mask.sum(), 0)
         self.assertEqual(result.mask.dtype, np.uint8)
+        self.assertEqual(result.mask_role, "censor_restoration")
 
     def test_detects_light_horizontal_bar(self):
         image = np.full((100, 100, 3), 128, dtype=np.uint8)
@@ -80,6 +81,71 @@ class CensorMaskDetectorTest(unittest.TestCase):
 
         self.assertGreaterEqual(len(result.boxes), 1)
         self.assertGreater(int(result.mask.sum()), 0)
+
+    def test_detects_gray_rectangular_region(self):
+        image = np.full((120, 120, 3), 255, dtype=np.uint8)
+        image[45:65, 35:65] = 150
+
+        result = self.detector().detect(image)
+
+        self.assertGreaterEqual(len(result.boxes), 1)
+        self.assertIn("gray", {box.kind for box in result.boxes})
+        self.assertGreater(int(result.mask.sum()), 0)
+        self.assertIn("gray_candidates", result.debug)
+
+    def test_detects_gray_horizontal_banded_region(self):
+        image = np.full((120, 120, 3), 255, dtype=np.uint8)
+        image[45:65, 35:75] = 150
+        image[46:65:4, 35:75] = 110
+
+        result = self.detector().detect(image)
+
+        self.assertGreaterEqual(len(result.boxes), 1)
+        self.assertGreater(result.debug["banded_candidates"], 0)
+        self.assertGreater(int(result.mask.sum()), 0)
+
+    def test_detects_two_small_gray_censor_blocks(self):
+        image = np.full((140, 140, 3), 255, dtype=np.uint8)
+        image[40:58, 35:55] = 145
+        image[82:102, 80:104] = 155
+
+        result = self.detector().detect(image)
+
+        self.assertGreaterEqual(len(result.boxes), 2)
+        self.assertGreater(int(result.mask.sum()), 0)
+
+    def test_large_white_speech_bubble_is_not_detected(self):
+        image = np.full((140, 140, 3), 150, dtype=np.uint8)
+        yy, xx = np.ogrid[:140, :140]
+        bubble = ((xx - 70) ** 2 / (48 ** 2) + (yy - 70) ** 2 / (34 ** 2)) <= 1
+        image[bubble] = 255
+
+        result = self.detector().detect(image)
+
+        self.assertEqual(result.boxes, [])
+        self.assertEqual(int(result.mask.sum()), 0)
+
+    def test_black_text_glyphs_are_not_detected(self):
+        image = np.full((120, 120, 3), 255, dtype=np.uint8)
+        image[35:70, 30:34] = 0
+        image[35:39, 30:48] = 0
+        image[52:56, 30:44] = 0
+        image[35:70, 55:59] = 0
+        image[66:70, 55:75] = 0
+
+        result = self.detector().detect(image)
+
+        self.assertEqual(result.boxes, [])
+        self.assertEqual(int(result.mask.sum()), 0)
+
+    def test_large_white_text_inpaint_mask_is_not_detected(self):
+        image = np.full((120, 120, 3), 160, dtype=np.uint8)
+        image[30:90, 35:85] = 255
+
+        result = self.detector().detect(image)
+
+        self.assertEqual(result.boxes, [])
+        self.assertEqual(int(result.mask.sum()), 0)
 
     def test_merges_nearby_bars(self):
         image = np.full((120, 120, 3), 255, dtype=np.uint8)

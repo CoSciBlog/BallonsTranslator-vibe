@@ -1,7 +1,10 @@
-from typing import Dict, Tuple
+from typing import Any, Dict, Tuple
+import os.path as osp
 
 import cv2
 import numpy as np
+
+from utils.logger import logger as LOGGER
 
 
 def _rgb(img: np.ndarray) -> np.ndarray:
@@ -69,6 +72,75 @@ def _mask_stats(mask: np.ndarray) -> Dict[str, float]:
         "mask_pixel_count": pixels,
         "mask_coverage_ratio": pixels / max(1, mask.shape[0] * mask.shape[1]),
     }
+
+
+def looks_like_binary_mask_image(img: np.ndarray) -> bool:
+    if img is None:
+        return False
+    if img.ndim != 2:
+        return False
+    values = img
+    unique = np.unique(values)
+    if unique.size > 4:
+        return False
+    if not np.all(np.isin(unique, [0, 1, 255])):
+        return False
+    active_ratio = float(np.count_nonzero(values)) / max(1, values.size)
+    return 0.005 <= active_ratio <= 0.995
+
+
+def _suspicious_decensor_source_name(source_name: str) -> bool:
+    lowered = source_name.replace("\\", "/").lower()
+    basename = osp.basename(lowered)
+    return (
+        "/mask/" in lowered
+        or "/decensor_mask/" in lowered
+        or "/debug/" in lowered
+        or "debug" in basename
+        or "mask" in basename
+        or "thumbnail" in basename
+    )
+
+
+def _validate_decensor_input(img: np.ndarray, source_name: str) -> np.ndarray:
+    if img is None:
+        raise ValueError(f"Censor Restoration input source is empty: {source_name}")
+    if _suspicious_decensor_source_name(source_name):
+        raise ValueError(f"Censor Restoration input source looks like a mask/debug image: {source_name}")
+    if looks_like_binary_mask_image(img):
+        raise ValueError("Invalid decensor input: image looks like a binary mask.")
+    return img
+
+
+def select_decensor_input_image(project: Any, imgname: str) -> Tuple[np.ndarray, str]:
+    candidates = []
+
+    def add_candidate(source: str, source_name: str, loader) -> None:
+        try:
+            img = loader()
+            if img is not None:
+                candidates.append((source, source_name, img))
+        except Exception as exc:
+            LOGGER.debug(f"Censor Restoration input source {source} unavailable for {imgname}: {exc}")
+
+    add_candidate("original", f"original:{imgname}", lambda: project.read_img(imgname))
+
+    if getattr(project, "current_img", None) == imgname and getattr(project, "img_array", None) is not None:
+        add_candidate("current", f"current:{imgname}", lambda: project.img_array.copy())
+
+    add_candidate("cleaned", f"cleaned:{imgname}", lambda: project.load_inpainted_by_imgname(imgname))
+    add_candidate("current_fallback", f"current_fallback:{imgname}", lambda: project.ensure_upscaled_img(imgname))
+
+    last_error = None
+    for source, source_name, img in candidates:
+        try:
+            validated = _validate_decensor_input(img, source_name)
+            return validated, source
+        except ValueError as exc:
+            last_error = exc
+            LOGGER.warning(f"Rejected Censor Restoration input source {source} for {imgname}: {exc}")
+
+    raise ValueError(str(last_error) if last_error else f"No valid Censor Restoration input image for {imgname}")
 
 
 def _merge_close_components(mask: np.ndarray, kernels) -> np.ndarray:
@@ -157,6 +229,50 @@ def bar_mask(img: np.ndarray, min_area_ratio: float = 0.00005) -> np.ndarray:
             fill_rect=True,
         )
         combined = cv2.bitwise_or(combined, cv2.bitwise_or(raw_candidates, cv2.bitwise_or(cv2.bitwise_or(horizontal, vertical), blocky)))
+
+    gray_candidate = ((gray >= 70) & (gray <= 230) & (saturation <= 35)).astype(np.uint8) * 255
+    gray_candidate = cv2.morphologyEx(
+        gray_candidate,
+        cv2.MORPH_OPEN,
+        cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3)),
+        iterations=1,
+    )
+    gray_candidate = _merge_close_components(gray_candidate, [(9, 9), (15, 15)])
+    gray_regions = _candidate_components(
+        gray_candidate,
+        min_area_ratio=max(min_area_ratio, 0.00003),
+        max_area_ratio=0.05,
+        min_fill=0.65,
+        min_size=8,
+        aspect_min=0.25,
+        aspect_max=4.0,
+        fill_rect=True,
+    )
+
+    gray_f = gray.astype(np.float32)
+    grad_x = np.abs(cv2.Sobel(gray_f, cv2.CV_32F, 1, 0, ksize=3))
+    grad_y = np.abs(cv2.Sobel(gray_f, cv2.CV_32F, 0, 1, ksize=3))
+    local_mean = cv2.blur(gray_f, (9, 9))
+    local_std = np.sqrt(np.maximum(cv2.blur(gray_f * gray_f, (9, 9)) - local_mean * local_mean, 0))
+    banded_candidate = (
+        (saturation <= 45)
+        & (gray >= 70)
+        & (gray <= 230)
+        & (np.maximum(grad_x, grad_y) >= 6.0)
+        & (local_std >= 3.2)
+    ).astype(np.uint8) * 255
+    banded_candidate = _merge_close_components(banded_candidate, [(7, 7), (13, 13), (19, 19)])
+    banded_regions = _candidate_components(
+        banded_candidate,
+        min_area_ratio=max(min_area_ratio, 0.00003),
+        max_area_ratio=0.05,
+        min_fill=0.35,
+        min_size=8,
+        aspect_min=0.25,
+        aspect_max=4.0,
+        fill_rect=True,
+    )
+    combined = cv2.bitwise_or(combined, cv2.bitwise_or(gray_regions, banded_regions))
     return combined
 
 

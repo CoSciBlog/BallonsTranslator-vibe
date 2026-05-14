@@ -12,7 +12,7 @@ from utils.logger import logger as LOGGER
 from utils.registry import Registry
 from utils.imgproc_utils import enlarge_window, get_block_mask
 from utils.io_utils import imread, text_is_empty
-from utils.decensor import build_decensor_mask
+from utils.decensor import build_decensor_mask, select_decensor_input_image
 from modules.translators import MissingTranslatorParams
 from modules.base import BaseModule, soft_empty_cache
 from modules import INPAINTERS, TRANSLATORS, TEXTDETECTORS, OCR, \
@@ -483,29 +483,32 @@ class ImgtransThread(QThread):
         return pages_to_iterate
 
     def _decensor_page(self, imgname: str):
-        img = self.imgtrans_proj.load_inpainted_by_imgname(imgname)
-        if img is None:
-            img = self.imgtrans_proj.ensure_upscaled_img(imgname)
-        if img is None:
-            raise FileNotFoundError(imgname)
+        img, input_source = select_decensor_input_image(self.imgtrans_proj, imgname)
+        LOGGER.info(
+            f'Censor Restoration input image source: {input_source} '
+            f'for {imgname}, size={img.shape[1]}x{img.shape[0]}'
+        )
 
-        mask, mode, debug = build_decensor_mask(
+        censor_mask, mode, debug = build_decensor_mask(
             img,
             mode=pcfg.decensor_mask_mode,
             dilate=pcfg.decensor_mask_dilate,
             min_area_ratio=pcfg.decensor_min_area_ratio,
             return_debug=True,
         )
+        debug["input_source"] = input_source
+        debug["mask_source"] = "censor_restoration_detector"
 
-        self.imgtrans_proj.save_decensor_mask(imgname, mask)
+        self.imgtrans_proj.save_decensor_mask(imgname, censor_mask)
 
-        if np.any(mask > 0):
-            decensored = self.inpainter.inpaint(img, mask, self.imgtrans_proj.pages.get(imgname, []))
+        if np.any(censor_mask > 0):
+            decensored = self.inpainter.inpaint(img, censor_mask, self.imgtrans_proj.pages.get(imgname, []))
             LOGGER.info(f'Decensor mask mode "{mode}" applied to {imgname}.')
         else:
             decensored = np.copy(img)
             LOGGER.info(
                 f'No decensor mask found for {imgname}. '
+                f'The text inpaint mask will not be used automatically. '
                 f'debug={debug}. Try enabling debug masks or adjust detector thresholds.'
             )
 
