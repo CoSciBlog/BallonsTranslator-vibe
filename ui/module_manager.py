@@ -1027,6 +1027,9 @@ class ModuleManager(QObject):
             LOGGER.info('proj file is empty, nothing to decensor')
             self.progress_msgbox.hide()
             return
+        if self.anyPipelineThreadRunning():
+            LOGGER.warning('Stopping existing pipeline before starting decensor.')
+            self.forceStopImgtransPipeline(emit_finished=False)
         self.last_finished_index = -1
         self.pipeline_pages_to_process = pages_to_process
         self.post_pipeline_merge_done = False
@@ -1046,6 +1049,18 @@ class ModuleManager(QObject):
         LOGGER.info('Stopping image translation pipeline...')
         self.imgtrans_thread.requestStop()
 
+    def anyPipelineThreadRunning(self) -> bool:
+        return any(
+            thread.isRunning()
+            for thread in [
+                self.imgtrans_thread,
+                self.translate_thread,
+                self.textdetect_thread,
+                self.ocr_thread,
+                self.inpaint_thread,
+            ]
+        )
+
     def _force_terminate_thread(self, thread: QThread, thread_name: str):
         if thread is None or not thread.isRunning():
             return
@@ -1059,7 +1074,7 @@ class ModuleManager(QObject):
         if not thread.wait(1500):
             LOGGER.warning(f'{thread_name} thread did not finish after force stop.')
 
-    def forceStopImgtransPipeline(self):
+    def forceStopImgtransPipeline(self, emit_finished: bool = True):
         """Forcefully terminate all running pipeline and translation threads."""
         LOGGER.warning('Force stopping image translation pipeline and translation process.')
         for thread, name in [
@@ -1080,7 +1095,8 @@ class ModuleManager(QObject):
         self.inpaint_thread.inpainting = False
         self.block_set_inpainter = False
         self.progress_msgbox.hide()
-        self.imgtrans_pipeline_finished.emit()
+        if emit_finished:
+            self.imgtrans_pipeline_finished.emit()
 
     def runBlktransPipeline(self, blk_list: List[TextBlock], tgt_img: np.ndarray, mode: int, blk_ids: List[int], tgt_mask):
         self.terminateRunningThread()
