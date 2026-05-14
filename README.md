@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README_EN.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.16`
+Fork release: `1.4.0-vibe.17`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -34,6 +34,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Added page-list previews, a page context-menu toggle for ignoring pages in pipeline runs, and project JSON persistence for ignored pages.
 - Added LLM project-context settings for previous pages, optional next-page context, capped document context, and narrower automatic glossary category extraction.
 - Added a `Force Stop` control to the run progress dialog for terminating stuck pipeline or translation threads.
+- Prevented the current-page decensor action from overlapping an active pipeline or LLM translation worker.
 
 ## Features
 
@@ -101,6 +102,8 @@ The General settings page also places `Post-merge` near the top, before settings
 The left sidebar includes a `Decens` button below Pages, Search/Replace, and Glossary. It runs the decensor pass on the current page directly. The Run menu also includes `Decensor Current Page` and `Decensor All Pages`. General settings include a `Decensor` section with an optional `Run decensor pass after pipeline` checkbox. The pass creates project-local `decensor_mask` and `decensored` outputs, then updates the normal `inpainted` working image so export uses the decensored result.
 
 Mask detection is intentionally conservative and supports automatic mode, DeepCreamPy-style green masks, censor bars, and mosaic-like regions. The actual reconstruction is handled by the currently selected inpainter, so existing models such as `lama_large_512px` and optional `flux2-klein` can be used without adding a separate model selector.
+
+Starting a current-page or all-pages decensor run now first force-stops any active pipeline or translation worker. This prevents stuck LLM/background translation work from overlapping the decensor worker and touching project/UI state from the wrong thread.
 
 ## Page pipeline ignore
 

@@ -1,6 +1,11 @@
 # Changelogs
 
 ### 2026-05-14
+[v1.4.0-vibe.17] current-page decensor worker isolation
+1. Prevented current-page and all-pages decensor runs from starting on top of an active pipeline or translation worker.
+2. Reused the force-stop cleanup path before decensoring so stuck LLM/background translation work cannot keep touching project state from the wrong thread.
+3. Updated README documentation and bumped the fork runtime version string to `1.4.0-vibe.17`.
+
 [v1.4.0-vibe.16] force stop for stuck runs
 1. Added a `Force Stop` button next to the normal run progress `Stop` button.
 2. Wired force stop to terminate active pipeline, translator, OCR, text detection, and inpainting threads when a normal stop request is stuck.
