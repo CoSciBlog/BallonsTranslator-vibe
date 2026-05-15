@@ -191,6 +191,114 @@ class GlossaryMergeTest(unittest.TestCase):
         self.assertEqual(saved, 0)
         self.assertEqual(translator.glossary_text, "")
 
+    def test_positive_japanese_character_names_are_kept(self):
+        translator = self.make_translator("")
+        cases = [
+            ("山田先輩", "Yamada-senpai"),
+            ("めいちゃん", "Mei-chan"),
+            ("稲光伸", "Inamitsu Shin"),
+            ("稲光伸二", "Shinji Inamitsu"),
+            ("池田", "Ikeda"),
+            ("秋元", "Akimoto"),
+            ("悠聖", "Yuusei"),
+            ("高城さ～ん", "Takagi-san"),
+            ("内田雪那", "Yukina Uchida"),
+            ("ひかる", "Hikaru"),
+        ]
+
+        saved = translator._save_glossary_entries(
+            GlossaryResponse.model_validate(
+                {
+                    "entries": [
+                        {
+                            "source": source,
+                            "target": target,
+                            "category": "name",
+                            "confidence": 0.9,
+                        }
+                        for source, target in cases
+                    ]
+                }
+            ).entries
+        )
+
+        self.assertEqual(saved, len(cases))
+        self.assertIn("山田先輩 => Yamada-senpai [character]", translator.glossary_text)
+        self.assertIn("高城さ～ん => Takagi-san [character]", translator.glossary_text)
+        self.assertIn("ひかる => Hikaru [character]", translator.glossary_text)
+
+    def test_negative_character_interjections_and_dialogue_are_rejected(self):
+        translator = self.make_translator("")
+        cases = [
+            ("きゃッ！", "Ah!"),
+            ("あっ", "Ah"),
+            ("あんっ", "Ahh"),
+            ("アッ", "Ah"),
+            ("フッ！", "Hmph!"),
+            ("チッ", "Tsk."),
+            ("へへっ", "Hehe"),
+            ("ウッ", "Ugh"),
+            ("ごめんなさい！", "Sorry!"),
+            ("待ってよ！", "Wait!"),
+            ("タクシー止めていい？", "Can I call a taxi?"),
+            ("もういいや", "That's enough."),
+            ("。", "."),
+            ("～～～ッッ！", "~~~!"),
+        ]
+
+        saved = translator._save_glossary_entries(
+            GlossaryResponse.model_validate(
+                {
+                    "entries": [
+                        {
+                            "source": source,
+                            "target": target,
+                            "category": "name",
+                            "confidence": 0.9,
+                        }
+                        for source, target in cases
+                    ]
+                }
+            ).entries
+        )
+
+        self.assertEqual(saved, 0)
+        self.assertEqual(translator.glossary_text, "")
+        self.assertTrue(any("reason=interjection_or_sfx" in message for message in translator.logger.infos))
+        self.assertTrue(any("reason=sentence_like" in message for message in translator.logger.infos))
+        self.assertTrue(any("reason=punctuation_only" in message for message in translator.logger.infos))
+        self.assertTrue(any("raw=14" in message and "rejected=14" in message for message in translator.logger.infos))
+
+    def test_negative_dialogue_titles_are_rejected(self):
+        translator = self.make_translator("", enabled={"title": "titles"})
+        cases = [
+            ("タクシー止めていい？", "Can I call a taxi?"),
+            ("オメーが払えよな", "You'll pay for it."),
+            ("待ってよ！", "Wait!"),
+            ("ごめんなさい！", "Sorry!"),
+            ("これも着ぐるみじゃない", "This isn't a costume either."),
+        ]
+
+        saved = translator._save_glossary_entries(
+            GlossaryResponse.model_validate(
+                {
+                    "entries": [
+                        {
+                            "source": source,
+                            "target": target,
+                            "category": "title",
+                            "confidence": 0.9,
+                        }
+                        for source, target in cases
+                    ]
+                }
+            ).entries
+        )
+
+        self.assertEqual(saved, 0)
+        self.assertEqual(translator.glossary_text, "")
+        self.assertTrue(any("reason=invalid_title" in message for message in translator.logger.infos))
+
 
 if __name__ == "__main__":
     unittest.main()
