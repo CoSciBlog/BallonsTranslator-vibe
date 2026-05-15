@@ -66,6 +66,7 @@ class LeftBar(Widget):
     save_config = Signal()
     glossary_clicked = Signal()
     run_decensor_clicked = Signal()
+    run_reinpaint_clicked = Signal()
     run_translate_clicked = Signal()
     def __init__(self, mainwindow, *args, **kwargs) -> None:
         super().__init__(mainwindow, *args, **kwargs)
@@ -190,12 +191,23 @@ class LeftBar(Widget):
         self.runDecensorBtn.setFixedSize(LEFTBTN_WIDTH, LEFTBTN_WIDTH)
         self.runDecensorBtn.clicked.connect(self.run_decensor_clicked)
 
+        self.runReInpaintBtn = QPushButton()
+        self.runReInpaintBtn.setObjectName('RunButton')
+        self.runReInpaintBtn.setText(self.tr('Ri'))
+        self.runReInpaintBtn.setToolTip(self.tr('Re-run Inpainting: apply all existing inpaint masks again on the current page.'))
+        font = self.runReInpaintBtn.font()
+        font.setPixelSize(10)
+        self.runReInpaintBtn.setFont(font)
+        self.runReInpaintBtn.setFixedSize(LEFTBTN_WIDTH, LEFTBTN_WIDTH)
+        self.runReInpaintBtn.clicked.connect(self.run_reinpaint_clicked)
+
         vlayout = QVBoxLayout(self)
         vlayout.addWidget(openBtnToolBar)
         vlayout.addWidget(self.showPageListLabel)
         vlayout.addWidget(self.globalSearchChecker)
         vlayout.addWidget(self.glossaryBtn)
         vlayout.addWidget(self.runDecensorBtn)
+        vlayout.addWidget(self.runReInpaintBtn)
         vlayout.addWidget(self.imgTransChecker)
         vlayout.addItem(QSpacerItem(0, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
         vlayout.addWidget(self.configChecker)
@@ -430,9 +442,15 @@ class TitleBar(Widget):
         mergeToolAction = QAction(self.tr('Region Merge Tool'), self)
         mergeToolAction.setShortcut(QKeySequence('Ctrl+Shift+M'))
         self.merge_tool_trigger = mergeToolAction.triggered
+
+        reinpaintAction = QAction(self.tr('Re-run Inpainting Current Page'), self)
+        reinpaintAction.setShortcut(QKeySequence('Ctrl+Shift+I'))
+        reinpaintAction.setToolTip(self.tr('Re-run Inpainting: apply all existing inpaint masks again on the current page.'))
+        self.reinpaint_current_page_trigger = reinpaintAction.triggered
         
         toolsMenu = QMenu(self.toolsToolBtn)
         toolsMenu.addAction(mergeToolAction)
+        toolsMenu.addAction(reinpaintAction)
         self.toolsToolBtn.setMenu(toolsMenu)
         self.toolsToolBtn.setPopupMode(QToolButton.InstantPopup)
 
