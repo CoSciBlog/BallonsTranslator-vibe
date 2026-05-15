@@ -107,7 +107,7 @@ The launcher update flow tracks `https://github.com/CoSciBlog/BallonsTranslator-
 
 ## Project glossary
 
-The left sidebar includes a `Gloss` button with a glossary icon that opens the current project's glossary window. Entries and the glossary prompt are saved inside the project's `imgtrans_*.json` file under `glossary`, so each manga/comic project can keep its own terminology. LLM translators use those entries for consistency, but category labels and notes such as `[CHARACTER]` or `[PLACE]` are treated as metadata and are not included in translation output. Automatic glossary extraction defaults to names and places only; optional translator checkboxes can enable organizations, titles, domain terms, honorifics, or catchphrases when needed.
+The left sidebar includes a `Gloss` button with a glossary icon that opens the current project's glossary window. Entries and the glossary prompt are saved inside the project's `imgtrans_*.json` file under `glossary`, so each manga/comic project can keep its own terminology. LLM translators use those entries for consistency, but category labels and notes such as `[CHARACTER]` or `[PLACE]` are treated as metadata and are not included in translation output. Automatic glossary extraction defaults to character/name entries and places only; optional translator checkboxes can enable organizations, titles, domain terms, honorifics, or catchphrases when needed. Automatically extracted names are merged without replacing existing manual glossary entries.
 
 ## Settings input safety
 
@@ -286,8 +286,11 @@ The `LLM_API_Translator` and `Two-Step Translator` include glossary support for 
 - `auto glossary names`, `auto glossary places`, and the optional organization/title/term/honorific/catchphrase checkboxes control which categories can be captured automatically.
 - `glossary refinement pass` runs a second LLM pass after translation to align the translated batch with the current glossary.
 - `glossary max entries` limits how many entries are kept so prompts do not grow without bound.
+- The review/reflection pass checks pronouns, address forms, and speaker/addressee references when enough context is available.
+- Character/name glossary entries and aliases are passed into review so inconsistent names can be normalized to the preferred target form.
+- Manual glossary entries have priority over automatic extraction and are not overwritten by new auto entries.
 
-This improves consistency across pages, especially for character names and locations, but it adds extra LLM/API calls and token usage when automatic extraction or the refinement pass is enabled.
+This improves consistency across pages, especially for character names, pronouns, address forms, and locations, but it adds extra LLM/API calls and token usage when automatic extraction or the refinement pass is enabled. The LLM can only verify pronouns and address forms from available source, context, and glossary information; it is instructed not to invent unknown gender, pronoun, relationship, or formality details.
 
 ## Headless mode
 

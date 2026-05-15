@@ -328,8 +328,9 @@ class TwoStepTranslator(LLM_API_Translator):
             "Keep the same IDs. Do not reorder. Do not merge items.\n"
             "If unsure, return the draft_translation unchanged.\n"
             "Do not include source, draft_translation, metadata, markdown, or explanations in the final output.\n\n"
+            f"{self._review_quality_rules(len(expected_items), expected_ids)}"
             f"{self._translation_context_prompt_section()}"
-            f"{self._glossary_prompt_section()}"
+            f"{self._review_glossary_prompt_section()}"
             f"INPUT:\n{json.dumps(expected_items, ensure_ascii=False, indent=2)}"
         )
 
@@ -476,6 +477,10 @@ class TwoStepTranslator(LLM_API_Translator):
 
         draft_list = self._first_step_translate(src_list)
         to_lang = self.lang_map.get(self.lang_target, self.lang_target)
+        glossary_drafts = [
+            draft or source for source, draft in zip(src_list, draft_list)
+        ]
+        self._update_glossary_from_batch(src_list, glossary_drafts, to_lang)
         expected_items = self._expected_refinement_items(src_list, draft_list)
         self.last_refinement_used_draft_fallback = False
         translations: List[str] = []
@@ -508,7 +513,6 @@ class TwoStepTranslator(LLM_API_Translator):
                     "LLM refinement failed and no first-step draft translations were available."
                 )
 
-        self._update_glossary_from_batch(src_list, translations, to_lang)
         return self._refine_translations_with_glossary(
             src_list, translations, to_lang
         )
