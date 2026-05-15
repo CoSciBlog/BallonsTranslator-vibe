@@ -26,6 +26,10 @@ Version:
 Added:
 1. Optional debug output for Censor Restoration masks and overlays.
 2. Manual-mask pipeline fallback support for Censor Restoration integration code.
+3. Added LLM model matrix benchmarking for LLM and Two-Step translation.
+4. Added repeated benchmark runs per model.
+5. Added JSON/CSV benchmark result exports and summary output.
+6. Added benchmark metrics for duration, errors, retries, and fallback usage.
 
 [v1.4.0-vibe.28] ui translations and german language
 1. Extracted all new strings from recent UI updates and recompiled all `.qm` translation files.

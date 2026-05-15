@@ -37,6 +37,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Reintroduced Censor Restoration / Decensor Inpaint controls in General settings and added a current-page sidebar action.
 - Added readable English names to source-language selectors, for example `日本語 (Japanese)`, `Deutsch (German)`, and `Polski (Polish)`, while keeping the original internal language values.
 - Added a Translation Benchmark window from the Run menu to compare current-page translations from multiple translators or LLM configurations side by side.
+- Added an LLM model matrix benchmark for repeated `LLM_API_Translator` and `Two-Step Translator` runs across Ollama-style model lists.
 - Changed project working folders so `mask`, `inpainted`, `upscaled`, `decensor_mask`, and `decensored` are created only when an output is actually written. Upscaling output is no longer created while upscaling is disabled.
 - Exposed `mask_dilation_size`, `mask_dilation_kernel`, and `inpaint_enlarge_ratio` for `lama_large_512px` in the Inpainter settings, with hover tooltips and runtime handling in the LaMa inpaint path.
 
@@ -156,6 +157,18 @@ The `Two-Step Translator` first creates Google, DeepL Free, or DeepL draft trans
 The strict retry is attempted before the final draft fallback when the LLM returns empty JSON, malformed JSON, a partial response, missing IDs, extra IDs, or a mismatched item count. Usable partial LLM results are merged by numeric ID only, never by list position, so a response for `id: 2` cannot be applied to `id: 1`.
 
 For local Ollama models such as `translategemma:12b` or `translategemma:27b`, disabling `reasoning` is usually faster and more stable for JSON output. Use moderate `max tokens` values, typically 2048-4096; values above 8192 are clamped for Ollama refinement requests. Smaller refinement chunks also improve JSON stability for local models.
+
+## LLM model matrix benchmark
+
+The Translation Benchmark window in the Run menu can run an LLM model matrix on the current page. It tests `LLM_API_Translator`, `Two-Step Translator`, or both against multiple models, with repeated runs per model and optional warmup runs. This is useful for local Ollama models such as `translategemma:12b`, `translategemma:27b`, or `qwen3.5:9b`.
+
+Benchmark output is written under `benchmarks/results/` as JSON, CSV, and a Markdown summary. The files include duration, success/failure, errors, request counts, JSON parse errors, retry and fallback counters, model name, provider, translator type, token counts when available, and Two-Step refinement timings when available. API keys are not written to the result files.
+
+The same benchmark can be run from the command line:
+
+```bash
+python scripts/benchmark_llm_model_matrix.py --models translategemma:12b,translategemma:27b,qwen3.5:9b --translator-types llm,two_step --runs-per-model 3 --provider Ollama --endpoint http://localhost:11434/v1 --texts "こんにちは||ありがとう"
+```
 
 ## Programmatic use
 
