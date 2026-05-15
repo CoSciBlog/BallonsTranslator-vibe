@@ -1268,14 +1268,21 @@ class LLM_API_Translator(BaseTranslator):
         return (
             f"Extract a reusable translation glossary from {from_lang} to {to_lang}.\n"
             f"{category_prompt}\n"
-            "Extract character/person names from source and draft_translation when present. "
+            "Strict category rules:\n"
+            "- character: only real person/character names from source and draft_translation. "
+            "Names with honorifics are allowed, including ちゃん, くん, さん, 先輩, 先生, and 様; "
+            "keep honorific variants as aliases or short notes when useful. "
             "Use category \"character\" for character/person names; do not use category \"name\".\n"
-            "Do not add generic words, full sentences, ordinary phrases, one-off "
-            "dialogue, common pronouns, ordinary address words, or style notes. "
-            "Do not invent names, aliases, genders, pronouns, or relationships. "
-            "Alternative romanizations or spellings may be aliases.\n\n"
+            "- title: only real titles, roles, works, chapter/series titles, job titles, or ranks. "
+            "Do not classify questions, commands, reactions, or ordinary dialogue as title.\n"
+            "- Do not add generic words, ordinary phrases, one-off dialogue, common pronouns, ordinary address words, or style notes.\n"
+            "- Do not classify interjections, moans, sound effects, punctuation, or normal dialogue as names or titles.\n"
+            "- Do not add entries like Ah, Ahh, Huh, Hmph, Tsk, Ugh, Hehe, Sorry, Wait, Yes, No, or Oh as names.\n"
+            "- Reject source strings that are punctuation-only, almost empty, sentence-like, a full sentence, a question, or a command.\n"
+            "- If unsure whether something is a real name/title, omit it.\n"
+            "- Do not invent names, aliases, genders, pronouns, or relationships. Alternative romanizations or spellings may be aliases.\n\n"
             "Return JSON only with the GlossaryResponse schema: "
-            '{"entries":[{"source":"\u539f\u6587\u540d","target":"Preferred translated name","category":"character","aliases":[],"notes":"optional short note","confidence":0.5}]}. '
+            '{"entries":[{"source":"原文名","target":"Preferred translated name","category":"character|place|organization|title|term|honorific|catchphrase","aliases":[],"notes":"optional short note","confidence":0.5}]}. '
             "Never return {}. If no valid entries are found, return {\"entries\":[]}. "
             "Each entry must contain source, target, category, aliases, notes, and confidence. "
             "Category, aliases, notes, and confidence are metadata for the glossary only; they must never be copied into translations.\n\n"
@@ -1293,9 +1300,12 @@ class LLM_API_Translator(BaseTranslator):
 
         system_prompt = (
             "You extract concise translation glossaries. Return only valid JSON "
-            'matching the GlossaryResponse schema: {"entries":[{"source":"\u539f\u6587\u540d",'
-            '"target":"Preferred translated name","category":"character","aliases":[],'
-            '"notes":"optional short note","confidence":0.5}]}. Never return {}.'
+            'matching the GlossaryResponse schema: {"entries":[{"source":"原文名",'
+            '"target":"Preferred translated name","category":"character|place|organization|title|term|honorific|catchphrase","aliases":[],'
+            '"notes":"optional short note","confidence":0.5}]}. Never return {}. '
+            'If no valid glossary entries exist, return {"entries":[]}. '
+            "Do not invent names. Do not classify interjections, moans, sound effects, punctuation, "
+            "questions, commands, or normal dialogue as names or titles."
         )
         prompt = self._build_glossary_extraction_prompt(src_list, translations, to_lang)
         try:
