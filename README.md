@@ -109,6 +109,8 @@ The launcher update flow tracks `https://github.com/CoSciBlog/BallonsTranslator-
 
 The left sidebar includes a `Gloss` button with a glossary icon that opens the current project's glossary window. Entries and the glossary prompt are saved inside the project's `imgtrans_*.json` file under `glossary`, so each manga/comic project can keep its own terminology. LLM translators use those entries for consistency, but category labels and notes such as `[CHARACTER]` or `[PLACE]` are treated as metadata and are not included in translation output. Automatic glossary extraction defaults to character/name entries and places only; optional translator checkboxes can enable organizations, titles, domain terms, honorifics, or catchphrases when needed. Automatically extracted names are merged without replacing existing manual glossary entries.
 
+Auto Glossary now extracts names/characters more conservatively: `name` entries are normalized to the `character` category, and interjections, SFX, punctuation, normal dialogue, questions, and commands are filtered so they are not saved as names or titles. Manual glossary entries remain dominant over automatic entries.
+
 ## Settings input safety
 
 The General settings page includes `Prevent mouse wheel changes on input fields`. When enabled, mouse wheel events over combo boxes and spin boxes are blocked or forwarded to the surrounding scroll area, so scrolling the settings page does not accidentally change values. Long text fields such as API keys, URLs, proxies, glossary prompts, and LLM prompt templates are wider or taller so more content remains visible while editing.
@@ -282,7 +284,7 @@ The `LLM_API_Translator` and `Two-Step Translator` include glossary support for 
 
 - `glossary` stores persistent entries in the format `source => target [category] # optional note`.
 - `use glossary` injects the glossary into translation prompts so known terms are reused consistently.
-- `auto build glossary` asks the LLM to extract reusable glossary entries from each translated batch and append or update them in the settings. By default, automatic extraction keeps only names and places.
+- `auto build glossary` asks the LLM to extract reusable glossary entries from each translated batch and append or update them in the settings. By default, automatic extraction keeps only names and places, and it filters interjections, SFX, punctuation, and normal dialogue out of name/title categories.
 - `auto glossary names`, `auto glossary places`, and the optional organization/title/term/honorific/catchphrase checkboxes control which categories can be captured automatically.
 - `glossary refinement pass` runs a second LLM pass after translation to align the translated batch with the current glossary.
 - `glossary max entries` limits how many entries are kept so prompts do not grow without bound.

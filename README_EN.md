@@ -107,7 +107,9 @@ The launcher update flow tracks `https://github.com/CoSciBlog/BallonsTranslator-
 
 ## Project glossary
 
-The left sidebar includes a `Gloss` button with a glossary icon that opens the current project's glossary window. Entries and the glossary prompt are saved inside the project's `imgtrans_*.json` file under `glossary`, so each manga/comic project can keep its own terminology. LLM translators use those entries for consistency, but category labels and notes such as `[CHARACTER]` or `[PLACE]` are treated as metadata and are not included in translation output. Automatic glossary extraction defaults to names and places only; optional translator checkboxes can enable organizations, titles, domain terms, honorifics, or catchphrases when needed.
+The left sidebar includes a `Gloss` button with a glossary icon that opens the current project's glossary window. Entries and the glossary prompt are saved inside the project's `imgtrans_*.json` file under `glossary`, so each manga/comic project can keep its own terminology. LLM translators use those entries for consistency, but category labels and notes such as `[CHARACTER]` or `[PLACE]` are treated as metadata and are not included in translation output. Automatic glossary extraction defaults to character/name entries and places only; optional translator checkboxes can enable organizations, titles, domain terms, honorifics, or catchphrases when needed. Automatically extracted names are merged without replacing existing manual glossary entries.
+
+Auto Glossary now extracts names/characters more conservatively: `name` entries are normalized to the `character` category, and interjections, SFX, punctuation, normal dialogue, questions, and commands are filtered so they are not saved as names or titles. Manual glossary entries remain dominant over automatic entries.
 
 ## Settings input safety
 

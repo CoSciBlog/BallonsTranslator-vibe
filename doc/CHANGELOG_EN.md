@@ -11,6 +11,9 @@ Fixed:
 3. Improved Windows robustness for atomic project saving and UI save-error handling.
 4. Added diagnostics for Censor Restoration mask detection.
 5. Improved simple censor bar and block mask detection.
+6. Improved auto glossary filtering to avoid classifying interjections, SFX, punctuation, and normal dialogue as character names or titles.
+7. Normalized name entries to character glossary category.
+8. Added stricter title filtering and glossary rejection diagnostics.
 
 Added:
 1. Optional debug output for Censor Restoration masks and overlays.
