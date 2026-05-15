@@ -21,7 +21,7 @@ Fixed:
 13. Added stricter title filtering and glossary rejection diagnostics.
 
 Version:
-1. Bumped the fork runtime version string to `1.4.0-vibe.29`.
+1. Bumped the fork runtime version string to `1.4.0-vibe.30`.
 
 Added:
 1. Optional debug output for Censor Restoration masks and overlays.
