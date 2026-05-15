@@ -2,7 +2,8 @@ import re
 import time
 import json
 import traceback
-from typing import Any, List, Dict, Optional, Type
+import unicodedata
+from typing import Any, List, Dict, Optional, Set, Tuple, Type
 
 import httpx
 import openai
@@ -35,9 +36,11 @@ class GlossaryEntry(BaseModel):
     target: str = Field(..., description="Preferred translated form.")
     category: str = Field(
         default="term",
-        description="Enabled category key such as name, place, organization, title, term, honorific, or catchphrase.",
+        description="Enabled category key such as character, place, organization, title, term, honorific, or catchphrase.",
     )
+    aliases: List[str] = Field(default_factory=list, description="Alternative spellings or romanizations.")
     note: str = Field(default="", description="Short optional usage note.")
+    confidence: float = Field(default=0.0, description="Optional model confidence from 0.0 to 1.0.")
 
 
 class GlossaryResponse(BaseModel):
@@ -48,7 +51,7 @@ class GlossaryResponse(BaseModel):
 
 
 AUTO_GLOSSARY_CATEGORY_CONFIG = {
-    "name": {
+    "character": {
         "param": "auto glossary names",
         "label": "character/person names and nicknames",
         "aliases": {"character", "person", "name", "names", "nickname", "nicknames"},
@@ -84,6 +87,19 @@ AUTO_GLOSSARY_CATEGORY_CONFIG = {
         "aliases": {"catchphrase", "catchphrases", "phrase", "phrases", "fixed phrase"},
     },
 }
+
+REVIEW_GLOSSARY_CATEGORIES = ("character", "honorific", "title", "place", "organization")
+
+
+def canonicalize_glossary_category(category: str) -> str:
+    raw_category = (category or "").strip().lower()
+    raw_category = raw_category.strip("[](){}")
+    raw_category = re.sub(r"\s+", " ", raw_category)
+    raw_category = raw_category.removesuffix(" name")
+    for canonical, config in AUTO_GLOSSARY_CATEGORY_CONFIG.items():
+        if raw_category in config["aliases"]:
+            return canonical
+    return raw_category or "term"
 
 
 def _category_param_description(label: str) -> str:
@@ -845,34 +861,61 @@ class LLM_API_Translator(BaseTranslator):
 
     @classmethod
     def _normalize_glossary_response_data(cls, data: Any, logger=None) -> Any:
+        def normalize_entry(entry: Any) -> Any:
+            if not isinstance(entry, dict):
+                return entry
+            normalized_entry = dict(entry)
+            if "notes" in normalized_entry and "note" not in normalized_entry:
+                normalized_entry["note"] = normalized_entry.get("notes") or ""
+            aliases = normalized_entry.get("aliases", [])
+            if isinstance(aliases, str):
+                aliases = [
+                    alias.strip()
+                    for alias in re.split(r"[,|;/]", aliases)
+                    if alias.strip()
+                ]
+            elif not isinstance(aliases, list):
+                aliases = []
+            normalized_entry["aliases"] = [
+                str(alias).strip() for alias in aliases if str(alias).strip()
+            ]
+            normalized_entry["category"] = canonicalize_glossary_category(
+                normalized_entry.get("category", "")
+            )
+            return normalized_entry
+
+        def normalize_entries(entries: Any) -> List[Any]:
+            if entries is None:
+                return []
+            if isinstance(entries, dict):
+                entries = [entries]
+            if isinstance(entries, list):
+                return [normalize_entry(entry) for entry in entries]
+            return entries
+
         if isinstance(data, dict) and not data:
             if logger is not None:
                 logger.warning("LLM returned empty glossary JSON object; no glossary entries were extracted.")
             return {"entries": []}
 
         if isinstance(data, list):
-            return {"entries": data}
+            return {"entries": normalize_entries(data)}
 
         if not isinstance(data, dict):
             return data
 
         if "entries" in data:
-            entries = data.get("entries")
-            if entries is None:
-                entries = []
-            elif isinstance(entries, dict):
-                entries = [entries]
             normalized = dict(data)
-            normalized["entries"] = entries
+            normalized["entries"] = normalize_entries(data.get("entries"))
             return normalized
 
         for key in ("glossary", "terms", "items"):
             entries = data.get(key)
             if isinstance(entries, list):
-                return {"entries": entries}
+                return {"entries": normalize_entries(entries)}
 
         if "source" in data and "target" in data:
-            return {"entries": [data]}
+            return {"entries": normalize_entries([data])}
 
         return data
 
@@ -880,26 +923,21 @@ class LLM_API_Translator(BaseTranslator):
         self, original_prompt: str, draft_response: TranslationResponse
     ) -> str:
         draft_json = draft_response.model_dump_json(indent=2)
+        expected_ids = [item.id for item in draft_response.translations]
         return (
             f"{self.reflection_prompt}\n\n"
+            f"{self._review_quality_rules(len(draft_response.translations), expected_ids)}"
+            f"{self._review_glossary_prompt_section()}"
             "ORIGINAL TRANSLATION TASK:\n"
             f"{original_prompt}\n\n"
             "DRAFT TRANSLATION JSON:\n"
             f"{draft_json}\n\n"
-            "Return the reviewed and improved translation as JSON with the same "
-            "'translations' list and the same numeric ids. Required schema: "
+            "Return JSON only with the TranslationResponse schema: "
             '{"translations":[{"id":1,"translation":"Reviewed translation"}]}.'
         )
 
     def _canonical_glossary_category(self, category: str) -> str:
-        raw_category = (category or "").strip().lower()
-        raw_category = raw_category.strip("[](){}")
-        raw_category = re.sub(r"\s+", " ", raw_category)
-        raw_category = raw_category.removesuffix(" name")
-        for canonical, config in AUTO_GLOSSARY_CATEGORY_CONFIG.items():
-            if raw_category in config["aliases"]:
-                return canonical
-        return raw_category or "term"
+        return canonicalize_glossary_category(category)
 
     def _enabled_auto_glossary_categories(self) -> Dict[str, str]:
         enabled = {}
@@ -939,25 +977,183 @@ class LLM_API_Translator(BaseTranslator):
             )
         )
 
+    def _review_quality_rules(self, expected_count: int, expected_ids: List[int]) -> str:
+        return (
+            "REVIEW REQUIREMENTS:\n"
+            "- JSON only. Do not output explanations, markdown, comments, source text, draft_translation, or glossary metadata.\n"
+            "- Use the TranslationResponse schema exactly: {\"translations\":[{\"id\":1,\"translation\":\"reviewed translation\"}]}.\n"
+            f"- Return exactly {expected_count} items with the same IDs: {expected_ids}.\n"
+            "- Keep the same IDs, keep the same item count, and do not reorder, merge, add, or omit items.\n"
+            "- If a draft translation is already correct, return it unchanged.\n"
+            "- Check pronoun consistency against the available source and context.\n"
+            "- Check speaker and addressee references, including whether first person and second person are preserved.\n"
+            "- Do not change I/me/my into we/us/our unless the source clearly means plural first person.\n"
+            "- Do not change you into they/he/she or the wrong form of address unless the source clearly requires it.\n"
+            "- Check address forms and honorifics such as Mr./Ms., Herr/Frau, du/Sie, and similar forms when context or glossary supports them.\n"
+            "- If gender, pronouns, or social address are unknown, do not invent that information.\n"
+            "- Use glossary names, aliases, titles, and honorifics as guidance only; never write category labels, aliases, notes, confidence, or other metadata into translations.\n\n"
+        )
+
+    def _review_glossary_entries(self) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
+        stats: Dict[str, Any] = {
+            "duplicates": 0,
+            "conflicts": 0,
+            "categories": set(),
+            "enabled": False,
+        }
+        if not self.use_glossary_enabled:
+            return [], stats
+        entries = self._parse_glossary_entries()
+        if not entries:
+            return [], stats
+
+        compact_entries: List[Dict[str, Any]] = []
+        seen_terms: Set[Tuple[str, str]] = set()
+        for entry in entries:
+            category = self._canonical_glossary_category(entry.get("category", ""))
+            if category not in REVIEW_GLOSSARY_CATEGORIES:
+                continue
+            terms = {
+                self._normalize_glossary_term(entry.get("source", "")),
+                self._normalize_glossary_term(entry.get("target", "")),
+                *[
+                    self._normalize_glossary_term(alias)
+                    for alias in entry.get("aliases", [])
+                ],
+            }
+            terms.discard("")
+            duplicate = any((category, term) in seen_terms for term in terms)
+            if duplicate:
+                stats["duplicates"] += 1
+                stats["conflicts"] += 1
+                continue
+            compact = dict(entry)
+            compact["category"] = category
+            compact_entries.append(compact)
+            stats["categories"].add(category)
+            for term in terms:
+                seen_terms.add((category, term))
+
+        stats["enabled"] = bool(compact_entries)
+        return compact_entries, stats
+
+    def _review_glossary_prompt_section(self) -> str:
+        entries, stats = self._review_glossary_entries()
+        logger = getattr(self, "logger", None)
+        if not entries:
+            if logger is not None:
+                logger.info("Review glossary guidance disabled or no relevant entries found.")
+            return ""
+
+        max_entries = self.glossary_max_entries or len(entries)
+        entries = entries[:max_entries]
+        categories = sorted(stats["categories"])
+        if logger is not None:
+            logger.info(
+                "Review glossary guidance enabled: entries=%s categories=%s duplicates=%s conflicts=%s"
+                % (
+                    len(entries),
+                    ", ".join(categories),
+                    stats["duplicates"],
+                    stats["conflicts"],
+                )
+            )
+
+        lines = []
+        for entry in entries:
+            parts = [
+                f"- [{entry['category']}] {entry['source']} -> {entry['target']}"
+            ]
+            aliases = entry.get("aliases") or []
+            note = entry.get("note") or ""
+            if aliases:
+                parts.append("aliases: " + ", ".join(aliases))
+            if note:
+                parts.append("notes: " + note)
+            lines.append("; ".join(parts))
+
+        return (
+            "RELEVANT GLOSSARY FOR REVIEW:\n"
+            "Use these entries to keep character names, aliases, titles, honorifics, places, and organizations consistent. "
+            "Aliases should be normalized to the preferred target. Use honorifics and titles only when natural and supported by context. "
+            "Do not output category labels, aliases, notes, confidence, or glossary metadata.\n"
+            + "\n".join(lines)
+            + "\n\n"
+        )
+
     def _format_glossary_entry(
         self, entry: GlossaryEntry, category: Optional[str] = None
     ) -> str:
         category = category or self._canonical_glossary_category(entry.category)
         note = (entry.note or "").strip()
+        aliases = [alias.strip() for alias in (entry.aliases or []) if alias.strip()]
+        if aliases and not self._extract_aliases_from_note(note):
+            alias_note = "aliases: " + ", ".join(aliases)
+            note = f"{note}; {alias_note}" if note else alias_note
         line = f"{entry.source.strip()} => {entry.target.strip()} [{category}]"
         if note:
             line = f"{line} # {note}"
         return line
 
+    def _normalize_glossary_term(self, value: str) -> str:
+        value = unicodedata.normalize("NFKC", str(value or "")).casefold().strip()
+        value = re.sub(r"[\s\-_.'\"`´’‘“”、。・/\\|]+", "", value)
+        return value
+
+    def _extract_aliases_from_note(self, note: str) -> List[str]:
+        if not note:
+            return []
+        match = re.search(r"(?:^|;)\s*(?:aliases?|aka)\s*[:=]\s*([^;#]+)", note, flags=re.IGNORECASE)
+        if not match:
+            return []
+        return [
+            alias.strip()
+            for alias in re.split(r"[,|/]", match.group(1))
+            if alias.strip()
+        ]
+
+    def _parse_glossary_entry_line(self, line: str) -> Optional[Dict[str, Any]]:
+        clean = line.strip()
+        if not clean or clean.startswith("#") or "=>" not in clean:
+            return None
+        source, remainder = clean.split("=>", 1)
+        source = source.strip()
+        if not source:
+            return None
+        target_part = remainder.strip()
+        note = ""
+        if "#" in target_part:
+            target_part, note = target_part.split("#", 1)
+            note = note.strip()
+        category = "term"
+        match = re.search(r"\[([^\]]+)\]\s*$", target_part)
+        if match:
+            category = self._canonical_glossary_category(match.group(1))
+            target_part = target_part[: match.start()].strip()
+        target = target_part.strip()
+        if not target:
+            return None
+        return {
+            "source": source,
+            "target": target,
+            "category": category,
+            "aliases": self._extract_aliases_from_note(note),
+            "note": note,
+            "line": clean,
+        }
+
+    def _parse_glossary_entries(self) -> List[Dict[str, Any]]:
+        entries: List[Dict[str, Any]] = []
+        for line in self.glossary_text.splitlines():
+            entry = self._parse_glossary_entry_line(line)
+            if entry is not None:
+                entries.append(entry)
+        return entries
+
     def _parse_glossary_lines(self) -> Dict[str, str]:
         entries = {}
-        for line in self.glossary_text.splitlines():
-            clean = line.strip()
-            if not clean or clean.startswith("#") or "=>" not in clean:
-                continue
-            source = clean.split("=>", 1)[0].strip()
-            if source:
-                entries[source] = clean
+        for entry in self._parse_glossary_entries():
+            entries[entry["source"]] = entry["line"]
         return entries
 
     def _save_glossary_entries(self, entries: List[GlossaryEntry]) -> int:
@@ -968,30 +1164,103 @@ class LLM_API_Translator(BaseTranslator):
         if not enabled_categories:
             return 0
 
-        saved_count = 0
-        glossary_lines = self._parse_glossary_lines()
+        stats = {
+            "recognized": len(entries),
+            "recognized_names": 0,
+            "added": 0,
+            "added_names": 0,
+            "deduplicated": 0,
+            "discarded": 0,
+            "conflicts": 0,
+        }
+        existing_entries = self._parse_glossary_entries()
+        glossary_lines = [entry["line"] for entry in existing_entries]
+        seen_terms: Set[Tuple[str, str]] = set()
+        seen_sources: Set[str] = set()
+
+        for existing in existing_entries:
+            category = existing["category"]
+            source_norm = self._normalize_glossary_term(existing["source"])
+            if source_norm:
+                seen_sources.add(source_norm)
+                seen_terms.add((category, source_norm))
+            if category in {"character", "honorific", "title", "place", "organization"}:
+                target_norm = self._normalize_glossary_term(existing["target"])
+                if target_norm:
+                    seen_terms.add((category, target_norm))
+            for alias in existing.get("aliases", []):
+                alias_norm = self._normalize_glossary_term(alias)
+                if alias_norm:
+                    seen_terms.add((category, alias_norm))
+
         for entry in entries:
             source = entry.source.strip()
             target = entry.target.strip()
             category = self._canonical_glossary_category(entry.category)
+            if category == "character":
+                stats["recognized_names"] += 1
             if not source or not target:
+                stats["discarded"] += 1
                 continue
             if category not in enabled_categories:
+                stats["discarded"] += 1
                 continue
-            glossary_lines[source] = self._format_glossary_entry(entry, category=category)
-            saved_count += 1
+            candidate_terms = {
+                self._normalize_glossary_term(source),
+                *[
+                    self._normalize_glossary_term(alias)
+                    for alias in (entry.aliases or [])
+                ],
+            }
+            if category in {"character", "honorific", "title", "place", "organization"}:
+                candidate_terms.add(self._normalize_glossary_term(target))
+            candidate_terms.discard("")
+            if not candidate_terms:
+                stats["discarded"] += 1
+                continue
+            source_norm = self._normalize_glossary_term(source)
+            duplicate_keys = {
+                term for term in candidate_terms if (category, term) in seen_terms
+            }
+            if source_norm in seen_sources or duplicate_keys:
+                stats["deduplicated"] += 1
+                stats["conflicts"] += 1
+                self.logger.info(
+                    f"Glossary entry skipped to preserve existing value: {source} [{category}]"
+                )
+                continue
+            glossary_lines.append(self._format_glossary_entry(entry, category=category))
+            stats["added"] += 1
+            if category == "character":
+                stats["added_names"] += 1
+            if source_norm:
+                seen_sources.add(source_norm)
+            for term in candidate_terms:
+                seen_terms.add((category, term))
 
-        limited_lines = list(glossary_lines.values())[-self.glossary_max_entries :]
+        limited_lines = glossary_lines[-self.glossary_max_entries :]
         self.set_param_value("glossary", "\n".join(limited_lines), convert_dtype=False)
         self.project_glossary_text = "\n".join(limited_lines)
-        return saved_count
+        self.logger.info(
+            "Glossary extraction stats: recognized=%s recognized_names=%s added=%s added_names=%s deduplicated=%s discarded=%s conflicts=%s"
+            % (
+                stats["recognized"],
+                stats["recognized_names"],
+                stats["added"],
+                stats["added_names"],
+                stats["deduplicated"],
+                stats["discarded"],
+                stats["conflicts"],
+            )
+        )
+        return stats["added"]
 
     def _build_glossary_extraction_prompt(
         self, src_list: List[str], translations: List[str], to_lang: str
     ) -> str:
         from_lang = self.lang_map.get(self.lang_source, self.lang_source)
         pairs = [
-            {"id": i + 1, "source": source, "translation": translation}
+            {"id": i + 1, "source": source, "draft_translation": translation}
             for i, (source, translation) in enumerate(zip(src_list, translations))
         ]
         existing_glossary = self.glossary_text.strip() or "(empty)"
@@ -999,14 +1268,17 @@ class LLM_API_Translator(BaseTranslator):
         return (
             f"Extract a reusable translation glossary from {from_lang} to {to_lang}.\n"
             f"{category_prompt}\n"
+            "Extract character/person names from source and draft_translation when present. "
+            "Use category \"character\" for character/person names; do not use category \"name\".\n"
             "Do not add generic words, full sentences, ordinary phrases, one-off "
-            "dialogue, or style notes. Metadata belongs only in the glossary entry; "
-            "it must never be copied into translated text.\n\n"
+            "dialogue, common pronouns, ordinary address words, or style notes. "
+            "Do not invent names, aliases, genders, pronouns, or relationships. "
+            "Alternative romanizations or spellings may be aliases.\n\n"
             "Return JSON only with the GlossaryResponse schema: "
-            '{"entries":[{"source":"term","target":"translated term","category":"term","note":""}]}. '
-            "Each entry must contain source, target, category, and optional note. "
-            "Category and note are metadata for the glossary only; they must never "
-            "be copied into translations.\n\n"
+            '{"entries":[{"source":"原文名","target":"Preferred translated name","category":"character","aliases":[],"notes":"optional short note","confidence":0.5}]}. '
+            "Never return {}. If no valid entries are found, return {\"entries\":[]}. "
+            "Each entry must contain source, target, category, aliases, notes, and confidence. "
+            "Category, aliases, notes, and confidence are metadata for the glossary only; they must never be copied into translations.\n\n"
             f"EXISTING GLOSSARY:\n{existing_glossary}\n\n"
             f"TRANSLATION PAIRS:\n{json.dumps(pairs, ensure_ascii=False, indent=2)}"
         )
@@ -1021,8 +1293,9 @@ class LLM_API_Translator(BaseTranslator):
 
         system_prompt = (
             "You extract concise translation glossaries. Return only valid JSON "
-            'matching the GlossaryResponse schema: {"entries":[{"source":"term",'
-            '"target":"translated term","category":"term","note":""}]}.'
+            'matching the GlossaryResponse schema: {"entries":[{"source":"原文名",'
+            '"target":"Preferred translated name","category":"character","aliases":[],'
+            '"notes":"optional short note","confidence":0.5}]}. Never return {}.'
         )
         prompt = self._build_glossary_extraction_prompt(src_list, translations, to_lang)
         try:
@@ -1055,13 +1328,14 @@ class LLM_API_Translator(BaseTranslator):
         ]
         return (
             f"Revise the translations from {from_lang} to {to_lang} using the glossary.\n"
+            f"{self._review_quality_rules(len(items), [item['id'] for item in items])}"
             "Only change text where the glossary improves consistency. Preserve "
             "meaning, tone, line count, ids, and natural target-language grammar. "
-            "Do not insert glossary category labels, notes, comments, or bracketed "
-            "metadata into the translation text. "
+            "Correct inconsistent character names by normalizing aliases to the preferred target. "
+            "Honorifics and titles should be used only when natural and supported by context. "
             "Return only JSON in the required translation schema.\n\n"
             f"{self._translation_context_prompt_section()}"
-            f"{self._glossary_prompt_section()}"
+            f"{self._review_glossary_prompt_section()}"
             f"TRANSLATIONS TO REVIEW:\n{json.dumps(items, ensure_ascii=False, indent=2)}"
         )
 

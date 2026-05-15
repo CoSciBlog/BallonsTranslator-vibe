@@ -64,6 +64,9 @@ class FakeTwoStepTranslator(TwoStepTranslator):
     def _glossary_prompt_section(self):
         return ""
 
+    def _review_glossary_prompt_section(self):
+        return ""
+
     def _request_translation(self, prompt, is_reflection=False, **kwargs):
         self.requests.append({"prompt": prompt, "is_reflection": is_reflection, **kwargs})
         if self._errors:
@@ -255,6 +258,9 @@ class TwoStepFallbackTest(unittest.TestCase):
         self.assertIn("Expected IDs: [1]", normal_prompt)
         self.assertIn("Never return {}", normal_prompt)
         self.assertIn("Required IDs", retry_prompt)
+        self.assertIn("Check pronoun consistency", normal_prompt)
+        self.assertIn("Do not change I/me/my into we/us/our", normal_prompt)
+        self.assertIn("Do not change you into they/he/she", normal_prompt)
         self.assertIn("If unsure, copy the draft unchanged", retry_prompt)
         self.assertNotIn("ORIGINAL TRANSLATION TASK", retry_prompt)
         self.assertNotIn("GlossaryResponse", normal_prompt)
