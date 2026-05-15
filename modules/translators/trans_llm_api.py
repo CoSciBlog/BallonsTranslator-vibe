@@ -301,6 +301,15 @@ class LLM_API_Translator(BaseTranslator):
             "value": "medium",
             "description": "Reasoning effort used when reasoning is enabled.",
         },
+        "json mode": {
+            "type": "checkbox",
+            "value": True,
+            "description": "Request structured JSON output from OpenAI-compatible providers when supported.",
+        },
+        "num ctx": {
+            "value": 0,
+            "description": "Optional Ollama context window size. 0 lets the provider use its default.",
+        },
         "reflection": {
             "type": "checkbox",
             "value": False,
@@ -566,6 +575,14 @@ class LLM_API_Translator(BaseTranslator):
     def reasoning_level(self) -> str:
         level = str(self.get_param_value("reasoning level") or "medium").lower()
         return level if level in {"low", "medium", "high"} else "medium"
+
+    @property
+    def json_mode_enabled(self) -> bool:
+        return bool(self.get_param_value("json mode"))
+
+    @property
+    def num_ctx(self) -> int:
+        return self._param_int("num ctx")
 
     @property
     def reflection_enabled(self) -> bool:
@@ -867,17 +884,22 @@ class LLM_API_Translator(BaseTranslator):
     def _build_reasoning_extra_body(self) -> Dict:
         level = self.reasoning_level
         provider = self.provider
+        extra_body = {}
+        if self.num_ctx > 0 and provider in {"Ollama", "LLM Studio"}:
+            extra_body["num_ctx"] = self.num_ctx
         if provider == "Ollama":
-            return {"think": bool(self.reasoning_enabled)}
+            extra_body["think"] = bool(self.reasoning_enabled)
+            return extra_body
         if not self.reasoning_enabled:
-            return {}
+            return extra_body
         if provider == "OpenRouter":
-            return {"reasoning": {"effort": level}}
+            extra_body["reasoning"] = {"effort": level}
         if provider == "LLM Studio":
-            return {"reasoning": {"effort": level}, "think": True}
+            extra_body["reasoning"] = {"effort": level}
+            extra_body["think"] = True
         if provider in ["Google", "Grok"]:
-            return {"reasoning_effort": level}
-        return {}
+            extra_body["reasoning_effort"] = level
+        return extra_body
 
     def _strip_reasoning_markup(self, content: str) -> str:
         cleaned = re.sub(r"<think>.*?</think>", "", content, flags=re.DOTALL | re.IGNORECASE)
@@ -1723,12 +1745,12 @@ class LLM_API_Translator(BaseTranslator):
             "max_tokens": self.max_tokens,
         }
 
-        if self.provider == "LLM Studio":
+        if self.json_mode_enabled and self.provider == "LLM Studio":
             api_args["response_format"] = {
                 "type": "json_schema",
                 "json_schema": {"schema": response_model.model_json_schema()},
             }
-        elif self.provider in ["OpenAI", "Grok", "Google", "OpenRouter", "Ollama"]:
+        elif self.json_mode_enabled and self.provider in ["OpenAI", "Grok", "Google", "OpenRouter", "Ollama"]:
             api_args["response_format"] = {"type": "json_object"}
 
         if self.provider == "OpenAI":
@@ -1962,13 +1984,13 @@ class LLM_API_Translator(BaseTranslator):
             "max_tokens": response_max_tokens,
         }
 
-        if self.provider == "LLM Studio":
+        if self.json_mode_enabled and self.provider == "LLM Studio":
             self.logger.debug("Using 'json_schema' mode for LLM Studio.")
             api_args["response_format"] = {
                 "type": "json_schema",
                 "json_schema": {"schema": TranslationResponse.model_json_schema()},
             }
-        elif self.provider in ["OpenAI", "Grok", "Google", "OpenRouter", "Ollama"]:
+        elif self.json_mode_enabled and self.provider in ["OpenAI", "Grok", "Google", "OpenRouter", "Ollama"]:
             self.logger.debug(f"Using 'json_object' mode for {self.provider}.")
             api_args["response_format"] = {"type": "json_object"}
 
