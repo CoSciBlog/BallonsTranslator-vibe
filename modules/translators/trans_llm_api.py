@@ -89,6 +89,114 @@ AUTO_GLOSSARY_CATEGORY_CONFIG = {
 }
 
 REVIEW_GLOSSARY_CATEGORIES = ("character", "honorific", "title", "place", "organization")
+GLOSSARY_JA_HONORIFICS = ("ちゃん", "くん", "さん", "先輩", "先生", "様")
+GLOSSARY_REACTION_TARGETS = {
+    "ah",
+    "ahh",
+    "aha",
+    "huh",
+    "hmph",
+    "tsk",
+    "ugh",
+    "hehe",
+    "sorry",
+    "wait",
+    "yes",
+    "no",
+    "oh",
+    "ooh",
+    "ow",
+    "ouch",
+    "eek",
+    "kya",
+    "um",
+    "uh",
+    "hmm",
+}
+GLOSSARY_INTERJECTION_STEMS = {
+    "",
+    "あ",
+    "あん",
+    "きゃ",
+    "きゃあ",
+    "ふ",
+    "ち",
+    "ん",
+    "はぁ",
+    "はあ",
+    "ひ",
+    "く",
+    "う",
+    "へへ",
+    "おほ",
+    "いや",
+    "ええ",
+    "な",
+}
+GLOSSARY_DIALOGUE_SOURCE_PATTERNS = (
+    "待って",
+    "ごめん",
+    "すみません",
+    "止めて",
+    "払え",
+    "もういい",
+    "いいや",
+    "じゃない",
+    "ではない",
+    "ください",
+    "オメー",
+    "おまえ",
+    "これも",
+    "タクシー",
+)
+GLOSSARY_TITLE_SOURCE_MARKERS = (
+    "先生",
+    "先輩",
+    "様",
+    "殿",
+    "社長",
+    "部長",
+    "課長",
+    "係長",
+    "店長",
+    "監督",
+    "隊長",
+    "博士",
+    "教授",
+    "王",
+    "女王",
+    "姫",
+    "皇帝",
+    "章",
+    "巻",
+    "話",
+    "編",
+)
+GLOSSARY_TITLE_TARGET_MARKERS = (
+    "mr",
+    "mrs",
+    "ms",
+    "miss",
+    "dr",
+    "professor",
+    "teacher",
+    "senpai",
+    "sensei",
+    "lord",
+    "lady",
+    "king",
+    "queen",
+    "captain",
+    "chief",
+    "president",
+    "director",
+    "manager",
+    "chapter",
+    "episode",
+    "volume",
+    "rank",
+    "title",
+)
 
 
 def canonicalize_glossary_category(category: str) -> str:
@@ -1100,6 +1208,145 @@ class LLM_API_Translator(BaseTranslator):
         value = re.sub(r"[\s\-_.'\"`´’‘“”、。・/\\|]+", "", value)
         return value
 
+    def _fold_kana_for_glossary_filter(self, value: str) -> str:
+        text = unicodedata.normalize("NFKC", str(value or "")).strip().casefold()
+        folded = []
+        for char in text:
+            code = ord(char)
+            if 0x30A1 <= code <= 0x30F6:
+                folded.append(chr(code - 0x60))
+            else:
+                folded.append(char)
+        return "".join(folded)
+
+    def _compact_glossary_source(self, value: str) -> str:
+        text = self._fold_kana_for_glossary_filter(value)
+        text = re.sub(r"[\s\t\r\n!！?？。｡、,.，…・･♪♡❤（）()\[\]{}「」『』\"'`´“”‘’:：;；]+", "", text)
+        text = re.sub(r"[ー〜～~]+", "", text)
+        text = re.sub(r"[っッ]+$", "", text)
+        return text
+
+    def _compact_glossary_target(self, value: str) -> str:
+        text = unicodedata.normalize("NFKC", str(value or "")).casefold().strip()
+        return re.sub(r"[\s\-_.'\"`´’‘“”!?]+", "", text)
+
+    def _glossary_punctuation_only(self, value: str) -> bool:
+        text = unicodedata.normalize("NFKC", str(value or "")).strip()
+        if not text:
+            return False
+        return not any(char.isalnum() for char in text)
+
+    def _glossary_is_interjection_or_sfx(self, source: str, target: str) -> bool:
+        if self._compact_glossary_source(source) in GLOSSARY_INTERJECTION_STEMS:
+            return True
+        if self._compact_glossary_target(target) in GLOSSARY_REACTION_TARGETS:
+            return True
+        return False
+
+    def _glossary_has_japanese_honorific(self, source: str) -> bool:
+        source_norm = self._fold_kana_for_glossary_filter(source)
+        source_norm = re.sub(r"[!！?？。｡、,.，…・･♪♡❤（）()\[\]{}「」『』\"'`´“”‘’:：;；\s]+$", "", source_norm)
+        if re.search(r"さ[〜～ー-]*ん$", source_norm):
+            return True
+        return any(source_norm.endswith(honorific) for honorific in GLOSSARY_JA_HONORIFICS)
+
+    def _glossary_looks_like_japanese_name(self, source: str) -> bool:
+        source_norm = self._fold_kana_for_glossary_filter(source)
+        source_norm = re.sub(r"[\s!！?？。｡、,.，…・･♪♡❤（）()\[\]{}「」『』\"'`´“”‘’:：;；]+", "", source_norm)
+        source_norm = re.sub(r"[〜～ー-]+$", "", source_norm)
+        if not source_norm:
+            return False
+        if self._glossary_has_japanese_honorific(source):
+            return True
+        if re.fullmatch(r"[\u4e00-\u9fff]{1,6}", source_norm):
+            return True
+        if 2 <= len(source_norm) <= 8 and re.fullmatch(r"[\u3040-\u309f\u30a0-\u30ffー〜～]+", source_norm):
+            return source_norm not in GLOSSARY_INTERJECTION_STEMS
+        return False
+
+    def _glossary_looks_like_latin_name(self, value: str) -> bool:
+        text = unicodedata.normalize("NFKC", str(value or "")).strip()
+        text = re.sub(r"[!！?？。｡、,.，…]+$", "", text)
+        if self._compact_glossary_target(text) in GLOSSARY_REACTION_TARGETS:
+            return False
+        return bool(re.fullmatch(r"[A-Z][A-Za-z'’-]{1,30}(?:\s+[A-Z][A-Za-z'’-]{1,30}){0,3}", text))
+
+    def _glossary_looks_like_name_candidate(self, source: str, target: str) -> bool:
+        return (
+            self._glossary_looks_like_japanese_name(source)
+            or self._glossary_looks_like_latin_name(source)
+            or self._glossary_looks_like_latin_name(target)
+        )
+
+    def _glossary_source_sentence_like(self, source: str, category: str) -> bool:
+        if category == "character" and self._glossary_looks_like_name_candidate(source, ""):
+            return False
+        source_norm = self._fold_kana_for_glossary_filter(source)
+        compact = self._compact_glossary_source(source)
+        if re.search(r"[?？]", source_norm):
+            return True
+        if re.search(r"[。｡!！]", source_norm) and len(compact) > 3:
+            return True
+        if any(pattern in source_norm for pattern in GLOSSARY_DIALOGUE_SOURCE_PATTERNS):
+            return True
+        if re.search(r"(ます|です|した|して|する|たい|ない|だよ|だね|だな)$", source_norm):
+            return True
+        if len(compact) > 3 and re.search(r"(よ|ね|か|や)$", source_norm):
+            return True
+        return False
+
+    def _glossary_target_sentence_like(self, target: str) -> bool:
+        target_norm = unicodedata.normalize("NFKC", str(target or "")).strip()
+        if re.search(r"[?？]", target_norm):
+            return True
+        if re.match(r"(?i)^(can|could|would|will|you|you'll|this|that|it|i|we)\b", target_norm):
+            return True
+        words = re.findall(r"[A-Za-z0-9']+", target_norm)
+        if len(words) > 4:
+            return True
+        if re.search(r"[.!！]", target_norm) and self._compact_glossary_target(target_norm) not in GLOSSARY_REACTION_TARGETS:
+            return len(words) > 1
+        return False
+
+    def _glossary_title_candidate_valid(self, source: str, target: str) -> bool:
+        if self._glossary_source_sentence_like(source, "title") or self._glossary_target_sentence_like(target):
+            return False
+        if self._glossary_is_interjection_or_sfx(source, target):
+            return False
+        source_norm = self._fold_kana_for_glossary_filter(source)
+        target_norm = unicodedata.normalize("NFKC", str(target or "")).casefold()
+        if any(marker in source_norm for marker in GLOSSARY_TITLE_SOURCE_MARKERS):
+            return True
+        if any(marker in target_norm for marker in GLOSSARY_TITLE_TARGET_MARKERS):
+            return True
+        if re.search(r"第\s*\d+|#\s*\d+", source_norm) or re.search(r"chapter\s+\d+|episode\s+\d+|volume\s+\d+", target_norm):
+            return True
+        return False
+
+    def _glossary_entry_rejection_reason(self, entry: GlossaryEntry, category: str) -> Optional[str]:
+        source = entry.source.strip()
+        target = entry.target.strip()
+        if not source or not target:
+            return "empty_source_or_target"
+        if self._glossary_punctuation_only(source) or self._glossary_punctuation_only(target):
+            return "punctuation_only"
+        if category == "character":
+            if self._glossary_is_interjection_or_sfx(source, target):
+                return "interjection_or_sfx"
+            if self._glossary_source_sentence_like(source, category) or self._glossary_target_sentence_like(target):
+                return "sentence_like"
+            if entry.confidence < 0.5 and not self._glossary_looks_like_name_candidate(source, target):
+                return "sentence_like"
+        elif category == "title":
+            if not self._glossary_title_candidate_valid(source, target):
+                return "invalid_title"
+        return None
+
+    def _log_glossary_rejection(self, source: str, target: str, category: str, reason: str):
+        self.logger.info(
+            f'Glossary rejected entry: source="{source}" target="{target}" category={category} reason={reason}'
+        )
+
     def _extract_aliases_from_note(self, note: str) -> List[str]:
         if not note:
             return []
@@ -1165,18 +1412,25 @@ class LLM_API_Translator(BaseTranslator):
             return 0
 
         stats = {
-            "recognized": len(entries),
+            "raw": len(entries),
+            "normalized": 0,
             "recognized_names": 0,
             "added": 0,
             "added_names": 0,
             "deduplicated": 0,
-            "discarded": 0,
+            "rejected": 0,
             "conflicts": 0,
         }
+        rejection_reasons: Dict[str, int] = {}
         existing_entries = self._parse_glossary_entries()
         glossary_lines = [entry["line"] for entry in existing_entries]
         seen_terms: Set[Tuple[str, str]] = set()
         seen_sources: Set[str] = set()
+
+        def reject(source: str, target: str, category: str, reason: str):
+            stats["rejected"] += 1
+            rejection_reasons[reason] = rejection_reasons.get(reason, 0) + 1
+            self._log_glossary_rejection(source, target, category, reason)
 
         for existing in existing_entries:
             category = existing["category"]
@@ -1197,13 +1451,18 @@ class LLM_API_Translator(BaseTranslator):
             source = entry.source.strip()
             target = entry.target.strip()
             category = self._canonical_glossary_category(entry.category)
+            stats["normalized"] += 1
             if category == "character":
                 stats["recognized_names"] += 1
             if not source or not target:
-                stats["discarded"] += 1
+                reject(source, target, category, "empty_source_or_target")
                 continue
             if category not in enabled_categories:
-                stats["discarded"] += 1
+                reject(source, target, category, "category_disabled")
+                continue
+            reason = self._glossary_entry_rejection_reason(entry, category)
+            if reason is not None:
+                reject(source, target, category, reason)
                 continue
             candidate_terms = {
                 self._normalize_glossary_term(source),
@@ -1216,7 +1475,7 @@ class LLM_API_Translator(BaseTranslator):
                 candidate_terms.add(self._normalize_glossary_term(target))
             candidate_terms.discard("")
             if not candidate_terms:
-                stats["discarded"] += 1
+                reject(source, target, category, "empty_source_or_target")
                 continue
             source_norm = self._normalize_glossary_term(source)
             duplicate_keys = {
@@ -1225,9 +1484,7 @@ class LLM_API_Translator(BaseTranslator):
             if source_norm in seen_sources or duplicate_keys:
                 stats["deduplicated"] += 1
                 stats["conflicts"] += 1
-                self.logger.info(
-                    f"Glossary entry skipped to preserve existing value: {source} [{category}]"
-                )
+                reject(source, target, category, "duplicate")
                 continue
             glossary_lines.append(self._format_glossary_entry(entry, category=category))
             stats["added"] += 1
@@ -1242,15 +1499,17 @@ class LLM_API_Translator(BaseTranslator):
         self.set_param_value("glossary", "\n".join(limited_lines), convert_dtype=False)
         self.project_glossary_text = "\n".join(limited_lines)
         self.logger.info(
-            "Glossary extraction stats: recognized=%s recognized_names=%s added=%s added_names=%s deduplicated=%s discarded=%s conflicts=%s"
+            "Glossary extraction stats: raw=%s normalized=%s accepted=%s recognized_names=%s added_names=%s deduplicated=%s rejected=%s conflicts=%s rejection_reasons=%s"
             % (
-                stats["recognized"],
-                stats["recognized_names"],
+                stats["raw"],
+                stats["normalized"],
                 stats["added"],
+                stats["recognized_names"],
                 stats["added_names"],
                 stats["deduplicated"],
-                stats["discarded"],
+                stats["rejected"],
                 stats["conflicts"],
+                rejection_reasons,
             )
         )
         return stats["added"]
