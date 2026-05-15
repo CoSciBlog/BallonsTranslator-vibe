@@ -147,6 +147,14 @@ The `LLM_API_Translator` and `Two-Step Translator` can pass project context into
 
 These settings improve continuity for names, tone, and references when pages are translated in reading order. They do not change the output mapping: the current page or selected text boxes are still the only items returned in the JSON translation response.
 
+## Two-Step LLM refinement
+
+The `Two-Step Translator` first creates Google, DeepL Free, or DeepL draft translations, then asks the configured LLM to refine those drafts. `fallback to first step` is the final fallback only: it uses first-step draft translations if the normal LLM refinement and the strict LLM retry both fail.
+
+The strict retry is attempted before the final draft fallback when the LLM returns empty JSON, malformed JSON, a partial response, missing IDs, extra IDs, or a mismatched item count. Usable partial LLM results are merged by numeric ID only, never by list position, so a response for `id: 2` cannot be applied to `id: 1`.
+
+For local Ollama models such as `translategemma:12b` or `translategemma:27b`, disabling `reasoning` is usually faster and more stable for JSON output. Use moderate `max tokens` values, typically 2048-4096; values above 8192 are clamped for Ollama refinement requests. Smaller refinement chunks also improve JSON stability for local models.
+
 ## Programmatic use
 
 BallonsTranslator does not expose a built-in HTTP API, so `curl` is not applicable unless you place a wrapper service in front of it. The supported automation path in this fork is the headless CLI entry point.

@@ -63,6 +63,21 @@ class LLMResponseNormalizationTest(unittest.TestCase):
             "\n".join(captured.output),
         )
 
+    def test_missing_id_is_dropped(self):
+        normalized = self.normalize({"translations": [{"translation": "Hello"}]})
+
+        self.assertEqual(normalized, {"translations": []})
+
+    def test_string_id_is_normalized_to_int(self):
+        response = self.validate({"translations": [{"id": "7", "translation": "Hello"}]})
+
+        self.assertEqual(response.translations[0].id, 7)
+
+    def test_entry_without_translation_or_draft_is_dropped(self):
+        normalized = self.normalize({"translations": [{"id": 1, "source": "Hallo"}]})
+
+        self.assertEqual(normalized, {"translations": []})
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -3,14 +3,14 @@ import threading
 import time
 from copy import deepcopy
 from json import JSONDecodeError
-from typing import Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import requests
 from pydantic import ValidationError
 
 from .base import register_translator
 from .trans_google import GoogleTranslateProviderPython, ProviderError
-from .trans_llm_api import LLM_API_Translator
+from .trans_llm_api import LLM_API_Translator, TranslationResponse
 
 
 DEEPL_FREE_API_URL = "https://api-free.deepl.com/v2/translate"
@@ -36,7 +36,7 @@ class TwoStepTranslator(LLM_API_Translator):
         "fallback to first step": {
             "type": "checkbox",
             "value": True,
-            "description": "Return the first-step machine translation if the LLM refinement fails.",
+            "description": "Use first-step draft translations if LLM refinement and strict retry fail.",
         },
         "first step delay": {
             "value": 0.5,
@@ -51,6 +51,10 @@ class TwoStepTranslator(LLM_API_Translator):
             "type": "checkbox",
             "value": True,
             "description": "When parallel first-step translation is enabled, unload text detection, OCR, and inpainting models before the final Ollama/LLM refinement step to free RAM/VRAM.",
+        },
+        "max refinement items per request": {
+            "value": 8,
+            "description": "Maximum text blocks sent to each Two-Step LLM refinement request. Smaller chunks improve JSON stability for local Ollama models.",
         },
         **deepcopy(LLM_API_Translator.params),
     }
@@ -85,6 +89,13 @@ class TwoStepTranslator(LLM_API_Translator):
     @property
     def fallback_to_first_step(self) -> bool:
         return bool(self.get_param_value("fallback to first step"))
+
+    @property
+    def max_refinement_items_per_request(self) -> int:
+        try:
+            return max(1, int(float(self.get_param_value("max refinement items per request"))))
+        except Exception:
+            return 8
 
     @property
     def first_step_delay(self) -> float:
@@ -288,22 +299,176 @@ class TwoStepTranslator(LLM_API_Translator):
         for tr, blk in zip(translations, textblk_lst):
             blk.translation = tr
 
+    def _expected_refinement_items(
+        self, src_list: List[str], draft_list: List[str], start_id: int = 1
+    ) -> List[Dict[str, Any]]:
+        return [
+            {"id": start_id + i, "source": source, "draft_translation": draft}
+            for i, (source, draft) in enumerate(zip(src_list, draft_list))
+        ]
+
+    def _chunk_expected_items(self, expected_items: List[Dict[str, Any]]) -> List[List[Dict[str, Any]]]:
+        chunk_size = self.max_refinement_items_per_request
+        return [
+            expected_items[i : i + chunk_size]
+            for i in range(0, len(expected_items), chunk_size)
+        ]
+
+    def _assemble_refinement_prompt_from_items(
+        self, expected_items: List[Dict[str, Any]], to_lang: str
+    ) -> str:
+        from_lang = self.lang_map.get(self.lang_source, self.lang_source)
+        expected_ids = [item["id"] for item in expected_items]
+        return (
+            f"Improve draft translations from {from_lang} to {to_lang}.\n"
+            "JSON only. Never return {}.\n"
+            'Use exactly this schema: { "translations": [ {"id": 1, "translation": "final improved translation"} ] }\n'
+            f"Return the same number of items as the input: {len(expected_items)}.\n"
+            f"Expected IDs: {expected_ids}.\n"
+            "Keep the same IDs. Do not reorder. Do not merge items.\n"
+            "If unsure, return the draft_translation unchanged.\n"
+            "Do not include source, draft_translation, metadata, markdown, or explanations in the final output.\n\n"
+            f"{self._translation_context_prompt_section()}"
+            f"{self._glossary_prompt_section()}"
+            f"INPUT:\n{json.dumps(expected_items, ensure_ascii=False, indent=2)}"
+        )
+
     def _assemble_refinement_prompt(
         self, src_list: List[str], draft_list: List[str], to_lang: str
     ) -> str:
-        from_lang = self.lang_map.get(self.lang_source, self.lang_source)
-        items = [
-            {"id": i + 1, "source": source, "draft_translation": draft}
-            for i, (source, draft) in enumerate(zip(src_list, draft_list))
-        ]
-        return (
-            f"Improve the draft translations from {from_lang} to {to_lang}. "
-            "Use the source text as the authority and preserve each id exactly. "
-            "Return only JSON in the required schema.\n\n"
-            f"{self._translation_context_prompt_section()}"
-            f"{self._glossary_prompt_section()}"
-            f"INPUT:\n{json.dumps(items, ensure_ascii=False, indent=2)}"
+        return self._assemble_refinement_prompt_from_items(
+            self._expected_refinement_items(src_list, draft_list),
+            to_lang,
         )
+
+    def _assemble_strict_refinement_retry_prompt(
+        self, expected_items: List[Dict[str, Any]], to_lang: str
+    ) -> str:
+        expected_ids = [item["id"] for item in expected_items]
+        return (
+            f"Fix the previous LLM refinement response for {to_lang}.\n"
+            "JSON only. Never return {}.\n"
+            'Schema: {"translations":[{"id":1,"translation":"final improved translation"}]}\n'
+            f"Required IDs: {expected_ids}.\n"
+            "Return exactly these IDs. Do not omit IDs. Do not add IDs.\n"
+            "Do not reorder, merge, or include source/draft_translation/metadata.\n"
+            "If unsure, copy the draft unchanged.\n\n"
+            f"INPUT:\n{json.dumps(expected_items, ensure_ascii=False, indent=2)}"
+        )
+
+    def _translation_items_by_id(
+        self, response: Optional[TranslationResponse], label: str
+    ) -> Dict[int, str]:
+        items_by_id: Dict[int, str] = {}
+        if not response:
+            return items_by_id
+        response = self._clean_translation_response(response)
+        for item in response.translations:
+            if not item.translation:
+                continue
+            if item.id in items_by_id:
+                self.logger.warning(f"{label} duplicate id ignored: {item.id}")
+                continue
+            items_by_id[item.id] = item.translation
+        return items_by_id
+
+    def _log_refinement_shape(
+        self, expected_ids: List[int], actual_ids: List[int], label: str
+    ) -> Tuple[List[int], List[int]]:
+        expected_set = set(expected_ids)
+        actual_set = set(actual_ids)
+        missing_ids = [item_id for item_id in expected_ids if item_id not in actual_set]
+        extra_ids = [item_id for item_id in actual_ids if item_id not in expected_set]
+        log_message = (
+            f"{label} expected_count={len(expected_ids)} actual_count={len(actual_ids)} "
+            f"missing_ids={missing_ids} extra_ids={extra_ids}"
+        )
+        if missing_ids or extra_ids or len(actual_ids) != len(expected_ids):
+            self.logger.warning(log_message)
+        else:
+            self.logger.info(log_message)
+        return missing_ids, extra_ids
+
+    def merge_refinement_with_drafts(
+        self,
+        expected_items: List[Dict[str, Any]],
+        normal_response: Optional[TranslationResponse],
+        retry_response: Optional[TranslationResponse],
+        fallback_to_first_step: bool = True,
+    ) -> List[str]:
+        expected_ids = [int(item["id"]) for item in expected_items]
+        normal_by_id = self._translation_items_by_id(normal_response, "normal_refinement")
+        retry_by_id = self._translation_items_by_id(retry_response, "strict_refinement_retry")
+        available_ids = set(normal_by_id) | set(retry_by_id)
+        missing_ids = [item_id for item_id in expected_ids if item_id not in available_ids]
+        extra_ids = sorted((set(normal_by_id) | set(retry_by_id)) - set(expected_ids))
+        if missing_ids:
+            self.logger.warning(f"Missing refinement ids: {missing_ids}")
+        if extra_ids:
+            self.logger.warning(f"Extra refinement ids ignored: {extra_ids}")
+
+        merged = []
+        for item in expected_items:
+            item_id = int(item["id"])
+            if item_id in retry_by_id:
+                merged.append(retry_by_id[item_id])
+            elif item_id in normal_by_id:
+                merged.append(normal_by_id[item_id])
+            elif fallback_to_first_step:
+                merged.append(item.get("draft_translation") or item.get("source") or "")
+        return merged
+
+    def _response_covers_expected_ids(
+        self, response: Optional[TranslationResponse], expected_ids: List[int], label: str
+    ) -> bool:
+        actual_ids = list(self._translation_items_by_id(response, label).keys())
+        missing_ids, extra_ids = self._log_refinement_shape(expected_ids, actual_ids, label)
+        return not missing_ids and not extra_ids and len(actual_ids) == len(expected_ids)
+
+    def _request_refinement_chunk(
+        self, expected_items: List[Dict[str, Any]], to_lang: str
+    ) -> Tuple[Optional[TranslationResponse], Optional[TranslationResponse]]:
+        expected_ids = [int(item["id"]) for item in expected_items]
+        normal_response = None
+        retry_response = None
+
+        try:
+            normal_prompt = self._assemble_refinement_prompt_from_items(expected_items, to_lang)
+            normal_response = self._request_translation(
+                normal_prompt,
+                is_reflection=True,
+                purpose="normal_refinement",
+                expected_count=len(expected_items),
+                expected_ids=expected_ids,
+                max_tokens_override=min(max(self.max_tokens, 2048), 8192),
+            )
+            if self._response_covers_expected_ids(normal_response, expected_ids, "normal_llm_refinement"):
+                return normal_response, None
+            self.logger.warning("normal_llm_refinement failed")
+        except Exception as e:
+            self.logger.warning("normal_llm_refinement failed")
+            self.logger.debug(f"normal_llm_refinement details: {type(e).__name__}: {e}")
+
+        try:
+            self.logger.info("strict_refinement_retry retry started")
+            retry_prompt = self._assemble_strict_refinement_retry_prompt(expected_items, to_lang)
+            retry_response = self._request_translation(
+                retry_prompt,
+                is_reflection=True,
+                purpose="strict_refinement_retry",
+                expected_count=len(expected_items),
+                expected_ids=expected_ids,
+                max_tokens_override=min(max(self.max_tokens, 2048), 8192),
+            )
+            if self._response_covers_expected_ids(retry_response, expected_ids, "strict_refinement_retry"):
+                self.logger.info("strict_refinement_retry retry succeeded")
+            else:
+                self.logger.warning("strict_refinement_retry retry failed")
+        except Exception as e:
+            self.logger.warning("strict_refinement_retry retry failed")
+            self.logger.debug(f"strict_refinement_retry details: {type(e).__name__}: {e}")
+
+        return normal_response, retry_response
 
     def _translate(self, src_list: List[str]) -> List[str]:
         if not src_list:
@@ -311,52 +476,39 @@ class TwoStepTranslator(LLM_API_Translator):
 
         draft_list = self._first_step_translate(src_list)
         to_lang = self.lang_map.get(self.lang_target, self.lang_target)
-        prompt = self._assemble_refinement_prompt(src_list, draft_list, to_lang)
+        expected_items = self._expected_refinement_items(src_list, draft_list)
         self.last_refinement_used_draft_fallback = False
+        translations: List[str] = []
 
-        try:
-            parsed_response = self._clean_translation_response(
-                self._request_translation(prompt, is_reflection=True)
+        for chunk in self._chunk_expected_items(expected_items):
+            normal_response, retry_response = self._request_refinement_chunk(chunk, to_lang)
+            chunk_translations = self.merge_refinement_with_drafts(
+                chunk,
+                normal_response,
+                retry_response,
+                fallback_to_first_step=self.fallback_to_first_step,
             )
-            if parsed_response and len(parsed_response.translations) == len(src_list):
-                translations_by_id = {
-                    item.id: item.translation for item in parsed_response.translations
-                }
-                translations = [
-                    translations_by_id.get(i, draft_list[i - 1])
-                    for i in range(1, len(src_list) + 1)
-                ]
-                self._update_glossary_from_batch(src_list, translations, to_lang)
-                return self._refine_translations_with_glossary(
-                    src_list, translations, to_lang
+            if len(chunk_translations) < len(chunk):
+                self.logger.warning(
+                    "LLM refinement and strict retry failed and first-step draft fallback is disabled."
                 )
-            raise ValueError(
-                f"LLM refinement returned an invalid translation count: "
-                f"{len(parsed_response.translations) if parsed_response else 0} != {len(src_list)}"
-            )
-        except (ValidationError, JSONDecodeError, TimeoutError, requests.RequestException, ValueError) as e:
-            self.logger.warning(
-                "LLM refinement failed; using first-step draft translations for this page/block."
-            )
-            self.logger.debug(f"LLM refinement fallback details: {type(e).__name__}: {e}")
-        except Exception as e:
-            self.logger.warning(
-                "LLM refinement failed; using first-step draft translations for this page/block."
-            )
-            self.logger.debug(f"LLM refinement unexpected fallback details: {type(e).__name__}: {e}")
+                chunk_translations.extend([""] * (len(chunk) - len(chunk_translations)))
+            translations.extend(chunk_translations)
 
         if self.fallback_to_first_step:
-            self.last_refinement_used_draft_fallback = True
-            if not any(draft_list):
+            used_draft = any(
+                translation == (item.get("draft_translation") or item.get("source") or "")
+                for translation, item in zip(translations, expected_items)
+            )
+            self.last_refinement_used_draft_fallback = used_draft
+            if used_draft:
+                self.logger.warning("draft fallback used")
+            if used_draft and not any(draft_list):
                 self.logger.warning(
                     "LLM refinement failed and no first-step draft translations were available."
                 )
-            fallback_translations = [
-                draft if draft else src
-                for src, draft in zip(src_list, draft_list)
-            ]
-            self._update_glossary_from_batch(src_list, fallback_translations, to_lang)
-            return self._refine_translations_with_glossary(
-                src_list, fallback_translations, to_lang
-            )
-        return [""] * len(src_list)
+
+        self._update_glossary_from_batch(src_list, translations, to_lang)
+        return self._refine_translations_with_glossary(
+            src_list, translations, to_lang
+        )

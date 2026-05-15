@@ -164,12 +164,12 @@ class LLM_API_Translator(BaseTranslator):
         },
         "max tokens": {
             "value": 4096,
-            "description": "Maximum tokens for the response.",
+            "description": "Maximum tokens for the response. Very high values can slow down local models and make JSON output less stable.",
         },
         "reasoning": {
             "type": "checkbox",
             "value": False,
-            "description": "Enable provider-specific reasoning controls for models that support thinking or reasoning.",
+            "description": "For local translation models, disabling reasoning is usually faster and more stable for JSON output.",
         },
         "reasoning level": {
             "type": "selector",
@@ -180,7 +180,7 @@ class LLM_API_Translator(BaseTranslator):
         "reflection": {
             "type": "checkbox",
             "value": False,
-            "description": "Run a second API call after translation so the model can review, score, and revise the result.",
+            "description": "Run an additional LLM review pass after translation. This adds extra LLM calls.",
         },
         "reflection prompt": {
             "type": "editor",
@@ -252,7 +252,7 @@ class LLM_API_Translator(BaseTranslator):
         "glossary refinement pass": {
             "type": "checkbox",
             "value": True,
-            "description": "Run a second LLM pass after translation to align the translated batch with the current glossary. This can improve names and terminology but adds latency and token cost.",
+            "description": "Extract or refine glossary entries with the LLM. This adds extra LLM calls.",
         },
         "glossary max entries": {
             "value": 200,
@@ -741,14 +741,15 @@ class LLM_API_Translator(BaseTranslator):
         return f"{prompt}\n\n{policy}"
 
     def _build_reasoning_extra_body(self) -> Dict:
-        if not self.reasoning_enabled:
-            return {}
-
         level = self.reasoning_level
         provider = self.provider
+        if provider == "Ollama":
+            return {"think": bool(self.reasoning_enabled)}
+        if not self.reasoning_enabled:
+            return {}
         if provider == "OpenRouter":
             return {"reasoning": {"effort": level}}
-        if provider in ["LLM Studio", "Ollama"]:
+        if provider == "LLM Studio":
             return {"reasoning": {"effort": level}, "think": True}
         if provider in ["Google", "Grok"]:
             return {"reasoning_effort": level}
@@ -765,16 +766,36 @@ class LLM_API_Translator(BaseTranslator):
         return cleaned.strip()
 
     @staticmethod
-    def _normalize_translation_entry(entry: Any, fallback_id: int) -> Any:
+    def _normalize_translation_entry(entry: Any, fallback_id: int = 0) -> Optional[Dict]:
         if not isinstance(entry, dict):
-            return {"id": fallback_id, "translation": str(entry)}
+            return None
 
         normalized = dict(entry)
         if "id" not in normalized:
-            normalized["id"] = fallback_id
+            return None
+        try:
+            normalized["id"] = int(normalized["id"])
+        except (TypeError, ValueError):
+            return None
         if "translation" not in normalized and "draft_translation" in normalized:
             normalized["translation"] = normalized.get("draft_translation") or ""
+        if "translation" not in normalized:
+            return None
         return normalized
+
+    @classmethod
+    def _normalize_translation_entries(cls, entries: List[Any], logger=None) -> List[Dict]:
+        normalized_entries = []
+        dropped = 0
+        for idx, item in enumerate(entries):
+            normalized = cls._normalize_translation_entry(item, idx + 1)
+            if normalized is None:
+                dropped += 1
+                continue
+            normalized_entries.append(normalized)
+        if dropped and logger is not None:
+            logger.warning(f"Dropped {dropped} translation entries without usable id or translation.")
+        return normalized_entries
 
     @classmethod
     def _normalize_translation_response_data(cls, data: Any, logger=None) -> Any:
@@ -787,10 +808,7 @@ class LLM_API_Translator(BaseTranslator):
 
         if isinstance(data, list):
             return {
-                "translations": [
-                    cls._normalize_translation_entry(item, idx + 1)
-                    for idx, item in enumerate(data)
-                ]
+                "translations": cls._normalize_translation_entries(data, logger)
             }
 
         if not isinstance(data, dict):
@@ -805,10 +823,7 @@ class LLM_API_Translator(BaseTranslator):
             elif not isinstance(translations, list):
                 return data
             normalized = dict(data)
-            normalized["translations"] = [
-                cls._normalize_translation_entry(item, idx + 1)
-                for idx, item in enumerate(translations)
-            ]
+            normalized["translations"] = cls._normalize_translation_entries(translations, logger)
             return normalized
 
         if all(isinstance(key, str) and key.isdigit() for key in data.keys()):
@@ -823,7 +838,8 @@ class LLM_API_Translator(BaseTranslator):
             "translation" in data
             or "draft_translation" in data
         ):
-            return {"translations": [cls._normalize_translation_entry(data, 1)]}
+            normalized = cls._normalize_translation_entry(data, 1)
+            return {"translations": [normalized] if normalized else []}
 
         return data
 
@@ -871,7 +887,8 @@ class LLM_API_Translator(BaseTranslator):
             "DRAFT TRANSLATION JSON:\n"
             f"{draft_json}\n\n"
             "Return the reviewed and improved translation as JSON with the same "
-            "'translations' list and the same numeric ids."
+            "'translations' list and the same numeric ids. Required schema: "
+            '{"translations":[{"id":1,"translation":"Reviewed translation"}]}.'
         )
 
     def _canonical_glossary_category(self, category: str) -> str:
@@ -985,9 +1002,11 @@ class LLM_API_Translator(BaseTranslator):
             "Do not add generic words, full sentences, ordinary phrases, one-off "
             "dialogue, or style notes. Metadata belongs only in the glossary entry; "
             "it must never be copied into translated text.\n\n"
-            "Return JSON with key 'entries'. Each entry must contain source, target, "
-            "category, and optional note. Category and note are metadata for the "
-            "glossary only; they must never be copied into translations.\n\n"
+            "Return JSON only with the GlossaryResponse schema: "
+            '{"entries":[{"source":"term","target":"translated term","category":"term","note":""}]}. '
+            "Each entry must contain source, target, category, and optional note. "
+            "Category and note are metadata for the glossary only; they must never "
+            "be copied into translations.\n\n"
             f"EXISTING GLOSSARY:\n{existing_glossary}\n\n"
             f"TRANSLATION PAIRS:\n{json.dumps(pairs, ensure_ascii=False, indent=2)}"
         )
@@ -1002,12 +1021,19 @@ class LLM_API_Translator(BaseTranslator):
 
         system_prompt = (
             "You extract concise translation glossaries. Return only valid JSON "
-            "matching this schema: {'entries': [{'source': str, 'target': str, "
-            "'category': str, 'note': str}]}."
+            'matching the GlossaryResponse schema: {"entries":[{"source":"term",'
+            '"target":"translated term","category":"term","note":""}]}.'
         )
         prompt = self._build_glossary_extraction_prompt(src_list, translations, to_lang)
         try:
-            response = self._request_model_object(prompt, GlossaryResponse, system_prompt)
+            response = self._request_model_object(
+                prompt,
+                GlossaryResponse,
+                system_prompt,
+                purpose="glossary",
+                expected_count=len(src_list),
+                expected_ids=list(range(1, len(src_list) + 1)),
+            )
             if isinstance(response, GlossaryResponse):
                 saved_count = self._save_glossary_entries(response.entries)
                 if saved_count:
@@ -1081,7 +1107,13 @@ class LLM_API_Translator(BaseTranslator):
 
         prompt = self._build_glossary_refinement_prompt(src_list, translations, to_lang)
         try:
-            response = self._request_translation(prompt, is_reflection=True)
+            response = self._request_translation(
+                prompt,
+                is_reflection=True,
+                purpose="glossary",
+                expected_count=len(src_list),
+                expected_ids=list(range(1, len(src_list) + 1)),
+            )
             if response and len(response.translations) == len(src_list):
                 response = self._clean_translation_response(response)
                 translations_by_id = {
@@ -1107,7 +1139,13 @@ class LLM_API_Translator(BaseTranslator):
             self.token_count_last = 0
 
     def _request_model_object(
-        self, prompt: str, response_model: Type[BaseModel], system_prompt: str
+        self,
+        prompt: str,
+        response_model: Type[BaseModel],
+        system_prompt: str,
+        purpose: str = "translation",
+        expected_count: Optional[int] = None,
+        expected_ids: Optional[List[int]] = None,
     ) -> Optional[BaseModel]:
         current_api_key = self._select_api_key()
 
@@ -1160,6 +1198,25 @@ class LLM_API_Translator(BaseTranslator):
         if extra_body:
             api_args["extra_body"] = extra_body
 
+        json_mode = api_args.get("response_format", {}).get("type", "none")
+        self.logger.info(
+            "LLM request purpose=%s provider=%s model=%s json_mode=%s reasoning=%s "
+            "think=%s num_ctx=%s max_tokens=%s expected_count=%s expected_ids=%s prompt_length=%s"
+            % (
+                purpose,
+                self.provider,
+                model_name,
+                json_mode,
+                self.reasoning_enabled,
+                extra_body.get("think") if isinstance(extra_body, dict) else None,
+                extra_body.get("num_ctx") if isinstance(extra_body, dict) else None,
+                self.max_tokens,
+                expected_count,
+                expected_ids,
+                len(prompt),
+            )
+        )
+
         completion = self._create_completion(api_args)
         self._record_usage(completion)
 
@@ -1209,6 +1266,13 @@ class LLM_API_Translator(BaseTranslator):
                 if key in retry_args:
                     retry_args.pop(key)
                     changed = True
+
+            if "extra_body" in retry_args:
+                retry_args.pop("extra_body")
+                changed = True
+                self.logger.warning(
+                    "Provider rejected request options; retrying without provider-specific reasoning/think controls."
+                )
 
             if not changed:
                 raise
@@ -1301,7 +1365,13 @@ class LLM_API_Translator(BaseTranslator):
         return None
 
     def _request_translation(
-        self, prompt: str, is_reflection: bool = False
+        self,
+        prompt: str,
+        is_reflection: bool = False,
+        purpose: Optional[str] = None,
+        expected_count: Optional[int] = None,
+        expected_ids: Optional[List[int]] = None,
+        max_tokens_override: Optional[int] = None,
     ) -> Optional[TranslationResponse]:
         current_api_key = self._select_api_key()
 
@@ -1330,12 +1400,23 @@ class LLM_API_Translator(BaseTranslator):
             {"role": "user", "content": prompt},
         ]
 
+        response_max_tokens = int(max_tokens_override or self.max_tokens)
+        if (
+            self.provider == "Ollama"
+            and purpose in {"normal_refinement", "strict_refinement_retry"}
+            and response_max_tokens > 8192
+        ):
+            self.logger.warning(
+                f"Ollama {purpose} max tokens {response_max_tokens} is high; clamping to 8192 for JSON stability."
+            )
+            response_max_tokens = 8192
+
         api_args = {
             "model": model_name,
             "messages": messages,
             "temperature": self.temperature,
             "top_p": self.top_p,
-            "max_tokens": self.max_tokens,
+            "max_tokens": response_max_tokens,
         }
 
         if self.provider == "LLM Studio":
@@ -1357,6 +1438,26 @@ class LLM_API_Translator(BaseTranslator):
         extra_body = self._build_reasoning_extra_body()
         if extra_body:
             api_args["extra_body"] = extra_body
+
+        json_mode = api_args.get("response_format", {}).get("type", "none")
+        request_purpose = purpose or ("reflection" if is_reflection else "translation")
+        self.logger.info(
+            "LLM request purpose=%s provider=%s model=%s json_mode=%s reasoning=%s "
+            "think=%s num_ctx=%s max_tokens=%s expected_count=%s expected_ids=%s prompt_length=%s"
+            % (
+                request_purpose,
+                self.provider,
+                model_name,
+                json_mode,
+                self.reasoning_enabled,
+                extra_body.get("think") if isinstance(extra_body, dict) else None,
+                extra_body.get("num_ctx") if isinstance(extra_body, dict) else None,
+                response_max_tokens,
+                expected_count,
+                expected_ids,
+                len(prompt),
+            )
+        )
 
         try:
             completion = self._create_completion(api_args)
@@ -1448,7 +1549,11 @@ class LLM_API_Translator(BaseTranslator):
             reflection_prompt = self._build_reflection_prompt(prompt, validated_response)
             try:
                 reflected_response = self._request_translation(
-                    reflection_prompt, is_reflection=True
+                    reflection_prompt,
+                    is_reflection=True,
+                    purpose="reflection",
+                    expected_count=len(validated_response.translations),
+                    expected_ids=[item.id for item in validated_response.translations],
                 )
                 if reflected_response and reflected_response.translations:
                     self.logger.info(

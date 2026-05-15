@@ -15,3 +15,11 @@
 ### Changed
 
 - Existing translation, OCR, and inpainting workflows are unchanged.
+
+### Fixed
+
+- Improved Two-Step Translator LLM refinement handling for empty, partial, and malformed JSON responses.
+- Added strict LLM refinement retry before falling back to first-step drafts.
+- Added safe ID-based partial merge for usable LLM refinement outputs.
+- Improved Ollama request logging for local translation models.
+- Clarified separation between refinement, strict retry, reflection, and glossary prompts.

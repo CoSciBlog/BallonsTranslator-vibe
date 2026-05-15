@@ -10,6 +10,7 @@ data/models
 data/testpacks/eng_dontupload
 data/testpacks/testpacks
 data/*.png
+data/*cache*.bin
 data/testpacks
 config/textstyles
 release
