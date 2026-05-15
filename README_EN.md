@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.30`
+Fork release: `1.4.0-vibe.31`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -35,6 +35,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Added the missing `accelerate>=0.26.0` dependency required by `flux2-klein` GGUF loading.
 - Expanded intermediate image saving to `PNG`, `JPG`, `WEBP`, and `JXL` with a separate quality setting.
 - Reintroduced Censor Restoration / Decensor Inpaint controls in General settings and added a current-page sidebar action.
+- Added a `Ri` sidebar action, Drawboard Re-Inpaint settings tab, Tools-menu action, and `Ctrl+Shift+I` shortcut to re-run inpainting for the current page with existing masks.
 - Added readable English names to source-language selectors, for example `日本語 (Japanese)`, `Deutsch (German)`, and `Polski (Polish)`, while keeping the original internal language values.
 - Added a Translation Benchmark window from the Run menu to compare current-page translations from multiple translators or LLM configurations side by side.
 - Added an LLM model matrix benchmark for repeated `LLM_API_Translator` and `Two-Step Translator` runs across Ollama-style model lists.
@@ -81,6 +82,12 @@ Known limitations:
 - Automatic detection can produce false positives or false negatives.
 - Difficult structures can create visible inpainting artifacts.
 - Semantic or prompt-based inpainting is not a standard part of this MVP.
+
+## Re-Inpaint current page
+
+The left sidebar includes a `Ri` button below `Gloss` and `Dc`. It re-runs inpainting for the currently opened page only, using the page's existing text/manual inpaint mask plus any explicit Censor Restoration mask saved for that same page. Masks from other pages, debug masks, thumbnails, and exported result images are not used.
+
+The same action is available from `Tools -> Re-run Inpainting Current Page` and the `Ctrl+Shift+I` shortcut. The Drawboard has a Re-Inpaint settings tab with the current inpainter selector and a dedicated `Dilate` slider, matching the rectangle repair tool's dilation behavior. This is useful after changing the inpainting model or editing masks manually.
 
 ## Pinokio launcher
 

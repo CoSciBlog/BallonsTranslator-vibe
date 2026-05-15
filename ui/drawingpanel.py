@@ -271,9 +271,53 @@ class RectPanel(Widget):
         return cv2.dilate(mask, element)
 
 
+class ReInpaintPanel(Widget):
+    dilate_ksize_changed = Signal()
+    reinpaint_btn_clicked = Signal()
+
+    def __init__(self, inpainter_panel: InpaintConfigPanel, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+
+        self.dilate_label = ToolNameLabel(100, self.tr('Dilate'))
+        self.dilate_slider = PaintQSlider()
+        self.dilate_slider.setRange(0, 100)
+        self.dilate_slider.valueChanged.connect(self.dilate_ksize_changed)
+
+        self.reinpaint_btn = QPushButton(self.tr("Re-Inpaint"))
+        self.reinpaint_btn.setToolTip(self.tr("Re-run inpainting for the current page using existing masks."))
+        self.reinpaint_btn.clicked.connect(self.reinpaint_btn_clicked)
+
+        self.inpaint_layout = inpaint_layout = QHBoxLayout()
+        inpaint_layout.addWidget(ToolNameLabel(100, self.tr('Inpainter')))
+        self.inpainter_panel = inpainter_panel
+
+        glayout = QGridLayout()
+        glayout.addWidget(self.dilate_label, 0, 0)
+        glayout.addWidget(self.dilate_slider, 0, 1)
+
+        layout = QVBoxLayout(self)
+        layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        layout.addLayout(inpaint_layout)
+        layout.addLayout(glayout)
+        layout.addWidget(self.reinpaint_btn)
+        layout.setSpacing(14)
+
+    def showEvent(self, e) -> None:
+        self.inpaint_layout.addWidget(self.inpainter_panel.module_combobox)
+        super().showEvent(e)
+
+    def hideEvent(self, e) -> None:
+        self.inpaint_layout.removeWidget(self.inpainter_panel.module_combobox)
+        return super().hideEvent(e)
+
+    def dilate(self) -> int:
+        return self.dilate_slider.value()
+
+
 class DrawingPanel(Widget):
 
     scale_tool_pos: QPointF = None
+    reinpaint_current_page_clicked = Signal()
 
     def __init__(self, canvas: Canvas, inpainter_panel: InpaintConfigPanel, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -318,6 +362,13 @@ class DrawingPanel(Widget):
         self.rectPanel.delete_btn_clicked.connect(self.on_rect_deletebtn_clicked)
         self.rectPanel.dilate_ksize_changed.connect(self.on_rectool_ksize_changed)
 
+        self.reinpaintTool = DrawToolCheckBox()
+        self.reinpaintTool.setObjectName("DrawReInpaintTool")
+        self.reinpaintTool.checked.connect(self.on_use_reinpainttool)
+        self.reinpaintPanel = ReInpaintPanel(inpainter_panel)
+        self.reinpaintPanel.dilate_ksize_changed.connect(self.on_reinpaint_ksize_changed)
+        self.reinpaintPanel.reinpaint_btn_clicked.connect(self.reinpaint_current_page_clicked)
+
         self.penTool = DrawToolCheckBox()
         self.penTool.setObjectName("DrawPenTool")
         self.penTool.checked.connect(self.on_use_pentool)
@@ -332,6 +383,7 @@ class DrawingPanel(Widget):
         toolboxlayout.addWidget(self.inpaintTool)
         toolboxlayout.addWidget(self.penTool)
         toolboxlayout.addWidget(self.rectTool)
+        toolboxlayout.addWidget(self.reinpaintTool)
 
         self.canvas.painting_pen = self.pentool_pen = \
             QPen(Qt.GlobalColor.black, 1, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap, Qt.PenJoinStyle.RoundJoin)
@@ -346,6 +398,7 @@ class DrawingPanel(Widget):
         self.toolConfigStackwidget.addWidget(self.inpaintConfigPanel)
         self.toolConfigStackwidget.addWidget(self.penConfigPanel)
         self.toolConfigStackwidget.addWidget(self.rectPanel)
+        self.toolConfigStackwidget.addWidget(self.reinpaintPanel)
 
         self.maskTransperancySlider = PaintQSlider()
         self.maskTransperancySlider.valueChanged.connect(self.canvas.setMaskTransparencyBySlider)
@@ -467,6 +520,14 @@ class DrawingPanel(Widget):
         self.canvas.image_edit_mode = ImageEditMode.RectTool
         self.setCrossCursor()
 
+    def on_use_reinpainttool(self) -> None:
+        if self.currentTool is not None and self.currentTool != self.reinpaintTool:
+            self.currentTool.setChecked(False)
+        self.currentTool = self.reinpaintTool
+        self.toolConfigStackwidget.setCurrentWidget(self.reinpaintPanel)
+        self.canvas.gv.setDragMode(QGraphicsView.DragMode.ScrollHandDrag)
+        self.canvas.image_edit_mode = ImageEditMode.HandTool
+
     def set_config(self, config: DrawPanelConfig):
         self.setPenToolWidth(config.pentool_width)
         self.setPenToolColor(config.pentool_color)
@@ -480,6 +541,7 @@ class DrawingPanel(Widget):
         self.rectPanel.dilate_slider.setValue(config.recttool_dilate_ksize)
         self.rectPanel.autoChecker.setChecked(config.rectool_auto)
         self.rectPanel.methodComboBox.setCurrentIndex(config.rectool_method)
+        self.reinpaintPanel.dilate_slider.setValue(config.reinpaint_dilate_ksize)
         if config.current_tool == ImageEditMode.HandTool:
             self.handTool.setChecked(True)
         elif config.current_tool == ImageEditMode.InpaintTool:
@@ -830,6 +892,9 @@ class DrawingPanel(Widget):
         user_preview_mask = np.zeros((mask.shape[0], mask.shape[1], 4), dtype=np.uint8)
         user_preview_mask[:, :, [0, 2, 3]] = (mask[:, :, np.newaxis] / 2).astype(np.uint8)
         self.inpaint_mask_item.setPixmap(ndarray2pixmap(user_preview_mask))
+
+    def on_reinpaint_ksize_changed(self):
+        pcfg.drawpanel.reinpaint_dilate_ksize = self.reinpaintPanel.dilate_slider.value()
 
     def on_rectchecker_changed(self):
         if not self.rectTool.isChecked():

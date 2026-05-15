@@ -9,11 +9,12 @@ import cv2
 
 from tqdm import tqdm
 from qtpy.QtWidgets import QAction, QFileDialog, QMenu, QHBoxLayout, QVBoxLayout, QApplication, QStackedWidget, QSplitter, QListWidget, QShortcut, QListWidgetItem, QMessageBox, QTextEdit, QPlainTextEdit
-from qtpy.QtCore import Qt, QPoint, QSize, QEvent, Signal, QThread
+from qtpy.QtCore import Qt, QPoint, QSize, QEvent, Signal, QThread, QTimer
 from qtpy.QtGui import QContextMenuEvent, QTextCursor, QGuiApplication, QIcon, QCloseEvent, QKeySequence, QKeyEvent, QPainter, QClipboard, QImage, QColor, QBrush
 
 from utils.logger import logger as LOGGER
 from utils.text_processing import is_cjk, full_len, half_len
+from utils.imgproc_utils import enlarge_window
 from utils.textblock import TextBlock, TextAlignment
 from utils import shared
 from utils.message import create_error_dialog, create_info_dialog
@@ -22,6 +23,7 @@ from modules.translators import lang_display_label, lang_display_to_key
 from modules import GET_VALID_TEXTDETECTORS, GET_VALID_INPAINTERS, GET_VALID_TRANSLATORS, GET_VALID_OCR
 from .misc import parse_stylesheet, set_html_family, QKEY
 from utils.config import ProgramConfig, pcfg, save_config, text_styles, save_text_styles, load_textstyle_from, FontFormat
+from utils.reinpaint import combine_inpaint_masks, mask_bounding_rect
 from utils.proj_imgtrans import ProjImgTrans
 from .canvas import Canvas
 from .configpanel import ConfigPanel
@@ -254,6 +256,7 @@ class MainWindow(mainwindow_cls):
         self.glossaryWindow.saved.connect(self.on_project_glossary_saved)
         self.glossaryWindow.hide()
         self._decensor_current_page_request = None
+        self._reinpaint_current_page_request = None
 
         SW.st_manager = self.st_manager = SceneTextManager(self.app, self, self.canvas, self.textPanel)
         self.st_manager.new_textblk.connect(self.canvas.search_widget.on_new_textblk)
@@ -399,11 +402,13 @@ class MainWindow(mainwindow_cls):
         module_manager.imgtrans_pipeline_finished.connect(self.on_imgtrans_pipeline_finished)
         module_manager.page_trans_finished.connect(self.on_pagtrans_finished)
         module_manager.page_decensor_finished.connect(self.on_page_decensor_finished)
+        module_manager.canvas_inpaint_finished.connect(self.on_reinpaint_current_page_finished)
         module_manager.setupThread(self.configPanel, self.imgtrans_progress_msgbox, self.ocr_postprocess, self.translate_preprocess, self.translate_postprocess)
         module_manager.progress_msgbox.showed.connect(self.on_imgtrans_progressbox_showed)
         module_manager.blktrans_pipeline_finished.connect(self.on_blktrans_finished)
         module_manager.imgtrans_thread.post_process_mask = self.drawingPanel.rectPanel.post_process_mask
         module_manager.inpaint_thread.finish_set_module.connect(self.on_finish_setinpainter)
+        module_manager.inpaint_thread.inpaint_failed.connect(self.on_reinpaint_current_page_failed)
         module_manager.translate_thread.finish_set_module.connect(self.on_finish_settranslator)
         module_manager.textdetect_thread.finish_set_module.connect(self.on_finish_setdetector)
         module_manager.ocr_thread.finish_set_module.connect(self.on_finish_setocr)
@@ -414,12 +419,14 @@ class MainWindow(mainwindow_cls):
 
         self.leftBar.run_imgtrans_clicked.connect(self.run_imgtrans)
         self.leftBar.run_decensor_clicked.connect(self.run_decensor_current_page)
+        self.leftBar.run_reinpaint_clicked.connect(self.run_reinpaint_current_page)
         self.leftBar.run_translate_clicked.connect(self.run_translate_only)
 
         self.titleBar.darkModeAction.setChecked(pcfg.darkmode)
 
         self.drawingPanel.set_config(pcfg.drawpanel)
         self.drawingPanel.initDLModule(module_manager)
+        self.drawingPanel.reinpaint_current_page_clicked.connect(self.run_reinpaint_current_page)
 
         self.global_search_widget.imgtrans_proj = self.imgtrans_proj
         self.global_search_widget.setupReplaceThread(self.st_manager.pairwidget_list, self.st_manager.textblk_item_list)
@@ -801,6 +808,7 @@ class MainWindow(mainwindow_cls):
         self.titleBar.exporttstyle_trigger.connect(self.export_tstyles)
         self.titleBar.darkmode_trigger.connect(self.on_darkmode_triggered)
         self.titleBar.merge_tool_trigger.connect(self.on_open_merge_tool)
+        self.titleBar.reinpaint_current_page_trigger.connect(self.run_reinpaint_current_page)
 
         shortcutA = QShortcut(QKeySequence("A"), self)
         shortcutA.activated.connect(self.shortcutBefore)
@@ -838,11 +846,14 @@ class MainWindow(mainwindow_cls):
         shortcutDelete = QShortcut(QKeySequence.StandardKey.Delete, self)
         shortcutDelete.activated.connect(self.shortcutDelete)
 
-        drawpanel_shortcuts = {'hand': 'H', 'rect': 'R', 'inpaint': 'J', 'pen': 'B'}
+        drawpanel_shortcuts = {'hand': 'H', 'rect': 'R', 'inpaint': 'J', 'pen': 'B', 'reinpaint': 'I'}
         for tool_name, shortcut_key in drawpanel_shortcuts.items():
             shortcut = QShortcut(QKeySequence(shortcut_key), self)
             shortcut.activated.connect(partial(self.drawingPanel.shortcutSetCurrentToolByName, tool_name))
             self.drawingPanel.setShortcutTip(tool_name, shortcut_key)
+
+        shortcutReInpaint = QShortcut(QKeySequence("Ctrl+Shift+I"), self)
+        shortcutReInpaint.activated.connect(self.run_reinpaint_current_page)
 
     def shortcutNext(self):
         sender: QShortcut = self.sender()
@@ -1740,6 +1751,129 @@ class MainWindow(mainwindow_cls):
             self.bottomBar.textblockChecker.click()
         self._decensor_current_page_request = page_name
         self.module_manager.runDecensorPipeline([page_name])
+
+    def _show_reinpaint_progress(self, message: str):
+        try:
+            progress_box = self.module_manager.progress_msgbox
+            progress_box.hide_all_bars()
+            progress_box.inpaint_bar.show()
+            progress_box.zero_progress()
+            progress_box.updateInpaintProgress(0, message)
+            progress_box.show()
+        except Exception:
+            LOGGER.debug('Could not show Re-Inpaint progress box.', exc_info=True)
+
+    def _current_page_reinpaint_mask(self, page_name: str):
+        img = self.imgtrans_proj.img_array
+        if img is None:
+            return None
+        masks = []
+        if page_name == self.imgtrans_proj.current_img and self.imgtrans_proj.mask_array is not None:
+            stored_mask = self.imgtrans_proj.mask_array
+        else:
+            try:
+                stored_mask = self.imgtrans_proj.load_mask_by_imgname(page_name)
+            except Exception:
+                LOGGER.warning(f'Could not load stored inpaint mask for {page_name}.', exc_info=True)
+                stored_mask = None
+        masks.append(stored_mask)
+
+        try:
+            decensor_mask = self.imgtrans_proj.load_decensor_mask_by_imgname(page_name)
+        except Exception:
+            LOGGER.warning(f'Could not load stored decensor mask for {page_name}.', exc_info=True)
+            decensor_mask = None
+        masks.append(decensor_mask)
+
+        return combine_inpaint_masks(
+            masks,
+            img.shape[:2],
+            dilate=pcfg.drawpanel.reinpaint_dilate_ksize,
+        )
+
+    def run_reinpaint_current_page(self):
+        if self.imgtrans_proj.is_empty or not self.imgtrans_proj.current_img:
+            create_info_dialog(self.tr('Open a project page before re-running inpainting.'))
+            return
+
+        page_name = self.imgtrans_proj.current_img
+        if page_name not in self.imgtrans_proj.pages:
+            create_info_dialog(self.tr('The current page is not available in the project.'))
+            return
+
+        if self.module_manager.inpainterBusy():
+            create_info_dialog(self.tr('Inpainting is already running. Please wait until it finishes.'))
+            return
+
+        if self.module_manager.inpainter is None:
+            fallback = 'lama_large_512px'
+            if fallback in GET_VALID_INPAINTERS():
+                LOGGER.info(f'No active inpainter; loading fallback {fallback} for Re-Inpaint.')
+                self.module_manager.setInpainter(fallback)
+                create_info_dialog(self.tr('Loading fallback inpainter. Run Re-Inpaint again after it is ready.'))
+            else:
+                create_info_dialog(self.tr('Select an inpainter before re-running inpainting.'))
+            return
+
+        mask = self._current_page_reinpaint_mask(page_name)
+        if mask is None or not np.any(mask > 0):
+            create_info_dialog(self.tr('No inpaint masks found for the current page.'))
+            return
+
+        bbox = mask_bounding_rect(mask)
+        if bbox is None:
+            create_info_dialog(self.tr('No inpaint masks found for the current page.'))
+            return
+
+        img = self.imgtrans_proj.img_array
+        x1, y1, x2, y2 = enlarge_window(list(bbox), img.shape[1], img.shape[0])
+        inpaint_dict = {
+            'img': np.copy(img[y1:y2, x1:x2]),
+            'mask': mask[y1:y2, x1:x2],
+            'inpaint_rect': [x1, y1, x2, y2],
+            'operation': 'reinpaint_current_page',
+            'page_name': page_name,
+        }
+        self._reinpaint_current_page_request = page_name
+        LOGGER.info(
+            f'Re-running inpainting on current page {page_name}; '
+            f'dilate={pcfg.drawpanel.reinpaint_dilate_ksize}; rect={[x1, y1, x2, y2]}.'
+        )
+        self._show_reinpaint_progress(self.tr('Re-running inpainting on current page...'))
+        self.module_manager.canvas_inpaint(inpaint_dict)
+
+    def on_reinpaint_current_page_finished(self, inpaint_dict: dict):
+        if inpaint_dict.get('operation') != 'reinpaint_current_page':
+            return
+        page_name = inpaint_dict.get('page_name')
+        if self._reinpaint_current_page_request != page_name:
+            return
+        self._reinpaint_current_page_request = None
+        QTimer.singleShot(0, self._finalize_reinpaint_current_page)
+
+    def _finalize_reinpaint_current_page(self):
+        try:
+            self.module_manager.progress_msgbox.updateInpaintProgress(100)
+            self.module_manager.progress_msgbox.hide()
+        except Exception:
+            LOGGER.debug('Could not hide Re-Inpaint progress box.', exc_info=True)
+        self.canvas.updateCanvas()
+        self.pageList.viewport().update()
+        self.save_project_safely(self.tr('current page re-inpaint'), notify_user=False)
+        self.saveCurrentPage(update_scene_text=False, save_proj=True)
+        create_info_dialog(self.tr('Inpainting re-run completed for current page.'))
+
+    def on_reinpaint_current_page_failed(self):
+        if self._reinpaint_current_page_request is None:
+            return
+        page_name = self._reinpaint_current_page_request
+        self._reinpaint_current_page_request = None
+        try:
+            self.module_manager.progress_msgbox.hide()
+        except Exception:
+            LOGGER.debug('Could not hide Re-Inpaint progress box after failure.', exc_info=True)
+        LOGGER.error(f'Re-Inpaint failed for current page {page_name}.')
+        create_info_dialog(self.tr('Re-running inpainting failed for the current page. Check the log for details.'))
 
     def on_run_imgtrans(self, continue_mode=False):
         self.backup_blkstyles.clear()
