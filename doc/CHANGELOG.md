@@ -7,13 +7,21 @@ Changed:
 
 Fixed:
 1. Improved handling of malformed or empty LLM JSON responses.
-2. Added fallback to first-step draft translations when LLM refinement fails.
-3. Improved Windows robustness for atomic project saving and UI save-error handling.
-4. Added diagnostics for Censor Restoration mask detection.
-5. Improved simple censor bar and block mask detection.
-6. Improved auto glossary filtering to avoid classifying interjections, SFX, punctuation, and normal dialogue as character names or titles.
-7. Normalized name entries to character glossary category.
-8. Added stricter title filtering and glossary rejection diagnostics.
+2. Improved Two-Step Translator LLM refinement handling for empty, partial, and malformed JSON responses.
+3. Added strict LLM refinement retry before falling back to first-step drafts.
+4. Added safe ID-based partial merge for usable LLM refinement outputs.
+5. Prevented partial refinement responses from discarding all usable ID-matched translations.
+6. Improved Ollama request logging for local translation models.
+7. Clarified separation between refinement, strict retry, reflection, and glossary prompts.
+8. Improved Windows robustness for atomic project saving and UI save-error handling.
+9. Added diagnostics for Censor Restoration mask detection.
+10. Improved simple censor bar and block mask detection.
+11. Improved auto glossary filtering to avoid classifying interjections, SFX, punctuation, and normal dialogue as character names or titles.
+12. Normalized name entries to character glossary category.
+13. Added stricter title filtering and glossary rejection diagnostics.
+
+Version:
+1. Bumped the fork runtime version string to `1.4.0-vibe.29`.
 
 Added:
 1. Optional debug output for Censor Restoration masks and overlays.

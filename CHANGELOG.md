@@ -26,6 +26,8 @@
 - Improved Two-Step Translator LLM refinement handling for empty, partial, and malformed JSON responses.
 - Added strict LLM refinement retry before falling back to first-step drafts.
 - Added safe ID-based partial merge for usable LLM refinement outputs.
+- Prevented partial refinement responses from discarding all usable ID-matched translations.
 - Improved Ollama request logging for local translation models.
 - Clarified separation between refinement, strict retry, reflection, and glossary prompts.
+- Bumped the fork runtime version string to `1.4.0-vibe.29`.
 - Reduced inconsistent character names and pronoun drift during review.

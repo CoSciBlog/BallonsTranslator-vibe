@@ -77,6 +77,7 @@ class TwoStepTranslator(LLM_API_Translator):
         self._draft_cache: Dict[Tuple[str, str, str, Tuple[str, ...]], List[str]] = {}
         self._draft_cache_lock = threading.RLock()
         self.last_refinement_used_draft_fallback = False
+        self._last_draft_fallback_ids: List[int] = []
 
     @property
     def first_step_translator(self) -> str:
@@ -321,13 +322,17 @@ class TwoStepTranslator(LLM_API_Translator):
         expected_ids = [item["id"] for item in expected_items]
         return (
             f"Improve draft translations from {from_lang} to {to_lang}.\n"
-            "JSON only. Never return {}.\n"
+            "Return valid JSON only. No markdown. No explanations. No comments. Never return {}.\n"
             'Use exactly this schema: { "translations": [ {"id": 1, "translation": "final improved translation"} ] }\n'
             f"Return the same number of items as the input: {len(expected_items)}.\n"
             f"Expected IDs: {expected_ids}.\n"
-            "Keep the same IDs. Do not reorder. Do not merge items.\n"
-            "If unsure, return the draft_translation unchanged.\n"
-            "Do not include source, draft_translation, metadata, markdown, or explanations in the final output.\n\n"
+            "Return exactly one translation item for every input item.\n"
+            "Preserve every id exactly. Do not add, remove, reorder, or merge items.\n"
+            "If a draft is already good, return the draft unchanged.\n"
+            "If unsure, return the draft unchanged.\n"
+            "Keep the same target language.\n"
+            "Do not include source, draft_translation, category labels, glossary metadata, notes, or comments in the final output.\n"
+            "The number of returned translations must equal the number of input items.\n\n"
             f"{self._review_quality_rules(len(expected_items), expected_ids)}"
             f"{self._translation_context_prompt_section()}"
             f"{self._review_glossary_prompt_section()}"
@@ -353,6 +358,7 @@ class TwoStepTranslator(LLM_API_Translator):
             f"Required IDs: {expected_ids}.\n"
             "Return exactly these IDs. Do not omit IDs. Do not add IDs.\n"
             "Do not reorder, merge, or include source/draft_translation/metadata.\n"
+            "If the draft is acceptable, copy it unchanged.\n"
             "If unsure, copy the draft unchanged.\n\n"
             f"INPUT:\n{json.dumps(expected_items, ensure_ascii=False, indent=2)}"
         )
@@ -416,6 +422,9 @@ class TwoStepTranslator(LLM_API_Translator):
             elif item_id in normal_by_id:
                 merged.append(normal_by_id[item_id])
             elif fallback_to_first_step:
+                if not hasattr(self, "_last_draft_fallback_ids"):
+                    self._last_draft_fallback_ids = []
+                self._last_draft_fallback_ids.append(item_id)
                 merged.append(item.get("draft_translation") or item.get("source") or "")
         return merged
 
@@ -445,6 +454,13 @@ class TwoStepTranslator(LLM_API_Translator):
             )
             if self._response_covers_expected_ids(normal_response, expected_ids, "normal_llm_refinement"):
                 return normal_response, None
+            normal_ids = set(
+                self._translation_items_by_id(normal_response, "normal_llm_refinement").keys()
+            )
+            if normal_ids & set(expected_ids):
+                self.logger.warning(
+                    "LLM refinement returned partial response; using ID-matched refined translations and drafts for missing IDs."
+                )
             self.logger.warning("normal_llm_refinement failed")
         except Exception as e:
             self.logger.warning("normal_llm_refinement failed")
@@ -459,7 +475,7 @@ class TwoStepTranslator(LLM_API_Translator):
                 purpose="strict_refinement_retry",
                 expected_count=len(expected_items),
                 expected_ids=expected_ids,
-                max_tokens_override=min(max(self.max_tokens, 2048), 8192),
+                max_tokens_override=min(max(self.max_tokens, 2048), 4096),
             )
             if self._response_covers_expected_ids(retry_response, expected_ids, "strict_refinement_retry"):
                 self.logger.info("strict_refinement_retry retry succeeded")
@@ -483,6 +499,7 @@ class TwoStepTranslator(LLM_API_Translator):
         self._update_glossary_from_batch(src_list, glossary_drafts, to_lang)
         expected_items = self._expected_refinement_items(src_list, draft_list)
         self.last_refinement_used_draft_fallback = False
+        self._last_draft_fallback_ids = []
         translations: List[str] = []
 
         for chunk in self._chunk_expected_items(expected_items):
@@ -501,13 +518,12 @@ class TwoStepTranslator(LLM_API_Translator):
             translations.extend(chunk_translations)
 
         if self.fallback_to_first_step:
-            used_draft = any(
-                translation == (item.get("draft_translation") or item.get("source") or "")
-                for translation, item in zip(translations, expected_items)
-            )
+            used_draft = bool(self._last_draft_fallback_ids)
             self.last_refinement_used_draft_fallback = used_draft
             if used_draft:
-                self.logger.warning("draft fallback used")
+                self.logger.warning(
+                    f"draft fallback used for ids={self._last_draft_fallback_ids}"
+                )
             if used_draft and not any(draft_list):
                 self.logger.warning(
                     "LLM refinement failed and no first-step draft translations were available."

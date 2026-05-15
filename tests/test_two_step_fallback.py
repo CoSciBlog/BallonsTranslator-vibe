@@ -97,6 +97,20 @@ class TwoStepFallbackTest(unittest.TestCase):
         self.assertFalse(translator.last_refinement_used_draft_fallback)
         self.assertEqual(len(translator.requests), 1)
 
+    def test_llm_can_copy_draft_without_marking_draft_fallback(self):
+        response = TranslationResponse(
+            translations=[TranslationElement(id=1, translation="Draft")]
+        )
+        translator = FakeTwoStepTranslator(["Draft"], responses=[response])
+
+        result = translator._translate(["Quelle"])
+
+        self.assertEqual(result, ["Draft"])
+        self.assertFalse(translator.last_refinement_used_draft_fallback)
+        self.assertFalse(
+            any("draft fallback used" in warning for warning in translator.logger.warnings)
+        )
+
     def test_empty_llm_response_retries_before_draft_fallback(self):
         empty = TranslationResponse(translations=[])
         retry = TranslationResponse(
@@ -123,7 +137,9 @@ class TwoStepFallbackTest(unittest.TestCase):
         self.assertEqual(result, ["Draft"])
         self.assertTrue(translator.last_refinement_used_draft_fallback)
         self.assertEqual(translator.glossary_updates, [(["Quelle"], ["Draft"], "English")])
-        self.assertIn("draft fallback used", translator.logger.warnings)
+        self.assertTrue(
+            any("draft fallback used" in warning for warning in translator.logger.warnings)
+        )
 
     def test_fallback_disabled_returns_empty_when_retry_fails(self):
         empty = TranslationResponse(translations=[])
