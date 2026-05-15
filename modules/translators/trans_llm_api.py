@@ -1275,7 +1275,7 @@ class LLM_API_Translator(BaseTranslator):
             "Do not invent names, aliases, genders, pronouns, or relationships. "
             "Alternative romanizations or spellings may be aliases.\n\n"
             "Return JSON only with the GlossaryResponse schema: "
-            '{"entries":[{"source":"原文名","target":"Preferred translated name","category":"character","aliases":[],"notes":"optional short note","confidence":0.5}]}. '
+            '{"entries":[{"source":"\u539f\u6587\u540d","target":"Preferred translated name","category":"character","aliases":[],"notes":"optional short note","confidence":0.5}]}. '
             "Never return {}. If no valid entries are found, return {\"entries\":[]}. "
             "Each entry must contain source, target, category, aliases, notes, and confidence. "
             "Category, aliases, notes, and confidence are metadata for the glossary only; they must never be copied into translations.\n\n"
@@ -1293,7 +1293,7 @@ class LLM_API_Translator(BaseTranslator):
 
         system_prompt = (
             "You extract concise translation glossaries. Return only valid JSON "
-            'matching the GlossaryResponse schema: {"entries":[{"source":"原文名",'
+            'matching the GlossaryResponse schema: {"entries":[{"source":"\u539f\u6587\u540d",'
             '"target":"Preferred translated name","category":"character","aliases":[],'
             '"notes":"optional short note","confidence":0.5}]}. Never return {}.'
         )
