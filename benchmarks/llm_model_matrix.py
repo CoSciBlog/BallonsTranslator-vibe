@@ -229,6 +229,8 @@ class TranslatorMetricProbe:
             "llm_refinement_duration": 0.0,
             "review_reflection_duration": 0.0,
             "glossary_duration": 0.0,
+            "refined_translation_count": 0,
+            "draft_fallback_count": 0,
         }
         self._originals: Dict[str, Callable] = {}
 
@@ -561,4 +563,3 @@ def run_benchmark_matrix(
     with open(artifacts.summary_path, "r", encoding="utf-8") as fh:
         summary = fh.read()
     return BenchmarkResult(config=config, runs=runs, artifacts=artifacts, summary=summary)
-

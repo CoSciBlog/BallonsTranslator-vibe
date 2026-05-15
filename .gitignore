@@ -29,6 +29,10 @@ tmp
 logs
 debug/
 **/debug/censor_restoration/
+benchmarks/results/
+**/benchmark_*.json
+**/benchmark_*.csv
+**/benchmark_*_summary.md
 ballontrans_pylibs_win
 config/config.json
 config/presets/*.json
