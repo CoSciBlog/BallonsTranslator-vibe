@@ -19,9 +19,10 @@ Fixed:
 11. Improved auto glossary filtering to avoid classifying interjections, SFX, punctuation, and normal dialogue as character names or titles.
 12. Normalized name entries to character glossary category.
 13. Added stricter title filtering and glossary rejection diagnostics.
+14. Fixed NameError 'np' is not defined during re-inpainting function.
 
 Version:
-1. Bumped the fork runtime version string to `1.4.0-vibe.31`.
+1. Bumped the fork runtime version string to `1.4.0-vibe.32`.
 
 Added:
 1. Optional debug output for Censor Restoration masks and overlays.
