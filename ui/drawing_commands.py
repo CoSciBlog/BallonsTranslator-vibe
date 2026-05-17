@@ -76,6 +76,32 @@ class InpaintUndoCommand(QUndoCommand):
         self.canvas.updateLayers()
 
 
+class RemoveAllMasksCommand(QUndoCommand):
+    def __init__(self, canvas: Canvas):
+        super().__init__()
+        self.canvas = canvas
+        img_array = self.canvas.imgtrans_proj.inpainted_array
+        mask_array = self.canvas.imgtrans_proj.mask_array
+        original_array = self.canvas.imgtrans_proj.img_array
+        self.mask_points = np.where(mask_array > 0)
+        self.undo_img = np.copy(img_array)
+        self.undo_mask = np.copy(mask_array)
+        self.redo_img = np.copy(img_array)
+        self.redo_img[self.mask_points] = original_array[self.mask_points]
+        self.redo_mask = np.copy(mask_array)
+        self.redo_mask[self.mask_points] = 0
+
+    def redo(self) -> None:
+        self.canvas.imgtrans_proj.inpainted_array[:] = self.redo_img
+        self.canvas.imgtrans_proj.mask_array[:] = self.redo_mask
+        self.canvas.updateLayers()
+
+    def undo(self) -> None:
+        self.canvas.imgtrans_proj.inpainted_array[:] = self.undo_img
+        self.canvas.imgtrans_proj.mask_array[:] = self.undo_mask
+        self.canvas.updateLayers()
+
+
 class EmptyCommand(QUndoCommand):
     def __init__(self, parent=None):
         super().__init__(parent=parent)

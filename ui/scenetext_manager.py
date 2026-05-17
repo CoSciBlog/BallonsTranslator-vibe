@@ -19,7 +19,7 @@ from .textedit_commands import propagate_user_edit, TextEditCommand, ReshapeItem
 from .text_panel import FontFormatPanel
 from utils.config import pcfg
 from utils import shared
-from utils.imgproc_utils import extract_ballon_region, rotate_polygons, get_block_mask
+from utils.imgproc_utils import extract_ballon_region, rotate_polygons, get_connected_block_mask
 from utils.text_processing import seg_text, is_cjk
 from utils.text_layout import layout_text
 
@@ -62,6 +62,7 @@ class DeleteBlkItemsCommand(QUndoCommand):
         self.mode = mode
 
         self.undo_img_list = []
+        self.undo_mask_list = []
         self.redo_img_list = []
         self.inpaint_rect_lst = []
         self.mask_pnts = []
@@ -86,18 +87,21 @@ class DeleteBlkItemsCommand(QUndoCommand):
 
             if mode == 1:
                 is_empty = False
-                msk, xyxy = get_block_mask(blkitem.absBoundingRect(), mask_array, blkitem.rotation())
+                msk, xyxy = get_connected_block_mask(blkitem.absBoundingRect(), mask_array, blkitem.rotation())
                 if msk is None:
                     is_empty = True
                 if is_empty:
                     self.undo_img_list.append(None)
+                    self.undo_mask_list.append(None)
                     self.redo_img_list.append(None)
                     self.inpaint_rect_lst.append(None)
                     self.mask_pnts.append(None)
                 else:
                     x1, y1, x2, y2 = xyxy
-                    self.mask_pnts.append(np.where(msk))
+                    mask_pnts = np.where(msk > 0)
+                    self.mask_pnts.append(mask_pnts)
                     self.undo_img_list.append(np.copy(img_array[y1: y2, x1: x2]))
+                    self.undo_mask_list.append(np.copy(mask_array[y1: y2, x1: x2]))
                     self.redo_img_list.append(np.copy(original_array[y1: y2, x1: x2]))
                     self.inpaint_rect_lst.append([x1, y1, x2, y2])
 
@@ -148,7 +152,7 @@ class DeleteBlkItemsCommand(QUndoCommand):
             img_array = self.canvas.imgtrans_proj.inpainted_array
             mask_array = self.canvas.imgtrans_proj.mask_array
             for mskpnt, inpaint_rect, redo_img in zip(self.mask_pnts, self.inpaint_rect_lst, self.redo_img_list):
-                if mskpnt == None:
+                if mskpnt is None:
                     continue
                 x1, y1, x2, y2 = inpaint_rect
                 img_array[y1: y2, x1: x2][mskpnt] = redo_img[mskpnt]
@@ -183,12 +187,12 @@ class DeleteBlkItemsCommand(QUndoCommand):
             self.canvas.saved_drawundo_step += 1
             img_array = self.canvas.imgtrans_proj.inpainted_array
             mask_array = self.canvas.imgtrans_proj.mask_array
-            for mskpnt, inpaint_rect, undo_img in zip(self.mask_pnts, self.inpaint_rect_lst, self.undo_img_list):
-                if mskpnt == None:
+            for mskpnt, inpaint_rect, undo_img, undo_mask in zip(self.mask_pnts, self.inpaint_rect_lst, self.undo_img_list, self.undo_mask_list):
+                if mskpnt is None:
                     continue
                 x1, y1, x2, y2 = inpaint_rect
                 img_array[y1: y2, x1: x2][mskpnt] = undo_img[mskpnt]
-                mask_array[y1: y2, x1: x2][mskpnt] = 255
+                mask_array[y1: y2, x1: x2][mskpnt] = undo_mask[mskpnt]
             self.canvas.updateLayers()
 
         self.ctrl.recoverTextblkItemList(self.blk_list, self.pwidget_list)

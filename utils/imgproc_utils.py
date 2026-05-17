@@ -422,4 +422,29 @@ def get_block_mask(xywh: List, mask_array: np.ndarray, angle: int):
             msk = mask_array[y1: y2, x1: x2]
 
     return msk, [x1, y1, x2, y2]
-        
+
+
+def get_connected_block_mask(xywh: List, mask_array: np.ndarray, angle: int):
+    block_mask, block_rect = get_block_mask(xywh, mask_array, angle)
+    if block_mask is None or block_rect is None or not np.any(block_mask > 0):
+        return None, None
+
+    binary_mask = (mask_array > 0).astype(np.uint8)
+    num_labels, labels, _, _ = cv2.connectedComponentsWithStats(binary_mask, connectivity=8)
+    if num_labels <= 1:
+        return None, None
+
+    x1, y1, x2, y2 = block_rect
+    overlap_labels = np.unique(labels[y1:y2, x1:x2][block_mask > 0])
+    overlap_labels = overlap_labels[overlap_labels > 0]
+    if len(overlap_labels) == 0:
+        return None, None
+
+    comp_mask = np.isin(labels, overlap_labels)
+    comp_points = np.where(comp_mask)
+    if len(comp_points[0]) == 0:
+        return None, None
+
+    y_min, y_max = int(comp_points[0].min()), int(comp_points[0].max()) + 1
+    x_min, x_max = int(comp_points[1].min()), int(comp_points[1].max()) + 1
+    return mask_array[y_min:y_max, x_min:x_max] * comp_mask[y_min:y_max, x_min:x_max].astype(mask_array.dtype), [x_min, y_min, x_max, y_max]

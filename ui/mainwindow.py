@@ -41,7 +41,7 @@ from .translation_benchmark import TranslationBenchmarkWindow
 from .input_wheel_guard import InputWheelGuard
 from .textedit_commands import GlobalRepalceAllCommand
 from .framelesswindow import FramelessWindow, FramelessMoveResize
-from .drawing_commands import RunBlkTransCommand
+from .drawing_commands import RunBlkTransCommand, RemoveAllMasksCommand
 from .keywordsubwidget import KeywordSubWidget
 from . import shared_widget as SW
 from .custom_widget import MessageBox, FrameLessMessageBox, ImgtransProgressMessageBox
@@ -810,6 +810,7 @@ class MainWindow(mainwindow_cls):
         self.titleBar.darkmode_trigger.connect(self.on_darkmode_triggered)
         self.titleBar.merge_tool_trigger.connect(self.on_open_merge_tool)
         self.titleBar.reinpaint_current_page_trigger.connect(self.run_reinpaint_current_page)
+        self.titleBar.remove_current_page_masks_trigger.connect(self.remove_current_page_masks)
 
         shortcutA = QShortcut(QKeySequence("A"), self)
         shortcutA.activated.connect(self.shortcutBefore)
@@ -855,6 +856,9 @@ class MainWindow(mainwindow_cls):
 
         shortcutReInpaint = QShortcut(QKeySequence("Ctrl+Shift+I"), self)
         shortcutReInpaint.activated.connect(self.run_reinpaint_current_page)
+
+        shortcutRemoveMasks = QShortcut(QKeySequence("Ctrl+Shift+Backspace"), self)
+        shortcutRemoveMasks.activated.connect(self.remove_current_page_masks)
 
     def shortcutNext(self):
         sender: QShortcut = self.sender()
@@ -1842,6 +1846,22 @@ class MainWindow(mainwindow_cls):
         )
         self._show_reinpaint_progress(self.tr('Re-running inpainting on current page...'))
         self.module_manager.canvas_inpaint(inpaint_dict)
+
+    def remove_current_page_masks(self):
+        if self.imgtrans_proj.is_empty or not self.imgtrans_proj.current_img:
+            create_info_dialog(self.tr('Open a project page before removing masks.'))
+            return
+        if self.imgtrans_proj.mask_array is None or self.imgtrans_proj.inpainted_array is None:
+            create_info_dialog(self.tr('No inpaint masks found for the current page.'))
+            return
+        if not np.any(self.imgtrans_proj.mask_array > 0):
+            create_info_dialog(self.tr('No inpaint masks found for the current page.'))
+            return
+
+        self.canvas.push_draw_command(RemoveAllMasksCommand(self.canvas))
+        self.save_project_safely(self.tr('remove current page masks'), notify_user=False)
+        self.saveCurrentPage(update_scene_text=False, save_proj=True)
+        create_info_dialog(self.tr('All masks and related inpainting were removed from the current page.'))
 
     def on_reinpaint_current_page_finished(self, inpaint_dict: dict):
         if inpaint_dict.get('operation') != 'reinpaint_current_page':

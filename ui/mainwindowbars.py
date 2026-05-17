@@ -447,10 +447,16 @@ class TitleBar(Widget):
         reinpaintAction.setShortcut(QKeySequence('Ctrl+Shift+I'))
         reinpaintAction.setToolTip(self.tr('Re-run Inpainting: apply all existing inpaint masks again on the current page.'))
         self.reinpaint_current_page_trigger = reinpaintAction.triggered
+
+        removeMasksAction = QAction(self.tr('Remove All Masks Current Page'), self)
+        removeMasksAction.setShortcut(QKeySequence('Ctrl+Shift+Backspace'))
+        removeMasksAction.setToolTip(self.tr('Remove every mask on the current page and restore the inpainted pixels from the original image.'))
+        self.remove_current_page_masks_trigger = removeMasksAction.triggered
         
         toolsMenu = QMenu(self.toolsToolBtn)
         toolsMenu.addAction(mergeToolAction)
         toolsMenu.addAction(reinpaintAction)
+        toolsMenu.addAction(removeMasksAction)
         self.toolsToolBtn.setMenu(toolsMenu)
         self.toolsToolBtn.setPopupMode(QToolButton.InstantPopup)
 
