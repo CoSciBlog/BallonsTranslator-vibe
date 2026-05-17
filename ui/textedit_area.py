@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import Dict, List, Union
 
 from qtpy.QtWidgets import QStackedWidget, QSizePolicy, QTextEdit, QScrollArea, QGraphicsDropShadowEffect, QVBoxLayout, QApplication, QHBoxLayout, QSizePolicy, QLabel, QLineEdit
 from qtpy.QtCore import Signal, Qt, QMimeData, QEvent, QPoint, QSize
@@ -410,6 +410,7 @@ class TransPairWidget(Widget):
         super().__init__(*args, **kwargs)
         self.e_source = SourceTextEdit(idx, self, fold)
         self.e_draft = SourceTextEdit(idx, self, fold)
+        self.e_provider_results = SourceTextEdit(idx, self, fold)
         self.e_trans = TransTextEdit(idx, self, fold)
         self.draft_label = QLabel(self.tr("First step draft"), self)
         self.draft_label.setStyleSheet(STYLE_DRAFT_LABEL)
@@ -418,6 +419,13 @@ class TransPairWidget(Widget):
         self.e_draft.setToolTip(self.tr("Google/DeepL first-step result before LLM refinement. This text is saved with the project and is hidden when no draft exists."))
         self.e_draft.setPlaceholderText(self.tr("No first-step draft available."))
         self.e_draft.setStyleSheet(STYLE_DRAFT_TEXT)
+        self.provider_results_label = QLabel(self.tr("Machine translator results"), self)
+        self.provider_results_label.setStyleSheet(STYLE_DRAFT_LABEL)
+        self.provider_results_label.setToolTip(self.tr("Saved Google/DeepL outputs for this text block. Use them to compare raw machine translations with the final text."))
+        self.e_provider_results.setReadOnly(True)
+        self.e_provider_results.setToolTip(self.tr("Saved Google/DeepL outputs for this text block. This text is saved with the project and is hidden when no provider result exists."))
+        self.e_provider_results.setPlaceholderText(self.tr("No saved Google/DeepL result available."))
+        self.e_provider_results.setStyleSheet(STYLE_DRAFT_TEXT)
         self.idx_label = RowIndexLabel(idx, self)
         self.idx_label.setText(str(idx + 1).zfill(2))   # showed index start from 1!
         self.submmit_idx = self.idx_label.submmit_idx.connect(self.on_idx_edited)
@@ -429,6 +437,8 @@ class TransPairWidget(Widget):
         vlayout.addWidget(self.e_source)
         vlayout.addWidget(self.draft_label)
         vlayout.addWidget(self.e_draft)
+        vlayout.addWidget(self.provider_results_label)
+        vlayout.addWidget(self.e_provider_results)
         vlayout.addWidget(self.e_trans)
         vlayout.addWidget(SeparatorWidget(self))
         spacing = 7
@@ -445,6 +455,7 @@ class TransPairWidget(Widget):
 
         self.setAcceptDrops(True)
         self.setDraftText(getattr(textblock, "translation_draft", "") if textblock is not None else "")
+        self.setProviderResults(getattr(textblock, "translation_provider_results", {}) if textblock is not None else {})
 
     def setDraftText(self, text: str):
         text = text or ""
@@ -454,6 +465,22 @@ class TransPairWidget(Widget):
         show = bool(text.strip())
         self.draft_label.setVisible(show)
         self.e_draft.setVisible(show)
+
+    def setProviderResults(self, results: Dict[str, str]):
+        if not isinstance(results, dict):
+            results = {}
+        lines = []
+        for provider in ("Google", "DeepL Free", "DeepL"):
+            value = results.get(provider)
+            if value and str(value).strip():
+                lines.append(f"{provider}:\n{value}")
+        text = "\n\n".join(lines)
+        self.e_provider_results.block_all_signals(True)
+        self.e_provider_results.setPlainText(text)
+        self.e_provider_results.block_all_signals(False)
+        show = bool(text.strip())
+        self.provider_results_label.setVisible(show)
+        self.e_provider_results.setVisible(show)
 
     def on_idx_edited(self, new_idx: int):
         new_idx -= 1

@@ -222,6 +222,32 @@ class BaseTranslator(BaseModule):
         text_list = text.split(breaker)
         return [text.lstrip().rstrip() for text in text_list]
 
+    def provider_result_label(self) -> str:
+        if self.name == 'google':
+            return 'Google'
+        if self.name == 'DeepL':
+            return 'DeepL'
+        return ''
+
+    def _store_provider_results(
+        self,
+        textblk_lst: List[TextBlock],
+        non_empty_ids: List[int],
+        translations: List[str],
+        label: str = '',
+    ):
+        label = label or self.provider_result_label()
+        if not label:
+            return
+        for ii, idx in enumerate(non_empty_ids):
+            if ii >= len(translations):
+                break
+            results = getattr(textblk_lst[idx], 'translation_provider_results', None)
+            if not isinstance(results, dict):
+                results = {}
+            results[label] = translations[ii] or ''
+            textblk_lst[idx].translation_provider_results = results
+
     def translate_textblk_lst(self, textblk_lst: List[TextBlock]):
         '''
         only textblks with non-empty source text would be passed to translator
@@ -244,6 +270,7 @@ class BaseTranslator(BaseModule):
 
         if len(text_list) > 0:
             _translations = self.translate(text_list)
+            self._store_provider_results(textblk_lst, non_empty_ids, _translations)
             for ii, idx in enumerate(non_empty_ids):
                 translations[idx] = _translations[ii]
 

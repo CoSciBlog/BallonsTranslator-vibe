@@ -245,6 +245,16 @@ class TwoStepTranslator(LLM_API_Translator):
             self.logger.error(f"First-step translation failed: {e}")
         return [""] * len(src_list)
 
+    def _first_step_provider_label(self) -> str:
+        provider = self.first_step_translator
+        if provider == "google":
+            return "Google"
+        return provider
+
+    def _store_first_step_results(self, textblk_lst, non_empty_ids: List[int], draft_list: List[str]) -> None:
+        label = self._first_step_provider_label()
+        self._store_provider_results(textblk_lst, non_empty_ids, draft_list, label=label)
+
     def _collect_translation_inputs(self, textblk_lst) -> Tuple[List[int], List[str], List[str]]:
         non_empty_ids = []
         text_list = []
@@ -270,6 +280,7 @@ class TwoStepTranslator(LLM_API_Translator):
         if not src_list:
             return
         draft_list = self._first_step_translate(src_list)
+        self._store_first_step_results(textblk_lst, non_empty_ids, draft_list)
         for ii, idx in enumerate(non_empty_ids):
             textblk_lst[idx].translation_draft = draft_list[ii]
         self.logger.info(
@@ -280,6 +291,7 @@ class TwoStepTranslator(LLM_API_Translator):
         non_empty_ids, text_list, translations = self._collect_translation_inputs(textblk_lst)
         if text_list:
             draft_list = self._first_step_translate(text_list)
+            self._store_first_step_results(textblk_lst, non_empty_ids, draft_list)
             for ii, idx in enumerate(non_empty_ids):
                 textblk_lst[idx].translation_draft = draft_list[ii]
 

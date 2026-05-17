@@ -5,6 +5,7 @@
 Changed:
 1. Default page zoom now fits the current page into the visible canvas when opening a project.
 2. Project glossaries now save to a separate `glossary.json` file in the image project folder.
+3. Direct Google/DeepL translation and Two-Step first-step translation now persist raw provider results in each project's `imgtrans_*.json`.
 
 Fixed:
 1. Improved handling of malformed or empty LLM JSON responses.
@@ -24,7 +25,7 @@ Fixed:
 15. Prevented automatically extracted glossary entries from being saved into the global translator config and reused by unrelated projects.
 
 Version:
-1. Bumped the fork runtime version string to `1.4.0-vibe.32`.
+1. Bumped the fork runtime version string to `1.4.0-vibe.34`.
 
 Added:
 1. Optional debug output for Censor Restoration masks and overlays.
@@ -34,6 +35,7 @@ Added:
 5. Added JSON/CSV benchmark result exports and summary output.
 6. Added benchmark metrics for duration, errors, retries, and fallback usage.
 7. Added sidebar, Tools-menu, shortcut, and Drawboard controls to re-run inpainting for the current page using existing masks.
+8. Saved Google/DeepL provider outputs per text block and showed them in the text editor sidebar for comparison.
 
 [v1.4.0-vibe.28] ui translations and german language
 1. Extracted all new strings from recent UI updates and recompiled all `.qm` translation files.

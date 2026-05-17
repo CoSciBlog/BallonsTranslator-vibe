@@ -14,6 +14,7 @@
 - Added character/name glossary extraction during the first translation pass.
 - Added glossary-assisted name consistency checks during translation review.
 - Added pronoun and address-form checks to the translation review prompt.
+- Saved Google/DeepL provider outputs per text block and showed them in the text editor sidebar for comparison.
 
 ### Changed
 
@@ -21,6 +22,7 @@
 - Review now uses character and honorific glossary entries as guidance.
 - Manual glossary entries are preserved and preferred over automatic entries.
 - Project glossaries now save to `glossary.json` in the image project folder instead of the global translator config or embedded `imgtrans` project JSON.
+- Direct Google/DeepL translation and Two-Step first-step translation now persist raw provider results in each project's `imgtrans_*.json`.
 
 ### Fixed
 
@@ -33,3 +35,4 @@
 - Bumped the fork runtime version string to `1.4.0-vibe.29`.
 - Reduced inconsistent character names and pronoun drift during review.
 - Prevented automatically extracted glossary entries from being carried into unrelated projects through `config/config.json`.
+- Bumped the fork runtime version string to `1.4.0-vibe.34`.
