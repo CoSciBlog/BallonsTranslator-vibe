@@ -389,7 +389,7 @@ class LLM_API_Translator(BaseTranslator):
         },
         "glossary max entries": {
             "value": 200,
-            "description": "Maximum number of glossary entries kept in the translator settings. Higher values preserve more terms but increase prompt size and cost.",
+            "description": "Maximum number of glossary entries kept in the current project glossary. Higher values preserve more terms but increase prompt size and cost.",
         },
         "glossary prompt": {
             "type": "editor",
@@ -399,7 +399,7 @@ class LLM_API_Translator(BaseTranslator):
         "glossary": {
             "type": "editor",
             "value": "",
-            "description": "Persistent glossary used by the translator. Format: source => target [category] # optional note. You can edit it manually; auto build glossary appends or updates entries.",
+            "description": "Legacy fallback glossary used only when no project glossary is loaded. Project glossaries are saved in each image folder's glossary.json.",
         },
         "temperature": {
             "value": 0.1,
@@ -469,6 +469,7 @@ class LLM_API_Translator(BaseTranslator):
         self.client = None
         self.project_glossary_text = ""
         self.project_glossary_prompt = ""
+        self.project_glossary_loaded = False
         self.context_project = None
         self.context_page_key = ""
 
@@ -632,16 +633,17 @@ class LLM_API_Translator(BaseTranslator):
 
     @property
     def glossary_text(self) -> str:
-        project_glossary = getattr(self, "project_glossary_text", "")
-        if project_glossary.strip():
-            return project_glossary
+        if getattr(self, "project_glossary_loaded", False):
+            return getattr(self, "project_glossary_text", "") or ""
         return self.get_param_value("glossary") or ""
 
     @property
     def glossary_prompt(self) -> str:
-        project_prompt = getattr(self, "project_glossary_prompt", "")
-        if project_prompt.strip():
-            return project_prompt.strip()
+        if getattr(self, "project_glossary_loaded", False):
+            project_prompt = getattr(self, "project_glossary_prompt", "")
+            if project_prompt.strip():
+                return project_prompt.strip()
+            return ""
         return self.get_param_value("glossary prompt") or ""
 
     @property
@@ -849,6 +851,7 @@ class LLM_API_Translator(BaseTranslator):
         )
 
     def set_project_glossary(self, glossary):
+        self.project_glossary_loaded = True
         if isinstance(glossary, dict):
             self.project_glossary_text = glossary.get("entries", "") or ""
             self.project_glossary_prompt = glossary.get("prompt", "") or ""
@@ -1518,8 +1521,8 @@ class LLM_API_Translator(BaseTranslator):
                 seen_terms.add((category, term))
 
         limited_lines = glossary_lines[-self.glossary_max_entries :]
-        self.set_param_value("glossary", "\n".join(limited_lines), convert_dtype=False)
         self.project_glossary_text = "\n".join(limited_lines)
+        self.project_glossary_loaded = True
         self.logger.info(
             "Glossary extraction stats: raw=%s normalized=%s accepted=%s recognized_names=%s added_names=%s deduplicated=%s rejected=%s conflicts=%s rejection_reasons=%s"
             % (

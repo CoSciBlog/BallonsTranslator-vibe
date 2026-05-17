@@ -29,7 +29,7 @@ class GlossaryWindow(QDialog):
         self._loading = False
 
         self.info_label = QLabel(
-            self.tr("Glossary entries saved in the current project's imgtrans JSON.")
+            self.tr("Glossary entries saved in the current project's glossary.json.")
         )
         self.info_label.setToolTip(
             self.tr(
@@ -66,7 +66,7 @@ class GlossaryWindow(QDialog):
         self.del_btn.setToolTip(self.tr("Delete selected glossary entries."))
         self.del_btn.clicked.connect(self.delete_selected_rows)
         self.save_btn = NoBorderPushBtn(self.tr("Save Glossary"), self)
-        self.save_btn.setToolTip(self.tr("Save the glossary into the current project's imgtrans JSON."))
+        self.save_btn.setToolTip(self.tr("Save the glossary into the current project's glossary.json."))
         self.save_btn.clicked.connect(self.save_glossary)
 
         layout = QVBoxLayout(self)

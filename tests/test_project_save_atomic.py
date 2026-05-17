@@ -9,7 +9,7 @@ from unittest.mock import patch
 APP_ROOT = osp.dirname(osp.dirname(osp.abspath(__file__)))
 sys.path.append(APP_ROOT)
 
-from utils.proj_imgtrans import safe_replace_with_retries
+from utils.proj_imgtrans import ProjImgTrans, safe_replace_with_retries
 
 
 class ProjectSaveAtomicTest(unittest.TestCase):
@@ -75,6 +75,58 @@ class ProjectSaveAtomicTest(unittest.TestCase):
                 self.assertEqual(json.load(f), {"old": True})
             with open(tmp, "r", encoding="utf8") as f:
                 self.assertEqual(json.load(f), {"new": True})
+
+    def test_project_save_writes_glossary_to_separate_json(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            proj = ProjImgTrans()
+            proj.directory = tmpdir
+            proj.proj_path = osp.join(tmpdir, "imgtrans_test.json")
+            proj.pages = {}
+            proj.not_found_pages = {}
+            proj._image_info = {}
+            proj.current_img = None
+            proj.glossary = {
+                "entries": "source => Cynthia [character]",
+                "prompt": "Use project terms only.",
+            }
+
+            proj.save()
+
+            with open(proj.proj_path, "r", encoding="utf8") as f:
+                project_json = json.load(f)
+            with open(osp.join(tmpdir, "glossary.json"), "r", encoding="utf8") as f:
+                glossary_json = json.load(f)
+
+            self.assertNotIn("glossary", project_json)
+            self.assertEqual(glossary_json["entries"], "source => Cynthia [character]")
+            self.assertEqual(glossary_json["prompt"], "Use project terms only.")
+
+    def test_project_load_prefers_separate_glossary_json_over_legacy_field(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            project_path = osp.join(tmpdir, "imgtrans_test.json")
+            with open(project_path, "w", encoding="utf8") as f:
+                json.dump(
+                    {
+                        "directory": tmpdir,
+                        "pages": {},
+                        "current_img": None,
+                        "image_info": {},
+                        "glossary": {"entries": "legacy => global", "prompt": "Legacy"},
+                    },
+                    f,
+                )
+            with open(osp.join(tmpdir, "glossary.json"), "w", encoding="utf8") as f:
+                json.dump(
+                    {"entries": "project => local [term]", "prompt": "Project only"},
+                    f,
+                    ensure_ascii=False,
+                )
+
+            proj = ProjImgTrans()
+            proj.load(tmpdir, json_path=project_path)
+
+            self.assertEqual(proj.glossary["entries"], "project => local [term]")
+            self.assertEqual(proj.glossary["prompt"], "Project only")
 
 
 if __name__ == "__main__":

@@ -20,6 +20,7 @@
 - Existing translation, OCR, and inpainting workflows are unchanged.
 - Review now uses character and honorific glossary entries as guidance.
 - Manual glossary entries are preserved and preferred over automatic entries.
+- Project glossaries now save to `glossary.json` in the image project folder instead of the global translator config or embedded `imgtrans` project JSON.
 
 ### Fixed
 
@@ -31,3 +32,4 @@
 - Clarified separation between refinement, strict retry, reflection, and glossary prompts.
 - Bumped the fork runtime version string to `1.4.0-vibe.29`.
 - Reduced inconsistent character names and pronoun drift during review.
+- Prevented automatically extracted glossary entries from being carried into unrelated projects through `config/config.json`.

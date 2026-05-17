@@ -16,6 +16,18 @@ from . import shared
 from .exceptions import ImgnameNotInProjectException, ProjectLoadFailureException, ProjectDirNotExistException, ProjectNotSupportedException
 
 
+def atomic_write_json(path: str, data, encoder=None) -> None:
+    tmp_path = path + '.tmp'
+    try:
+        with open(tmp_path, "w", encoding="utf-8") as f:
+            f.write(json.dumps(data, ensure_ascii=False, cls=encoder))
+            f.flush()
+            os.fsync(f.fileno())
+    except Exception as exc:
+        raise Exception(f'Failed to write temporary JSON file {tmp_path}: {exc}') from exc
+    safe_replace_with_retries(tmp_path, path)
+
+
 def safe_replace_with_retries(tmp_path: str, target_path: str, retries: int = 5, delay: float = 0.15) -> None:
     last_error = None
     attempts = max(1, int(retries))
@@ -155,6 +167,9 @@ class ProjImgTrans:
     def proj_name(self) -> str:
         return self.type+'_'+osp.basename(self.directory)
 
+    def glossary_path(self) -> str:
+        return osp.join(self.directory, 'glossary.json')
+
     @classmethod
     def default_glossary(cls) -> Dict[str, str]:
         return {
@@ -192,6 +207,7 @@ class ProjImgTrans:
             except Exception as e:
                 raise ProjectLoadFailureException(e)
             self.load_from_dict(proj_dict)
+        self.load_glossary()
         return new_proj
 
     def ensure_dir(self, directory: str):
@@ -425,22 +441,28 @@ class ProjImgTrans:
             self._image_info[imgname] = {'finish_code': 0}
         self.set_current_img_byidx(0)
         self.save()
+
+    def load_glossary(self):
+        glossary_path = self.glossary_path()
+        if not osp.exists(glossary_path):
+            return
+        try:
+            with open(glossary_path, 'r', encoding='utf8') as f:
+                self.glossary = self.normalize_glossary(json.loads(f.read()))
+        except Exception as e:
+            LOGGER.warning(f'Failed to load project glossary {glossary_path}: {e}')
+
+    def save_glossary(self):
+        atomic_write_json(self.glossary_path(), self.normalize_glossary(self.glossary))
         
     def save(self, keep_exist_as_backup=False):
         if not osp.exists(self.directory):
             raise ProjectDirNotExistException
         with self._save_lock:
-            tmp_save_tgt = self.proj_path + '.tmp'
-            try:
-                with open(tmp_save_tgt, "w", encoding="utf-8") as f:
-                    f.write(json.dumps(self.to_dict(), ensure_ascii=False, cls=TextBlkEncoder))
-                    f.flush()
-                    os.fsync(f.fileno())
-            except Exception as exc:
-                raise Exception(f'Failed to write project temporary file {tmp_save_tgt}: {exc}') from exc
             if osp.exists(self.proj_path) and keep_exist_as_backup:
                 shutil.copy2(self.proj_path, self.proj_path + '.backup')
-            safe_replace_with_retries(tmp_save_tgt, self.proj_path)
+            atomic_write_json(self.proj_path, self.to_dict(), encoder=TextBlkEncoder)
+            self.save_glossary()
             LOGGER.debug(f'project saved to {self.proj_path}')
 
     def to_dict(self) -> Dict:
@@ -452,7 +474,6 @@ class ProjImgTrans:
             'pages': pages,
             'current_img': self.current_img,
             'image_info': image_info,
-            'glossary': self.glossary,
             'ignored_pages': sorted([page for page in self.ignored_pages if page in pages]),
         }
 

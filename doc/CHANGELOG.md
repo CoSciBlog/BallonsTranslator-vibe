@@ -4,6 +4,7 @@
 [Unreleased] robustness fixes
 Changed:
 1. Default page zoom now fits the current page into the visible canvas when opening a project.
+2. Project glossaries now save to a separate `glossary.json` file in the image project folder.
 
 Fixed:
 1. Improved handling of malformed or empty LLM JSON responses.
@@ -20,6 +21,7 @@ Fixed:
 12. Normalized name entries to character glossary category.
 13. Added stricter title filtering and glossary rejection diagnostics.
 14. Fixed NameError 'np' is not defined during re-inpainting function.
+15. Prevented automatically extracted glossary entries from being saved into the global translator config and reused by unrelated projects.
 
 Version:
 1. Bumped the fork runtime version string to `1.4.0-vibe.32`.

@@ -97,13 +97,14 @@ class GlossaryMergeTest(unittest.TestCase):
     def make_translator(self, glossary, enabled=None):
         class MergeFakeTranslator(LLM_API_Translator):
             def __init__(self):
-                self._glossary = glossary
+                self.project_glossary_text = glossary
+                self.project_glossary_loaded = True
                 self._enabled = enabled if enabled is not None else {"character": "names"}
                 self.logger = FakeLogger()
 
             @property
             def glossary_text(self):
-                return self._glossary
+                return self.project_glossary_text
 
             @property
             def glossary_max_entries(self):
@@ -113,8 +114,7 @@ class GlossaryMergeTest(unittest.TestCase):
                 return dict(self._enabled)
 
             def set_param_value(self, param_key, param_value, convert_dtype=True):
-                if param_key == "glossary":
-                    self._glossary = param_value
+                raise AssertionError("Glossary entries must not be written to translator settings")
 
         return MergeFakeTranslator()
 
