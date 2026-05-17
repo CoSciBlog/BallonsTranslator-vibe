@@ -2,6 +2,7 @@ import time
 from typing import Union, List, Dict, Callable
 import os.path as osp
 
+import cv2
 import numpy as np
 from qtpy.QtCore import QThread, Signal, QObject, QLocale, QTimer
 from qtpy.QtWidgets import QFileDialog
@@ -12,6 +13,7 @@ from utils.logger import logger as LOGGER
 from utils.registry import Registry
 from utils.imgproc_utils import enlarge_window, get_block_mask
 from utils.io_utils import imread, text_is_empty
+from utils.textblock_mask import canny_flood, connected_canny_flood, existing_mask
 from utils.decensor import build_decensor_mask, select_decensor_input_image, write_decensor_debug_outputs
 from modules.translators import MissingTranslatorParams
 from modules.base import BaseModule, soft_empty_cache
@@ -28,6 +30,45 @@ from .configpanel import ConfigPanel
 from utils.proj_imgtrans import ProjImgTrans
 from utils.config import pcfg, RunStatus
 cfg_module = pcfg.module
+
+
+def _mask_has_pixels(mask: np.ndarray) -> bool:
+    return mask is not None and np.any(mask > 0)
+
+
+def _post_process_blktrans_mask(mask: np.ndarray, post_process_mask: Callable = None) -> np.ndarray:
+    if mask is None:
+        return None
+    if post_process_mask is not None:
+        return post_process_mask(mask)
+    ksize = pcfg.drawpanel.recttool_dilate_ksize
+    if ksize == 0:
+        return mask
+    element = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * ksize + 1, 2 * ksize + 1), (ksize, ksize))
+    return cv2.dilate(mask, element)
+
+
+def _textbox_inpaint_mask(img: np.ndarray, mask: np.ndarray, post_process_mask: Callable = None) -> np.ndarray:
+    preferred_method = get_maskseg_method()
+    methods = [preferred_method, canny_flood, connected_canny_flood]
+    if _mask_has_pixels(mask):
+        methods.insert(0, existing_mask)
+
+    seen = set()
+    for method in methods:
+        if method in seen:
+            continue
+        seen.add(method)
+        try:
+            inpaint_mask_array, _ballon_mask, _bub_dict = method(img, mask=mask)
+        except Exception as e:
+            LOGGER.debug(f'Textbox inpaint mask method {getattr(method, "__name__", method)} failed: {e}')
+            continue
+
+        processed_mask = _post_process_blktrans_mask(inpaint_mask_array, post_process_mask)
+        if _mask_has_pixels(processed_mask):
+            return processed_mask
+    return None
 
 
 class ModuleThread(QThread):
@@ -459,10 +500,17 @@ class ImgtransThread(QThread):
                 blk.region_inpaint_dict = None
                 if y2 - y1 > 2 and x2 - x1 > 2:
                     im = np.copy(tgt_img[y1: y2, x1: x2])
-                    maskseg_method = get_maskseg_method()
-                    inpaint_mask_array, ballon_mask, bub_dict = maskseg_method(im, mask=tgt_mask[y1: y2, x1: x2])
-                    mask = self.post_process_mask(inpaint_mask_array)
-                    if mask.sum() > 0:
+                    mask_crop = None
+                    if tgt_mask is not None:
+                        mask_crop = tgt_mask[y1: y2, x1: x2]
+                    if mask_crop is None:
+                        mask_crop = np.zeros((y2 - y1, x2 - x1), dtype=np.uint8)
+                    mask = _textbox_inpaint_mask(
+                        im,
+                        mask_crop,
+                        getattr(self, 'post_process_mask', None),
+                    )
+                    if _mask_has_pixels(mask):
                         inpainted = self.inpaint_thread.inpainter.inpaint(im, mask)
                         blk.region_inpaint_dict = {'img': im, 'mask': mask, 'inpaint_rect': [x1, y1, x2, y2], 'inpainted': inpainted}
                     self.finish_blktrans_stage.emit('inpaint', int((ii+1) * progress_prod))

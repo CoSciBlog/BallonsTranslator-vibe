@@ -283,7 +283,7 @@ class TwoStepTranslator(LLM_API_Translator):
             for ii, idx in enumerate(non_empty_ids):
                 textblk_lst[idx].translation_draft = draft_list[ii]
 
-            refined = self.translate(text_list)
+            refined = self._refine_draft_translations(text_list, draft_list)
             for ii, idx in enumerate(non_empty_ids):
                 translations[idx] = refined[ii]
                 textblk_lst[idx].translation_draft_fallback = bool(
@@ -492,6 +492,9 @@ class TwoStepTranslator(LLM_API_Translator):
             return []
 
         draft_list = self._first_step_translate(src_list)
+        return self._refine_draft_translations(src_list, draft_list)
+
+    def _refine_draft_translations(self, src_list: List[str], draft_list: List[str]) -> List[str]:
         to_lang = self.lang_map.get(self.lang_target, self.lang_target)
         glossary_drafts = [
             draft or source for source, draft in zip(src_list, draft_list)
