@@ -406,12 +406,17 @@ class DrawingPanel(Widget):
         masklayout.addWidget(ToolNameLabel(130, self.tr('Mask Opacity')))
         masklayout.addWidget(self.maskTransperancySlider)
 
+        self.showTranslatedTextChecker = QCheckBox(self.tr('Show translated text'))
+        self.showTranslatedTextChecker.setToolTip(self.tr('Show translated text boxes on the Drawboard while editing masks.'))
+        self.showTranslatedTextChecker.stateChanged.connect(self.on_show_translated_text_changed)
+
         layout = QVBoxLayout(self)
         layout.addLayout(toolboxlayout)
         layout.addWidget(SeparatorWidget())
         layout.addWidget(self.toolConfigStackwidget)
         layout.addWidget(SeparatorWidget())
         layout.addLayout(masklayout)
+        layout.addWidget(self.showTranslatedTextChecker)
         layout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
     def setCurrentToolByName(self, tool_name: str):
@@ -542,6 +547,8 @@ class DrawingPanel(Widget):
         self.rectPanel.autoChecker.setChecked(config.rectool_auto)
         self.rectPanel.methodComboBox.setCurrentIndex(config.rectool_method)
         self.reinpaintPanel.dilate_slider.setValue(config.reinpaint_dilate_ksize)
+        self.showTranslatedTextChecker.setChecked(config.show_translated_text)
+        self.apply_translated_text_visibility()
         if config.current_tool == ImageEditMode.HandTool:
             self.handTool.setChecked(True)
         elif config.current_tool == ImageEditMode.InpaintTool:
@@ -895,6 +902,23 @@ class DrawingPanel(Widget):
 
     def on_reinpaint_ksize_changed(self):
         pcfg.drawpanel.reinpaint_dilate_ksize = self.reinpaintPanel.dilate_slider.value()
+
+    def on_show_translated_text_changed(self, *_args):
+        pcfg.drawpanel.show_translated_text = self.showTranslatedTextChecker.isChecked()
+        self.apply_translated_text_visibility()
+
+    def apply_translated_text_visibility(self):
+        if self.isVisible():
+            self.canvas.textLayer.setVisible(pcfg.drawpanel.show_translated_text)
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        self.apply_translated_text_visibility()
+
+    def hideEvent(self, event):
+        super().hideEvent(event)
+        if not self.canvas.textEditMode():
+            self.canvas.textLayer.hide()
 
     def on_rectchecker_changed(self):
         if not self.rectTool.isChecked():

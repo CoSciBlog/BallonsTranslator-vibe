@@ -117,6 +117,7 @@ class DrawPanelConfig(Config):
     rectool_method: int = 0
     recttool_dilate_ksize: int = 0
     reinpaint_dilate_ksize: int = 0
+    show_translated_text: bool = False
 
 @nested_dataclass
 class ProgramConfig(Config):

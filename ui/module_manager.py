@@ -150,11 +150,11 @@ class InpaintThread(ModuleThread):
         self.job = lambda : self._set_module(inpainter)
         self.start()
 
-    def inpaint(self, img: np.ndarray, mask: np.ndarray, img_key: str = None, inpaint_rect=None):
-        self.job = lambda : self._inpaint(img, mask, img_key, inpaint_rect)
+    def inpaint(self, img: np.ndarray, mask: np.ndarray, img_key: str = None, inpaint_rect=None, **metadata):
+        self.job = lambda : self._inpaint(img, mask, img_key, inpaint_rect, **metadata)
         self.start()
     
-    def _inpaint(self, img: np.ndarray, mask: np.ndarray, img_key: str = None, inpaint_rect=None):
+    def _inpaint(self, img: np.ndarray, mask: np.ndarray, img_key: str = None, inpaint_rect=None, **metadata):
         inpaint_dict = {}
         self.inpainting = True
         try:
@@ -166,6 +166,7 @@ class InpaintThread(ModuleThread):
                 'img_key': img_key,
                 'inpaint_rect': inpaint_rect
             }
+            inpaint_dict.update(metadata)
             self.finish_inpaint.emit(inpaint_dict)
         except Exception as e:
             create_error_dialog(e, self.tr('Inpainting Failed.'), 'InpaintFailed')
@@ -1016,7 +1017,7 @@ class ModuleManager(QObject):
         if self.inpaint_thread.isRunning():
             LOGGER.warning('Waiting for inpainting to finish')
             return
-        self.inpaint_thread.inpaint(img, mask, img_key, inpaint_rect)
+        self.inpaint_thread.inpaint(img, mask, img_key, inpaint_rect, **kwargs)
 
     def terminateRunningThread(self):
         if self.textdetect_thread.isRunning():
@@ -1114,6 +1115,10 @@ class ModuleManager(QObject):
     
     def stopImgtransPipeline(self):
         """停止图像翻译流程"""
+        if self.run_canvas_inpaint and self.inpaint_thread.isRunning():
+            LOGGER.info('Stopping canvas inpainting operation...')
+            self.forceStopImgtransPipeline(emit_finished=False)
+            return
         LOGGER.info('Stopping image translation pipeline...')
         self.imgtrans_thread.requestStop()
 
@@ -1145,6 +1150,7 @@ class ModuleManager(QObject):
     def forceStopImgtransPipeline(self, emit_finished: bool = True):
         """Forcefully terminate all running pipeline and translation threads."""
         LOGGER.warning('Force stopping image translation pipeline and translation process.')
+        was_canvas_inpaint = self.run_canvas_inpaint
         for thread, name in [
             (self.translate_thread, 'translator'),
             (self.textdetect_thread, 'text detection'),
@@ -1160,9 +1166,12 @@ class ModuleManager(QObject):
         self.imgtrans_thread.decensor_only = False
         self.imgtrans_thread.pipeline_pagekey_queue.clear()
         self.translate_thread.pipeline_pagekey_queue.clear()
+        self.run_canvas_inpaint = False
         self.inpaint_thread.inpainting = False
         self.block_set_inpainter = False
         self.progress_msgbox.hide()
+        if was_canvas_inpaint:
+            self.inpaint_thread.inpaint_failed.emit()
         if emit_finished:
             self.imgtrans_pipeline_finished.emit()
 

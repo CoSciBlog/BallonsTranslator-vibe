@@ -1,6 +1,17 @@
 # Changelogs
 
 ### 2026-05-18
+[v1.4.0-vibe.40] re-inpaint completion and drawboard text overlay
+Added:
+1. Added a Drawboard checkbox for showing translated text boxes while editing or reviewing masks.
+
+Fixed:
+1. Preserved current-page Re-Inpaint metadata through the inpaint thread so the completion handler closes the progress dialog after the result is applied.
+
+Version:
+1. Bumped the fork runtime version string to `1.4.0-vibe.40`.
+
+### 2026-05-18
 [v1.4.0-vibe.39] translator performance tooltip details
 Changed:
 1. Expanded LLM_API_Translator hover descriptions for provider latency, API key rate limits, request delay, JSON mode, reasoning, reflection, context pages, glossary prompts, glossary extraction, and low VRAM mode.
