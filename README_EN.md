@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.36`
+Fork release: `1.4.0-vibe.37`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -42,8 +42,8 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Added saved Google/DeepL provider result fields to each text block so raw machine translations can be compared in the text editor sidebar and persisted in the project JSON.
 - Changed project working folders so `mask`, `inpainted`, `upscaled`, `decensor_mask`, and `decensored` are created only when an output is actually written. Upscaling output is no longer created while upscaling is disabled.
 - Exposed `mask_dilation_size`, `mask_dilation_kernel`, and `inpaint_enlarge_ratio` for `lama_large_512px` in the Inpainter settings, with hover tooltips and runtime handling in the LaMa inpaint path.
-- Expanded Settings labels and hover tooltips with performance notes for speed, memory, disk writes, API cost, cache behavior, and module-specific tradeoffs.
-- Reused the shared module-parameter performance tooltip text so Settings labels and controls stay consistent while avoiding repeated tooltip assembly.
+- Refined Settings hover tooltips so performance notes are shown only for options that affect runtime, memory, disk writes, network/API usage, or model behavior.
+- Removed the generic module-parameter performance note so Detector, OCR, Inpainter, and Translator settings use their own specific descriptions.
 
 ## Features
 
@@ -126,11 +126,11 @@ Auto Glossary now extracts names/characters more conservatively: `name` entries 
 
 The General settings page includes `Prevent mouse wheel changes on input fields`. When enabled, mouse wheel events over combo boxes and spin boxes are blocked or forwarded to the surrounding scroll area, so scrolling the settings page does not accidentally change values. Long text fields such as API keys, URLs, proxies, glossary prompts, and LLM prompt templates are wider or taller so more content remains visible while editing.
 
-## Settings performance hints
+## Settings hover hints
 
-Settings hover text now calls out how each option can affect runtime. Upscaling, larger masks, debug output, extra LLM context, retries, reflection, glossary extraction, and high-quality encoders can make processing slower or use more RAM, VRAM, disk, or API tokens. Cache, batching, GPU, simpler global text-style settings, lower output limits, and skipped upscaling can make compatible workloads faster, but may trade away quality, stability, or visual matching.
+Settings hover text now calls out runtime impact only when an option affects processing. Upscaling, larger masks, debug output, extra LLM context, retries, reflection, glossary extraction, high-quality encoders, cache behavior, batching, GPU selection, output limits, and skipped upscaling can affect speed, memory, disk use, API tokens, quality, stability, or visual matching.
 
-The module settings panel reuses a shared performance-note formatter for labels and controls, so Detector, OCR, Inpainter, and Translator parameter hints stay consistent without duplicating tooltip text in each widget.
+UI-only settings such as preset import/export, keyboard shortcuts, mouse-wheel protection, startup reopening, and display filters now use neutral descriptions without performance claims. Detector, OCR, Inpainter, and Translator parameter hints use only the descriptions provided by each module.
 
 ## Source language labels
 

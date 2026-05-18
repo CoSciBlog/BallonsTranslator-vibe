@@ -160,13 +160,6 @@ class ParamWidget(QWidget):
 
     paramwidget_edited = Signal(str, dict)
 
-    def _tooltip_with_performance_note(self, description: str = None) -> str:
-        if not description:
-            return self._performance_note
-        if 'Performance:' in description:
-            return description
-        return f'{description}\n\n{self._performance_note}'
-
     def __init__(self, params, scrollWidget: QWidget = None, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         layout = QHBoxLayout(self)
@@ -177,11 +170,8 @@ class ParamWidget(QWidget):
         layout.addLayout(param_layout)
         layout.addStretch(-1)
 
-        self._performance_note = self.tr(
-            'Performance: this setting can affect speed, memory use, API cost, or output stability depending on the selected module. Higher quality, larger batches, more context, extra retries, debug output, and network delays usually make processing slower; acceleration, GPU, cache, and batching options can make compatible workloads faster but may use more memory.'
-        )
         if 'description' in params:
-            self.setToolTip(self._tooltip_with_performance_note(params['description']))
+            self.setToolTip(params['description'])
 
         for ii, param_key in enumerate(params):
             if param_key == 'description' or param_key.startswith('__'):
@@ -262,7 +252,7 @@ class ParamWidget(QWidget):
                 if param_widget is not None:
                     param_widget.paramwidget_edited.connect(self.on_paramwidget_edited)
 
-            tooltip = self._tooltip_with_performance_note(description) if description else None
+            tooltip = description
             if tooltip and param_widget is not None:
                 param_widget.setToolTip(tooltip)
             widget_idx = 0

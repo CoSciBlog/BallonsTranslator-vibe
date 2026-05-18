@@ -1,6 +1,16 @@
 # Changelogs
 
 ### 2026-05-18
+[v1.4.0-vibe.37] settings tooltip cleanup
+Changed:
+1. Removed the generic module-parameter performance note from Detector, OCR, Inpainter, and Translator settings.
+2. Reworded Settings hover descriptions so UI-only controls no longer claim runtime or processing impact.
+3. Kept performance notes only on settings that can affect runtime, memory, disk writes, network/API usage, or model behavior.
+
+Version:
+1. Bumped the fork runtime version string to `1.4.0-vibe.37`.
+
+### 2026-05-18
 [v1.4.0-vibe.36] settings tooltip reuse and dependency review
 Changed:
 1. Reused the module-parameter performance tooltip text so labels and controls share one composed tooltip per setting.

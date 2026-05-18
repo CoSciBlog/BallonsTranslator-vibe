@@ -15,7 +15,7 @@
 - Added glossary-assisted name consistency checks during translation review.
 - Added pronoun and address-form checks to the translation review prompt.
 - Saved Google/DeepL provider outputs per text block and showed them in the text editor sidebar for comparison.
-- Expanded Settings labels, hover text, and tooltips with performance notes for speed, memory, disk writes, API cost, cache behavior, and module-specific tradeoffs.
+- Refined Settings labels, hover text, and tooltips so performance notes appear only where settings affect runtime, memory, disk writes, network/API usage, or model behavior.
 
 ### Changed
 
@@ -24,8 +24,8 @@
 - Manual glossary entries are preserved and preferred over automatic entries.
 - Project glossaries now save to `glossary.json` in the image project folder instead of the global translator config or embedded `imgtrans` project JSON.
 - Direct Google/DeepL translation and Two-Step first-step translation now persist raw provider results in each project's `imgtrans_*.json`.
-- Dynamic module parameter tooltips now include a general performance note so OCR, detector, translator, and inpaint settings explain likely speed and memory tradeoffs.
-- Module parameter tooltip generation now reuses one performance note per settings widget and one composed tooltip per parameter instead of rebuilding the same text for both labels and controls.
+- Dynamic module parameter tooltips now use their module-provided descriptions without appending a generic performance note.
+- UI-only settings such as preset import/export, mouse-wheel protection, startup reopening, keyboard shortcuts, and display filters now avoid performance claims.
 
 ### Fixed
 
@@ -41,3 +41,4 @@
 - Bumped the fork runtime version string to `1.4.0-vibe.34`.
 - Bumped the fork runtime version string to `1.4.0-vibe.35`.
 - Bumped the fork runtime version string to `1.4.0-vibe.36`.
+- Bumped the fork runtime version string to `1.4.0-vibe.37`.

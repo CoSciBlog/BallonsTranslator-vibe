@@ -509,7 +509,7 @@ class ConfigPanel(Widget):
                 self.tr('Horizontal then Vertical'),
             ],
             self.tr('Post-pipeline merge mode'),
-            discription=self.tr('Direction used when automatically merging translated text boxes after the pipeline finishes. Mode choice has little speed impact, but broader merge passes can slightly increase post-processing time.'))
+            discription=self.tr('Direction used when automatically merging translated text boxes after the pipeline finishes. Broader merge passes can slightly increase post-processing time.'))
         self.post_merge_mode_combobox.activated.connect(self.on_post_merge_mode_changed)
         post_merge_vgap_tip = self.tr('Maximum pixel distance between stacked boxes for automatic vertical merging. Larger values may merge more boxes and add a small amount of processing time.')
         post_merge_hgap_tip = self.tr('Maximum pixel distance between side-by-side boxes for automatic horizontal merging. Larger values may merge more boxes and add a small amount of processing time.')
@@ -568,7 +568,7 @@ class ConfigPanel(Widget):
         self.decensor_save_debug_checker.stateChanged.connect(self.on_decensor_debug_changed)
 
         generalConfigPanel.addTextLabel(label_settings_presets)
-        preset_tip = self.tr('Saved settings snapshots. Applying one replaces the current application settings; performance depends on the settings stored in the selected preset.')
+        preset_tip = self.tr('Saved settings snapshots. Applying one replaces the current application settings with the values stored in the preset.')
         preset_container = QWidget()
         preset_layout = QVBoxLayout(preset_container)
         preset_layout.setContentsMargins(0, 0, 0, 0)
@@ -589,17 +589,17 @@ class ConfigPanel(Widget):
         preset_layout.addLayout(preset_selector_layout)
 
         self.settings_apply_preset_btn = QPushButton(self.tr('Apply preset'), self)
-        self.settings_apply_preset_btn.setToolTip(self.tr('Load the selected settings preset into the current session. The app may become faster or slower depending on the preset values.'))
+        self.settings_apply_preset_btn.setToolTip(self.tr('Load the selected settings preset into the current session and update the visible controls.'))
         self.settings_save_preset_btn = QPushButton(self.tr('Save current as preset'), self)
-        self.settings_save_preset_btn.setToolTip(self.tr('Save the current settings as a named reusable preset. This has no runtime speed impact until the preset is applied.'))
+        self.settings_save_preset_btn.setToolTip(self.tr('Save the current settings as a named reusable preset.'))
         self.settings_import_preset_btn = QPushButton(self.tr('Import preset'), self)
-        self.settings_import_preset_btn.setToolTip(self.tr('Copy a settings preset JSON file into the local preset library. Importing is quick; performance changes only after applying the preset.'))
+        self.settings_import_preset_btn.setToolTip(self.tr('Copy a settings preset JSON file into the local preset library.'))
         self.settings_export_preset_btn = QPushButton(self.tr('Export selected preset'), self)
-        self.settings_export_preset_btn.setToolTip(self.tr('Export the selected preset to a JSON file. This only writes a file and does not affect processing speed.'))
+        self.settings_export_preset_btn.setToolTip(self.tr('Export the selected preset to a JSON file.'))
         self.settings_export_current_btn = QPushButton(self.tr('Export current settings'), self)
-        self.settings_export_current_btn.setToolTip(self.tr('Export the current settings directly to a JSON file. This only writes a file and does not affect processing speed.'))
+        self.settings_export_current_btn.setToolTip(self.tr('Export the current settings directly to a JSON file.'))
         self.settings_import_current_btn = QPushButton(self.tr('Import settings file'), self)
-        self.settings_import_current_btn.setToolTip(self.tr('Load a settings JSON file immediately without first saving it as a preset. The app may become faster or slower depending on the imported values.'))
+        self.settings_import_current_btn.setToolTip(self.tr('Load a settings JSON file immediately without first saving it as a preset.'))
 
         preset_buttons = QHBoxLayout()
         preset_buttons.setContentsMargins(0, 0, 0, 0)
@@ -627,11 +627,11 @@ class ConfigPanel(Widget):
 
         generalConfigPanel.addTextLabel(label_startup)
         self.open_on_startup_checker, _ = generalConfigPanel.addCheckBox(self.tr('Reopen last project on startup'))
-        self.open_on_startup_checker.setToolTip(self.tr('Open the most recently used project automatically when the application starts. Startup can be slower for large projects, but pipeline speed is unchanged.'))
+        self.open_on_startup_checker.setToolTip(self.tr('Open the most recently used project automatically when the application starts.'))
         self.open_on_startup_checker.stateChanged.connect(self.on_open_onstartup_changed)
         self.prevent_input_wheel_checker, _ = generalConfigPanel.addCheckBox(
             self.tr('Prevent mouse wheel changes on input fields'),
-            discription=self.tr('Ignore mouse wheel changes on combo boxes and spin boxes so scrolling settings does not accidentally change values. This only affects UI interaction and does not change processing speed.'))
+            discription=self.tr('Ignore mouse wheel changes on combo boxes and spin boxes so scrolling settings does not accidentally change values.'))
         self.prevent_input_wheel_checker.stateChanged.connect(self.on_prevent_input_wheel_changed)
 
         generalConfigPanel.addTextLabel(label_typesetting)
@@ -650,7 +650,7 @@ class ConfigPanel(Widget):
         self.let_fntsize_combox, sublock = combobox_with_label(
             [dec_program_str, use_global_str], self.tr('Font Size'),
             parent=self, insert_stretch=True)
-        tt_fntsize = self.tr('Choose whether translated text keeps the original detected size from the image or always uses the fixed global font size defined in the text style presets. Global values are slightly faster and more consistent; detected values may fit the source layout better.')
+        tt_fntsize = self.tr('Choose whether translated text keeps the original detected size from the image or always uses the fixed global font size defined in the text style presets.')
         sublock.name_label.setToolTip(tt_fntsize)
         self.let_fntsize_combox.setToolTip(tt_fntsize)
         sublock.setContentsMargins(0, 2, 12, 2)
@@ -661,7 +661,7 @@ class ConfigPanel(Widget):
         self.let_fntstroke_combox, sublock = combobox_with_label(
             [dec_program_str, use_global_str], self.tr('Stroke Size'),
             parent=self, insert_stretch=True)
-        tt_stroke = self.tr('Choose whether stroke width is detected dynamically per region based on the original text or taken from the fixed global text style preset. Global stroke values are slightly faster; dynamic detection can preserve the original look better.')
+        tt_stroke = self.tr('Choose whether stroke width is detected dynamically per region based on the original text or taken from the fixed global text style preset.')
         sublock.name_label.setToolTip(tt_stroke)
         self.let_fntstroke_combox.setToolTip(tt_stroke)
         sublock.setContentsMargins(0, 2, 12, 2)
@@ -671,7 +671,7 @@ class ConfigPanel(Widget):
         self.let_fntcolor_combox, sublock = combobox_with_label(
             [dec_program_str, use_global_str], self.tr('Font Color'),
             parent=self, insert_stretch=True)
-        tt_color = self.tr('Choose whether the main text color is detected from the original image or forced to use the global font color setting. Global color is slightly faster; detected color can better match mixed source pages.')
+        tt_color = self.tr('Choose whether the main text color is detected from the original image or forced to use the global font color setting.')
         sublock.name_label.setToolTip(tt_color)
         self.let_fntcolor_combox.setToolTip(tt_color)
         sublock.setContentsMargins(0, 2, 12, 2)
@@ -681,7 +681,7 @@ class ConfigPanel(Widget):
         self.let_fnt_scolor_combox, sublock = combobox_with_label(
             [dec_program_str, use_global_str], self.tr('Stroke Color'),
             parent=self, insert_stretch=True)
-        tt_scolor = self.tr('Choose whether the text outline (stroke) color is detected from the original image or forced to use the global stroke color setting. Global color is slightly faster; detected color can better match varied source lettering.')
+        tt_scolor = self.tr('Choose whether the text outline (stroke) color is detected from the original image or forced to use the global stroke color setting.')
         sublock.name_label.setToolTip(tt_scolor)
         self.let_fnt_scolor_combox.setToolTip(tt_scolor)
         sublock.setContentsMargins(0, 2, 12, 2)
@@ -691,7 +691,7 @@ class ConfigPanel(Widget):
         self.let_effect_combox, sublock = combobox_with_label(
             [dec_program_str, use_global_str], self.tr('Effect'),
             parent=self, insert_stretch=True)
-        tt_effect = self.tr('Choose whether special text effects such as outlines or drop shadows are detected per region or forced to match the global effect settings. Global effects are faster; detected effects can improve visual matching.')
+        tt_effect = self.tr('Choose whether special text effects such as outlines or drop shadows are detected per region or forced to match the global effect settings.')
         sublock.name_label.setToolTip(tt_effect)
         self.let_effect_combox.setToolTip(tt_effect)
         sublock.setContentsMargins(0, 2, 12, 2)
@@ -701,7 +701,7 @@ class ConfigPanel(Widget):
         self.let_alignment_combox, sublock = combobox_with_label(
             [dec_program_str, use_global_str], self.tr('Alignment'),
             parent=self, insert_stretch=True)
-        tt_align = self.tr('Choose whether paragraph text alignment is detected per region or forced to use the global alignment setting. Global alignment is slightly faster; detected alignment can reduce manual layout fixes.')
+        tt_align = self.tr('Choose whether paragraph text alignment is detected per region or forced to use the global alignment setting.')
         sublock.name_label.setToolTip(tt_align)
         self.let_alignment_combox.setToolTip(tt_align)
         sublock.setContentsMargins(0, 2, 12, 2)
@@ -711,7 +711,7 @@ class ConfigPanel(Widget):
         self.let_writing_mode_combox, sublock = combobox_with_label(
             [dec_program_str, use_global_str], self.tr('Writing-mode'),
             parent=self, insert_stretch=True)
-        tt_writing = self.tr('Choose whether the text direction is detected automatically per region or forced to follow the global writing direction setting. Global direction is slightly faster; automatic detection handles mixed horizontal and vertical text better.')
+        tt_writing = self.tr('Choose whether the text direction is detected automatically per region or forced to follow the global writing direction setting.')
         sublock.name_label.setToolTip(tt_writing)
         self.let_writing_mode_combox.setToolTip(tt_writing)
         sublock.setContentsMargins(0, 2, 12, 2)
@@ -721,7 +721,7 @@ class ConfigPanel(Widget):
         self.let_family_combox, sublock = combobox_with_label(
             [self.tr('Keep existing'), self.tr('Always use global setting')], self.tr('Font Family'),
             parent=self, insert_stretch=True)
-        tt_family = self.tr('Choose whether existing region fonts are preserved or entirely replaced by the global font family setting. Global fonts simplify rendering and can be slightly faster; preserving fonts may better match the source.')
+        tt_family = self.tr('Choose whether existing region fonts are preserved or entirely replaced by the global font family setting.')
         sublock.name_label.setToolTip(tt_family)
         self.let_family_combox.setToolTip(tt_family)
         sublock.setContentsMargins(0, 2, 12, 2)
@@ -736,12 +736,12 @@ class ConfigPanel(Widget):
         self.let_autolayout_checker.stateChanged.connect(self.on_autolayout_changed)
         self.let_uppercase_checker, _ = generalConfigPanel.addCheckBox(
             self.tr('To uppercase'),
-            discription=self.tr('Convert rendered translation text to uppercase. This has negligible performance impact.'))
+            discription=self.tr('Convert rendered translation text to uppercase.'))
         self.let_uppercase_checker.stateChanged.connect(self.on_uppercase_changed)
 
         self.let_textstyle_indep_checker, _ = generalConfigPanel.addCheckBox(
             self.tr('Independent text styles for each project'),
-            discription=self.tr('Store text style presets separately per project. This has little processing impact, but can slightly increase project save/load work.'))
+            discription=self.tr('Store text style presets separately per project.'))
         self.let_textstyle_indep_checker.stateChanged.connect(self.on_textstyle_indep_changed)
 
         self.let_show_only_custom_fonts, sublock = generalConfigPanel.addCheckBox(
@@ -786,18 +786,18 @@ class ConfigPanel(Widget):
 
         self.selectext_minimenu_checker, _ = generalConfigPanel.addCheckBox(
             self.tr('Show mini menu when selecting text'),
-            discription=self.tr('Show the SalaDict mini menu when text is selected. This affects UI responsiveness only and does not change pipeline speed.'))
+            discription=self.tr('Show the SalaDict mini menu when text is selected.'))
         self.selectext_minimenu_checker.stateChanged.connect(self.on_selectext_minimenu_changed)
         self.saladict_shortcut = QKeySequenceEdit("ALT+W", self)
         self.saladict_shortcut.keySequenceChanged.connect(self.on_saladict_shortcut_changed)
         self.saladict_shortcut.setFixedWidth(CONFIG_COMBOBOX_MIDEAN)
 
-        saladict_shortcut_tip = self.tr('Keyboard shortcut for SalaDict lookup. This has no processing performance impact.')
+        saladict_shortcut_tip = self.tr('Keyboard shortcut for SalaDict lookup.')
         self.saladict_shortcut.setToolTip(saladict_shortcut_tip)
         sublock = ConfigSubBlock(self.saladict_shortcut, self.tr("Shortcut"), saladict_shortcut_tip, vertical_layout=False)
         sublock.layout().insertStretch(-1)
         generalConfigPanel.addSublock(sublock)
-        self.searchurl_combobox, _ = generalConfigPanel.addCombobox(["https://www.google.com/search?q=", "https://www.bing.com/search?q=", "https://duckduckgo.com/?q=", "https://yandex.com/search/?text=", "http://www.baidu.com/s?wd=", "https://search.yahoo.com/search;?p=", "https://www.urbandictionary.com/define.php?term="], self.tr("Search Engines"), discription=self.tr('Search URL used by SalaDict lookups. Network speed depends on the selected search engine, but the translation pipeline is unchanged.'), fix_size=False)
+        self.searchurl_combobox, _ = generalConfigPanel.addCombobox(["https://www.google.com/search?q=", "https://www.bing.com/search?q=", "https://duckduckgo.com/?q=", "https://yandex.com/search/?text=", "http://www.baidu.com/s?wd=", "https://search.yahoo.com/search;?p=", "https://www.urbandictionary.com/define.php?term="], self.tr("Search Engines"), discription=self.tr('Search URL used by SalaDict lookups.'), fix_size=False)
         self.searchurl_combobox.setEditable(True)
         self.searchurl_combobox.setFixedWidth(CONFIG_COMBOBOX_LONG)
         self.searchurl_combobox.currentTextChanged.connect(self.on_searchurl_changed)
