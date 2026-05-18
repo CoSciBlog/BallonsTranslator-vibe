@@ -4,42 +4,42 @@
 <context>
     <name>BottomBar</name>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="756" />
+        <location filename="..\ui\mainwindowbars.py" line="792" />
         <source>Text Detector</source>
         <translation>텍스트 감지기</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="757" />
+        <location filename="..\ui\mainwindowbars.py" line="793" />
         <source>OCR</source>
         <translation>OCR</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="758" />
+        <location filename="..\ui\mainwindowbars.py" line="794" />
         <source>Inpaint</source>
         <translation>인페인트</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="764" />
+        <location filename="..\ui\mainwindowbars.py" line="800" />
         <source>Enable/disable paint mode</source>
         <translation>페인트 모드를 활성화/비활성화</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="768" />
+        <location filename="..\ui\mainwindowbars.py" line="804" />
         <source>Enable/disable text edit mode</source>
         <translation>텍스트 편집 모드를 활성화/비활성화</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="772" />
+        <location filename="..\ui\mainwindowbars.py" line="808" />
         <source>Show and edit text block bounding boxes.</source>
         <translation>텍스트 블록 경계 상자를 표시하고 편집합니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="775" />
+        <location filename="..\ui\mainwindowbars.py" line="811" />
         <source>Original image opacity</source>
         <translation>원본 이미지 불투명도</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="779" />
+        <location filename="..\ui\mainwindowbars.py" line="815" />
         <source>Text layer opacity</source>
         <translation>텍스트 레이어 불투명도</translation>
     </message>
@@ -62,77 +62,77 @@
 </context><context>
     <name>Canvas</name>
     <message>
-        <location filename="..\ui\canvas.py" line="761" />
+        <location filename="..\ui\canvas.py" line="807" />
         <source>Copy</source>
         <translation>복사</translation>
     </message>
     <message>
-        <location filename="..\ui\canvas.py" line="763" />
+        <location filename="..\ui\canvas.py" line="809" />
         <source>Paste</source>
         <translation>붙여넣기</translation>
     </message>
     <message>
-        <location filename="..\ui\canvas.py" line="765" />
+        <location filename="..\ui\canvas.py" line="811" />
         <source>Delete</source>
         <translation>삭제</translation>
     </message>
     <message>
-        <location filename="..\ui\canvas.py" line="767" />
+        <location filename="..\ui\canvas.py" line="813" />
         <source>Copy source text</source>
         <translation>소스 텍스트를 복사합니다</translation>
     </message>
     <message>
-        <location filename="..\ui\canvas.py" line="769" />
+        <location filename="..\ui\canvas.py" line="815" />
         <source>Paste source text</source>
         <translation>소스 텍스트를 붙여 넣습니다</translation>
     </message>
     <message>
-        <location filename="..\ui\canvas.py" line="771" />
+        <location filename="..\ui\canvas.py" line="817" />
         <source>Delete and Recover removed text</source>
         <translation>삭제하고 원본 텍스트를 복원</translation>
     </message>
     <message>
-        <location filename="..\ui\canvas.py" line="776" />
+        <location filename="..\ui\canvas.py" line="822" />
         <source>Apply font formatting</source>
         <translation>글꼴 형식 적용</translation>
     </message>
     <message>
-        <location filename="..\ui\canvas.py" line="777" />
+        <location filename="..\ui\canvas.py" line="823" />
         <source>Auto layout</source>
         <translation>자동 레이아웃</translation>
     </message>
     <message>
-        <location filename="..\ui\canvas.py" line="778" />
+        <location filename="..\ui\canvas.py" line="824" />
         <source>Reset Angle</source>
         <translation>각도 초기화</translation>
     </message>
     <message>
-        <location filename="..\ui\canvas.py" line="779" />
+        <location filename="..\ui\canvas.py" line="825" />
         <source>Squeeze</source>
         <translation>텍스트 맞춤 크기 조절</translation>
     </message>
     <message>
-        <location filename="..\ui\canvas.py" line="781" />
+        <location filename="..\ui\canvas.py" line="827" />
         <source>translate</source>
         <translation>번역</translation>
     </message>
     <message>
-        <location filename="..\ui\canvas.py" line="782" />
+        <location filename="..\ui\canvas.py" line="828" />
         <source>OCR</source>
         <translation>OCR</translation>
     </message>
     <message>
-        <location filename="..\ui\canvas.py" line="783" />
+        <location filename="..\ui\canvas.py" line="829" />
         <source>OCR and translate</source>
         <translation>OCR과 번역</translation>
     </message>
     <message>
-        <location filename="..\ui\canvas.py" line="784" />
+        <location filename="..\ui\canvas.py" line="830" />
         <source>OCR, translate and inpaint</source>
         <translation>OCR, 번역 및 인페인트</translation>
     </message>
     <message>
-        <location filename="..\ui\canvas.py" line="785" />
+        <location filename="..\ui\canvas.py" line="831" />
         <source>inpaint</source>
         <translation>인페인트</translation>
     </message>
@@ -154,7 +154,7 @@
         <translation>텍스트 검출</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="452" />
+        <location filename="..\ui\configpanel.py" line="454" />
         <location filename="..\ui\configpanel.py" line="406" />
         <source>OCR</source>
         <translation>OCR</translation>
@@ -186,566 +186,817 @@
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="412" />
+        <source>Censor Restoration</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\configpanel.py" line="413" />
         <source>Typesetting</source>
         <translation>글꼴</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="413" />
+        <location filename="..\ui\configpanel.py" line="414" />
         <source>Save</source>
         <translation>저장</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="414" />
+        <location filename="..\ui\configpanel.py" line="415" />
         <source>SalaDict</source>
         <translation>SalaDict(확장)</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="415" />
+        <location filename="..\ui\configpanel.py" line="416" />
         <source>Settings presets</source>
         <translation>설정 사전 설정</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="433" />
+        <location filename="..\ui\configpanel.py" line="435" />
         <source>Load models on demand</source>
         <translation>필요할 때만 모델로드</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="433" />
-        <source>Load models on demand to save memory.</source>
-        <translation>메모리를 절약하기 위해 필요할 때만 모델을 로드</translation>
+        <location filename="..\ui\configpanel.py" line="435" />
+        <source>Load models only when a step needs them. This lowers idle RAM/VRAM use, but the first run or first module switch is slower because models must be loaded on demand.</source>
+        <translation type="unfinished" />
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="436" />
+        <location filename="..\ui\configpanel.py" line="438" />
         <source>Empty cache after RUN</source>
         <translation>실행 후 캐시 삭제</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="436" />
-        <source>Empty cache after RUN to save memory.</source>
-        <translation>메모리를 절약하기 위해 실행 후 캐시 삭제</translation>
+        <location filename="..\ui\configpanel.py" line="438" />
+        <source>Release framework caches after each RUN. This can prevent memory pressure on long sessions, but repeated runs may become slower because GPU/CPU caches must warm up again.</source>
+        <translation type="unfinished" />
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="441" />
+        <location filename="..\ui\configpanel.py" line="443" />
         <source>Unload All Models</source>
         <translation>모든 모델 언로드</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="442" />
-        <source>Immediately unload loaded detection, OCR, inpaint, and translation models from memory.</source>
-        <translation>로드된 감지, OCR, 인페인트 및 번역 모델을 메모리에서 즉시 언로드합니다.</translation>
+        <location filename="..\ui\configpanel.py" line="444" />
+        <source>Immediately unload loaded detection, OCR, inpaint, and translation models from memory. This frees RAM/VRAM now, but the next run is slower while models are loaded again.</source>
+        <translation type="unfinished" />
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="447" />
+        <location filename="..\ui\configpanel.py" line="449" />
         <source>Detector</source>
         <translation>검출기</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="456" />
+        <location filename="..\ui\configpanel.py" line="458" />
         <source>Inpainter</source>
         <translation>인페인터</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="465" />
+        <location filename="..\ui\configpanel.py" line="467" />
         <source>Upscale pages before detection</source>
         <translation>감지 전 페이지 확장</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="466" />
-        <source>Create a high-resolution working copy before text detection. Detection, OCR, masks, inpainting, and export then use that upscaled image.</source>
-        <translation>텍스트 감지 전에 고해상도 작업 복사본을 만듭니다. 그런 다음 감지, OCR, 마스크, 인페인팅 및 내보내기를 통해 확대된 이미지를 사용합니다.</translation>
-    </message>
-    <message>
         <location filename="..\ui\configpanel.py" line="468" />
-        <source>Resolution multiplier for pages that pass the size limits. Example: 2.0 for 2x.</source>
-        <translation>크기 제한을 통과한 페이지의 해상도 승수입니다. 예: 2x의 경우 2.0.</translation>
-    </message>
-    <message>
-        <location filename="..\ui\configpanel.py" line="469" />
-        <source>Maximum long-edge resolution after upscaling. The factor is capped so the result does not exceed this value.</source>
-        <translation>업스케일링 후 최대 긴 가장자리 해상도. 결과가 이 값을 초과하지 않도록 계수에 제한이 있습니다.</translation>
+        <source>Create a high-resolution working copy before text detection. This can improve OCR and mask quality, but it makes detection, OCR, inpainting, export, and disk writes slower and uses more RAM/VRAM.</source>
+        <translation type="unfinished" />
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="470" />
-        <source>Pages whose original long edge is already above this value are not upscaled. Use 0 to always allow upscaling.</source>
-        <translation>원래 긴 가장자리가 이미 이 값보다 큰 페이지는 확대되지 않습니다. 항상 업스케일링을 허용하려면 0을 사용합니다.</translation>
+        <source>Resolution multiplier for pages that pass the size limits. Higher values can improve small text recognition, but each step runs slower and uses more memory. Example: 2.0 for 2x.</source>
+        <translation type="unfinished" />
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="471" />
-        <source>Quality/speed preset for OpenCV upscaling. AnimeSharp adds stronger manga-style sharpening inspired by 2x-AnimeSharpV4.</source>
-        <translation>OpenCV 업스케일링을 위한 품질/속도 사전 설정. AnimeSharp는 2x-AnimeSharpV4에서 영감을 받아 더욱 강력한 만화 스타일의 선명 효과를 추가합니다.</translation>
+        <source>Maximum long-edge resolution after upscaling. Lower limits keep runs faster and lighter; higher limits preserve more detail but slow down later processing.</source>
+        <translation type="unfinished" />
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="482" />
+        <location filename="..\ui\configpanel.py" line="472" />
+        <source>Pages whose original long edge is already above this value are not upscaled. Lower values skip more large pages and speed up runs; use 0 to always allow upscaling.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\configpanel.py" line="473" />
+        <source>Quality/speed preset for OpenCV upscaling. Fast is quickest, Quality and AnimeSharp are slower, and AnimeSharp adds stronger manga-style sharpening inspired by 2x-AnimeSharpV4.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\configpanel.py" line="484" />
         <source>Fast</source>
         <translation>빠른</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="483" />
+        <location filename="..\ui\configpanel.py" line="485" />
         <source>Balanced</source>
         <translation>균형 잡힌</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="703" />
-        <location filename="..\ui\configpanel.py" line="493" />
-        <location filename="..\ui\configpanel.py" line="484" />
+        <location filename="..\ui\configpanel.py" line="762" />
+        <location filename="..\ui\configpanel.py" line="495" />
+        <location filename="..\ui\configpanel.py" line="486" />
         <source>Quality</source>
         <translation>품질</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="485" />
+        <location filename="..\ui\configpanel.py" line="487" />
         <source>AnimeSharp</source>
         <translation>애니메샤프</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="490" />
+        <location filename="..\ui\configpanel.py" line="492" />
         <source>Factor</source>
         <translation>요인</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="491" />
+        <location filename="..\ui\configpanel.py" line="493" />
         <source>Max long edge</source>
         <translation>최대 긴 가장자리</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="492" />
+        <location filename="..\ui\configpanel.py" line="494" />
         <source>Skip above</source>
         <translation>위에서 건너뛰기</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="499" />
+        <location filename="..\ui\configpanel.py" line="501" />
         <source>Merge nearby text boxes after pipeline</source>
         <translation>파이프라인 이후 근처 텍스트 상자 병합</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="500" />
-        <source>After translation, merge nearby text boxes using the Region Merge Tool rules to reduce overlapping rendered text.</source>
-        <translation>번역 후 영역 병합 도구 규칙을 사용하여 근처의 텍스트 상자를 병합하여 렌더링된 텍스트가 겹치는 것을 줄입니다.</translation>
+        <location filename="..\ui\configpanel.py" line="502" />
+        <source>After translation, merge nearby text boxes using the Region Merge Tool rules. This adds a small post-processing step, usually slower by a little, but can reduce manual cleanup and overlapping rendered text.</source>
+        <translation type="unfinished" />
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="504" />
+        <location filename="..\ui\configpanel.py" line="506" />
         <source>Vertical Merge</source>
         <translation>수직 병합</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="505" />
+        <location filename="..\ui\configpanel.py" line="507" />
         <source>Horizontal Merge</source>
         <translation>수평 병합</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="506" />
+        <location filename="..\ui\configpanel.py" line="508" />
         <source>Vertical then Horizontal</source>
         <translation>수직 다음 수평</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="507" />
+        <location filename="..\ui\configpanel.py" line="509" />
         <source>Horizontal then Vertical</source>
         <translation>수평 다음 수직</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="509" />
+        <location filename="..\ui\configpanel.py" line="511" />
         <source>Post-pipeline merge mode</source>
         <translation>파이프라인 이후 병합 모드</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="510" />
-        <source>Direction used when automatically merging translated text boxes after the pipeline finishes.</source>
-        <translation>파이프라인이 완료된 후 번역된 텍스트 상자를 자동으로 병합할 때 사용되는 방향입니다.</translation>
-    </message>
-    <message>
         <location filename="..\ui\configpanel.py" line="512" />
-        <source>Maximum pixel distance between stacked boxes for automatic vertical merging.</source>
-        <translation>자동 수직 병합을 위한 쌓인 상자 사이의 최대 픽셀 거리입니다.</translation>
-    </message>
-    <message>
-        <location filename="..\ui\configpanel.py" line="513" />
-        <source>Maximum pixel distance between side-by-side boxes for automatic horizontal merging.</source>
-        <translation>자동 수평 병합을 위한 병렬 상자 간의 최대 픽셀 거리입니다.</translation>
+        <source>Direction used when automatically merging translated text boxes after the pipeline finishes. Mode choice has little speed impact, but broader merge passes can slightly increase post-processing time.</source>
+        <translation type="unfinished" />
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="514" />
-        <source>Minimum horizontal overlap required when merging boxes above or below each other.</source>
-        <translation>상자를 서로 위나 아래에 병합할 때 최소 수평 겹침이 필요합니다.</translation>
+        <source>Maximum pixel distance between stacked boxes for automatic vertical merging. Larger values may merge more boxes and add a small amount of processing time.</source>
+        <translation type="unfinished" />
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="515" />
-        <source>Minimum vertical overlap required when merging boxes next to each other.</source>
-        <translation>서로 옆에 있는 상자를 병합할 때 최소 수직 겹침이 필요합니다.</translation>
+        <source>Maximum pixel distance between side-by-side boxes for automatic horizontal merging. Larger values may merge more boxes and add a small amount of processing time.</source>
+        <translation type="unfinished" />
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="529" />
+        <location filename="..\ui\configpanel.py" line="516" />
+        <source>Minimum horizontal overlap required when merging boxes above or below each other. Higher values are stricter and can avoid extra merge work.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\configpanel.py" line="517" />
+        <source>Minimum vertical overlap required when merging boxes next to each other. Higher values are stricter and can avoid extra merge work.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\configpanel.py" line="531" />
         <source>Vertical gap</source>
         <translation>수직 간격</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="530" />
+        <location filename="..\ui\configpanel.py" line="532" />
         <source>Horizontal gap</source>
         <translation>수평 간격</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="531" />
+        <location filename="..\ui\configpanel.py" line="533" />
         <source>Horizontal overlap %</source>
         <translation>수평 겹침 %</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="532" />
+        <location filename="..\ui\configpanel.py" line="534" />
         <source>Vertical overlap %</source>
         <translation>수직 겹침 %</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="539" />
+        <source>Mask detector used by Censor Restoration / Decensor Inpaint. Auto combines supported detectors and is slower than a single mode, but usually needs less manual retrying.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\configpanel.py" line="540" />
+        <source>Pixels added around detected censor regions before inpainting. Higher values repair more surrounding edge artifacts, but larger masks make inpainting slower.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\configpanel.py" line="541" />
+        <source>Minimum detected region size relative to the page area. Increasing it ignores small false positives and can speed up restoration by reducing unnecessary masks.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\configpanel.py" line="542" />
+        <source>Save Censor Restoration input, candidate masks, overlays, and a detection report under debug/censor_restoration. This helps troubleshooting but slows runs slightly due to extra disk writes.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\configpanel.py" line="545" />
+        <source>Auto</source>
+        <translation type="unfinished">자동</translation>
+    </message>
+    <message>
+        <location filename="..\ui\configpanel.py" line="546" />
+        <source>Bars</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\configpanel.py" line="547" />
+        <source>Green</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\configpanel.py" line="548" />
+        <source>Mosaic</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\configpanel.py" line="559" />
+        <source>Mask mode</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\configpanel.py" line="560" />
+        <source>Mask padding</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\configpanel.py" line="561" />
+        <source>Min area ratio</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\configpanel.py" line="565" />
+        <source>Save Censor Restoration debug masks</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\configpanel.py" line="571" />
+        <source>Saved settings snapshots. Applying one replaces the current application settings; performance depends on the settings stored in the selected preset.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\configpanel.py" line="581" />
         <source>Preset</source>
         <translation>프리셋</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="540" />
-        <source>Saved settings snapshots. Applying one replaces the current application settings.</source>
-        <translation>저장된 설정 스냅샷. 하나를 적용하면 현재 애플리케이션 설정이 대체됩니다.</translation>
-    </message>
-    <message>
-        <location filename="..\ui\configpanel.py" line="544" />
+        <location filename="..\ui\configpanel.py" line="591" />
         <source>Apply preset</source>
         <translation>사전 설정 적용</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="545" />
-        <source>Load the selected settings preset into the current session.</source>
-        <translation>선택한 설정 사전 설정을 현재 세션에 로드합니다.</translation>
+        <location filename="..\ui\configpanel.py" line="592" />
+        <source>Load the selected settings preset into the current session. The app may become faster or slower depending on the preset values.</source>
+        <translation type="unfinished" />
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="546" />
+        <location filename="..\ui\configpanel.py" line="593" />
         <source>Save current as preset</source>
         <translation>현재를 사전 설정으로 저장</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="547" />
-        <source>Save the current settings as a named reusable preset.</source>
-        <translation>현재 설정을 이름이 지정된 재사용 가능한 사전 설정으로 저장합니다.</translation>
+        <location filename="..\ui\configpanel.py" line="594" />
+        <source>Save the current settings as a named reusable preset. This has no runtime speed impact until the preset is applied.</source>
+        <translation type="unfinished" />
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="548" />
+        <location filename="..\ui\configpanel.py" line="595" />
         <source>Import preset</source>
         <translation>사전 설정 가져오기</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="549" />
-        <source>Copy a settings preset JSON file into the local preset library.</source>
-        <translation>설정 사전 설정 JSON 파일을 로컬 사전 설정 라이브러리에 복사합니다.</translation>
+        <location filename="..\ui\configpanel.py" line="596" />
+        <source>Copy a settings preset JSON file into the local preset library. Importing is quick; performance changes only after applying the preset.</source>
+        <translation type="unfinished" />
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="550" />
+        <location filename="..\ui\configpanel.py" line="597" />
         <source>Export selected preset</source>
         <translation>선택한 사전 설정 내보내기</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="551" />
-        <source>Export the selected preset to a JSON file.</source>
-        <translation>선택한 사전 설정을 JSON 파일로 내보냅니다.</translation>
+        <location filename="..\ui\configpanel.py" line="598" />
+        <source>Export the selected preset to a JSON file. This only writes a file and does not affect processing speed.</source>
+        <translation type="unfinished" />
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="821" />
-        <location filename="..\ui\configpanel.py" line="552" />
+        <location filename="..\ui\configpanel.py" line="887" />
+        <location filename="..\ui\configpanel.py" line="599" />
         <source>Export current settings</source>
         <translation>현재 설정 내보내기</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="553" />
-        <source>Export the current settings directly to a JSON file.</source>
-        <translation>현재 설정을 JSON 파일로 직접 내보냅니다.</translation>
+        <location filename="..\ui\configpanel.py" line="600" />
+        <source>Export the current settings directly to a JSON file. This only writes a file and does not affect processing speed.</source>
+        <translation type="unfinished" />
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="832" />
-        <location filename="..\ui\configpanel.py" line="554" />
+        <location filename="..\ui\configpanel.py" line="898" />
+        <location filename="..\ui\configpanel.py" line="601" />
         <source>Import settings file</source>
         <translation>설정 파일 가져오기</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="555" />
-        <source>Load a settings JSON file immediately without first saving it as a preset.</source>
-        <translation>먼저 사전 설정으로 저장하지 않고 설정 JSON 파일을 즉시 로드합니다.</translation>
+        <location filename="..\ui\configpanel.py" line="602" />
+        <source>Load a settings JSON file immediately without first saving it as a preset. The app may become faster or slower depending on the imported values.</source>
+        <translation type="unfinished" />
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="579" />
+        <location filename="..\ui\configpanel.py" line="629" />
         <source>Reopen last project on startup</source>
         <translation>시작시 마지막 프로젝트 다시 열기</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="580" />
-        <source>Open the most recently used project automatically when the application starts.</source>
-        <translation>애플리케이션이 시작되면 가장 최근에 사용한 프로젝트를 자동으로 엽니다.</translation>
+        <location filename="..\ui\configpanel.py" line="630" />
+        <source>Open the most recently used project automatically when the application starts. Startup can be slower for large projects, but pipeline speed is unchanged.</source>
+        <translation type="unfinished" />
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="583" />
+        <location filename="..\ui\configpanel.py" line="633" />
         <source>Prevent mouse wheel changes on input fields</source>
         <translation>입력 필드에서 마우스 휠 변경 방지</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="584" />
-        <source>Ignore mouse wheel changes on combo boxes and spin boxes so scrolling settings does not accidentally change values.</source>
-        <translation>스크롤 설정으로 인해 값이 실수로 변경되지 않도록 콤보 상자 및 스핀 상자에서 마우스 휠 변경을 무시합니다.</translation>
+        <location filename="..\ui\configpanel.py" line="634" />
+        <source>Ignore mouse wheel changes on combo boxes and spin boxes so scrolling settings does not accidentally change values. This only affects UI interaction and does not change processing speed.</source>
+        <translation type="unfinished" />
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="588" />
+        <location filename="..\ui\configpanel.py" line="638" />
         <source>decide by program</source>
         <translation>프로그램이 결정</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="589" />
+        <location filename="..\ui\configpanel.py" line="639" />
         <source>use global setting</source>
         <translation>글로벌 설정 사용</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="601" />
+        <location filename="..\ui\configpanel.py" line="651" />
         <source>Font Size</source>
         <translation>글꼴 크기</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="603" />
-        <source>Choose whether translated text keeps the original detected size from the image or always uses the fixed global font size defined in the text style presets.</source>
-        <translation>번역된 텍스트가 이미지에서 감지된 원본 크기를 유지할지 아니면 항상 텍스트 스타일 사전 설정에 정의된 고정된 전역 글꼴 크기를 사용할지 선택합니다.</translation>
+        <location filename="..\ui\configpanel.py" line="653" />
+        <source>Choose whether translated text keeps the original detected size from the image or always uses the fixed global font size defined in the text style presets. Global values are slightly faster and more consistent; detected values may fit the source layout better.</source>
+        <translation type="unfinished" />
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="612" />
+        <location filename="..\ui\configpanel.py" line="662" />
         <source>Stroke Size</source>
         <translation>획 크기</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="614" />
-        <source>Choose whether stroke width is detected dynamically per region based on the original text or taken from the fixed global text style preset.</source>
-        <translation>원본 텍스트를 기반으로 영역별로 획 너비를 동적으로 감지할지 아니면 고정된 전역 텍스트 스타일 사전 설정에서 가져올지 선택합니다.</translation>
+        <location filename="..\ui\configpanel.py" line="664" />
+        <source>Choose whether stroke width is detected dynamically per region based on the original text or taken from the fixed global text style preset. Global stroke values are slightly faster; dynamic detection can preserve the original look better.</source>
+        <translation type="unfinished" />
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="622" />
+        <location filename="..\ui\configpanel.py" line="672" />
         <source>Font Color</source>
         <translation>글꼴 색상</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="624" />
-        <source>Choose whether the main text color is detected from the original image or if it is forced to use the global font color setting.</source>
-        <translation>기본 텍스트 색상을 원본 이미지에서 감지할지 아니면 강제로 전체 글꼴 색상 설정을 사용해야 할지 선택합니다.</translation>
+        <location filename="..\ui\configpanel.py" line="674" />
+        <source>Choose whether the main text color is detected from the original image or forced to use the global font color setting. Global color is slightly faster; detected color can better match mixed source pages.</source>
+        <translation type="unfinished" />
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="632" />
+        <location filename="..\ui\configpanel.py" line="682" />
         <source>Stroke Color</source>
         <translation>획 색상</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="634" />
-        <source>Choose whether the text outline (stroke) color is detected from the original image or if it is forced to use the global stroke color setting.</source>
-        <translation>원본 이미지에서 텍스트 윤곽선(획) 색상을 감지할지 아니면 강제로 전체 획 색상 설정을 사용해야 하는지 선택합니다.</translation>
+        <location filename="..\ui\configpanel.py" line="684" />
+        <source>Choose whether the text outline (stroke) color is detected from the original image or forced to use the global stroke color setting. Global color is slightly faster; detected color can better match varied source lettering.</source>
+        <translation type="unfinished" />
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="642" />
+        <location filename="..\ui\configpanel.py" line="692" />
         <source>Effect</source>
         <translation>효과</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="644" />
-        <source>Choose whether special text effects (like outlines or drop shadows) are detected per region or forced to match the global effect settings.</source>
-        <translation>특수 텍스트 효과(예: 윤곽선 또는 그림자)를 영역별로 감지할지 아니면 전역 효과 설정과 일치하도록 강제할지 선택합니다.</translation>
+        <location filename="..\ui\configpanel.py" line="694" />
+        <source>Choose whether special text effects such as outlines or drop shadows are detected per region or forced to match the global effect settings. Global effects are faster; detected effects can improve visual matching.</source>
+        <translation type="unfinished" />
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="652" />
+        <location filename="..\ui\configpanel.py" line="702" />
         <source>Alignment</source>
         <translation>정렬</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="654" />
-        <source>Choose whether paragraph text alignment (left, center, right) is detected per region or if it is forced to use the global alignment setting.</source>
-        <translation>단락 텍스트 정렬(왼쪽, 가운데, 오른쪽)을 영역별로 감지할지, 아니면 전체 정렬 설정을 사용하도록 강제할지 선택합니다.</translation>
+        <location filename="..\ui\configpanel.py" line="704" />
+        <source>Choose whether paragraph text alignment is detected per region or forced to use the global alignment setting. Global alignment is slightly faster; detected alignment can reduce manual layout fixes.</source>
+        <translation type="unfinished" />
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="662" />
+        <location filename="..\ui\configpanel.py" line="712" />
         <source>Writing-mode</source>
         <translation>텍스트 방향(세로식질)</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="664" />
-        <source>Choose whether the text direction (horizontal or vertical) is detected automatically per region or forced to follow the global writing direction setting.</source>
-        <translation>텍스트 방향(가로 또는 세로)을 지역별로 자동으로 감지할지 아니면 전역 쓰기 방향 설정을 따르도록 강제할지 선택합니다.</translation>
+        <location filename="..\ui\configpanel.py" line="714" />
+        <source>Choose whether the text direction is detected automatically per region or forced to follow the global writing direction setting. Global direction is slightly faster; automatic detection handles mixed horizontal and vertical text better.</source>
+        <translation type="unfinished" />
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="672" />
+        <location filename="..\ui\configpanel.py" line="722" />
         <source>Keep existing</source>
         <translation>기존 설정 유지</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="672" />
+        <location filename="..\ui\configpanel.py" line="722" />
         <source>Always use global setting</source>
         <translation>항상 글로벌 설정 사용</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="672" />
+        <location filename="..\ui\configpanel.py" line="722" />
         <source>Font Family</source>
         <translation>글꼴 스타일</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="674" />
-        <source>Choose whether the existing region fonts from the original text are preserved or if they are entirely replaced by the global font family setting.</source>
-        <translation>원본 텍스트의 기존 지역 글꼴을 유지할지 아니면 전역 글꼴 모음 설정으로 완전히 바꿀지 선택합니다.</translation>
+        <location filename="..\ui\configpanel.py" line="724" />
+        <source>Choose whether existing region fonts are preserved or entirely replaced by the global font family setting. Global fonts simplify rendering and can be slightly faster; preserving fonts may better match the source.</source>
+        <translation type="unfinished" />
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="683" />
+        <location filename="..\ui\configpanel.py" line="733" />
         <source>Auto layout</source>
         <translation>자동 레이아웃</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="684" />
-        <source>Split translation into multi-lines according to the extracted balloon region.</source>
-        <translation>말풍선 모양에 맞게 번역본을 여러줄로 분할</translation>
+        <location filename="..\ui\configpanel.py" line="734" />
+        <source>Split translation into multiple lines according to the extracted balloon region. This adds layout work and can be slightly slower, but usually reduces manual line-break edits.</source>
+        <translation type="unfinished" />
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="687" />
+        <location filename="..\ui\configpanel.py" line="738" />
         <source>To uppercase</source>
         <translation>대문자로</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="690" />
-        <source>Independent text styles for each projects</source>
-        <translation>프로젝트마다 독립적인 텍스트 스타일 사용</translation>
+        <location filename="..\ui\configpanel.py" line="739" />
+        <source>Convert rendered translation text to uppercase. This has negligible performance impact.</source>
+        <translation type="unfinished" />
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="693" />
+        <location filename="..\ui\configpanel.py" line="743" />
+        <source>Independent text styles for each project</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\configpanel.py" line="744" />
+        <source>Store text style presets separately per project. This has little processing impact, but can slightly increase project save/load work.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\configpanel.py" line="748" />
         <source>Show only custom fonts</source>
         <translation>커스텀 폰트만 표시</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="697" />
+        <location filename="..\ui\configpanel.py" line="749" />
+        <source>Limit font pickers to fonts from the project fonts folder. Font lists become easier to scan and may open faster when many system fonts are installed.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\configpanel.py" line="753" />
+        <source>Final exported image format. PNG is lossless but can be larger and slower to write; JPG is smaller and often faster; WEBP/JXL can save space but may take longer to encode.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\configpanel.py" line="754" />
         <source>Result image format</source>
         <translation>결과 이미지 형식</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="708" />
+        <location filename="..\ui\configpanel.py" line="760" />
+        <source>Final image quality for lossy formats. Higher quality keeps more detail but can write larger files and may export slower.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\configpanel.py" line="767" />
+        <source>Format for project working images such as masks and inpainted pages. PNG is safest but can use more disk space; JPG/WEBP/JXL can reduce disk usage but may add encoding time.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\configpanel.py" line="768" />
         <source>Intermediate image format</source>
         <translation>중간 이미지 형식</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="714" />
+        <location filename="..\ui\configpanel.py" line="774" />
+        <source>Quality for lossy intermediate working images. Higher values preserve detail for later steps, but use more disk space and can slow writes.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\configpanel.py" line="776" />
         <source>Intermediate quality</source>
         <translation>중간 품질</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="721" />
+        <location filename="..\ui\configpanel.py" line="783" />
         <source>&lt;a href="https://github.com/dmMaze/BallonsTranslator/tree/master/doc/saladict.md"&gt;Installation guide&lt;/a&gt;</source>
         <translation>&lt;a href = "https://github.com/dmmaze/ballonstranslator/tree/master/doc/saladict.md"&gt; 설치 안내서 &lt;/a&gt;</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="725" />
-        <source>Show mini menu when selecting text.</source>
-        <translation>텍스트 선택 시 미니 메뉴 표시</translation>
+        <location filename="..\ui\configpanel.py" line="788" />
+        <source>Show mini menu when selecting text</source>
+        <translation type="unfinished" />
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="731" />
+        <location filename="..\ui\configpanel.py" line="789" />
+        <source>Show the SalaDict mini menu when text is selected. This affects UI responsiveness only and does not change pipeline speed.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\configpanel.py" line="795" />
+        <source>Keyboard shortcut for SalaDict lookup. This has no processing performance impact.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\configpanel.py" line="797" />
         <source>Shortcut</source>
         <translation>단축키</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="734" />
+        <location filename="..\ui\configpanel.py" line="800" />
         <source>Search Engines</source>
         <translation>검색 엔진</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="838" />
-        <location filename="..\ui\configpanel.py" line="829" />
-        <location filename="..\ui\configpanel.py" line="827" />
-        <location filename="..\ui\configpanel.py" line="818" />
-        <location filename="..\ui\configpanel.py" line="816" />
-        <location filename="..\ui\configpanel.py" line="814" />
-        <location filename="..\ui\configpanel.py" line="801" />
-        <location filename="..\ui\configpanel.py" line="799" />
-        <location filename="..\ui\configpanel.py" line="790" />
-        <location filename="..\ui\configpanel.py" line="788" />
-        <location filename="..\ui\configpanel.py" line="779" />
-        <location filename="..\ui\configpanel.py" line="770" />
+        <location filename="..\ui\configpanel.py" line="800" />
+        <source>Search URL used by SalaDict lookups. Network speed depends on the selected search engine, but the translation pipeline is unchanged.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\configpanel.py" line="904" />
+        <location filename="..\ui\configpanel.py" line="895" />
+        <location filename="..\ui\configpanel.py" line="893" />
+        <location filename="..\ui\configpanel.py" line="884" />
+        <location filename="..\ui\configpanel.py" line="882" />
+        <location filename="..\ui\configpanel.py" line="880" />
+        <location filename="..\ui\configpanel.py" line="867" />
+        <location filename="..\ui\configpanel.py" line="865" />
+        <location filename="..\ui\configpanel.py" line="856" />
+        <location filename="..\ui\configpanel.py" line="854" />
+        <location filename="..\ui\configpanel.py" line="845" />
+        <location filename="..\ui\configpanel.py" line="836" />
         <source>Settings</source>
         <translation>설정</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="770" />
+        <location filename="..\ui\configpanel.py" line="836" />
         <source>Settings loaded from </source>
         <translation>다음에서 로드된 설정</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="779" />
+        <location filename="..\ui\configpanel.py" line="845" />
         <source>Failed to apply settings preset: </source>
         <translation>설정 사전 설정을 적용하지 못했습니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="782" />
+        <location filename="..\ui\configpanel.py" line="848" />
         <source>Save settings preset</source>
         <translation>설정 사전 설정 저장</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="782" />
+        <location filename="..\ui\configpanel.py" line="848" />
         <source>Preset name:</source>
         <translation>사전 설정 이름:</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="788" />
+        <location filename="..\ui\configpanel.py" line="854" />
         <source>Settings preset saved.</source>
         <translation>설정 사전 설정이 저장되었습니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="790" />
+        <location filename="..\ui\configpanel.py" line="856" />
         <source>Failed to save settings preset: </source>
         <translation>설정 사전 설정을 저장하지 못했습니다:</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="793" />
+        <location filename="..\ui\configpanel.py" line="859" />
         <source>Import settings preset</source>
         <translation>가져오기 설정 사전 설정</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="832" />
-        <location filename="..\ui\configpanel.py" line="821" />
-        <location filename="..\ui\configpanel.py" line="807" />
-        <location filename="..\ui\configpanel.py" line="793" />
+        <location filename="..\ui\configpanel.py" line="898" />
+        <location filename="..\ui\configpanel.py" line="887" />
+        <location filename="..\ui\configpanel.py" line="873" />
+        <location filename="..\ui\configpanel.py" line="859" />
         <source>JSON files (*.json)</source>
         <translation>JSON 파일(*.json)</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="799" />
+        <location filename="..\ui\configpanel.py" line="865" />
         <source>Settings preset imported.</source>
         <translation>설정 사전 설정을 가져왔습니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="801" />
+        <location filename="..\ui\configpanel.py" line="867" />
         <source>Failed to import settings preset: </source>
         <translation>설정 사전 설정을 가져오지 못했습니다:</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="807" />
+        <location filename="..\ui\configpanel.py" line="873" />
         <source>Export settings preset</source>
         <translation>내보내기 설정 사전 설정</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="814" />
+        <location filename="..\ui\configpanel.py" line="880" />
         <source>Settings preset exported.</source>
         <translation>설정 사전 설정을 내보냈습니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="816" />
+        <location filename="..\ui\configpanel.py" line="882" />
         <source>Failed to export settings preset.</source>
         <translation>설정 사전 설정을 내보내지 못했습니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="818" />
+        <location filename="..\ui\configpanel.py" line="884" />
         <source>Failed to export settings preset: </source>
         <translation>설정 사전 설정을 내보내지 못했습니다:</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="827" />
+        <location filename="..\ui\configpanel.py" line="893" />
         <source>Current settings exported.</source>
         <translation>현재 설정을 내보냈습니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="829" />
+        <location filename="..\ui\configpanel.py" line="895" />
         <source>Failed to export current settings.</source>
         <translation>현재 설정을 내보내지 못했습니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\configpanel.py" line="838" />
+        <location filename="..\ui\configpanel.py" line="904" />
         <source>Failed to import settings file: </source>
         <translation>설정 파일을 가져오지 못했습니다:</translation>
+    </message>
+    <message>
+        <source>Load models on demand to save memory.</source>
+        <translation type="vanished">메모리를 절약하기 위해 필요할 때만 모델을 로드</translation>
+    </message>
+    <message>
+        <source>Empty cache after RUN to save memory.</source>
+        <translation type="vanished">메모리를 절약하기 위해 실행 후 캐시 삭제</translation>
+    </message>
+    <message>
+        <source>Immediately unload loaded detection, OCR, inpaint, and translation models from memory.</source>
+        <translation type="vanished">로드된 감지, OCR, 인페인트 및 번역 모델을 메모리에서 즉시 언로드합니다.</translation>
+    </message>
+    <message>
+        <source>Create a high-resolution working copy before text detection. Detection, OCR, masks, inpainting, and export then use that upscaled image.</source>
+        <translation type="vanished">텍스트 감지 전에 고해상도 작업 복사본을 만듭니다. 그런 다음 감지, OCR, 마스크, 인페인팅 및 내보내기를 통해 확대된 이미지를 사용합니다.</translation>
+    </message>
+    <message>
+        <source>Resolution multiplier for pages that pass the size limits. Example: 2.0 for 2x.</source>
+        <translation type="vanished">크기 제한을 통과한 페이지의 해상도 승수입니다. 예: 2x의 경우 2.0.</translation>
+    </message>
+    <message>
+        <source>Maximum long-edge resolution after upscaling. The factor is capped so the result does not exceed this value.</source>
+        <translation type="vanished">업스케일링 후 최대 긴 가장자리 해상도. 결과가 이 값을 초과하지 않도록 계수에 제한이 있습니다.</translation>
+    </message>
+    <message>
+        <source>Pages whose original long edge is already above this value are not upscaled. Use 0 to always allow upscaling.</source>
+        <translation type="vanished">원래 긴 가장자리가 이미 이 값보다 큰 페이지는 확대되지 않습니다. 항상 업스케일링을 허용하려면 0을 사용합니다.</translation>
+    </message>
+    <message>
+        <source>Quality/speed preset for OpenCV upscaling. AnimeSharp adds stronger manga-style sharpening inspired by 2x-AnimeSharpV4.</source>
+        <translation type="vanished">OpenCV 업스케일링을 위한 품질/속도 사전 설정. AnimeSharp는 2x-AnimeSharpV4에서 영감을 받아 더욱 강력한 만화 스타일의 선명 효과를 추가합니다.</translation>
+    </message>
+    <message>
+        <source>After translation, merge nearby text boxes using the Region Merge Tool rules to reduce overlapping rendered text.</source>
+        <translation type="vanished">번역 후 영역 병합 도구 규칙을 사용하여 근처의 텍스트 상자를 병합하여 렌더링된 텍스트가 겹치는 것을 줄입니다.</translation>
+    </message>
+    <message>
+        <source>Direction used when automatically merging translated text boxes after the pipeline finishes.</source>
+        <translation type="vanished">파이프라인이 완료된 후 번역된 텍스트 상자를 자동으로 병합할 때 사용되는 방향입니다.</translation>
+    </message>
+    <message>
+        <source>Maximum pixel distance between stacked boxes for automatic vertical merging.</source>
+        <translation type="vanished">자동 수직 병합을 위한 쌓인 상자 사이의 최대 픽셀 거리입니다.</translation>
+    </message>
+    <message>
+        <source>Maximum pixel distance between side-by-side boxes for automatic horizontal merging.</source>
+        <translation type="vanished">자동 수평 병합을 위한 병렬 상자 간의 최대 픽셀 거리입니다.</translation>
+    </message>
+    <message>
+        <source>Minimum horizontal overlap required when merging boxes above or below each other.</source>
+        <translation type="vanished">상자를 서로 위나 아래에 병합할 때 최소 수평 겹침이 필요합니다.</translation>
+    </message>
+    <message>
+        <source>Minimum vertical overlap required when merging boxes next to each other.</source>
+        <translation type="vanished">서로 옆에 있는 상자를 병합할 때 최소 수직 겹침이 필요합니다.</translation>
+    </message>
+    <message>
+        <source>Saved settings snapshots. Applying one replaces the current application settings.</source>
+        <translation type="vanished">저장된 설정 스냅샷. 하나를 적용하면 현재 애플리케이션 설정이 대체됩니다.</translation>
+    </message>
+    <message>
+        <source>Load the selected settings preset into the current session.</source>
+        <translation type="vanished">선택한 설정 사전 설정을 현재 세션에 로드합니다.</translation>
+    </message>
+    <message>
+        <source>Save the current settings as a named reusable preset.</source>
+        <translation type="vanished">현재 설정을 이름이 지정된 재사용 가능한 사전 설정으로 저장합니다.</translation>
+    </message>
+    <message>
+        <source>Copy a settings preset JSON file into the local preset library.</source>
+        <translation type="vanished">설정 사전 설정 JSON 파일을 로컬 사전 설정 라이브러리에 복사합니다.</translation>
+    </message>
+    <message>
+        <source>Export the selected preset to a JSON file.</source>
+        <translation type="vanished">선택한 사전 설정을 JSON 파일로 내보냅니다.</translation>
+    </message>
+    <message>
+        <source>Export the current settings directly to a JSON file.</source>
+        <translation type="vanished">현재 설정을 JSON 파일로 직접 내보냅니다.</translation>
+    </message>
+    <message>
+        <source>Load a settings JSON file immediately without first saving it as a preset.</source>
+        <translation type="vanished">먼저 사전 설정으로 저장하지 않고 설정 JSON 파일을 즉시 로드합니다.</translation>
+    </message>
+    <message>
+        <source>Open the most recently used project automatically when the application starts.</source>
+        <translation type="vanished">애플리케이션이 시작되면 가장 최근에 사용한 프로젝트를 자동으로 엽니다.</translation>
+    </message>
+    <message>
+        <source>Ignore mouse wheel changes on combo boxes and spin boxes so scrolling settings does not accidentally change values.</source>
+        <translation type="vanished">스크롤 설정으로 인해 값이 실수로 변경되지 않도록 콤보 상자 및 스핀 상자에서 마우스 휠 변경을 무시합니다.</translation>
+    </message>
+    <message>
+        <source>Choose whether translated text keeps the original detected size from the image or always uses the fixed global font size defined in the text style presets.</source>
+        <translation type="vanished">번역된 텍스트가 이미지에서 감지된 원본 크기를 유지할지 아니면 항상 텍스트 스타일 사전 설정에 정의된 고정된 전역 글꼴 크기를 사용할지 선택합니다.</translation>
+    </message>
+    <message>
+        <source>Choose whether stroke width is detected dynamically per region based on the original text or taken from the fixed global text style preset.</source>
+        <translation type="vanished">원본 텍스트를 기반으로 영역별로 획 너비를 동적으로 감지할지 아니면 고정된 전역 텍스트 스타일 사전 설정에서 가져올지 선택합니다.</translation>
+    </message>
+    <message>
+        <source>Choose whether the main text color is detected from the original image or if it is forced to use the global font color setting.</source>
+        <translation type="vanished">기본 텍스트 색상을 원본 이미지에서 감지할지 아니면 강제로 전체 글꼴 색상 설정을 사용해야 할지 선택합니다.</translation>
+    </message>
+    <message>
+        <source>Choose whether the text outline (stroke) color is detected from the original image or if it is forced to use the global stroke color setting.</source>
+        <translation type="vanished">원본 이미지에서 텍스트 윤곽선(획) 색상을 감지할지 아니면 강제로 전체 획 색상 설정을 사용해야 하는지 선택합니다.</translation>
+    </message>
+    <message>
+        <source>Choose whether special text effects (like outlines or drop shadows) are detected per region or forced to match the global effect settings.</source>
+        <translation type="vanished">특수 텍스트 효과(예: 윤곽선 또는 그림자)를 영역별로 감지할지 아니면 전역 효과 설정과 일치하도록 강제할지 선택합니다.</translation>
+    </message>
+    <message>
+        <source>Choose whether paragraph text alignment (left, center, right) is detected per region or if it is forced to use the global alignment setting.</source>
+        <translation type="vanished">단락 텍스트 정렬(왼쪽, 가운데, 오른쪽)을 영역별로 감지할지, 아니면 전체 정렬 설정을 사용하도록 강제할지 선택합니다.</translation>
+    </message>
+    <message>
+        <source>Choose whether the text direction (horizontal or vertical) is detected automatically per region or forced to follow the global writing direction setting.</source>
+        <translation type="vanished">텍스트 방향(가로 또는 세로)을 지역별로 자동으로 감지할지 아니면 전역 쓰기 방향 설정을 따르도록 강제할지 선택합니다.</translation>
+    </message>
+    <message>
+        <source>Choose whether the existing region fonts from the original text are preserved or if they are entirely replaced by the global font family setting.</source>
+        <translation type="vanished">원본 텍스트의 기존 지역 글꼴을 유지할지 아니면 전역 글꼴 모음 설정으로 완전히 바꿀지 선택합니다.</translation>
+    </message>
+    <message>
+        <source>Split translation into multi-lines according to the extracted balloon region.</source>
+        <translation type="vanished">말풍선 모양에 맞게 번역본을 여러줄로 분할</translation>
+    </message>
+    <message>
+        <source>Independent text styles for each projects</source>
+        <translation type="vanished">프로젝트마다 독립적인 텍스트 스타일 사용</translation>
+    </message>
+    <message>
+        <source>Show mini menu when selecting text.</source>
+        <translation type="vanished">텍스트 선택 시 미니 메뉴 표시</translation>
     </message>
     <message>
         <source>Adjust font size adaptively if it is set to "decide by program."</source>
@@ -754,7 +1005,7 @@
 </context><context>
     <name>DrawingPanel</name>
     <message>
-        <location filename="..\ui\drawingpanel.py" line="353" />
+        <location filename="..\ui\drawingpanel.py" line="406" />
         <source>Mask Opacity</source>
         <translation>마스크 불투명도</translation>
     </message>
@@ -954,8 +1205,8 @@
     </message>
     <message>
         <location filename="..\ui\glossary_widget.py" line="32" />
-        <source>Glossary entries saved in the current project's imgtrans JSON.</source>
-        <translation>현재 프로젝트의 imgtrans JSON에 저장된 용어집 항목입니다.</translation>
+        <source>Glossary entries saved in the current project's glossary.json.</source>
+        <translation type="unfinished" />
     </message>
     <message>
         <location filename="..\ui\glossary_widget.py" line="35" />
@@ -1009,8 +1260,16 @@
     </message>
     <message>
         <location filename="..\ui\glossary_widget.py" line="69" />
+        <source>Save the glossary into the current project's glossary.json.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <source>Glossary entries saved in the current project's imgtrans JSON.</source>
+        <translation type="vanished">현재 프로젝트의 imgtrans JSON에 저장된 용어집 항목입니다.</translation>
+    </message>
+    <message>
         <source>Save the glossary into the current project's imgtrans JSON.</source>
-        <translation>현재 프로젝트의 imgtrans JSON에 용어집을 저장합니다.</translation>
+        <translation type="vanished">현재 프로젝트의 imgtrans JSON에 용어집을 저장합니다.</translation>
     </message>
 </context><context>
     <name>ImgtransProgressMessageBox</name>
@@ -1033,23 +1292,23 @@
 </context><context>
     <name>ImgtransThread</name>
     <message>
-        <location filename="..\ui\module_manager.py" line="601" />
-        <location filename="..\ui\module_manager.py" line="446" />
+        <location filename="..\ui\module_manager.py" line="681" />
+        <location filename="..\ui\module_manager.py" line="487" />
         <source>OCR Failed.</source>
         <translation>OCR이 실패했습니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\module_manager.py" line="519" />
+        <location filename="..\ui\module_manager.py" line="599" />
         <source>Decensoring Failed.</source>
         <translation>검열 취소에 실패했습니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\module_manager.py" line="576" />
+        <location filename="..\ui\module_manager.py" line="656" />
         <source>Text Detection Failed.</source>
         <translation>텍스트 검출에 실패했습니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\module_manager.py" line="665" />
+        <location filename="..\ui\module_manager.py" line="745" />
         <source>Inpainting Failed.</source>
         <translation>인페인팅이 실패했습니다.</translation>
     </message>
@@ -1068,12 +1327,12 @@
 </context><context>
     <name>InpaintConfigPanel</name>
     <message>
-        <location filename="..\ui\module_parse_widgets.py" line="469" />
+        <location filename="..\ui\module_parse_widgets.py" line="481" />
         <source>Let the program decide whether it is necessary to use the selected inpaint method.</source>
         <translation>선택한 인페인트 방식 사용 여부를 프로그램이 결정</translation>
     </message>
     <message>
-        <location filename="..\ui\module_parse_widgets.py" line="470" />
+        <location filename="..\ui\module_parse_widgets.py" line="482" />
         <source>When enabled, the app decides per region whether inpainting is needed before rendering translated text.</source>
         <translation>활성화되면 앱은 번역된 텍스트를 렌더링하기 전에 인페인팅이 필요한지 지역별로 결정합니다.</translation>
     </message>
@@ -1107,7 +1366,7 @@
 </context><context>
     <name>InpaintThread</name>
     <message>
-        <location filename="..\ui\module_manager.py" line="130" />
+        <location filename="..\ui\module_manager.py" line="171" />
         <source>Inpainting Failed.</source>
         <translation>인페인팅이 실패했습니다.</translation>
     </message>
@@ -1152,122 +1411,142 @@
 </context><context>
     <name>LeftBar</name>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="76" />
+        <location filename="..\ui\mainwindowbars.py" line="78" />
         <source>Pages: show or hide the project page list.</source>
         <translation>페이지: 프로젝트 페이지 목록을 표시하거나 숨깁니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="80" />
+        <location filename="..\ui\mainwindowbars.py" line="82" />
         <source>Search/Replace: find and replace text across the project (Ctrl+G).</source>
         <translation>검색/바꾸기: 프로젝트 전체에서 텍스트를 찾아 바꿉니다(Ctrl+G).</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="84" />
+        <location filename="..\ui\mainwindowbars.py" line="86" />
         <source>Translation workspace: show the canvas, page list, and editing panels.</source>
         <translation>번역 작업 영역: 캔버스, 페이지 목록 및 편집 패널을 표시합니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="89" />
+        <location filename="..\ui\mainwindowbars.py" line="91" />
         <source>Settings: configure OCR, translation, inpainting, text detection, and app options.</source>
         <translation>설정: OCR, 번역, 인페인팅, 텍스트 감지 및 앱 옵션을 구성합니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="93" />
+        <location filename="..\ui\mainwindowbars.py" line="95" />
         <source>Open Folder ...</source>
         <translation>폴더 열기 ...</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="97" />
+        <location filename="..\ui\mainwindowbars.py" line="99" />
         <source>Open Project ... *.json</source>
         <translation>프로젝트 열기 ... *.json</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="100" />
+        <location filename="..\ui\mainwindowbars.py" line="102" />
         <source>Save Project</source>
         <translation>프로젝트 저장</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="104" />
+        <location filename="..\ui\mainwindowbars.py" line="106" />
         <source>Export as Doc</source>
         <translation>DOC 내보내기</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="106" />
+        <location filename="..\ui\mainwindowbars.py" line="108" />
         <source>Import from Doc</source>
         <translation>DOC 불러오기</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="109" />
+        <location filename="..\ui\mainwindowbars.py" line="111" />
         <source>Export source text as TXT</source>
         <translation>소스 텍스트를 TXT로 내보내기</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="111" />
+        <location filename="..\ui\mainwindowbars.py" line="113" />
         <source>Export translation as TXT</source>
         <translation>번역 텍스트 TXT로 내보내기</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="114" />
+        <location filename="..\ui\mainwindowbars.py" line="116" />
         <source>Export source text as markdown</source>
         <translation>소스 텍스트를 마크다운으로 내보내기</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="116" />
+        <location filename="..\ui\mainwindowbars.py" line="118" />
         <source>Export translation as markdown</source>
         <translation>번역 텍스트 마크다운 문서로 내보내기</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="119" />
+        <location filename="..\ui\mainwindowbars.py" line="121" />
         <source>Import translation from TXT/markdown</source>
         <translation>텍스트/마크다운 파일에서 번역 불러오기</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="122" />
+        <location filename="..\ui\mainwindowbars.py" line="124" />
         <source>Open Recent</source>
         <translation>최근 프로젝트</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="140" />
+        <location filename="..\ui\mainwindowbars.py" line="142" />
         <source>Menu: open, save, import, and export projects.</source>
         <translation>메뉴: 프로젝트 열기, 저장, 가져오기 및 내보내기.</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="150" />
+        <location filename="..\ui\mainwindowbars.py" line="152" />
         <source>Run</source>
         <translation>달리다</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="155" />
+        <location filename="..\ui\mainwindowbars.py" line="157" />
         <source>Run: process the project with the enabled detection, OCR, translation, and inpainting stages.</source>
         <translation>실행: 감지, OCR, 번역 및 인페인팅 단계가 활성화된 프로젝트를 처리합니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="161" />
+        <location filename="..\ui\mainwindowbars.py" line="163" />
         <source>Trans</source>
         <translation>트랜스</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="162" />
+        <location filename="..\ui\mainwindowbars.py" line="164" />
         <source>Translate only: run translation on existing text boxes without text detection, OCR, or inpainting.</source>
         <translation>번역만: 텍스트 감지, OCR 또는 인페인팅 없이 기존 텍스트 상자에서 번역을 실행합니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="172" />
+        <location filename="..\ui\mainwindowbars.py" line="174" />
         <source>Gloss</source>
         <translation>광택</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="173" />
+        <location filename="..\ui\mainwindowbars.py" line="175" />
         <source>Glossary: open the current project glossary.</source>
         <translation>용어집: 현재 프로젝트 용어집을 엽니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="273" />
+        <location filename="..\ui\mainwindowbars.py" line="186" />
+        <source>Dc</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\mainwindowbars.py" line="187" />
+        <source>Censor Restoration: detect censored regions on the current page and repair them with inpainting.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\mainwindowbars.py" line="196" />
+        <source>Ri</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\mainwindowbars.py" line="197" />
+        <source>Re-run Inpainting: apply all existing inpaint masks again on the current page.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\mainwindowbars.py" line="297" />
         <source>Select Directory</source>
         <translation>경로 선택</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="280" />
+        <location filename="..\ui\mainwindowbars.py" line="304" />
         <source>Import *.docx</source>
         <translation>*.docx 불러오기</translation>
     </message>
@@ -1290,104 +1569,127 @@
 </context><context>
     <name>MainWindow</name>
     <message>
-        <location filename="..\ui\mainwindow.py" line="239" />
+        <location filename="..\ui\mainwindow.py" line="243" />
         <source>Keyword substitution for source text</source>
         <translation>OCR 결과에 대한 키워드 치환</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="243" />
+        <location filename="..\ui\mainwindow.py" line="247" />
         <source>Keyword substitution for machine translation source text</source>
         <translation>원문에 대한 키워드 치환(전처리)</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="247" />
+        <location filename="..\ui\mainwindow.py" line="251" />
         <source>Keyword substitution for machine translation</source>
         <translation>번역문에 대한 키워드 치환(후처리)</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="531" />
+        <location filename="..\ui\mainwindow.py" line="543" />
         <source>Failed to load project </source>
         <translation>프로젝트를로드하지 못했습니다</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="574" />
+        <location filename="..\ui\mainwindow.py" line="587" />
         <source>Failed to load project from</source>
         <translation>프로젝트를로드하지 못했습니다</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="596" />
+        <location filename="..\ui\mainwindow.py" line="609" />
         <source>Ignored in pipeline runs: text detection, OCR, translation, and inpainting are skipped for this page.</source>
         <translation>파이프라인 실행 시 무시됨: 이 페이지에서는 텍스트 감지, OCR, 번역 및 인페인팅을 건너뜁니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="599" />
+        <location filename="..\ui\mainwindow.py" line="612" />
         <source>Page preview</source>
         <translation>페이지 미리보기</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="641" />
+        <location filename="..\ui\mainwindow.py" line="654" />
         <source>Open a project before editing the glossary.</source>
         <translation>용어집을 편집하기 전에 프로젝트를 엽니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="656" />
-        <source>Failed to save project glossary</source>
-        <translation>프로젝트 용어집을 저장하지 못했습니다.</translation>
+        <location filename="..\ui\mainwindow.py" line="665" />
+        <source>saving project glossary</source>
+        <translation type="unfinished" />
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="685" />
+        <location filename="..\ui\mainwindow.py" line="695" />
         <source>Restart to apply changes? 
 </source>
         <translation>변경 사항을 적용하기 위해 다시 시작 하시겠습니까?
 </translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="1063" />
-        <location filename="..\ui\mainwindow.py" line="1058" />
-        <location filename="..\ui\mainwindow.py" line="997" />
-        <location filename="..\ui\mainwindow.py" line="993" />
-        <location filename="..\ui\mainwindow.py" line="983" />
+        <location filename="..\ui\mainwindow.py" line="752" />
+        <source>
+A temporary project file was kept at:
+{path}</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\mainwindow.py" line="753" />
+        <source>Project changes could not be saved right now. The project is still marked as unsaved; please try saving again.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\mainwindow.py" line="769" />
+        <location filename="..\ui\mainwindow.py" line="758" />
+        <source>Project Save Failed</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\mainwindow.py" line="770" />
+        <source>Project changes could not be saved. The project remains unsaved.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\mainwindow.py" line="1115" />
+        <location filename="..\ui\mainwindow.py" line="1110" />
+        <location filename="..\ui\mainwindow.py" line="1049" />
+        <location filename="..\ui\mainwindow.py" line="1045" />
+        <location filename="..\ui\mainwindow.py" line="1035" />
         <source>Warning</source>
         <translation>경고</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="983" />
+        <location filename="..\ui\mainwindow.py" line="1035" />
         <source>Please open a project first.</source>
         <translation>먼저 프로젝트를 열어주세요.</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="993" />
+        <location filename="..\ui\mainwindow.py" line="1045" />
         <source>No current file.</source>
         <translation>현재 파일이 없습니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="997" />
+        <location filename="..\ui\mainwindow.py" line="1049" />
         <source>Current page data does not exist.</source>
         <translation>현재 페이지 데이터가 존재하지 않습니다.</translation>
     </message>
     <message>
+        <location filename="..\ui\mainwindow.py" line="1106" />
         <location filename="..\ui\mainwindow.py" line="1054" />
-        <location filename="..\ui\mainwindow.py" line="1002" />
         <source>Notice</source>
         <translation>알아채다</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="1002" />
+        <location filename="..\ui\mainwindow.py" line="1054" />
         <source>The current page has no text boxes.</source>
         <translation>현재 페이지에는 텍스트 상자가 없습니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="1035" />
+        <location filename="..\ui\mainwindow.py" line="1087" />
         <source>Success</source>
         <translation>성공</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="1036" />
+        <location filename="..\ui\mainwindow.py" line="1088" />
         <source>Merge complete: box count {initial} -&gt; {final} ({reduced} fewer)</source>
         <translation>병합 완료: 상자 개수 {초기} -&gt; {최종}({감소}개 감소)</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="1044" />
+        <location filename="..\ui\mainwindow.py" line="1096" />
         <source>No merge was performed.
 There are {count} text boxes.
 Label types: {labels}
@@ -1408,27 +1710,27 @@ Suggestions:
 4. 라벨이 블랙리스트에 있는지 확인하세요.</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="1053" />
+        <location filename="..\ui\mainwindow.py" line="1105" />
         <source>none</source>
         <translation>없음</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="1058" />
+        <location filename="..\ui\mainwindow.py" line="1110" />
         <source>The project has no images.</source>
         <translation>프로젝트에 이미지가 없습니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="1063" />
+        <location filename="..\ui\mainwindow.py" line="1115" />
         <source>Project JSON file not found: {path}</source>
         <translation>프로젝트 JSON 파일을 찾을 수 없습니다: {path}</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="1107" />
+        <location filename="..\ui\mainwindow.py" line="1159" />
         <source>Complete</source>
         <translation>완벽한</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="1108" />
+        <location filename="..\ui\mainwindow.py" line="1160" />
         <source>Region merge complete
 Succeeded: {success}/{total}
 Failed: {failed}/{total}</source>
@@ -1437,139 +1739,255 @@ Failed: {failed}/{total}</source>
 실패: {실패}/{총계}</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="1385" />
+        <location filename="..\ui\mainwindow.py" line="1285" />
+        <source>saving current page</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\mainwindow.py" line="1441" />
         <source>Open a project page before running a translation benchmark.</source>
         <translation>번역 벤치마크를 실행하기 전에 프로젝트 페이지를 엽니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="1390" />
+        <location filename="..\ui\mainwindow.py" line="1446" />
         <source>The current page has no source text to benchmark.</source>
         <translation>현재 페이지에는 벤치마킹할 원본 텍스트가 없습니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="1570" />
+        <location filename="..\ui\mainwindow.py" line="1611" />
+        <source>page translation finish</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\mainwindow.py" line="1622" />
+        <source>page decensor finish</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\mainwindow.py" line="1630" />
+        <source>No censor mask was detected. You can draw/select a repair mask manually and run Censor Restoration again. No censor mask found. Try debug masks or adjust gray/banded censor detection settings. The text inpaint mask will not be used automatically.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\mainwindow.py" line="1636" />
+        <source>Censor Restoration finished for the current page.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\mainwindow.py" line="1641" />
         <source>unsaved</source>
         <translation>저장안됨</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="1570" />
+        <location filename="..\ui\mainwindow.py" line="1641" />
         <source>saved</source>
         <translation>저장</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="1604" />
+        <location filename="..\ui\mainwindow.py" line="1675" />
         <source>Saving image...</source>
         <translation>이미지 저장 ...</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="1620" />
+        <location filename="..\ui\mainwindow.py" line="1691" />
         <source>Confirmation</source>
         <translation>확인</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="1621" />
+        <location filename="..\ui\mainwindow.py" line="1692" />
         <source>"Run" will clear previous results, "Continue" will try to run from previous progress</source>
         <translation>"실행"은 이전 결과를 지우고, "계속"은 이전 진행에서 실행을 시도합니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="1624" />
+        <location filename="..\ui\mainwindow.py" line="1695" />
         <source>Run</source>
         <translation>달리다</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="1625" />
+        <location filename="..\ui\mainwindow.py" line="1696" />
         <source>Continue</source>
         <translation>계속하다</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="1626" />
+        <location filename="..\ui\mainwindow.py" line="1697" />
         <source>Cancel</source>
         <translation>취소</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="1682" />
+        <location filename="..\ui\mainwindow.py" line="1743" />
+        <source>Open a project page before running Censor Restoration.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\mainwindow.py" line="1806" />
+        <location filename="..\ui\mainwindow.py" line="1748" />
+        <source>The current page is not available in the project.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\mainwindow.py" line="1752" />
+        <source>Select an inpainter before running Censor Restoration.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\mainwindow.py" line="1801" />
+        <source>Open a project page before re-running inpainting.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\mainwindow.py" line="1810" />
+        <source>Inpainting is already running. Please wait until it finishes.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\mainwindow.py" line="1818" />
+        <source>Loading fallback inpainter. Run Re-Inpaint again after it is ready.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\mainwindow.py" line="1820" />
+        <source>Select an inpainter before re-running inpainting.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\mainwindow.py" line="1858" />
+        <location filename="..\ui\mainwindow.py" line="1855" />
+        <location filename="..\ui\mainwindow.py" line="1830" />
+        <location filename="..\ui\mainwindow.py" line="1825" />
+        <source>No inpaint masks found for the current page.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\mainwindow.py" line="1847" />
+        <source>Re-running inpainting on current page...</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\mainwindow.py" line="1852" />
+        <source>Open a project page before removing masks.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\mainwindow.py" line="1862" />
+        <source>remove current page masks</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\mainwindow.py" line="1864" />
+        <source>All masks and related inpainting were removed from the current page.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\mainwindow.py" line="1883" />
+        <source>current page re-inpaint</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\mainwindow.py" line="1885" />
+        <source>Inpainting re-run completed for current page.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\mainwindow.py" line="1897" />
+        <source>Re-running inpainting failed for the current page. Check the log for details.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\mainwindow.py" line="1911" />
         <source>All pages are ignored for pipeline runs.</source>
         <translation>파이프라인 실행 시 모든 페이지가 무시됩니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="1738" />
+        <location filename="..\ui\mainwindow.py" line="1967" />
         <source>Import Text Styles</source>
         <translation>텍스트 스타일 가져오기</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="1752" />
+        <location filename="..\ui\mainwindow.py" line="1981" />
         <source>Save Text Styles</source>
         <translation>텍스트 스타일 내보내기</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="1795" />
+        <location filename="..\ui\mainwindow.py" line="2024" />
         <source>Text file exported to </source>
         <translation>텍스트 파일 저장됨: </translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="1797" />
+        <location filename="..\ui\mainwindow.py" line="2026" />
         <source>Failed to export as TEXT file</source>
         <translation>텍스트 파일을 내보내는 데 실패했습니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="1803" />
+        <location filename="..\ui\mainwindow.py" line="2032" />
         <source>Import *.md/*.txt</source>
         <translation>*.md/*.txt 불러오기</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="1815" />
+        <location filename="..\ui\mainwindow.py" line="2044" />
         <source>Translation imported and matched successfully.</source>
         <translation>번역을 성공적으로 불러왔습니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="1817" />
+        <location filename="..\ui\mainwindow.py" line="2046" />
         <source>Imported txt file not fully matched with current project, please make sure source txt file structured like results from "export TXT/markdown"</source>
         <translation>불러온 텍스트 파일이 현재 프로젝트와 전체 매칭 되지 않습니다, 소스 텍스트가 "텍스트/마크다운 파일 내보내기" 메뉴로 생성된 파일과 동일한 구조인지 확인하세요</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="1819" />
+        <location filename="..\ui\mainwindow.py" line="2048" />
         <source>Missing pages: </source>
         <translation>누락된 페이지: </translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="1822" />
+        <location filename="..\ui\mainwindow.py" line="2051" />
         <source>Unexpected pages: </source>
         <translation>예상치 못한 페이지: </translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="1825" />
+        <location filename="..\ui\mainwindow.py" line="2054" />
         <source>Unmatched pages: </source>
         <translation>불일치한 페이지: </translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="1836" />
+        <location filename="..\ui\mainwindow.py" line="2065" />
         <source>Failed to import translation from </source>
         <translation>다음 파일에서 불러오기를 실패하였습니다: </translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="1847" />
-        <source>Failed to save ignored page state</source>
-        <translation>무시된 페이지 상태를 저장하지 못했습니다.</translation>
+        <location filename="..\ui\mainwindow.py" line="2072" />
+        <source>saving ignored page state</source>
+        <translation type="unfinished" />
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="1853" />
+        <location filename="..\ui\mainwindow.py" line="2079" />
         <source>Delete Page Data</source>
         <translation>페이지 데이터 삭제</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="1854" />
+        <location filename="..\ui\mainwindow.py" line="2080" />
         <source>Are you sure you want to delete textboxes, masks, and inpainting for this page?</source>
         <translation>이 페이지의 텍스트 상자, 마스크 및 인페인팅을 삭제하시겠습니까?</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="1882" />
-        <source>Failed to save state after deleting page data</source>
-        <translation>페이지 데이터 삭제 후 상태를 저장하지 못했습니다.</translation>
+        <location filename="..\ui\mainwindow.py" line="2104" />
+        <source>saving deleted page data state</source>
+        <translation type="unfinished" />
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="1911" />
+        <location filename="..\ui\mainwindow.py" line="2134" />
         <source>Export to </source>
         <translation>내보내기</translation>
+    </message>
+    <message>
+        <source>Failed to save project glossary</source>
+        <translation type="vanished">프로젝트 용어집을 저장하지 못했습니다.</translation>
+    </message>
+    <message>
+        <source>Failed to save ignored page state</source>
+        <translation type="vanished">무시된 페이지 상태를 저장하지 못했습니다.</translation>
+    </message>
+    <message>
+        <source>Failed to save state after deleting page data</source>
+        <translation type="vanished">페이지 데이터 삭제 후 상태를 저장하지 못했습니다.</translation>
     </message>
     <message>
         <source>Keyword substitution for OCR</source>
@@ -1932,15 +2350,18 @@ qipao,qipao2</source>
 </context><context>
     <name>ModuleConfigParseWidget</name>
     <message>
-        <location filename="..\ui\module_parse_widgets.py" line="324" />
-        <location filename="..\ui\module_parse_widgets.py" line="323" />
+        <location filename="..\ui\module_parse_widgets.py" line="334" />
+        <source>Select which module implementation is used for this step. Different modules can be much faster or slower depending on CPU/GPU support, model size, and network/API latency.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
         <source>Select which module implementation is used for this step.</source>
-        <translation>이 단계에 사용할 모듈 구현을 선택합니다.</translation>
+        <translation type="vanished">이 단계에 사용할 모듈 구현을 선택합니다.</translation>
     </message>
 </context><context>
     <name>ModuleManager</name>
     <message>
-        <location filename="..\ui\module_manager.py" line="1325" />
+        <location filename="..\ui\module_manager.py" line="1405" />
         <source>Set Inpainter...</source>
         <translation>인페인터 설정 ...</translation>
     </message>
@@ -1951,22 +2372,22 @@ qipao,qipao2</source>
 </context><context>
     <name>OCRConfigPanel</name>
     <message>
-        <location filename="..\ui\module_parse_widgets.py" line="497" />
+        <location filename="..\ui\module_parse_widgets.py" line="509" />
         <source>Delete and restore region where OCR return empty string.</source>
         <translation>OCR 결과가 없을 경우 원본 유지</translation>
     </message>
     <message>
-        <location filename="..\ui\module_parse_widgets.py" line="498" />
+        <location filename="..\ui\module_parse_widgets.py" line="510" />
         <source>Remove OCR regions that return empty text and restore the underlying image area.</source>
         <translation>빈 텍스트를 반환하는 OCR 영역을 제거하고 기본 이미지 영역을 복원합니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\module_parse_widgets.py" line="502" />
+        <location filename="..\ui\module_parse_widgets.py" line="514" />
         <source>Font Detection</source>
         <translation>글꼴 감지</translation>
     </message>
     <message>
-        <location filename="..\ui\module_parse_widgets.py" line="503" />
+        <location filename="..\ui\module_parse_widgets.py" line="515" />
         <source>Try to detect font properties from the source image for each OCR region.</source>
         <translation>각 OCR 영역의 소스 이미지에서 글꼴 속성을 감지해 보세요.</translation>
     </message>
@@ -1977,32 +2398,32 @@ qipao,qipao2</source>
 </context><context>
     <name>PageListView</name>
     <message>
-        <location filename="..\ui\mainwindow.py" line="67" />
+        <location filename="..\ui\mainwindow.py" line="70" />
         <source>Reveal in File Explorer</source>
         <translation>파일 탐색기에서 열기</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="69" />
+        <location filename="..\ui\mainwindow.py" line="72" />
         <source>Include Page in Pipeline</source>
         <translation>파이프라인에 페이지 포함</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="69" />
+        <location filename="..\ui\mainwindow.py" line="72" />
         <source>Ignore Page in Pipeline</source>
         <translation>파이프라인에서 페이지 무시</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="71" />
+        <location filename="..\ui\mainwindow.py" line="74" />
         <source>Skip this page during text detection, OCR, translation, and inpainting pipeline runs.</source>
         <translation>텍스트 감지, OCR, 번역 및 인페인팅 파이프라인 실행 중에는 이 페이지를 건너뜁니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="73" />
+        <location filename="..\ui\mainwindow.py" line="76" />
         <source>Delete Page Data</source>
         <translation>페이지 데이터 삭제</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindow.py" line="74" />
+        <location filename="..\ui\mainwindow.py" line="77" />
         <source>Delete textboxes, masks, and inpainting for this page.</source>
         <translation>이 페이지의 텍스트 상자, 마스크 및 인페인팅을 삭제합니다.</translation>
     </message>
@@ -2080,6 +2501,13 @@ qipao,qipao2</source>
         <translation>닫기</translation>
     </message>
 </context><context>
+    <name>ParamWidget</name>
+    <message>
+        <location filename="..\ui\module_parse_widgets.py" line="164" />
+        <source>Performance: this setting can affect speed, memory use, API cost, or output stability depending on the selected module. Higher quality, larger batches, more context, extra retries, debug output, and network delays usually make processing slower; acceleration, GPU, cache, and batching options can make compatible workloads faster but may use more memory.</source>
+        <translation type="unfinished" />
+    </message>
+</context><context>
     <name>PenConfigPanel</name>
     <message>
         <location filename="..\ui\drawingpanel.py" line="136" />
@@ -2110,6 +2538,28 @@ qipao,qipao2</source>
         <location filename="..\ui\drawingpanel.py" line="154" />
         <source>Rectangle</source>
         <translation>사각형</translation>
+    </message>
+</context><context>
+    <name>ReInpaintPanel</name>
+    <message>
+        <location filename="..\ui\drawingpanel.py" line="281" />
+        <source>Dilate</source>
+        <translation type="unfinished">확장</translation>
+    </message>
+    <message>
+        <location filename="..\ui\drawingpanel.py" line="286" />
+        <source>Re-Inpaint</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\drawingpanel.py" line="287" />
+        <source>Re-run inpainting for the current page using existing masks.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\drawingpanel.py" line="291" />
+        <source>Inpainter</source>
+        <translation type="unfinished">인페인터</translation>
     </message>
 </context><context>
     <name>RectPanel</name>
@@ -2183,17 +2633,17 @@ qipao,qipao2</source>
 </context><context>
     <name>SelectionWithConfigWidget</name>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="632" />
+        <location filename="..\ui\mainwindowbars.py" line="668" />
         <source>Open settings for </source>
         <translation>설정 열기</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="636" />
+        <location filename="..\ui\mainwindowbars.py" line="672" />
         <source>Select </source>
         <translation>선택하다</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="641" />
+        <location filename="..\ui\mainwindowbars.py" line="677" />
         <source>Configure </source>
         <translation>구성</translation>
     </message>
@@ -2236,12 +2686,12 @@ qipao,qipao2</source>
 </context><context>
     <name>TextDetectConfigPanel</name>
     <message>
-        <location filename="..\ui\module_parse_widgets.py" line="487" />
+        <location filename="..\ui\module_parse_widgets.py" line="499" />
         <source>Keep Existing Lines</source>
         <translation>기존 회선 유지</translation>
     </message>
     <message>
-        <location filename="..\ui\module_parse_widgets.py" line="488" />
+        <location filename="..\ui\module_parse_widgets.py" line="500" />
         <source>Keep manually edited or existing text lines instead of replacing them during detection.</source>
         <translation>감지 중에 수동으로 편집한 텍스트 줄이나 기존 텍스트 줄을 바꾸는 대신 유지하십시오.</translation>
     </message>
@@ -2435,238 +2885,258 @@ qipao,qipao2</source>
 </context><context>
     <name>TitleBar</name>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="327" />
+        <location filename="..\ui\mainwindowbars.py" line="351" />
         <source>Edit</source>
         <translation>편집</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="328" />
+        <location filename="..\ui\mainwindowbars.py" line="352" />
         <source>Edit menu: undo, redo, search, and keyword substitution.</source>
         <translation>편집 메뉴: 실행 취소, 다시 실행, 검색 및 키워드 대체.</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="330" />
+        <location filename="..\ui\mainwindowbars.py" line="354" />
         <source>Undo</source>
         <translation>실행 취소</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="333" />
+        <location filename="..\ui\mainwindowbars.py" line="357" />
         <source>Redo</source>
         <translation>다시 실행</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="336" />
+        <location filename="..\ui\mainwindowbars.py" line="360" />
         <source>Search</source>
         <translation>찾기</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="339" />
+        <location filename="..\ui\mainwindowbars.py" line="363" />
         <source>Global Search</source>
         <translation>글로벌 검색</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="343" />
+        <location filename="..\ui\mainwindowbars.py" line="367" />
         <source>Keyword substitution for machine translation source text</source>
         <translation>원문에 대한 키워드 치환(전처리)</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="345" />
+        <location filename="..\ui\mainwindowbars.py" line="369" />
         <source>Keyword substitution for machine translation</source>
         <translation>번역문에 대한 키워드 치환(후처리)</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="347" />
+        <location filename="..\ui\mainwindowbars.py" line="371" />
         <source>Keyword substitution for source text</source>
         <translation>OCR 결과에 대한 키워드 치환</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="358" />
+        <location filename="..\ui\mainwindowbars.py" line="382" />
         <source>View</source>
         <translation>보기</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="359" />
+        <location filename="..\ui\mainwindowbars.py" line="383" />
         <source>View menu: display language, panels, text styles, and theme.</source>
         <translation>보기 메뉴: 표시 언어, 패널, 텍스트 스타일 및 테마.</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="361" />
+        <location filename="..\ui\mainwindowbars.py" line="385" />
         <source>Display Language</source>
         <translation>디스플레이 언어</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="375" />
+        <location filename="..\ui\mainwindowbars.py" line="399" />
         <source>Drawing Board</source>
         <translation>그림판</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="377" />
+        <location filename="..\ui\mainwindowbars.py" line="401" />
         <source>Text Editor</source>
         <translation>텍스트 편집기</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="379" />
+        <location filename="..\ui\mainwindowbars.py" line="403" />
         <source>Import Text Styles</source>
         <translation>텍스트 스타일 가져오기</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="380" />
+        <location filename="..\ui\mainwindowbars.py" line="404" />
         <source>Export Text Styles</source>
         <translation>텍스트 스타일 내보내기</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="381" />
+        <location filename="..\ui\mainwindowbars.py" line="405" />
         <source>Dark Mode</source>
         <translation>다크 모드</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="401" />
+        <location filename="..\ui\mainwindowbars.py" line="425" />
         <source>Go</source>
         <translation>이동</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="402" />
+        <location filename="..\ui\mainwindowbars.py" line="426" />
         <source>Go menu: move between project pages.</source>
         <translation>이동 메뉴: 프로젝트 페이지 사이를 이동합니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="403" />
+        <location filename="..\ui\mainwindowbars.py" line="427" />
         <source>Previous Page</source>
         <translation>이전 페이지</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="405" />
+        <location filename="..\ui\mainwindowbars.py" line="429" />
         <source>Next Page</source>
         <translation>다음 페이지</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="415" />
+        <location filename="..\ui\mainwindowbars.py" line="439" />
         <source>Tools</source>
         <translation>도구</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="416" />
+        <location filename="..\ui\mainwindowbars.py" line="440" />
         <source>Tools menu: utilities for project editing.</source>
         <translation>도구 메뉴: 프로젝트 편집을 위한 유틸리티.</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="418" />
+        <location filename="..\ui\mainwindowbars.py" line="442" />
         <source>Region Merge Tool</source>
         <translation>지역 병합 도구</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="462" />
-        <location filename="..\ui\mainwindowbars.py" line="428" />
+        <location filename="..\ui\mainwindowbars.py" line="446" />
+        <source>Re-run Inpainting Current Page</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\mainwindowbars.py" line="448" />
+        <source>Re-run Inpainting: apply all existing inpaint masks again on the current page.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\mainwindowbars.py" line="451" />
+        <source>Remove All Masks Current Page</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\mainwindowbars.py" line="453" />
+        <source>Remove every mask on the current page and restore the inpainted pixels from the original image.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\mainwindowbars.py" line="498" />
+        <location filename="..\ui\mainwindowbars.py" line="464" />
         <source>Run</source>
         <translation>실행</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="429" />
+        <location filename="..\ui\mainwindowbars.py" line="465" />
         <source>Run menu: choose enabled stages, presets, and translation commands.</source>
         <translation>실행 메뉴: 활성화된 단계, 사전 설정 및 번역 명령을 선택합니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="432" />
+        <location filename="..\ui\mainwindowbars.py" line="468" />
         <source>Enable Text Detection</source>
         <translation>텍스트 감지 활성화</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="433" />
+        <location filename="..\ui\mainwindowbars.py" line="469" />
         <source>Enable OCR</source>
         <translation>OCR 활성화</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="434" />
+        <location filename="..\ui\mainwindowbars.py" line="470" />
         <source>Enable Translation</source>
         <translation>번역 활성화</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="435" />
+        <location filename="..\ui\mainwindowbars.py" line="471" />
         <source>Enable Inpainting</source>
         <translation>인페인팅 활성화</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="442" />
+        <location filename="..\ui\mainwindowbars.py" line="478" />
         <source>Preset: Full Run</source>
         <translation>사전 설정: 전체 실행</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="443" />
+        <location filename="..\ui\mainwindowbars.py" line="479" />
         <source>Preset: Text Detection</source>
         <translation>사전 설정: 텍스트 감지</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="444" />
+        <location filename="..\ui\mainwindowbars.py" line="480" />
         <source>Preset: OCR</source>
         <translation>사전 설정: OCR</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="445" />
+        <location filename="..\ui\mainwindowbars.py" line="481" />
         <source>Preset: Translation</source>
         <translation>사전 설정: 번역</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="446" />
+        <location filename="..\ui\mainwindowbars.py" line="482" />
         <source>Preset: Inpainting</source>
         <translation>사전 설정: 인페인팅</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="454" />
+        <location filename="..\ui\mainwindowbars.py" line="490" />
         <source>Enable text detection, OCR, translation, and inpainting.</source>
         <translation>텍스트 감지, OCR, 번역 및 인페인팅을 활성화합니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="455" />
+        <location filename="..\ui\mainwindowbars.py" line="491" />
         <source>Enable only text detection. OCR, translation, and inpainting are disabled.</source>
         <translation>텍스트 감지만 활성화합니다. OCR, 번역, 인페인팅이 비활성화됩니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="456" />
+        <location filename="..\ui\mainwindowbars.py" line="492" />
         <source>Enable only OCR for existing text regions.</source>
         <translation>기존 텍스트 영역에 대해서만 OCR을 활성화합니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="457" />
+        <location filename="..\ui\mainwindowbars.py" line="493" />
         <source>Enable only translation for existing source text.</source>
         <translation>기존 소스 텍스트에 대해서만 번역을 활성화합니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="458" />
+        <location filename="..\ui\mainwindowbars.py" line="494" />
         <source>Enable only inpainting for existing regions.</source>
         <translation>기존 영역에 대해서만 인페인팅을 활성화합니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="463" />
+        <location filename="..\ui\mainwindowbars.py" line="499" />
         <source>Run without updating text style</source>
         <translation>텍스트 스타일을 업데이트하지 않고 실행</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="464" />
+        <location filename="..\ui\mainwindowbars.py" line="500" />
         <source>Translate Page</source>
         <translation>페이지 번역</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="465" />
+        <location filename="..\ui\mainwindowbars.py" line="501" />
         <source>Translation Benchmark</source>
         <translation>번역 벤치마크</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="466" />
+        <location filename="..\ui\mainwindowbars.py" line="502" />
         <source>Compare the current page translation with multiple translators or LLM configurations in a side-by-side table.</source>
         <translation>현재 페이지 번역을 병렬 테이블에서 여러 번역자 또는 LLM 구성과 비교합니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="506" />
+        <location filename="..\ui\mainwindowbars.py" line="542" />
         <source>Minimize window</source>
         <translation>창 최소화</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="510" />
+        <location filename="..\ui\mainwindowbars.py" line="546" />
         <source>Maximize or restore window</source>
         <translation>창 최대화 또는 복원</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="515" />
+        <location filename="..\ui\mainwindowbars.py" line="551" />
         <source>Close window</source>
         <translation>창 닫기</translation>
     </message>
@@ -2693,35 +3163,55 @@ qipao,qipao2</source>
 </context><context>
     <name>TransPairWidget</name>
     <message>
-        <location filename="..\ui\textedit_area.py" line="414" />
+        <location filename="..\ui\textedit_area.py" line="415" />
         <source>First step draft</source>
         <translation>첫 번째 단계 초안</translation>
     </message>
     <message>
-        <location filename="..\ui\textedit_area.py" line="416" />
+        <location filename="..\ui\textedit_area.py" line="417" />
         <source>Google/DeepL first-step result before LLM refinement. Use it to compare the raw draft with the final translation.</source>
         <translation>LLM 개선 전 Google/DeepL 첫 번째 단계 결과입니다. 이를 사용하여 원본 초안과 최종 번역을 비교하세요.</translation>
     </message>
     <message>
-        <location filename="..\ui\textedit_area.py" line="418" />
+        <location filename="..\ui\textedit_area.py" line="419" />
         <source>Google/DeepL first-step result before LLM refinement. This text is saved with the project and is hidden when no draft exists.</source>
         <translation>LLM 개선 전 Google/DeepL 첫 번째 단계 결과입니다. 이 텍스트는 프로젝트와 함께 저장되며 초안이 없으면 숨겨집니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\textedit_area.py" line="419" />
+        <location filename="..\ui\textedit_area.py" line="420" />
         <source>No first-step draft available.</source>
         <translation>사용할 수 있는 첫 번째 단계 초안이 없습니다.</translation>
+    </message>
+    <message>
+        <location filename="..\ui\textedit_area.py" line="422" />
+        <source>Machine translator results</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\textedit_area.py" line="424" />
+        <source>Saved Google/DeepL outputs for this text block. Use them to compare raw machine translations with the final text.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\textedit_area.py" line="426" />
+        <source>Saved Google/DeepL outputs for this text block. This text is saved with the project and is hidden when no provider result exists.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\textedit_area.py" line="427" />
+        <source>No saved Google/DeepL result available.</source>
+        <translation type="unfinished" />
     </message>
 </context><context>
     <name>TranslateThread</name>
     <message>
-        <location filename="..\ui\module_manager.py" line="197" />
+        <location filename="..\ui\module_manager.py" line="238" />
         <source>Failed to set translator </source>
         <translation>번역기를 설정하지 못했습니다</translation>
     </message>
     <message>
-        <location filename="..\ui\module_manager.py" line="292" />
-        <location filename="..\ui\module_manager.py" line="224" />
+        <location filename="..\ui\module_manager.py" line="333" />
+        <location filename="..\ui\module_manager.py" line="265" />
         <source>Translation Failed.</source>
         <translation>번역이 실패했습니다.</translation>
     </message>
@@ -2732,178 +3222,268 @@ qipao,qipao2</source>
 </context><context>
     <name>TranslationBenchmarkWindow</name>
     <message>
-        <location filename="..\ui\translation_benchmark.py" line="124" />
+        <location filename="..\ui\translation_benchmark.py" line="163" />
         <source>Translation Benchmark</source>
         <translation>번역 벤치마크</translation>
     </message>
     <message>
-        <location filename="..\ui\translation_benchmark.py" line="129" />
+        <location filename="..\ui\translation_benchmark.py" line="168" />
         <source>Current page: {page}</source>
         <translation>현재 페이지: {페이지}</translation>
     </message>
     <message>
-        <location filename="..\ui\translation_benchmark.py" line="130" />
+        <location filename="..\ui\translation_benchmark.py" line="169" />
         <source>Select translators and run the benchmark.</source>
         <translation>번역자를 선택하고 벤치마크를 실행합니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\translation_benchmark.py" line="224" />
-        <location filename="..\ui\translation_benchmark.py" line="137" />
+        <location filename="..\ui\translation_benchmark.py" line="323" />
+        <location filename="..\ui\translation_benchmark.py" line="176" />
         <source>#</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="..\ui\translation_benchmark.py" line="224" />
-        <location filename="..\ui\translation_benchmark.py" line="137" />
+        <location filename="..\ui\translation_benchmark.py" line="323" />
+        <location filename="..\ui\translation_benchmark.py" line="176" />
         <source>Source</source>
         <translation>원천</translation>
     </message>
     <message>
-        <location filename="..\ui\translation_benchmark.py" line="152" />
+        <location filename="..\ui\translation_benchmark.py" line="191" />
         <source>Run Benchmark</source>
         <translation>벤치마크 실행</translation>
     </message>
     <message>
-        <location filename="..\ui\translation_benchmark.py" line="153" />
+        <location filename="..\ui\translation_benchmark.py" line="192" />
         <source>Translate the current page with the selected translators and compare the results side by side.</source>
         <translation>선택된 번역자들과 함께 현재 페이지를 번역하고 결과를 나란히 비교해 보세요.</translation>
     </message>
     <message>
-        <location filename="..\ui\translation_benchmark.py" line="156" />
+        <location filename="..\ui\translation_benchmark.py" line="218" />
+        <source>LLM</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\translation_benchmark.py" line="220" />
+        <source>Two-Step</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\translation_benchmark.py" line="222" />
+        <source>Reasoning</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\translation_benchmark.py" line="223" />
+        <source>JSON mode</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\translation_benchmark.py" line="226" />
+        <source>Run LLM Model Matrix</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\translation_benchmark.py" line="227" />
+        <source>Run repeated LLM and Two-Step benchmarks for each listed model and export JSON, CSV, and summary files.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\translation_benchmark.py" line="230" />
         <source>Close</source>
         <translation>닫다</translation>
     </message>
     <message>
-        <location filename="..\ui\translation_benchmark.py" line="165" />
+        <location filename="..\ui\translation_benchmark.py" line="239" />
         <source>Translators</source>
         <translation>번역가</translation>
     </message>
     <message>
-        <location filename="..\ui\translation_benchmark.py" line="220" />
+        <location filename="..\ui\translation_benchmark.py" line="242" />
+        <source>LLM model matrix</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\translation_benchmark.py" line="251" />
+        <source>Runs</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\translation_benchmark.py" line="253" />
+        <source>Warmup</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\translation_benchmark.py" line="256" />
+        <source>Provider</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\translation_benchmark.py" line="258" />
+        <source>Endpoint</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\translation_benchmark.py" line="261" />
+        <source>Max tokens</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\translation_benchmark.py" line="263" />
+        <source>num_ctx</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\translation_benchmark.py" line="319" />
         <source>Select at least one translator.</source>
         <translation>번역자를 한 명 이상 선택하세요.</translation>
     </message>
     <message>
-        <location filename="..\ui\translation_benchmark.py" line="228" />
+        <location filename="..\ui\translation_benchmark.py" line="327" />
         <source>Running ...</source>
         <translation>달리기 ...</translation>
     </message>
     <message>
-        <location filename="..\ui\translation_benchmark.py" line="266" />
+        <location filename="..\ui\translation_benchmark.py" line="353" />
+        <source>Enter at least one model for the model matrix.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\translation_benchmark.py" line="362" />
+        <source>Select LLM, Two-Step, or both.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\translation_benchmark.py" line="409" />
+        <source>Model matrix benchmark saved: {summary_path}</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\translation_benchmark.py" line="416" />
+        <source>Model matrix benchmark failed: {message}</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="..\ui\translation_benchmark.py" line="420" />
         <source>Benchmark is still running. Wait for it to finish before closing.</source>
         <translation>벤치마크는 아직 실행 중입니다. 닫기 전에 끝날 때까지 기다리십시오.</translation>
+    </message>
+    <message>
+        <location filename="..\ui\translation_benchmark.py" line="424" />
+        <source>Model matrix benchmark is still running. Wait for it to finish before closing.</source>
+        <translation type="unfinished" />
     </message>
 </context><context>
     <name>TranslatorConfigPanel</name>
     <message>
-        <location filename="..\ui\module_parse_widgets.py" line="412" />
+        <location filename="..\ui\module_parse_widgets.py" line="424" />
         <source>Language expected in the detected source text.</source>
         <translation>감지된 소스 텍스트에 예상되는 언어입니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\module_parse_widgets.py" line="413" />
+        <location filename="..\ui\module_parse_widgets.py" line="425" />
         <source>Language used for translated output.</source>
         <translation>번역된 출력에 사용되는 언어입니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\module_parse_widgets.py" line="414" />
+        <location filename="..\ui\module_parse_widgets.py" line="426" />
         <source>Keyword substitution for machine translation source text</source>
         <translation>원문에 대한 키워드 치환(전처리)</translation>
     </message>
     <message>
-        <location filename="..\ui\module_parse_widgets.py" line="415" />
+        <location filename="..\ui\module_parse_widgets.py" line="427" />
         <source>Configure replacements that run before machine translation reads the source text.</source>
         <translation>기계 번역이 원본 텍스트를 읽기 전에 실행되는 대체를 구성합니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\module_parse_widgets.py" line="418" />
+        <location filename="..\ui\module_parse_widgets.py" line="430" />
         <source>Keyword substitution for machine translation</source>
         <translation>번역문에 대한 키워드 치환(후처리)</translation>
     </message>
     <message>
-        <location filename="..\ui\module_parse_widgets.py" line="419" />
+        <location filename="..\ui\module_parse_widgets.py" line="431" />
         <source>Configure replacements that run on machine translation output.</source>
         <translation>기계 번역 출력에서 ​​실행되는 대체를 구성합니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\module_parse_widgets.py" line="422" />
+        <location filename="..\ui\module_parse_widgets.py" line="434" />
         <source>Keyword substitution for source text</source>
         <translation>OCR 결과에 대한 키워드 치환</translation>
     </message>
     <message>
-        <location filename="..\ui\module_parse_widgets.py" line="423" />
+        <location filename="..\ui\module_parse_widgets.py" line="435" />
         <source>Configure replacements that run on OCR/source text before translation.</source>
         <translation>번역하기 전에 OCR/원본 텍스트에서 실행되는 대체를 구성합니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\module_parse_widgets.py" line="426" />
+        <location filename="..\ui\module_parse_widgets.py" line="438" />
         <source>Translate each text block individually</source>
         <translation>각 텍스트 블록을 개별적으로 번역</translation>
     </message>
     <message>
-        <location filename="..\ui\module_parse_widgets.py" line="427" />
+        <location filename="..\ui\module_parse_widgets.py" line="439" />
         <source>Translate every detected text block as a separate request instead of batching them together.</source>
         <translation>감지된 모든 텍스트 블록을 일괄 처리하는 대신 별도의 요청으로 번역합니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\module_parse_widgets.py" line="433" />
+        <location filename="..\ui\module_parse_widgets.py" line="445" />
         <source>Source</source>
         <translation>원본</translation>
     </message>
     <message>
-        <location filename="..\ui\module_parse_widgets.py" line="435" />
+        <location filename="..\ui\module_parse_widgets.py" line="447" />
         <source>Target</source>
         <translation>대상</translation>
     </message>
 </context><context>
     <name>TranslatorSelectionWidget</name>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="683" />
+        <location filename="..\ui\mainwindowbars.py" line="719" />
         <source>Translate</source>
         <translation>번역하다</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="684" />
+        <location filename="..\ui\mainwindowbars.py" line="720" />
         <source>Open translator settings.</source>
         <translation>번역기 설정을 엽니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="686" />
+        <location filename="..\ui\mainwindowbars.py" line="722" />
         <source>Source</source>
         <translation>원천</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="687" />
+        <location filename="..\ui\mainwindowbars.py" line="723" />
         <source>Open source language settings.</source>
         <translation>오픈 소스 언어 설정.</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="689" />
+        <location filename="..\ui\mainwindowbars.py" line="725" />
         <source>Target</source>
         <translation>목표</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="690" />
+        <location filename="..\ui\mainwindowbars.py" line="726" />
         <source>Open target language settings.</source>
         <translation>대상 언어 설정을 엽니다.</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="694" />
+        <location filename="..\ui\mainwindowbars.py" line="730" />
         <source>Select translator module.</source>
         <translation>번역기 모듈을 선택하세요.</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="696" />
+        <location filename="..\ui\mainwindowbars.py" line="732" />
         <source>Source language.</source>
         <translation>소스 언어.</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="698" />
+        <location filename="..\ui\mainwindowbars.py" line="734" />
         <source>Target language.</source>
         <translation>대상 언어.</translation>
     </message>
     <message>
-        <location filename="..\ui\mainwindowbars.py" line="700" />
+        <location filename="..\ui\mainwindowbars.py" line="736" />
         <source>Configure translator module.</source>
         <translation>번역기 모듈을 구성합니다.</translation>
     </message>

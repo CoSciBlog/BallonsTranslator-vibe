@@ -1,5 +1,15 @@
 # Changelogs
 
+### 2026-05-18
+[v1.4.0-vibe.35] settings performance tooltips
+Changed:
+1. Expanded Settings labels, hover text, and tooltips with speed, memory, disk-write, cache, API-cost, and quality tradeoff notes.
+2. Added a generic performance note to dynamic module parameter tooltips so Detector, OCR, Inpainter, and Translator settings explain likely runtime impact.
+3. Updated Qt translation source files and recompiled the `.qm` translation files.
+
+Version:
+1. Bumped the fork runtime version string to `1.4.0-vibe.35`.
+
 ### 2026-05-14
 [Unreleased] robustness fixes
 Changed:

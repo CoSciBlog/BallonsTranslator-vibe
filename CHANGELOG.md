@@ -15,6 +15,7 @@
 - Added glossary-assisted name consistency checks during translation review.
 - Added pronoun and address-form checks to the translation review prompt.
 - Saved Google/DeepL provider outputs per text block and showed them in the text editor sidebar for comparison.
+- Expanded Settings labels, hover text, and tooltips with performance notes for speed, memory, disk writes, API cost, cache behavior, and module-specific tradeoffs.
 
 ### Changed
 
@@ -23,6 +24,7 @@
 - Manual glossary entries are preserved and preferred over automatic entries.
 - Project glossaries now save to `glossary.json` in the image project folder instead of the global translator config or embedded `imgtrans` project JSON.
 - Direct Google/DeepL translation and Two-Step first-step translation now persist raw provider results in each project's `imgtrans_*.json`.
+- Dynamic module parameter tooltips now include a general performance note so OCR, detector, translator, and inpaint settings explain likely speed and memory tradeoffs.
 
 ### Fixed
 
@@ -36,3 +38,4 @@
 - Reduced inconsistent character names and pronoun drift during review.
 - Prevented automatically extracted glossary entries from being carried into unrelated projects through `config/config.json`.
 - Bumped the fork runtime version string to `1.4.0-vibe.34`.
+- Bumped the fork runtime version string to `1.4.0-vibe.35`.

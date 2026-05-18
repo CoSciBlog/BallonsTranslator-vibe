@@ -159,6 +159,17 @@ class ParamPushButton(QPushButton):
 class ParamWidget(QWidget):
 
     paramwidget_edited = Signal(str, dict)
+
+    def _tooltip_with_performance_note(self, description: str = None) -> str:
+        performance_note = self.tr(
+            'Performance: this setting can affect speed, memory use, API cost, or output stability depending on the selected module. Higher quality, larger batches, more context, extra retries, debug output, and network delays usually make processing slower; acceleration, GPU, cache, and batching options can make compatible workloads faster but may use more memory.'
+        )
+        if not description:
+            return performance_note
+        if 'Performance:' in description:
+            return description
+        return f'{description}\n\n{performance_note}'
+
     def __init__(self, params, scrollWidget: QWidget = None, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         layout = QHBoxLayout(self)
@@ -170,7 +181,7 @@ class ParamWidget(QWidget):
         layout.addStretch(-1)
 
         if 'description' in params:
-            self.setToolTip(params['description'])
+            self.setToolTip(self._tooltip_with_performance_note(params['description']))
 
         for ii, param_key in enumerate(params):
             if param_key == 'description' or param_key.startswith('__'):
@@ -251,13 +262,13 @@ class ParamWidget(QWidget):
                 if param_widget is not None:
                     param_widget.paramwidget_edited.connect(self.on_paramwidget_edited)
                     if description:
-                        param_widget.setToolTip(description)
+                        param_widget.setToolTip(self._tooltip_with_performance_note(description))
 
             widget_idx = 0
             if require_label:
                 param_label = ParamNameLabel(display_param_name)
                 if description:
-                    param_label.setToolTip(description)
+                    param_label.setToolTip(self._tooltip_with_performance_note(description))
                 param_layout.addWidget(param_label, ii, 0)
                 widget_idx = 1
             if param_widget is not None:
@@ -320,8 +331,9 @@ class ModuleConfigParseWidget(QWidget):
         p_layout = QHBoxLayout()
         p_layout.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
         self.module_label = ParamNameLabel(module_name)
-        self.module_label.setToolTip(self.tr('Select which module implementation is used for this step.'))
-        self.module_combobox.setToolTip(self.tr('Select which module implementation is used for this step.'))
+        module_tooltip = self.tr('Select which module implementation is used for this step. Different modules can be much faster or slower depending on CPU/GPU support, model size, and network/API latency.')
+        self.module_label.setToolTip(module_tooltip)
+        self.module_combobox.setToolTip(module_tooltip)
         p_layout.addWidget(self.module_label)
         p_layout.addWidget(self.module_combobox)
         p_layout.addStretch(-1)
