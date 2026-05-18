@@ -22,6 +22,7 @@ from utils import shared
 from utils.imgproc_utils import extract_ballon_region, rotate_polygons, get_connected_block_mask
 from utils.text_processing import seg_text, is_cjk
 from utils.text_layout import layout_text
+from utils.textbox_merge import join_textbox_texts, union_xywh_rects
 
 
 class CreateItemCommand(QUndoCommand):
@@ -204,6 +205,118 @@ class DeleteBlkItemsCommand(QUndoCommand):
             self.sw.updateCounterText()
 
 
+class MergeBlkItemsCommand(QUndoCommand):
+    def __init__(self, blk_list: List[TextBlkItem], ctrl, parent=None):
+        super().__init__(parent)
+        self.ctrl: SceneTextManager = ctrl
+        self.canvas: Canvas = ctrl.canvas
+        self.op_counter = 0
+        self.blk_list = [blk for blk in blk_list if isinstance(blk, TextBlkItem)]
+        self.blk_list.sort(key=lambda blk: blk.idx)
+        if len(self.blk_list) < 2:
+            return
+
+        self.target = self.blk_list[0]
+        self.removed = self.blk_list[1:]
+        self.target_pairw = ctrl.pairwidget_list[self.target.idx]
+        self.old_blk = copy.deepcopy(self.target.blk)
+        self.old_rect = self.target.absBoundingRect(qrect=True)
+        self.old_html = self.target.toHtml()
+        self.old_source = self.target_pairw.e_source.toPlainText()
+        self.old_translation = self.target_pairw.e_trans.toPlainText()
+
+        source_texts = []
+        translation_texts = []
+        rects = []
+        for blkitem in self.blk_list:
+            pairw = ctrl.pairwidget_list[blkitem.idx]
+            source_texts.append(pairw.e_source.toPlainText() or blkitem.blk.get_text())
+            translation_texts.append(pairw.e_trans.toPlainText() or blkitem.toPlainText())
+            rects.append(blkitem.absBoundingRect())
+
+        self.new_source = join_textbox_texts(source_texts)
+        self.new_translation = join_textbox_texts(translation_texts)
+        self.new_rect = union_xywh_rects(rects)
+        self.delete_command = DeleteBlkItemsCommand(self.removed, 0, ctrl)
+        self.apply_new_state()
+
+    def _replace_target_block(self, block: TextBlock):
+        self.target.blk.__dict__.clear()
+        self.target.blk.__dict__.update(copy.deepcopy(block).__dict__)
+        self.target_pairw.textblock = self.target.blk
+
+    def _sync_editors(self, source: str, translation: str):
+        self.target_pairw.e_source.in_redo_undo = True
+        self.target_pairw.e_trans.in_redo_undo = True
+        try:
+            self.target_pairw.e_source.setPlainText(source)
+            self.target_pairw.e_trans.setPlainText(translation)
+        finally:
+            self.target_pairw.e_source.in_redo_undo = False
+            self.target_pairw.e_trans.in_redo_undo = False
+        self.target_pairw.e_source.old_undo_steps = self.target_pairw.e_source.document().availableUndoSteps()
+        self.target_pairw.e_trans.old_undo_steps = self.target_pairw.e_trans.document().availableUndoSteps()
+
+    def _set_target_plain_text(self, text: str):
+        self.target.in_redo_undo = True
+        try:
+            self.target.setPlainText('')
+            self.target.setPlainText(text)
+        finally:
+            self.target.in_redo_undo = False
+        self.target.old_undo_steps = self.target.document().availableUndoSteps()
+
+    def _set_target_html(self, html: str):
+        self.target.in_redo_undo = True
+        try:
+            self.target.setPlainText('')
+            self.target.setHtml(html)
+        finally:
+            self.target.in_redo_undo = False
+        self.target.old_undo_steps = self.target.document().availableUndoSteps()
+
+    def apply_new_state(self):
+        x, y, w, h = self.new_rect
+        self.target.blk.text = self.new_source.splitlines()
+        self.target.blk.translation = self.new_translation
+        self.target.blk.rich_text = ''
+        self.target.blk.translation_draft = ''
+        self.target.blk.translation_provider_results = {}
+        self.target.blk.xyxy = [x, y, x + w, y + h]
+        self.target.blk.set_lines_by_xywh(np.array([x, y, w, h]), angle=0, adjust_bbox=True)
+        self.target.blk._bounding_rect = [x, y, w, h]
+        self.target.setAngle(0)
+        self.target.setRect(QRectF(x, y, w, h), repaint=False)
+        self._set_target_plain_text(self.new_translation)
+        self._sync_editors(self.new_source, self.new_translation)
+        self.ctrl.txtblkShapeControl.setBlkItem(self.target)
+
+    def restore_old_state(self):
+        self._replace_target_block(self.old_blk)
+        self.target.setRect(self.old_rect, repaint=False)
+        self._set_target_html(self.old_html)
+        if self.target.fontformat.letter_spacing != 1:
+            self.target.setLetterSpacing(self.target.fontformat.letter_spacing, force=True)
+        self.target.setAngle(self.target.blk.angle)
+        self._sync_editors(self.old_source, self.old_translation)
+        self.ctrl.txtblkShapeControl.setBlkItem(self.target)
+
+    def redo(self):
+        if len(self.blk_list) < 2:
+            return
+        if self.op_counter == 0:
+            self.op_counter += 1
+            return
+        self.delete_command.redo()
+        self.apply_new_state()
+
+    def undo(self):
+        if len(self.blk_list) < 2:
+            return
+        self.restore_old_state()
+        self.delete_command.undo()
+
+
 class PasteBlkItemsCommand(QUndoCommand):
     def __init__(self, blk_list: List[TextBlkItem], pwidget_list: List[TransPairWidget], ctrl, parent=None):
         super().__init__(parent)
@@ -338,6 +451,7 @@ class SceneTextManager(QObject):
         self.canvas.paste_textblks.connect(self.onPasteBlkItems)
         self.canvas.format_textblks.connect(self.onFormatTextblks)
         self.canvas.layout_textblks.connect(self.onAutoLayoutTextblks)
+        self.canvas.merge_textblks.connect(self.onMergeTextblks)
         self.canvas.reset_angle.connect(self.onResetAngle)
         self.canvas.squeeze_blk.connect(self.onSqueezeBlk)
         self.canvas.incanvas_selection_changed.connect(self.on_incanvas_selection_changed)
@@ -708,6 +822,11 @@ class SceneTextManager(QObject):
                 self.layout_textblk(blkitem)
 
             self.canvas.push_undo_command(AutoLayoutCommand(selected_blks, old_rect_lst, old_html_lst, trans_widget_lst))
+
+    def onMergeTextblks(self):
+        selected_blks = self.canvas.selected_text_items()
+        if len(selected_blks) >= 2:
+            self.canvas.push_undo_command(MergeBlkItemsCommand(selected_blks, self))
 
     def onResetAngle(self):
         selected_blks = self.canvas.selected_text_items()

@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README_EN.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.41`
+Fork release: `1.4.0-vibe.42`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -49,6 +49,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Fixed current-page Re-Inpaint completion so the progress dialog closes after the inpaint result is applied.
 - Added a Drawboard checkbox to show translated text boxes while editing or reviewing masks.
 - Glossary target-term edits now update matching existing translations, re-render affected pages, and save the updated project.
+- Added a right-click text box action that merges two or more selected text boxes into the first selected box while leaving the inpainted page layer unchanged.
 
 ## Features
 
@@ -62,6 +63,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
   - rich text editing
   - search and replace
   - text style presets
+  - right-click merge for multiple selected text boxes
   - import and export for Word documents
 - Image editing workflow:
   - mask editing

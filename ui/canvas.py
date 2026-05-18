@@ -167,6 +167,7 @@ class Canvas(QGraphicsScene):
 
     format_textblks = Signal()
     layout_textblks = Signal()
+    merge_textblks = Signal()
     reset_angle = Signal()
     squeeze_blk = Signal()
 
@@ -821,6 +822,8 @@ class Canvas(QGraphicsScene):
 
             format_act = menu.addAction(self.tr("Apply font formatting"))
             layout_act = menu.addAction(self.tr("Auto layout"))
+            merge_act = menu.addAction(self.tr("Merge selected text boxes"))
+            merge_act.setEnabled(len(self.selected_text_items()) >= 2)
             angle_act = menu.addAction(self.tr("Reset Angle"))
             squeeze_act = menu.addAction(self.tr("Squeeze"))
             menu.addSeparator()
@@ -848,6 +851,8 @@ class Canvas(QGraphicsScene):
                 self.format_textblks.emit()
             elif rst == layout_act:
                 self.layout_textblks.emit()
+            elif rst == merge_act:
+                self.merge_textblks.emit()
             elif rst == angle_act:
                 self.reset_angle.emit()
             elif rst == squeeze_act:

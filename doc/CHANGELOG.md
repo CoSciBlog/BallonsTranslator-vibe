@@ -1,6 +1,16 @@
 # Changelogs
 
 ### 2026-05-18
+[v1.4.0-vibe.42] text box context merge
+Added:
+1. Added a right-click text box action for merging two or more selected text boxes into the first selected box.
+2. Combined selected source and translated texts with line breaks while preserving the already inpainted page layer and mask data.
+3. Added undo/redo support for the merge action and covered merge helper behavior with tests.
+
+Version:
+1. Bumped the fork runtime version string to `1.4.0-vibe.42`.
+
+### 2026-05-18
 [v1.4.0-vibe.41] glossary edit propagation
 Added:
 1. Glossary target-term edits now update matching existing translations and rich text in the open project.
