@@ -19,6 +19,10 @@ from utils.imgproc_utils import enlarge_window
 from utils.textblock import TextBlock, TextAlignment
 from utils import shared
 from utils.message import create_error_dialog, create_info_dialog
+from utils.glossary_replacement import (
+    apply_glossary_replacements_to_text,
+    build_glossary_replacements,
+)
 from modules.translators.trans_chatgpt import GPTTranslator
 from modules.translators import lang_display_label, lang_display_to_key
 from modules import GET_VALID_TEXTDETECTORS, GET_VALID_INPAINTERS, GET_VALID_TRANSLATORS, GET_VALID_OCR
@@ -660,10 +664,71 @@ class MainWindow(mainwindow_cls):
         self.glossaryWindow.activateWindow()
 
     def on_project_glossary_saved(self, glossary: dict):
+        old_glossary = self.imgtrans_proj.normalize_glossary(self.imgtrans_proj.glossary)
+        if self.canvas.text_change_unsaved():
+            self.st_manager.updateTextBlkList()
         self.imgtrans_proj.glossary = self.imgtrans_proj.normalize_glossary(glossary)
+        changed_pages, replacement_count = self.apply_project_glossary_changes(old_glossary, self.imgtrans_proj.glossary)
         self.sync_project_glossary_to_translator()
         if self.save_project_safely(self.tr('saving project glossary'), notify_user=True):
+            if changed_pages:
+                self.rerender_glossary_changed_pages(changed_pages)
+                LOGGER.info(
+                    f'Applied glossary changes to {replacement_count} translation occurrence(s) '
+                    f'on {len(changed_pages)} page(s).'
+                )
             self.canvas.setProjSaveState(False)
+
+    def apply_project_glossary_changes(self, old_glossary: dict, new_glossary: dict):
+        replacements = build_glossary_replacements(old_glossary, new_glossary)
+        if not replacements:
+            return [], 0
+
+        changed_pages = []
+        replacement_count = 0
+        for page_name, blk_list in self.imgtrans_proj.pages.items():
+            page_changed = False
+            for blk in blk_list:
+                for attr in ('translation', 'rich_text'):
+                    text = getattr(blk, attr, '')
+                    updated, count = apply_glossary_replacements_to_text(text, replacements)
+                    if count:
+                        setattr(blk, attr, updated)
+                        replacement_count += count
+                        page_changed = True
+            if page_changed:
+                changed_pages.append(page_name)
+
+        if self.imgtrans_proj.current_img in changed_pages:
+            self.st_manager.updateTranslation()
+            self.canvas.setProjSaveState(True)
+        return changed_pages, replacement_count
+
+    def rerender_glossary_changed_pages(self, changed_pages: List[str]):
+        if not changed_pages:
+            return
+
+        original_page = self.imgtrans_proj.current_img
+        original_save_on_page_changed = self.save_on_page_changed
+        self.save_on_page_changed = False
+        try:
+            for page_name in changed_pages:
+                page_index = self.imgtrans_proj.pagename2idx(page_name)
+                if page_index < 0:
+                    continue
+                if self.pageList.currentIndex().row() != page_index:
+                    self.pageList.setCurrentRow(page_index)
+                else:
+                    self.imgtrans_proj.set_current_img(page_name)
+                    self.canvas.updateCanvas()
+                    self.st_manager.updateSceneTextitems()
+                self.saveCurrentPage(update_scene_text=False, save_proj=False, save_rst_only=True)
+        finally:
+            if original_page in self.imgtrans_proj.pages:
+                original_index = self.imgtrans_proj.pagename2idx(original_page)
+                if original_index >= 0 and self.pageList.currentIndex().row() != original_index:
+                    self.pageList.setCurrentRow(original_index)
+            self.save_on_page_changed = original_save_on_page_changed
 
     def closeEvent(self, event: QCloseEvent) -> None:
         if not self.imgtrans_proj.is_empty:

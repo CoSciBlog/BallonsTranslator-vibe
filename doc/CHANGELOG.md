@@ -1,6 +1,15 @@
 # Changelogs
 
 ### 2026-05-18
+[v1.4.0-vibe.41] glossary edit propagation
+Added:
+1. Glossary target-term edits now update matching existing translations and rich text in the open project.
+2. Affected pages are re-rendered and saved after glossary replacements are applied.
+
+Version:
+1. Bumped the fork runtime version string to `1.4.0-vibe.41`.
+
+### 2026-05-18
 [v1.4.0-vibe.40] re-inpaint completion and drawboard text overlay
 Added:
 1. Added a Drawboard checkbox for showing translated text boxes while editing or reviewing masks.

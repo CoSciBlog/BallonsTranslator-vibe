@@ -1,4 +1,3 @@
-import re
 from typing import Dict, List
 
 from qtpy.QtCore import Qt, Signal
@@ -13,6 +12,7 @@ from qtpy.QtWidgets import (
 )
 
 from .custom_widget import NoBorderPushBtn
+from utils.glossary_replacement import parse_glossary_entries
 
 
 class GlossaryWindow(QDialog):
@@ -83,7 +83,7 @@ class GlossaryWindow(QDialog):
         self._loading = True
         self.project_glossary = dict(glossary or {})
         self.model.removeRows(0, self.model.rowCount())
-        for entry in self.parse_entries(self.project_glossary.get("entries", "")):
+        for entry in parse_glossary_entries(self.project_glossary.get("entries", "")):
             self.add_row(entry, save=False)
         self.prompt_editor.setPlainText(self.project_glossary.get("prompt", ""))
         self._loading = False
@@ -136,26 +136,4 @@ class GlossaryWindow(QDialog):
 
     @staticmethod
     def parse_entries(text: str) -> List[Dict[str, str]]:
-        entries = []
-        for line in (text or "").splitlines():
-            clean = line.strip()
-            if not clean or clean.startswith("#") or "=>" not in clean:
-                continue
-            source, rest = [part.strip() for part in clean.split("=>", 1)]
-            note = ""
-            if "#" in rest:
-                rest, note = [part.strip() for part in rest.split("#", 1)]
-            category = "term"
-            category_match = re.search(r"\[([^\]]+)\]\s*$", rest)
-            if category_match:
-                category = category_match.group(1).strip() or "term"
-                rest = rest[: category_match.start()].strip()
-            entries.append(
-                {
-                    "source": source,
-                    "target": rest,
-                    "category": category,
-                    "note": note,
-                }
-            )
-        return entries
+        return parse_glossary_entries(text)

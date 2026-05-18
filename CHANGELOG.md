@@ -19,6 +19,7 @@
 - Removed the legacy Settings-page LLM glossary and glossary-prompt text editors; project glossaries are edited through the Glossary window and saved in `glossary.json`.
 - Expanded LLM and Two-Step Settings hover text with performance effects for provider choice, API keys and rate limits, glossary/context size, reasoning, reflection, JSON mode, delay, per-block translation, refinement batch size, pipeline overlap, and VRAM unloading.
 - Drawboard checkbox for showing translated text boxes while mask editing.
+- Glossary target-term changes now propagate to existing project translations and trigger affected page re-renders.
 
 ### Changed
 
@@ -51,3 +52,4 @@
 - Bumped the fork runtime version string to `1.4.0-vibe.39`.
 - Preserved Re-Inpaint request metadata through the inpaint thread so the current-page completion handler closes the progress dialog.
 - Bumped the fork runtime version string to `1.4.0-vibe.40`.
+- Bumped the fork runtime version string to `1.4.0-vibe.41`.

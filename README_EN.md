@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.40`
+Fork release: `1.4.0-vibe.41`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -48,6 +48,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Expanded Settings hover descriptions for LLM and Two-Step translation speed factors, including provider latency, API limits, glossary/context prompt size, reasoning, reflection, JSON mode, per-block translation, batching, pipeline overlap, and VRAM unloading.
 - Fixed current-page Re-Inpaint completion so the progress dialog closes after the inpaint result is applied.
 - Added a Drawboard checkbox to show translated text boxes while editing or reviewing masks.
+- Glossary target-term edits now update matching existing translations, re-render affected pages, and save the updated project.
 
 ## Features
 
@@ -125,6 +126,8 @@ The launcher update flow tracks `https://github.com/CoSciBlog/BallonsTranslator-
 ## Project glossary
 
 The left sidebar includes a `Gloss` button with a glossary icon that opens the current project's glossary window. Entries and the glossary prompt are saved in a separate `glossary.json` file inside the project's image folder, next to the project's `imgtrans_*.json` file, so each manga/comic project keeps its own terminology. The old Settings-page glossary text boxes are no longer used; edit glossary entries and the glossary prompt from the Glossary window. LLM translators use those entries for consistency, but category labels and notes such as `[CHARACTER]` or `[PLACE]` are treated as metadata and are not included in translation output. Automatic glossary extraction defaults to character/name entries and places only; optional translator checkboxes can enable organizations, titles, domain terms, honorifics, or catchphrases when needed. Automatically extracted names are merged without replacing existing manual glossary entries.
+
+When an existing glossary entry's target text is changed, for example a character name is corrected, the app applies that target-term change to existing translations in the project, updates rich text where possible, saves `glossary.json` and the project JSON, and re-renders the affected result pages.
 
 Auto Glossary now extracts names/characters more conservatively: `name` entries are normalized to the `character` category, and interjections, SFX, punctuation, normal dialogue, questions, and commands are filtered so they are not saved as names or titles. Manual glossary entries remain dominant over automatic entries.
 
