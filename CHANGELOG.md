@@ -25,6 +25,7 @@
 - Project glossaries now save to `glossary.json` in the image project folder instead of the global translator config or embedded `imgtrans` project JSON.
 - Direct Google/DeepL translation and Two-Step first-step translation now persist raw provider results in each project's `imgtrans_*.json`.
 - Dynamic module parameter tooltips now include a general performance note so OCR, detector, translator, and inpaint settings explain likely speed and memory tradeoffs.
+- Module parameter tooltip generation now reuses one performance note per settings widget and one composed tooltip per parameter instead of rebuilding the same text for both labels and controls.
 
 ### Fixed
 
@@ -39,3 +40,4 @@
 - Prevented automatically extracted glossary entries from being carried into unrelated projects through `config/config.json`.
 - Bumped the fork runtime version string to `1.4.0-vibe.34`.
 - Bumped the fork runtime version string to `1.4.0-vibe.35`.
+- Bumped the fork runtime version string to `1.4.0-vibe.36`.

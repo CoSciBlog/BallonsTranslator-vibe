@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README_EN.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.35`
+Fork release: `1.4.0-vibe.36`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -43,6 +43,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Changed project working folders so `mask`, `inpainted`, `upscaled`, `decensor_mask`, and `decensored` are created only when an output is actually written. Upscaling output is no longer created while upscaling is disabled.
 - Exposed `mask_dilation_size`, `mask_dilation_kernel`, and `inpaint_enlarge_ratio` for `lama_large_512px` in the Inpainter settings, with hover tooltips and runtime handling in the LaMa inpaint path.
 - Expanded Settings labels and hover tooltips with performance notes for speed, memory, disk writes, API cost, cache behavior, and module-specific tradeoffs.
+- Reused the shared module-parameter performance tooltip text so Settings labels and controls stay consistent while avoiding repeated tooltip assembly.
 
 ## Features
 
@@ -128,6 +129,8 @@ The General settings page includes `Prevent mouse wheel changes on input fields`
 ## Settings performance hints
 
 Settings hover text now calls out how each option can affect runtime. Upscaling, larger masks, debug output, extra LLM context, retries, reflection, glossary extraction, and high-quality encoders can make processing slower or use more RAM, VRAM, disk, or API tokens. Cache, batching, GPU, simpler global text-style settings, lower output limits, and skipped upscaling can make compatible workloads faster, but may trade away quality, stability, or visual matching.
+
+The module settings panel reuses a shared performance-note formatter for labels and controls, so Detector, OCR, Inpainter, and Translator parameter hints stay consistent without duplicating tooltip text in each widget.
 
 ## Source language labels
 

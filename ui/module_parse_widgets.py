@@ -161,14 +161,11 @@ class ParamWidget(QWidget):
     paramwidget_edited = Signal(str, dict)
 
     def _tooltip_with_performance_note(self, description: str = None) -> str:
-        performance_note = self.tr(
-            'Performance: this setting can affect speed, memory use, API cost, or output stability depending on the selected module. Higher quality, larger batches, more context, extra retries, debug output, and network delays usually make processing slower; acceleration, GPU, cache, and batching options can make compatible workloads faster but may use more memory.'
-        )
         if not description:
-            return performance_note
+            return self._performance_note
         if 'Performance:' in description:
             return description
-        return f'{description}\n\n{performance_note}'
+        return f'{description}\n\n{self._performance_note}'
 
     def __init__(self, params, scrollWidget: QWidget = None, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -180,6 +177,9 @@ class ParamWidget(QWidget):
         layout.addLayout(param_layout)
         layout.addStretch(-1)
 
+        self._performance_note = self.tr(
+            'Performance: this setting can affect speed, memory use, API cost, or output stability depending on the selected module. Higher quality, larger batches, more context, extra retries, debug output, and network delays usually make processing slower; acceleration, GPU, cache, and batching options can make compatible workloads faster but may use more memory.'
+        )
         if 'description' in params:
             self.setToolTip(self._tooltip_with_performance_note(params['description']))
 
@@ -261,14 +261,15 @@ class ParamWidget(QWidget):
 
                 if param_widget is not None:
                     param_widget.paramwidget_edited.connect(self.on_paramwidget_edited)
-                    if description:
-                        param_widget.setToolTip(self._tooltip_with_performance_note(description))
 
+            tooltip = self._tooltip_with_performance_note(description) if description else None
+            if tooltip and param_widget is not None:
+                param_widget.setToolTip(tooltip)
             widget_idx = 0
             if require_label:
                 param_label = ParamNameLabel(display_param_name)
-                if description:
-                    param_label.setToolTip(self._tooltip_with_performance_note(description))
+                if tooltip:
+                    param_label.setToolTip(tooltip)
                 param_layout.addWidget(param_label, ii, 0)
                 widget_idx = 1
             if param_widget is not None:

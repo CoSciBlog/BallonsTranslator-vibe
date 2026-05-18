@@ -1,6 +1,16 @@
 # Changelogs
 
 ### 2026-05-18
+[v1.4.0-vibe.36] settings tooltip reuse and dependency review
+Changed:
+1. Reused the module-parameter performance tooltip text so labels and controls share one composed tooltip per setting.
+2. Reviewed the recent Settings tooltip changes for deprecated Qt/Python patterns; no deprecated API usage was found in the touched code.
+3. Checked installed Python packages for available updates and verified `pip check` reports no broken requirements.
+
+Version:
+1. Bumped the fork runtime version string to `1.4.0-vibe.36`.
+
+### 2026-05-18
 [v1.4.0-vibe.35] settings performance tooltips
 Changed:
 1. Expanded Settings labels, hover text, and tooltips with speed, memory, disk-write, cache, API-cost, and quality tradeoff notes.
