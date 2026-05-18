@@ -1,6 +1,16 @@
 # Changelogs
 
 ### 2026-05-18
+[v1.4.0-vibe.38] project-only glossary settings cleanup
+Changed:
+1. Removed the legacy LLM glossary and glossary-prompt text editors from Settings.
+2. LLM translators now use only the current project's glossary data from `glossary.json` and the Glossary window.
+3. Embedded legacy glossary data inside `imgtrans_*.json` is no longer used as a project glossary source.
+
+Version:
+1. Bumped the fork runtime version string to `1.4.0-vibe.38`.
+
+### 2026-05-18
 [v1.4.0-vibe.37] settings tooltip cleanup
 Changed:
 1. Removed the generic module-parameter performance note from Detector, OCR, Inpainter, and Translator settings.

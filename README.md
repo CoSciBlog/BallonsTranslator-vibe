@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README_EN.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.37`
+Fork release: `1.4.0-vibe.38`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -44,6 +44,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Exposed `mask_dilation_size`, `mask_dilation_kernel`, and `inpaint_enlarge_ratio` for `lama_large_512px` in the Inpainter settings, with hover tooltips and runtime handling in the LaMa inpaint path.
 - Refined Settings hover tooltips so performance notes are shown only for options that affect runtime, memory, disk writes, network/API usage, or model behavior.
 - Removed the generic module-parameter performance note so Detector, OCR, Inpainter, and Translator settings use their own specific descriptions.
+- Removed the legacy LLM glossary and glossary-prompt text editors from Settings; project terminology now comes only from the project's `glossary.json` via the Glossary window.
 
 ## Features
 
@@ -118,13 +119,13 @@ The launcher update flow tracks `https://github.com/CoSciBlog/BallonsTranslator-
 
 ## Project glossary
 
-The left sidebar includes a `Gloss` button with a glossary icon that opens the current project's glossary window. Entries and the glossary prompt are saved in a separate `glossary.json` file inside the project's image folder, next to the project's `imgtrans_*.json` file, so each manga/comic project keeps its own terminology. Older projects that still have a `glossary` block inside `imgtrans_*.json` are migrated on load, and the separate file takes precedence when both exist. LLM translators use those entries for consistency, but category labels and notes such as `[CHARACTER]` or `[PLACE]` are treated as metadata and are not included in translation output. Automatic glossary extraction defaults to character/name entries and places only; optional translator checkboxes can enable organizations, titles, domain terms, honorifics, or catchphrases when needed. Automatically extracted names are merged without replacing existing manual glossary entries.
+The left sidebar includes a `Gloss` button with a glossary icon that opens the current project's glossary window. Entries and the glossary prompt are saved in a separate `glossary.json` file inside the project's image folder, next to the project's `imgtrans_*.json` file, so each manga/comic project keeps its own terminology. The old Settings-page glossary text boxes are no longer used; edit glossary entries and the glossary prompt from the Glossary window. LLM translators use those entries for consistency, but category labels and notes such as `[CHARACTER]` or `[PLACE]` are treated as metadata and are not included in translation output. Automatic glossary extraction defaults to character/name entries and places only; optional translator checkboxes can enable organizations, titles, domain terms, honorifics, or catchphrases when needed. Automatically extracted names are merged without replacing existing manual glossary entries.
 
 Auto Glossary now extracts names/characters more conservatively: `name` entries are normalized to the `character` category, and interjections, SFX, punctuation, normal dialogue, questions, and commands are filtered so they are not saved as names or titles. Manual glossary entries remain dominant over automatic entries.
 
 ## Settings input safety
 
-The General settings page includes `Prevent mouse wheel changes on input fields`. When enabled, mouse wheel events over combo boxes and spin boxes are blocked or forwarded to the surrounding scroll area, so scrolling the settings page does not accidentally change values. Long text fields such as API keys, URLs, proxies, glossary prompts, and LLM prompt templates are wider or taller so more content remains visible while editing.
+The General settings page includes `Prevent mouse wheel changes on input fields`. When enabled, mouse wheel events over combo boxes and spin boxes are blocked or forwarded to the surrounding scroll area, so scrolling the settings page does not accidentally change values. Long text fields such as API keys, URLs, proxies, and LLM prompt templates are wider or taller so more content remains visible while editing.
 
 ## Settings hover hints
 
@@ -313,7 +314,7 @@ Use `first step delay` to throttle the Google/DeepL draft calls. Higher values r
 
 The `LLM_API_Translator` and `Two-Step Translator` include glossary support for names, places, and optional terminology categories.
 
-- Project glossary entries are stored in the current project's `glossary.json` file in the format `source => target [category] # optional note`.
+- Project glossary entries and the glossary prompt are edited from the left-sidebar Glossary window and stored in the current project's `glossary.json` file. Entries use the format `source => target [category] # optional note`.
 - `use glossary` injects the glossary into translation prompts so known terms are reused consistently.
 - `auto build glossary` asks the LLM to extract reusable glossary entries from each translated batch and append or update them in the current project's `glossary.json`. By default, automatic extraction keeps only names and places, and it filters interjections, SFX, punctuation, and normal dialogue out of name/title categories.
 - `auto glossary names`, `auto glossary places`, and the optional organization/title/term/honorific/catchphrase checkboxes control which categories can be captured automatically.

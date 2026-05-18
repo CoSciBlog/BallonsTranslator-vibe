@@ -1,11 +1,13 @@
 import os.path as osp
 import sys
+import tempfile
 import unittest
 
 APP_ROOT = osp.dirname(osp.dirname(osp.abspath(__file__)))
 sys.path.append(APP_ROOT)
 
 from modules.translators.trans_llm_api import GlossaryResponse, LLM_API_Translator
+from utils.proj_imgtrans import ProjImgTrans
 
 
 class FakeLogger:
@@ -117,6 +119,50 @@ class GlossaryMergeTest(unittest.TestCase):
                 raise AssertionError("Glossary entries must not be written to translator settings")
 
         return MergeFakeTranslator()
+
+    def test_llm_settings_do_not_expose_legacy_glossary_editors(self):
+        self.assertNotIn("glossary", LLM_API_Translator.params)
+        self.assertNotIn("glossary prompt", LLM_API_Translator.params)
+
+    def test_translator_uses_project_glossary_only(self):
+        class ProjectOnlyTranslator(LLM_API_Translator):
+            def __init__(self):
+                self.project_glossary_text = ""
+                self.project_glossary_prompt = ""
+
+            def get_param_value(self, param_key):
+                raise AssertionError(f"unexpected settings lookup: {param_key}")
+
+        translator = ProjectOnlyTranslator()
+
+        self.assertEqual(translator.glossary_text, "")
+        self.assertIn("Use the glossary only", translator.glossary_prompt)
+
+        translator.set_project_glossary(
+            {
+                "entries": "Tomori => Tomori [character]",
+                "prompt": "Use project glossary terms.",
+            }
+        )
+
+        self.assertEqual(translator.glossary_text, "Tomori => Tomori [character]")
+        self.assertEqual(translator.glossary_prompt, "Use project glossary terms.")
+
+    def test_embedded_project_glossary_is_ignored_without_glossary_json(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            project = ProjImgTrans()
+            project.directory = tmpdir
+            project.load_from_dict(
+                {
+                    "pages": {},
+                    "glossary": {
+                        "entries": "Legacy => Should Not Load [term]",
+                        "prompt": "Legacy prompt",
+                    },
+                }
+            )
+
+            self.assertEqual(project.glossary, ProjImgTrans.default_glossary())
 
     def test_character_names_are_saved_and_name_category_is_normalized(self):
         translator = self.make_translator("")

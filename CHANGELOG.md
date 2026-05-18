@@ -16,6 +16,7 @@
 - Added pronoun and address-form checks to the translation review prompt.
 - Saved Google/DeepL provider outputs per text block and showed them in the text editor sidebar for comparison.
 - Refined Settings labels, hover text, and tooltips so performance notes appear only where settings affect runtime, memory, disk writes, network/API usage, or model behavior.
+- Removed the legacy Settings-page LLM glossary and glossary-prompt text editors; project glossaries are edited through the Glossary window and saved in `glossary.json`.
 
 ### Changed
 
@@ -26,6 +27,7 @@
 - Direct Google/DeepL translation and Two-Step first-step translation now persist raw provider results in each project's `imgtrans_*.json`.
 - Dynamic module parameter tooltips now use their module-provided descriptions without appending a generic performance note.
 - UI-only settings such as preset import/export, mouse-wheel protection, startup reopening, keyboard shortcuts, and display filters now avoid performance claims.
+- LLM translators now read glossary entries and the glossary prompt only from the current project's separate `glossary.json` data.
 
 ### Fixed
 
@@ -42,3 +44,4 @@
 - Bumped the fork runtime version string to `1.4.0-vibe.35`.
 - Bumped the fork runtime version string to `1.4.0-vibe.36`.
 - Bumped the fork runtime version string to `1.4.0-vibe.37`.
+- Bumped the fork runtime version string to `1.4.0-vibe.38`.

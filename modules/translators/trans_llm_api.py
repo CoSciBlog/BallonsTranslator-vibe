@@ -391,16 +391,6 @@ class LLM_API_Translator(BaseTranslator):
             "value": 200,
             "description": "Maximum number of glossary entries kept in the current project glossary. Higher values preserve more terms but increase prompt size and cost.",
         },
-        "glossary prompt": {
-            "type": "editor",
-            "value": "Use glossary entries as terminology guidance only. Apply preferred target terms naturally in the target language. Never include category labels, notes, comments, or bracketed metadata such as [CHARACTER], [PLACE], [ORGANIZATION], [TITLE], or [TERM] in the translation output.",
-            "description": "Custom instructions inserted before glossary entries in translation and glossary refinement prompts.",
-        },
-        "glossary": {
-            "type": "editor",
-            "value": "",
-            "description": "Legacy fallback glossary used only when no project glossary is loaded. Project glossaries are saved in each image folder's glossary.json.",
-        },
         "temperature": {
             "value": 0.1,
             "description": "Sampling temperature. Lower values are recommended for structured output.",
@@ -633,18 +623,18 @@ class LLM_API_Translator(BaseTranslator):
 
     @property
     def glossary_text(self) -> str:
-        if getattr(self, "project_glossary_loaded", False):
-            return getattr(self, "project_glossary_text", "") or ""
-        return self.get_param_value("glossary") or ""
+        return getattr(self, "project_glossary_text", "") or ""
 
     @property
     def glossary_prompt(self) -> str:
-        if getattr(self, "project_glossary_loaded", False):
-            project_prompt = getattr(self, "project_glossary_prompt", "")
-            if project_prompt.strip():
-                return project_prompt.strip()
-            return ""
-        return self.get_param_value("glossary prompt") or ""
+        project_prompt = getattr(self, "project_glossary_prompt", "")
+        if project_prompt.strip():
+            return project_prompt.strip()
+        return (
+            "Use the glossary only as translation guidance. Apply preferred target "
+            "terms naturally, but never copy glossary categories, notes, or bracketed "
+            "metadata such as [CHARACTER] or [PLACE] into the translated text."
+        )
 
     @property
     def retry_attempts(self) -> int:

@@ -261,7 +261,7 @@ class ProjImgTrans:
         else:
             self._image_info = {}
 
-        self.glossary = self.normalize_glossary(proj_dict.get('glossary', {}))
+        self.glossary = self.default_glossary()
         ignored_pages = proj_dict.get('ignored_pages', [])
         if isinstance(ignored_pages, list):
             self.ignored_pages = {p for p in ignored_pages if isinstance(p, str)}
