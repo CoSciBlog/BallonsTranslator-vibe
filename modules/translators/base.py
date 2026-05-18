@@ -280,6 +280,43 @@ class BaseTranslator(BaseModule):
         for tr, blk in zip(translations, textblk_lst):
             blk.translation = tr
 
+    def review_translations(self, src_list: List[str], draft_list: List[str]) -> List[str]:
+        raise NotImplementedError(f'{self.name} does not support LLM translation review.')
+
+    def supports_translation_review(self) -> bool:
+        return type(self).review_translations is not BaseTranslator.review_translations
+
+    def review_textblk_lst(self, textblk_lst: List[TextBlock]):
+        '''
+        Review existing translations without rerunning OCR, inpainting, or first-step translation.
+        '''
+        non_empty_ids = []
+        text_list = []
+        draft_list = []
+        reviewed = [blk.translation for blk in textblk_lst]
+
+        for ii, blk in enumerate(textblk_lst):
+            source = blk.get_text()
+            if source.strip() != '':
+                non_empty_ids.append(ii)
+                text_list.append(source)
+                draft_list.append(blk.translation or source)
+
+        if len(text_list) > 0:
+            _translations = self.review_translations(text_list, draft_list)
+            if _translations is None:
+                _translations = []
+            if len(_translations) < len(non_empty_ids):
+                _translations = list(_translations) + draft_list[len(_translations):]
+            for ii, idx in enumerate(non_empty_ids):
+                reviewed[idx] = _translations[ii]
+
+        for callback_name, callback in self._postprocess_hooks.items():
+            callback(translations=reviewed, textblocks=textblk_lst, translator=self)
+
+        for tr, blk in zip(reviewed, textblk_lst):
+            blk.translation = tr
+
     def supported_languages(self) -> List[str]:
         return self.valid_lang_list
 

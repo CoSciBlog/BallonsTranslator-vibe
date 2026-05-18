@@ -388,6 +388,7 @@ class ImgtransThread(QThread):
         self.pages_to_process = None  # 需要处理的页面列表（用于继续运行模式）
 
         self.translation_only = False
+        self.review_only = False
         self.decensor_only = False
         self.blktrans_page_key = None
 
@@ -433,12 +434,21 @@ class ImgtransThread(QThread):
         finally:
             self._clear_translator_page_context()
 
+    def _review_textblocks(self, imgname: str, blk_list: List[TextBlock]):
+        try:
+            if imgname:
+                self._set_translator_page_context(imgname)
+            self.translator.review_textblk_lst(blk_list)
+        finally:
+            self._clear_translator_page_context()
+
     def runImgtransPipeline(self, imgtrans_proj: ProjImgTrans, pages_to_process=None):
         self.imgtrans_proj = imgtrans_proj
         self.pages_to_process = pages_to_process  # 保存需要处理的页面列表
         self.num_pages = len(self.imgtrans_proj.pages)
         self.stop_requested = False
         self.translation_only = False
+        self.review_only = False
         self.decensor_only = False
         # 创建处理索引到实际页面索引的映射
         self.process_idx_to_page_idx = {}
@@ -451,9 +461,22 @@ class ImgtransThread(QThread):
         self.num_pages = len(self.imgtrans_proj.pages)
         self.stop_requested = False
         self.translation_only = True
+        self.review_only = False
         self.decensor_only = False
         self.process_idx_to_page_idx = {}
         self.job = self._translate_only_pipeline
+        self.start()
+
+    def runReviewPipeline(self, imgtrans_proj: ProjImgTrans, pages_to_process=None):
+        self.imgtrans_proj = imgtrans_proj
+        self.pages_to_process = pages_to_process
+        self.num_pages = len(self.imgtrans_proj.pages)
+        self.stop_requested = False
+        self.translation_only = False
+        self.review_only = True
+        self.decensor_only = False
+        self.process_idx_to_page_idx = {}
+        self.job = self._review_pipeline
         self.start()
 
     def runDecensorPipeline(self, imgtrans_proj: ProjImgTrans, pages_to_process=None):
@@ -462,6 +485,7 @@ class ImgtransThread(QThread):
         self.num_pages = len(self.imgtrans_proj.pages)
         self.stop_requested = False
         self.translation_only = False
+        self.review_only = False
         self.decensor_only = True
         self.process_idx_to_page_idx = {}
         self.job = self._decensor_pipeline
@@ -809,6 +833,38 @@ class ImgtransThread(QThread):
         if self.stop_requested:
             self.pipeline_stopped.emit()
 
+    def _review_pipeline(self):
+        self.detect_counter = 0
+        self.ocr_counter = 0
+        self.translate_counter = 0
+        self.inpaint_counter = 0
+        self.decensor_counter = 0
+
+        all_pages = list(self.imgtrans_proj.pages.keys())
+        pages_to_iterate = self.imgtrans_proj.pipeline_pages(self.pages_to_process, skip_ignored=True)
+
+        self.num_pages = max(1, len(pages_to_iterate))
+        for process_idx, page_name in enumerate(pages_to_iterate):
+            self.process_idx_to_page_idx[process_idx] = all_pages.index(page_name)
+
+        self.translate_thread.num_process_pages = self.num_pages
+        LOGGER.info(f'Running LLM translation review for {len(pages_to_iterate)} pages')
+
+        for imgname in pages_to_iterate:
+            if self.stop_requested:
+                LOGGER.info('LLM translation review stopped by user')
+                break
+
+            blk_list = self.imgtrans_proj.pages.get(imgname, [])
+            if len(blk_list) > 0:
+                self._review_textblocks(imgname, blk_list)
+            self.translate_counter += 1
+            self.imgtrans_proj.update_page_progress(imgname, RunStatus.FIN_TRANSLATE)
+            self.update_translate_progress.emit(self.translate_counter)
+
+        if self.stop_requested:
+            self.pipeline_stopped.emit()
+
     def _decensor_pipeline(self):
         self.detect_counter = 0
         self.ocr_counter = 0
@@ -835,6 +891,8 @@ class ImgtransThread(QThread):
 
     def translate_finished(self) -> bool:
         if self.translation_only:
+            return self.translate_counter == self.num_pages
+        if self.review_only:
             return self.translate_counter == self.num_pages
         if self.imgtrans_proj is None \
             or not cfg_module.enable_ocr \
@@ -1091,6 +1149,39 @@ class ModuleManager(QObject):
         self.progress_msgbox.show()
         self.imgtrans_thread.runTranslateOnlyPipeline(self.imgtrans_proj, pages_to_process)
 
+    def runReviewPipeline(self, pages_to_process=None):
+        if self.imgtrans_proj.is_empty:
+            LOGGER.info('proj file is empty, nothing to review')
+            self.progress_msgbox.hide()
+            return
+        if (
+            self.translator is None
+            or not hasattr(self.translator, 'supports_translation_review')
+            or not self.translator.supports_translation_review()
+        ):
+            LOGGER.info('Current translator does not support LLM review')
+            self.progress_msgbox.hide()
+            self.imgtrans_pipeline_finished.emit()
+            return
+        if len(self.imgtrans_proj.pipeline_pages(pages_to_process, skip_ignored=True)) == 0:
+            LOGGER.info('No pages to review after applying ignored page filters')
+            self.progress_msgbox.hide()
+            self.imgtrans_pipeline_finished.emit()
+            return
+        self.last_finished_index = -1
+        self.pipeline_pages_to_process = pages_to_process
+        self.post_pipeline_merge_done = False
+        self.terminateRunningThread()
+
+        self.progress_msgbox.detect_bar.setVisible(False)
+        self.progress_msgbox.ocr_bar.setVisible(False)
+        self.progress_msgbox.translate_bar.setVisible(True)
+        self.progress_msgbox.inpaint_bar.setVisible(False)
+        self.progress_msgbox.decensor_bar.setVisible(False)
+        self.progress_msgbox.zero_progress()
+        self.progress_msgbox.show()
+        self.imgtrans_thread.runReviewPipeline(self.imgtrans_proj, pages_to_process)
+
     def runDecensorPipeline(self, pages_to_process=None):
         if self.imgtrans_proj.is_empty:
             LOGGER.info('proj file is empty, nothing to decensor')
@@ -1163,6 +1254,7 @@ class ModuleManager(QObject):
         self.imgtrans_thread.stop_requested = False
         self.translate_thread.stop_requested = False
         self.imgtrans_thread.translation_only = False
+        self.imgtrans_thread.review_only = False
         self.imgtrans_thread.decensor_only = False
         self.imgtrans_thread.pipeline_pagekey_queue.clear()
         self.translate_thread.pipeline_pagekey_queue.clear()
@@ -1279,7 +1371,7 @@ class ModuleManager(QObject):
     def proj_finished(self):
         if self.imgtrans_thread.decensor_only:
             return self.imgtrans_thread.decensor_finished()
-        if self.imgtrans_thread.translation_only:
+        if self.imgtrans_thread.translation_only or self.imgtrans_thread.review_only:
             return self.imgtrans_thread.translate_finished()
         if self.imgtrans_thread.detect_finished() \
             and self.imgtrans_thread.ocr_finished() \
@@ -1378,11 +1470,12 @@ class ModuleManager(QObject):
 
     def finishImgtransPipeline(self):
         if self.proj_finished():
-            if not self.imgtrans_thread.translation_only:
+            if not self.imgtrans_thread.translation_only and not self.imgtrans_thread.review_only:
                 self.apply_post_pipeline_textbox_merge()
             self.progress_msgbox.hide()
             self.imgtrans_pipeline_finished.emit()
             self.imgtrans_thread.translation_only = False
+            self.imgtrans_thread.review_only = False
             self.imgtrans_thread.decensor_only = False
     
     def on_imgtrans_thread_stopped(self):
@@ -1391,6 +1484,7 @@ class ModuleManager(QObject):
         self.progress_msgbox.hide()
         self.imgtrans_pipeline_finished.emit()
         self.imgtrans_thread.translation_only = False
+        self.imgtrans_thread.review_only = False
         self.imgtrans_thread.decensor_only = False
 
     def setTranslator(self, translator: str = None):

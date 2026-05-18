@@ -1,6 +1,16 @@
 # Changelogs
 
 ### 2026-05-18
+[v1.4.0-vibe.43] Run-menu LLM translation review
+Added:
+1. Added `Review Current Page` and `Review All Pages` actions to the Run menu.
+2. Added a review-only pipeline that re-checks existing translations with the active ChatGPT, LLM_API_Translator, or Two-Step Translator settings without rerunning OCR or inpainting.
+3. Review results are applied to text blocks and then re-rendered and saved through the existing page-finish flow.
+
+Version:
+1. Bumped the fork runtime version string to `1.4.0-vibe.43`.
+
+### 2026-05-18
 [v1.4.0-vibe.42] text box context merge
 Added:
 1. Added a right-click text box action for merging two or more selected text boxes into the first selected box.

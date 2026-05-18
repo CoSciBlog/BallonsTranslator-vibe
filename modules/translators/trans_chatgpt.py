@@ -277,6 +277,51 @@ class GPTTranslator(BaseTranslator):
 
         return translations
 
+    def review_translations(self, src_list: List[str], draft_list: List[str]) -> List[str]:
+        translations = []
+        from_lang = self.lang_map[self.lang_source]
+        to_lang = self.lang_map[self.lang_target]
+        queries = [
+            f"Source ({from_lang}):\n{source}\n\nCurrent translation ({to_lang}):\n{draft}"
+            for source, draft in zip(src_list, draft_list)
+        ]
+        review_prefix = (
+            f"Review and correct the following existing manga/comic translations into {to_lang}. "
+            "Use the source text to fix mistranslations, names, pronouns, address forms, and missing meaning. "
+            "If a current translation is already correct, output it unchanged. "
+            "Return only the reviewed translations using the same <|n|> markers, with no notes.\n"
+        )
+        chat_sample = None
+        for prompt, num_src in self._assemble_prompts(queries, from_lang, to_lang):
+            prompt = review_prefix + prompt
+            retry_attempt = 0
+            while True:
+                response = ''
+                try:
+                    response = self._request_translation(prompt, chat_sample)
+                    new_translations = re.split(r'<\|\d+\|>', response)[-num_src:]
+                    if len(new_translations) != num_src:
+                        _tr2 = re.sub(r'<\|\d+\|>', '', response).split('\n')
+                        if len(_tr2) == num_src:
+                            new_translations = _tr2
+                        else:
+                            raise InvalidNumTranslations
+                    break
+                except Exception as e:
+                    retry_attempt += 1
+                    if retry_attempt >= self.retry_attempts:
+                        self.logger.warning(f'Review failed; using existing translations. {type(e).__name__}: {e}')
+                        new_translations = draft_list[len(translations):len(translations) + num_src]
+                        break
+                    self.logger.warning(f'Review failed due to {e}. Attempt: {retry_attempt}, sleep for {self.retry_timeout} secs...')
+                    time.sleep(self.retry_timeout)
+            translations.extend([t.strip() for t in new_translations])
+
+        if self.token_count_last:
+            self.logger.info(f'Used {self.token_count_last} tokens (Total: {self.token_count})')
+
+        return translations
+
     def _request_translation_gpt3(self, prompt: str) -> str:
 
         if OPENAPI_V1_API:

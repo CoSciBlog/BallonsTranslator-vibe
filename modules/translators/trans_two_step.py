@@ -547,3 +547,6 @@ class TwoStepTranslator(LLM_API_Translator):
         return self._refine_translations_with_glossary(
             src_list, translations, to_lang
         )
+
+    def review_translations(self, src_list: List[str], draft_list: List[str]) -> List[str]:
+        return self._refine_draft_translations(src_list, draft_list)

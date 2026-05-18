@@ -1059,6 +1059,63 @@ class LLM_API_Translator(BaseTranslator):
             '{"translations":[{"id":1,"translation":"Reviewed translation"}]}.'
         )
 
+    def _build_manual_review_prompt(
+        self, expected_items: List[Dict[str, Any]], to_lang: str
+    ) -> str:
+        expected_ids = [item["id"] for item in expected_items]
+        from_lang = self.lang_map.get(self.lang_source, self.lang_source)
+        return (
+            f"Review and correct existing translations from {from_lang} to {to_lang}.\n"
+            "Return valid JSON only. No markdown. No explanations. No comments. Never return {}.\n"
+            'Use exactly this schema: { "translations": [ {"id": 1, "translation": "reviewed translation"} ] }\n'
+            f"Return exactly {len(expected_items)} items with these IDs: {expected_ids}.\n"
+            "Preserve every id exactly. Do not add, remove, reorder, merge, or split items.\n"
+            "Use source text to catch mistranslations, missing meaning, wrong pronouns, wrong names, and inconsistent address forms.\n"
+            "If the current translation is already good, return it unchanged.\n"
+            "If unsure, return the current translation unchanged.\n"
+            "Keep the same target language.\n"
+            "Do not include source, draft_translation, category labels, glossary metadata, notes, or comments in the final output.\n\n"
+            f"{self._review_quality_rules(len(expected_items), expected_ids)}"
+            f"{self._translation_context_prompt_section()}"
+            f"{self._review_glossary_prompt_section()}"
+            f"INPUT:\n{json.dumps(expected_items, ensure_ascii=False, indent=2)}"
+        )
+
+    def review_translations(self, src_list: List[str], draft_list: List[str]) -> List[str]:
+        if not src_list:
+            return []
+
+        to_lang = self.lang_map.get(self.lang_target, self.lang_target)
+        expected_items = [
+            {"id": i + 1, "source": source, "draft_translation": draft}
+            for i, (source, draft) in enumerate(zip(src_list, draft_list))
+        ]
+        chunk_size = 20
+        items_by_id: Dict[int, str] = {}
+        for chunk in (
+            expected_items[i : i + chunk_size]
+            for i in range(0, len(expected_items), chunk_size)
+        ):
+            prompt = self._build_manual_review_prompt(chunk, to_lang)
+            expected_ids = [item["id"] for item in chunk]
+            response = self._request_translation(
+                prompt,
+                is_reflection=True,
+                purpose="manual_review",
+                expected_count=len(chunk),
+                expected_ids=expected_ids,
+                max_tokens_override=min(max(self.max_tokens, 2048), 8192),
+            )
+            if response is not None:
+                response = self._clean_translation_response(response)
+                for item in response.translations:
+                    if item.id not in items_by_id and item.translation:
+                        items_by_id[item.id] = item.translation
+        return [
+            items_by_id.get(item["id"], item.get("draft_translation") or item.get("source") or "")
+            for item in expected_items
+        ]
+
     def _canonical_glossary_category(self, category: str) -> str:
         return canonicalize_glossary_category(category)
 

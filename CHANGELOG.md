@@ -21,6 +21,7 @@
 - Drawboard checkbox for showing translated text boxes while mask editing.
 - Glossary target-term changes now propagate to existing project translations and trigger affected page re-renders.
 - Text box context-menu action for merging two or more selected text boxes into one combined text box without changing the inpainted page layer.
+- Run-menu LLM review actions for the current page and all non-ignored pages, using the active ChatGPT, LLM_API_Translator, or Two-Step Translator settings.
 
 ### Changed
 
@@ -55,3 +56,4 @@
 - Bumped the fork runtime version string to `1.4.0-vibe.40`.
 - Bumped the fork runtime version string to `1.4.0-vibe.41`.
 - Bumped the fork runtime version string to `1.4.0-vibe.42`.
+- Bumped the fork runtime version string to `1.4.0-vibe.43`.

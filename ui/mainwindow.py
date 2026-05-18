@@ -868,6 +868,8 @@ class MainWindow(mainwindow_cls):
         self.titleBar.run_trigger.connect(self.leftBar.runImgtransBtn.click)
         self.titleBar.run_woupdate_textstyle_trigger.connect(self.run_imgtrans_wo_textstyle_update)
         self.titleBar.translate_page_trigger.connect(self.on_transpagebtn_pressed)
+        self.titleBar.review_current_page_trigger.connect(self.run_review_current_page)
+        self.titleBar.review_all_pages_trigger.connect(self.run_review_all_pages)
         self.titleBar.translation_benchmark_trigger.connect(self.show_translation_benchmark_window)
         self.titleBar.enable_module.connect(self.on_enable_module)
         self.titleBar.importtstyle_trigger.connect(self.import_tstyles)
@@ -1802,6 +1804,44 @@ class MainWindow(mainwindow_cls):
                 textblk.vertical = textblk.src_is_vertical
 
         self.module_manager.runTranslateOnlyPipeline()
+
+    def _translator_supports_review(self) -> bool:
+        translator = self.module_manager.translator
+        return (
+            translator is not None
+            and hasattr(translator, 'supports_translation_review')
+            and translator.supports_translation_review()
+        )
+
+    def _prepare_review_run(self) -> bool:
+        if self.imgtrans_proj.is_empty:
+            return False
+        if not self._translator_supports_review():
+            create_info_dialog(self.tr('Select ChatGPT, LLM_API_Translator, or Two-Step Translator before running translation review.'))
+            return False
+        if self.bottomBar.textblockChecker.isChecked():
+            self.bottomBar.textblockChecker.click()
+        self.postprocess_mt_toggle = False
+        self.st_manager.updateTextBlkList()
+        return True
+
+    def run_review_current_page(self):
+        if not self._prepare_review_run():
+            return
+        page_name = self.imgtrans_proj.current_img
+        if not page_name or page_name not in self.imgtrans_proj.pages:
+            create_info_dialog(self.tr('Open a project page before running translation review.'))
+            return
+        self.module_manager.runReviewPipeline(pages_to_process=[page_name])
+
+    def run_review_all_pages(self):
+        if not self._prepare_review_run():
+            return
+        page_names = self.imgtrans_proj.pipeline_pages(skip_ignored=True)
+        if len(page_names) == 0:
+            create_info_dialog(self.tr('No non-ignored pages are available for translation review.'))
+            return
+        self.module_manager.runReviewPipeline()
 
     def run_decensor_current_page(self):
         if self.imgtrans_proj.is_empty or not self.imgtrans_proj.current_img:
