@@ -223,16 +223,16 @@ class LLM_API_Translator(BaseTranslator):
             "type": "selector",
             "options": ["OpenAI", "Google", "Grok", "OpenRouter", "LLM Studio", "Ollama"],
             "value": "OpenAI",
-            "description": "Select the LLM provider.",
+            "description": "Select the LLM provider. Translation speed depends on provider latency, queueing, rate limits, JSON support, and for local providers the CPU/GPU and model size.",
         },
         "apikey": {
             "value": "",
-            "description": "Single API key to use if multiple keys are not provided.",
+            "description": "Single API key to use if multiple keys are not provided. The key itself does not make translation faster, but provider quotas and rate limits can throttle request throughput.",
         },
         "multiple_keys": {
             "type": "editor",
             "value": "",
-            "description": "API keys separated by semicolons (;). Requests will rotate through these keys.",
+            "description": "API keys separated by semicolons (;). Requests rotate through these keys, which can improve throughput when a provider rate-limits each key separately.",
         },
         "model": {
             "type": "selector",
@@ -284,7 +284,7 @@ class LLM_API_Translator(BaseTranslator):
         },
         "delay": {
             "value": 0.3,
-            "description": "Global delay in seconds between requests.",
+            "description": "Global delay in seconds between LLM requests. Higher values deliberately slow translation to avoid provider rate limits; lower values maximize throughput.",
         },
         "max tokens": {
             "value": 4096,
@@ -293,18 +293,18 @@ class LLM_API_Translator(BaseTranslator):
         "reasoning": {
             "type": "checkbox",
             "value": False,
-            "description": "For local translation models, disabling reasoning is usually faster and more stable for JSON output.",
+            "description": "Ask supported models to use reasoning controls. This can improve difficult edits, but usually increases latency and token work; disabling it is faster and often more stable for JSON translation.",
         },
         "reasoning level": {
             "type": "selector",
             "options": ["low", "medium", "high"],
             "value": "medium",
-            "description": "Reasoning effort used when reasoning is enabled.",
+            "description": "Reasoning effort used when reasoning is enabled. Higher levels can spend more time and tokens per request; low is usually the fastest option.",
         },
         "json mode": {
             "type": "checkbox",
             "value": True,
-            "description": "Request structured JSON output from OpenAI-compatible providers when supported.",
+            "description": "Request structured JSON output from OpenAI-compatible providers when supported. It can reduce parse retries and speed up failed batches, but unsupported or strict providers may add overhead or require fallback.",
         },
         "num ctx": {
             "value": 0,
@@ -313,7 +313,7 @@ class LLM_API_Translator(BaseTranslator):
         "reflection": {
             "type": "checkbox",
             "value": False,
-            "description": "Run an additional LLM review pass after translation. This adds extra LLM calls.",
+            "description": "Run an additional LLM review pass after translation. This adds another LLM request for each batch, so translation is slower and uses more tokens.",
         },
         "reflection prompt": {
             "type": "editor",
@@ -322,30 +322,30 @@ class LLM_API_Translator(BaseTranslator):
         },
         "previous context pages": {
             "value": 0,
-            "description": "Number of previous project pages to include as source and existing translation context for LLM translation. 0 disables previous-page context.",
+            "description": "Number of previous project pages included as source and existing translation context. More pages improve continuity but enlarge prompts, increasing latency, token use, and local model memory pressure.",
         },
         "include next context page": {
             "type": "checkbox",
             "value": False,
-            "description": "Also include the next project page as context when its text is available. This helps foreshadow names and references but increases token usage.",
+            "description": "Also include the next project page when text is available. This can improve names and references, but adds prompt text and can slow each LLM request.",
         },
         "document context pages": {
             "value": 0,
-            "description": "Include up to this many pages from the project as document context for each LLM batch. 0 disables document-level context; higher values cost more tokens.",
+            "description": "Include up to this many pages from the project as document-level context for each LLM batch. Higher values can improve consistency but increase prompt size, cost, and response time.",
         },
         "context max characters": {
             "value": 6000,
-            "description": "Maximum characters allowed for all LLM context sections combined before truncation. Lower this if the model context window is small.",
+            "description": "Maximum characters allowed for all LLM context sections combined before truncation. Raising this gives the model more context but usually slows requests; lowering it is faster for small context windows.",
         },
         "use glossary": {
             "type": "checkbox",
             "value": True,
-            "description": "Include the glossary in translation prompts so character names, places, organizations, titles, and recurring terms stay consistent.",
+            "description": "Include the current project's glossary.json entries in translation prompts. This improves term consistency, but larger glossaries increase prompt size, token use, and request latency.",
         },
         "auto build glossary": {
             "type": "checkbox",
             "value": True,
-            "description": "After each LLM translation batch, ask the model to extract reusable glossary entries from the source/translation pairs. This improves consistency but adds extra API calls.",
+            "description": "After each LLM translation batch, ask the model to extract reusable glossary entries from the source/translation pairs. This improves later consistency but adds extra LLM calls and slows translation.",
         },
         "auto glossary names": {
             "type": "checkbox",
@@ -385,11 +385,11 @@ class LLM_API_Translator(BaseTranslator):
         "glossary refinement pass": {
             "type": "checkbox",
             "value": True,
-            "description": "Extract or refine glossary entries with the LLM. This adds extra LLM calls.",
+            "description": "Extract or refine glossary entries with the LLM. This adds extra LLM requests, so it increases translation time and token/API usage.",
         },
         "glossary max entries": {
             "value": 200,
-            "description": "Maximum number of glossary entries kept in the current project glossary. Higher values preserve more terms but increase prompt size and cost.",
+            "description": "Maximum number of entries kept in the current project's glossary.json. Higher values preserve more terms but increase prompt size, token cost, and latency when use glossary is enabled.",
         },
         "temperature": {
             "value": 0.1,
@@ -418,7 +418,7 @@ class LLM_API_Translator(BaseTranslator):
         "presence penalty": {"value": 0.0, "description": "Presence penalty (OpenAI)."},
         "low vram mode": {
             'value': False,
-            'description': 'check it if you\'re running it locally on a single device and encountered a crash due to vram OOM',
+            'description': 'Use this for local single-device runs that crash from VRAM exhaustion. It is a memory-safety option, not a speed boost; it prevents translation from running in parallel with the image pipeline and can increase total runtime.',
             'type': 'checkbox',
         }
     }

@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README_EN.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.38`
+Fork release: `1.4.0-vibe.39`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -45,6 +45,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Refined Settings hover tooltips so performance notes are shown only for options that affect runtime, memory, disk writes, network/API usage, or model behavior.
 - Removed the generic module-parameter performance note so Detector, OCR, Inpainter, and Translator settings use their own specific descriptions.
 - Removed the legacy LLM glossary and glossary-prompt text editors from Settings; project terminology now comes only from the project's `glossary.json` via the Glossary window.
+- Expanded Settings hover descriptions for LLM and Two-Step translation speed factors, including provider latency, API limits, glossary/context prompt size, reasoning, reflection, JSON mode, per-block translation, batching, pipeline overlap, and VRAM unloading.
 
 ## Features
 
@@ -129,7 +130,7 @@ The General settings page includes `Prevent mouse wheel changes on input fields`
 
 ## Settings hover hints
 
-Settings hover text now calls out runtime impact only when an option affects processing. Upscaling, larger masks, debug output, extra LLM context, retries, reflection, glossary extraction, high-quality encoders, cache behavior, batching, GPU selection, output limits, and skipped upscaling can affect speed, memory, disk use, API tokens, quality, stability, or visual matching.
+Settings hover text now calls out runtime impact only when an option affects processing. Upscaling, larger masks, debug output, extra LLM context, retries, reflection, glossary extraction, high-quality encoders, cache behavior, batching, GPU selection, provider latency, API rate limits, reasoning, JSON retries, VRAM unloading, output limits, and skipped upscaling can affect speed, memory, disk use, API tokens, quality, stability, or visual matching.
 
 UI-only settings such as preset import/export, keyboard shortcuts, mouse-wheel protection, startup reopening, and display filters now use neutral descriptions without performance claims. Detector, OCR, Inpainter, and Translator parameter hints use only the descriptions provided by each module.
 

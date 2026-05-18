@@ -427,7 +427,7 @@ class TranslatorConfigPanel(ModuleConfigParseWidget):
         self.replaceOCRkeywordBtn.clicked.connect(self.show_OCR_keyword_window)
         self.replaceOCRkeywordBtn.setFixedWidth(500)
         self.translateByTextblockBox = ParamCheckerBox(self.tr('Translate each text block individually'))
-        self.translateByTextblockBox.setToolTip(self.tr('Translate every detected text block as a separate request instead of batching them together.'))
+        self.translateByTextblockBox.setToolTip(self.tr('Translate every detected text block as a separate request instead of batching them together. This can improve isolation for providers that struggle with batches, but it usually slows translation because it creates many more requests.'))
         self.translateByTextblockBox.name_label.setToolTip(self.translateByTextblockBox.toolTip())
 
         st_layout = QHBoxLayout()

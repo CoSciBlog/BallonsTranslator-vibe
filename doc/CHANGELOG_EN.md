@@ -1,6 +1,16 @@
 # Changelogs
 
 ### 2026-05-18
+[v1.4.0-vibe.39] translator performance tooltip details
+Changed:
+1. Expanded LLM_API_Translator hover descriptions for provider latency, API key rate limits, request delay, JSON mode, reasoning, reflection, context pages, glossary prompts, glossary extraction, and low VRAM mode.
+2. Expanded Two-Step Translator hover descriptions for parallel first-step translation, refinement batch size, and unloading vision models before local LLM refinement.
+3. Clarified that per-text-block translation usually slows translation because it creates more requests.
+
+Version:
+1. Bumped the fork runtime version string to `1.4.0-vibe.39`.
+
+### 2026-05-18
 [v1.4.0-vibe.38] project-only glossary settings cleanup
 Changed:
 1. Removed the legacy LLM glossary and glossary-prompt text editors from Settings.

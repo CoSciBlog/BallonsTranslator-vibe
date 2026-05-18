@@ -45,16 +45,16 @@ class TwoStepTranslator(LLM_API_Translator):
         "parallel first step during pipeline": {
             "type": "checkbox",
             "value": False,
-            "description": "During full RUN, start the Google/DeepL draft translation in the background as soon as OCR finishes for a page. The LLM refinement still waits until detection, OCR, and inpainting are done.",
+            "description": "During full RUN, start Google/DeepL draft translation in the background as soon as OCR finishes for a page. This can reduce total wall-clock time by overlapping network translation with later image work, but it increases concurrent API activity and does not make the final LLM refinement itself faster.",
         },
         "unload vision models before llm": {
             "type": "checkbox",
             "value": True,
-            "description": "When parallel first-step translation is enabled, unload text detection, OCR, and inpainting models before the final Ollama/LLM refinement step to free RAM/VRAM.",
+            "description": "When parallel first-step translation is enabled, unload text detection, OCR, and inpainting models before final Ollama/LLM refinement. This frees RAM/VRAM for local LLMs and can prevent slowdowns or OOM on memory-limited GPUs, but unloading/reloading adds overhead.",
         },
         "max refinement items per request": {
             "value": 8,
-            "description": "Maximum text blocks sent to each Two-Step LLM refinement request. Smaller chunks improve JSON stability for local Ollama models.",
+            "description": "Maximum text blocks sent to each Two-Step LLM refinement request. Larger chunks reduce request count and can be faster, but bigger prompts may slow local models and increase JSON failure risk; smaller chunks are steadier but make more requests.",
         },
         **deepcopy(LLM_API_Translator.params),
     }
