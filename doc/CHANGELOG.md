@@ -1,6 +1,15 @@
 # Changelogs
 
 ### 2026-05-19
+[v1.4.0-vibe.47] lazy test dependencies
+Added:
+1. Added `requirements-test.txt` for test-only dependency declarations.
+2. Added a Pinokio `test.js` launcher that installs `requirements-test.txt` only when tests are run, then executes the unittest suite.
+
+Version:
+1. Bumped the fork runtime version string to `1.4.0-vibe.47`.
+
+### 2026-05-19
 [v1.4.0-vibe.46] setup compatibility and on-demand model downloads
 Added:
 1. Added a `Tools -> Model Downloads` window for downloading selected missing or optional local model files.

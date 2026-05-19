@@ -1,0 +1,4 @@
+# Test-only dependencies.
+# The current test suite uses Python's standard-library unittest runner and
+# does not require third-party packages beyond the runtime requirements.
+# Add future test-only packages here instead of requirements.txt.

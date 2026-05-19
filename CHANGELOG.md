@@ -25,6 +25,7 @@
 - Live first-start progress output for Windows batch launchers and Pinokio install/start scripts, including timed heartbeat messages for silent setup commands.
 - Live update progress output for Pinokio `update.js` and `launch.py --update`, including Git progress and dependency refresh step labels.
 - Tools-menu Model Downloads window for downloading missing or optional local model files on demand.
+- Pinokio `test.js` launcher that installs `requirements-test.txt` only for test runs before executing the unittest suite.
 
 ### Changed
 
@@ -65,3 +66,4 @@
 - Bumped the fork runtime version string to `1.4.0-vibe.45`.
 - Pinned setup tooling to `setuptools==71.1.0` to avoid `PyExecJS` metadata failures with newer setuptools releases.
 - Bumped the fork runtime version string to `1.4.0-vibe.46`.
+- Bumped the fork runtime version string to `1.4.0-vibe.47`.
