@@ -1,6 +1,18 @@
 # Changelogs
 
 ### 2026-05-19
+[v1.4.0-vibe.50] comic archive import
+Added:
+1. Added direct `.cbz`, `.cbr`, and `.zip` comic archive import from the Open menu, drag-and-drop, recent projects, and `--proj-dir`.
+2. Added archive extraction into regular image project folders with natural page ordering and `archive_import.json` metadata.
+
+Changed:
+1. Documented archive import support, CBR `7z` requirements, and GPL-3.0 license continuity.
+
+Version:
+1. Bumped the fork runtime version string to `1.4.0-vibe.50`.
+
+### 2026-05-19
 [v1.4.0-vibe.49] settings tooltip cleanup and background model downloads
 Added:
 1. Added shared tooltip wrapping for long Settings and module-parameter hover descriptions.

@@ -1,4 +1,5 @@
 import os.path as osp
+from utils.archive_import import archive_filter
 from typing import List, Union
 
 from qtpy.QtWidgets import QMainWindow, QHBoxLayout, QVBoxLayout, QFileDialog, QLabel, QSizePolicy, QToolBar, QMenu, QSpacerItem, QPushButton, QCheckBox, QToolButton
@@ -96,6 +97,9 @@ class LeftBar(Widget):
         actionOpenFolder.triggered.connect(self.onOpenFolder)
         actionOpenFolder.setShortcut(QKeySequence.Open)
 
+        actionOpenArchive = QAction(self.tr("Open Comic Archive ... *.cbz *.cbr *.zip"), self)
+        actionOpenArchive.triggered.connect(self.onOpenArchive)
+
         actionOpenProj = QAction(self.tr("Open Project ... *.json"), self)
         actionOpenProj.triggered.connect(self.onOpenProj)
 
@@ -124,7 +128,7 @@ class LeftBar(Widget):
         self.recentMenu = QMenu(self.tr("Open Recent"), self)
         
         openMenu = QMenu(self)
-        openMenu.addActions([actionOpenFolder, actionOpenProj])
+        openMenu.addActions([actionOpenFolder, actionOpenArchive, actionOpenProj])
         openMenu.addMenu(self.recentMenu)
         openMenu.addSeparator()
         openMenu.addActions([
@@ -304,6 +308,17 @@ class LeftBar(Widget):
         json_path = str(dialog.getOpenFileUrl(self.parent(), self.tr('Import *.docx'), filter="*.json")[0].toLocalFile())
         if osp.exists(json_path):
             self.open_json_proj.emit(json_path)
+
+    def onOpenArchive(self):
+        dialog = QFileDialog()
+        archive_path = str(dialog.getOpenFileUrl(
+            self.parent(),
+            self.tr('Open Comic Archive'),
+            filter=archive_filter(),
+        )[0].toLocalFile())
+        if osp.exists(archive_path):
+            self.updateRecentProjList(archive_path)
+            self.open_dir.emit(archive_path)
 
     def stateCheckerChanged(self, checker_type: str):
         if checker_type == 'imgtrans':

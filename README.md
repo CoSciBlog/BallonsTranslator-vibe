@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README_EN.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.49`
+Fork release: `1.4.0-vibe.50`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -59,6 +59,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Added first-use local model downloads for backends that declare downloadable files, so optional models can be fetched when the selected backend is first loaded.
 - Cleaned up Save settings so image format and quality explanations stay in hover tooltips instead of visible labels, and wrapped long tooltip text for narrower screens.
 - Made the Model Downloads window explicitly non-modal so selected or all downloads continue in the background while the app remains usable.
+- Added direct comic archive import for `.cbz`, `.cbr`, and `.zip` files by extracting supported images into a normal project folder.
 
 ## Features
 
@@ -68,6 +69,10 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
   - inpainting / text removal
   - machine translation
   - automatic typesetting based on the original balloon layout
+- Comic archive import:
+  - open `.cbz`, `.cbr`, or `.zip` files from the Open menu, drag-and-drop, or `--proj-dir`
+  - extracts pages into a regular image project folder next to the archive
+  - keeps natural page ordering for nested archive paths
 - Interactive editing workflow:
   - rich text editing
   - search and replace
@@ -102,6 +107,14 @@ Known limitations:
 - Automatic detection can produce false positives or false negatives.
 - Difficult structures can create visible inpainting artifacts.
 - Semantic or prompt-based inpainting is not a standard part of this MVP.
+
+## Comic archive import
+
+Open `.cbz`, `.cbr`, or `.zip` files from `Open -> Open Comic Archive`, drag them onto the canvas, or pass them to `launch.py --proj-dir`. The importer extracts supported image pages into a normal project folder next to the archive, for example `Series.cbz` becomes `Series/`, then loads that folder through the existing project workflow.
+
+ZIP and CBZ archives are handled with Python's standard `zipfile` support. CBR archives require a local `7z`-compatible extractor on `PATH`; Pinokio's Windows environment provides `7z`. Nested archive folders are flattened into ordered page files such as `0001_page.png`, `0002_page.png`, and an `archive_import.json` file records the source archive and imported pages.
+
+The importer only writes into the derived project folder. If that folder already contains image pages, it is reused instead of being overwritten.
 
 ## Re-Inpaint current page
 
@@ -310,7 +323,7 @@ Recommended flow:
 
 1. Start the application from a terminal so crashes still print useful information.
 2. Open settings and choose the translator, source language, and target language.
-3. Open a folder that contains comic or manga images.
+3. Open a folder that contains comic or manga images, or open a `.cbz`, `.cbr`, or `.zip` comic archive.
 4. Click `Run` and wait for detection, OCR, translation, inpainting, and typesetting to finish.
 5. Review the translated text manually before publishing or sharing.
 
@@ -377,8 +390,9 @@ Notes:
 
 - Upstream project: [dmMaze/BallonsTranslator](https://github.com/dmMaze/BallonsTranslator)
 - AI-modified downstream variant referenced by the project: [thomaswantstobeaskeleton/BallonsTranslator-Pro](https://github.com/thomaswantstobeaskeleton/BallonsTranslator-Pro)
-- Fork maintenance and launcher/documentation extension: this `BallonsTranslator-vibe` fork
+- Fork maintenance, archive import, launcher integration, and documentation extension: this `BallonsTranslator-vibe` fork
+- Archive import uses Python standard-library ZIP handling and the user's locally installed `7z`/Pinokio-provided extractor for CBR files.
 
 ## License
 
-See [LICENSE](LICENSE).
+This fork remains licensed under GPL-3.0. See [LICENSE](LICENSE). The archive importer does not add cloud services or a new bundled extractor; CBR support uses the user's local `7z`-compatible tool when available.

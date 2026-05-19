@@ -30,6 +30,7 @@ from .misc import parse_stylesheet, set_html_family, QKEY
 from utils.config import ProgramConfig, pcfg, save_config, text_styles, save_text_styles, load_textstyle_from, FontFormat
 from utils.reinpaint import combine_inpaint_masks, mask_bounding_rect
 from utils.proj_imgtrans import ProjImgTrans
+from utils.archive_import import import_archive_to_project, is_archive_path
 from .canvas import Canvas
 from .configpanel import ConfigPanel
 from .module_manager import ModuleManager
@@ -503,6 +504,12 @@ class MainWindow(mainwindow_cls):
         self.retranslateUI()
 
     def OpenProj(self, proj_path: str):
+        if osp.isfile(proj_path) and is_archive_path(proj_path):
+            try:
+                proj_path = import_archive_to_project(proj_path)
+            except Exception as e:
+                create_error_dialog(e, self.tr('Failed to import archive ') + proj_path)
+                return
         if osp.isdir(proj_path):
             self.openDir(proj_path)
         else:

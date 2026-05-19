@@ -20,6 +20,7 @@ from .page_search_widget import PageSearchWidget
 from utils import shared as C
 from utils.config import pcfg
 from utils.proj_imgtrans import ProjImgTrans
+from utils.archive_import import is_archive_path
 
 CANVAS_SCALE_MAX = 10.0
 CANVAS_SCALE_MIN = 0.01
@@ -313,7 +314,7 @@ class Canvas(QGraphicsScene):
             ufolder = None
             for url in urls:
                 furl = url.toLocalFile()
-                if os.path.isdir(furl):
+                if os.path.isdir(furl) or is_archive_path(furl):
                     ufolder = furl
                     break
             if ufolder is not None:
