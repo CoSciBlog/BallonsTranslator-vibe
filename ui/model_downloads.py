@@ -21,6 +21,7 @@ from utils.logger import logger as LOGGER
 CHECKED = Qt.CheckState.Checked if hasattr(Qt, "CheckState") else Qt.Checked
 UNCHECKED = Qt.CheckState.Unchecked if hasattr(Qt, "CheckState") else Qt.Unchecked
 USER_ROLE = Qt.ItemDataRole.UserRole if hasattr(Qt, "ItemDataRole") else Qt.UserRole
+ITEM_IS_USER_CHECKABLE = Qt.ItemFlag.ItemIsUserCheckable if hasattr(Qt, "ItemFlag") else Qt.ItemIsUserCheckable
 
 
 class ModelDownloadWorker(QThread):
@@ -84,10 +85,17 @@ class ModelDownloadWindow(QDialog):
         self.list_widget.clear()
         for entry in get_downloadable_model_entries():
             state = self.tr("installed") if entry["ready"] else self.tr("missing")
+            if not entry.get("downloadable", True):
+                state = self.tr("runtime")
             optional = self.tr("optional") if entry["optional_startup"] else self.tr("startup")
             label = f"{entry['category']}/{entry['key']} - {state} - {optional}"
+            if entry.get("note"):
+                label = f"{label} - {entry['note']}"
             item = QListWidgetItem(label)
-            item.setCheckState(UNCHECKED if entry["ready"] else CHECKED)
+            if entry.get("downloadable", True):
+                item.setCheckState(UNCHECKED if entry["ready"] else CHECKED)
+            else:
+                item.setFlags(item.flags() & ~ITEM_IS_USER_CHECKABLE)
             item.setData(USER_ROLE, entry)
             self.list_widget.addItem(item)
 
@@ -100,6 +108,8 @@ class ModelDownloadWindow(QDialog):
             entry = item.data(USER_ROLE)
             if not include_installed and entry["ready"]:
                 continue
+            if not entry.get("downloadable", True):
+                continue
             tasks.append((entry["category"], entry["key"], entry["module_class"]))
         return tasks
 
@@ -110,7 +120,7 @@ class ModelDownloadWindow(QDialog):
         tasks = [
             (entry["category"], entry["key"], entry["module_class"])
             for entry in get_downloadable_model_entries()
-            if not entry["ready"]
+            if entry.get("downloadable", True) and not entry["ready"]
         ]
         self.start_download(tasks)
 

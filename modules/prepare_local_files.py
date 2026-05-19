@@ -16,7 +16,18 @@ REGISTRY_LABELS = [
 ]
 
 OPTIONAL_STARTUP_DOWNLOADS = {
+    ('inpainter', 'aot'),
     ('inpainter', 'flux2-klein'),
+    ('ocr', 'PaddleOCRVLManga'),
+    ('ocr', 'one_ocr'),
+    ('ocr', 'paddle_ocr'),
+    ('ocr', 'stariver_ocr'),
+}
+
+RUNTIME_MODEL_NOTES = {
+    ('ocr', 'paddle_ocr'): 'managed by PaddleOCR on first use',
+    ('ocr', 'one_ocr'): 'manual oneocr.dll and oneocr.onemodel files required',
+    ('ocr', 'stariver_ocr'): 'API-based OCR, no local model download',
 }
 
 
@@ -67,7 +78,9 @@ def module_download_status(module_class: BaseModule, verify_hash: bool = False) 
 
 def get_downloadable_model_entries():
     entries = []
+    seen = set()
     for category, module_key, module_class in iter_downloadable_modules():
+        seen.add((category, module_key))
         ready, missing = module_download_status(module_class)
         entries.append({
             'category': category,
@@ -76,7 +89,24 @@ def get_downloadable_model_entries():
             'ready': ready,
             'missing': missing,
             'optional_startup': (category, module_key) in OPTIONAL_STARTUP_DOWNLOADS,
+            'downloadable': True,
+            'note': '',
         })
+    for category, registry in REGISTRY_LABELS:
+        for module_key, module_class in registry.module_dict.items():
+            marker = (category, module_key)
+            if marker in seen or marker not in RUNTIME_MODEL_NOTES:
+                continue
+            entries.append({
+                'category': category,
+                'key': module_key,
+                'module_class': module_class,
+                'ready': True,
+                'missing': [],
+                'optional_startup': marker in OPTIONAL_STARTUP_DOWNLOADS,
+                'downloadable': False,
+                'note': RUNTIME_MODEL_NOTES[marker],
+            })
     return entries
 
 

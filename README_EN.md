@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.47`
+Fork release: `1.4.0-vibe.48`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -54,8 +54,9 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Improved first-start launcher output so Windows batch and Pinokio install/start flows show live dependency output plus periodic progress messages during silent setup steps.
 - Improved the Pinokio and `launch.py --update` update flows so Git and dependency refresh steps stream progress output instead of appearing idle.
 - Pinned setup tooling to `setuptools==71.1.0` so legacy packages such as `PyExecJS` install correctly during first setup.
-- Added `Tools -> Model Downloads` for downloading missing or optional local models on demand, and moved the large optional `flux2-klein` model out of the automatic first-start download set.
+- Added `Tools -> Model Downloads` for downloading missing or optional local models on demand, and moved large optional models such as `flux2-klein`, `aot`, and PaddleOCR-VL Manga out of the automatic first-start download set.
 - Added a separate Pinokio test launcher and `requirements-test.txt` so test-only dependencies are installed only when tests are run.
+- Added first-use local model downloads for backends that declare downloadable files, so optional models can be fetched when the selected backend is first loaded.
 
 ## Features
 
@@ -108,7 +109,7 @@ The same action is available from `Tools -> Re-run Inpainting Current Page` and 
 
 The Drawboard sidebar also includes a `Show translated text` checkbox. Enable it while drawing masks if you need to see the translated text boxes together with the mask layer.
 
-Use `Tools -> Model Downloads` to download optional or missing local models after setup. The first setup still downloads the common text detection, `manga_ocr`, `mit48px`, and LaMa inpainting assets, while the large optional `flux2-klein` files are downloaded only when selected in that window.
+Use `Tools -> Model Downloads` to download optional or missing local models after setup. The first setup still downloads the common text detection, `manga_ocr`, `mit48px`, and LaMa inpainting assets, while optional backends such as `flux2-klein`, `aot`, and PaddleOCR-VL Manga are downloaded only from that window or when a backend with declared downloadable files is first loaded. Native PaddleOCR downloads its own runtime assets on first use, OneOCR still requires the local `oneocr.dll` and `oneocr.onemodel` files to be supplied manually, and Stariver OCR is API-based without a local model download.
 
 ## Pinokio launcher
 

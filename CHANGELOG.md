@@ -4,6 +4,7 @@
 
 ### Added
 
+- First-use local model downloads for modules with declared downloadable files, so optional models can be fetched when their backend is selected.
 - Censor Restoration / Decensor Inpaint pipeline for simple dark or light censor bars.
 - Automatic mask detection for block-like censor regions.
 - Current-page restoration path using existing inpainting backends.
@@ -29,6 +30,7 @@
 
 ### Changed
 
+- Automatic first-start model downloads now also skip optional `aot`, PaddleOCR-VL Manga, native PaddleOCR, OneOCR, and Stariver OCR entries. Backends with known downloadable files remain available through `Tools -> Model Downloads`; native PaddleOCR downloads on first use, OneOCR requires manually supplied local files, and Stariver OCR is API-only.
 - Existing translation, OCR, and inpainting workflows are unchanged.
 - Review now uses character and honorific glossary entries as guidance.
 - Manual glossary entries are preserved and preferred over automatic entries.
@@ -67,3 +69,4 @@
 - Pinned setup tooling to `setuptools==71.1.0` to avoid `PyExecJS` metadata failures with newer setuptools releases.
 - Bumped the fork runtime version string to `1.4.0-vibe.46`.
 - Bumped the fork runtime version string to `1.4.0-vibe.47`.
+- Bumped the fork runtime version string to `1.4.0-vibe.48`.

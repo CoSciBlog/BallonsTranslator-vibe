@@ -1,6 +1,19 @@
 # Changelogs
 
 ### 2026-05-19
+[v1.4.0-vibe.48] more on-demand model downloads
+Added:
+1. Added first-use local model downloads for modules that declare downloadable model files.
+
+Changed:
+1. Skipped optional `aot`, PaddleOCR-VL Manga, native PaddleOCR, OneOCR, and Stariver OCR entries during automatic first-start model download handling.
+2. Kept optional models with known downloadable files available through `Tools -> Model Downloads`.
+3. Documented that native PaddleOCR downloads its own runtime assets on first use, OneOCR requires manually supplied local files, and Stariver OCR is API-only.
+
+Version:
+1. Bumped the fork runtime version string to `1.4.0-vibe.48`.
+
+### 2026-05-19
 [v1.4.0-vibe.47] lazy test dependencies
 Added:
 1. Added `requirements-test.txt` for test-only dependency declarations.

@@ -228,10 +228,20 @@ class BaseModule:
         return model_deleted
 
     def load_model(self):
-        # TODO: check and download files & inform UIs
         aquire_model_loading_lock()
-        self._load_model()
-        release_model_loading_lock()
+        try:
+            if self.download_file_list is not None:
+                from modules.prepare_local_files import download_module_files, module_download_status
+
+                module_name = self.__class__.__name__
+                ready, missing = module_download_status(self.__class__)
+                if not ready:
+                    self.logger.info(f'Downloading missing model files before loading {module_name}: {missing}')
+                    if not download_module_files(self.__class__):
+                        raise RuntimeError(f'Failed to download required model files for {module_name}.')
+            self._load_model()
+        finally:
+            release_model_loading_lock()
         return
 
     def _load_model(self):
