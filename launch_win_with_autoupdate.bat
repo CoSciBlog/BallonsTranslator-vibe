@@ -38,7 +38,7 @@ echo Couldn't launch pip from virtual environment
 goto :show_stdout_stderr
 
 :install_requirements
-"%PYTHON%" "%STEP_RUNNER%" "Installing/upgrading pip, wheel, and setuptools" -- "%PYTHON%" -m pip install --upgrade pip wheel setuptools --progress-bar on
+"%PYTHON%" "%STEP_RUNNER%" "Installing/upgrading pip, wheel, and compatible setuptools" -- "%PYTHON%" -m pip install --upgrade pip wheel setuptools==71.1.0 --progress-bar on
 if not %ERRORLEVEL% == 0 goto :show_stdout_stderr
 "%PYTHON%" "%STEP_RUNNER%" "Installing BallonsTranslator requirements from requirements.txt" -- "%PYTHON%" -m pip install -r requirements.txt --progress-bar on
 if not %ERRORLEVEL% == 0 goto :show_stdout_stderr

@@ -24,6 +24,7 @@
 - Run-menu LLM review actions for the current page and all non-ignored pages, using the active ChatGPT, LLM_API_Translator, or Two-Step Translator settings.
 - Live first-start progress output for Windows batch launchers and Pinokio install/start scripts, including timed heartbeat messages for silent setup commands.
 - Live update progress output for Pinokio `update.js` and `launch.py --update`, including Git progress and dependency refresh step labels.
+- Tools-menu Model Downloads window for downloading missing or optional local model files on demand.
 
 ### Changed
 
@@ -36,6 +37,7 @@
 - UI-only settings such as preset import/export, mouse-wheel protection, startup reopening, keyboard shortcuts, and display filters now avoid performance claims.
 - LLM translators now read glossary entries and the glossary prompt only from the current project's separate `glossary.json` data.
 - Translator hover descriptions now distinguish true speed impacts from reliability, memory-safety, or quota-related behavior.
+- The optional `flux2-klein` inpainting model is skipped during automatic first-start model downloads and can be downloaded later from `Tools -> Model Downloads`.
 
 ### Fixed
 
@@ -61,3 +63,5 @@
 - Bumped the fork runtime version string to `1.4.0-vibe.43`.
 - Bumped the fork runtime version string to `1.4.0-vibe.44`.
 - Bumped the fork runtime version string to `1.4.0-vibe.45`.
+- Pinned setup tooling to `setuptools==71.1.0` to avoid `PyExecJS` metadata failures with newer setuptools releases.
+- Bumped the fork runtime version string to `1.4.0-vibe.46`.

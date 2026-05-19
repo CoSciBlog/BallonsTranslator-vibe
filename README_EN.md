@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.45`
+Fork release: `1.4.0-vibe.46`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -53,6 +53,8 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Added Run-menu review actions for the current page and all pages, using the active ChatGPT, LLM_API_Translator, or Two-Step Translator settings to re-check and correct existing translations.
 - Improved first-start launcher output so Windows batch and Pinokio install/start flows show live dependency output plus periodic progress messages during silent setup steps.
 - Improved the Pinokio and `launch.py --update` update flows so Git and dependency refresh steps stream progress output instead of appearing idle.
+- Pinned setup tooling to `setuptools==71.1.0` so legacy packages such as `PyExecJS` install correctly during first setup.
+- Added `Tools -> Model Downloads` for downloading missing or optional local models on demand, and moved the large optional `flux2-klein` model out of the automatic first-start download set.
 
 ## Features
 
@@ -104,6 +106,8 @@ The left sidebar includes a `Ri` button below `Gloss` and `Dc`. It re-runs inpai
 The same action is available from `Tools -> Re-run Inpainting Current Page` and the `Ctrl+Shift+I` shortcut. The Drawboard has a Re-Inpaint settings tab with the current inpainter selector and a dedicated `Dilate` slider, matching the rectangle repair tool's dilation behavior. Re-Inpaint now keeps the page metadata attached to the inpaint result, so the progress dialog can close when the current-page result finishes. This is useful after changing the inpainting model or editing masks manually.
 
 The Drawboard sidebar also includes a `Show translated text` checkbox. Enable it while drawing masks if you need to see the translated text boxes together with the mask layer.
+
+Use `Tools -> Model Downloads` to download optional or missing local models after setup. The first setup still downloads the common text detection, `manga_ocr`, `mit48px`, and LaMa inpainting assets, while the large optional `flux2-klein` files are downloaded only when selected in that window.
 
 ## Pinokio launcher
 

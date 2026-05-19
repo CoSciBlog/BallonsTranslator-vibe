@@ -1,6 +1,18 @@
 # Changelogs
 
 ### 2026-05-19
+[v1.4.0-vibe.46] setup compatibility and on-demand model downloads
+Added:
+1. Added a `Tools -> Model Downloads` window for downloading selected missing or optional local model files.
+
+Changed:
+1. Skipped the large optional `flux2-klein` model during automatic first-start model downloads; common detection, `manga_ocr`, `mit48px`, and LaMa assets still download during setup.
+2. Pinned launcher setup tooling to `setuptools==71.1.0` so legacy packages such as `PyExecJS` can generate metadata successfully.
+
+Version:
+1. Bumped the fork runtime version string to `1.4.0-vibe.46`.
+
+### 2026-05-19
 [v1.4.0-vibe.45] update progress output
 Added:
 1. Updated Pinokio `update.js` to show labeled Git and dependency-refresh steps with timed progress heartbeats.

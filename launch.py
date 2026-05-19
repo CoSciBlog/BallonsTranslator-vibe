@@ -8,9 +8,10 @@ import subprocess
 from platform import platform
 
 BRANCH = 'dev'
-VERSION = '1.4.0-vibe.45'
+VERSION = '1.4.0-vibe.46'
 FORK_REPO_URL = os.environ.get('BALLOONTRANS_UPDATE_REPO', 'https://github.com/CoSciBlog/BallonsTranslator-vibe.git')
 UPDATE_BRANCH = os.environ.get('BALLOONTRANS_UPDATE_BRANCH', BRANCH)
+BUILD_TOOL_REQUIREMENTS = ['wheel', 'setuptools==71.1.0']
 
 python = sys.executable
 git = os.environ.get('GIT', "git")
@@ -360,6 +361,10 @@ def prepare_environment():
         return
 
     req_updated = False
+    if not check_reqs(BUILD_TOOL_REQUIREMENTS):
+        run_pip("install --upgrade wheel setuptools==71.1.0", "compatible build tooling")
+        req_updated = True
+
     if sys.platform == 'win32':
         for req in REQ_WIN:
             if not check_reqs([req]):

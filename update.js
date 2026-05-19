@@ -31,7 +31,7 @@ module.exports = {
           PIP_PROGRESS_BAR: "on"
         },
         message: [
-          "python -u scripts/launch_step.py \"Refreshing pip, wheel, and setuptools\" -- python -m pip install --upgrade pip wheel setuptools --progress-bar on",
+          "python -u scripts/launch_step.py \"Refreshing pip, wheel, and compatible setuptools\" -- python -m pip install --upgrade pip wheel setuptools==71.1.0 --progress-bar on",
           "python -u scripts/launch_step.py \"Refreshing BallonsTranslator requirements\" -- uv pip install -r requirements.txt"
         ]
       }

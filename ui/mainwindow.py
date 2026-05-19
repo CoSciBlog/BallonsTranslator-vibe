@@ -42,6 +42,7 @@ from .custom_widget import Widget, ViewWidget
 from .global_search_widget import GlobalSearchWidget
 from .glossary_widget import GlossaryWindow
 from .translation_benchmark import TranslationBenchmarkWindow
+from .model_downloads import ModelDownloadWindow
 from .input_wheel_guard import InputWheelGuard
 from .textedit_commands import GlobalRepalceAllCommand
 from .framelesswindow import FramelessWindow, FramelessMoveResize
@@ -878,6 +879,7 @@ class MainWindow(mainwindow_cls):
         self.titleBar.merge_tool_trigger.connect(self.on_open_merge_tool)
         self.titleBar.reinpaint_current_page_trigger.connect(self.run_reinpaint_current_page)
         self.titleBar.remove_current_page_masks_trigger.connect(self.remove_current_page_masks)
+        self.titleBar.model_downloads_trigger.connect(self.show_model_download_window)
 
         shortcutA = QShortcut(QKeySequence("A"), self)
         shortcutA.activated.connect(self.shortcutBefore)
@@ -1523,6 +1525,12 @@ class MainWindow(mainwindow_cls):
         self.translation_benchmark_window.show()
         self.translation_benchmark_window.raise_()
         self.translation_benchmark_window.activateWindow()
+
+    def show_model_download_window(self, checked: bool = False):
+        self.model_download_window = ModelDownloadWindow(self)
+        self.model_download_window.show()
+        self.model_download_window.raise_()
+        self.model_download_window.activateWindow()
 
     def translateBlkitemList(self, blkitem_list: List, mode: int) -> bool:
 

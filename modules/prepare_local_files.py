@@ -1,28 +1,108 @@
-from typing import Union, List
+from typing import Union, List, Dict, Tuple
 import os.path as osp
 import os
 
 from . import INPAINTERS, TEXTDETECTORS, OCR, TRANSLATORS
 from .base import BaseModule, LOGGER
 import utils.shared as shared
-from utils.download_util import download_and_check_files
+from utils.download_util import download_and_check_files, check_local_file
+
+
+REGISTRY_LABELS = [
+    ('inpainter', INPAINTERS),
+    ('textdetector', TEXTDETECTORS),
+    ('ocr', OCR),
+    ('translator', TRANSLATORS),
+]
+
+OPTIONAL_STARTUP_DOWNLOADS = {
+    ('inpainter', 'flux2-klein'),
+}
+
+
+def iter_downloadable_modules():
+    for category, registry in REGISTRY_LABELS:
+        for module_key, module_class in registry.module_dict.items():
+            if module_class.download_file_list is None:
+                continue
+            yield category, module_key, module_class
+
+
+def _wrap_download_entries(download_kwargs: Dict) -> Tuple[List[str], List[str], List[str]]:
+    files = download_kwargs.get('files')
+    if not isinstance(files, list):
+        files = [files]
+
+    save_files = download_kwargs.get('save_files')
+    if save_files is None:
+        save_files = files
+    elif not isinstance(save_files, list):
+        save_files = [save_files]
+
+    sha256_pre_calculated = download_kwargs.get('sha256_pre_calculated')
+    if not isinstance(sha256_pre_calculated, list):
+        if sha256_pre_calculated is None:
+            sha256_pre_calculated = [None] * len(files)
+        else:
+            sha256_pre_calculated = [sha256_pre_calculated]
+
+    save_dir = download_kwargs.get('save_dir')
+    if save_dir is not None:
+        save_files = [osp.join(save_dir, savep) for savep in save_files]
+
+    return files, save_files, sha256_pre_calculated
+
+
+def module_download_status(module_class: BaseModule, verify_hash: bool = False) -> Tuple[bool, List[str]]:
+    missing = []
+    for download_kwargs in module_class.download_file_list or []:
+        _, save_files, sha256_pre_calculated = _wrap_download_entries(download_kwargs)
+        for savep, sha256_precal in zip(save_files, sha256_pre_calculated):
+            hash_value = sha256_precal if verify_hash else None
+            file_exists, valid_hash, _ = check_local_file(savep, hash_value, cache_hash=False)
+            if not file_exists or not valid_hash:
+                missing.append(savep)
+    return not missing, missing
+
+
+def get_downloadable_model_entries():
+    entries = []
+    for category, module_key, module_class in iter_downloadable_modules():
+        ready, missing = module_download_status(module_class)
+        entries.append({
+            'category': category,
+            'key': module_key,
+            'module_class': module_class,
+            'ready': ready,
+            'missing': missing,
+            'optional_startup': (category, module_key) in OPTIONAL_STARTUP_DOWNLOADS,
+        })
+    return entries
+
+
+def download_module_files(module_class: BaseModule) -> bool:
+    all_successful = True
+    for download_kwargs in module_class.download_file_list or []:
+        all_successful = download_and_check_files(**download_kwargs) and all_successful
+    return all_successful
 
 
 def download_and_check_module_files(module_class_list: List[BaseModule] = None):
     if module_class_list is None:
         module_class_list = []
-        for registered in [INPAINTERS, TEXTDETECTORS, OCR, TRANSLATORS]:
-            for module_key in registered.module_dict.keys():
-                module_class_list.append(registered.get(module_key))
+        for category, module_key, module_class in iter_downloadable_modules():
+            if (category, module_key) in OPTIONAL_STARTUP_DOWNLOADS:
+                LOGGER.info(f'Skipping optional startup model download for {category}/{module_key}. Use Tools -> Model Downloads to fetch it.')
+                continue
+            module_class_list.append(module_class)
 
     for module_class in module_class_list:
         if module_class.download_file_on_load or module_class.download_file_list is None:
             continue
-        for download_kwargs in module_class.download_file_list:
-            all_successful = download_and_check_files(**download_kwargs)
-            if all_successful:
-                continue
-            LOGGER.error(f'Please save these files manually to sepcified path and restart the application, otherwise {module_class} will be unavailable.')
+        all_successful = download_module_files(module_class)
+        if all_successful:
+            continue
+        LOGGER.error(f'Please save these files manually to sepcified path and restart the application, otherwise {module_class} will be unavailable.')
 
 def prepare_pkuseg():
     try:

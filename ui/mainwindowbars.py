@@ -452,11 +452,17 @@ class TitleBar(Widget):
         removeMasksAction.setShortcut(QKeySequence('Ctrl+Shift+Backspace'))
         removeMasksAction.setToolTip(self.tr('Remove every mask on the current page and restore the inpainted pixels from the original image.'))
         self.remove_current_page_masks_trigger = removeMasksAction.triggered
+
+        modelDownloadsAction = QAction(self.tr('Model Downloads'), self)
+        modelDownloadsAction.setToolTip(self.tr('Download optional or missing local OCR, detection, inpainting, and translator model files.'))
+        self.model_downloads_trigger = modelDownloadsAction.triggered
         
         toolsMenu = QMenu(self.toolsToolBtn)
         toolsMenu.addAction(mergeToolAction)
         toolsMenu.addAction(reinpaintAction)
         toolsMenu.addAction(removeMasksAction)
+        toolsMenu.addSeparator()
+        toolsMenu.addAction(modelDownloadsAction)
         self.toolsToolBtn.setMenu(toolsMenu)
         self.toolsToolBtn.setPopupMode(QToolButton.InstantPopup)
 
