@@ -7,9 +7,11 @@ module.exports = {
         venv: "env",
         path: ".",
         env: {
-          HF_HUB_ENABLE_HF_TRANSFER: "1"
+          HF_HUB_ENABLE_HF_TRANSFER: "1",
+          PYTHONUNBUFFERED: "1",
+          PIP_PROGRESS_BAR: "on"
         },
-        message: "python launch.py --frozen"
+        message: "python -u launch.py --frozen"
       }
     }
   ]

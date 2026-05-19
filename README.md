@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README_EN.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.43`
+Fork release: `1.4.0-vibe.44`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -51,6 +51,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Glossary target-term edits now update matching existing translations, re-render affected pages, and save the updated project.
 - Added a right-click text box action that merges two or more selected text boxes into the first selected box while leaving the inpainted page layer unchanged.
 - Added Run-menu review actions for the current page and all pages, using the active ChatGPT, LLM_API_Translator, or Two-Step Translator settings to re-check and correct existing translations.
+- Improved first-start launcher output so Windows batch and Pinokio install/start flows show live dependency output plus periodic progress messages during silent setup steps.
 
 ## Features
 
@@ -121,7 +122,7 @@ update.js
 reset.js
 ```
 
-The launcher update flow tracks `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` on the `dev` branch. The Windows batch launchers also create and reuse the same `env` virtual environment instead of the old bundled `ballontrans_pylibs_win` runtime.
+The launcher update flow tracks `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` on the `dev` branch. The Windows batch launchers also create and reuse the same `env` virtual environment instead of the old bundled `ballontrans_pylibs_win` runtime. On first start, the launchers print the active setup step, stream pip/download output, and emit periodic `still working` progress messages while silent commands such as virtual-environment creation are running.
 
 ## OCR notes
 
@@ -256,6 +257,8 @@ If you do not want to install Python and Git manually and you have normal Intern
 - Download `BallonsTranslator_dev_src_with_gitpython.7z` from the upstream distribution links.
 - Extract it.
 - Run `launch_win.bat`.
+
+The first start can take several minutes while the `env` virtual environment and Python dependencies are created. The launcher now prints live setup output and timed progress messages, so a quiet terminal still means setup is active unless an error is shown.
 
 The provided packages do not run on Windows 7. Windows 7 users need to install [Python 3.8](https://www.python.org/downloads/release/python-3810/) and run the source code directly.
 

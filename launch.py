@@ -8,7 +8,7 @@ import subprocess
 from platform import platform
 
 BRANCH = 'dev'
-VERSION = '1.4.0-vibe.43'
+VERSION = '1.4.0-vibe.44'
 FORK_REPO_URL = os.environ.get('BALLOONTRANS_UPDATE_REPO', 'https://github.com/CoSciBlog/BallonsTranslator-vibe.git')
 UPDATE_BRANCH = os.environ.get('BALLOONTRANS_UPDATE_BRANCH', BRANCH)
 
@@ -65,7 +65,7 @@ def is_installed(package):
 
 def run(command, desc=None, errdesc=None, custom_env=None, live=False):
     if desc is not None:
-        print(desc)
+        print(desc, flush=True)
 
     if live:
         result = subprocess.run(command, shell=True, env=os.environ if custom_env is None else custom_env)
@@ -342,6 +342,7 @@ def supported_amd_nightly_gpu():
         return "None"
 
 def prepare_environment():
+    print('Checking runtime environment and Python dependencies...', flush=True)
 
     try:
         import packaging
@@ -351,10 +352,11 @@ def prepare_environment():
     from utils.package import check_req_file, check_reqs
 
     if getattr(sys, 'frozen', False):
-        print('Running as app, skip dependency installation')
+        print('Running as app, skip dependency installation', flush=True)
         return
 
     if args.frozen:
+        print('Frozen launch requested, skipping dependency checks.', flush=True)
         return
 
     req_updated = False
@@ -392,6 +394,9 @@ def prepare_environment():
     if req_updated:
         import site
         importlib.reload(site)
+        print('Dependency installation finished.', flush=True)
+    else:
+        print('Runtime dependencies already satisfy requirements.', flush=True)
 
 
 

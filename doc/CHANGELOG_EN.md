@@ -1,5 +1,15 @@
 # Changelogs
 
+### 2026-05-19
+[v1.4.0-vibe.44] first-start launcher progress output
+Added:
+1. Added a small launch-step runner that prints timed progress heartbeats while silent setup commands are still running.
+2. Updated Windows batch launchers to stream virtual-environment and dependency-install output instead of hiding it in temporary log files.
+3. Updated Pinokio install/start scripts to use unbuffered Python output and visible dependency progress.
+
+Version:
+1. Bumped the fork runtime version string to `1.4.0-vibe.44`.
+
 ### 2026-05-18
 [v1.4.0-vibe.43] Run-menu LLM translation review
 Added:
