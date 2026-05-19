@@ -1,6 +1,15 @@
 # Changelogs
 
 ### 2026-05-19
+[v1.4.0-vibe.45] update progress output
+Added:
+1. Updated Pinokio `update.js` to show labeled Git and dependency-refresh steps with timed progress heartbeats.
+2. Updated `launch.py --update` to stream Git fetch and pull progress while checking and applying fork updates.
+
+Version:
+1. Bumped the fork runtime version string to `1.4.0-vibe.45`.
+
+### 2026-05-19
 [v1.4.0-vibe.44] first-start launcher progress output
 Added:
 1. Added a small launch-step runner that prints timed progress heartbeats while silent setup commands are still running.

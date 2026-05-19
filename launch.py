@@ -8,7 +8,7 @@ import subprocess
 from platform import platform
 
 BRANCH = 'dev'
-VERSION = '1.4.0-vibe.44'
+VERSION = '1.4.0-vibe.45'
 FORK_REPO_URL = os.environ.get('BALLOONTRANS_UPDATE_REPO', 'https://github.com/CoSciBlog/BallonsTranslator-vibe.git')
 UPDATE_BRANCH = os.environ.get('BALLOONTRANS_UPDATE_BRANCH', BRANCH)
 
@@ -161,21 +161,21 @@ def main():
         if getattr(sys, 'frozen', False):
             print('Running as app, skipping update.')
         else:
-            print('Checking for updates...')
+            print('Checking for updates...', flush=True)
             try:
                 current_commit = commit_hash()
-                run(f"{git} remote set-url origin {FORK_REPO_URL}", desc="Configuring update repository...", errdesc="Failed to configure update repository.")
-                run(f"{git} fetch origin {UPDATE_BRANCH}", desc="Fetching updates from BallonsTranslator-vibe fork...", errdesc="Failed to fetch updates.")
+                run(f"{git} remote set-url origin {FORK_REPO_URL}", desc="Configuring update repository...", errdesc="Failed to configure update repository.", live=True)
+                run(f"{git} fetch --progress origin {UPDATE_BRANCH}", desc="Fetching updates from BallonsTranslator-vibe fork...", errdesc="Failed to fetch updates.", live=True)
                 latest_commit = run(f"{git} rev-parse origin/{UPDATE_BRANCH}").strip()
 
                 if current_commit != latest_commit:
-                    print("New updates found. Updating repository...")
-                    run(f"{git} pull --ff-only origin {UPDATE_BRANCH}", desc="Updating repository...", errdesc="Failed to update repository.")
-                    print("Repository updated. Restarting to apply updates...")
+                    print("New updates found. Updating repository...", flush=True)
+                    run(f"{git} pull --ff-only --progress origin {UPDATE_BRANCH}", desc="Updating repository...", errdesc="Failed to update repository.", live=True)
+                    print("Repository updated. Restarting to apply updates...", flush=True)
                     restart()
                     return
                 else:
-                    print("No updates found.")
+                    print("No updates found.", flush=True)
             except Exception as e:
                 print(f"Update check failed: {e}")
                 print("Continuing with the current version.")
