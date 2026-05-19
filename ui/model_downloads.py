@@ -16,6 +16,7 @@ from modules.prepare_local_files import (
     get_downloadable_model_entries,
 )
 from utils.logger import logger as LOGGER
+from .tooltip_utils import wrap_tooltip
 
 
 CHECKED = Qt.CheckState.Checked if hasattr(Qt, "CheckState") else Qt.Checked
@@ -51,6 +52,8 @@ class ModelDownloadWindow(QDialog):
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
         self.setWindowTitle(self.tr("Model Downloads"))
+        self.setModal(False)
+        self.setWindowModality(Qt.WindowModality.NonModal if hasattr(Qt, "WindowModality") else Qt.NonModal)
         self.resize(680, 460)
         self.worker = None
 
@@ -89,9 +92,9 @@ class ModelDownloadWindow(QDialog):
                 state = self.tr("runtime")
             optional = self.tr("optional") if entry["optional_startup"] else self.tr("startup")
             label = f"{entry['category']}/{entry['key']} - {state} - {optional}"
-            if entry.get("note"):
-                label = f"{label} - {entry['note']}"
             item = QListWidgetItem(label)
+            if entry.get("note"):
+                item.setToolTip(wrap_tooltip(entry["note"]))
             if entry.get("downloadable", True):
                 item.setCheckState(UNCHECKED if entry["ready"] else CHECKED)
             else:
@@ -129,6 +132,7 @@ class ModelDownloadWindow(QDialog):
             self.status_label.setText(self.tr("No missing selected models."))
             return
         self.set_buttons_enabled(False)
+        self.status_label.setText(self.tr("Downloads are running in the background. You can keep using the app."))
         self.worker = ModelDownloadWorker(tasks, self)
         self.worker.status_changed.connect(self.status_label.setText)
         self.worker.module_finished.connect(self.on_module_finished)
@@ -147,11 +151,12 @@ class ModelDownloadWindow(QDialog):
         self.refresh_button.setEnabled(enabled)
         self.download_selected_button.setEnabled(enabled)
         self.download_all_button.setEnabled(enabled)
-        self.close_button.setEnabled(enabled)
+        self.close_button.setEnabled(True)
 
     def closeEvent(self, event) -> None:
         if self.worker is not None and self.worker.isRunning():
-            self.status_label.setText(self.tr("Downloads are still running. Wait for them to finish before closing."))
+            self.status_label.setText(self.tr("Downloads continue in the background. Reopen this window to check progress."))
+            self.hide()
             event.ignore()
             return
         super().closeEvent(event)

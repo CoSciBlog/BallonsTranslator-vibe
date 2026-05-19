@@ -5,6 +5,7 @@ from modules import GET_VALID_INPAINTERS, GET_VALID_TEXTDETECTORS, GET_VALID_TRA
 from modules.translators.base import lang_display_label
 from utils.logger import logger as LOGGER
 from .custom_widget import ConfigComboBox, ParamComboBox, NoBorderPushBtn, ParamNameLabel
+from .tooltip_utils import wrap_tooltip
 from utils.shared import CONFIG_COMBOBOX_LONG, size2width, CONFIG_COMBOBOX_SHORT, CONFIG_COMBOBOX_HEIGHT
 from utils.config import pcfg
 
@@ -252,7 +253,7 @@ class ParamWidget(QWidget):
                 if param_widget is not None:
                     param_widget.paramwidget_edited.connect(self.on_paramwidget_edited)
 
-            tooltip = description
+            tooltip = wrap_tooltip(description)
             if tooltip and param_widget is not None:
                 param_widget.setToolTip(tooltip)
             widget_idx = 0

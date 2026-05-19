@@ -1,6 +1,19 @@
 # Changelogs
 
 ### 2026-05-19
+[v1.4.0-vibe.49] settings tooltip cleanup and background model downloads
+Added:
+1. Added shared tooltip wrapping for long Settings and module-parameter hover descriptions.
+
+Changed:
+1. Removed visible description labels from the Save image format and quality controls; the descriptions remain available as hover tooltips.
+2. Made the Model Downloads window explicitly non-modal so downloads started with `Download Selected` or `Download All` continue in the background while the main app stays usable.
+3. Moved runtime-only Model Downloads notes into item hover text instead of appending them to the visible model row.
+
+Version:
+1. Bumped the fork runtime version string to `1.4.0-vibe.49`.
+
+### 2026-05-19
 [v1.4.0-vibe.48] more on-demand model downloads
 Added:
 1. Added first-use local model downloads for modules that declare downloadable model files.

@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README_EN.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.48`
+Fork release: `1.4.0-vibe.49`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -57,6 +57,8 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Added `Tools -> Model Downloads` for downloading missing or optional local models on demand, and moved large optional models such as `flux2-klein`, `aot`, and PaddleOCR-VL Manga out of the automatic first-start download set.
 - Added a separate Pinokio test launcher and `requirements-test.txt` so test-only dependencies are installed only when tests are run.
 - Added first-use local model downloads for backends that declare downloadable files, so optional models can be fetched when the selected backend is first loaded.
+- Cleaned up Save settings so image format and quality explanations stay in hover tooltips instead of visible labels, and wrapped long tooltip text for narrower screens.
+- Made the Model Downloads window explicitly non-modal so selected or all downloads continue in the background while the app remains usable.
 
 ## Features
 

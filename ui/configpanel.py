@@ -20,6 +20,7 @@ from utils.config import (
 from utils import shared as C
 from utils.shared import CONFIG_FONTSIZE_CONTENT, CONFIG_FONTSIZE_HEADER, CONFIG_FONTSIZE_TABLE, CONFIG_COMBOBOX_SHORT, CONFIG_COMBOBOX_LONG, CONFIG_COMBOBOX_MIDEAN, CONFIG_COMBOBOX_HEIGHT
 from .module_parse_widgets import InpaintConfigPanel, TextDetectConfigPanel, TranslatorConfigPanel, OCRConfigPanel
+from .tooltip_utils import wrap_tooltip
 
 class CustomIntValidator(QIntValidator):
 
@@ -97,7 +98,7 @@ class ConfigTextLabel(QLabel):
 
 class ConfigSubBlock(Widget):
     pressed = Signal(int, int)
-    def __init__(self, widget: Union[QWidget, QLayout], name: str = None, discription: str = None, vertical_layout=True, insert_stretch: bool = False, content_margins = (24, 6, 24, 6)) -> None:
+    def __init__(self, widget: Union[QWidget, QLayout], name: str = None, discription: str = None, vertical_layout=True, insert_stretch: bool = False, content_margins = (24, 6, 24, 6), show_description: bool = True) -> None:
         super().__init__()
         self.idx0: int = None
         self.idx1: int = None
@@ -106,22 +107,23 @@ class ConfigSubBlock(Widget):
         else:
             layout = QHBoxLayout(self)
         self.name = name
+        tooltip = wrap_tooltip(discription)
         if name is not None:
             textlabel = ConfigTextLabel(name, CONFIG_FONTSIZE_CONTENT, QFont.Weight.Normal)
-            if discription is not None:
-                textlabel.setToolTip(discription)
+            if tooltip is not None:
+                textlabel.setToolTip(tooltip)
             self.name_label = textlabel
             layout.addWidget(textlabel)
-        if discription is not None:
+        if discription is not None and show_description:
             description_label = ConfigTextLabel(discription, CONFIG_FONTSIZE_CONTENT-2)
             description_label.setWordWrap(True)
-            description_label.setToolTip(discription)
+            description_label.setToolTip(tooltip)
             layout.addWidget(description_label)
         if insert_stretch:
             layout.insertStretch(-1)
         if isinstance(widget, QWidget):
-            if discription is not None and not widget.toolTip():
-                widget.setToolTip(discription)
+            if tooltip is not None and not widget.toolTip():
+                widget.setToolTip(tooltip)
             layout.addWidget(widget)
         else:
             layout.addLayout(widget)
@@ -137,18 +139,23 @@ class ConfigSubBlock(Widget):
         return super().enterEvent(e)
     
 
-def combobox_with_label(sel: List[str], name: str, discription: str = None, vertical_layout: bool = False, target_block: QWidget = None, fix_size: bool = True, parent: QWidget = None, insert_stretch: bool = False) -> Tuple[ConfigComboBox, QWidget]:
+def combobox_with_label(sel: List[str], name: str, discription: str = None, vertical_layout: bool = False, target_block: QWidget = None, fix_size: bool = True, parent: QWidget = None, insert_stretch: bool = False, show_description: bool = True) -> Tuple[ConfigComboBox, QWidget]:
     combox = ConfigComboBox(fix_size=fix_size, scrollWidget=parent)
     combox.addItems(sel)
     if target_block is None:
-        sublock = ConfigSubBlock(combox, name, discription, vertical_layout=vertical_layout, insert_stretch=insert_stretch)
+        sublock = ConfigSubBlock(combox, name, discription, vertical_layout=vertical_layout, insert_stretch=insert_stretch, show_description=show_description)
         sublock.layout().setAlignment(Qt.AlignmentFlag.AlignLeft)
         sublock.layout().setSpacing(20)
         return combox, sublock
     else:
         layout = target_block.layout()
         layout.addSpacing(20)
-        layout.addWidget(ConfigTextLabel(name, CONFIG_FONTSIZE_CONTENT, QFont.Weight.Normal))
+        label = ConfigTextLabel(name, CONFIG_FONTSIZE_CONTENT, QFont.Weight.Normal)
+        tooltip = wrap_tooltip(discription)
+        if tooltip:
+            label.setToolTip(tooltip)
+            combox.setToolTip(tooltip)
+        layout.addWidget(label)
         layout.addWidget(combox)
         return combox, target_block
     
@@ -159,7 +166,7 @@ def checkbox_with_label(name: str, discription: str = None, target_block: QWidge
         font.setPointSizeF(CONFIG_FONTSIZE_CONTENT * 0.8)
         checkbox.setFont(font)
         checkbox.setText(discription)
-        checkbox.setToolTip(discription)
+        checkbox.setToolTip(wrap_tooltip(discription))
         vertical_layout = True
     else:
         vertical_layout = False
@@ -211,8 +218,8 @@ class ConfigBlock(Widget):
         sublock.pressed.connect(lambda idx0, idx1: self.sublock_pressed.emit(idx0, idx1))
         self.subblock_list.append(sublock)
 
-    def addCombobox(self, sel: List[str], name: str, discription: str = None, vertical_layout: bool = False, target_block: QWidget = None, fix_size: bool = True) -> Tuple[ConfigComboBox, QWidget]:
-        combox, sublock = combobox_with_label(sel, name, discription, vertical_layout, target_block, fix_size, parent=self)
+    def addCombobox(self, sel: List[str], name: str, discription: str = None, vertical_layout: bool = False, target_block: QWidget = None, fix_size: bool = True, show_description: bool = True) -> Tuple[ConfigComboBox, QWidget]:
+        combox, sublock = combobox_with_label(sel, name, discription, vertical_layout, target_block, fix_size, parent=self, show_description=show_description)
         if target_block is None:
             self.addSublock(sublock)
         return combox, sublock
@@ -751,29 +758,29 @@ class ConfigPanel(Widget):
 
         generalConfigPanel.addTextLabel(label_save)
         result_format_tip = self.tr('Final exported image format. PNG is lossless but can be larger and slower to write; JPG is smaller and often faster; WEBP/JXL can save space but may take longer to encode.')
-        self.rst_imgformat_combobox, imsave_sublock = generalConfigPanel.addCombobox(['PNG', 'JPG', 'WEBP', 'JXL'], self.tr('Result image format'), discription=result_format_tip)
+        self.rst_imgformat_combobox, imsave_sublock = generalConfigPanel.addCombobox(['PNG', 'JPG', 'WEBP', 'JXL'], self.tr('Result image format'), discription=result_format_tip, show_description=False)
         self.rst_imgformat_combobox.activated.connect(self.on_rst_imgformat_changed)
         self.rst_imgquality_edit = PercentageLineEdit('100')
         self.rst_imgquality_edit.setFixedWidth(CONFIG_COMBOBOX_SHORT)
         self.rst_imgquality_edit.finish_edited.connect(self.on_edit_quality_changed)
 
         result_quality_tip = self.tr('Final image quality for lossy formats. Higher quality keeps more detail but can write larger files and may export slower.')
-        self.rst_imgquality_edit.setToolTip(result_quality_tip)
-        sublock = ConfigSubBlock(self.rst_imgquality_edit, self.tr('Quality'), result_quality_tip, vertical_layout=False)
+        self.rst_imgquality_edit.setToolTip(wrap_tooltip(result_quality_tip))
+        sublock = ConfigSubBlock(self.rst_imgquality_edit, self.tr('Quality'), result_quality_tip, vertical_layout=False, show_description=False)
         sublock.layout().setAlignment(Qt.AlignmentFlag.AlignLeft)
         sublock.layout().insertStretch(-1)
         imsave_sublock.layout().addWidget(sublock)
 
         intermediate_format_tip = self.tr('Format for project working images such as masks and inpainted pages. PNG is safest but can use more disk space; JPG/WEBP/JXL can reduce disk usage but may add encoding time.')
-        self.intermediate_imgformat_combobox, intermediate_imsave_sublock = generalConfigPanel.addCombobox(['PNG', 'JPG', 'WEBP', 'JXL'], self.tr('Intermediate image format'), discription=intermediate_format_tip)
+        self.intermediate_imgformat_combobox, intermediate_imsave_sublock = generalConfigPanel.addCombobox(['PNG', 'JPG', 'WEBP', 'JXL'], self.tr('Intermediate image format'), discription=intermediate_format_tip, show_description=False)
         self.intermediate_imgformat_combobox.activated.connect(self.on_intermediate_imgformat_changed)
         self.intermediate_imgquality_edit = PercentageLineEdit('100')
         self.intermediate_imgquality_edit.setFixedWidth(CONFIG_COMBOBOX_SHORT)
         self.intermediate_imgquality_edit.finish_edited.connect(self.on_intermediate_quality_changed)
 
         intermediate_quality_tip = self.tr('Quality for lossy intermediate working images. Higher values preserve detail for later steps, but use more disk space and can slow writes.')
-        self.intermediate_imgquality_edit.setToolTip(intermediate_quality_tip)
-        sublock = ConfigSubBlock(self.intermediate_imgquality_edit, self.tr('Intermediate quality'), intermediate_quality_tip, vertical_layout=False)
+        self.intermediate_imgquality_edit.setToolTip(wrap_tooltip(intermediate_quality_tip))
+        sublock = ConfigSubBlock(self.intermediate_imgquality_edit, self.tr('Intermediate quality'), intermediate_quality_tip, vertical_layout=False, show_description=False)
         sublock.layout().setAlignment(Qt.AlignmentFlag.AlignLeft)
         sublock.layout().insertStretch(-1)
         intermediate_imsave_sublock.layout().addWidget(sublock)

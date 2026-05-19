@@ -27,6 +27,7 @@
 - Live update progress output for Pinokio `update.js` and `launch.py --update`, including Git progress and dependency refresh step labels.
 - Tools-menu Model Downloads window for downloading missing or optional local model files on demand.
 - Pinokio `test.js` launcher that installs `requirements-test.txt` only for test runs before executing the unittest suite.
+- Shared tooltip wrapping for long Settings and module-parameter hover descriptions.
 
 ### Changed
 
@@ -41,6 +42,8 @@
 - LLM translators now read glossary entries and the glossary prompt only from the current project's separate `glossary.json` data.
 - Translator hover descriptions now distinguish true speed impacts from reliability, memory-safety, or quota-related behavior.
 - The optional `flux2-klein` inpainting model is skipped during automatic first-start model downloads and can be downloaded later from `Tools -> Model Downloads`.
+- Save image format and quality descriptions now appear only as hover text instead of visible labels.
+- Model Downloads now runs downloads from `Download Selected` and `Download All` in a non-modal background window so the main app remains usable.
 
 ### Fixed
 
@@ -70,3 +73,4 @@
 - Bumped the fork runtime version string to `1.4.0-vibe.46`.
 - Bumped the fork runtime version string to `1.4.0-vibe.47`.
 - Bumped the fork runtime version string to `1.4.0-vibe.48`.
+- Bumped the fork runtime version string to `1.4.0-vibe.49`.
