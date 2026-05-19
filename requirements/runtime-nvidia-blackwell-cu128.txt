@@ -1,0 +1,11 @@
+numpy
+opencv-python
+torch
+torchvision
+torchaudio
+transformers
+tokenizers
+huggingface_hub
+accelerate
+diffusers
+safetensors

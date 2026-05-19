@@ -52,6 +52,10 @@ parser.add_argument("--frozen", action='store_true', help='run without checking 
 parser.add_argument("--update", action='store_true', help="Update the repository before launching") # Add argument --update
 parser.add_argument("--config_path", default=shared.CONFIG_PATH, help='Config file to use for translation') # Named config_path to avoid conflict with existing name config
 parser.add_argument('--nightly', action='store_true', help="Enable AMD Nightly ROCm")
+parser.add_argument("--runtime-profile", choices=["auto", "nvidia_compat_cu118", "nvidia_blackwell_cu128", "cpu_fallback"], default="auto")
+parser.add_argument("--repair-runtime", action='store_true')
+parser.add_argument("--skip-runtime-check", action='store_true')
+parser.add_argument("--no-auto-install", action='store_true')
 args, _ = parser.parse_known_args()
 
 
@@ -371,30 +375,24 @@ def prepare_environment():
                 run_pip(f"install {req}", req)
                 req_updated = True
 
-    if is_amd_gpu():
-        print('AMD GPU: Yes')
-        if args.nightly:
-            amd_nightly_gpu = supported_amd_nightly_gpu()
-            if amd_nightly_gpu == "None":
-                Exception("No AMD Nightly GPU supported")
-            if amd_nightly_gpu == "RDNA3":
-                torch_command = os.environ.get('TORCH_COMMAND',
-                                               "pip install https://repo.radeon.com/rocm/windows/rocm-rel-6.4.4/torch-2.8.0a0%2Bgitfc14c65-cp312-cp312-win_amd64.whl https://repo.radeon.com/rocm/windows/rocm-rel-6.4.4/torchvision-0.24.0a0%2Bc85f008-cp312-cp312-win_amd64.whl https://repo.radeon.com/rocm/windows/rocm-rel-6.4.4/torchaudio-2.6.0a0%2B1a8f621-cp312-cp312-win_amd64.whl")
-            if amd_nightly_gpu == "RDNA4":
-                torch_command = os.environ.get('TORCH_COMMAND',
-                                               "pip install https://repo.radeon.com/rocm/windows/rocm-rel-6.4.4/torch-2.8.0a0%2Bgitfc14c65-cp312-cp312-win_amd64.whl https://repo.radeon.com/rocm/windows/rocm-rel-6.4.4/torchvision-0.24.0a0%2Bc85f008-cp312-cp312-win_amd64.whl https://repo.radeon.com/rocm/windows/rocm-rel-6.4.4/torchaudio-2.6.0a0%2B1a8f621-cp312-cp312-win_amd64.whl")
-        else:
-            # AMD GPU: Cuda 11.8, Pytorch 2.2.2
-            torch_command = os.environ.get('TORCH_COMMAND', "pip install torch==2.2.2 torchvision==0.17.2 torchaudio==2.2.2 --index-url https://download.pytorch.org/whl/cu118 --disable-pip-version-check")
-    else:
-        torch_command = os.environ.get('TORCH_COMMAND', "pip install torch==2.7.1 torchvision==0.22.1 torchaudio==2.7.1 --index-url https://download.pytorch.org/whl/cu118 --disable-pip-version-check")
-    if args.reinstall_torch or not is_installed("torch") or not is_installed("torchvision"):
-        run(f'"{python}" -m {torch_command}', "Installing torch and torchvision", "Couldn't install torch", live=True)
+    try:
+        rm_cmd = [sys.executable, str(PATH_ROOT / "tools" / "runtime_manager.py"), "--runtime-profile", args.runtime_profile]
+        if args.repair_runtime:
+            rm_cmd.append("--repair-runtime")
+        if args.skip_runtime_check:
+            rm_cmd.append("--skip-runtime-check")
+        if args.no_auto_install:
+            rm_cmd.append("--no-auto-install")
+        
+        print("Running GPU-aware Runtime Manager...", flush=True)
+        rm_res = subprocess.run(rm_cmd)
+        if rm_res.returncode != 0:
+            print("Runtime Manager failed to initialize a stable environment. Exiting.", flush=True)
+            sys.exit(1)
         req_updated = True
-
-    if not check_req_file(args.requirements):
-        run_pip(f"install -r {args.requirements}", "requirements")
-        req_updated = True
+    except Exception as e:
+        print(f"Failed to execute runtime_manager: {e}", flush=True)
+        sys.exit(1)
 
     if req_updated:
         import site
@@ -409,3 +407,4 @@ def prepare_environment():
 
 if __name__ == '__main__':
     main()
+
