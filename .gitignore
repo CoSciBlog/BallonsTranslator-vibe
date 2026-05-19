@@ -54,6 +54,7 @@ localtmp*
 venv
 env
 .venv
+.runtime_profile.json
 pip
 .DS_Store
 *.dic

@@ -11,7 +11,7 @@ module.exports = {
           PYTHONUNBUFFERED: "1",
           PIP_PROGRESS_BAR: "on"
         },
-        message: "python -u launch.py --frozen"
+        message: "python -u launch.py --runtime-profile auto"
       }
     }
   ]

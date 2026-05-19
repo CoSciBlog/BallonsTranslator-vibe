@@ -1,312 +1,527 @@
-import os
-import sys
+import argparse
+import importlib
 import json
 import logging
-import argparse
+import os
+import platform
+import re
+import shutil
 import subprocess
+import sys
+import traceback
 from datetime import datetime
+from importlib import metadata
+from pathlib import Path
 
-LOG_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "logs")
-os.makedirs(LOG_DIR, exist_ok=True)
 
-INSTALL_LOG = os.path.join(LOG_DIR, "runtime_install.log")
-CHECK_LOG = os.path.join(LOG_DIR, "runtime_check.log")
-PROFILE_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".runtime_profile.json")
-REQ_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "requirements")
+ROOT = Path(__file__).resolve().parents[1]
+LOG_DIR = ROOT / "logs"
+INSTALL_LOG = LOG_DIR / "runtime_install.log"
+CHECK_LOG = LOG_DIR / "runtime_check.log"
+PROFILE_FILE = ROOT / ".runtime_profile.json"
+REQ_DIR = ROOT / "requirements"
 
-def setup_logger(name, log_file):
+PROFILE_CHOICES = ["auto", "nvidia_compat_cu118", "nvidia_blackwell_cu128", "cpu_fallback"]
+RUNTIME_PACKAGES = [
+    "torch",
+    "torchvision",
+    "torchaudio",
+    "numpy",
+    "opencv-python",
+    "opencv-contrib-python",
+    "opencv-python-headless",
+    "transformers",
+    "tokenizers",
+    "huggingface_hub",
+    "accelerate",
+    "diffusers",
+    "safetensors",
+]
+
+COMPAT_CORE = ["numpy==1.26.4", "opencv-python==4.10.0.84"]
+COMPAT_TORCH = ["torch==2.4.1+cu118", "torchvision==0.19.1+cu118", "torchaudio==2.4.1+cu118"]
+COMPAT_HF = [
+    "transformers==4.46.3",
+    "tokenizers==0.20.3",
+    "huggingface_hub==0.26.5",
+    "accelerate==0.34.2",
+    "diffusers==0.31.0",
+    "safetensors==0.7.0",
+]
+
+
+def setup_logger(name, path):
+    LOG_DIR.mkdir(parents=True, exist_ok=True)
     logger = logging.getLogger(name)
     logger.setLevel(logging.DEBUG)
-    fh = logging.FileHandler(log_file, mode='a', encoding='utf-8')
-    fh.setFormatter(logging.Formatter('%(asctime)s [%(levelname)s] %(message)s'))
-    ch = logging.StreamHandler()
-    ch.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
-    logger.addHandler(fh)
-    logger.addHandler(ch)
+    logger.handlers.clear()
+
+    file_handler = logging.FileHandler(path, mode="a", encoding="utf-8")
+    file_handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(message)s"))
+    stream_handler = logging.StreamHandler()
+    stream_handler.setFormatter(logging.Formatter("%(levelname)s: %(message)s"))
+
+    logger.addHandler(file_handler)
+    logger.addHandler(stream_handler)
     return logger
 
-install_logger = setup_logger("install", INSTALL_LOG)
-check_logger = setup_logger("check", CHECK_LOG)
 
-def get_fallback_compute_cap(gpu_name):
-    name_lower = gpu_name.lower()
-    if "rtx 50" in name_lower or "blackwell" in name_lower:
+install_logger = setup_logger("runtime_install", INSTALL_LOG)
+check_logger = setup_logger("runtime_check", CHECK_LOG)
+
+
+def parse_version_tuple(value):
+    numbers = []
+    for part in str(value).split("."):
+        match = re.match(r"(\d+)", part)
+        if not match:
+            break
+        numbers.append(int(match.group(1)))
+    return tuple(numbers)
+
+
+def package_version(dist_name):
+    try:
+        version = metadata.version(dist_name)
+        return version or "not installed"
+    except metadata.PackageNotFoundError:
+        return "not installed"
+
+
+def collect_versions():
+    return {
+        "torch": package_version("torch"),
+        "torchvision": package_version("torchvision"),
+        "torchaudio": package_version("torchaudio"),
+        "numpy": package_version("numpy"),
+        "opencv": package_version("opencv-python"),
+        "transformers": package_version("transformers"),
+        "tokenizers": package_version("tokenizers"),
+        "huggingface_hub": package_version("huggingface-hub"),
+        "accelerate": package_version("accelerate"),
+        "diffusers": package_version("diffusers"),
+        "safetensors": package_version("safetensors"),
+    }
+
+
+def log_versions(logger, label):
+    logger.info("%s package versions: %s", label, json.dumps(collect_versions(), sort_keys=True))
+
+
+def fallback_compute_capability(gpu_name):
+    name = gpu_name.lower()
+    if "rtx 50" in name or any(model in name for model in ("5070", "5080", "5090")) or "blackwell" in name:
         return 12.0
-    if "rtx 40" in name_lower:
+    if "rtx 40" in name or re.search(r"\b4\d{3}\b", name):
         return 8.9
-    if "rtx 30" in name_lower:
+    if "rtx 30" in name or re.search(r"\b3\d{3}\b", name):
         return 8.6
-    if "rtx 20" in name_lower:
+    if "rtx 20" in name or re.search(r"\b2\d{3}\b", name):
         return 7.5
-    if "gtx 16" in name_lower:
+    if "gtx 16" in name:
         return 7.5
-    if "gtx 10" in name_lower:
+    if "gtx 10" in name:
         return 6.1
     return None
 
+
+def run_command(command, logger, cwd=ROOT, check=False):
+    logger.info("Running command: %s", " ".join(str(part) for part in command))
+    result = subprocess.run(command, cwd=str(cwd), capture_output=True, text=True)
+    if result.stdout:
+        logger.info("stdout:\n%s", result.stdout.rstrip())
+    if result.stderr:
+        logger.info("stderr:\n%s", result.stderr.rstrip())
+    if check and result.returncode != 0:
+        raise RuntimeError(f"Command failed with exit code {result.returncode}: {' '.join(command)}")
+    return result
+
+
+def run_pip(args, logger, check=True):
+    return run_command([sys.executable, "-m", "pip"] + args, logger, check=check)
+
+
+def query_nvidia_smi(query_fields):
+    return subprocess.run(
+        ["nvidia-smi", f"--query-gpu={query_fields}", "--format=csv,noheader"],
+        capture_output=True,
+        text=True,
+    )
+
+
+def read_nvidia_header_cuda_version():
+    try:
+        result = subprocess.run(["nvidia-smi"], capture_output=True, text=True)
+    except FileNotFoundError:
+        return None
+    if result.returncode != 0:
+        return None
+    match = re.search(r"CUDA Version:\s*([0-9.]+)", result.stdout)
+    return match.group(1) if match else None
+
+
 def detect_environment():
     env = {
-        "os": sys.platform,
-        "python_version": sys.version.split(' ')[0],
+        "os": platform.system(),
+        "platform": sys.platform,
+        "python_version": platform.python_version(),
         "venv_path": sys.prefix,
         "pip_version": "unknown",
-        "nvidia_smi_available": False,
-        "gpus": [],
+        "nvidia_smi_available": shutil.which("nvidia-smi") is not None,
+        "gpu_name": None,
+        "vram": None,
         "driver_version": None,
         "cuda_version": None,
-        "compute_capability": None
+        "compute_capability": None,
+        "gpus": [],
+        "warnings": [],
     }
-    
-    try:
-        pip_res = subprocess.run([sys.executable, "-m", "pip", "--version"], capture_output=True, text=True, check=True)
-        env["pip_version"] = pip_res.stdout.split(' ')[1]
-    except Exception:
-        pass
 
-    try:
-        smi_res = subprocess.run(
-            ["nvidia-smi", "--query-gpu=name,compute_cap,driver_version,cuda_version,memory.total", "--format=csv,noheader"],
-            capture_output=True, text=True
-        )
-        if smi_res.returncode == 0:
-            env["nvidia_smi_available"] = True
-            lines = smi_res.stdout.strip().split('\n')
-            for line in lines:
-                parts = [p.strip() for p in line.split(',')]
-                if len(parts) >= 5:
-                    gpu = {
-                        "name": parts[0],
-                        "compute_cap_str": parts[1],
-                        "driver_version": parts[2],
-                        "cuda_version": parts[3],
-                        "memory": parts[4]
-                    }
-                    if env["driver_version"] is None:
-                        env["driver_version"] = parts[2]
-                        env["cuda_version"] = parts[3]
-                    
-                    cc = None
-                    try:
-                        cc = float(parts[1])
-                    except ValueError:
-                        cc = get_fallback_compute_cap(parts[0])
-                    
-                    gpu["compute_cap"] = cc
-                    if env["compute_capability"] is None or (cc is not None and cc > env["compute_capability"]):
-                        env["compute_capability"] = cc
-                    env["gpus"].append(gpu)
-    except FileNotFoundError:
-        pass
-    except Exception as e:
-        check_logger.warning(f"Error running nvidia-smi: {e}")
+    pip_result = run_command([sys.executable, "-m", "pip", "--version"], check_logger, check=False)
+    if pip_result.returncode == 0 and pip_result.stdout:
+        parts = pip_result.stdout.split()
+        if len(parts) >= 2:
+            env["pip_version"] = parts[1]
+
+    if not env["nvidia_smi_available"]:
+        return env
+
+    fields = ["name", "compute_cap", "driver_version", "cuda_version", "memory.total"]
+    result = query_nvidia_smi(",".join(fields))
+    if result.returncode != 0:
+        env["warnings"].append(result.stderr.strip())
+        fields = ["name", "driver_version", "memory.total"]
+        result = query_nvidia_smi(",".join(fields))
+
+    if result.returncode != 0:
+        env["warnings"].append(result.stderr.strip())
+        return env
+
+    header_cuda = read_nvidia_header_cuda_version()
+    for line in result.stdout.splitlines():
+        parts = [part.strip() for part in line.split(",")]
+        if len(parts) < len(fields):
+            continue
+
+        values = dict(zip(fields, parts))
+        gpu_name = values.get("name")
+        cc = None
+        if values.get("compute_cap"):
+            try:
+                cc = float(values["compute_cap"])
+            except ValueError:
+                cc = None
+        if cc is None and gpu_name:
+            cc = fallback_compute_capability(gpu_name)
+
+        gpu = {
+            "name": gpu_name,
+            "vram": values.get("memory.total"),
+            "driver_version": values.get("driver_version"),
+            "cuda_version": values.get("cuda_version") or header_cuda,
+            "compute_capability": cc,
+        }
+        env["gpus"].append(gpu)
+
+        if env["gpu_name"] is None:
+            env["gpu_name"] = gpu["name"]
+            env["vram"] = gpu["vram"]
+            env["driver_version"] = gpu["driver_version"]
+            env["cuda_version"] = gpu["cuda_version"]
+
+        if cc is not None and (env["compute_capability"] is None or cc > env["compute_capability"]):
+            env["compute_capability"] = cc
 
     return env
 
+
 def choose_runtime_profile(env):
-    if not env["nvidia_smi_available"] or not env["gpus"]:
+    if not env.get("nvidia_smi_available") or not env.get("gpus"):
         return "cpu_fallback"
-    
-    cc = env["compute_capability"]
+
+    cc = env.get("compute_capability")
     if cc is None:
-        return "nvidia_compat_cu118"  # fallback but health check is mandatory
+        return "nvidia_compat_cu118"
     if cc >= 12.0:
         return "nvidia_blackwell_cu128"
     if cc >= 6.0:
         return "nvidia_compat_cu118"
-    
     return "cpu_fallback"
 
-def run_pip_command(args, logger):
-    cmd = [sys.executable, "-m", "pip"] + args
-    logger.info(f"Running: {' '.join(cmd)}")
-    result = subprocess.run(cmd, capture_output=True, text=True)
-    if result.returncode != 0:
-        logger.error(f"Pip command failed: {result.stderr}")
-    else:
-        logger.info(f"Pip command success.")
-        logger.debug(result.stdout)
-    return result.returncode == 0
 
-def uninstall_packages(logger):
-    packages = [
-        "torch", "torchvision", "torchaudio", "numpy",
-        "opencv-python", "opencv-contrib-python", "opencv-python-headless",
-        "transformers", "tokenizers", "huggingface_hub",
-        "accelerate", "diffusers", "safetensors"
-    ]
-    run_pip_command(["uninstall", "-y"] + packages, logger)
+def load_profile_state():
+    if not PROFILE_FILE.exists():
+        return None
+    try:
+        return json.loads(PROFILE_FILE.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+
+
+def uninstall_runtime_packages():
+    log_versions(install_logger, "Before uninstall")
+    run_pip(["uninstall", "-y"] + RUNTIME_PACKAGES, install_logger, check=False)
+
+
+def install_base_requirements():
+    base_file = REQ_DIR / "base.txt"
+    if base_file.exists():
+        run_pip(["install", "-r", str(base_file)], install_logger)
+    else:
+        run_pip(["install", "-r", "requirements.txt"], install_logger)
+
 
 def install_profile(profile):
-    install_logger.info(f"Starting installation for profile: {profile}")
-    uninstall_packages(install_logger)
+    install_logger.info("Starting runtime installation for profile: %s", profile)
+    env = detect_environment()
+    install_logger.info("Detected environment: %s", json.dumps(env, indent=2))
+    log_versions(install_logger, "Before installation")
 
-    run_pip_command(["install", "-r", "requirements.txt"], install_logger)
+    if profile == "nvidia_blackwell_cu128":
+        py_version = parse_version_tuple(platform.python_version())
+        if py_version < (3, 10) or py_version >= (3, 14):
+            raise RuntimeError(
+                "nvidia_blackwell_cu128 requires a Python version supported by current PyTorch cu128 wheels "
+                "(expected Python >=3.10 and <3.14). Current Python: " + platform.python_version()
+            )
+
+    uninstall_runtime_packages()
+    install_base_requirements()
 
     if profile == "nvidia_compat_cu118":
-        run_pip_command(["install", "numpy==1.26.4"], install_logger)
-        run_pip_command(["install", "opencv-python==4.10.0.84"], install_logger)
-        run_pip_command(["install", "--no-deps", "torch==2.4.1+cu118", "torchvision==0.19.1+cu118", "torchaudio==2.4.1+cu118", "--index-url", "https://download.pytorch.org/whl/cu118"], install_logger)
-        run_pip_command(["install", "--no-deps", "-r", os.path.join(REQ_DIR, "runtime-nvidia-compat-cu118.txt")], install_logger)
+        run_pip(["install"] + COMPAT_CORE, install_logger)
+        run_pip(
+            ["install", "--no-deps", "--index-url", "https://download.pytorch.org/whl/cu118"] + COMPAT_TORCH,
+            install_logger,
+        )
+        run_pip(["install", "--no-deps"] + COMPAT_HF, install_logger)
     elif profile == "nvidia_blackwell_cu128":
-        run_pip_command(["install", "numpy", "opencv-python"], install_logger)
-        run_pip_command(["install", "--no-deps", "torch", "torchvision", "torchaudio", "--index-url", "https://download.pytorch.org/whl/cu128"], install_logger)
-        run_pip_command(["install", "-r", os.path.join(REQ_DIR, "runtime-nvidia-blackwell-cu128.txt")], install_logger)
+        run_pip(["install", "numpy", "opencv-python"], install_logger)
+        run_pip(
+            ["install", "--no-deps", "--index-url", "https://download.pytorch.org/whl/cu128", "torch", "torchvision", "torchaudio"],
+            install_logger,
+        )
+        run_pip(["install", "-r", str(REQ_DIR / "runtime-nvidia-blackwell-cu128.txt")], install_logger)
+    elif profile == "cpu_fallback":
+        install_logger.warning("CPU fallback selected. OCR, inpainting, and text detection can be slow.")
+        run_pip(["install", "numpy", "opencv-python"], install_logger)
+        run_pip(
+            ["install", "--no-deps", "--index-url", "https://download.pytorch.org/whl/cpu", "torch", "torchvision", "torchaudio"],
+            install_logger,
+        )
+        run_pip(["install", "-r", str(REQ_DIR / "runtime-cpu.txt")], install_logger)
     else:
-        run_pip_command(["install", "numpy", "opencv-python"], install_logger)
-        run_pip_command(["install", "torch", "torchvision", "torchaudio"], install_logger)
-        run_pip_command(["install", "-r", os.path.join(REQ_DIR, "runtime-cpu.txt")], install_logger)
-        install_logger.warning("CPU-Fallback aktiv. OCR, Inpainting und Text Detection können deutlich langsamer sein.")
+        raise ValueError(f"Unknown runtime profile: {profile}")
 
-    run_pip_command(["check"], install_logger)
-    install_logger.info("Installation completed.")
+    run_pip(["check"], install_logger, check=False)
+    log_versions(install_logger, "After installation")
+    install_logger.info("Runtime installation completed for profile: %s", profile)
+
+
+def classify_known_error(error_text):
+    lowered = error_text.lower()
+    if "infer_schema" in lowered or "unsupported type torch.tensor" in lowered:
+        return "known_infer_schema_torch_transformers_incompatibility"
+    if "keyerror" in lowered and "manga_ocr" in lowered:
+        return "known_manga_ocr_registry_failure"
+    return None
+
+
+def import_check(module_name, status):
+    try:
+        module = importlib.import_module(module_name)
+        check_logger.info("Import OK: %s", module_name)
+        return module
+    except Exception:
+        tb = traceback.format_exc()
+        known = classify_known_error(tb)
+        status["ok"] = False
+        status["errors"].append({"test": f"import {module_name}", "error": tb, "known_issue": known})
+        check_logger.error("Import failed: %s\n%s", module_name, tb)
+        if known:
+            check_logger.error("Known incompatibility detected: %s", known)
+        return None
+
 
 def health_check(profile):
-    check_logger.info(f"Running health check for profile: {profile}")
+    check_logger.info("Running health check for profile: %s", profile)
+    env = detect_environment()
+    check_logger.info("Detected environment: %s", json.dumps(env, indent=2))
     status = {"ok": True, "errors": []}
-    
-    def try_import(name, desc=""):
-        try:
-            mod = __import__(name)
-            check_logger.info(f"Successfully imported {name} {desc}")
-            return mod
-        except Exception as e:
-            status["ok"] = False
-            err_msg = f"Failed to import {name}: {str(e)}"
-            check_logger.error(err_msg)
-            status["errors"].append(err_msg)
-            if "infer_schema" in str(e) or "unsupported type torch.Tensor" in str(e):
-                check_logger.error("KNOWN ISSUE: infer_schema error detected. This is a Torch/Transformers/Custom-Op incompatibility.")
-            return None
-
-    versions = {}
-    
-    np_mod = try_import("numpy")
-    if np_mod: versions["numpy"] = np_mod.__version__
-    
-    cv2_mod = try_import("cv2")
-    if cv2_mod: versions["opencv"] = cv2_mod.__version__
-    
-    torch_mod = try_import("torch")
-    if torch_mod: versions["torch"] = torch_mod.__version__
-    
-    try_import("torchvision")
-    try_import("transformers")
-    try_import("diffusers")
-    
+    versions = collect_versions()
     cuda_available = False
-    if torch_mod:
-        cuda_available = torch_mod.cuda.is_available()
-        if cuda_available:
-            check_logger.info(f"CUDA is available. Device: {torch_mod.cuda.get_device_name(0)}, Capability: {torch_mod.cuda.get_device_capability(0)}")
-            try:
+    cuda_device_name = None
+    cuda_device_capability = None
+
+    import_check("numpy", status)
+    import_check("cv2", status)
+    torch_mod = import_check("torch", status)
+    import_check("torchvision", status)
+    import_check("transformers", status)
+    import_check("diffusers", status)
+
+    if torch_mod is not None:
+        try:
+            cuda_available = bool(torch_mod.cuda.is_available())
+            check_logger.info("torch.cuda.is_available(): %s", cuda_available)
+            if cuda_available:
+                cuda_device_name = torch_mod.cuda.get_device_name(0)
+                cuda_device_capability = torch_mod.cuda.get_device_capability(0)
+                check_logger.info("CUDA device: %s, capability: %s", cuda_device_name, cuda_device_capability)
                 x = torch_mod.randn((1024, 1024), device="cuda")
                 y = x @ x
+                del y
                 torch_mod.cuda.synchronize()
-                check_logger.info("CUDA basic matrix multiplication test passed.")
-            except Exception as e:
+                check_logger.info("CUDA matrix multiplication test passed.")
+            elif profile.startswith("nvidia"):
                 status["ok"] = False
-                err_msg = f"CUDA basic test failed: {e}"
-                check_logger.error(err_msg)
-                status["errors"].append(err_msg)
-        else:
-            if profile.startswith("nvidia"):
-                check_logger.warning("CUDA is NOT available but an NVIDIA profile is active.")
-                status["ok"] = False
-                status["errors"].append("CUDA not available for NVIDIA profile.")
+                status["errors"].append({"test": "torch.cuda.is_available", "error": "CUDA is not available for NVIDIA profile."})
+        except Exception:
+            tb = traceback.format_exc()
+            status["ok"] = False
+            status["errors"].append({"test": "cuda runtime", "error": tb, "known_issue": classify_known_error(tb)})
+            check_logger.error("CUDA runtime test failed:\n%s", tb)
 
-    # Application specific imports
-    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    try_import("modules.ocr.ocr_manga", desc="(Manga OCR)")
-    try_import("modules.ocr.ocr_paddleVL_manga", desc="(Paddle OCR)")
-    try_import("modules.textdetector.detector_ctd", desc="(CTD Detector)")
-    
+    sys.path.insert(0, str(ROOT))
+    import_check("modules.ocr.ocr_manga", status)
+    import_check("modules.ocr.ocr_paddleVL_manga", status)
+    import_check("modules.textdetector.detector_ctd", status)
+
+    try:
+        from modules.base import init_module_registries
+        from modules import OCR, TEXTDETECTORS
+
+        init_module_registries(["ocr", "textdetector"])
+        if "manga_ocr" not in OCR.module_dict:
+            status["ok"] = False
+            status["errors"].append({"test": "OCR registry", "error": "manga_ocr is not registered in OCR.module_dict"})
+        else:
+            check_logger.info("Registry OK: manga_ocr is available.")
+        if "ctd" not in TEXTDETECTORS.module_dict:
+            check_logger.warning("CTD registry key 'ctd' not found. Available text detectors: %s", sorted(TEXTDETECTORS.module_dict))
+    except Exception:
+        tb = traceback.format_exc()
+        known = classify_known_error(tb)
+        status["ok"] = False
+        status["errors"].append({"test": "module registry", "error": tb, "known_issue": known})
+        check_logger.error("Registry check failed:\n%s", tb)
+
+    if profile == "nvidia_blackwell_cu128" and not status["ok"]:
+        warning = (
+            "RTX 50xx erkannt. CUDA funktioniert möglicherweise, aber die aktuelle OCR/Transformers-Kombination "
+            "ist mit BallonsTranslator-vibe noch nicht stabil. Bitte alternatives OCR-Modul wählen oder "
+            "Compat-Profil auf RTX 3090 verwenden."
+        )
+        check_logger.error(warning)
+        print(warning, flush=True)
+
     if not status["ok"]:
-        check_logger.error(f"Health check failed for profile {profile}.")
-        if profile == "nvidia_blackwell_cu128":
-            check_logger.error("RTX 50xx / Blackwell wurde erkannt. CUDA funktioniert möglicherweise, aber die aktuelle OCR-/Transformers-/Torch-Kombination ist mit BallonsTranslator-vibe noch nicht stabil. Bitte alternatives OCR-Modul wählen, Paketprofil anpassen oder das stabile nvidia_compat_cu118-Profil auf einer RTX 3090 verwenden.")
+        diagnosis = {
+            "profile": profile,
+            "gpu": env.get("gpu_name"),
+            "compute_capability": env.get("compute_capability"),
+            "versions": versions,
+            "cuda_available": cuda_available,
+            "cuda_device_name": cuda_device_name,
+            "cuda_device_capability": cuda_device_capability,
+            "failed_tests": status["errors"],
+            "next_action": next_action(profile, status),
+        }
+        check_logger.error("Runtime health diagnosis:\n%s", json.dumps(diagnosis, indent=2))
+        print("Runtime health check failed. See logs/runtime_check.log for full diagnostics.", flush=True)
+        print(json.dumps(diagnosis, indent=2), flush=True)
     else:
         check_logger.info("Health check passed.")
 
     return status["ok"], versions, cuda_available
 
+
+def next_action(profile, status):
+    errors = json.dumps(status.get("errors", []))
+    if "CUDA is not available" in errors and profile.startswith("nvidia"):
+        return "Check NVIDIA driver/CUDA visibility, then run with --repair-runtime."
+    if "manga_ocr" in errors or "infer_schema" in errors:
+        if profile == "nvidia_blackwell_cu128":
+            return "Use another OCR module on RTX 50xx or test the stable nvidia_compat_cu118 profile on RTX 3090."
+        return "Run python launch.py --runtime-profile nvidia_compat_cu118 --repair-runtime."
+    if "No module named" in errors:
+        return "Run with --repair-runtime to reinstall the selected runtime profile."
+    return "Inspect logs/runtime_check.log and rerun with --repair-runtime if the package set is inconsistent."
+
+
 def save_profile_state(env, profile, versions, cuda_available, is_ok):
     state = {
         "selected_profile": profile,
-        "gpu_name": env["gpus"][0]["name"] if env["gpus"] else "Unknown",
-        "compute_capability": env["compute_capability"],
+        "gpu_name": env.get("gpu_name") or "Unknown",
+        "compute_capability": env.get("compute_capability"),
         "torch_version": versions.get("torch", "Unknown"),
+        "torchvision_version": versions.get("torchvision", "Unknown"),
         "numpy_version": versions.get("numpy", "Unknown"),
-        "opencv_version": versions.get("opencv", "Unknown"),
+        "transformers_version": versions.get("transformers", "Unknown"),
+        "diffusers_version": versions.get("diffusers", "Unknown"),
         "cuda_available": cuda_available,
         "last_health_check_ok": is_ok,
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
     }
-    with open(PROFILE_FILE, "w", encoding="utf-8") as f:
-        json.dump(state, f, indent=2)
-    check_logger.info(f"Saved runtime profile state to {PROFILE_FILE}")
+    PROFILE_FILE.write_text(json.dumps(state, indent=2), encoding="utf-8")
+    check_logger.info("Saved runtime profile state: %s", json.dumps(state, indent=2))
+
+
+def show_profile():
+    env = detect_environment()
+    selected = choose_runtime_profile(env)
+    state = load_profile_state()
+    print(json.dumps({"detected_profile": selected, "environment": env, "saved_state": state}, indent=2))
+
 
 def main():
-    parser = argparse.ArgumentParser(description="Runtime and Dependency Manager for GPU-aware environments.")
-    parser.add_argument("--runtime-profile", choices=["auto", "nvidia_compat_cu118", "nvidia_blackwell_cu128", "cpu_fallback"], default="auto")
+    parser = argparse.ArgumentParser(description="GPU-aware runtime manager for BallonsTranslator-vibe.")
+    parser.add_argument("--runtime-profile", choices=PROFILE_CHOICES, default="auto")
     parser.add_argument("--repair-runtime", action="store_true")
     parser.add_argument("--skip-runtime-check", action="store_true")
     parser.add_argument("--no-auto-install", action="store_true")
     parser.add_argument("--check", action="store_true")
     parser.add_argument("--show-profile", action="store_true")
     parser.add_argument("--detect", action="store_true")
-    
     args = parser.parse_args()
 
     env = detect_environment()
+    profile = choose_runtime_profile(env) if args.runtime_profile == "auto" else args.runtime_profile
 
     if args.detect:
         print(json.dumps(env, indent=2))
         return
-
     if args.show_profile:
-        if os.path.exists(PROFILE_FILE):
-            with open(PROFILE_FILE, "r", encoding="utf-8") as f:
-                print(f.read())
-        else:
-            print("No profile state found.")
+        show_profile()
         return
-
-    profile = args.runtime_profile
-    if profile == "auto":
-        profile = choose_runtime_profile(env)
-
     if args.check:
-        health_check(profile)
+        ok, versions, cuda_available = health_check(profile)
+        save_profile_state(env, profile, versions, cuda_available, ok)
+        sys.exit(0 if ok else 1)
+
+    state = load_profile_state()
+    needs_install = args.repair_runtime
+    if state is None:
+        needs_install = True
+    elif state.get("selected_profile") != profile or not state.get("last_health_check_ok", False):
+        needs_install = True
+
+    if needs_install:
+        if args.no_auto_install:
+            check_logger.error("--no-auto-install is set but runtime profile %s needs installation or repair.", profile)
+            sys.exit(1)
+        install_profile(profile)
+    else:
+        install_logger.info("Existing healthy runtime profile found; skipping dependency installation.")
+
+    if args.skip_runtime_check:
+        check_logger.info("Skipping runtime health check by request.")
         return
 
-    needs_install = False
-    
-    if args.repair_runtime:
-        needs_install = True
-    elif not os.path.exists(PROFILE_FILE):
-        needs_install = True
-    else:
-        with open(PROFILE_FILE, "r", encoding="utf-8") as f:
-            try:
-                state = json.load(f)
-                if state.get("selected_profile") != profile or not state.get("last_health_check_ok", False):
-                    needs_install = True
-            except Exception:
-                needs_install = True
+    ok, versions, cuda_available = health_check(profile)
+    save_profile_state(env, profile, versions, cuda_available, ok)
+    sys.exit(0 if ok else 1)
 
-    if needs_install and not args.no_auto_install:
-        install_profile(profile)
-    elif args.no_auto_install and needs_install:
-        check_logger.error("--no-auto-install is set but runtime needs repair. Exiting.")
-        sys.exit(1)
-
-    if not args.skip_runtime_check:
-        is_ok, versions, cuda_available = health_check(profile)
-        save_profile_state(env, profile, versions, cuda_available, is_ok)
-        if not is_ok:
-            sys.exit(1)
-    else:
-        check_logger.info("Skipping runtime check as requested.")
 
 if __name__ == "__main__":
     main()
