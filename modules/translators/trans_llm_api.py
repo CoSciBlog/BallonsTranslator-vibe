@@ -459,6 +459,8 @@ class LLM_API_Translator(BaseTranslator):
         self.client = None
         self.project_glossary_text = ""
         self.project_glossary_prompt = ""
+        self.project_glossary_reference_text = ""
+        self.project_glossary_reference_prompt = ""
         self.project_glossary_loaded = False
         self.context_project = None
         self.context_page_key = ""
@@ -626,6 +628,10 @@ class LLM_API_Translator(BaseTranslator):
         return getattr(self, "project_glossary_text", "") or ""
 
     @property
+    def glossary_reference_text(self) -> str:
+        return getattr(self, "project_glossary_reference_text", "") or ""
+
+    @property
     def glossary_prompt(self) -> str:
         project_prompt = getattr(self, "project_glossary_prompt", "")
         if project_prompt.strip():
@@ -634,6 +640,16 @@ class LLM_API_Translator(BaseTranslator):
             "Use the glossary only as translation guidance. Apply preferred target "
             "terms naturally, but never copy glossary categories, notes, or bracketed "
             "metadata such as [CHARACTER] or [PLACE] into the translated text."
+        )
+
+    @property
+    def glossary_reference_prompt(self) -> str:
+        project_prompt = getattr(self, "project_glossary_reference_prompt", "")
+        if project_prompt.strip():
+            return project_prompt.strip()
+        return (
+            "Use the reference glossary as supporting context from earlier chapters or "
+            "official translations. Prefer explicit project glossary entries when they conflict."
         )
 
     @property
@@ -831,31 +847,48 @@ class LLM_API_Translator(BaseTranslator):
         if not self.use_glossary_enabled:
             return ""
         glossary = self.glossary_text.strip()
-        if not glossary:
+        reference = self.glossary_reference_text.strip()
+        if not glossary and not reference:
             return ""
-        prompt = self.glossary_prompt.strip()
-        return (
-            "GLOSSARY:\n"
-            f"{prompt}\n"
-            f"{glossary}\n\n"
-        )
+        sections = []
+        if glossary:
+            sections.append(
+                "PROJECT GLOSSARY:\n"
+                f"{self.glossary_prompt.strip()}\n"
+                f"{glossary}"
+            )
+        if reference:
+            sections.append(
+                "REFERENCE GLOSSARY:\n"
+                f"{self.glossary_reference_prompt.strip()}\n"
+                f"{reference}"
+            )
+        return "\n\n".join(sections) + "\n\n"
 
     def set_project_glossary(self, glossary):
         self.project_glossary_loaded = True
         if isinstance(glossary, dict):
             self.project_glossary_text = glossary.get("entries", "") or ""
             self.project_glossary_prompt = glossary.get("prompt", "") or ""
+            self.project_glossary_reference_text = glossary.get("reference_entries", "") or ""
+            self.project_glossary_reference_prompt = glossary.get("reference_prompt", "") or ""
         elif isinstance(glossary, str):
             self.project_glossary_text = glossary
             self.project_glossary_prompt = ""
+            self.project_glossary_reference_text = ""
+            self.project_glossary_reference_prompt = ""
         else:
             self.project_glossary_text = ""
             self.project_glossary_prompt = ""
+            self.project_glossary_reference_text = ""
+            self.project_glossary_reference_prompt = ""
 
     def get_project_glossary(self) -> Dict[str, str]:
         return {
             "entries": self.glossary_text,
             "prompt": self.glossary_prompt,
+            "reference_entries": self.glossary_reference_text,
+            "reference_prompt": self.glossary_reference_prompt,
         }
 
     def _system_prompt_with_reasoning_policy(self) -> str:
@@ -1463,7 +1496,10 @@ class LLM_API_Translator(BaseTranslator):
 
     def _parse_glossary_entries(self) -> List[Dict[str, Any]]:
         entries: List[Dict[str, Any]] = []
-        for line in self.glossary_text.splitlines():
+        combined = "\n".join(
+            part for part in (self.glossary_text, self.glossary_reference_text) if part
+        )
+        for line in combined.splitlines():
             entry = self._parse_glossary_entry_line(line)
             if entry is not None:
                 entries.append(entry)

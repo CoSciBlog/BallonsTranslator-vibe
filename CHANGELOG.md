@@ -30,6 +30,9 @@
 - Tools-menu Model Downloads window for downloading missing or optional local model files on demand.
 - Pinokio `test.js` launcher that installs `requirements-test.txt` only for test runs before executing the unittest suite.
 - Shared tooltip wrapping for long Settings and module-parameter hover descriptions.
+- Glossary import/export actions in the project Glossary window.
+- A separate reference-glossary field for importing glossary context from another chapter without replacing the current project glossary.
+- Translated-folder glossary template generation with optional subfolder scanning for extracting likely official names, places, organizations, and titles from translated project/text data.
 
 ### Changed
 
@@ -42,6 +45,7 @@
 - Dynamic module parameter tooltips now use their module-provided descriptions without appending a generic performance note.
 - UI-only settings such as preset import/export, mouse-wheel protection, startup reopening, keyboard shortcuts, and display filters now avoid performance claims.
 - LLM translators now read glossary entries and the glossary prompt only from the current project's separate `glossary.json` data.
+- LLM translators now include reference-glossary entries as secondary guidance and keep explicit project glossary entries as the preferred source when terms conflict.
 - Translator hover descriptions now distinguish true speed impacts from reliability, memory-safety, or quota-related behavior.
 - The optional `flux2-klein` inpainting model is skipped during automatic first-start model downloads and can be downloaded later from `Tools -> Model Downloads`.
 - Save image format and quality descriptions now appear only as hover text instead of visible labels.
@@ -77,3 +81,4 @@
 - Bumped the fork runtime version string to `1.4.0-vibe.48`.
 - Bumped the fork runtime version string to `1.4.0-vibe.49`.
 - Bumped the fork runtime version string to `1.4.0-vibe.50`.
+- Bumped the fork runtime version string to `1.4.0-vibe.51`.

@@ -142,11 +142,36 @@ class GlossaryMergeTest(unittest.TestCase):
             {
                 "entries": "Tomori => Tomori [character]",
                 "prompt": "Use project glossary terms.",
+                "reference_entries": "Eden => Eden [place]",
+                "reference_prompt": "Use reference terms for continuity.",
             }
         )
 
         self.assertEqual(translator.glossary_text, "Tomori => Tomori [character]")
         self.assertEqual(translator.glossary_prompt, "Use project glossary terms.")
+        self.assertEqual(translator.glossary_reference_text, "Eden => Eden [place]")
+        self.assertEqual(translator.glossary_reference_prompt, "Use reference terms for continuity.")
+
+    def test_reference_glossary_is_included_in_prompts_and_getter(self):
+        class PromptFakeTranslator(LLM_API_Translator):
+            def __init__(self):
+                self.project_glossary_text = ""
+                self.project_glossary_prompt = "Project terms."
+                self.project_glossary_reference_text = "Eden => Eden [place]"
+                self.project_glossary_reference_prompt = "Reference terms."
+
+            @property
+            def use_glossary_enabled(self):
+                return True
+
+        translator = PromptFakeTranslator()
+
+        prompt = translator._glossary_prompt_section()
+        glossary = translator.get_project_glossary()
+
+        self.assertIn("REFERENCE GLOSSARY", prompt)
+        self.assertIn("Eden => Eden [place]", prompt)
+        self.assertEqual(glossary["reference_entries"], "Eden => Eden [place]")
 
     def test_embedded_project_glossary_is_ignored_without_glossary_json(self):
         with tempfile.TemporaryDirectory() as tmpdir:
