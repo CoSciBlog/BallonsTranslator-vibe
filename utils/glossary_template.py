@@ -105,6 +105,56 @@ def build_glossary_from_translated_folder(folder: str, include_subfolders: bool 
     }
 
 
+def build_glossary_from_project_text(project, pages: Iterable[str] = None) -> Dict[str, str]:
+    entries: "OrderedDict[Tuple[str, str], str]" = OrderedDict()
+    page_names = list(pages) if pages is not None else list(getattr(project, "pages", {}).keys())
+    text_count = 0
+
+    for page_name in page_names:
+        blocks = getattr(project, "pages", {}).get(page_name, [])
+        for block in blocks:
+            text = ""
+            if hasattr(block, "get_text"):
+                text = block.get_text()
+            elif isinstance(block, dict):
+                text = block.get("text", "")
+            if not isinstance(text, str) or not text.strip():
+                continue
+            text_count += 1
+            for term, category in extract_reference_terms(text):
+                key = (term.casefold(), category)
+                if key not in entries:
+                    note = f"gloss scan: {page_name}"
+                    entries[key] = format_glossary_line(term, term, category, note)
+
+    return {
+        "entries": "\n".join(entries.values()),
+        "prompt": "",
+        "reference_entries": "",
+        "source_count": len(page_names),
+        "text_count": text_count,
+    }
+
+
+def merge_glossary_entry_text(existing: str, incoming: str) -> str:
+    merged: "OrderedDict[Tuple[str, str], str]" = OrderedDict()
+    for line in (existing or "").splitlines():
+        key = _glossary_line_key(line) or ("raw", line.strip())
+        if key is not None and key not in merged:
+            merged[key] = line.strip()
+    for line in (incoming or "").splitlines():
+        key = _glossary_line_key(line) or ("raw", line.strip())
+        if key is not None and key not in merged:
+            merged[key] = line.strip()
+    return "\n".join(line for line in merged.values() if line)
+
+
+def _glossary_line_key(line: str):
+    for source, _target, category, _note in _explicit_entries_from_text(line):
+        return source.casefold(), (category or "term").casefold()
+    return None
+
+
 def _texts_from_file(path: str) -> Iterable[Tuple[str, str]]:
     name = osp.basename(path)
     ext = osp.splitext(name)[1].lower()

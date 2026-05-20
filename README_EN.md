@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.51`
+Fork release: `1.4.0-vibe.52`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -61,6 +61,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Made the Model Downloads window explicitly non-modal so selected or all downloads continue in the background while the app remains usable.
 - Added direct comic archive import for `.cbz`, `.cbr`, and `.zip` files from the Open menu, drag-and-drop, recent projects, and `--proj-dir`.
 - Added glossary import/export, reference-glossary support, and a translated-folder glossary template builder for reusing official terminology across chapters.
+- Added `Gloss Scan`, an OCR-only current-manga glossary builder available from the left sidebar and the Run menu. It detects text and runs OCR, then creates reusable glossary candidates without translation or inpainting.
 
 ## Features
 
@@ -162,9 +163,13 @@ Use `Import Glossary` to merge entries from another `glossary.json` into the cur
 
 `Build From Translated Folder` creates a reference glossary template from a folder that already contains translated project data, exported text/markdown, or existing `glossary.json` files. Enable `Include subfolders` when a volume or series folder contains chapter subfolders. The template builder scans existing translated text, extracts likely character names, places, organizations, and titles, and writes them as reference entries so official English names can guide later chapter translations.
 
+`Gloss Scan` is available as the `GScan` sidebar button and as `Run -> Gloss Scan Current Manga`. It temporarily runs only text detection and OCR for the current non-ignored pages, skips translation and inpainting, and appends likely names, places, organizations, titles, and terms to the current project's glossary without overwriting existing manual entries. Export that glossary from the Glossary window, then import it as a reference glossary in another manga or chapter when official names should guide later translation work.
+
 When an existing glossary entry's target text is changed, for example a character name is corrected, the app applies that target-term change to existing translations in the project, updates rich text where possible, saves `glossary.json` and the project JSON, and re-renders the affected result pages.
 
 Auto Glossary now extracts names/characters more conservatively: `name` entries are normalized to the `character` category, and interjections, SFX, punctuation, normal dialogue, questions, and commands are filtered so they are not saved as names or titles. Manual glossary entries remain dominant over automatic entries.
+
+`Gloss Scan Current Manga` builds glossary candidates from detected OCR text only, without translation, LLM extraction, or inpainting.
 
 ## Settings input safety
 
@@ -356,9 +361,9 @@ Notes:
 
 - Upstream project: [dmMaze/BallonsTranslator](https://github.com/dmMaze/BallonsTranslator)
 - AI-modified downstream variant referenced by the project: [thomaswantstobeaskeleton/BallonsTranslator-Pro](https://github.com/thomaswantstobeaskeleton/BallonsTranslator-Pro)
-- Fork maintenance, archive import, launcher integration, and documentation extension: this `BallonsTranslator-vibe` fork
+- Fork maintenance, archive import, launcher integration, Gloss Scan/reference glossary workflows, and documentation extension: this `BallonsTranslator-vibe` fork
 - Archive import uses Python standard-library ZIP handling and the user's locally installed `7z`/Pinokio-provided extractor for CBR files.
 
 ## License
 
-This fork remains licensed under GPL-3.0. See [LICENSE](LICENSE). The archive importer does not add cloud services or a bundled extractor; CBR support uses the user's local `7z`-compatible tool when available.
+This fork remains licensed under GPL-3.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE.md). The archive importer does not add cloud services or a bundled extractor; CBR support uses the user's local `7z`-compatible tool when available. Gloss Scan and glossary import/export operate on local project text and JSON files and do not add a new bundled service or third-party license.

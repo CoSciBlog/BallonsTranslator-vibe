@@ -66,6 +66,7 @@ class LeftBar(Widget):
     save_proj = Signal()
     save_config = Signal()
     glossary_clicked = Signal()
+    run_gloss_scan_clicked = Signal()
     run_decensor_clicked = Signal()
     run_reinpaint_clicked = Signal()
     run_translate_clicked = Signal()
@@ -185,6 +186,18 @@ class LeftBar(Widget):
         self.glossaryBtn.setFixedSize(LEFTBTN_WIDTH, LEFTBTN_WIDTH)
         self.glossaryBtn.clicked.connect(self.glossary_clicked)
 
+        self.runGlossScanBtn = QPushButton()
+        self.runGlossScanBtn.setObjectName('RunButton')
+        self.runGlossScanBtn.setText(self.tr('GScan'))
+        self.runGlossScanBtn.setToolTip(self.tr('Gloss Scan: detect text and OCR the project to build a reusable glossary without translation or inpainting.'))
+        self.runGlossScanBtn.setIcon(QIcon('icons/leftbar_glossary.svg'))
+        self.runGlossScanBtn.setIconSize(QSize(17, 17))
+        font = self.runGlossScanBtn.font()
+        font.setPixelSize(8)
+        self.runGlossScanBtn.setFont(font)
+        self.runGlossScanBtn.setFixedSize(LEFTBTN_WIDTH, LEFTBTN_WIDTH)
+        self.runGlossScanBtn.clicked.connect(self.run_gloss_scan_clicked)
+
         self.runDecensorBtn = QPushButton()
         self.runDecensorBtn.setObjectName('RunButton')
         self.runDecensorBtn.setText(self.tr('Dc'))
@@ -210,6 +223,7 @@ class LeftBar(Widget):
         vlayout.addWidget(self.showPageListLabel)
         vlayout.addWidget(self.globalSearchChecker)
         vlayout.addWidget(self.glossaryBtn)
+        vlayout.addWidget(self.runGlossScanBtn)
         vlayout.addWidget(self.runDecensorBtn)
         vlayout.addWidget(self.runReInpaintBtn)
         vlayout.addWidget(self.imgTransChecker)
@@ -519,9 +533,11 @@ class TitleBar(Widget):
         runAction = QAction(self.tr('Run'), self)
         runWoUpdateTextStyle = QAction(self.tr('Run without updating text style'), self)
         translatePageAction = QAction(self.tr('Translate Page'), self)
+        glossScanAction = QAction(self.tr('Gloss Scan Current Manga'), self)
         reviewCurrentPageAction = QAction(self.tr('Review Current Page'), self)
         reviewAllPagesAction = QAction(self.tr('Review All Pages'), self)
         translationBenchmarkAction = QAction(self.tr('Translation Benchmark'), self)
+        glossScanAction.setToolTip(self.tr('Detect text and run OCR on the current manga, then build a reusable glossary without translation or inpainting.'))
         reviewCurrentPageAction.setToolTip(self.tr('Review and correct existing translations on the current page with the active LLM translator settings.'))
         reviewAllPagesAction.setToolTip(self.tr('Review and correct existing translations on all non-ignored pages with the active LLM translator settings.'))
         translationBenchmarkAction.setToolTip(self.tr('Compare the current page translation with multiple translators or LLM configurations in a side-by-side table.'))
@@ -532,12 +548,15 @@ class TitleBar(Widget):
         runMenu.addSeparator()
         runMenu.addActions([runAction, runWoUpdateTextStyle, translatePageAction])
         runMenu.addSeparator()
+        runMenu.addAction(glossScanAction)
+        runMenu.addSeparator()
         runMenu.addActions([reviewCurrentPageAction, reviewAllPagesAction, translationBenchmarkAction])
         self.runToolBtn.setMenu(runMenu)
         self.runToolBtn.setPopupMode(QToolButton.InstantPopup)
         self.run_trigger = runAction.triggered
         self.run_woupdate_textstyle_trigger = runWoUpdateTextStyle.triggered
         self.translate_page_trigger = translatePageAction.triggered
+        self.gloss_scan_trigger = glossScanAction.triggered
         self.review_current_page_trigger = reviewCurrentPageAction.triggered
         self.review_all_pages_trigger = reviewAllPagesAction.triggered
         self.translation_benchmark_trigger = translationBenchmarkAction.triggered

@@ -33,6 +33,8 @@
 - Glossary import/export actions in the project Glossary window.
 - A separate reference-glossary field for importing glossary context from another chapter without replacing the current project glossary.
 - Translated-folder glossary template generation with optional subfolder scanning for extracting likely official names, places, organizations, and titles from translated project/text data.
+- `Gloss Scan Current Manga` action in the sidebar and Run menu for detecting text, running OCR, and building a reusable project glossary without translation or inpainting.
+- Glossary export/import documentation for using a scanned current-manga glossary as a reference glossary in another chapter or manga.
 
 ### Changed
 
@@ -46,6 +48,7 @@
 - UI-only settings such as preset import/export, mouse-wheel protection, startup reopening, keyboard shortcuts, and display filters now avoid performance claims.
 - LLM translators now read glossary entries and the glossary prompt only from the current project's separate `glossary.json` data.
 - LLM translators now include reference-glossary entries as secondary guidance and keep explicit project glossary entries as the preferred source when terms conflict.
+- Current-manga glossary scans merge detected OCR terms into the project glossary without overwriting existing manual entries.
 - Translator hover descriptions now distinguish true speed impacts from reliability, memory-safety, or quota-related behavior.
 - The optional `flux2-klein` inpainting model is skipped during automatic first-start model downloads and can be downloaded later from `Tools -> Model Downloads`.
 - Save image format and quality descriptions now appear only as hover text instead of visible labels.
@@ -82,3 +85,4 @@
 - Bumped the fork runtime version string to `1.4.0-vibe.49`.
 - Bumped the fork runtime version string to `1.4.0-vibe.50`.
 - Bumped the fork runtime version string to `1.4.0-vibe.51`.
+- Bumped the fork runtime version string to `1.4.0-vibe.52`.

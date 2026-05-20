@@ -23,6 +23,10 @@ from utils.glossary_replacement import (
     apply_glossary_replacements_to_text,
     build_glossary_replacements,
 )
+from utils.glossary_template import (
+    build_glossary_from_project_text,
+    merge_glossary_entry_text,
+)
 from modules.translators.trans_chatgpt import GPTTranslator
 from modules.translators import lang_display_label, lang_display_to_key
 from modules import GET_VALID_TEXTDETECTORS, GET_VALID_INPAINTERS, GET_VALID_TRANSLATORS, GET_VALID_OCR
@@ -262,6 +266,9 @@ class MainWindow(mainwindow_cls):
         self.glossaryWindow = GlossaryWindow(self)
         self.glossaryWindow.saved.connect(self.on_project_glossary_saved)
         self.glossaryWindow.hide()
+        self._gloss_scan_pending = False
+        self._gloss_scan_stage_backup = None
+        self._gloss_scan_pages = None
         self._decensor_current_page_request = None
         self._reinpaint_current_page_request = None
 
@@ -425,6 +432,7 @@ class MainWindow(mainwindow_cls):
         module_manager.setInpainter()
 
         self.leftBar.run_imgtrans_clicked.connect(self.run_imgtrans)
+        self.leftBar.run_gloss_scan_clicked.connect(self.run_gloss_scan_current_manga)
         self.leftBar.run_decensor_clicked.connect(self.run_decensor_current_page)
         self.leftBar.run_reinpaint_clicked.connect(self.run_reinpaint_current_page)
         self.leftBar.run_translate_clicked.connect(self.run_translate_only)
@@ -687,6 +695,100 @@ class MainWindow(mainwindow_cls):
                 )
             self.canvas.setProjSaveState(False)
 
+    def _set_pipeline_stage_state(self, detect: bool, ocr: bool, translate: bool, inpaint: bool):
+        pcfg.module.enable_detect = detect
+        pcfg.module.enable_ocr = ocr
+        pcfg.module.enable_translate = translate
+        pcfg.module.enable_inpaint = inpaint
+        pcfg.module.update_finish_code()
+
+        selectors = [
+            self.bottomBar.textdet_selector,
+            self.bottomBar.ocr_selector,
+            self.bottomBar.trans_selector,
+            self.bottomBar.inpaint_selector,
+        ]
+        values = [detect, ocr, translate, inpaint]
+        for selector, value in zip(selectors, values):
+            selector.setVisible(value)
+
+        if hasattr(self.titleBar, 'stageActions'):
+            for action, value in zip(self.titleBar.stageActions, values):
+                action.blockSignals(True)
+                action.setChecked(value)
+                action.blockSignals(False)
+
+    def _restore_gloss_scan_stage_state(self):
+        if self._gloss_scan_stage_backup is None:
+            return
+        self._set_pipeline_stage_state(*self._gloss_scan_stage_backup)
+        self._gloss_scan_stage_backup = None
+
+    def run_gloss_scan_current_manga(self):
+        if self.imgtrans_proj.is_empty:
+            create_info_dialog(self.tr('Open a project before running Gloss Scan.'))
+            return
+        if self.module_manager.anyPipelineThreadRunning():
+            create_info_dialog(self.tr('Another pipeline is already running. Please wait until it finishes.'))
+            return
+
+        page_names = self.imgtrans_proj.pipeline_pages(skip_ignored=True)
+        if len(page_names) == 0:
+            create_info_dialog(self.tr('No non-ignored pages are available for Gloss Scan.'))
+            return
+
+        if self.bottomBar.textblockChecker.isChecked():
+            self.bottomBar.textblockChecker.click()
+        if self.canvas.text_change_unsaved():
+            self.st_manager.updateTextBlkList()
+
+        self._gloss_scan_pending = True
+        self._gloss_scan_pages = list(page_names)
+        self._gloss_scan_stage_backup = (
+            pcfg.module.enable_detect,
+            pcfg.module.enable_ocr,
+            pcfg.module.enable_translate,
+            pcfg.module.enable_inpaint,
+        )
+        self._set_pipeline_stage_state(True, True, False, False)
+        LOGGER.info(
+            f'Running Gloss Scan on {len(page_names)} page(s): text detection and OCR only; '
+            'translation and inpainting are disabled for this run.'
+        )
+        self.on_run_imgtrans()
+
+    def finish_gloss_scan_current_manga(self):
+        try:
+            pages = self._gloss_scan_pages
+            glossary = build_glossary_from_project_text(self.imgtrans_proj, pages=pages)
+            generated_entries = glossary.get('entries', '')
+            old_glossary = self.imgtrans_proj.normalize_glossary(self.imgtrans_proj.glossary)
+            merged_entries = merge_glossary_entry_text(old_glossary.get('entries', ''), generated_entries)
+            line_count = len([line for line in generated_entries.splitlines() if line.strip()])
+
+            if line_count == 0:
+                create_info_dialog(self.tr('Gloss Scan finished, but no glossary terms were found in the OCR text.'))
+                return
+
+            self.imgtrans_proj.glossary = self.imgtrans_proj.normalize_glossary({
+                **old_glossary,
+                'entries': merged_entries,
+            })
+            self.sync_project_glossary_to_ui()
+            self.sync_project_glossary_to_translator()
+            if self.save_project_safely(self.tr('saving Gloss Scan glossary'), notify_user=True):
+                self.canvas.setProjSaveState(False)
+                LOGGER.info(f'Gloss Scan added or refreshed {line_count} glossary candidate(s).')
+                create_info_dialog(
+                    self.tr('Gloss Scan finished. {count} glossary candidates were added to the project glossary.').format(
+                        count=line_count
+                    )
+                )
+        finally:
+            self._gloss_scan_pending = False
+            self._gloss_scan_pages = None
+            self._restore_gloss_scan_stage_state()
+
     def apply_project_glossary_changes(self, old_glossary: dict, new_glossary: dict):
         replacements = build_glossary_replacements(old_glossary, new_glossary)
         if not replacements:
@@ -876,6 +978,7 @@ class MainWindow(mainwindow_cls):
         self.titleBar.run_trigger.connect(self.leftBar.runImgtransBtn.click)
         self.titleBar.run_woupdate_textstyle_trigger.connect(self.run_imgtrans_wo_textstyle_update)
         self.titleBar.translate_page_trigger.connect(self.on_transpagebtn_pressed)
+        self.titleBar.gloss_scan_trigger.connect(self.run_gloss_scan_current_manga)
         self.titleBar.review_current_page_trigger.connect(self.run_review_current_page)
         self.titleBar.review_all_pages_trigger.connect(self.run_review_all_pages)
         self.titleBar.translation_benchmark_trigger.connect(self.show_translation_benchmark_window)
@@ -1574,7 +1677,10 @@ class MainWindow(mainwindow_cls):
         self.backup_blkstyles.clear()
         self._run_imgtrans_wo_textstyle_update = False
         self.postprocess_mt_toggle = True
-        self.sync_translator_glossary_to_project(update_ui=True)
+        if self._gloss_scan_pending:
+            self.finish_gloss_scan_current_manga()
+        else:
+            self.sync_translator_glossary_to_project(update_ui=True)
         if pcfg.module.empty_runcache and not (shared.HEADLESS or shared.HEADLESS_CONTINUOUS):
             self.module_manager.unload_all_models()
         if shared.args.export_translation_txt:

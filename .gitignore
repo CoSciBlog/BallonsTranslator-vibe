@@ -27,6 +27,7 @@ PortableGit
 test_dir
 tmp
 logs
+.pinokio-temp/
 debug/
 **/debug/censor_restoration/
 benchmarks/results/
