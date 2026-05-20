@@ -8,7 +8,7 @@ import subprocess
 from platform import platform
 
 BRANCH = 'dev'
-VERSION = '1.4.0-vibe.53'
+VERSION = '1.4.0-vibe.54'
 FORK_REPO_URL = os.environ.get('BALLOONTRANS_UPDATE_REPO', 'https://github.com/CoSciBlog/BallonsTranslator-vibe.git')
 UPDATE_BRANCH = os.environ.get('BALLOONTRANS_UPDATE_BRANCH', BRANCH)
 BUILD_TOOL_REQUIREMENTS = ['wheel', 'setuptools==71.1.0']
@@ -25,6 +25,7 @@ REQ_WIN = [
 ]
 
 PATH_ROOT=Path(__file__).parent
+RUNTIME_PROFILE_FILE = PATH_ROOT / ".runtime_profile.json"
 PATH_FONTS=str(PATH_ROOT/'fonts')
 FONT_EXTS = {'.ttf','.otf','.ttc','.pfb'}
 
@@ -135,6 +136,43 @@ def setup_locks():
     RUNTIME_LOCKS['model_loading'] = QMutex()
 
 
+def should_prepare_environment(runtime_profile_file=None):
+    runtime_profile_file = runtime_profile_file or RUNTIME_PROFILE_FILE
+    if args.frozen:
+        return False
+    if args.update or args.repair_runtime:
+        return True
+    if os.environ.get('BALLOONTRANS_FORCE_RUNTIME_CHECK') == '1':
+        return True
+    return not Path(runtime_profile_file).exists()
+
+
+def handle_update():
+    if not args.update:
+        return
+    if getattr(sys, 'frozen', False):
+        print('Running as app, skipping update.')
+        return
+
+    print('Checking for updates...', flush=True)
+    try:
+        current_commit = commit_hash()
+        run(f"{git} remote set-url origin {FORK_REPO_URL}", desc="Configuring update repository...", errdesc="Failed to configure update repository.", live=True)
+        run(f"{git} fetch --progress origin {UPDATE_BRANCH}", desc="Fetching updates from BallonsTranslator-vibe fork...", errdesc="Failed to fetch updates.", live=True)
+        latest_commit = run(f"{git} rev-parse origin/{UPDATE_BRANCH}").strip()
+
+        if current_commit != latest_commit:
+            print("New updates found. Updating repository...", flush=True)
+            run(f"{git} pull --ff-only --progress origin {UPDATE_BRANCH}", desc="Updating repository...", errdesc="Failed to update repository.", live=True)
+            print("Repository updated. Restarting to apply updates...", flush=True)
+            restart()
+        else:
+            print("No updates found.", flush=True)
+    except Exception as e:
+        print(f"Update check failed: {e}")
+        print("Continuing with the current version.")
+
+
 def main():
 
     if args.debug:
@@ -157,33 +195,15 @@ def main():
     if not args.system_hf_cache:
         os.environ['HF_HOME'] = osp.join(APP_DIR, 'data/models')
 
-    prepare_environment()
+    handle_update()
+
+    if should_prepare_environment():
+        prepare_environment()
+    else:
+        print('Skipping dependency and runtime checks on normal start. Use --repair-runtime or --update to refresh them.', flush=True)
 
     from utils.zluda_config import enable_zluda_config
     enable_zluda_config()
-
-    if args.update:
-        if getattr(sys, 'frozen', False):
-            print('Running as app, skipping update.')
-        else:
-            print('Checking for updates...', flush=True)
-            try:
-                current_commit = commit_hash()
-                run(f"{git} remote set-url origin {FORK_REPO_URL}", desc="Configuring update repository...", errdesc="Failed to configure update repository.", live=True)
-                run(f"{git} fetch --progress origin {UPDATE_BRANCH}", desc="Fetching updates from BallonsTranslator-vibe fork...", errdesc="Failed to fetch updates.", live=True)
-                latest_commit = run(f"{git} rev-parse origin/{UPDATE_BRANCH}").strip()
-
-                if current_commit != latest_commit:
-                    print("New updates found. Updating repository...", flush=True)
-                    run(f"{git} pull --ff-only --progress origin {UPDATE_BRANCH}", desc="Updating repository...", errdesc="Failed to update repository.", live=True)
-                    print("Repository updated. Restarting to apply updates...", flush=True)
-                    restart()
-                    return
-                else:
-                    print("No updates found.", flush=True)
-            except Exception as e:
-                print(f"Update check failed: {e}")
-                print("Continuing with the current version.")
 
 
     from utils.logger import setup_logging, logger as LOGGER

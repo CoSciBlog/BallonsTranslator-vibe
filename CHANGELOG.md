@@ -36,6 +36,7 @@
 - `Gloss Scan Current Manga` action in the sidebar and Run menu for detecting text, running OCR, and building a reusable project glossary without translation or inpainting.
 - Glossary export/import documentation for using a scanned current-manga glossary as a reference glossary in another chapter or manga.
 - Live Runtime Manager pip install output so package downloads, CUDA wheel installs, and progress bars are visible during launch and repair.
+- First-start/update-only dependency checks for the launcher, with an explicit force-check environment override.
 
 ### Changed
 
@@ -51,6 +52,7 @@
 - LLM translators now include reference-glossary entries as secondary guidance and keep explicit project glossary entries as the preferred source when terms conflict.
 - Current-manga glossary scans merge detected OCR terms into the project glossary without overwriting existing manual entries.
 - NVIDIA runtime profile installs now force-reinstall PyTorch packages from the selected CUDA/CPU wheel index, preventing a CPU Torch wheel from satisfying the Blackwell cu128 profile.
+- Normal application starts skip build-tool, Windows helper, and Runtime Manager checks once `.runtime_profile.json` exists; update, repair, first start, and `BALLOONTRANS_FORCE_RUNTIME_CHECK=1` still run them.
 - Translator hover descriptions now distinguish true speed impacts from reliability, memory-safety, or quota-related behavior.
 - The optional `flux2-klein` inpainting model is skipped during automatic first-start model downloads and can be downloaded later from `Tools -> Model Downloads`.
 - Save image format and quality descriptions now appear only as hover text instead of visible labels.
@@ -89,3 +91,4 @@
 - Bumped the fork runtime version string to `1.4.0-vibe.51`.
 - Bumped the fork runtime version string to `1.4.0-vibe.52`.
 - Bumped the fork runtime version string to `1.4.0-vibe.53`.
+- Bumped the fork runtime version string to `1.4.0-vibe.54`.
