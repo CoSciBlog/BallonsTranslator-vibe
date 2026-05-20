@@ -70,6 +70,7 @@ class LeftBar(Widget):
     run_decensor_clicked = Signal()
     run_reinpaint_clicked = Signal()
     run_translate_clicked = Signal()
+    export_comic_clicked = Signal()
     def __init__(self, mainwindow, *args, **kwargs) -> None:
         super().__init__(mainwindow, *args, **kwargs)
         self.mainwindow: QMainWindow = mainwindow
@@ -110,6 +111,8 @@ class LeftBar(Widget):
 
         actionExportAsDoc = QAction(self.tr("Export as Doc"), self)
         self.export_doc = actionExportAsDoc.triggered
+        actionExportComic = QAction(self.tr("Export as Comic Archive/PDF ... *.cbz *.cbr *.zip *.pdf"), self)
+        self.export_comic_clicked = actionExportComic.triggered
         actionImportFromDoc = QAction(self.tr("Import from Doc"), self)
         self.import_doc = actionImportFromDoc.triggered
 
@@ -135,6 +138,7 @@ class LeftBar(Widget):
         openMenu.addActions([
             actionSaveProj,
             actionExportAsDoc,
+            actionExportComic,
             actionImportFromDoc,
             actionExportSrcTxt,
             actionExportTranslationTxt,

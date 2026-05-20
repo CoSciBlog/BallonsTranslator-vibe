@@ -6,6 +6,8 @@
 
 - Direct `.cbz`, `.cbr`, and `.zip` comic archive import from the Open menu, drag-and-drop, recent projects, and `--proj-dir`.
 - Archive extraction into regular image project folders with natural page ordering and `archive_import.json` metadata.
+- Comic export for rendered result pages as `.cbz`, `.zip`, `.pdf`, and `.cbr` when a local RAR writer is installed.
+- PDF comic export that writes each rendered image as its own page using that image's dimensions, aspect ratio, and orientation.
 - First-use local model downloads for modules with declared downloadable files, so optional models can be fetched when their backend is selected.
 - Censor Restoration / Decensor Inpaint pipeline for simple dark or light censor bars.
 - Automatic mask detection for block-like censor regions.
@@ -92,3 +94,4 @@
 - Bumped the fork runtime version string to `1.4.0-vibe.52`.
 - Bumped the fork runtime version string to `1.4.0-vibe.53`.
 - Bumped the fork runtime version string to `1.4.0-vibe.54`.
+- Bumped the fork runtime version string to `1.4.0-vibe.55`.

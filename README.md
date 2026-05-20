@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README_EN.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.54`
+Fork release: `1.4.0-vibe.55`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -60,6 +60,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Cleaned up Save settings so image format and quality explanations stay in hover tooltips instead of visible labels, and wrapped long tooltip text for narrower screens.
 - Made the Model Downloads window explicitly non-modal so selected or all downloads continue in the background while the app remains usable.
 - Added direct comic archive import for `.cbz`, `.cbr`, and `.zip` files by extracting supported images into a normal project folder.
+- Added comic export for `.cbz`, `.zip`, `.pdf`, and `.cbr` when a local RAR writer is installed.
 - Added glossary import/export, reference-glossary support, and a translated-folder glossary template builder for reusing official terminology across chapters.
 - Added `Gloss Scan`, an OCR-only current-manga glossary builder available from the left sidebar and the Run menu. It detects text and runs OCR, then creates reusable glossary candidates without translation or inpainting.
 - Improved Blackwell/RTX 50xx runtime repair so CUDA PyTorch wheels are force-reinstalled from the cu128 index instead of reusing an already-satisfied CPU Torch package, and runtime package installs now stream live progress output.
@@ -73,10 +74,11 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
   - inpainting / text removal
   - machine translation
   - automatic typesetting based on the original balloon layout
-- Comic archive import:
+- Comic archive import and export:
   - open `.cbz`, `.cbr`, or `.zip` files from the Open menu, drag-and-drop, or `--proj-dir`
   - extracts pages into a regular image project folder next to the archive
   - keeps natural page ordering for nested archive paths
+  - exports rendered result pages as `.cbz`, `.zip`, `.pdf`, or `.cbr`
 - Interactive editing workflow:
   - rich text editing
   - search and replace
@@ -112,13 +114,15 @@ Known limitations:
 - Difficult structures can create visible inpainting artifacts.
 - Semantic or prompt-based inpainting is not a standard part of this MVP.
 
-## Comic archive import
+## Comic archive import and export
 
 Open `.cbz`, `.cbr`, or `.zip` files from `Open -> Open Comic Archive`, drag them onto the canvas, or pass them to `launch.py --proj-dir`. The importer extracts supported image pages into a normal project folder next to the archive, for example `Series.cbz` becomes `Series/`, then loads that folder through the existing project workflow.
 
 ZIP and CBZ archives are handled with Python's standard `zipfile` support. CBR archives require a local `7z`-compatible extractor on `PATH`; Pinokio's Windows environment provides `7z`. Nested archive folders are flattened into ordered page files such as `0001_page.png`, `0002_page.png`, and an `archive_import.json` file records the source archive and imported pages.
 
 The importer only writes into the derived project folder. If that folder already contains image pages, it is reused instead of being overwritten.
+
+Use `Open -> Export as Comic Archive/PDF` after saving or running the project to export rendered result pages. `.cbz` and `.zip` are written directly with Python's standard ZIP support. `.pdf` writes one image per PDF page and uses each rendered image's own dimensions, so portrait, landscape, and mixed-size pages keep independent page boxes. `.cbr` export requires a local `rar` or WinRAR command line writer; if none is available, use `.cbz`, `.zip`, or `.pdf`.
 
 ## Re-Inpaint current page
 
@@ -338,6 +342,7 @@ Recommended flow:
 3. Open a folder that contains comic or manga images, or open a `.cbz`, `.cbr`, or `.zip` comic archive.
 4. Click `Run` and wait for detection, OCR, translation, inpainting, and typesetting to finish.
 5. Review the translated text manually before publishing or sharing.
+6. Export rendered pages as `.cbz`, `.zip`, `.pdf`, or `.cbr` from `Open -> Export as Comic Archive/PDF` when needed.
 
 The app estimates font size, color, outline, angle, direction, and alignment from the source page. You can override those defaults with global or per-block formatting controls.
 
@@ -403,9 +408,10 @@ Notes:
 
 - Upstream project: [dmMaze/BallonsTranslator](https://github.com/dmMaze/BallonsTranslator)
 - AI-modified downstream variant referenced by the project: [thomaswantstobeaskeleton/BallonsTranslator-Pro](https://github.com/thomaswantstobeaskeleton/BallonsTranslator-Pro)
-- Fork maintenance, archive import, launcher integration, Gloss Scan/reference glossary workflows, and documentation extension: this `BallonsTranslator-vibe` fork
+- Fork maintenance, archive import/export, launcher integration, Gloss Scan/reference glossary workflows, and documentation extension: this `BallonsTranslator-vibe` fork
 - Archive import uses Python standard-library ZIP handling and the user's locally installed `7z`/Pinokio-provided extractor for CBR files.
+- Archive export uses Python standard-library ZIP handling for `.cbz`/`.zip`, Pillow PDF writing for per-image PDF pages, and the user's locally installed `rar`/WinRAR command for `.cbr`.
 
 ## License
 
-This fork remains licensed under GPL-3.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE.md). The archive importer does not add cloud services or a new bundled extractor; CBR support uses the user's local `7z`-compatible tool when available. Gloss Scan and glossary import/export operate on local project text and JSON files and do not add a new bundled service or third-party license.
+This fork remains licensed under GPL-3.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE.md). Archive import/export does not add cloud services or a new bundled extractor; CBR import uses the user's local `7z`-compatible tool when available, and CBR export uses the user's local `rar`/WinRAR command when available. Gloss Scan and glossary import/export operate on local project text and JSON files and do not add a new bundled service or third-party license.

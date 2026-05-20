@@ -1,5 +1,17 @@
 # Changelogs
 
+### 2026-05-20
+[v1.4.0-vibe.55] comic archive export
+Added:
+1. Added comic export for rendered result pages as `.cbz`, `.zip`, `.pdf`, and `.cbr` when a local RAR writer is installed.
+2. Added PDF export that writes each rendered image as its own page using that image's dimensions, aspect ratio, and orientation.
+
+Changed:
+1. Documented comic archive export, CBR writer requirements, and GPL-3.0 license continuity.
+
+Version:
+1. Bumped the fork runtime version string to `1.4.0-vibe.55`.
+
 ### 2026-05-19
 [v1.4.0-vibe.50] comic archive import
 Added:

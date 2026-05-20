@@ -10,7 +10,7 @@ import cv2
 
 from tqdm import tqdm
 from qtpy.QtWidgets import QAction, QFileDialog, QMenu, QHBoxLayout, QVBoxLayout, QApplication, QStackedWidget, QSplitter, QListWidget, QShortcut, QListWidgetItem, QMessageBox, QTextEdit, QPlainTextEdit
-from qtpy.QtCore import Qt, QPoint, QSize, QEvent, Signal, QThread, QTimer
+from qtpy.QtCore import Qt, QPoint, QSize, QEvent, Signal, QThread, QTimer, QUrl
 from qtpy.QtGui import QContextMenuEvent, QTextCursor, QGuiApplication, QIcon, QCloseEvent, QKeySequence, QKeyEvent, QPainter, QClipboard, QImage, QColor, QBrush
 
 from utils.logger import logger as LOGGER
@@ -35,6 +35,7 @@ from utils.config import ProgramConfig, pcfg, save_config, text_styles, save_tex
 from utils.reinpaint import combine_inpaint_masks, mask_bounding_rect
 from utils.proj_imgtrans import ProjImgTrans
 from utils.archive_import import import_archive_to_project, is_archive_path
+from utils.archive_export import archive_export_filter, default_export_path, export_project
 from .canvas import Canvas
 from .configpanel import ConfigPanel
 from .module_manager import ModuleManager
@@ -185,6 +186,7 @@ class MainWindow(mainwindow_cls):
         self.leftBar.open_json_proj.connect(self.openJsonProj)
         self.leftBar.save_proj.connect(self.manual_save)
         self.leftBar.export_doc.connect(self.on_export_doc)
+        self.leftBar.export_comic_clicked.connect(self.on_export_comic_archive)
         self.leftBar.import_doc.connect(self.on_import_doc)
         self.leftBar.export_src_txt.connect(lambda : self.on_export_txt(dump_target='source'))
         self.leftBar.export_trans_txt.connect(lambda : self.on_export_txt(dump_target='translation'))
@@ -2240,6 +2242,39 @@ class MainWindow(mainwindow_cls):
         if self.canvas.text_change_unsaved():
             self.st_manager.updateTextBlkList()
         self.export_doc_thread.exportAsDoc(self.imgtrans_proj)
+
+    def _wait_for_image_saves(self):
+        while self.imsave_thread.isRunning():
+            self.app.processEvents()
+            time.sleep(0.05)
+
+    def on_export_comic_archive(self):
+        try:
+            if self.imgtrans_proj.is_empty:
+                create_info_dialog(self.tr('Open a project before exporting a comic archive.'))
+                return
+            if self.canvas.text_change_unsaved():
+                self.st_manager.updateTextBlkList()
+            self.saveCurrentPage(update_scene_text=False, save_proj=True, restore_interface=True)
+            self._wait_for_image_saves()
+
+            dialog = QFileDialog()
+            default_path = default_export_path(self.imgtrans_proj.directory, '.cbz')
+            selected_file = str(dialog.getSaveFileUrl(
+                self.parent(),
+                self.tr('Export Comic Archive/PDF'),
+                QUrl.fromLocalFile(default_path),
+                filter=archive_export_filter(),
+            )[0].toLocalFile())
+            if selected_file == '':
+                return
+            if Path(selected_file).suffix == '':
+                selected_file += '.cbz'
+
+            exported_path = export_project(self.imgtrans_proj, selected_file)
+            create_info_dialog(self.tr('Comic export written to ') + exported_path)
+        except Exception as e:
+            create_error_dialog(e, self.tr('Failed to export comic archive/PDF'))
 
     def on_import_doc(self):
         self.import_doc_thread.importDoc(self.imgtrans_proj)
