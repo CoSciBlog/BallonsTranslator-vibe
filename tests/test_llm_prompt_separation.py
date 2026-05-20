@@ -37,6 +37,14 @@ class PromptFakeTranslator(LLM_API_Translator):
         return "Use glossary entries as terminology guidance only."
 
     @property
+    def glossary_reference_text(self):
+        return "港町 => Harbor City [place] # official translation"
+
+    @property
+    def glossary_reference_prompt(self):
+        return "Prefer official reference spellings."
+
+    @property
     def use_glossary_enabled(self):
         return True
 
@@ -107,6 +115,9 @@ class LLMPromptSeparationTest(unittest.TestCase):
         self.assertIn('{"entries":[]}', prompt)
         self.assertIn('category "character"', prompt)
         self.assertIn("draft_translation", prompt)
+        self.assertIn("official/reference translation", prompt)
+        self.assertIn("REFERENCE GLOSSARY", prompt)
+        self.assertIn("Harbor City", prompt)
         self.assertNotIn('"translations"', prompt)
 
     def test_glossary_usage_is_guidance_only(self):

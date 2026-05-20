@@ -6,6 +6,7 @@ from typing import List, Union
 from pathlib import Path
 import subprocess
 from functools import partial
+from copy import deepcopy
 import time
 import cv2
 
@@ -26,10 +27,12 @@ from utils.glossary_replacement import (
 )
 from utils.glossary_template import (
     build_glossary_from_project_text,
+    collect_project_translation_pairs,
     merge_glossary_entry_text,
 )
 from modules.translators.trans_chatgpt import GPTTranslator
-from modules.translators import lang_display_label, lang_display_to_key
+from modules.translators.trans_llm_api import LLM_API_Translator
+from modules.translators import TRANSLATORS, lang_display_label, lang_display_to_key
 from modules import GET_VALID_TEXTDETECTORS, GET_VALID_INPAINTERS, GET_VALID_TRANSLATORS, GET_VALID_OCR
 from .misc import parse_stylesheet, set_html_family, QKEY
 from utils.config import ProgramConfig, pcfg, save_config, text_styles, save_text_styles, load_textstyle_from, FontFormat
@@ -797,6 +800,56 @@ class MainWindow(mainwindow_cls):
                 if update_ui and QThread.currentThread() == self.thread():
                     self.sync_project_glossary_to_ui()
 
+    def _gloss_scan_llm_translator(self):
+        translator = getattr(self.module_manager, 'translator', None)
+        if isinstance(translator, LLM_API_Translator):
+            return translator
+
+        translator_name = pcfg.module.translator
+        if translator_name not in {"LLM_API_Translator", "Two-Step Translator"}:
+            return None
+        try:
+            translator_cls = TRANSLATORS.module_dict[translator_name]
+            params = deepcopy(pcfg.module.translator_params.get(translator_name, {}))
+            return translator_cls(
+                pcfg.module.translate_source,
+                pcfg.module.translate_target,
+                raise_unsupported_lang=False,
+                **params,
+            )
+        except Exception as e:
+            LOGGER.warning(f'Failed to initialize Gloss Scan LLM translator {translator_name}: {e}')
+            return None
+
+    def _run_llm_gloss_scan(self, pages: List[str], old_glossary: dict) -> int:
+        translator = self._gloss_scan_llm_translator()
+        if translator is None or not hasattr(translator, '_update_glossary_from_batch'):
+            LOGGER.info('Gloss Scan LLM extraction skipped: select LLM_API_Translator or Two-Step Translator in Settings.')
+            return 0
+
+        pairs = collect_project_translation_pairs(self.imgtrans_proj, pages=pages)
+        if not pairs:
+            return 0
+
+        translator.set_project_glossary(old_glossary)
+        src_list = [source for source, _target in pairs]
+        draft_list = [target for _source, target in pairs]
+        to_lang = getattr(translator, 'lang_map', {}).get(translator.lang_target, translator.lang_target)
+        LOGGER.info(
+            f'Gloss Scan LLM extraction using {translator.name or pcfg.module.translator} '
+            f'with {len(src_list)} OCR/reference pair(s).'
+        )
+        added_count = translator._update_glossary_from_batch(
+            src_list,
+            draft_list,
+            to_lang,
+            force=True,
+        )
+        glossary = translator.get_project_glossary()
+        if isinstance(glossary, dict):
+            self.imgtrans_proj.glossary = self.imgtrans_proj.normalize_glossary(glossary)
+        return added_count
+
     def show_project_glossary_window(self):
         if self.imgtrans_proj is None or self.imgtrans_proj.directory is None:
             create_info_dialog(self.tr('Open a project before editing the glossary.'))
@@ -892,24 +945,32 @@ class MainWindow(mainwindow_cls):
             generated_entries = glossary.get('entries', '')
             old_glossary = self.imgtrans_proj.normalize_glossary(self.imgtrans_proj.glossary)
             merged_entries = merge_glossary_entry_text(old_glossary.get('entries', ''), generated_entries)
-            line_count = len([line for line in generated_entries.splitlines() if line.strip()])
-
-            if line_count == 0:
-                create_info_dialog(self.tr('Gloss Scan finished, but no glossary terms were found in the OCR text.'))
-                return
-
             self.imgtrans_proj.glossary = self.imgtrans_proj.normalize_glossary({
                 **old_glossary,
                 'entries': merged_entries,
             })
+            llm_added_count = self._run_llm_gloss_scan(pages, self.imgtrans_proj.glossary)
+            generated_line_count = len([line for line in generated_entries.splitlines() if line.strip()])
+            final_entries = self.imgtrans_proj.glossary.get('entries', '')
+            old_entry_count = len([line for line in old_glossary.get('entries', '').splitlines() if line.strip()])
+            final_entry_count = len([line for line in final_entries.splitlines() if line.strip()])
+            added_or_merged_count = max(final_entry_count - old_entry_count, 0)
+
+            if generated_line_count == 0 and llm_added_count == 0 and added_or_merged_count == 0:
+                create_info_dialog(self.tr('Gloss Scan finished, but no glossary terms were found in the OCR text or by the selected LLM glossary scan.'))
+                return
+
             self.sync_project_glossary_to_ui()
             self.sync_project_glossary_to_translator()
             if self.save_project_safely(self.tr('saving Gloss Scan glossary'), notify_user=True):
                 self.canvas.setProjSaveState(False)
-                LOGGER.info(f'Gloss Scan added or refreshed {line_count} glossary candidate(s).')
+                LOGGER.info(
+                    f'Gloss Scan added or refreshed {generated_line_count} heuristic '
+                    f'and {llm_added_count} LLM glossary candidate(s).'
+                )
                 create_info_dialog(
                     self.tr('Gloss Scan finished. {count} glossary candidates were added to the project glossary.').format(
-                        count=line_count
+                        count=added_or_merged_count or generated_line_count + llm_added_count
                     )
                 )
         finally:

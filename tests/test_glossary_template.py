@@ -11,6 +11,7 @@ from utils.glossary_template import (
     build_glossary_from_project_text,
     build_glossary_from_translated_folder,
     classify_reference_term,
+    collect_project_translation_pairs,
     extract_reference_terms,
     merge_glossary_entry_text,
 )
@@ -84,6 +85,25 @@ class GlossaryTemplateTest(unittest.TestCase):
         self.assertIn("Professor Willow => Professor Willow [title]", glossary["entries"])
         self.assertIn("Harbor City => Harbor City [place]", glossary["entries"])
         self.assertEqual(glossary["entries"].count("Harbor City => Harbor City"), 1)
+
+    def test_collects_project_pairs_with_existing_translation_first(self):
+        class Block:
+            def __init__(self, text, translation=""):
+                self.text = text
+                self.translation = translation
+
+            def get_text(self):
+                return self.text
+
+        class Project:
+            pages = {
+                "001.png": [Block("灯里", "Akari")],
+                "002.png": [Block("港町")],
+            }
+
+        pairs = collect_project_translation_pairs(Project())
+
+        self.assertEqual(pairs, [("灯里", "Akari"), ("港町", "港町")])
 
     def test_merges_glossary_text_without_overwriting_existing_terms(self):
         merged = merge_glossary_entry_text(

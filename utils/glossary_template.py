@@ -136,6 +136,29 @@ def build_glossary_from_project_text(project, pages: Iterable[str] = None) -> Di
     }
 
 
+def collect_project_translation_pairs(project, pages: Iterable[str] = None) -> List[Tuple[str, str]]:
+    """Collect OCR source text with any existing official/reference translation.
+
+    Gloss Scan runs after OCR and may be used on projects that already contain an
+    official translation in the translation fields. When no target text exists,
+    the source is reused so an LLM can still extract source-side names and terms.
+    """
+    pairs: List[Tuple[str, str]] = []
+    page_names = list(pages) if pages is not None else list(getattr(project, "pages", {}).keys())
+    for page_name in page_names:
+        blocks = getattr(project, "pages", {}).get(page_name, [])
+        for block in blocks:
+            source = _block_text(block, ("text",))
+            if not source:
+                continue
+            target = _block_text(
+                block,
+                ("translation", "rich_text", "translation_draft", "text"),
+            )
+            pairs.append((source, target or source))
+    return pairs
+
+
 def merge_glossary_entry_text(existing: str, incoming: str) -> str:
     merged: "OrderedDict[Tuple[str, str], str]" = OrderedDict()
     for line in (existing or "").splitlines():
@@ -147,6 +170,24 @@ def merge_glossary_entry_text(existing: str, incoming: str) -> str:
         if key is not None and key not in merged:
             merged[key] = line.strip()
     return "\n".join(line for line in merged.values() if line)
+
+
+def _block_text(block, keys: Tuple[str, ...]) -> str:
+    for key in keys:
+        if key == "text" and hasattr(block, "get_text"):
+            try:
+                text = block.get_text()
+                if isinstance(text, str) and text.strip():
+                    return _strip_markup(text)
+            except Exception:
+                pass
+        if isinstance(block, dict):
+            value = block.get(key, "")
+        else:
+            value = getattr(block, key, "")
+        if isinstance(value, str) and value.strip():
+            return _strip_markup(value)
+    return ""
 
 
 def _glossary_line_key(line: str):

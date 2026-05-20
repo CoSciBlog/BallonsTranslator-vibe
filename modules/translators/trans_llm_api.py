@@ -1631,10 +1631,19 @@ class LLM_API_Translator(BaseTranslator):
             for i, (source, translation) in enumerate(zip(src_list, translations))
         ]
         existing_glossary = self.glossary_text.strip() or "(empty)"
+        reference_glossary = self.glossary_reference_text.strip()
+        reference_section = (
+            f"\n\nREFERENCE GLOSSARY:\n{self.glossary_reference_prompt.strip()}\n{reference_glossary}"
+            if reference_glossary and self.use_glossary_enabled
+            else ""
+        )
         category_prompt = self._auto_glossary_category_prompt()
         return (
             f"Extract a reusable translation glossary from {from_lang} to {to_lang}.\n"
             f"{category_prompt}\n"
+            "The draft_translation field may contain an official/reference translation, "
+            "a previous project translation, or the source text when no translation is available. "
+            "Prefer official/reference spellings when present.\n"
             "Strict category rules:\n"
             "- character: only real person/character names from source and draft_translation. "
             "Names with honorifics are allowed, including ちゃん, くん, さん, 先輩, 先生, and 様; "
@@ -1653,17 +1662,18 @@ class LLM_API_Translator(BaseTranslator):
             "Never return {}. If no valid entries are found, return {\"entries\":[]}. "
             "Each entry must contain source, target, category, aliases, notes, and confidence. "
             "Category, aliases, notes, and confidence are metadata for the glossary only; they must never be copied into translations.\n\n"
-            f"EXISTING GLOSSARY:\n{existing_glossary}\n\n"
+            f"EXISTING GLOSSARY:\n{existing_glossary}"
+            f"{reference_section}\n\n"
             f"TRANSLATION PAIRS:\n{json.dumps(pairs, ensure_ascii=False, indent=2)}"
         )
 
     def _update_glossary_from_batch(
-        self, src_list: List[str], translations: List[str], to_lang: str
-    ):
-        if not self.auto_build_glossary_enabled or not src_list:
-            return
+        self, src_list: List[str], translations: List[str], to_lang: str, force: bool = False
+    ) -> int:
+        if (not force and not self.auto_build_glossary_enabled) or not src_list:
+            return 0
         if not self._enabled_auto_glossary_categories():
-            return
+            return 0
 
         system_prompt = (
             "You extract concise translation glossaries. Return only valid JSON "
@@ -1690,10 +1700,12 @@ class LLM_API_Translator(BaseTranslator):
                     self.logger.info(
                         f"Glossary updated with {saved_count} extracted entries."
                     )
+                return saved_count
         except Exception as e:
             self.logger.warning(
                 f"Glossary extraction failed; continuing without glossary update. {type(e).__name__}: {e}"
             )
+        return 0
 
     def _build_glossary_refinement_prompt(
         self, src_list: List[str], translations: List[str], to_lang: str

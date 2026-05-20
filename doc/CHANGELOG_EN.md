@@ -1,6 +1,19 @@
 # Changelogs
 
 ### 2026-05-20
+[v1.4.0-vibe.58] LLM Gloss Scan reference glossary
+Added:
+1. Added LLM-backed Gloss Scan extraction after text detection and OCR.
+2. Gloss Scan now uses the selected `LLM_API_Translator` or `Two-Step Translator` settings, including Ollama/provider, model, endpoint, JSON/reasoning options, category filters, and glossary max-entry limits.
+3. Gloss Scan now uses existing official/reference translations in text blocks as target spellings when building a reusable project glossary for export or later chapters.
+
+Changed:
+1. Glossary extraction prompts now include the project's reference glossary as supporting context while preserving project glossary entries as preferred terms.
+
+Version:
+1. Bumped the fork runtime version string to `1.4.0-vibe.58`.
+
+### 2026-05-20
 [v1.4.0-vibe.57] grouped source folder import
 Added:
 1. Added source-folder import from `Open -> Import Folder` and drag-and-drop for folders containing `.cbr`, `.cbz`, `.zip`, `.pdf`, and nested image files.

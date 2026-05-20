@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README_EN.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.57`
+Fork release: `1.4.0-vibe.58`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -62,7 +62,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Added direct comic archive, PDF, and source-folder import for `.cbz`, `.cbr`, `.zip`, `.pdf`, and nested image folders by extracting, rendering, or copying pages into a normal project folder.
 - Added comic export for `.cbz`, `.zip`, `.pdf`, and `.cbr` when a local RAR writer is installed.
 - Added glossary import/export, reference-glossary support, and a translated-folder glossary template builder for reusing official terminology across chapters.
-- Added `Gloss Scan`, an OCR-only current-manga glossary builder available from the left sidebar and the Run menu. It detects text and runs OCR, then creates reusable glossary candidates without translation or inpainting.
+- Added `Gloss Scan`, a current-manga glossary builder available from the left sidebar and the Run menu. It detects text, runs OCR, then uses the selected `LLM_API_Translator` or `Two-Step Translator` settings, including Ollama/provider and glossary category settings, to build an exportable project/reference glossary without inpainting.
 - Improved Blackwell/RTX 50xx runtime repair so CUDA PyTorch wheels are force-reinstalled from the cu128 index instead of reusing an already-satisfied CPU Torch package, and runtime package installs now stream live progress output.
 - Normal starts now skip dependency and Runtime Manager checks after the first successful runtime setup. Checks run again on first start, `--update`, explicit `--repair-runtime`, or when `BALLOONTRANS_FORCE_RUNTIME_CHECK=1` is set.
 
@@ -89,6 +89,11 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
   - right-click merge for multiple selected text boxes
   - LLM review for current page or all non-ignored pages from the Run menu
   - import and export for Word documents
+- Glossary workflow:
+  - use `Gloss Scan Current Manga` to run text detection, OCR, and LLM/Ollama glossary extraction on the current project
+  - reuses the selected `LLM_API_Translator` or `Two-Step Translator` provider/model settings and automatic glossary category settings
+  - uses existing official/reference translations in text blocks as target spellings when available, otherwise it still extracts source-side OCR terms
+  - saves the reusable glossary in the project's `glossary.json` so it can be exported or imported as a reference glossary for other chapters
 - Image editing workflow:
   - mask editing
   - inpainting brush style cleanup
@@ -176,7 +181,7 @@ Use `Import Glossary` to merge entries from another `glossary.json` into the cur
 
 `Build From Translated Folder` creates a reference glossary template from a folder that already contains translated project data, exported text/markdown, or existing `glossary.json` files. Enable `Include subfolders` when a volume or series folder contains chapter subfolders. The template builder scans existing translated text, extracts likely character names, places, organizations, and titles, and writes them as reference entries so official English names can guide later chapter translations.
 
-`Gloss Scan` is available as the `GScan` sidebar button and as `Run -> Gloss Scan Current Manga`. It temporarily runs only text detection and OCR for the current non-ignored pages, skips translation and inpainting, and appends likely names, places, organizations, titles, and terms to the current project's glossary without overwriting existing manual entries. Export that glossary from the Glossary window, then import it as a reference glossary in another manga or chapter when official names should guide later translation work.
+`Gloss Scan` is available as the `GScan` sidebar button and as `Run -> Gloss Scan Current Manga`. It temporarily runs text detection and OCR for the current non-ignored pages, skips inpainting, and then uses the selected `LLM_API_Translator` or `Two-Step Translator` settings to extract glossary entries from OCR text plus any existing official/reference translations in the text blocks. It appends likely names, places, organizations, titles, and terms to the current project's glossary without overwriting existing manual entries. Export that glossary from the Glossary window, then import it as a reference glossary in another manga or chapter when official names should guide later translation work.
 
 When an existing glossary entry's target text is changed, for example a character name is corrected, the app applies that target-term change to existing translations in the project, updates rich text where possible, saves `glossary.json` and the project JSON, and re-renders the affected result pages.
 
@@ -381,7 +386,7 @@ The `LLM_API_Translator` and `Two-Step Translator` include glossary support for 
 - Project glossary entries and the glossary prompt are edited from the left-sidebar Glossary window and stored in the current project's `glossary.json` file. Entries use the format `source => target [category] # optional note`.
 - `use glossary` injects the glossary into translation prompts so known terms are reused consistently.
 - `auto build glossary` asks the LLM to extract reusable glossary entries from each translated batch and append or update them in the current project's `glossary.json`. By default, automatic extraction keeps only names and places, and it filters interjections, SFX, punctuation, and normal dialogue out of name/title categories.
-- `Gloss Scan Current Manga` builds glossary candidates from detected OCR text only, without translation, LLM extraction, or inpainting.
+- `Gloss Scan Current Manga` builds glossary candidates from detected OCR text and existing official/reference translations using the selected LLM or Two-Step/Ollama settings, without running normal translation or inpainting.
 - `auto glossary names`, `auto glossary places`, and the optional organization/title/term/honorific/catchphrase checkboxes control which categories can be captured automatically.
 - `glossary refinement pass` runs a second LLM pass after translation to align the translated batch with the current glossary.
 - `glossary max entries` limits how many entries are kept so prompts do not grow without bound.
