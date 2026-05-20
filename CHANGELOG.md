@@ -69,6 +69,7 @@
 
 ### Fixed
 
+- Fixed startup with no project open after grouped import metadata support was added.
 - Improved Two-Step Translator LLM refinement handling for empty, partial, and malformed JSON responses.
 - Added strict LLM refinement retry before falling back to first-step drafts.
 - Added safe ID-based partial merge for usable LLM refinement outputs.
@@ -105,3 +106,4 @@
 - Bumped the fork runtime version string to `1.4.0-vibe.56`.
 - Bumped the fork runtime version string to `1.4.0-vibe.57`.
 - Bumped the fork runtime version string to `1.4.0-vibe.58`.
+- Bumped the fork runtime version string to `1.4.0-vibe.59`.

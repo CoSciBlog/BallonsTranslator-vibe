@@ -1,6 +1,14 @@
 # Changelogs
 
 ### 2026-05-20
+[v1.4.0-vibe.59] startup without project fix
+Fixed:
+1. Fixed startup with no project open after grouped import metadata support was added.
+
+Version:
+1. Bumped the fork runtime version string to `1.4.0-vibe.59`.
+
+### 2026-05-20
 [v1.4.0-vibe.58] LLM Gloss Scan reference glossary
 Added:
 1. Added LLM-backed Gloss Scan extraction after text detection and OCR.

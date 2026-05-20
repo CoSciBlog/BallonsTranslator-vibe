@@ -703,6 +703,8 @@ class MainWindow(mainwindow_cls):
 
     def _load_page_import_groups(self) -> dict:
         project_dir = getattr(self.imgtrans_proj, 'directory', '')
+        if not project_dir:
+            return {}
         metadata_path = osp.join(project_dir, IMPORT_METADATA)
         if not osp.exists(metadata_path):
             return {}
