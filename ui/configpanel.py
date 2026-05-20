@@ -508,6 +508,10 @@ class ConfigPanel(Widget):
             self.tr('Merge nearby text boxes after pipeline'),
             discription=self.tr('After translation, merge nearby text boxes using the Region Merge Tool rules. This adds a small post-processing step, usually slower by a little, but can reduce manual cleanup and overlapping rendered text.'))
         self.post_merge_checker.stateChanged.connect(self.on_post_merge_changed)
+        self.pronoun_review_checker, _ = generalConfigPanel.addCheckBox(
+            self.tr('Review pronouns after translation'),
+            discription=self.tr('After each LLM-capable translation page, run an additional review pass focused on pronouns, speaker/addressee references, gendered wording, and formal/informal address. This improves consistency but adds extra LLM requests.'))
+        self.pronoun_review_checker.stateChanged.connect(self.on_pronoun_review_changed)
         self.post_merge_mode_combobox, _ = generalConfigPanel.addCombobox(
             [
                 self.tr('Vertical Merge'),
@@ -978,6 +982,9 @@ class ConfigPanel(Widget):
     def on_post_merge_changed(self):
         pcfg.module.post_merge_textboxes = self.post_merge_checker.isChecked()
 
+    def on_pronoun_review_changed(self):
+        pcfg.module.pronoun_review_after_translation = self.pronoun_review_checker.isChecked()
+
     def on_post_merge_mode_changed(self):
         mode_map = {
             0: 'VERTICAL',
@@ -1126,6 +1133,7 @@ class ConfigPanel(Widget):
         self.let_writing_mode_combox.setCurrentIndex(pcfg.let_writing_mode_flag)
         self.let_autolayout_checker.setChecked(pcfg.let_autolayout_flag)
         self.post_merge_checker.setChecked(pcfg.module.post_merge_textboxes)
+        self.pronoun_review_checker.setChecked(pcfg.module.pronoun_review_after_translation)
         post_merge_modes = ['VERTICAL', 'HORIZONTAL', 'VERTICAL_THEN_HORIZONTAL', 'HORIZONTAL_THEN_VERTICAL']
         if pcfg.module.post_merge_mode in post_merge_modes:
             self.post_merge_mode_combobox.setCurrentIndex(post_merge_modes.index(pcfg.module.post_merge_mode))

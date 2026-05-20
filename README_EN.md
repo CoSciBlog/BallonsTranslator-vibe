@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.59`
+Fork release: `1.4.0-vibe.60`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -51,6 +51,8 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Glossary target-term edits now update matching existing translations, re-render affected pages, and save the updated project.
 - Added a right-click text box action that merges two or more selected text boxes into the first selected box while leaving the inpainted page layer unchanged.
 - Added Run-menu review actions for the current page and all pages, using the active ChatGPT, LLM_API_Translator, or Two-Step Translator settings to re-check and correct existing translations.
+- Added optional inpaint optimization: after normal inpainting, the app can re-detect leftover text on the inpainted page and run a second inpaint pass; the same optimization is available for the current page or all non-ignored pages.
+- Added an optional Settings switch to run a post-translation pronoun/address review with LLM-capable translators, and tightened translation, glossary, and review prompts for names, gendered wording, pronouns, and speaker/addressee consistency.
 - Improved first-start launcher output so Windows batch and Pinokio install/start flows show live dependency output plus periodic progress messages during silent setup steps.
 - Improved the Pinokio and `launch.py --update` update flows so Git and dependency refresh steps stream progress output instead of appearing idle.
 - Pinned setup tooling to `setuptools==71.1.0` so legacy packages such as `PyExecJS` install correctly during first setup.
@@ -62,7 +64,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Added direct comic archive, PDF, and source-folder import for `.cbz`, `.cbr`, `.zip`, `.pdf`, and nested image folders from the Open menu, drag-and-drop, recent projects, and `--proj-dir`.
 - Added comic export for `.cbz`, `.zip`, `.pdf`, and `.cbr` when a local RAR writer is installed.
 - Added glossary import/export, reference-glossary support, and a translated-folder glossary template builder for reusing official terminology across chapters.
-- Added `Gloss Scan`, a current-manga glossary builder available from the left sidebar and the Run menu. It detects text, runs OCR, then uses the selected `LLM_API_Translator` or `Two-Step Translator` settings, including Ollama/provider and glossary category settings, to build an exportable project/reference glossary without inpainting.
+- Added `Gloss Scan`, a current-manga glossary builder available from the Run menu. It detects text, runs OCR, then uses the selected `LLM_API_Translator` or `Two-Step Translator` settings, including Ollama/provider and glossary category settings, to build an exportable project/reference glossary without inpainting.
 - Improved Blackwell/RTX 50xx runtime repair so CUDA PyTorch wheels are force-reinstalled from the cu128 index instead of reusing an already-satisfied CPU Torch package, and runtime package installs now stream live progress output.
 - Normal starts now skip dependency and Runtime Manager checks after the first successful runtime setup. Checks run again on first start, `--update`, explicit `--repair-runtime`, or when `BALLOONTRANS_FORCE_RUNTIME_CHECK=1` is set.
 
@@ -89,6 +91,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Image editing workflow:
   - mask editing
   - inpainting brush style cleanup
+  - optional second-pass inpaint optimization for the current page, all non-ignored pages, or full pipeline runs
   - support for long-strip and webtoon-style pages
 - Censor Restoration / Decensor Inpaint workflow:
   - works on the currently selected page when invoked by the app workflow
@@ -141,6 +144,16 @@ The left sidebar includes a `Ri` button below `Gloss` and `Dc`. It re-runs inpai
 The same action is available from `Tools -> Re-run Inpainting Current Page` and the `Ctrl+Shift+I` shortcut. The Drawboard has a Re-Inpaint settings tab with the current inpainter selector and a dedicated `Dilate` slider, matching the rectangle repair tool's dilation behavior. Re-Inpaint now keeps the page metadata attached to the inpaint result, so the progress dialog can close when the current-page result finishes. This is useful after changing the inpainting model or editing masks manually.
 
 The Drawboard sidebar also includes a `Show translated text` checkbox. Enable it while drawing masks if you need to see the translated text boxes together with the mask layer.
+
+## Inpaint optimization
+
+Enable `Run -> Enable Inpaint Optimization` to add a second detect-and-inpaint pass after normal inpainting. The optimizer scans the finished inpainted page for leftover text-like regions, merges the residual mask into the page mask, and repairs those regions with the active inpainter.
+
+Use the left sidebar `Opt` button or `Tools -> Optimize Inpainting Current Page` for the currently opened page. Use `Tools -> Optimize Inpainting All Pages` to scan all non-ignored pages after a project is already processed.
+
+## Pronoun and address review
+
+LLM translation and review prompts now explicitly check names, pronouns, gendered wording, first-person singular/plural, speaker/addressee roles, and formal/informal address. Enable `Settings -> General -> Review pronouns after translation` to run an additional LLM review pass after translation for each page, using ChatGPT, `LLM_API_Translator`, or `Two-Step Translator`.
 
 Use `Tools -> Model Downloads` to download optional or missing local models after setup. The first setup still downloads the common text detection, `manga_ocr`, `mit48px`, and LaMa inpainting assets, while optional backends such as `flux2-klein`, `aot`, and PaddleOCR-VL Manga are downloaded only from that window or when a backend with declared downloadable files is first loaded. Native PaddleOCR downloads its own runtime assets on first use, OneOCR still requires the local `oneocr.dll` and `oneocr.onemodel` files to be supplied manually, and Stariver OCR is API-based without a local model download.
 

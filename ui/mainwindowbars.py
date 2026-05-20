@@ -70,6 +70,7 @@ class LeftBar(Widget):
     run_gloss_scan_clicked = Signal()
     run_decensor_clicked = Signal()
     run_reinpaint_clicked = Signal()
+    run_inpaint_optimize_clicked = Signal()
     run_translate_clicked = Signal()
     export_comic_clicked = Signal()
     def __init__(self, mainwindow, *args, **kwargs) -> None:
@@ -193,18 +194,6 @@ class LeftBar(Widget):
         self.glossaryBtn.setFixedSize(LEFTBTN_WIDTH, LEFTBTN_WIDTH)
         self.glossaryBtn.clicked.connect(self.glossary_clicked)
 
-        self.runGlossScanBtn = QPushButton()
-        self.runGlossScanBtn.setObjectName('RunButton')
-        self.runGlossScanBtn.setText(self.tr('GScan'))
-        self.runGlossScanBtn.setToolTip(self.tr('Gloss Scan: detect text and OCR the project to build a reusable glossary without translation or inpainting.'))
-        self.runGlossScanBtn.setIcon(QIcon('icons/leftbar_glossary.svg'))
-        self.runGlossScanBtn.setIconSize(QSize(17, 17))
-        font = self.runGlossScanBtn.font()
-        font.setPixelSize(8)
-        self.runGlossScanBtn.setFont(font)
-        self.runGlossScanBtn.setFixedSize(LEFTBTN_WIDTH, LEFTBTN_WIDTH)
-        self.runGlossScanBtn.clicked.connect(self.run_gloss_scan_clicked)
-
         self.runDecensorBtn = QPushButton()
         self.runDecensorBtn.setObjectName('RunButton')
         self.runDecensorBtn.setText(self.tr('Dc'))
@@ -225,14 +214,24 @@ class LeftBar(Widget):
         self.runReInpaintBtn.setFixedSize(LEFTBTN_WIDTH, LEFTBTN_WIDTH)
         self.runReInpaintBtn.clicked.connect(self.run_reinpaint_clicked)
 
+        self.runInpaintOptimizeBtn = QPushButton()
+        self.runInpaintOptimizeBtn.setObjectName('RunButton')
+        self.runInpaintOptimizeBtn.setText(self.tr('Opt'))
+        self.runInpaintOptimizeBtn.setToolTip(self.tr('Optimize Inpainting: detect leftover text on the current inpainted page and repair it again.'))
+        font = self.runInpaintOptimizeBtn.font()
+        font.setPixelSize(10)
+        self.runInpaintOptimizeBtn.setFont(font)
+        self.runInpaintOptimizeBtn.setFixedSize(LEFTBTN_WIDTH, LEFTBTN_WIDTH)
+        self.runInpaintOptimizeBtn.clicked.connect(self.run_inpaint_optimize_clicked)
+
         vlayout = QVBoxLayout(self)
         vlayout.addWidget(openBtnToolBar)
         vlayout.addWidget(self.showPageListLabel)
         vlayout.addWidget(self.globalSearchChecker)
         vlayout.addWidget(self.glossaryBtn)
-        vlayout.addWidget(self.runGlossScanBtn)
         vlayout.addWidget(self.runDecensorBtn)
         vlayout.addWidget(self.runReInpaintBtn)
+        vlayout.addWidget(self.runInpaintOptimizeBtn)
         vlayout.addWidget(self.imgTransChecker)
         vlayout.addItem(QSpacerItem(0, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
         vlayout.addWidget(self.configChecker)
@@ -385,11 +384,11 @@ class TitleBar(Widget):
     enable_module = Signal(int, bool)
 
     RUN_PRESETS = {
-        'full': (True, True, True, True),
-        'text_detection': (True, False, False, False),
-        'ocr': (False, True, False, False),
-        'translation': (False, False, True, False),
-        'inpainting': (False, False, False, True),
+        'full': (True, True, True, True, False),
+        'text_detection': (True, False, False, False, False),
+        'ocr': (False, True, False, False, False),
+        'translation': (False, False, True, False, False),
+        'inpainting': (False, False, False, True, False),
     }
 
     def __init__(self, parent, *args, **kwargs) -> None:
@@ -505,6 +504,15 @@ class TitleBar(Widget):
         reinpaintAction.setToolTip(self.tr('Re-run Inpainting: apply all existing inpaint masks again on the current page.'))
         self.reinpaint_current_page_trigger = reinpaintAction.triggered
 
+        optimizeInpaintCurrentAction = QAction(self.tr('Optimize Inpainting Current Page'), self)
+        optimizeInpaintCurrentAction.setShortcut(QKeySequence('Ctrl+Alt+I'))
+        optimizeInpaintCurrentAction.setToolTip(self.tr('Detect leftover text on the current inpainted page and repair it with a second inpainting pass.'))
+        self.optimize_inpaint_current_page_trigger = optimizeInpaintCurrentAction.triggered
+
+        optimizeInpaintAllAction = QAction(self.tr('Optimize Inpainting All Pages'), self)
+        optimizeInpaintAllAction.setToolTip(self.tr('Detect leftover text on all non-ignored inpainted pages and repair it with a second inpainting pass.'))
+        self.optimize_inpaint_all_pages_trigger = optimizeInpaintAllAction.triggered
+
         removeMasksAction = QAction(self.tr('Remove All Masks Current Page'), self)
         removeMasksAction.setShortcut(QKeySequence('Ctrl+Shift+Backspace'))
         removeMasksAction.setToolTip(self.tr('Remove every mask on the current page and restore the inpainted pixels from the original image.'))
@@ -517,6 +525,8 @@ class TitleBar(Widget):
         toolsMenu = QMenu(self.toolsToolBtn)
         toolsMenu.addAction(mergeToolAction)
         toolsMenu.addAction(reinpaintAction)
+        toolsMenu.addAction(optimizeInpaintCurrentAction)
+        toolsMenu.addAction(optimizeInpaintAllAction)
         toolsMenu.addAction(removeMasksAction)
         toolsMenu.addSeparator()
         toolsMenu.addAction(modelDownloadsAction)
@@ -531,7 +541,8 @@ class TitleBar(Widget):
             QAction(self.tr('Enable Text Detection'), self),
             QAction(self.tr('Enable OCR'), self),
             QAction(self.tr('Enable Translation'), self),
-            QAction(self.tr('Enable Inpainting'), self)
+            QAction(self.tr('Enable Inpainting'), self),
+            QAction(self.tr('Enable Inpaint Optimization'), self)
         ]
         for idx, sa in enumerate(stageActions):
             sa.setCheckable(True)
@@ -555,6 +566,7 @@ class TitleBar(Widget):
         presetOcrAction.setToolTip(self.tr('Enable only OCR for existing text regions.'))
         presetTranslationAction.setToolTip(self.tr('Enable only translation for existing source text.'))
         presetInpaintingAction.setToolTip(self.tr('Enable only inpainting for existing regions.'))
+        stageActions[4].setToolTip(self.tr('After normal inpainting, detect leftover text on the inpainted page and run a second repair pass.'))
         for action in self.runPresetActions:
             action.triggered.connect(self.runPresetTriggered)
 

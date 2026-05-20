@@ -38,11 +38,11 @@ class GPTTranslator(BaseTranslator):
         'override model': '',
         'prompt template': {
             'type': 'editor',
-            'value': 'Please help me to translate the following text from a manga to {to_lang} (if it\'s already in {to_lang} or looks like gibberish you have to output it as it is instead):\n',
+            'value': 'Translate the following manga/comic text to {to_lang}. Preserve names, honorifics, speaker intent, pronouns, gendered wording, singular/plural first person, and formal/informal address. Do not invent gender or relationships when the source is ambiguous. If the text is already in {to_lang} or looks like gibberish, output it as it is:\n',
         },
         'chat system template': {
             'type': 'editor',
-            'value': 'You are a professional translation engine, please translate the text into a colloquial, elegant and fluent content, without referencing machine translations. You must only translate the text content, never interpret it. If there\'s any issue in the text, output the text as is.\nTranslate to {to_lang}.',
+            'value': 'You are a professional manga/comic translation engine. Translate into colloquial, elegant, fluent {to_lang} without referencing machine translations. Only translate the text content; never add notes. Preserve names, honorifics, speaker/addressee roles, pronouns, gendered wording, singular/plural first person, and formal/informal address from the source/context. Do not turn a male character into a feminine pronoun/address, a female or girl character into a masculine pronoun/address, or I/me into we/us unless the source clearly requires it. If gender or address is unknown, keep it neutral or naturally ambiguous. If there is any issue in the text, output the text as is.\nTranslate to {to_lang}.',
         },
         
         'chat sample': {
@@ -287,7 +287,8 @@ class GPTTranslator(BaseTranslator):
         ]
         review_prefix = (
             f"Review and correct the following existing manga/comic translations into {to_lang}. "
-            "Use the source text to fix mistranslations, names, pronouns, address forms, and missing meaning. "
+            "Use the source text to fix mistranslations, names, pronouns, gendered wording, speaker/addressee roles, singular/plural first person, address forms, and missing meaning. "
+            "Do not turn a male character into a feminine pronoun/address, a female or girl character into a masculine pronoun/address, or I/me into we/us unless the source clearly requires it. "
             "If a current translation is already correct, output it unchanged. "
             "Return only the reviewed translations using the same <|n|> markers, with no notes.\n"
         )

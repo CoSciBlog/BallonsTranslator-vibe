@@ -271,7 +271,7 @@ class LLM_API_Translator(BaseTranslator):
         },
         "system_prompt": {
             "type": "editor",
-            "value": 'You are an expert translator. Your task is to accurately translate the given text snippets. You MUST provide the output strictly in the specified JSON format, without any additional explanations or markdown formatting. Return only valid JSON in this exact shape: {"translations":[{"id":1,"translation":"Translated text here."}]}. The JSON object must have a single key \'translations\', which is a list of objects, each with an \'id\' (integer) and a \'translation\' (string).\n\nExample Output Schema:\n{"translations": [{"id": 1, "translation": "Translated text here."}]}',
+            "value": 'You are an expert manga/comic translator and editor. Translate accurately and naturally while preserving speaker intent, character relationships, names, honorifics, pronouns, number, gender, and formal/informal address from the source and available context. Do not invent gender, pronouns, relationships, or names when the source is ambiguous; keep ambiguity natural in the target language. You MUST provide the output strictly in the specified JSON format, without any additional explanations or markdown formatting. Return only valid JSON in this exact shape: {"translations":[{"id":1,"translation":"Translated text here."}]}. The JSON object must have a single key \'translations\', which is a list of objects, each with an \'id\' (integer) and a \'translation\' (string).\n\nExample Output Schema:\n{"translations": [{"id": 1, "translation": "Translated text here."}]}',
             "description": "System message to instruct the LLM on its role and required output format.",
         },
         "invalid repeat count": {
@@ -317,7 +317,7 @@ class LLM_API_Translator(BaseTranslator):
         },
         "reflection prompt": {
             "type": "editor",
-            "value": "Review the draft translation against the original source text. Check meaning, terminology, tone, fluency, punctuation, and whether the number of translated items matches the input. Revise only where the translation can be improved. Return only the final improved JSON object in the required schema.",
+            "value": "Review the draft translation against the original source text. Check meaning, terminology, names, glossary terms, tone, fluency, punctuation, item count, pronouns, speaker/addressee references, gendered wording, singular/plural first person, and formal/informal address. Revise only where the translation can be improved. Return only the final improved JSON object in the required schema.",
             "description": "Instructions used for the optional reflection/revision API call.",
         },
         "previous context pages": {
@@ -834,8 +834,11 @@ class LLM_API_Translator(BaseTranslator):
         context_section = self._translation_context_prompt_section()
 
         prompt = (
-            f"Please translate the following text snippets from {from_lang} to {to_lang}. "
-            f"The input is provided as a JSON array. Respond with a JSON object in the specified format.\n\n"
+            f"Translate the following manga/comic text snippets from {from_lang} to {to_lang}. "
+            "The input is a JSON array. Respond with one JSON object in the required schema.\n"
+            "Preserve each id, item count, order, line intent, names, honorifics, pronouns, speaker/addressee roles, singular/plural first person, and formal/informal address. "
+            "Do not turn a male character into a feminine pronoun/address, a female/girl character into a masculine pronoun/address, or I/me into we/us unless the source/context clearly says so. "
+            "If gender or addressee form is unknown, keep the target wording neutral or as ambiguous as the language allows.\n\n"
             f"{context_section}"
             f"{glossary_section}"
             f"INPUT:\n{input_json_str}"
@@ -855,12 +858,14 @@ class LLM_API_Translator(BaseTranslator):
             sections.append(
                 "PROJECT GLOSSARY:\n"
                 f"{self.glossary_prompt.strip()}\n"
+                "Use project glossary entries as preferred terminology. Treat category labels, aliases, notes, confidence, gender/pronoun hints, and source comments as guidance only; never copy that metadata into the translation.\n"
                 f"{glossary}"
             )
         if reference:
             sections.append(
                 "REFERENCE GLOSSARY:\n"
                 f"{self.glossary_reference_prompt.strip()}\n"
+                "Use reference entries only as secondary consistency guidance when they do not conflict with the project glossary.\n"
                 f"{reference}"
             )
         return "\n\n".join(sections) + "\n\n"
@@ -1199,6 +1204,7 @@ class LLM_API_Translator(BaseTranslator):
             "- Keep the same IDs, keep the same item count, and do not reorder, merge, add, or omit items.\n"
             "- If a draft translation is already correct, return it unchanged.\n"
             "- Check pronoun consistency against the available source and context.\n"
+            "- Explicitly verify that male characters are not translated with feminine pronouns/address, female or girl characters are not translated with masculine pronouns/address, and a singular speaker is not changed into we/us/our.\n"
             "- Check speaker and addressee references, including whether first person and second person are preserved.\n"
             "- Do not change I/me/my into we/us/our unless the source clearly means plural first person.\n"
             "- Do not change you into they/he/she or the wrong form of address unless the source clearly requires it.\n"
@@ -1652,6 +1658,7 @@ class LLM_API_Translator(BaseTranslator):
             "- title: only real titles, roles, works, chapter/series titles, job titles, or ranks. "
             "Do not classify questions, commands, reactions, or ordinary dialogue as title.\n"
             "- Do not add generic words, ordinary phrases, one-off dialogue, common pronouns, ordinary address words, or style notes.\n"
+            "- Keep gender/pronoun information only as notes for disambiguation when it is clearly supported by the source or translations; do not invent it.\n"
             "- Do not classify interjections, moans, sound effects, punctuation, or normal dialogue as names or titles.\n"
             "- Do not add entries like Ah, Ahh, Huh, Hmph, Tsk, Ugh, Hehe, Sorry, Wait, Yes, No, or Oh as names.\n"
             "- Reject source strings that are punctuation-only, almost empty, sentence-like, a full sentence, a question, or a command.\n"

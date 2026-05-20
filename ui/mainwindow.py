@@ -385,6 +385,8 @@ class MainWindow(mainwindow_cls):
         elif idx == 3:
             pcfg.module.enable_inpaint = checked
             self.bottomBar.inpaint_selector.setVisible(checked)
+        elif idx == 4:
+            pcfg.module.enable_inpaint_optimization = checked
         pcfg.module.update_finish_code()
 
     def setupConfig(self):
@@ -454,6 +456,7 @@ class MainWindow(mainwindow_cls):
         self.leftBar.run_gloss_scan_clicked.connect(self.run_gloss_scan_current_manga)
         self.leftBar.run_decensor_clicked.connect(self.run_decensor_current_page)
         self.leftBar.run_reinpaint_clicked.connect(self.run_reinpaint_current_page)
+        self.leftBar.run_inpaint_optimize_clicked.connect(self.run_inpaint_optimize_current_page)
         self.leftBar.run_translate_clicked.connect(self.run_translate_only)
 
         self.titleBar.darkModeAction.setChecked(pcfg.darkmode)
@@ -1180,6 +1183,8 @@ class MainWindow(mainwindow_cls):
         self.titleBar.darkmode_trigger.connect(self.on_darkmode_triggered)
         self.titleBar.merge_tool_trigger.connect(self.on_open_merge_tool)
         self.titleBar.reinpaint_current_page_trigger.connect(self.run_reinpaint_current_page)
+        self.titleBar.optimize_inpaint_current_page_trigger.connect(self.run_inpaint_optimize_current_page)
+        self.titleBar.optimize_inpaint_all_pages_trigger.connect(self.run_inpaint_optimize_all_pages)
         self.titleBar.remove_current_page_masks_trigger.connect(self.remove_current_page_masks)
         self.titleBar.model_downloads_trigger.connect(self.show_model_download_window)
 
@@ -2264,6 +2269,41 @@ class MainWindow(mainwindow_cls):
         )
         self._show_reinpaint_progress(self.tr('Re-running inpainting on current page...'))
         self.module_manager.canvas_inpaint(inpaint_dict)
+
+    def _can_run_inpaint_optimization(self) -> bool:
+        if self.imgtrans_proj.is_empty:
+            create_info_dialog(self.tr('Open a project before optimizing inpainting.'))
+            return False
+        if self.module_manager.anyPipelineThreadRunning():
+            create_info_dialog(self.tr('Another pipeline is already running. Please wait until it finishes.'))
+            return False
+        if self.module_manager.textdetector is None:
+            create_info_dialog(self.tr('Select a text detector before optimizing inpainting.'))
+            return False
+        if self.module_manager.inpainter is None:
+            create_info_dialog(self.tr('Select an inpainter before optimizing inpainting.'))
+            return False
+        if self.bottomBar.textblockChecker.isChecked():
+            self.bottomBar.textblockChecker.click()
+        return True
+
+    def run_inpaint_optimize_current_page(self):
+        if not self._can_run_inpaint_optimization():
+            return
+        page_name = self.imgtrans_proj.current_img
+        if not page_name or page_name not in self.imgtrans_proj.pages:
+            create_info_dialog(self.tr('Open a project page before optimizing inpainting.'))
+            return
+        self.module_manager.runInpaintOptimizationPipeline([page_name])
+
+    def run_inpaint_optimize_all_pages(self):
+        if not self._can_run_inpaint_optimization():
+            return
+        page_names = self.imgtrans_proj.pipeline_pages(skip_ignored=True)
+        if len(page_names) == 0:
+            create_info_dialog(self.tr('No non-ignored pages are available for inpaint optimization.'))
+            return
+        self.module_manager.runInpaintOptimizationPipeline()
 
     def remove_current_page_masks(self):
         if self.imgtrans_proj.is_empty or not self.imgtrans_proj.current_img:

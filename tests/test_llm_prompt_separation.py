@@ -84,6 +84,8 @@ class LLMPromptSeparationTest(unittest.TestCase):
 
         self.assertIn("ORIGINAL TRANSLATION TASK", prompt)
         self.assertIn("Check pronoun consistency", prompt)
+        self.assertIn("male characters are not translated with feminine pronouns", prompt)
+        self.assertIn("female or girl characters are not translated with masculine pronouns", prompt)
         self.assertIn("speaker and addressee", prompt)
         self.assertIn("Do not change I/me/my into we/us/our", prompt)
         self.assertIn("Do not change you into they/he/she", prompt)
@@ -127,6 +129,7 @@ class LLMPromptSeparationTest(unittest.TestCase):
 
         self.assertIn("GLOSSARY", prompt)
         self.assertIn("terminology guidance only", prompt)
+        self.assertIn("never copy that metadata into the translation", prompt)
         self.assertNotIn("Extract a reusable translation glossary", prompt)
 
     def test_review_glossary_context_filters_relevant_categories(self):

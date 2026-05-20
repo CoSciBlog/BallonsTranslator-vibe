@@ -65,8 +65,10 @@ class TwoStepTranslator(LLM_API_Translator):
         "value"
     ] = (
         "You are a translation editor. Improve draft machine translations by "
-        "checking meaning, terminology, tone, fluency, punctuation, and line "
-        "count. Return only valid JSON in this exact shape: "
+        "checking meaning, terminology, names, honorifics, pronouns, gendered "
+        "address, speaker/addressee roles, tone, fluency, punctuation, and line "
+        "count. Do not invent gender or relationships when the source is "
+        "ambiguous. Return only valid JSON in this exact shape: "
         "{\"translations\":[{\"id\":1,\"translation\":\"...\"}]}. "
         "Do not include explanations."
     )
@@ -343,6 +345,8 @@ class TwoStepTranslator(LLM_API_Translator):
             "If a draft is already good, return the draft unchanged.\n"
             "If unsure, return the draft unchanged.\n"
             "Keep the same target language.\n"
+            "Verify pronouns, gendered wording, speaker/addressee roles, singular/plural first person, and formal/informal address against the source, draft, project context, and glossary.\n"
+            "Do not turn a male character into a feminine pronoun/address, a female or girl character into a masculine pronoun/address, or I/me into we/us unless the source/context clearly requires it.\n"
             "Do not include source, draft_translation, category labels, glossary metadata, notes, or comments in the final output.\n"
             "The number of returned translations must equal the number of input items.\n\n"
             f"{self._review_quality_rules(len(expected_items), expected_ids)}"

@@ -262,6 +262,13 @@ class TranslateThread(ModuleThread):
         try:
             self._set_translator_page_context(page_key)
             self.translator.translate_textblk_lst(page)
+            if (
+                pcfg.module.pronoun_review_after_translation
+                and hasattr(self.translator, 'supports_translation_review')
+                and self.translator.supports_translation_review()
+            ):
+                LOGGER.info(f'Running post-translation pronoun/address review for {page_key}.')
+                self.translator.review_textblk_lst(page)
         except Exception as e:
             create_error_dialog(e, self.tr('Translation Failed.'), 'TranslationFailed')
         finally:
@@ -390,6 +397,7 @@ class ImgtransThread(QThread):
         self.translation_only = False
         self.review_only = False
         self.decensor_only = False
+        self.inpaint_optimization_only = False
         self.blktrans_page_key = None
 
     def on_module_thread_stopped(self):
@@ -431,6 +439,13 @@ class ImgtransThread(QThread):
             if imgname:
                 self._set_translator_page_context(imgname)
             self.translator.translate_textblk_lst(blk_list)
+            if (
+                pcfg.module.pronoun_review_after_translation
+                and hasattr(self.translator, 'supports_translation_review')
+                and self.translator.supports_translation_review()
+            ):
+                LOGGER.info(f'Running post-translation pronoun/address review for {imgname}.')
+                self.translator.review_textblk_lst(blk_list)
         finally:
             self._clear_translator_page_context()
 
@@ -450,6 +465,7 @@ class ImgtransThread(QThread):
         self.translation_only = False
         self.review_only = False
         self.decensor_only = False
+        self.inpaint_optimization_only = False
         # 创建处理索引到实际页面索引的映射
         self.process_idx_to_page_idx = {}
         self.job = self._imgtrans_pipeline
@@ -463,6 +479,7 @@ class ImgtransThread(QThread):
         self.translation_only = True
         self.review_only = False
         self.decensor_only = False
+        self.inpaint_optimization_only = False
         self.process_idx_to_page_idx = {}
         self.job = self._translate_only_pipeline
         self.start()
@@ -475,6 +492,7 @@ class ImgtransThread(QThread):
         self.translation_only = False
         self.review_only = True
         self.decensor_only = False
+        self.inpaint_optimization_only = False
         self.process_idx_to_page_idx = {}
         self.job = self._review_pipeline
         self.start()
@@ -487,8 +505,22 @@ class ImgtransThread(QThread):
         self.translation_only = False
         self.review_only = False
         self.decensor_only = True
+        self.inpaint_optimization_only = False
         self.process_idx_to_page_idx = {}
         self.job = self._decensor_pipeline
+        self.start()
+
+    def runInpaintOptimizationPipeline(self, imgtrans_proj: ProjImgTrans, pages_to_process=None):
+        self.imgtrans_proj = imgtrans_proj
+        self.pages_to_process = pages_to_process
+        self.num_pages = len(self.imgtrans_proj.pages)
+        self.stop_requested = False
+        self.translation_only = False
+        self.review_only = False
+        self.decensor_only = False
+        self.inpaint_optimization_only = True
+        self.process_idx_to_page_idx = {}
+        self.job = self._inpaint_optimization_pipeline
         self.start()
     
     def requestStop(self):
@@ -624,6 +656,75 @@ class ImgtransThread(QThread):
                 create_error_dialog(e, self.tr('Decensoring Failed.'), 'DecensorFailed')
             self.decensor_counter += 1
             self.update_decensor_progress.emit(self.decensor_counter)
+
+    def _inpaint_optimization_source(self, imgname: str) -> np.ndarray:
+        inpainted = self.imgtrans_proj.load_inpainted_by_imgname(imgname)
+        if inpainted is not None:
+            return inpainted
+        return self.imgtrans_proj.ensure_upscaled_img(imgname)
+
+    def _optimize_inpaint_page(self, imgname: str, source_img: np.ndarray = None) -> bool:
+        if self.textdetector is None or self.inpainter is None:
+            LOGGER.info('Inpaint optimization skipped because detector or inpainter is not loaded.')
+            return False
+
+        source_img = source_img if source_img is not None else self._inpaint_optimization_source(imgname)
+        if source_img is None:
+            return False
+
+        try:
+            residual_mask, residual_blocks = self.textdetector.detect(source_img, self.imgtrans_proj)
+        except Exception as e:
+            create_error_dialog(e, self.tr('Inpaint Optimization Detection Failed.'), 'TextDetectFailed')
+            return False
+
+        if residual_mask is None or not np.any(residual_mask > 0):
+            LOGGER.info(f'Inpaint optimization found no residual text mask on {imgname}.')
+            return False
+
+        residual_pixels = int(np.count_nonzero(residual_mask))
+        existing_mask = self.imgtrans_proj.load_mask_by_imgname(imgname)
+        if existing_mask is not None and existing_mask.shape[:2] == residual_mask.shape[:2]:
+            self.imgtrans_proj.save_mask(imgname, np.bitwise_or(existing_mask, residual_mask))
+        else:
+            self.imgtrans_proj.save_mask(imgname, residual_mask)
+
+        try:
+            optimized = self.inpainter.inpaint(
+                source_img,
+                residual_mask,
+                residual_blocks or self.imgtrans_proj.pages.get(imgname, []),
+            )
+            self.imgtrans_proj.save_inpainted(imgname, optimized)
+            LOGGER.info(
+                f'Inpaint optimization repaired {residual_pixels} residual mask pixels on {imgname}.'
+            )
+            return True
+        except Exception as e:
+            create_error_dialog(e, self.tr('Inpaint Optimization Failed.'), 'InpaintFailed')
+            return False
+
+    def _inpaint_optimization_pipeline(self):
+        self.detect_counter = 0
+        self.ocr_counter = 0
+        self.translate_counter = 0
+        self.inpaint_counter = 0
+        self.decensor_counter = 0
+        pages_to_iterate = self._iter_pipeline_pages(skip_ignored=True)
+        self.inpaint_thread.num_process_pages = self.num_pages
+        LOGGER.info(f'Running inpaint optimization for {len(pages_to_iterate)} pages')
+
+        for imgname in pages_to_iterate:
+            if self.stop_requested:
+                LOGGER.info('Inpaint optimization stopped by user')
+                break
+            self._optimize_inpaint_page(imgname)
+            self.inpaint_counter += 1
+            self.imgtrans_proj.update_page_progress(imgname, RunStatus.FIN_INPAINT)
+            self.update_inpaint_progress.emit(self.inpaint_counter)
+
+        if self.stop_requested:
+            self.pipeline_stopped.emit()
 
     def _imgtrans_pipeline(self):
         self.detect_counter = 0
@@ -766,6 +867,8 @@ class ImgtransThread(QThread):
                     try:
                         inpainted = self.inpainter.inpaint(img, mask, blk_list)
                         self.imgtrans_proj.save_inpainted(imgname, inpainted)
+                        if cfg_module.enable_inpaint_optimization and not self.stop_requested:
+                            self._optimize_inpaint_page(imgname, inpainted)
                     except Exception as e:
                         create_error_dialog(e, self.tr('Inpainting Failed.'), 'InpaintFailed')
                     
@@ -904,6 +1007,8 @@ class ImgtransThread(QThread):
         return self.translate_counter == self.num_pages or not cfg_module.enable_translate
 
     def inpaint_finished(self) -> bool:
+        if self.inpaint_optimization_only:
+            return self.inpaint_counter == self.num_pages
         if self.imgtrans_proj is None or not cfg_module.enable_inpaint:
             return True
         return self.inpaint_counter == self.num_pages or not cfg_module.enable_inpaint
@@ -921,7 +1026,7 @@ class ImgtransThread(QThread):
         self.job = None
 
     def recent_finished_index(self, ref_counter: int) -> int:
-        if self.translation_only or self.decensor_only:
+        if self.translation_only or self.decensor_only or self.inpaint_optimization_only:
             process_idx = ref_counter - 1
             if hasattr(self, 'process_idx_to_page_idx') and process_idx in self.process_idx_to_page_idx:
                 return self.process_idx_to_page_idx[process_idx]
@@ -1203,6 +1308,38 @@ class ModuleManager(QObject):
         self.progress_msgbox.zero_progress()
         self.progress_msgbox.show()
         self.imgtrans_thread.runDecensorPipeline(self.imgtrans_proj, pages_to_process)
+
+    def runInpaintOptimizationPipeline(self, pages_to_process=None):
+        if self.imgtrans_proj.is_empty:
+            LOGGER.info('proj file is empty, nothing to optimize')
+            self.progress_msgbox.hide()
+            return
+        if self.textdetector is None or self.inpainter is None:
+            LOGGER.info('Inpaint optimization requires a loaded text detector and inpainter')
+            self.progress_msgbox.hide()
+            self.imgtrans_pipeline_finished.emit()
+            return
+        if len(self.imgtrans_proj.pipeline_pages(pages_to_process, skip_ignored=True)) == 0:
+            LOGGER.info('No pages to optimize after applying ignored page filters')
+            self.progress_msgbox.hide()
+            self.imgtrans_pipeline_finished.emit()
+            return
+        if self.anyPipelineThreadRunning():
+            LOGGER.warning('Stopping existing pipeline before starting inpaint optimization.')
+            self.forceStopImgtransPipeline(emit_finished=False)
+        self.last_finished_index = -1
+        self.pipeline_pages_to_process = pages_to_process
+        self.post_pipeline_merge_done = False
+        self.terminateRunningThread()
+
+        self.progress_msgbox.detect_bar.setVisible(False)
+        self.progress_msgbox.ocr_bar.setVisible(False)
+        self.progress_msgbox.translate_bar.setVisible(False)
+        self.progress_msgbox.inpaint_bar.setVisible(True)
+        self.progress_msgbox.decensor_bar.setVisible(False)
+        self.progress_msgbox.zero_progress()
+        self.progress_msgbox.show()
+        self.imgtrans_thread.runInpaintOptimizationPipeline(self.imgtrans_proj, pages_to_process)
     
     def stopImgtransPipeline(self):
         """停止图像翻译流程"""
@@ -1339,7 +1476,10 @@ class ModuleManager(QObject):
         self.progress_msgbox.updateInpaintProgress(progress)
         if ri != self.last_finished_index:
             self.last_finished_index = ri
-            self.page_trans_finished.emit(ri)
+            if self.imgtrans_thread.inpaint_optimization_only:
+                self.page_decensor_finished.emit(ri)
+            else:
+                self.page_trans_finished.emit(ri)
         if progress == 100:
             self.finishImgtransPipeline()
 
@@ -1371,6 +1511,8 @@ class ModuleManager(QObject):
     def proj_finished(self):
         if self.imgtrans_thread.decensor_only:
             return self.imgtrans_thread.decensor_finished()
+        if self.imgtrans_thread.inpaint_optimization_only:
+            return self.imgtrans_thread.inpaint_finished()
         if self.imgtrans_thread.translation_only or self.imgtrans_thread.review_only:
             return self.imgtrans_thread.translate_finished()
         if self.imgtrans_thread.detect_finished() \
@@ -1477,6 +1619,7 @@ class ModuleManager(QObject):
             self.imgtrans_thread.translation_only = False
             self.imgtrans_thread.review_only = False
             self.imgtrans_thread.decensor_only = False
+            self.imgtrans_thread.inpaint_optimization_only = False
     
     def on_imgtrans_thread_stopped(self):
         """线程完成时确保关闭进度对话框"""
@@ -1486,6 +1629,7 @@ class ModuleManager(QObject):
         self.imgtrans_thread.translation_only = False
         self.imgtrans_thread.review_only = False
         self.imgtrans_thread.decensor_only = False
+        self.imgtrans_thread.inpaint_optimization_only = False
 
     def setTranslator(self, translator: str = None):
         if translator is None:

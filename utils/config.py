@@ -29,6 +29,7 @@ class ModuleConfig(Config):
     enable_ocr: bool = True
     enable_translate: bool = True
     enable_inpaint: bool = True
+    enable_inpaint_optimization: bool = False
     # 是否在 OCR 后进行字体检测（默认不启用）
     ocr_font_detect: bool = False
     textdetector_params: Dict = field(default_factory=lambda: dict())
@@ -44,6 +45,7 @@ class ModuleConfig(Config):
     post_merge_max_horizontal_gap: int = 30
     post_merge_min_width_overlap_ratio: int = 50
     post_merge_min_height_overlap_ratio: int = 50
+    pronoun_review_after_translation: bool = False
 
     check_need_inpaint: bool = True
     load_model_on_demand: bool = False
@@ -89,6 +91,8 @@ class ModuleConfig(Config):
             return self.enable_translate
         elif idx == 3:
             return self.enable_inpaint
+        elif idx == 4:
+            return self.enable_inpaint_optimization
         else:
             raise Exception(f'not supported stage idx: {idx}')
         

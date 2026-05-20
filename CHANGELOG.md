@@ -46,6 +46,9 @@
 - Glossary export/import documentation for using a scanned current-manga glossary as a reference glossary in another chapter or manga.
 - Live Runtime Manager pip install output so package downloads, CUDA wheel installs, and progress bars are visible during launch and repair.
 - First-start/update-only dependency checks for the launcher, with an explicit force-check environment override.
+- Optional second-pass inpaint optimization that re-detects leftover text on inpainted pages and repairs residual masks after normal inpainting.
+- Current-page and all-pages inpaint optimization actions, including a left-sidebar `Opt` button and Tools-menu entries.
+- Optional Settings switch for a post-translation pronoun/address review pass with LLM-capable translators.
 
 ### Changed
 
@@ -66,6 +69,8 @@
 - The optional `flux2-klein` inpainting model is skipped during automatic first-start model downloads and can be downloaded later from `Tools -> Model Downloads`.
 - Save image format and quality descriptions now appear only as hover text instead of visible labels.
 - Model Downloads now runs downloads from `Download Selected` and `Download All` in a non-modal background window so the main app remains usable.
+- `Gloss Scan Current Manga` remains available from the Run menu, while the dedicated sidebar Gloss Scan button was removed to reduce left-sidebar clutter.
+- Translation, glossary, Two-Step refinement, reflection, and review prompts now emphasize names, pronouns, gendered wording, speaker/addressee roles, singular/plural first person, and formal/informal address.
 
 ### Fixed
 
@@ -107,3 +112,4 @@
 - Bumped the fork runtime version string to `1.4.0-vibe.57`.
 - Bumped the fork runtime version string to `1.4.0-vibe.58`.
 - Bumped the fork runtime version string to `1.4.0-vibe.59`.
+- Bumped the fork runtime version string to `1.4.0-vibe.60`.
