@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.52`
+Fork release: `1.4.0-vibe.53`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -62,6 +62,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Added direct comic archive import for `.cbz`, `.cbr`, and `.zip` files from the Open menu, drag-and-drop, recent projects, and `--proj-dir`.
 - Added glossary import/export, reference-glossary support, and a translated-folder glossary template builder for reusing official terminology across chapters.
 - Added `Gloss Scan`, an OCR-only current-manga glossary builder available from the left sidebar and the Run menu. It detects text and runs OCR, then creates reusable glossary candidates without translation or inpainting.
+- Improved Blackwell/RTX 50xx runtime repair so CUDA PyTorch wheels are force-reinstalled from the cu128 index instead of reusing an already-satisfied CPU Torch package, and runtime package installs now stream live progress output.
 
 ## Features
 
@@ -149,7 +150,9 @@ reset.js
 test.js
 ```
 
-The launcher update flow tracks `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` on the `dev` branch. `update.js` now prints each Git and dependency-refresh step, streams Git/pip/uv output, and emits timed `still working` progress messages while longer update commands are running. The Windows batch launchers also create and reuse the same `env` virtual environment instead of the old bundled `ballontrans_pylibs_win` runtime. On first start, the launchers print the active setup step, stream pip/download output, and emit periodic `still working` progress messages while silent commands such as virtual-environment creation are running. Runtime setup uses `requirements.txt`; test-only packages belong in `requirements-test.txt` and are installed only by `test.js`.
+The launcher update flow tracks `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` on the `dev` branch. `update.js` now prints each Git and dependency-refresh step, streams Git/pip/uv output, and emits timed `still working` progress messages while longer update commands are running. The Windows batch launchers also create and reuse the same `env` virtual environment instead of the old bundled `ballontrans_pylibs_win` runtime. On first start, the launchers print the active setup step, stream pip/download output, and emit periodic `still working` progress messages while silent commands such as virtual-environment creation are running. Runtime Manager package installs inherit the terminal so pip download bars and wheel-install output stay visible. Runtime setup uses `requirements.txt`; test-only packages belong in `requirements-test.txt` and are installed only by `test.js`.
+
+For NVIDIA Blackwell/RTX 50xx systems, the auto profile uses the PyTorch cu128 wheel index. If the base requirements previously installed a CPU Torch wheel, run `python launch.py --runtime-profile nvidia_blackwell_cu128 --repair-runtime`; the repair path force-reinstalls `torch`, `torchvision`, and `torchaudio` from the CUDA index before the health check.
 
 ## OCR notes
 

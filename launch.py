@@ -8,7 +8,7 @@ import subprocess
 from platform import platform
 
 BRANCH = 'dev'
-VERSION = '1.4.0-vibe.52'
+VERSION = '1.4.0-vibe.53'
 FORK_REPO_URL = os.environ.get('BALLOONTRANS_UPDATE_REPO', 'https://github.com/CoSciBlog/BallonsTranslator-vibe.git')
 UPDATE_BRANCH = os.environ.get('BALLOONTRANS_UPDATE_BRANCH', BRANCH)
 BUILD_TOOL_REQUIREMENTS = ['wheel', 'setuptools==71.1.0']
@@ -385,9 +385,11 @@ def prepare_environment():
             rm_cmd.append("--no-auto-install")
         
         print("Running GPU-aware Runtime Manager...", flush=True)
+        print("Runtime setup may download large CUDA/PyTorch wheels. Progress output is shown below.", flush=True)
         rm_res = subprocess.run(rm_cmd)
         if rm_res.returncode != 0:
             print("Runtime Manager failed to initialize a stable environment. Exiting.", flush=True)
+            print("Try running again with --repair-runtime after driver changes, or inspect logs/runtime_check.log.", flush=True)
             sys.exit(1)
         req_updated = True
     except Exception as e:

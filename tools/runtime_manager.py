@@ -125,8 +125,19 @@ def fallback_compute_capability(gpu_name):
     return None
 
 
-def run_command(command, logger, cwd=ROOT, check=False):
+def run_command(command, logger, cwd=ROOT, check=False, live=False):
     logger.info("Running command: %s", " ".join(str(part) for part in command))
+    if live:
+        env = os.environ.copy()
+        env.setdefault("PYTHONUNBUFFERED", "1")
+        env.setdefault("PIP_PROGRESS_BAR", "on")
+        print("Running command: " + " ".join(str(part) for part in command), flush=True)
+        result = subprocess.run(command, cwd=str(cwd), env=env)
+        logger.info("Command finished with exit code %s", result.returncode)
+        if check and result.returncode != 0:
+            raise RuntimeError(f"Command failed with exit code {result.returncode}: {' '.join(command)}")
+        return result
+
     result = subprocess.run(command, cwd=str(cwd), capture_output=True, text=True)
     if result.stdout:
         logger.info("stdout:\n%s", result.stdout.rstrip())
@@ -138,7 +149,10 @@ def run_command(command, logger, cwd=ROOT, check=False):
 
 
 def run_pip(args, logger, check=True):
-    return run_command([sys.executable, "-m", "pip"] + args, logger, check=check)
+    pip_args = list(args)
+    if pip_args and pip_args[0] == "install" and "--progress-bar" not in pip_args:
+        pip_args[1:1] = ["--progress-bar", "on"]
+    return run_command([sys.executable, "-m", "pip"] + pip_args, logger, check=check, live=True)
 
 
 def query_nvidia_smi(query_fields):
@@ -291,14 +305,14 @@ def install_profile(profile):
     if profile == "nvidia_compat_cu118":
         run_pip(["install"] + COMPAT_CORE, install_logger)
         run_pip(
-            ["install", "--no-deps", "--index-url", "https://download.pytorch.org/whl/cu118"] + COMPAT_TORCH,
+            ["install", "--force-reinstall", "--no-deps", "--index-url", "https://download.pytorch.org/whl/cu118"] + COMPAT_TORCH,
             install_logger,
         )
         run_pip(["install", "--no-deps"] + COMPAT_HF, install_logger)
     elif profile == "nvidia_blackwell_cu128":
         run_pip(["install", "numpy", "opencv-python"], install_logger)
         run_pip(
-            ["install", "--no-deps", "--index-url", "https://download.pytorch.org/whl/cu128", "torch", "torchvision", "torchaudio"],
+            ["install", "--force-reinstall", "--no-deps", "--index-url", "https://download.pytorch.org/whl/cu128", "torch", "torchvision", "torchaudio"],
             install_logger,
         )
         run_pip(["install", "-r", str(REQ_DIR / "runtime-nvidia-blackwell-cu128.txt")], install_logger)
@@ -306,7 +320,7 @@ def install_profile(profile):
         install_logger.warning("CPU fallback selected. OCR, inpainting, and text detection can be slow.")
         run_pip(["install", "numpy", "opencv-python"], install_logger)
         run_pip(
-            ["install", "--no-deps", "--index-url", "https://download.pytorch.org/whl/cpu", "torch", "torchvision", "torchaudio"],
+            ["install", "--force-reinstall", "--no-deps", "--index-url", "https://download.pytorch.org/whl/cpu", "torch", "torchvision", "torchaudio"],
             install_logger,
         )
         run_pip(["install", "-r", str(REQ_DIR / "runtime-cpu.txt")], install_logger)
@@ -408,9 +422,10 @@ def health_check(profile):
 
     if profile == "nvidia_blackwell_cu128" and not status["ok"]:
         warning = (
-            "RTX 50xx erkannt. CUDA funktioniert möglicherweise, aber die aktuelle OCR/Transformers-Kombination "
-            "ist mit BallonsTranslator-vibe noch nicht stabil. Bitte alternatives OCR-Modul wählen oder "
-            "Compat-Profil auf RTX 3090 verwenden."
+            "RTX 50xx was detected, but the runtime health check did not pass. If CUDA is unavailable, "
+            "run the launcher again with --repair-runtime so the CUDA PyTorch wheel is force-reinstalled "
+            "from the cu128 index. If OCR/Transformers imports fail after that, choose a different OCR "
+            "module or use the compat profile on older NVIDIA hardware."
         )
         check_logger.error(warning)
         print(warning, flush=True)
