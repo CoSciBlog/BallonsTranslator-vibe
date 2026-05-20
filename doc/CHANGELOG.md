@@ -1,6 +1,18 @@
 # Changelogs
 
 ### 2026-05-20
+[v1.4.0-vibe.56] PDF comic import
+Added:
+1. Added direct `.pdf` comic import from the Open menu, drag-and-drop, recent projects, and `--proj-dir`.
+2. Added multi-PDF import from the Open menu and drag-and-drop, combining selected PDFs into one ordered image project.
+
+Changed:
+1. Documented PDF import support and the PyMuPDF runtime dependency.
+
+Version:
+1. Bumped the fork runtime version string to `1.4.0-vibe.56`.
+
+### 2026-05-20
 [v1.4.0-vibe.55] comic archive export
 Added:
 1. Added comic export for rendered result pages as `.cbz`, `.zip`, `.pdf`, and `.cbr` when a local RAR writer is installed.

@@ -34,7 +34,7 @@ from .misc import parse_stylesheet, set_html_family, QKEY
 from utils.config import ProgramConfig, pcfg, save_config, text_styles, save_text_styles, load_textstyle_from, FontFormat
 from utils.reinpaint import combine_inpaint_masks, mask_bounding_rect
 from utils.proj_imgtrans import ProjImgTrans
-from utils.archive_import import import_archive_to_project, is_archive_path
+from utils.archive_import import ArchiveImportError, import_archive_to_project, import_pdfs_to_project, is_archive_path
 from utils.archive_export import archive_export_filter, default_export_path, export_project
 from .canvas import Canvas
 from .configpanel import ConfigPanel
@@ -183,6 +183,7 @@ class MainWindow(mainwindow_cls):
         self.leftBar.globalSearchChecker.clicked.connect(self.on_set_gsearch_widget)
         self.leftBar.glossary_clicked.connect(self.show_project_glossary_window)
         self.leftBar.open_dir.connect(self.OpenProj)
+        self.leftBar.open_paths.connect(self.OpenProj)
         self.leftBar.open_json_proj.connect(self.openJsonProj)
         self.leftBar.save_proj.connect(self.manual_save)
         self.leftBar.export_doc.connect(self.on_export_doc)
@@ -513,7 +514,25 @@ class MainWindow(mainwindow_cls):
     def set_display_lang(self, lang: str):
         self.retranslateUI()
 
-    def OpenProj(self, proj_path: str):
+    def OpenProj(self, proj_path):
+        if isinstance(proj_path, (list, tuple)):
+            paths = [str(path) for path in proj_path if osp.exists(str(path))]
+            if not paths:
+                return
+            pdf_paths = [path for path in paths if Path(path).suffix.lower() == '.pdf']
+            if len(pdf_paths) == len(paths):
+                try:
+                    proj_path = import_pdfs_to_project(pdf_paths)
+                except Exception as e:
+                    create_error_dialog(e, self.tr('Failed to import PDFs'))
+                    return
+            else:
+                create_error_dialog(
+                    ArchiveImportError(self.tr('Multiple-file import currently supports PDF files only.')),
+                    self.tr('Failed to import selection')
+                )
+                return
+
         if osp.isfile(proj_path) and is_archive_path(proj_path):
             try:
                 proj_path = import_archive_to_project(proj_path)
@@ -588,7 +607,13 @@ class MainWindow(mainwindow_cls):
         except Exception as e:
             LOGGER.error(f"Failed to generate TIF thumbnails: {e}")
         
-    def dropOpenDir(self, directory: str):
+    def dropOpenDir(self, directory):
+        if isinstance(directory, (list, tuple)):
+            paths = [str(path) for path in directory if osp.exists(str(path))]
+            if paths:
+                self.leftBar.updateRecentProjList(paths)
+                self.OpenProj(paths)
+            return
         if isinstance(directory, str) and osp.exists(directory):
             self.leftBar.updateRecentProjList(directory)
             self.OpenProj(directory)

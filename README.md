@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README_EN.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.55`
+Fork release: `1.4.0-vibe.56`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -59,7 +59,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Added first-use local model downloads for backends that declare downloadable files, so optional models can be fetched when the selected backend is first loaded.
 - Cleaned up Save settings so image format and quality explanations stay in hover tooltips instead of visible labels, and wrapped long tooltip text for narrower screens.
 - Made the Model Downloads window explicitly non-modal so selected or all downloads continue in the background while the app remains usable.
-- Added direct comic archive import for `.cbz`, `.cbr`, and `.zip` files by extracting supported images into a normal project folder.
+- Added direct comic archive and PDF import for `.cbz`, `.cbr`, `.zip`, and `.pdf` files by extracting or rendering pages into a normal project folder.
 - Added comic export for `.cbz`, `.zip`, `.pdf`, and `.cbr` when a local RAR writer is installed.
 - Added glossary import/export, reference-glossary support, and a translated-folder glossary template builder for reusing official terminology across chapters.
 - Added `Gloss Scan`, an OCR-only current-manga glossary builder available from the left sidebar and the Run menu. It detects text and runs OCR, then creates reusable glossary candidates without translation or inpainting.
@@ -75,9 +75,10 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
   - machine translation
   - automatic typesetting based on the original balloon layout
 - Comic archive import and export:
-  - open `.cbz`, `.cbr`, or `.zip` files from the Open menu, drag-and-drop, or `--proj-dir`
-  - extracts pages into a regular image project folder next to the archive
-  - keeps natural page ordering for nested archive paths
+  - open `.cbz`, `.cbr`, `.zip`, or `.pdf` files from the Open menu, drag-and-drop, or `--proj-dir`
+  - import one or more PDF files from the Open menu or by dragging them onto the canvas
+  - extracts archive pages or renders PDF pages into a regular image project folder next to the source file
+  - keeps natural page ordering for nested archive paths and multi-PDF imports
   - exports rendered result pages as `.cbz`, `.zip`, `.pdf`, or `.cbr`
 - Interactive editing workflow:
   - rich text editing
@@ -116,9 +117,9 @@ Known limitations:
 
 ## Comic archive import and export
 
-Open `.cbz`, `.cbr`, or `.zip` files from `Open -> Open Comic Archive`, drag them onto the canvas, or pass them to `launch.py --proj-dir`. The importer extracts supported image pages into a normal project folder next to the archive, for example `Series.cbz` becomes `Series/`, then loads that folder through the existing project workflow.
+Open `.cbz`, `.cbr`, `.zip`, or `.pdf` files from `Open -> Open Comic Archive/PDF`, drag them onto the canvas, or pass a single source file to `launch.py --proj-dir`. The importer extracts supported image pages or renders PDF pages into a normal project folder next to the source file, for example `Series.cbz` or `Series.pdf` becomes `Series/`, then loads that folder through the existing project workflow. The file dialog and drag-and-drop also accept multiple PDFs in one import; those pages are combined into one ordered image project folder such as `Chapter 01_pdf_import/`.
 
-ZIP and CBZ archives are handled with Python's standard `zipfile` support. CBR archives require a local `7z`-compatible extractor on `PATH`; Pinokio's Windows environment provides `7z`. Nested archive folders are flattened into ordered page files such as `0001_page.png`, `0002_page.png`, and an `archive_import.json` file records the source archive and imported pages.
+ZIP and CBZ archives are handled with Python's standard `zipfile` support. CBR archives require a local `7z`-compatible extractor on `PATH`; Pinokio's Windows environment provides `7z`. PDF pages are rendered with PyMuPDF. Nested archive folders and PDF pages are flattened into ordered page files such as `0001_page.png`, `0002_page.png`, and an `archive_import.json` file records the source file or PDFs and imported pages.
 
 The importer only writes into the derived project folder. If that folder already contains image pages, it is reused instead of being overwritten.
 

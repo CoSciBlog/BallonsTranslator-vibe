@@ -15,7 +15,7 @@ from .io_utils import IMG_EXT
 from .logger import logger as LOGGER
 
 
-ARCHIVE_EXT = {'.zip', '.cbz', '.cbr'}
+ARCHIVE_EXT = {'.zip', '.cbz', '.cbr', '.pdf'}
 IMPORT_METADATA = 'archive_import.json'
 
 
@@ -28,7 +28,7 @@ def is_archive_path(path: str) -> bool:
 
 
 def archive_filter() -> str:
-    return 'Comic archives (*.cbz *.cbr *.zip)'
+    return 'Comic archives and PDFs (*.cbz *.cbr *.zip *.pdf)'
 
 
 def _safe_project_dir_name(name: str) -> str:
@@ -39,6 +39,11 @@ def _safe_project_dir_name(name: str) -> str:
 def archive_project_dir(archive_path: str) -> str:
     archive = Path(archive_path)
     return str(archive.with_name(_safe_project_dir_name(archive.stem)))
+
+
+def multi_pdf_project_dir(pdf_paths: List[str]) -> str:
+    first_pdf = Path(pdf_paths[0])
+    return str(first_pdf.with_name(_safe_project_dir_name(first_pdf.stem + '_pdf_import')))
 
 
 def _is_supported_image_name(name: str) -> bool:
@@ -83,6 +88,24 @@ def _write_metadata(dest_dir: str, archive_path: str, image_names: List[str]) ->
         'source_archive': osp.abspath(archive_path),
         'source_size': stat.st_size,
         'source_mtime': stat.st_mtime,
+        'image_count': len(image_names),
+        'images': image_names,
+    }
+    with open(osp.join(dest_dir, IMPORT_METADATA), 'w', encoding='utf8') as f:
+        json.dump(metadata, f, ensure_ascii=False, indent=2)
+
+
+def _write_multi_pdf_metadata(dest_dir: str, pdf_paths: List[str], image_names: List[str]) -> None:
+    sources = []
+    for pdf_path in pdf_paths:
+        stat = os.stat(pdf_path)
+        sources.append({
+            'source_pdf': osp.abspath(pdf_path),
+            'source_size': stat.st_size,
+            'source_mtime': stat.st_mtime,
+        })
+    metadata = {
+        'source_pdfs': sources,
         'image_count': len(image_names),
         'images': image_names,
     }
@@ -157,6 +180,85 @@ def _import_cbr_archive(archive_path: str, dest_dir: str) -> List[str]:
     return written
 
 
+def _render_pdf_pages(pdf_path: str, dest_dir: str, used_names: set, start_index: int) -> List[str]:
+    try:
+        import fitz
+    except ImportError as e:
+        raise ArchiveImportError(
+            'PDF import requires PyMuPDF. Run the launcher update/install step to install it.'
+        ) from e
+
+    written = []
+    document = fitz.open(pdf_path)
+    try:
+        if document.page_count == 0:
+            raise ArchiveImportError(f'PDF contains no pages: {pdf_path}')
+
+        zoom = 2.0
+        matrix = fitz.Matrix(zoom, zoom)
+        source_stem = Path(pdf_path).stem
+        for page_number in range(document.page_count):
+            page = document.load_page(page_number)
+            pixmap = page.get_pixmap(matrix=matrix, alpha=False)
+            source_name = f'{source_stem}_page_{page_number + 1:04d}.png'
+            image_name = _safe_image_name(start_index + len(written), source_name, used_names)
+            pixmap.save(osp.join(dest_dir, image_name))
+            written.append(image_name)
+    finally:
+        document.close()
+    return written
+
+
+def _import_pdf(pdf_path: str, dest_dir: str) -> List[str]:
+    return _render_pdf_pages(pdf_path, dest_dir, set(), 1)
+
+
+def _prepare_multi_pdf_destination(pdf_paths: List[str]) -> str:
+    dest_dir = multi_pdf_project_dir(pdf_paths)
+    if osp.isdir(dest_dir):
+        existing_imgs = [p for p in os.listdir(dest_dir) if _is_supported_image_name(p)]
+        if existing_imgs:
+            LOGGER.info(f'Using existing PDF import folder: {dest_dir}')
+            return dest_dir
+        if os.listdir(dest_dir):
+            raise ArchiveImportError(
+                f'Cannot import PDFs into non-empty folder without images: {dest_dir}'
+            )
+    else:
+        os.makedirs(dest_dir)
+    return dest_dir
+
+
+def import_pdfs_to_project(pdf_paths: List[str]) -> str:
+    if not pdf_paths:
+        raise ArchiveImportError('No PDF files selected.')
+    pdf_paths = natsorted(osp.abspath(path) for path in pdf_paths)
+    for pdf_path in pdf_paths:
+        if not osp.isfile(pdf_path):
+            raise ArchiveImportError(f'PDF file does not exist: {pdf_path}')
+        if Path(pdf_path).suffix.lower() != '.pdf':
+            raise ArchiveImportError(f'Unsupported PDF import selection: {pdf_path}')
+
+    if len(pdf_paths) == 1:
+        return import_archive_to_project(pdf_paths[0])
+
+    dest_dir = _prepare_multi_pdf_destination(pdf_paths)
+    if [p for p in os.listdir(dest_dir) if _is_supported_image_name(p)]:
+        return dest_dir
+
+    LOGGER.info(f'Importing {len(pdf_paths)} PDFs into {dest_dir}')
+    used_names = set()
+    image_names = []
+    for pdf_path in natsorted(pdf_paths):
+        image_names.extend(_render_pdf_pages(pdf_path, dest_dir, used_names, len(image_names) + 1))
+
+    if not image_names:
+        raise ArchiveImportError('Selected PDFs contain no renderable pages.')
+
+    _write_multi_pdf_metadata(dest_dir, pdf_paths, image_names)
+    return dest_dir
+
+
 def import_archive_to_project(archive_path: str) -> str:
     if not osp.isfile(archive_path):
         raise ArchiveImportError(f'Archive file does not exist: {archive_path}')
@@ -173,6 +275,8 @@ def import_archive_to_project(archive_path: str) -> str:
         image_names = _import_zip_archive(archive_path, dest_dir)
     elif ext == '.cbr':
         image_names = _import_cbr_archive(archive_path, dest_dir)
+    elif ext == '.pdf':
+        image_names = _import_pdf(archive_path, dest_dir)
     else:
         image_names = []
 

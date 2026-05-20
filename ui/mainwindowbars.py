@@ -62,6 +62,7 @@ class LeftBar(Widget):
     imgTransChecked = Signal()
     configChecked = Signal()
     open_dir = Signal(str)
+    open_paths = Signal(list)
     open_json_proj = Signal(str)
     save_proj = Signal()
     save_config = Signal()
@@ -99,7 +100,7 @@ class LeftBar(Widget):
         actionOpenFolder.triggered.connect(self.onOpenFolder)
         actionOpenFolder.setShortcut(QKeySequence.Open)
 
-        actionOpenArchive = QAction(self.tr("Open Comic Archive ... *.cbz *.cbr *.zip"), self)
+        actionOpenArchive = QAction(self.tr("Open Comic Archive/PDF ... *.cbz *.cbr *.zip *.pdf"), self)
         actionOpenArchive.triggered.connect(self.onOpenArchive)
 
         actionOpenProj = QAction(self.tr("Open Project ... *.json"), self)
@@ -329,14 +330,19 @@ class LeftBar(Widget):
 
     def onOpenArchive(self):
         dialog = QFileDialog()
-        archive_path = str(dialog.getOpenFileUrl(
+        urls = dialog.getOpenFileUrls(
             self.parent(),
-            self.tr('Open Comic Archive'),
+            self.tr('Open Comic Archive/PDF'),
             filter=archive_filter(),
-        )[0].toLocalFile())
-        if osp.exists(archive_path):
-            self.updateRecentProjList(archive_path)
-            self.open_dir.emit(archive_path)
+        )[0]
+        paths = [str(url.toLocalFile()) for url in urls if osp.exists(str(url.toLocalFile()))]
+        if not paths:
+            return
+        self.updateRecentProjList(paths)
+        if len(paths) == 1:
+            self.open_dir.emit(paths[0])
+        else:
+            self.open_paths.emit(paths)
 
     def stateCheckerChanged(self, checker_type: str):
         if checker_type == 'imgtrans':

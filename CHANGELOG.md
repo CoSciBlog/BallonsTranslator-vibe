@@ -4,6 +4,8 @@
 
 ### Added
 
+- Direct `.pdf` comic import from the Open menu, drag-and-drop, recent projects, and `--proj-dir`.
+- Multi-PDF import from the Open menu and drag-and-drop, combining selected PDFs into one ordered image project.
 - Direct `.cbz`, `.cbr`, and `.zip` comic archive import from the Open menu, drag-and-drop, recent projects, and `--proj-dir`.
 - Archive extraction into regular image project folders with natural page ordering and `archive_import.json` metadata.
 - Comic export for rendered result pages as `.cbz`, `.zip`, `.pdf`, and `.cbr` when a local RAR writer is installed.
@@ -95,3 +97,4 @@
 - Bumped the fork runtime version string to `1.4.0-vibe.53`.
 - Bumped the fork runtime version string to `1.4.0-vibe.54`.
 - Bumped the fork runtime version string to `1.4.0-vibe.55`.
+- Bumped the fork runtime version string to `1.4.0-vibe.56`.

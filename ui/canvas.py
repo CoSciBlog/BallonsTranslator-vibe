@@ -188,7 +188,7 @@ class Canvas(QGraphicsScene):
     projstate_unsaved = False
     proj_savestate_changed = Signal(bool)
     textstack_changed = Signal()
-    drop_open_folder = Signal(str)
+    drop_open_folder = Signal(object)
     context_menu_requested = Signal(QPoint, bool)
     incanvas_selection_changed = Signal()
     switch_text_item = Signal(int, QKeyEvent)
@@ -288,7 +288,7 @@ class Canvas(QGraphicsScene):
 
         self.clipboard_blks: List[TextBlock] = []
 
-        self.drop_folder: str = None
+        self.drop_folder = None
         self.block_selection_signal = False
         
         im_rect = QRectF(0, 0, C.SCREEN_W, C.SCREEN_H)
@@ -311,15 +311,14 @@ class Canvas(QGraphicsScene):
         self.drop_folder = None
         if e.mimeData().hasUrls():
             urls = e.mimeData().urls()
-            ufolder = None
+            drop_paths = []
             for url in urls:
                 furl = url.toLocalFile()
                 if os.path.isdir(furl) or is_archive_path(furl):
-                    ufolder = furl
-                    break
-            if ufolder is not None:
+                    drop_paths.append(furl)
+            if drop_paths:
                 e.acceptProposedAction()
-                self.drop_folder = ufolder
+                self.drop_folder = drop_paths[0] if len(drop_paths) == 1 else drop_paths
 
     def dropEvent(self, event) -> None:
         if self.drop_folder is not None:
