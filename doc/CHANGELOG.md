@@ -1,6 +1,19 @@
 # Changelogs
 
 ### 2026-05-20
+[v1.4.0-vibe.57] grouped source folder import
+Added:
+1. Added source-folder import from `Open -> Import Folder` and drag-and-drop for folders containing `.cbr`, `.cbz`, `.zip`, `.pdf`, and nested image files.
+2. Added recursive image-folder import that flattens subfolder images into an ordered image project while ignoring generated project output folders.
+3. Added sidebar page labels and tooltips that mark imported pages by source folder, archive, or PDF group.
+
+Changed:
+1. Multi-source imports now share the same collection importer for archives, PDFs, and image files.
+
+Version:
+1. Bumped the fork runtime version string to `1.4.0-vibe.57`.
+
+### 2026-05-20
 [v1.4.0-vibe.56] PDF comic import
 Added:
 1. Added direct `.pdf` comic import from the Open menu, drag-and-drop, recent projects, and `--proj-dir`.

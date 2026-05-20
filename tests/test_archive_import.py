@@ -12,7 +12,13 @@ sys.path.append(APP_ROOT)
 
 from PIL import Image
 
-from utils.archive_import import archive_project_dir, import_archive_to_project, import_pdfs_to_project, is_archive_path
+from utils.archive_import import (
+    archive_project_dir,
+    import_archive_to_project,
+    import_pdfs_to_project,
+    import_sources_to_project,
+    is_archive_path,
+)
 from utils.io_utils import find_all_imgs
 
 
@@ -27,6 +33,9 @@ class ArchiveImportTest(unittest.TestCase):
         with zipfile.ZipFile(path, "w") as archive:
             for name, data in members.items():
                 archive.writestr(name, data)
+
+    def _write_pdf(self, path, color=(255, 0, 0)):
+        Image.new("RGB", (8, 8), color).save(path, "PDF")
 
     def test_zip_archive_imports_images_as_project_folder(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -111,6 +120,55 @@ class ArchiveImportTest(unittest.TestCase):
                 find_all_imgs(project_dir, sort=True),
                 ["0001_Chapter 01_page_0001.png", "0002_Chapter 02_page_0001.png"],
             )
+
+    def test_folder_import_combines_archives_and_pdfs(self):
+        try:
+            import fitz  # noqa: F401
+        except ImportError:
+            self.skipTest("PyMuPDF is not installed")
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            source_dir = osp.join(tmpdir, "Sources")
+            os.makedirs(source_dir)
+            archive_path = osp.join(source_dir, "Book.cbz")
+            pdf_path = osp.join(source_dir, "Doc.pdf")
+            self._write_archive(archive_path, {"001.jpg": PNG_1X1})
+            self._write_pdf(pdf_path)
+
+            project_dir = import_sources_to_project([source_dir])
+
+            self.assertEqual(project_dir, osp.join(tmpdir, "Sources_import"))
+            self.assertEqual(
+                find_all_imgs(project_dir, sort=True),
+                ["0001_001.jpg", "0002_Doc_page_0001.png"],
+            )
+            with open(osp.join(project_dir, "archive_import.json"), "r", encoding="utf8") as f:
+                metadata = json.load(f)
+            self.assertEqual([group["name"] for group in metadata["image_groups"]], ["Book", "Doc"])
+            self.assertEqual([group["type"] for group in metadata["image_groups"]], ["archive", "pdf"])
+
+    def test_folder_import_flattens_nested_image_folders_with_groups(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            source_dir = osp.join(tmpdir, "Image Sources")
+            nested_dir = osp.join(source_dir, "chapter-a")
+            os.makedirs(nested_dir)
+            with open(osp.join(source_dir, "cover.png"), "wb") as f:
+                f.write(PNG_1X1)
+            with open(osp.join(nested_dir, "page2.png"), "wb") as f:
+                f.write(PNG_1X1)
+
+            project_dir = import_sources_to_project([source_dir])
+
+            self.assertEqual(project_dir, osp.join(tmpdir, "Image Sources_import"))
+            self.assertEqual(
+                find_all_imgs(project_dir, sort=True),
+                ["0001_cover.png", "0002_page2.png"],
+            )
+            with open(osp.join(project_dir, "archive_import.json"), "r", encoding="utf8") as f:
+                metadata = json.load(f)
+            self.assertEqual([group["name"] for group in metadata["image_groups"]], ["Image Sources", "Image Sources/chapter-a"])
+            self.assertEqual(metadata["image_groups"][0]["images"], ["0001_cover.png"])
+            self.assertEqual(metadata["image_groups"][1]["images"], ["0002_page2.png"])
 
     def test_archive_extension_detection(self):
         self.assertTrue(is_archive_path("comic.cbz"))

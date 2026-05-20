@@ -20,7 +20,7 @@ from .page_search_widget import PageSearchWidget
 from utils import shared as C
 from utils.config import pcfg
 from utils.proj_imgtrans import ProjImgTrans
-from utils.archive_import import is_archive_path
+from utils.archive_import import has_importable_sources, is_archive_path, is_importable_file_path
 
 CANVAS_SCALE_MAX = 10.0
 CANVAS_SCALE_MIN = 0.01
@@ -314,7 +314,11 @@ class Canvas(QGraphicsScene):
             drop_paths = []
             for url in urls:
                 furl = url.toLocalFile()
-                if os.path.isdir(furl) or is_archive_path(furl):
+                if os.path.isdir(furl) and has_importable_sources(furl):
+                    drop_paths.append(furl)
+                elif os.path.isdir(furl):
+                    drop_paths.append(furl)
+                elif is_archive_path(furl) or is_importable_file_path(furl):
                     drop_paths.append(furl)
             if drop_paths:
                 e.acceptProposedAction()

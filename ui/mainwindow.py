@@ -1,4 +1,5 @@
 import os.path as osp
+import json
 import os, re, traceback, sys
 import numpy as np
 from typing import List, Union
@@ -34,8 +35,18 @@ from .misc import parse_stylesheet, set_html_family, QKEY
 from utils.config import ProgramConfig, pcfg, save_config, text_styles, save_text_styles, load_textstyle_from, FontFormat
 from utils.reinpaint import combine_inpaint_masks, mask_bounding_rect
 from utils.proj_imgtrans import ProjImgTrans
-from utils.archive_import import ArchiveImportError, import_archive_to_project, import_pdfs_to_project, is_archive_path
+from utils.archive_import import (
+    ARCHIVE_EXT,
+    IMPORT_METADATA,
+    ArchiveImportError,
+    collect_importable_sources,
+    has_importable_sources,
+    import_archive_to_project,
+    import_sources_to_project,
+    is_archive_path,
+)
 from utils.archive_export import archive_export_filter, default_export_path, export_project
+from utils.io_utils import IMG_EXT
 from .canvas import Canvas
 from .configpanel import ConfigPanel
 from .module_manager import ModuleManager
@@ -64,6 +75,8 @@ class PageListView(QListWidget):
     delete_page_data = Signal(str)
     PAGE_NAME_ROLE = Qt.ItemDataRole.UserRole
     PAGE_IGNORED_ROLE = Qt.ItemDataRole.UserRole + 1
+    PAGE_GROUP_ROLE = Qt.ItemDataRole.UserRole + 2
+    PAGE_SOURCE_TYPE_ROLE = Qt.ItemDataRole.UserRole + 3
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -514,23 +527,40 @@ class MainWindow(mainwindow_cls):
     def set_display_lang(self, lang: str):
         self.retranslateUI()
 
+    def _project_json_path_for_dir(self, directory: str) -> str:
+        return osp.join(directory, osp.basename(osp.normpath(directory)) + '.json')
+
+    def _looks_like_existing_project_dir(self, directory: str) -> bool:
+        return (
+            osp.exists(self._project_json_path_for_dir(directory))
+            or osp.exists(osp.join(directory, IMPORT_METADATA))
+        )
+
+    def _should_import_dropped_directory(self, directory: str) -> bool:
+        if not osp.isdir(directory) or self._looks_like_existing_project_dir(directory):
+            return False
+        sources = collect_importable_sources([directory], include_images=True)
+        if not sources:
+            return False
+
+        for source in sources:
+            ext = Path(source).suffix.lower()
+            if ext in ARCHIVE_EXT:
+                return True
+            if ext in IMG_EXT and osp.dirname(source) != osp.abspath(directory):
+                return True
+        return False
+
     def OpenProj(self, proj_path):
         if isinstance(proj_path, (list, tuple)):
             paths = [str(path) for path in proj_path if osp.exists(str(path))]
             if not paths:
                 return
-            pdf_paths = [path for path in paths if Path(path).suffix.lower() == '.pdf']
-            if len(pdf_paths) == len(paths):
-                try:
-                    proj_path = import_pdfs_to_project(pdf_paths)
-                except Exception as e:
-                    create_error_dialog(e, self.tr('Failed to import PDFs'))
-                    return
-            else:
-                create_error_dialog(
-                    ArchiveImportError(self.tr('Multiple-file import currently supports PDF files only.')),
-                    self.tr('Failed to import selection')
-                )
+            try:
+                proj_path = import_sources_to_project(paths, include_images=True)
+                self.leftBar.updateRecentProjList(proj_path)
+            except Exception as e:
+                create_error_dialog(e, self.tr('Failed to import selected sources'))
                 return
 
         if osp.isfile(proj_path) and is_archive_path(proj_path):
@@ -538,6 +568,19 @@ class MainWindow(mainwindow_cls):
                 proj_path = import_archive_to_project(proj_path)
             except Exception as e:
                 create_error_dialog(e, self.tr('Failed to import archive ') + proj_path)
+                return
+        elif osp.isfile(proj_path) and Path(proj_path).suffix.lower() in IMG_EXT:
+            try:
+                proj_path = import_sources_to_project([proj_path], include_images=True)
+            except Exception as e:
+                create_error_dialog(e, self.tr('Failed to import image ') + proj_path)
+                return
+        elif osp.isdir(proj_path) and self._should_import_dropped_directory(proj_path):
+            try:
+                proj_path = import_sources_to_project([proj_path], include_images=True)
+                self.leftBar.updateRecentProjList(proj_path)
+            except Exception as e:
+                create_error_dialog(e, self.tr('Failed to import folder ') + proj_path)
                 return
         if osp.isdir(proj_path):
             self.openDir(proj_path)
@@ -616,7 +659,12 @@ class MainWindow(mainwindow_cls):
             return
         if isinstance(directory, str) and osp.exists(directory):
             self.leftBar.updateRecentProjList(directory)
-            self.OpenProj(directory)
+            if osp.isfile(directory) and has_importable_sources(directory, include_images=True):
+                self.OpenProj([directory])
+            elif osp.isdir(directory) and self._should_import_dropped_directory(directory):
+                self.OpenProj([directory])
+            else:
+                self.OpenProj(directory)
 
     def openJsonProj(self, json_path: str):
         try:
@@ -636,27 +684,80 @@ class MainWindow(mainwindow_cls):
     def updatePageList(self):
         if self.pageList.count() != 0:
             self.pageList.clear()
+        page_groups = self._load_page_import_groups()
         for imgname in self.imgtrans_proj.pages:
             img_path = osp.join(self.imgtrans_proj.directory, imgname)
-            lstitem = QListWidgetItem(QIcon(img_path), imgname)
+            group_info = page_groups.get(imgname, {})
+            display_name = self._page_display_name(imgname, group_info)
+            lstitem = QListWidgetItem(QIcon(img_path), display_name)
             lstitem.setData(PageListView.PAGE_NAME_ROLE, imgname)
+            lstitem.setData(PageListView.PAGE_GROUP_ROLE, group_info.get('name', ''))
+            lstitem.setData(PageListView.PAGE_SOURCE_TYPE_ROLE, group_info.get('type', ''))
             self.apply_page_list_item_state(lstitem, imgname)
             self.pageList.addItem(lstitem)
             if imgname == self.imgtrans_proj.current_img:
                 self.pageList.setCurrentItem(lstitem)
 
+    def _load_page_import_groups(self) -> dict:
+        project_dir = getattr(self.imgtrans_proj, 'directory', '')
+        metadata_path = osp.join(project_dir, IMPORT_METADATA)
+        if not osp.exists(metadata_path):
+            return {}
+        try:
+            with open(metadata_path, 'r', encoding='utf8') as f:
+                metadata = json.load(f)
+        except Exception as e:
+            LOGGER.warning(f'Failed to read import metadata {metadata_path}: {e}')
+            return {}
+
+        page_groups = {}
+        for group in metadata.get('image_groups', []) or []:
+            if not isinstance(group, dict):
+                continue
+            group_name = group.get('name', '')
+            group_type = group.get('type', '')
+            source = group.get('source', '')
+            for image_name in group.get('images', []) or []:
+                if isinstance(image_name, str):
+                    page_groups[image_name] = {
+                        'name': group_name,
+                        'type': group_type,
+                        'source': source,
+                    }
+        return page_groups
+
+    def _page_display_name(self, imgname: str, group_info: dict) -> str:
+        group = group_info.get('name') if group_info else ''
+        if not group:
+            return imgname
+        return f'{group} / {Path(imgname).name}'
+
     def apply_page_list_item_state(self, item: QListWidgetItem, imgname: str):
         ignored = self.imgtrans_proj.is_page_ignored(imgname)
+        group = item.data(PageListView.PAGE_GROUP_ROLE) or ''
+        source_type = item.data(PageListView.PAGE_SOURCE_TYPE_ROLE) or ''
         item.setData(PageListView.PAGE_IGNORED_ROLE, ignored)
         font = item.font()
         font.setItalic(ignored)
+        font.setBold(bool(group))
         item.setFont(font)
+        tooltip = self.tr('Page preview')
+        if group:
+            source_label = source_type.upper() if source_type else self.tr('source')
+            tooltip = self.tr('Imported from {source_type}: {group}\nPage: {page}').format(
+                source_type=source_label,
+                group=group,
+                page=imgname,
+            )
         if ignored:
             item.setBackground(QBrush(QColor(255, 214, 92, 72)))
-            item.setToolTip(self.tr('Ignored in pipeline runs: text detection, OCR, translation, and inpainting are skipped for this page.'))
+            item.setToolTip(
+                tooltip + '\n' +
+                self.tr('Ignored in pipeline runs: text detection, OCR, translation, and inpainting are skipped for this page.')
+            )
         else:
             item.setBackground(QBrush())
-            item.setToolTip(self.tr('Page preview'))
+            item.setToolTip(tooltip)
 
     def refresh_page_list_item(self, imgname: str):
         for ii in range(self.pageList.count()):
@@ -980,7 +1081,8 @@ class MainWindow(mainwindow_cls):
         if item is not None:
             if self.save_on_page_changed:
                 self.conditional_save()
-            self.imgtrans_proj.set_current_img(item.text())
+            page_name = item.data(PageListView.PAGE_NAME_ROLE) or item.text()
+            self.imgtrans_proj.set_current_img(page_name)
             self.canvas.clear_undostack(update_saved_step=True)
             self.canvas.updateCanvas()
             self.st_manager.updateSceneTextitems()

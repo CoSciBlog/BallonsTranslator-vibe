@@ -102,6 +102,8 @@ class LeftBar(Widget):
 
         actionOpenArchive = QAction(self.tr("Open Comic Archive/PDF ... *.cbz *.cbr *.zip *.pdf"), self)
         actionOpenArchive.triggered.connect(self.onOpenArchive)
+        actionImportFolder = QAction(self.tr("Import Folder ... archives, PDFs, and images"), self)
+        actionImportFolder.triggered.connect(self.onImportFolder)
 
         actionOpenProj = QAction(self.tr("Open Project ... *.json"), self)
         actionOpenProj.triggered.connect(self.onOpenProj)
@@ -133,7 +135,7 @@ class LeftBar(Widget):
         self.recentMenu = QMenu(self.tr("Open Recent"), self)
         
         openMenu = QMenu(self)
-        openMenu.addActions([actionOpenFolder, actionOpenArchive, actionOpenProj])
+        openMenu.addActions([actionOpenFolder, actionOpenArchive, actionImportFolder, actionOpenProj])
         openMenu.addMenu(self.recentMenu)
         openMenu.addSeparator()
         openMenu.addActions([
@@ -343,6 +345,22 @@ class LeftBar(Widget):
             self.open_dir.emit(paths[0])
         else:
             self.open_paths.emit(paths)
+
+    def onImportFolder(self):
+        d = None
+        if len(self.recent_proj_list) > 0:
+            for projp in self.recent_proj_list:
+                if not osp.isdir(projp):
+                    projp = osp.dirname(projp)
+                if osp.exists(projp):
+                    d = projp
+                    break
+
+        dialog = QFileDialog()
+        folder_path = str(dialog.getExistingDirectory(self, self.tr("Import Folder"), d))
+        if osp.exists(folder_path):
+            self.updateRecentProjList(folder_path)
+            self.open_paths.emit([folder_path])
 
     def stateCheckerChanged(self, checker_type: str):
         if checker_type == 'imgtrans':
