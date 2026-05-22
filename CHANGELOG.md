@@ -53,6 +53,8 @@
 
 ### Changed
 
+- Settings checkbox descriptions now wrap beside the checkbox instead of using unwrapped checkbox captions, preventing long General and DL Module option text from extending beyond the window.
+- Shortened visible Settings descriptions for Auto layout, custom fonts, Censor Restoration debug masks, Post-merge, Upscaling, pronoun review, and DL Module memory controls while keeping detailed hover text available.
 - Automatic first-start model downloads now also skip optional `aot`, PaddleOCR-VL Manga, native PaddleOCR, OneOCR, and Stariver OCR entries. Backends with known downloadable files remain available through `Tools -> Model Downloads`; native PaddleOCR downloads on first use, OneOCR requires manually supplied local files, and Stariver OCR is API-only.
 - Existing translation, OCR, and inpainting workflows are unchanged.
 - Review now uses character and honorific glossary entries as guidance.
@@ -118,3 +120,4 @@
 - Bumped the fork runtime version string to `1.4.0-vibe.60`.
 - Bumped the fork runtime version string to `1.4.0-vibe.61`.
 - Bumped the fork runtime version string to `1.4.0-vibe.62`.
+- Bumped the fork runtime version string to `1.4.0-vibe.63`.

@@ -8,7 +8,7 @@ import subprocess
 from platform import platform
 
 BRANCH = 'dev'
-VERSION = '1.4.0-vibe.62'
+VERSION = '1.4.0-vibe.63'
 FORK_REPO_URL = os.environ.get('BALLOONTRANS_UPDATE_REPO', 'https://github.com/CoSciBlog/BallonsTranslator-vibe.git')
 UPDATE_BRANCH = os.environ.get('BALLOONTRANS_UPDATE_BRANCH', BRANCH)
 BUILD_TOOL_REQUIREMENTS = ['wheel', 'setuptools==71.1.0']

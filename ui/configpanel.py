@@ -91,6 +91,7 @@ class ConfigTextLabel(QLabel):
         self.setFont(font)
         self.setTextInteractionFlags(Qt.TextInteractionFlag.TextBrowserInteraction)
         self.setOpenExternalLinks(True)
+        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
 
     def setActiveBackground(self):
         self.setStyleSheet("background-color:rgba(30, 147, 229, 51);")
@@ -162,17 +163,28 @@ def combobox_with_label(sel: List[str], name: str, discription: str = None, vert
 def checkbox_with_label(name: str, discription: str = None, target_block: QWidget = None):
     checkbox = QCheckBox()
     if discription is not None:
-        font = checkbox.font()
-        font.setPointSizeF(CONFIG_FONTSIZE_CONTENT * 0.8)
-        checkbox.setFont(font)
-        checkbox.setText(discription)
-        checkbox.setToolTip(wrap_tooltip(discription))
+        tooltip = wrap_tooltip(discription)
+        checkbox.setToolTip(tooltip)
+        checkbox.setAccessibleName(name)
+        checkbox.setAccessibleDescription(discription)
+        description_label = ConfigTextLabel(discription, CONFIG_FONTSIZE_CONTENT - 2)
+        description_label.setWordWrap(True)
+        description_label.setToolTip(tooltip)
+        description_label.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        row = QWidget()
+        row_layout = QHBoxLayout(row)
+        row_layout.setContentsMargins(0, 0, 0, 0)
+        row_layout.setSpacing(6)
+        row_layout.addWidget(checkbox, 0, Qt.AlignmentFlag.AlignTop)
+        row_layout.addWidget(description_label, 1)
+        widget = row
         vertical_layout = True
     else:
+        widget = checkbox
         vertical_layout = False
 
     if target_block is None:
-        sublock = ConfigSubBlock(checkbox, name, vertical_layout=vertical_layout)
+        sublock = ConfigSubBlock(widget, name, vertical_layout=vertical_layout)
         if vertical_layout is False:
             sublock.layout().addItem(QSpacerItem(0, 0, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding))
         target_block = sublock
@@ -439,14 +451,14 @@ class ConfigPanel(Widget):
             TableItem(label_saladict, CONFIG_FONTSIZE_TABLE),
         ])
         
-        self.load_model_checker, msublock = checkbox_with_label(self.tr('Load models on demand'), discription=self.tr('Load models only when a step needs them. This lowers idle RAM/VRAM use, but the first run or first module switch is slower because models must be loaded on demand.'))
+        self.load_model_checker, msublock = checkbox_with_label(self.tr('Load models on demand'), discription=self.tr('Loads models only when needed. Saves idle RAM/VRAM; first use or module switch takes longer.'))
         self.load_model_checker.stateChanged.connect(self.on_load_model_changed)
         dlConfigPanel.vlayout.addWidget(msublock)
-        self.empty_runcache_checker, msublock = checkbox_with_label(self.tr('Empty cache after RUN'), discription=self.tr('Release framework caches after each RUN. This can prevent memory pressure on long sessions, but repeated runs may become slower because GPU/CPU caches must warm up again.'))
+        self.empty_runcache_checker, msublock = checkbox_with_label(self.tr('Empty cache after RUN'), discription=self.tr('Releases framework caches after each RUN. Helps long sessions; repeated runs may need warm-up again.'))
         dlConfigPanel.vlayout.addWidget(msublock)
         self.empty_runcache_checker.stateChanged.connect(self.on_runcache_changed)
         self.unload_model_btn = QPushButton(parent=self)
-        self.unload_model_btn.setFixedWidth(500)
+        self.unload_model_btn.setMaximumWidth(500)
         self.unload_model_btn.setText(self.tr('Unload All Models'))
         self.unload_model_btn.setToolTip(self.tr('Immediately unload loaded detection, OCR, inpaint, and translation models from memory. This frees RAM/VRAM now, but the next run is slower while models are loaded again.'))
         self.unload_model_btn.clicked.connect(self.unload_models)
@@ -472,7 +484,7 @@ class ConfigPanel(Widget):
         generalConfigPanel.addTextLabel(label_upscaling)
         self.upscale_before_detection_checker, _ = generalConfigPanel.addCheckBox(
             self.tr('Upscale pages before detection'),
-            discription=self.tr('Create a high-resolution working copy before text detection. This can improve OCR and mask quality, but it makes detection, OCR, inpainting, export, and disk writes slower and uses more RAM/VRAM.'))
+            discription=self.tr('Creates a high-resolution working copy before detection. Can improve OCR and masks; uses more RAM/VRAM and slows later steps.'))
         self.upscale_before_detection_checker.stateChanged.connect(self.on_upscale_before_detection_changed)
         upscale_factor_tip = self.tr('Resolution multiplier for pages that pass the size limits. Higher values can improve small text recognition, but each step runs slower and uses more memory. Example: 2.0 for 2x.')
         upscale_max_edge_tip = self.tr('Maximum long-edge resolution after upscaling. Lower limits keep runs faster and lighter; higher limits preserve more detail but slow down later processing.')
@@ -506,11 +518,11 @@ class ConfigPanel(Widget):
         generalConfigPanel.addTextLabel(label_post_merge)
         self.post_merge_checker, _ = generalConfigPanel.addCheckBox(
             self.tr('Merge nearby text boxes after pipeline'),
-            discription=self.tr('After translation, merge nearby text boxes using the Region Merge Tool rules. This adds a small post-processing step, usually slower by a little, but can reduce manual cleanup and overlapping rendered text.'))
+            discription=self.tr('Merges nearby boxes after translation using Region Merge Tool rules. Can reduce cleanup; adds a short post-processing pass.'))
         self.post_merge_checker.stateChanged.connect(self.on_post_merge_changed)
         self.pronoun_review_checker, _ = generalConfigPanel.addCheckBox(
             self.tr('Review pronouns after translation'),
-            discription=self.tr('After each LLM-capable translation page, run an additional review pass focused on pronouns, speaker/addressee references, gendered wording, and formal/informal address. This improves consistency but adds extra LLM requests.'))
+            discription=self.tr('Runs an extra LLM review for pronouns, speaker/addressee references, gendered wording, and formality. Adds LLM requests.'))
         self.pronoun_review_checker.stateChanged.connect(self.on_pronoun_review_changed)
         self.post_merge_mode_combobox, _ = generalConfigPanel.addCombobox(
             [
@@ -550,7 +562,7 @@ class ConfigPanel(Widget):
         decensor_mode_tip = self.tr('Mask detector used by Censor Restoration / Decensor Inpaint. Auto combines supported detectors and is slower than a single mode, but usually needs less manual retrying.')
         decensor_dilate_tip = self.tr('Pixels added around detected censor regions before inpainting. Higher values repair more surrounding edge artifacts, but larger masks make inpainting slower.')
         decensor_min_area_tip = self.tr('Minimum detected region size relative to the page area. Increasing it ignores small false positives and can speed up restoration by reducing unnecessary masks.')
-        decensor_debug_tip = self.tr('Save Censor Restoration input, candidate masks, overlays, and a detection report under debug/censor_restoration. This helps troubleshooting but slows runs slightly due to extra disk writes.')
+        decensor_debug_tip = self.tr('Saves input, candidate masks, overlays, and a report under debug/censor_restoration. Useful for troubleshooting; writes extra files.')
         self.decensor_mask_mode_combobox = ConfigComboBox(scrollWidget=generalConfigPanel)
         self.decensor_mask_mode_combobox.addItems([
             self.tr('Auto'),
@@ -742,7 +754,7 @@ class ConfigPanel(Widget):
         global_fntfmt_layout.addItem(QSpacerItem(0, 0, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding), 0, 2)
 
         self.let_autolayout_checker, sublock = generalConfigPanel.addCheckBox(self.tr('Auto layout'), 
-                discription=self.tr('Split translation into multiple lines according to the extracted balloon region. This adds layout work and can be slightly slower, but usually reduces manual line-break edits.'))
+                discription=self.tr('Splits translations to fit the detected balloon. Usually reduces manual line breaks; may add a little layout time.'))
 
         self.let_autolayout_checker.stateChanged.connect(self.on_autolayout_changed)
         self.let_uppercase_checker, _ = generalConfigPanel.addCheckBox(
@@ -757,7 +769,7 @@ class ConfigPanel(Widget):
 
         self.let_show_only_custom_fonts, sublock = generalConfigPanel.addCheckBox(
             self.tr("Show only custom fonts"),
-            discription=self.tr('Limit font pickers to fonts from the project fonts folder. Font lists become easier to scan and may open faster when many system fonts are installed.'))
+            discription=self.tr('Shows only fonts from the project fonts folder. Easier to scan and faster with many installed system fonts.'))
         self.let_show_only_custom_fonts.stateChanged.connect(self.on_show_only_custom_fonts)
 
         generalConfigPanel.addTextLabel(label_save)

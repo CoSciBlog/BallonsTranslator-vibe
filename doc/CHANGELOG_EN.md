@@ -1,5 +1,15 @@
 # Changelogs
 
+### 2026-05-22
+[v1.4.0-vibe.63] settings checkbox wrapping
+Changed:
+1. Rendered Settings checkbox descriptions as wrapping text beside the checkbox instead of unwrapped checkbox captions.
+2. Shortened the visible descriptions for General and DL Module options that previously extended beyond the Settings window.
+3. Updated all Qt translation source files and recompiled the `.qm` translation files.
+
+Version:
+1. Bumped the fork runtime version string to `1.4.0-vibe.63`.
+
 ### 2026-05-20
 [v1.4.0-vibe.59] startup without project fix
 Fixed:

@@ -200,8 +200,8 @@
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="435" />
-        <source>Load models only when a step needs them. This lowers idle RAM/VRAM use, but the first run or first module switch is slower because models must be loaded on demand.</source>
-        <translation type="unfinished" />
+        <source>Loads models only when needed. Saves idle RAM/VRAM; first use or module switch takes longer.</source>
+        <translation>必要な時だけモデルを読み込みます。待機中の RAM/VRAM を節約しますが、初回使用やモジュール切替は遅くなります。</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="438" />
@@ -210,8 +210,8 @@
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="438" />
-        <source>Release framework caches after each RUN. This can prevent memory pressure on long sessions, but repeated runs may become slower because GPU/CPU caches must warm up again.</source>
-        <translation type="unfinished" />
+        <source>Releases framework caches after each RUN. Helps long sessions; repeated runs may need warm-up again.</source>
+        <translation>各 RUN 後にフレームワークのキャッシュを解放します。長時間セッションに有効ですが、連続実行では再ウォームアップが必要になる場合があります。</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="443" />
@@ -240,8 +240,8 @@
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="468" />
-        <source>Create a high-resolution working copy before text detection. This can improve OCR and mask quality, but it makes detection, OCR, inpainting, export, and disk writes slower and uses more RAM/VRAM.</source>
-        <translation type="unfinished" />
+        <source>Creates a high-resolution working copy before detection. Can improve OCR and masks; uses more RAM/VRAM and slows later steps.</source>
+        <translation>検出前に高解像度の作業コピーを作成します。OCR とマスク品質を改善できますが、RAM/VRAM 使用量が増え後続処理が遅くなります。</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="470" />
@@ -307,8 +307,8 @@
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="502" />
-        <source>After translation, merge nearby text boxes using the Region Merge Tool rules. This adds a small post-processing step, usually slower by a little, but can reduce manual cleanup and overlapping rendered text.</source>
-        <translation type="unfinished" />
+        <source>Merges nearby boxes after translation using Region Merge Tool rules. Can reduce cleanup; adds a short post-processing pass.</source>
+        <translation>翻訳後、Region Merge Tool のルールで近いボックスを結合します。手直しを減らせますが、短い後処理が追加されます。</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="506" />
@@ -397,8 +397,8 @@
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="542" />
-        <source>Save Censor Restoration input, candidate masks, overlays, and a detection report under debug/censor_restoration. This helps troubleshooting but slows runs slightly due to extra disk writes.</source>
-        <translation type="unfinished" />
+        <source>Saves input, candidate masks, overlays, and a report under debug/censor_restoration. Useful for troubleshooting; writes extra files.</source>
+        <translation>入力、候補マスク、オーバーレイ、レポートを debug/censor_restoration に保存します。トラブルシュートに便利ですが、追加ファイルを書き込みます。</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="545" />
@@ -639,8 +639,8 @@
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="734" />
-        <source>Split translation into multiple lines according to the extracted balloon region. This adds layout work and can be slightly slower, but usually reduces manual line-break edits.</source>
-        <translation type="unfinished" />
+        <source>Splits translations to fit the detected balloon. Usually reduces manual line breaks; may add a little layout time.</source>
+        <translation>検出した吹き出しに合うよう翻訳を分割します。手動改行を減らせますが、少しレイアウト時間が増える場合があります。</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="738" />
@@ -669,8 +669,8 @@
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="749" />
-        <source>Limit font pickers to fonts from the project fonts folder. Font lists become easier to scan and may open faster when many system fonts are installed.</source>
-        <translation type="unfinished" />
+        <source>Shows only fonts from the project fonts folder. Easier to scan and faster with many installed system fonts.</source>
+        <translation>プロジェクトの fonts フォルダー内のフォントだけを表示します。探しやすく、システムフォントが多い環境では高速です。</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="753" />
@@ -981,6 +981,11 @@
     <message>
         <source>Show mini menu when selecting text.</source>
         <translation type="vanished">テキスト選択時にミニメニューを表示します。</translation>
+    </message>
+
+    <message>
+        <source>Runs an extra LLM review for pronouns, speaker/addressee references, gendered wording, and formality. Adds LLM requests.</source>
+        <translation>代名詞、話者/相手の参照、性別表現、敬体/常体を確認する追加 LLM レビューを実行します。LLM リクエストが増えます。</translation>
     </message>
 </context><context>
     <name>DrawingPanel</name>

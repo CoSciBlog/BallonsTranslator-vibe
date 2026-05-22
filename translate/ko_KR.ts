@@ -216,8 +216,8 @@
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="435" />
-        <source>Load models only when a step needs them. This lowers idle RAM/VRAM use, but the first run or first module switch is slower because models must be loaded on demand.</source>
-        <translation type="unfinished" />
+        <source>Loads models only when needed. Saves idle RAM/VRAM; first use or module switch takes longer.</source>
+        <translation>필요할 때만 모델을 로드합니다. 유휴 RAM/VRAM을 절약하지만 첫 사용이나 모듈 전환은 더 오래 걸립니다.</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="438" />
@@ -226,8 +226,8 @@
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="438" />
-        <source>Release framework caches after each RUN. This can prevent memory pressure on long sessions, but repeated runs may become slower because GPU/CPU caches must warm up again.</source>
-        <translation type="unfinished" />
+        <source>Releases framework caches after each RUN. Helps long sessions; repeated runs may need warm-up again.</source>
+        <translation>각 RUN 후 프레임워크 캐시를 해제합니다. 긴 세션에 도움이 되지만 반복 실행 시 다시 예열이 필요할 수 있습니다.</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="443" />
@@ -256,8 +256,8 @@
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="468" />
-        <source>Create a high-resolution working copy before text detection. This can improve OCR and mask quality, but it makes detection, OCR, inpainting, export, and disk writes slower and uses more RAM/VRAM.</source>
-        <translation type="unfinished" />
+        <source>Creates a high-resolution working copy before detection. Can improve OCR and masks; uses more RAM/VRAM and slows later steps.</source>
+        <translation>감지 전에 고해상도 작업 사본을 만듭니다. OCR과 마스크 품질을 개선할 수 있지만 RAM/VRAM을 더 사용하고 이후 단계가 느려집니다.</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="470" />
@@ -323,8 +323,8 @@
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="502" />
-        <source>After translation, merge nearby text boxes using the Region Merge Tool rules. This adds a small post-processing step, usually slower by a little, but can reduce manual cleanup and overlapping rendered text.</source>
-        <translation type="unfinished" />
+        <source>Merges nearby boxes after translation using Region Merge Tool rules. Can reduce cleanup; adds a short post-processing pass.</source>
+        <translation>번역 후 Region Merge Tool 규칙으로 가까운 박스를 병합합니다. 수동 정리를 줄일 수 있지만 짧은 후처리가 추가됩니다.</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="506" />
@@ -413,8 +413,8 @@
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="542" />
-        <source>Save Censor Restoration input, candidate masks, overlays, and a detection report under debug/censor_restoration. This helps troubleshooting but slows runs slightly due to extra disk writes.</source>
-        <translation type="unfinished" />
+        <source>Saves input, candidate masks, overlays, and a report under debug/censor_restoration. Useful for troubleshooting; writes extra files.</source>
+        <translation>입력, 후보 마스크, 오버레이, 보고서를 debug/censor_restoration에 저장합니다. 문제 해결에 유용하지만 추가 파일을 씁니다.</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="545" />
@@ -655,8 +655,8 @@
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="734" />
-        <source>Split translation into multiple lines according to the extracted balloon region. This adds layout work and can be slightly slower, but usually reduces manual line-break edits.</source>
-        <translation type="unfinished" />
+        <source>Splits translations to fit the detected balloon. Usually reduces manual line breaks; may add a little layout time.</source>
+        <translation>감지된 말풍선에 맞게 번역을 나눕니다. 보통 수동 줄바꿈을 줄이지만 약간의 레이아웃 시간이 추가될 수 있습니다.</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="738" />
@@ -685,8 +685,8 @@
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="749" />
-        <source>Limit font pickers to fonts from the project fonts folder. Font lists become easier to scan and may open faster when many system fonts are installed.</source>
-        <translation type="unfinished" />
+        <source>Shows only fonts from the project fonts folder. Easier to scan and faster with many installed system fonts.</source>
+        <translation>프로젝트 fonts 폴더의 글꼴만 표시합니다. 살펴보기 쉽고 시스템 글꼴이 많을 때 더 빠릅니다.</translation>
     </message>
     <message>
         <location filename="..\ui\configpanel.py" line="753" />
@@ -1001,6 +1001,11 @@
     <message>
         <source>Adjust font size adaptively if it is set to "decide by program."</source>
         <translation type="vanished">"프로그램이 결정"으로 설정된 경우 글꼴 크기를 적응형으로 조정</translation>
+    </message>
+
+    <message>
+        <source>Runs an extra LLM review for pronouns, speaker/addressee references, gendered wording, and formality. Adds LLM requests.</source>
+        <translation>대명사, 화자/청자 참조, 성별 표현, 격식을 확인하는 추가 LLM 검토를 실행합니다. LLM 요청이 추가됩니다.</translation>
     </message>
 </context><context>
     <name>DrawingPanel</name>

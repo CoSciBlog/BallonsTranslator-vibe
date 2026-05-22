@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.62`
+Fork release: `1.4.0-vibe.63`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -68,6 +68,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Improved Blackwell/RTX 50xx runtime repair so CUDA PyTorch wheels are force-reinstalled from the cu128 index instead of reusing an already-satisfied CPU Torch package, and runtime package installs now stream live progress output.
 - Normal starts now skip dependency and Runtime Manager checks after the first successful runtime setup. Checks run again on first start, `--update`, explicit `--repair-runtime`, or when `BALLOONTRANS_FORCE_RUNTIME_CHECK=1` is set.
 - Added global Search/Replace sidebar actions to remove translation line breaks from the current page or from every page in the project.
+- Wrapped long Settings checkbox descriptions so General and DL Module options no longer extend beyond the window or create horizontal scrolling.
 
 ## Features
 
@@ -212,6 +213,8 @@ The General settings page includes `Prevent mouse wheel changes on input fields`
 Settings hover text now calls out runtime impact only when an option affects processing. Upscaling, larger masks, debug output, extra LLM context, retries, reflection, glossary extraction, high-quality encoders, cache behavior, batching, GPU selection, provider latency, API rate limits, reasoning, JSON retries, VRAM unloading, output limits, and skipped upscaling can affect speed, memory, disk use, API tokens, quality, stability, or visual matching.
 
 UI-only settings such as preset import/export, keyboard shortcuts, mouse-wheel protection, startup reopening, and display filters now use neutral descriptions without performance claims. Detector, OCR, Inpainter, and Translator parameter hints use only the descriptions provided by each module.
+
+Long checkbox descriptions in Settings are rendered as wrapping text beside the checkbox instead of as unwrapped checkbox captions. This keeps options such as Auto layout, custom fonts, Censor Restoration debug masks, Post-merge, Upscaling, and DL Module cache controls inside the visible Settings pane.
 
 ## Source language labels
 
