@@ -15,6 +15,7 @@ from .textedit_area import TransPairWidget, SourceTextEdit
 from .io_thread import ThreadBase
 from utils import shared as C
 from utils.proj_imgtrans import ProjImgTrans
+from utils.text_cleanup import remove_translation_linebreaks
 
 SEARCHRST_FONTSIZE = 10.3
 
@@ -340,11 +341,17 @@ class GlobalSearchWidget(Widget):
         self.replace_btn.clicked.connect(self.on_replace)
         self.replace_rerender_btn = NoBorderPushBtn(self.tr('Replace All and Re-render all pages'))
         self.replace_rerender_btn.clicked.connect(self.on_replace_rerender)
+        self.remove_current_linebreaks_btn = NoBorderPushBtn(self.tr('Remove line breaks (page)'))
+        self.remove_current_linebreaks_btn.clicked.connect(self.on_remove_current_translation_linebreaks)
+        self.remove_all_linebreaks_btn = NoBorderPushBtn(self.tr('Remove line breaks (all pages)'))
+        self.remove_all_linebreaks_btn.clicked.connect(self.on_remove_all_translation_linebreaks)
         self.replace_thread = GlobalReplaceThead()
 
         sp = self.replace_rerender_btn.sizePolicy()
         sp.setHorizontalPolicy(QSizePolicy.Policy.Expanding)
         self.replace_rerender_btn.setSizePolicy(sp)
+        self.remove_current_linebreaks_btn.setSizePolicy(sp)
+        self.remove_all_linebreaks_btn.setSizePolicy(sp)
 
         hlayout_bar1_0 = QHBoxLayout()
         hlayout_bar1_0.addWidget(self.search_editor)
@@ -375,6 +382,8 @@ class GlobalSearchWidget(Widget):
         vlayout.addWidget(self.search_tree)
         vlayout.addWidget(self.replace_btn)
         vlayout.addWidget(self.replace_rerender_btn)
+        vlayout.addWidget(self.remove_current_linebreaks_btn)
+        vlayout.addWidget(self.remove_all_linebreaks_btn)
         vlayout.setStretchFactor(self.search_tree, 10)
         vlayout.setSpacing(7)
 
@@ -539,6 +548,97 @@ class GlobalSearchWidget(Widget):
             # 新增：确保最后一页的界面刷新不会卡顿
             QApplication.processEvents()
         # 20260418 优化全部替换并渲染全部文件界面卡顿问题 end
+
+    def _set_linebreak_result_text(self, changed_count: int):
+        self.search_tree.clearPages()
+        self.counter_sum = 0
+        if changed_count > 0:
+            self.result_label.setText(
+                self.tr('Removed line breaks from {count} translation(s).').format(count=changed_count)
+            )
+        else:
+            self.result_label.setText(self.tr('No translation line breaks found.'))
+
+    def _remove_current_page_translation_linebreaks(self) -> int:
+        pagename = self.imgtrans_proj.current_img if self.imgtrans_proj else ''
+        if not pagename or pagename not in self.imgtrans_proj.pages:
+            return 0
+
+        changed_count = 0
+        for idx, item in enumerate(self.textblk_item_list):
+            original = item.toPlainText()
+            cleaned = remove_translation_linebreaks(original)
+            if cleaned == original:
+                continue
+
+            item.setPlainText(cleaned)
+            if idx < len(self.pairwidget_list):
+                self.pairwidget_list[idx].e_trans.setPlainText(cleaned)
+            if idx < len(self.imgtrans_proj.pages[pagename]):
+                blk = self.imgtrans_proj.pages[pagename][idx]
+                blk.translation = cleaned
+                blk.rich_text = ''
+            changed_count += 1
+        return changed_count
+
+    def on_remove_current_translation_linebreaks(self):
+        if self.imgtrans_proj is None or self.imgtrans_proj.is_empty:
+            return
+
+        msg = QMessageBox()
+        msg.setText(self.tr('Remove all line breaks from translations on the current page?'))
+        msg.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        if msg.exec_() != QMessageBox.StandardButton.Yes:
+            return
+
+        self.req_update_pagetext.emit()
+        changed_count = self._remove_current_page_translation_linebreaks()
+        if changed_count > 0:
+            current_img = self.imgtrans_proj.current_img
+            self.page_set = {current_img}
+            self.req_move_page.emit(current_img, True)
+        self._set_linebreak_result_text(changed_count)
+
+    def on_remove_all_translation_linebreaks(self):
+        if self.imgtrans_proj is None or self.imgtrans_proj.is_empty:
+            return
+
+        msg = QMessageBox()
+        msg.setText(self.tr('Remove all line breaks from translations on all pages? It can\'t be undone.'))
+        msg.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        if msg.exec_() != QMessageBox.StandardButton.Yes:
+            return
+
+        self.req_update_pagetext.emit()
+        page_names = list(self.imgtrans_proj.pages.keys())
+        if not page_names:
+            self._set_linebreak_result_text(0)
+            return
+
+        self.page_set = set()
+        self.num_pages = len(page_names)
+        self.fin_page_counter = 0
+        changed_count = 0
+        self.progress_bar.updateTaskProgress(0)
+        self.progress_bar.show()
+        QApplication.processEvents()
+
+        for page_index, pagename in enumerate(page_names):
+            self.req_move_page.emit(pagename, False)
+            QApplication.processEvents()
+            page_changed_count = self._remove_current_page_translation_linebreaks()
+            if page_changed_count > 0:
+                self.page_set.add(pagename)
+                changed_count += page_changed_count
+            self.progress_bar.updateTaskProgress(int((page_index + 1) / len(page_names) * 100))
+
+        current_img = self.imgtrans_proj.current_img
+        if current_img in self.page_set:
+            self.req_move_page.emit(current_img, True)
+            QApplication.processEvents()
+
+        self.progress_bar.hide()
+        self._set_linebreak_result_text(changed_count)
 
     def sizeHint(self) -> QSize:
         size = super().sizeHint()
