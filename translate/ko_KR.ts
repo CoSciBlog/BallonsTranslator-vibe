@@ -1007,6 +1007,14 @@
         <source>Runs an extra LLM review for pronouns, speaker/addressee references, gendered wording, and formality. Adds LLM requests.</source>
         <translation>대명사, 화자/청자 참조, 성별 표현, 격식을 확인하는 추가 LLM 검토를 실행합니다. LLM 요청이 추가됩니다.</translation>
     </message>
+    <message>
+        <source>Auto layout without stored line breaks</source>
+        <translation>저장된 줄바꿈 없는 자동 레이아웃</translation>
+    </message>
+    <message>
+        <source>Optimizes text boxes for the detected balloon but keeps translations as single-line text by removing inserted line breaks.</source>
+        <translation>감지된 말풍선에 맞게 텍스트 박스를 최적화하지만 삽입된 줄바꿈을 제거해 번역을 한 줄 텍스트로 유지합니다.</translation>
+    </message>
 </context><context>
     <name>DrawingPanel</name>
     <message>
@@ -1200,6 +1208,34 @@
         <location filename="..\ui\global_search_widget.py" line="487" />
         <source>Replace all occurrences re-render all pages? It can't be undone.</source>
         <translation>모든 페이지에 바꾸기 후 재렌더링 하시겠습니까? 되돌릴 수 없습니다.</translation>
+    </message>
+    <message>
+        <source>Replace + Re-render</source>
+        <translation>바꾸기 + 다시 렌더링</translation>
+    </message>
+    <message>
+        <source>Replace all current search results.</source>
+        <translation>현재 검색 결과를 모두 바꿉니다.</translation>
+    </message>
+    <message>
+        <source>Replace all current search results and re-render all affected pages.</source>
+        <translation>현재 검색 결과를 모두 바꾸고 영향받은 페이지를 다시 렌더링합니다.</translation>
+    </message>
+    <message>
+        <source>Remove line breaks: page</source>
+        <translation>줄바꿈 제거: 페이지</translation>
+    </message>
+    <message>
+        <source>Remove line breaks from translations on the current page.</source>
+        <translation>현재 페이지의 번역에서 줄바꿈을 제거합니다.</translation>
+    </message>
+    <message>
+        <source>Remove line breaks: all</source>
+        <translation>줄바꿈 제거: 모두</translation>
+    </message>
+    <message>
+        <source>Remove line breaks from translations on all pages.</source>
+        <translation>모든 페이지의 번역에서 줄바꿈을 제거합니다.</translation>
     </message>
 </context><context>
     <name>GlossaryWindow</name>
@@ -1570,6 +1606,10 @@
     <message>
         <source>RUN</source>
         <translation type="vanished">실행</translation>
+    </message>
+    <message>
+        <source>Pages: show or hide the project page list (Ctrl+Shift+P).</source>
+        <translation>페이지: 프로젝트 페이지 목록을 표시하거나 숨깁니다(Ctrl+Shift+P).</translation>
     </message>
 </context><context>
     <name>MainWindow</name>

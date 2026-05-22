@@ -987,6 +987,14 @@
         <source>Runs an extra LLM review for pronouns, speaker/addressee references, gendered wording, and formality. Adds LLM requests.</source>
         <translation>Ejecuta una revisión LLM extra para pronombres, referencias hablante/destinatario, lenguaje con género y formalidad. Agrega solicitudes LLM.</translation>
     </message>
+    <message>
+        <source>Auto layout without stored line breaks</source>
+        <translation>Auto layout sin saltos de linea guardados</translation>
+    </message>
+    <message>
+        <source>Optimizes text boxes for the detected balloon but keeps translations as single-line text by removing inserted line breaks.</source>
+        <translation>Optimiza los cuadros de texto para el globo detectado, pero mantiene las traducciones como texto de una sola linea eliminando los saltos insertados.</translation>
+    </message>
 </context><context>
     <name>DrawingPanel</name>
     <message>
@@ -1176,6 +1184,34 @@
         <location filename="..\ui\global_search_widget.py" line="487" />
         <source>Replace all occurrences re-render all pages? It can't be undone.</source>
         <translation>¿Sustituir todas las ocurrencias y volver a renderizar todas las páginas? No se puede deshacer.</translation>
+    </message>
+    <message>
+        <source>Replace + Re-render</source>
+        <translation>Reemplazar + renderizar</translation>
+    </message>
+    <message>
+        <source>Replace all current search results.</source>
+        <translation>Reemplaza todos los resultados de busqueda actuales.</translation>
+    </message>
+    <message>
+        <source>Replace all current search results and re-render all affected pages.</source>
+        <translation>Reemplaza todos los resultados actuales y vuelve a renderizar las paginas afectadas.</translation>
+    </message>
+    <message>
+        <source>Remove line breaks: page</source>
+        <translation>Quitar saltos: pagina</translation>
+    </message>
+    <message>
+        <source>Remove line breaks from translations on the current page.</source>
+        <translation>Quita saltos de linea de las traducciones en la pagina actual.</translation>
+    </message>
+    <message>
+        <source>Remove line breaks: all</source>
+        <translation>Quitar saltos: todo</translation>
+    </message>
+    <message>
+        <source>Remove line breaks from translations on all pages.</source>
+        <translation>Quita saltos de linea de las traducciones en todas las paginas.</translation>
     </message>
 </context><context>
     <name>GlossaryWindow</name>
@@ -1522,6 +1558,10 @@
     <message>
         <source>RUN</source>
         <translation type="vanished">RUN</translation>
+    </message>
+    <message>
+        <source>Pages: show or hide the project page list (Ctrl+Shift+P).</source>
+        <translation>Paginas: muestra u oculta la lista de paginas del proyecto (Ctrl+Mayus+P).</translation>
     </message>
 </context><context>
     <name>MainWindow</name>

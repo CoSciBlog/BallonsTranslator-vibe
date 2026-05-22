@@ -50,11 +50,15 @@
 - Optional second-pass inpaint optimization that re-detects leftover text on inpainted pages and repairs residual masks after normal inpainting.
 - Current-page and all-pages inpaint optimization actions, including a left-sidebar `Opt` button and Tools-menu entries.
 - Optional Settings switch for a post-translation pronoun/address review pass with LLM-capable translators.
+- Optional Auto layout mode that keeps the optimized text box sizing but removes inserted translation line breaks from stored text.
+- `Ctrl+Shift+P` shortcut for showing or hiding the page list.
+- Full language hover text and wider popups for compact language selectors.
 
 ### Changed
 
 - Settings checkbox descriptions now wrap beside the checkbox instead of using unwrapped checkbox captions, preventing long General and DL Module option text from extending beyond the window.
 - Shortened visible Settings descriptions for Auto layout, custom fonts, Censor Restoration debug masks, Post-merge, Upscaling, pronoun review, and DL Module memory controls while keeping detailed hover text available.
+- Search/Replace sidebar actions now use shorter visible labels with detailed tooltips so the sidebar keeps a stable width.
 - Automatic first-start model downloads now also skip optional `aot`, PaddleOCR-VL Manga, native PaddleOCR, OneOCR, and Stariver OCR entries. Backends with known downloadable files remain available through `Tools -> Model Downloads`; native PaddleOCR downloads on first use, OneOCR requires manually supplied local files, and Stariver OCR is API-only.
 - Existing translation, OCR, and inpainting workflows are unchanged.
 - Review now uses character and honorific glossary entries as guidance.
@@ -80,6 +84,7 @@
 ### Fixed
 
 - Fixed startup with no project open after grouped import metadata support was added.
+- Kept Auto layout disabled text boxes from collapsing to very narrow detected text-line widths by preserving a wider balloon-based text box.
 - Improved Two-Step Translator LLM refinement handling for empty, partial, and malformed JSON responses.
 - Added strict LLM refinement retry before falling back to first-step drafts.
 - Added safe ID-based partial merge for usable LLM refinement outputs.
@@ -121,3 +126,4 @@
 - Bumped the fork runtime version string to `1.4.0-vibe.61`.
 - Bumped the fork runtime version string to `1.4.0-vibe.62`.
 - Bumped the fork runtime version string to `1.4.0-vibe.63`.
+- Bumped the fork runtime version string to `1.4.0-vibe.64`.

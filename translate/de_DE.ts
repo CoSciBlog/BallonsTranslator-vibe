@@ -987,6 +987,14 @@
         <source>Runs an extra LLM review for pronouns, speaker/addressee references, gendered wording, and formality. Adds LLM requests.</source>
         <translation>Führt eine zusätzliche LLM-Prüfung für Pronomen, Sprecher-/Adressatenbezüge, geschlechtsspezifische Formulierungen und Förmlichkeit aus. Fügt LLM-Anfragen hinzu.</translation>
     </message>
+    <message>
+        <source>Auto layout without stored line breaks</source>
+        <translation>Automatisches Layout ohne gespeicherte Zeilenumbrueche</translation>
+    </message>
+    <message>
+        <source>Optimizes text boxes for the detected balloon but keeps translations as single-line text by removing inserted line breaks.</source>
+        <translation>Optimiert Textboxen fuer die erkannte Sprechblase, behaelt Uebersetzungen aber als einzeiligen Text, indem eingefuegte Zeilenumbrueche entfernt werden.</translation>
+    </message>
 </context><context>
     <name>DrawingPanel</name>
     <message>
@@ -1176,6 +1184,34 @@
         <location filename="..\ui\global_search_widget.py" line="487" />
         <source>Replace all occurrences re-render all pages? It can't be undone.</source>
         <translation>Alle Vorkommen ersetzen, alle Seiten neu rendern? Es kann nicht rückgängig gemacht werden.</translation>
+    </message>
+    <message>
+        <source>Replace + Re-render</source>
+        <translation>Ersetzen + neu rendern</translation>
+    </message>
+    <message>
+        <source>Replace all current search results.</source>
+        <translation>Ersetzt alle aktuellen Suchergebnisse.</translation>
+    </message>
+    <message>
+        <source>Replace all current search results and re-render all affected pages.</source>
+        <translation>Ersetzt alle aktuellen Suchergebnisse und rendert alle betroffenen Seiten neu.</translation>
+    </message>
+    <message>
+        <source>Remove line breaks: page</source>
+        <translation>Zeilenumbrueche entfernen: Seite</translation>
+    </message>
+    <message>
+        <source>Remove line breaks from translations on the current page.</source>
+        <translation>Entfernt Zeilenumbrueche aus Uebersetzungen auf der aktuellen Seite.</translation>
+    </message>
+    <message>
+        <source>Remove line breaks: all</source>
+        <translation>Zeilenumbrueche entfernen: alle</translation>
+    </message>
+    <message>
+        <source>Remove line breaks from translations on all pages.</source>
+        <translation>Entfernt Zeilenumbrueche aus Uebersetzungen auf allen Seiten.</translation>
     </message>
 </context><context>
     <name>GlossaryWindow</name>
@@ -1506,6 +1542,10 @@
         <location filename="..\ui\mainwindowbars.py" line="304" />
         <source>Import *.docx</source>
         <translation>*.docx importieren</translation>
+    </message>
+    <message>
+        <source>Pages: show or hide the project page list (Ctrl+Shift+P).</source>
+        <translation>Seiten: Projektseitenliste anzeigen oder ausblenden (Strg+Umschalt+P).</translation>
     </message>
 </context><context>
     <name>MainWindow</name>

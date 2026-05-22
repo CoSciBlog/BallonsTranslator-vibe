@@ -220,6 +220,8 @@ class MainWindow(mainwindow_cls):
         self.pageList.currentItemChanged.connect(self.pageListCurrentItemChanged)
 
         self.leftStackWidget = QStackedWidget(self)
+        self.leftStackWidget.setMinimumWidth(320)
+        self.leftStackWidget.setMaximumWidth(360)
         self.leftStackWidget.addWidget(self.pageList)
 
         self.global_search_widget = GlobalSearchWidget(self.leftStackWidget)
@@ -1200,6 +1202,8 @@ class MainWindow(mainwindow_cls):
 
         shortcutTextblock = QShortcut(QKeySequence("W"), self)
         shortcutTextblock.activated.connect(self.shortcutTextblock)
+        shortcutPageList = QShortcut(QKeySequence("Ctrl+Shift+P"), self)
+        shortcutPageList.activated.connect(self.shortcutPageList)
         shortcutZoomIn = QShortcut(QKeySequence.StandardKey.ZoomIn, self)
         shortcutZoomIn.activated.connect(self.canvas.gv.scale_up_signal)
         shortcutZoomOut = QShortcut(QKeySequence.StandardKey.ZoomOut, self)
@@ -1284,6 +1288,10 @@ class MainWindow(mainwindow_cls):
         if self.centralStackWidget.currentIndex() == 0:
             if self.bottomBar.texteditChecker.isChecked():
                 self.bottomBar.textblockChecker.click()
+
+    def shortcutPageList(self):
+        if self.centralStackWidget.currentIndex() == 0:
+            self.leftBar.showPageListLabel.click()
 
     def shortcutDrawboard(self):
         if self.centralStackWidget.currentIndex() == 0:

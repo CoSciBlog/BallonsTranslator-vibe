@@ -1007,6 +1007,14 @@
         <source>Runs an extra LLM review for pronouns, speaker/addressee references, gendered wording, and formality. Adds LLM requests.</source>
         <translation>Executa uma revisão LLM extra para pronomes, referências de falante/destinatário, linguagem de gênero e formalidade. Adiciona requisições LLM.</translation>
     </message>
+    <message>
+        <source>Auto layout without stored line breaks</source>
+        <translation>Layout automatico sem quebras de linha salvas</translation>
+    </message>
+    <message>
+        <source>Optimizes text boxes for the detected balloon but keeps translations as single-line text by removing inserted line breaks.</source>
+        <translation>Otimiza as caixas de texto para o balao detectado, mas mantem as traducoes em uma unica linha removendo quebras inseridas.</translation>
+    </message>
 </context><context>
     <name>DrawingPanel</name>
     <message>
@@ -1200,6 +1208,34 @@
         <location filename="..\ui\global_search_widget.py" line="487" />
         <source>Replace all occurrences re-render all pages? It can't be undone.</source>
         <translation>Substituir todas as ocorrências e renderizar novamente todas as páginas? Isso não pode ser desfeito.</translation>
+    </message>
+    <message>
+        <source>Replace + Re-render</source>
+        <translation>Substituir + renderizar</translation>
+    </message>
+    <message>
+        <source>Replace all current search results.</source>
+        <translation>Substitui todos os resultados de busca atuais.</translation>
+    </message>
+    <message>
+        <source>Replace all current search results and re-render all affected pages.</source>
+        <translation>Substitui todos os resultados atuais e renderiza novamente as paginas afetadas.</translation>
+    </message>
+    <message>
+        <source>Remove line breaks: page</source>
+        <translation>Remover quebras: pagina</translation>
+    </message>
+    <message>
+        <source>Remove line breaks from translations on the current page.</source>
+        <translation>Remove quebras de linha das traducoes na pagina atual.</translation>
+    </message>
+    <message>
+        <source>Remove line breaks: all</source>
+        <translation>Remover quebras: tudo</translation>
+    </message>
+    <message>
+        <source>Remove line breaks from translations on all pages.</source>
+        <translation>Remove quebras de linha das traducoes em todas as paginas.</translation>
     </message>
 </context><context>
     <name>GlossaryWindow</name>
@@ -1558,6 +1594,10 @@
     <message>
         <source>Global Search (Ctrl+G)</source>
         <translation type="vanished">Pesquisa Global (Ctrl+G)</translation>
+    </message>
+    <message>
+        <source>Pages: show or hide the project page list (Ctrl+Shift+P).</source>
+        <translation>Paginas: mostra ou oculta a lista de paginas do projeto (Ctrl+Shift+P).</translation>
     </message>
 </context><context>
     <name>MainWindow</name>

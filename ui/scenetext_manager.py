@@ -23,6 +23,7 @@ from utils.imgproc_utils import extract_ballon_region, rotate_polygons, get_conn
 from utils.text_processing import seg_text, is_cjk
 from utils.text_layout import layout_text
 from utils.textbox_merge import join_textbox_texts, union_xywh_rects
+from utils.text_cleanup import remove_translation_linebreaks
 
 
 class CreateItemCommand(QUndoCommand):
@@ -881,6 +882,8 @@ class SceneTextManager(QObject):
 
         if not text.strip():
             return
+        if pcfg.let_autolayout_no_linebreak_flag:
+            text = remove_translation_linebreaks(text)
 
         if mask is None:
             im_h, im_w = img.shape[:2]
@@ -898,6 +901,26 @@ class SceneTextManager(QObject):
             mask, ballon_area, mask_xyxy, region_rect = extract_ballon_region(img, bounding_rect, enlarge_ratio=enlarge_ratio, cal_region_rect=True)
         else:
             mask_xyxy = [bounding_rect[0], bounding_rect[1], bounding_rect[0]+bounding_rect[2], bounding_rect[1]+bounding_rect[3]]
+
+        if not pcfg.let_autolayout_flag:
+            ffmt = QFontMetricsF(blk_font)
+            text_lines = text.splitlines() or [text]
+            line_count = max(1, len(text_lines))
+            natural_w = max([ffmt.horizontalAdvance(line) for line in text_lines] or [0])
+            natural_h = ffmt.height()
+            min_w = max(old_br[2], bounding_rect[2], region_rect[2] * 0.75)
+            target_w = max(min_w, min(natural_w * 1.15, max(region_rect[2], min_w)))
+            target_h = max(old_br[3], min(region_rect[3], natural_h * line_count * 1.35))
+            if target_w > old_br[2] or target_h > old_br[3]:
+                cx = mask_xyxy[0] + region_rect[0] + region_rect[2] / 2
+                cy = mask_xyxy[1] + region_rect[1] + region_rect[3] / 2
+                rect = QRectF(cx - target_w / 2, cy - target_h / 2, target_w, target_h)
+                blkitem.setRect(rect, padding=True, repaint=False)
+            blkitem.setPlainText(text)
+            if len(self.pairwidget_list) > blkitem.idx:
+                self.pairwidget_list[blkitem.idx].e_trans.setPlainText(text)
+            blkitem.repaint_background()
+            return True
         
         words, delimiter = seg_text(text, pcfg.module.translate_target)
         if len(words) < 1:
@@ -1009,6 +1032,8 @@ class SceneTextManager(QObject):
         ffmt = QFontMetricsF(blk_font)
         maxw = max([ffmt.horizontalAdvance(t) for t in new_text.split('\n')])
         blkitem.set_size(maxw * 1.5, xywh[3], set_layout_maxsize=True)
+        if pcfg.let_autolayout_no_linebreak_flag:
+            new_text = remove_translation_linebreaks(new_text)
         blkitem.setPlainText(new_text)
         if len(self.pairwidget_list) > blkitem.idx:
             self.pairwidget_list[blkitem.idx].e_trans.setPlainText(new_text)

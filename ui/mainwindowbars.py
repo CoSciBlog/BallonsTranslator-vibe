@@ -80,7 +80,7 @@ class LeftBar(Widget):
         padding = (LEFTBAR_WIDTH - LEFTBTN_WIDTH) // 2
         self.setFixedWidth(LEFTBAR_WIDTH)
         self.showPageListLabel = ShowPageListChecker()
-        self.showPageListLabel.setToolTip(self.tr('Pages: show or hide the project page list.'))
+        self.showPageListLabel.setToolTip(self.tr('Pages: show or hide the project page list (Ctrl+Shift+P).'))
 
         self.globalSearchChecker = QCheckBox()
         self.globalSearchChecker.setObjectName('GlobalSearchChecker')
@@ -856,8 +856,12 @@ class TranslatorSelectionWidget(Widget):
         self.src_selector.clear()
         self.tgt_selector.clear()
         for lang in translator.supported_src_list:
-            self.src_selector.addItem(lang_display_label(lang), lang)
-        self.tgt_selector.addItems(translator.supported_tgt_list)
+            label = lang_display_label(lang)
+            self.src_selector.addItem(label, lang)
+            self.src_selector.setItemData(self.src_selector.count() - 1, label, Qt.ItemDataRole.ToolTipRole)
+        for lang in translator.supported_tgt_list:
+            self.tgt_selector.addItem(lang)
+            self.tgt_selector.setItemData(self.tgt_selector.count() - 1, lang_display_label(lang), Qt.ItemDataRole.ToolTipRole)
         self.selector.setCurrentText(translator.name)
         self.src_selector.setCurrentText(lang_display_label(translator.lang_source))
         self.tgt_selector.setCurrentText(translator.lang_target)

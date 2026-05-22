@@ -987,6 +987,14 @@
         <source>Runs an extra LLM review for pronouns, speaker/addressee references, gendered wording, and formality. Adds LLM requests.</source>
         <translation>Exécute une revue LLM supplémentaire pour les pronoms, références locuteur/destinataire, formulations genrées et niveau de formalité. Ajoute des requêtes LLM.</translation>
     </message>
+    <message>
+        <source>Auto layout without stored line breaks</source>
+        <translation>Mise en page auto sans retours a la ligne enregistres</translation>
+    </message>
+    <message>
+        <source>Optimizes text boxes for the detected balloon but keeps translations as single-line text by removing inserted line breaks.</source>
+        <translation>Optimise les zones de texte pour la bulle detectee, mais garde les traductions sur une seule ligne en supprimant les retours inseres.</translation>
+    </message>
 </context><context>
     <name>DrawingPanel</name>
     <message>
@@ -1176,6 +1184,34 @@
         <location filename="..\ui\global_search_widget.py" line="487" />
         <source>Replace all occurrences re-render all pages? It can't be undone.</source>
         <translation>Remplacer toutes les occurrences restituer toutes les pages ? Elle ne peut pas être annulée.</translation>
+    </message>
+    <message>
+        <source>Replace + Re-render</source>
+        <translation>Remplacer + re-rendu</translation>
+    </message>
+    <message>
+        <source>Replace all current search results.</source>
+        <translation>Remplace tous les resultats de recherche actuels.</translation>
+    </message>
+    <message>
+        <source>Replace all current search results and re-render all affected pages.</source>
+        <translation>Remplace tous les resultats actuels et relance le rendu des pages touchees.</translation>
+    </message>
+    <message>
+        <source>Remove line breaks: page</source>
+        <translation>Supprimer retours : page</translation>
+    </message>
+    <message>
+        <source>Remove line breaks from translations on the current page.</source>
+        <translation>Supprime les retours a la ligne des traductions de la page actuelle.</translation>
+    </message>
+    <message>
+        <source>Remove line breaks: all</source>
+        <translation>Supprimer retours : tout</translation>
+    </message>
+    <message>
+        <source>Remove line breaks from translations on all pages.</source>
+        <translation>Supprime les retours a la ligne des traductions sur toutes les pages.</translation>
     </message>
 </context><context>
     <name>GlossaryWindow</name>
@@ -1522,6 +1558,10 @@
     <message>
         <source>RUN</source>
         <translation type="vanished">EXÉCUTER</translation>
+    </message>
+    <message>
+        <source>Pages: show or hide the project page list (Ctrl+Shift+P).</source>
+        <translation>Pages : afficher ou masquer la liste des pages du projet (Ctrl+Maj+P).</translation>
     </message>
 </context><context>
     <name>MainWindow</name>

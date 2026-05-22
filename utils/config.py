@@ -147,6 +147,7 @@ class ProgramConfig(Config):
     let_writing_mode_flag: int = 0
     let_family_flag: int = 0
     let_autolayout_flag: bool = True
+    let_autolayout_no_linebreak_flag: bool = False
     let_uppercase_flag: bool = True
     let_show_only_custom_fonts_flag: bool = False
     let_textstyle_indep_flag: bool = False

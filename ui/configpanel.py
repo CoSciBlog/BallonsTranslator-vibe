@@ -757,6 +757,10 @@ class ConfigPanel(Widget):
                 discription=self.tr('Splits translations to fit the detected balloon. Usually reduces manual line breaks; may add a little layout time.'))
 
         self.let_autolayout_checker.stateChanged.connect(self.on_autolayout_changed)
+        self.let_autolayout_no_linebreak_checker, _ = generalConfigPanel.addCheckBox(
+            self.tr('Auto layout without stored line breaks'),
+            discription=self.tr('Optimizes text boxes for the detected balloon but keeps translations as single-line text by removing inserted line breaks.'))
+        self.let_autolayout_no_linebreak_checker.stateChanged.connect(self.on_autolayout_no_linebreak_changed)
         self.let_uppercase_checker, _ = generalConfigPanel.addCheckBox(
             self.tr('To uppercase'),
             discription=self.tr('Convert rendered translation text to uppercase.'))
@@ -991,6 +995,9 @@ class ConfigPanel(Widget):
     def on_autolayout_changed(self):
         pcfg.let_autolayout_flag = self.let_autolayout_checker.isChecked()
 
+    def on_autolayout_no_linebreak_changed(self):
+        pcfg.let_autolayout_no_linebreak_flag = self.let_autolayout_no_linebreak_checker.isChecked()
+
     def on_post_merge_changed(self):
         pcfg.module.post_merge_textboxes = self.post_merge_checker.isChecked()
 
@@ -1144,6 +1151,7 @@ class ConfigPanel(Widget):
         self.let_family_combox.setCurrentIndex(pcfg.let_family_flag)
         self.let_writing_mode_combox.setCurrentIndex(pcfg.let_writing_mode_flag)
         self.let_autolayout_checker.setChecked(pcfg.let_autolayout_flag)
+        self.let_autolayout_no_linebreak_checker.setChecked(pcfg.let_autolayout_no_linebreak_flag)
         self.post_merge_checker.setChecked(pcfg.module.post_merge_textboxes)
         self.pronoun_review_checker.setChecked(pcfg.module.pronoun_review_after_translation)
         post_merge_modes = ['VERTICAL', 'HORIZONTAL', 'VERTICAL_THEN_HORIZONTAL', 'HORIZONTAL_THEN_VERTICAL']

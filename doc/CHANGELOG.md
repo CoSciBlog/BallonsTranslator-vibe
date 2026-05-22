@@ -1,6 +1,20 @@
 # Changelogs
 
 ### 2026-05-22
+[v1.4.0-vibe.64] sidebar and auto layout polish
+Added:
+1. Added an Auto layout mode that optimizes text boxes while removing inserted translation line breaks from stored translation text.
+2. Added `Ctrl+Shift+P` for showing and hiding the page list.
+3. Added full language hover text and wider popups for compact source/target language selectors.
+
+Changed:
+1. Shortened Search/Replace sidebar button labels and moved details to tooltips so the sidebar no longer resizes around long actions.
+2. Improved disabled Auto layout behavior so rendered text boxes keep a wider balloon-based region instead of collapsing to narrow detected text lines.
+3. Updated all Qt translation source files and recompiled the `.qm` translation files.
+
+Version:
+1. Bumped the fork runtime version string to `1.4.0-vibe.64`.
+
 [v1.4.0-vibe.63] settings checkbox wrapping
 Changed:
 1. Rendered Settings checkbox descriptions as wrapping text beside the checkbox instead of unwrapped checkbox captions.

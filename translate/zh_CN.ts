@@ -1079,6 +1079,14 @@
         <source>Runs an extra LLM review for pronouns, speaker/addressee references, gendered wording, and formality. Adds LLM requests.</source>
         <translation>额外运行一次 LLM 审校，检查代词、说话者/对象指代、性别化措辞和正式程度。会增加 LLM 请求。</translation>
     </message>
+    <message>
+        <source>Auto layout without stored line breaks</source>
+        <translation>不保存换行的自动排版</translation>
+    </message>
+    <message>
+        <source>Optimizes text boxes for the detected balloon but keeps translations as single-line text by removing inserted line breaks.</source>
+        <translation>根据检测到的气泡优化文本框，但会移除插入的换行，使译文保持为单行文本。</translation>
+    </message>
 </context><context>
     <name>DrawingPanel</name>
     <message>
@@ -1284,6 +1292,34 @@
         <location filename="..\ui\global_search_widget.py" line="487" />
         <source>Replace all occurrences re-render all pages? It can't be undone.</source>
         <translation>全部替换并重新渲染所有页? 无法撤销. </translation>
+    </message>
+    <message>
+        <source>Replace + Re-render</source>
+        <translation>替换 + 重新渲染</translation>
+    </message>
+    <message>
+        <source>Replace all current search results.</source>
+        <translation>替换当前所有搜索结果。</translation>
+    </message>
+    <message>
+        <source>Replace all current search results and re-render all affected pages.</source>
+        <translation>替换当前所有搜索结果，并重新渲染受影响的页面。</translation>
+    </message>
+    <message>
+        <source>Remove line breaks: page</source>
+        <translation>移除换行：本页</translation>
+    </message>
+    <message>
+        <source>Remove line breaks from translations on the current page.</source>
+        <translation>移除当前页面译文中的换行。</translation>
+    </message>
+    <message>
+        <source>Remove line breaks: all</source>
+        <translation>移除换行：全部</translation>
+    </message>
+    <message>
+        <source>Remove line breaks from translations on all pages.</source>
+        <translation>移除所有页面译文中的换行。</translation>
     </message>
 </context><context>
     <name>GlossaryWindow</name>
@@ -1658,6 +1694,10 @@
     <message>
         <source>Export soure text as markdown</source>
         <translation type="vanished">原文导出为 Markdown</translation>
+    </message>
+    <message>
+        <source>Pages: show or hide the project page list (Ctrl+Shift+P).</source>
+        <translation>页面：显示或隐藏项目页面列表 (Ctrl+Shift+P)。</translation>
     </message>
 </context><context>
     <name>MainWindow</name>

@@ -1067,6 +1067,14 @@
         <source>Runs an extra LLM review for pronouns, speaker/addressee references, gendered wording, and formality. Adds LLM requests.</source>
         <translation>Запускает дополнительную LLM-проверку местоимений, связей говорящий/адресат, гендерных формулировок и формальности. Добавляет LLM-запросы.</translation>
     </message>
+    <message>
+        <source>Auto layout without stored line breaks</source>
+        <translation>Авторазметка без сохраненных переносов строк</translation>
+    </message>
+    <message>
+        <source>Optimizes text boxes for the detected balloon but keeps translations as single-line text by removing inserted line breaks.</source>
+        <translation>Оптимизирует текстовые блоки под найденное облако, но хранит перевод одной строкой, удаляя вставленные переносы.</translation>
+    </message>
 </context><context>
     <name>DrawingPanel</name>
     <message>
@@ -1272,6 +1280,34 @@
         <location filename="..\ui\global_search_widget.py" line="487" />
         <source>Replace all occurrences re-render all pages? It can't be undone.</source>
         <translation>Заменить все совпадения повторно отрендерив все страницы?Это будет нельзя отменить.</translation>
+    </message>
+    <message>
+        <source>Replace + Re-render</source>
+        <translation>Заменить + перерисовать</translation>
+    </message>
+    <message>
+        <source>Replace all current search results.</source>
+        <translation>Заменяет все текущие результаты поиска.</translation>
+    </message>
+    <message>
+        <source>Replace all current search results and re-render all affected pages.</source>
+        <translation>Заменяет все текущие результаты и заново рендерит затронутые страницы.</translation>
+    </message>
+    <message>
+        <source>Remove line breaks: page</source>
+        <translation>Убрать переносы: страница</translation>
+    </message>
+    <message>
+        <source>Remove line breaks from translations on the current page.</source>
+        <translation>Удаляет переносы строк из переводов на текущей странице.</translation>
+    </message>
+    <message>
+        <source>Remove line breaks: all</source>
+        <translation>Убрать переносы: все</translation>
+    </message>
+    <message>
+        <source>Remove line breaks from translations on all pages.</source>
+        <translation>Удаляет переносы строк из переводов на всех страницах.</translation>
     </message>
 </context><context>
     <name>GlossaryWindow</name>
@@ -1638,6 +1674,10 @@
     <message>
         <source>Global Search (Ctrl+G)</source>
         <translation type="vanished">Глобальный поиск (Ctrl+G)</translation>
+    </message>
+    <message>
+        <source>Pages: show or hide the project page list (Ctrl+Shift+P).</source>
+        <translation>Страницы: показать или скрыть список страниц проекта (Ctrl+Shift+P).</translation>
     </message>
 </context><context>
     <name>MainWindow</name>

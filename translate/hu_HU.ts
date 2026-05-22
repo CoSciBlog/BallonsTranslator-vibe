@@ -987,6 +987,14 @@
         <source>Runs an extra LLM review for pronouns, speaker/addressee references, gendered wording, and formality. Adds LLM requests.</source>
         <translation>Extra LLM-ellenőrzést futtat névmásokra, beszélő/címzett hivatkozásokra, nemhez kötött megfogalmazásra és formalitásra. LLM-kéréseket ad hozzá.</translation>
     </message>
+    <message>
+        <source>Auto layout without stored line breaks</source>
+        <translation>Automatikus elrendezes mentett sortores nelkul</translation>
+    </message>
+    <message>
+        <source>Optimizes text boxes for the detected balloon but keeps translations as single-line text by removing inserted line breaks.</source>
+        <translation>Optimalizalja a szovegdobozokat az erzekelt buborekhoz, de a beszurt sortoresek eltavolitasaval egysoros forditast tart meg.</translation>
+    </message>
 </context><context>
     <name>DrawingPanel</name>
     <message>
@@ -1176,6 +1184,34 @@
         <location filename="..\ui\global_search_widget.py" line="487" />
         <source>Replace all occurrences re-render all pages? It can't be undone.</source>
         <translation>Összes cseréje és minden oldal újra mentése? Nem visszaállítható.</translation>
+    </message>
+    <message>
+        <source>Replace + Re-render</source>
+        <translation>Csere + ujrarendereles</translation>
+    </message>
+    <message>
+        <source>Replace all current search results.</source>
+        <translation>Lecsereli az osszes aktualis keresesi talalatot.</translation>
+    </message>
+    <message>
+        <source>Replace all current search results and re-render all affected pages.</source>
+        <translation>Lecsereli az aktualis talalatokat, majd ujrarendereli az erintett oldalakat.</translation>
+    </message>
+    <message>
+        <source>Remove line breaks: page</source>
+        <translation>Sortoresek torlese: oldal</translation>
+    </message>
+    <message>
+        <source>Remove line breaks from translations on the current page.</source>
+        <translation>Eltavolitja a sortoreseket az aktualis oldal forditasaibol.</translation>
+    </message>
+    <message>
+        <source>Remove line breaks: all</source>
+        <translation>Sortoresek torlese: mind</translation>
+    </message>
+    <message>
+        <source>Remove line breaks from translations on all pages.</source>
+        <translation>Eltavolitja a sortoreseket az osszes oldal forditasaibol.</translation>
     </message>
 </context><context>
     <name>GlossaryWindow</name>
@@ -1522,6 +1558,10 @@
     <message>
         <source>RUN</source>
         <translation type="vanished">FUTTATÁS</translation>
+    </message>
+    <message>
+        <source>Pages: show or hide the project page list (Ctrl+Shift+P).</source>
+        <translation>Oldalak: a projekt oldallistajanak megjelenitese vagy elrejtese (Ctrl+Shift+P).</translation>
     </message>
 </context><context>
     <name>MainWindow</name>

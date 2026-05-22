@@ -1,6 +1,6 @@
 from typing import List, Callable
 
-from qtpy.QtWidgets import QComboBox, QWidget
+from qtpy.QtWidgets import QComboBox, QWidget, QStyle
 from qtpy.QtCore import Signal, Qt
 from qtpy.QtGui import QDoubleValidator
 
@@ -14,8 +14,27 @@ class ComboBox(QComboBox):
     def __init__(self, parent: QWidget = None, scrollWidget: QWidget = None, options: List[str] = None) -> None:
         super().__init__(parent)
         self.scrollWidget = scrollWidget
+        self.view().setTextElideMode(Qt.TextElideMode.ElideNone)
         if options is not None:
             self.addItems(options)
+
+    def addItem(self, *args, **kwargs) -> None:
+        super().addItem(*args, **kwargs)
+        text = self.itemText(self.count() - 1)
+        self.setItemData(self.count() - 1, text, Qt.ItemDataRole.ToolTipRole)
+
+    def addItems(self, texts: List[str]) -> None:
+        super().addItems(texts)
+        for idx, text in enumerate(texts):
+            self.setItemData(idx, text, Qt.ItemDataRole.ToolTipRole)
+
+    def showPopup(self) -> None:
+        view = self.view()
+        width = max(self.width(), view.sizeHintForColumn(0))
+        width += self.style().pixelMetric(QStyle.PixelMetric.PM_ScrollBarExtent)
+        width += 12
+        view.setMinimumWidth(width)
+        super().showPopup()
 
     def setScrollWidget(self, scrollWidget: QWidget):
         self.scrollWidget = scrollWidget

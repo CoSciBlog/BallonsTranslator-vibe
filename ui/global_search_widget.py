@@ -338,20 +338,29 @@ class GlobalSearchWidget(Widget):
 
         self.search_tree = SearchResultTree(self)
         self.replace_btn = NoBorderPushBtn(self.tr('Replace All'))
+        self.replace_btn.setToolTip(self.tr('Replace all current search results.'))
         self.replace_btn.clicked.connect(self.on_replace)
-        self.replace_rerender_btn = NoBorderPushBtn(self.tr('Replace All and Re-render all pages'))
+        self.replace_rerender_btn = NoBorderPushBtn(self.tr('Replace + Re-render'))
+        self.replace_rerender_btn.setToolTip(self.tr('Replace all current search results and re-render all affected pages.'))
         self.replace_rerender_btn.clicked.connect(self.on_replace_rerender)
-        self.remove_current_linebreaks_btn = NoBorderPushBtn(self.tr('Remove line breaks (page)'))
+        self.remove_current_linebreaks_btn = NoBorderPushBtn(self.tr('Remove line breaks: page'))
+        self.remove_current_linebreaks_btn.setToolTip(self.tr('Remove line breaks from translations on the current page.'))
         self.remove_current_linebreaks_btn.clicked.connect(self.on_remove_current_translation_linebreaks)
-        self.remove_all_linebreaks_btn = NoBorderPushBtn(self.tr('Remove line breaks (all pages)'))
+        self.remove_all_linebreaks_btn = NoBorderPushBtn(self.tr('Remove line breaks: all'))
+        self.remove_all_linebreaks_btn.setToolTip(self.tr('Remove line breaks from translations on all pages.'))
         self.remove_all_linebreaks_btn.clicked.connect(self.on_remove_all_translation_linebreaks)
         self.replace_thread = GlobalReplaceThead()
 
-        sp = self.replace_rerender_btn.sizePolicy()
-        sp.setHorizontalPolicy(QSizePolicy.Policy.Expanding)
-        self.replace_rerender_btn.setSizePolicy(sp)
-        self.remove_current_linebreaks_btn.setSizePolicy(sp)
-        self.remove_all_linebreaks_btn.setSizePolicy(sp)
+        for button in (
+            self.replace_btn,
+            self.replace_rerender_btn,
+            self.remove_current_linebreaks_btn,
+            self.remove_all_linebreaks_btn,
+        ):
+            sp = button.sizePolicy()
+            sp.setHorizontalPolicy(QSizePolicy.Policy.Ignored)
+            button.setSizePolicy(sp)
+            button.setMinimumWidth(0)
 
         hlayout_bar1_0 = QHBoxLayout()
         hlayout_bar1_0.addWidget(self.search_editor)
@@ -390,6 +399,8 @@ class GlobalSearchWidget(Widget):
         self.progress_bar = ProgressMessageBox('task')
         self.progress_bar.setTaskName(self.tr('Replace...'))
         self.progress_bar.hide()
+        self.setMinimumWidth(320)
+        self.setMaximumWidth(360)
 
     def setupReplaceThread(self, pairwidget_list: List[TransPairWidget], textblk_item_list: List[TextBlkItem]):
         self.pairwidget_list = self.replace_thread.pairwidget_list = pairwidget_list

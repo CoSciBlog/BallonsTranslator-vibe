@@ -987,6 +987,14 @@
         <source>Runs an extra LLM review for pronouns, speaker/addressee references, gendered wording, and formality. Adds LLM requests.</source>
         <translation>代名詞、話者/相手の参照、性別表現、敬体/常体を確認する追加 LLM レビューを実行します。LLM リクエストが増えます。</translation>
     </message>
+    <message>
+        <source>Auto layout without stored line breaks</source>
+        <translation>保存される改行なしの自動レイアウト</translation>
+    </message>
+    <message>
+        <source>Optimizes text boxes for the detected balloon but keeps translations as single-line text by removing inserted line breaks.</source>
+        <translation>検出した吹き出しに合わせてテキストボックスを最適化し、挿入された改行を削除して翻訳を1行のテキストとして保持します。</translation>
+    </message>
 </context><context>
     <name>DrawingPanel</name>
     <message>
@@ -1176,6 +1184,34 @@
         <location filename="..\ui\global_search_widget.py" line="487" />
         <source>Replace all occurrences re-render all pages? It can't be undone.</source>
         <translation>すべての出現箇所を置換してすべてのページを再レンダリングしますか?元に戻すことはできません。</translation>
+    </message>
+    <message>
+        <source>Replace + Re-render</source>
+        <translation>置換 + 再レンダリング</translation>
+    </message>
+    <message>
+        <source>Replace all current search results.</source>
+        <translation>現在の検索結果をすべて置換します。</translation>
+    </message>
+    <message>
+        <source>Replace all current search results and re-render all affected pages.</source>
+        <translation>現在の検索結果をすべて置換し、影響するページを再レンダリングします。</translation>
+    </message>
+    <message>
+        <source>Remove line breaks: page</source>
+        <translation>改行を削除: ページ</translation>
+    </message>
+    <message>
+        <source>Remove line breaks from translations on the current page.</source>
+        <translation>現在のページの翻訳から改行を削除します。</translation>
+    </message>
+    <message>
+        <source>Remove line breaks: all</source>
+        <translation>改行を削除: すべて</translation>
+    </message>
+    <message>
+        <source>Remove line breaks from translations on all pages.</source>
+        <translation>すべてのページの翻訳から改行を削除します。</translation>
     </message>
 </context><context>
     <name>GlossaryWindow</name>
@@ -1506,6 +1542,10 @@
         <location filename="..\ui\mainwindowbars.py" line="304" />
         <source>Import *.docx</source>
         <translation>*.docx をインポート</translation>
+    </message>
+    <message>
+        <source>Pages: show or hide the project page list (Ctrl+Shift+P).</source>
+        <translation>ページ: プロジェクトのページ一覧を表示または非表示にします (Ctrl+Shift+P)。</translation>
     </message>
 </context><context>
     <name>MainWindow</name>
