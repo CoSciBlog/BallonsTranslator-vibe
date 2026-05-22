@@ -58,6 +58,7 @@
 - Manual glossary entries are preserved and preferred over automatic entries.
 - Project glossaries now save to `glossary.json` in the image project folder instead of the global translator config or embedded `imgtrans` project JSON.
 - Direct Google/DeepL translation and Two-Step first-step translation now persist raw provider results in each project's `imgtrans_*.json`.
+- Google/DeepL provider results now appear only in `First step draft`; the separate text editor `Machine translator results` field was removed.
 - Dynamic module parameter tooltips now use their module-provided descriptions without appending a generic performance note.
 - UI-only settings such as preset import/export, mouse-wheel protection, startup reopening, keyboard shortcuts, and display filters now avoid performance claims.
 - LLM translators now read glossary entries and the glossary prompt only from the current project's separate `glossary.json` data.
@@ -71,6 +72,7 @@
 - Model Downloads now runs downloads from `Download Selected` and `Download All` in a non-modal background window so the main app remains usable.
 - `Gloss Scan Current Manga` remains available from the Run menu, while the dedicated sidebar Gloss Scan button was removed to reduce left-sidebar clutter.
 - Translation, glossary, Two-Step refinement, reflection, and review prompts now emphasize names, pronouns, gendered wording, speaker/addressee roles, singular/plural first person, and formal/informal address.
+- Google/DeepL direct and Two-Step first-step translations now mirror their raw provider output into `translation_draft` so `First step draft` is the single visible raw machine-translation result.
 
 ### Fixed
 
@@ -113,3 +115,4 @@
 - Bumped the fork runtime version string to `1.4.0-vibe.58`.
 - Bumped the fork runtime version string to `1.4.0-vibe.59`.
 - Bumped the fork runtime version string to `1.4.0-vibe.60`.
+- Bumped the fork runtime version string to `1.4.0-vibe.61`.

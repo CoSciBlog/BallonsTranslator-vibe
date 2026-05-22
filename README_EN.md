@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.60`
+Fork release: `1.4.0-vibe.61`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -39,7 +39,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Added readable English names to source-language selectors, for example `日本語 (Japanese)`, `Deutsch (German)`, and `Polski (Polish)`, while keeping the original internal language values.
 - Added a Translation Benchmark window from the Run menu to compare current-page translations from multiple translators or LLM configurations side by side.
 - Added an LLM model matrix benchmark for repeated `LLM_API_Translator` and `Two-Step Translator` runs across Ollama-style model lists.
-- Added saved Google/DeepL provider result fields to each text block so raw machine translations can be compared in the text editor sidebar and persisted in the project JSON.
+- Added saved Google/DeepL provider result fields to each text block so raw first-step drafts are persisted in the project JSON and shown through the `First step draft` field.
 - Changed project working folders so `mask`, `inpainted`, `upscaled`, `decensor_mask`, and `decensored` are created only when an output is actually written. Upscaling output is no longer created while upscaling is disabled.
 - Exposed `mask_dilation_size`, `mask_dilation_kernel`, and `inpaint_enlarge_ratio` for `lama_large_512px` in the Inpainter settings, with hover tooltips and runtime handling in the LaMa inpaint path.
 - Refined Settings hover tooltips so performance notes are shown only for options that affect runtime, memory, disk writes, network/API usage, or model behavior.
@@ -252,7 +252,7 @@ The `Two-Step Translator` first creates Google, DeepL Free, or DeepL draft trans
 
 The strict retry is attempted before the final draft fallback when the LLM returns empty JSON, malformed JSON, a partial response, missing IDs, extra IDs, or a mismatched item count. Usable partial LLM results are merged by numeric ID only, never by list position, so a response for `id: 2` cannot be applied to `id: 1`.
 
-When Google, DeepL Free, or DeepL is used directly or as the Two-Step first step, the raw provider output is saved on each text block in `translation_provider_results` inside the project JSON. The text editor sidebar shows these saved Google/DeepL results in a read-only comparison field above the final translation, while the existing `First step draft` field remains available for the active Two-Step draft.
+When Google, DeepL Free, or DeepL is used directly or as the Two-Step first step, the raw provider output is saved on each text block in `translation_provider_results` inside the project JSON and mirrored into `translation_draft`. The text editor sidebar shows this Google/DeepL result only as `First step draft`; the separate machine-translation-results field was removed.
 
 For local Ollama models such as `translategemma:12b` or `translategemma:27b`, disabling `reasoning` is usually faster and more stable for JSON output. Use moderate `max tokens` values, typically 2048-4096; values above 8192 are clamped for Ollama refinement requests. Smaller refinement chunks also improve JSON stability for local models.
 

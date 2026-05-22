@@ -247,6 +247,8 @@ class BaseTranslator(BaseModule):
                 results = {}
             results[label] = translations[ii] or ''
             textblk_lst[idx].translation_provider_results = results
+            if label in ('Google', 'DeepL', 'DeepL Free'):
+                textblk_lst[idx].translation_draft = translations[ii] or ''
 
     def translate_textblk_lst(self, textblk_lst: List[TextBlock]):
         '''

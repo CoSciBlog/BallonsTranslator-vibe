@@ -57,6 +57,8 @@ class TranslationProviderResultsTest(unittest.TestCase):
         self.assertEqual(blocks[0].translation_provider_results["DeepL"], "eins")
         self.assertEqual(blocks[0].translation_provider_results["Google"], "google one")
         self.assertEqual(blocks[1].translation_provider_results["Google"], "google two")
+        self.assertEqual(blocks[0].translation_draft, "google one")
+        self.assertEqual(blocks[1].translation_draft, "google two")
 
     def test_two_step_deepl_free_results_are_stored_with_provider_label(self):
         blocks = [TextBlock(text=["one"])]
@@ -68,6 +70,7 @@ class TranslationProviderResultsTest(unittest.TestCase):
             blocks[0].translation_provider_results,
             {"DeepL Free": "deepl free result"},
         )
+        self.assertEqual(blocks[0].translation_draft, "deepl free result")
 
 
 if __name__ == "__main__":

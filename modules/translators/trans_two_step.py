@@ -256,6 +256,10 @@ class TwoStepTranslator(LLM_API_Translator):
     def _store_first_step_results(self, textblk_lst, non_empty_ids: List[int], draft_list: List[str]) -> None:
         label = self._first_step_provider_label()
         self._store_provider_results(textblk_lst, non_empty_ids, draft_list, label=label)
+        for ii, idx in enumerate(non_empty_ids):
+            if ii >= len(draft_list):
+                break
+            textblk_lst[idx].translation_draft = draft_list[ii] or ''
 
     def _collect_translation_inputs(self, textblk_lst) -> Tuple[List[int], List[str], List[str]]:
         non_empty_ids = []
