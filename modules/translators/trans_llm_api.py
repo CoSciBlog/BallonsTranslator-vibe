@@ -272,7 +272,7 @@ class LLM_API_Translator(BaseTranslator):
         "system_prompt": {
             "type": "editor",
             "value": 'You are an expert manga/comic translator and editor. Translate accurately and naturally while preserving speaker intent, character relationships, names, honorifics, pronouns, number, gender, and formal/informal address from the source and available context. Do not invent gender, pronouns, relationships, or names when the source is ambiguous; keep ambiguity natural in the target language. You MUST provide the output strictly in the specified JSON format, without any additional explanations or markdown formatting. Return only valid JSON in this exact shape: {"translations":[{"id":1,"translation":"Translated text here."}]}. The JSON object must have a single key \'translations\', which is a list of objects, each with an \'id\' (integer) and a \'translation\' (string).\n\nExample Output Schema:\n{"translations": [{"id": 1, "translation": "Translated text here."}]}',
-            "description": "System message to instruct the LLM on its role and required output format.",
+            "description": "System message to instruct the LLM on its role and required output format. Available placeholders: {source_language} / {input_language} / {from_lang} for the source language, and {target_language} / {output_language} / {to_lang} for the target language. JSON braces that do not match these names are left unchanged.",
         },
         "invalid repeat count": {
             "value": 2,
@@ -318,7 +318,7 @@ class LLM_API_Translator(BaseTranslator):
         "reflection prompt": {
             "type": "editor",
             "value": "Review the draft translation against the original source text. Check meaning, terminology, names, glossary terms, tone, fluency, punctuation, item count, pronouns, speaker/addressee references, gendered wording, singular/plural first person, and formal/informal address. Revise only where the translation can be improved. Return only the final improved JSON object in the required schema.",
-            "description": "Instructions used for the optional reflection/revision API call.",
+            "description": "Instructions used for the optional reflection/revision API call. Available placeholders: {source_language} / {input_language} / {from_lang} for the source language, and {target_language} / {output_language} / {to_lang} for the target language. Reflection receives the original translation task and draft JSON automatically.",
         },
         "previous context pages": {
             "value": 0,
@@ -668,6 +668,23 @@ class LLM_API_Translator(BaseTranslator):
     def system_prompt(self) -> str:
         return self.get_param_value("system_prompt")
 
+    def _language_placeholder_values(self, to_lang: str = None) -> Dict[str, str]:
+        source_language = self.lang_map.get(self.lang_source, self.lang_source)
+        target_language = to_lang or self.lang_map.get(self.lang_target, self.lang_target)
+        return {
+            "source_language": source_language,
+            "input_language": source_language,
+            "from_lang": source_language,
+            "target_language": target_language,
+            "output_language": target_language,
+            "to_lang": target_language,
+        }
+
+    def _render_prompt_placeholders(self, prompt: str, to_lang: str = None) -> str:
+        for key, value in self._language_placeholder_values(to_lang=to_lang).items():
+            prompt = prompt.replace("{" + key + "}", value)
+        return prompt
+
     @property
     def invalid_repeat_count(self) -> int:
         return int(self.get_param_value("invalid repeat count"))
@@ -897,7 +914,7 @@ class LLM_API_Translator(BaseTranslator):
         }
 
     def _system_prompt_with_reasoning_policy(self) -> str:
-        prompt = self.system_prompt
+        prompt = self._render_prompt_placeholders(self.system_prompt)
         if self.reasoning_enabled:
             policy = (
                 f"Use {self.reasoning_level} reasoning effort internally if the "
@@ -1086,7 +1103,7 @@ class LLM_API_Translator(BaseTranslator):
         draft_json = draft_response.model_dump_json(indent=2)
         expected_ids = [item.id for item in draft_response.translations]
         return (
-            f"{self.reflection_prompt}\n\n"
+            f"{self._render_prompt_placeholders(self.reflection_prompt)}\n\n"
             f"{self._review_quality_rules(len(draft_response.translations), expected_ids)}"
             f"{self._review_glossary_prompt_section()}"
             "ORIGINAL TRANSLATION TASK:\n"

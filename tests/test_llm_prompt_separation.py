@@ -22,7 +22,7 @@ class PromptFakeTranslator(LLM_API_Translator):
 
     @property
     def reflection_prompt(self):
-        return "Review the draft translation."
+        return getattr(self, "_reflection_prompt", "Review the draft translation.")
 
     @property
     def glossary_text(self):
@@ -74,6 +74,28 @@ class FakeLogger:
 
 
 class LLMPromptSeparationTest(unittest.TestCase):
+    def test_language_placeholders_do_not_touch_json_braces(self):
+        translator = PromptFakeTranslator()
+
+        rendered = translator._render_prompt_placeholders(
+            'Translate from {source_language} to {target_language}. '
+            'Schema: {"translations":[{"id":1,"translation":"TEXT"}]}'
+        )
+
+        self.assertIn("from German to English", rendered)
+        self.assertIn('{"translations":[{"id":1,"translation":"TEXT"}]}', rendered)
+
+    def test_reflection_prompt_renders_language_placeholders(self):
+        translator = PromptFakeTranslator()
+        translator._reflection_prompt = "{from_lang} draft must become {to_lang} final."
+        response = TranslationResponse(
+            translations=[TranslationElement(id=1, translation="Draft")]
+        )
+
+        prompt = translator._build_reflection_prompt("INPUT", response)
+
+        self.assertIn("German draft must become English final.", prompt)
+
     def test_reflection_prompt_uses_translation_response_schema(self):
         translator = PromptFakeTranslator()
         response = TranslationResponse(

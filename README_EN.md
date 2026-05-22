@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.64`
+Fork release: `1.4.0-vibe.65`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -54,6 +54,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Added optional inpaint optimization: after normal inpainting, the app can re-detect leftover text on the inpainted page and run a second inpaint pass; the same optimization is available for the current page or all non-ignored pages.
 - Added an optional Settings switch to run a post-translation pronoun/address review with LLM-capable translators, and tightened translation, glossary, and review prompts for names, gendered wording, pronouns, and speaker/addressee consistency.
 - Stabilized the Search/Replace sidebar width, added `Ctrl+Shift+P` for the page list, added full language hover text in selector popups, and added an Auto layout mode that optimizes boxes without saving inserted translation line breaks.
+- Extended LLM Settings hover text for `system_prompt` and `reflection prompt` with supported language placeholders, and enabled `{source_language}`, `{target_language}`, `{input_language}`, `{output_language}`, `{from_lang}`, and `{to_lang}` inside those prompts.
 - Improved first-start launcher output so Windows batch and Pinokio install/start flows show live dependency output plus periodic progress messages during silent setup steps.
 - Improved the Pinokio and `launch.py --update` update flows so Git and dependency refresh steps stream progress output instead of appearing idle.
 - Pinned setup tooling to `setuptools==71.1.0` so legacy packages such as `PyExecJS` install correctly during first setup.

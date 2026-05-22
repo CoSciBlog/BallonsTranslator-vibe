@@ -53,12 +53,14 @@
 - Optional Auto layout mode that keeps the optimized text box sizing but removes inserted translation line breaks from stored text.
 - `Ctrl+Shift+P` shortcut for showing or hiding the page list.
 - Full language hover text and wider popups for compact language selectors.
+- Language placeholders for LLM `system_prompt` and `reflection prompt`: `{source_language}`, `{target_language}`, `{input_language}`, `{output_language}`, `{from_lang}`, and `{to_lang}`.
 
 ### Changed
 
 - Settings checkbox descriptions now wrap beside the checkbox instead of using unwrapped checkbox captions, preventing long General and DL Module option text from extending beyond the window.
 - Shortened visible Settings descriptions for Auto layout, custom fonts, Censor Restoration debug masks, Post-merge, Upscaling, pronoun review, and DL Module memory controls while keeping detailed hover text available.
 - Search/Replace sidebar actions now use shorter visible labels with detailed tooltips so the sidebar keeps a stable width.
+- LLM Settings hover text for `system_prompt` and `reflection prompt` now documents the supported language placeholders.
 - Automatic first-start model downloads now also skip optional `aot`, PaddleOCR-VL Manga, native PaddleOCR, OneOCR, and Stariver OCR entries. Backends with known downloadable files remain available through `Tools -> Model Downloads`; native PaddleOCR downloads on first use, OneOCR requires manually supplied local files, and Stariver OCR is API-only.
 - Existing translation, OCR, and inpainting workflows are unchanged.
 - Review now uses character and honorific glossary entries as guidance.
@@ -127,3 +129,4 @@
 - Bumped the fork runtime version string to `1.4.0-vibe.62`.
 - Bumped the fork runtime version string to `1.4.0-vibe.63`.
 - Bumped the fork runtime version string to `1.4.0-vibe.64`.
+- Bumped the fork runtime version string to `1.4.0-vibe.65`.

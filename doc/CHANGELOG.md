@@ -1,6 +1,16 @@
 # Changelogs
 
 ### 2026-05-22
+[v1.4.0-vibe.65] LLM prompt placeholder tooltips
+Added:
+1. Added language placeholder support for LLM `system_prompt` and `reflection prompt`: `{source_language}`, `{target_language}`, `{input_language}`, `{output_language}`, `{from_lang}`, and `{to_lang}`.
+
+Changed:
+1. Extended Settings hover text for `system_prompt` and `reflection prompt` so users can see which placeholders are available and what the reflection pass receives automatically.
+
+Version:
+1. Bumped the fork runtime version string to `1.4.0-vibe.65`.
+
 [v1.4.0-vibe.64] sidebar and auto layout polish
 Added:
 1. Added an Auto layout mode that optimizes text boxes while removing inserted translation line breaks from stored translation text.
