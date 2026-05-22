@@ -54,6 +54,7 @@
 - `Ctrl+Shift+P` shortcut for showing or hiding the page list.
 - Full language hover text and wider popups for compact language selectors.
 - Language placeholders for LLM `system_prompt` and `reflection prompt`: `{source_language}`, `{target_language}`, `{input_language}`, `{output_language}`, `{from_lang}`, and `{to_lang}`.
+- GUI batch processing from the Open menu that selects a parent folder, treats each immediate image subfolder as a separate project with its own glossary, ignores generated output folders, runs projects sequentially through the normal pipeline, and can optionally export each project as `.cbz` or `.pdf`.
 
 ### Changed
 
@@ -78,6 +79,7 @@
 - Translator hover descriptions now distinguish true speed impacts from reliability, memory-safety, or quota-related behavior.
 - The optional `flux2-klein` inpainting model is skipped during automatic first-start model downloads and can be downloaded later from `Tools -> Model Downloads`.
 - Save image format and quality descriptions now appear only as hover text instead of visible labels.
+- Bumped the fork runtime version string to `1.4.0-vibe.66`.
 - Model Downloads now runs downloads from `Download Selected` and `Download All` in a non-modal background window so the main app remains usable.
 - `Gloss Scan Current Manga` remains available from the Run menu, while the dedicated sidebar Gloss Scan button was removed to reduce left-sidebar clutter.
 - Translation, glossary, Two-Step refinement, reflection, and review prompts now emphasize names, pronouns, gendered wording, speaker/addressee roles, singular/plural first person, and formal/informal address.

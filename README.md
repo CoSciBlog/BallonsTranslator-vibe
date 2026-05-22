@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README_EN.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.65`
+Fork release: `1.4.0-vibe.66`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -65,6 +65,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Made the Model Downloads window explicitly non-modal so selected or all downloads continue in the background while the app remains usable.
 - Added direct comic archive, PDF, and source-folder import for `.cbz`, `.cbr`, `.zip`, `.pdf`, and nested image folders by extracting, rendering, or copying pages into a normal project folder.
 - Added comic export for `.cbz`, `.zip`, `.pdf`, and `.cbr` when a local RAR writer is installed.
+- Added GUI batch processing from the Open menu for processing each image subfolder as a separate project with its own `glossary.json`, selectable pipeline modules, optional `.cbz`/`.pdf` export, and an optional quit-on-finish mode.
 - Added glossary import/export, reference-glossary support, and a translated-folder glossary template builder for reusing official terminology across chapters.
 - Added `Gloss Scan`, a current-manga glossary builder available from the Run menu. It detects text, runs OCR, then uses the selected `LLM_API_Translator` or `Two-Step Translator` settings, including Ollama/provider and glossary category settings, to build an exportable project/reference glossary without inpainting.
 - Improved Blackwell/RTX 50xx runtime repair so CUDA PyTorch wheels are force-reinstalled from the cu128 index instead of reusing an already-satisfied CPU Torch package, and runtime package installs now stream live progress output.
@@ -110,6 +111,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
   - automatically builds masks for simple black or white censor bars and block-like censor regions
   - repairs the mask with the configured inpainting backend as a plausible inpaint reconstruction
 - Headless automation for batch processing from the command line
+- GUI batch processing from `Open -> Batch Processing` for selecting a parent folder and running each immediate image subfolder as its own project
 - Multiple OCR, translator, and inpainting backends already wired into the desktop app
 
 ## Censor Restoration / Decensor Inpaint
@@ -140,6 +142,8 @@ ZIP and CBZ archives are handled with Python's standard `zipfile` support. CBR a
 The importer only writes into the derived project folder. If that folder already contains image pages, it is reused instead of being overwritten.
 
 Use `Open -> Export as Comic Archive/PDF` after saving or running the project to export rendered result pages. `.cbz` and `.zip` are written directly with Python's standard ZIP support. `.pdf` writes one image per PDF page and uses each rendered image's own dimensions, so portrait, landscape, and mixed-size pages keep independent page boxes. `.cbr` export requires a local `rar` or WinRAR command line writer; if none is available, use `.cbz`, `.zip`, or `.pdf`.
+
+Use `Open -> Batch Processing` to choose a parent folder whose immediate subfolders are chapters/projects. The batch dialog lets you choose text detection, OCR, inpainting, and translation modules, enable or disable those pipeline stages, optionally export each finished project as `.cbz` or `.pdf`, and optionally quit the app when the batch is done. Generated subfolders such as `mask`, `result`, `inpainted`, and `upscaled` are ignored. Each accepted subfolder is opened and processed sequentially through the normal project pipeline, keeping its own project file and `glossary.json`; when the batch finishes without quit-on-finish, the first processed project is opened.
 
 ## Re-Inpaint current page
 

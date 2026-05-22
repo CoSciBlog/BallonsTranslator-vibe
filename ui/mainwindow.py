@@ -11,7 +11,7 @@ import time
 import cv2
 
 from tqdm import tqdm
-from qtpy.QtWidgets import QAction, QFileDialog, QMenu, QHBoxLayout, QVBoxLayout, QApplication, QStackedWidget, QSplitter, QListWidget, QShortcut, QListWidgetItem, QMessageBox, QTextEdit, QPlainTextEdit
+from qtpy.QtWidgets import QAction, QFileDialog, QMenu, QHBoxLayout, QVBoxLayout, QApplication, QStackedWidget, QSplitter, QListWidget, QShortcut, QListWidgetItem, QMessageBox, QTextEdit, QPlainTextEdit, QDialog
 from qtpy.QtCore import Qt, QPoint, QSize, QEvent, Signal, QThread, QTimer, QUrl
 from qtpy.QtGui import QContextMenuEvent, QTextCursor, QGuiApplication, QIcon, QCloseEvent, QKeySequence, QKeyEvent, QPainter, QClipboard, QImage, QColor, QBrush
 
@@ -50,6 +50,7 @@ from utils.archive_import import (
 )
 from utils.archive_export import archive_export_filter, default_export_path, export_project
 from utils.io_utils import IMG_EXT
+from utils.batch_processing import collect_batch_project_dirs
 from .canvas import Canvas
 from .configpanel import ConfigPanel
 from .module_manager import ModuleManager
@@ -63,6 +64,7 @@ from .global_search_widget import GlobalSearchWidget
 from .glossary_widget import GlossaryWindow
 from .translation_benchmark import TranslationBenchmarkWindow
 from .model_downloads import ModelDownloadWindow
+from .batch_processing_dialog import BatchProcessingDialog, BatchProcessingOptions
 from .input_wheel_guard import InputWheelGuard
 from .textedit_commands import GlobalRepalceAllCommand
 from .framelesswindow import FramelessWindow, FramelessMoveResize
@@ -202,6 +204,7 @@ class MainWindow(mainwindow_cls):
         self.leftBar.open_paths.connect(self.OpenProj)
         self.leftBar.open_json_proj.connect(self.openJsonProj)
         self.leftBar.save_proj.connect(self.manual_save)
+        self.leftBar.batch_processing_clicked.connect(self.show_batch_processing_dialog)
         self.leftBar.export_doc.connect(self.on_export_doc)
         self.leftBar.export_comic_clicked.connect(self.on_export_comic_archive)
         self.leftBar.import_doc.connect(self.on_import_doc)
@@ -290,6 +293,10 @@ class MainWindow(mainwindow_cls):
         self._gloss_scan_pending = False
         self._gloss_scan_stage_backup = None
         self._gloss_scan_pages = None
+        self._gui_batch_options: BatchProcessingOptions = None
+        self._gui_batch_queue = []
+        self._gui_batch_first_project = ''
+        self._gui_batch_active_project = ''
         self._decensor_current_page_request = None
         self._reinpaint_current_page_request = None
 
@@ -597,6 +604,101 @@ class MainWindow(mainwindow_cls):
         
         if pcfg.let_textstyle_indep_flag and not (shared.HEADLESS or shared.HEADLESS_CONTINUOUS):
             self.load_textstyle_from_proj_dir(from_proj=True)
+
+    def show_batch_processing_dialog(self):
+        if self.module_manager.anyPipelineThreadRunning():
+            create_info_dialog(self.tr('Another pipeline is already running. Please wait until it finishes.'))
+            return
+        dialog = BatchProcessingDialog(self)
+        if dialog.exec_() != QDialog.Accepted:
+            return
+        self.start_gui_batch_processing(dialog.options())
+
+    def start_gui_batch_processing(self, options: BatchProcessingOptions):
+        project_dirs = collect_batch_project_dirs(options.root_dir)
+        if not project_dirs:
+            create_info_dialog(self.tr('No project folders with images found. Generated folders are ignored.'))
+            return
+        if self.canvas.text_change_unsaved():
+            self.saveCurrentPage(update_scene_text=True, save_proj=True, restore_interface=True)
+
+        self._gui_batch_options = options
+        self._gui_batch_options.project_dirs = project_dirs
+        self._gui_batch_queue = list(project_dirs)
+        self._gui_batch_first_project = project_dirs[0]
+        self._gui_batch_active_project = ''
+        self._apply_gui_batch_options(options)
+        self.run_next_gui_batch_project()
+
+    def _apply_gui_batch_options(self, options: BatchProcessingOptions):
+        pcfg.module.textdetector = options.textdetector
+        pcfg.module.ocr = options.ocr
+        pcfg.module.inpainter = options.inpainter
+        pcfg.module.translator = options.translator
+
+        self.bottomBar.textdet_selector.setSelectedValue(options.textdetector)
+        self.bottomBar.ocr_selector.setSelectedValue(options.ocr)
+        self.bottomBar.inpaint_selector.setSelectedValue(options.inpainter)
+        self.bottomBar.trans_selector.selector.setCurrentText(options.translator)
+
+        self.module_manager.setTextDetector(options.textdetector)
+        self.module_manager.setOCR(options.ocr)
+        self.module_manager.setInpainter(options.inpainter)
+        self.module_manager.setTranslator(options.translator)
+        self._set_pipeline_stage_state(
+            options.enable_detect,
+            options.enable_ocr,
+            options.enable_translate,
+            options.enable_inpaint,
+        )
+
+    def run_next_gui_batch_project(self):
+        if not self._gui_batch_options:
+            return
+        if not self._gui_batch_queue:
+            self.finish_gui_batch_processing()
+            return
+
+        project_dir = self._gui_batch_queue.pop(0)
+        self._gui_batch_active_project = project_dir
+        LOGGER.info(f'Batch processing project {project_dir}')
+        self.OpenProj(project_dir)
+        if self.imgtrans_proj.is_empty:
+            LOGGER.warning(f'Batch project has no pages: {project_dir}')
+            self.run_next_gui_batch_project()
+            return
+        self.on_run_imgtrans()
+
+    def finish_current_gui_batch_project(self):
+        options = self._gui_batch_options
+        if not options:
+            return
+        try:
+            if self.canvas.text_change_unsaved():
+                self.st_manager.updateTextBlkList()
+            self.saveCurrentPage(update_scene_text=False, save_proj=True, restore_interface=True)
+            self._wait_for_image_saves()
+            if options.export_enabled:
+                output_path = default_export_path(self.imgtrans_proj.directory, options.export_ext)
+                exported_path = export_project(self.imgtrans_proj, output_path)
+                LOGGER.info(f'Batch export written to {exported_path}')
+        except Exception as e:
+            create_error_dialog(e, self.tr('Failed to finish batch project ') + self._gui_batch_active_project)
+
+    def finish_gui_batch_processing(self):
+        options = self._gui_batch_options
+        first_project = self._gui_batch_first_project
+        self._gui_batch_options = None
+        self._gui_batch_queue = []
+        self._gui_batch_first_project = ''
+        self._gui_batch_active_project = ''
+
+        if options and options.quit_when_finished:
+            self.close()
+            return
+        if first_project and osp.isdir(first_project):
+            self.OpenProj(first_project)
+        create_info_dialog(self.tr('Batch processing finished.'))
 
     def load_textstyle_from_proj_dir(self, from_proj=False):
         if from_proj:
@@ -1892,6 +1994,10 @@ class MainWindow(mainwindow_cls):
             self.on_export_txt('translation')
         if shared.args.export_source_txt:
             self.on_export_txt('source')
+        if self._gui_batch_options is not None:
+            self.finish_current_gui_batch_project()
+            self.run_next_gui_batch_project()
+            return
         if shared.HEADLESS or shared.HEADLESS_CONTINUOUS:
             self.run_next_dir()
 

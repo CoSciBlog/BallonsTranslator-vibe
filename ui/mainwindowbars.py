@@ -73,6 +73,7 @@ class LeftBar(Widget):
     run_inpaint_optimize_clicked = Signal()
     run_translate_clicked = Signal()
     export_comic_clicked = Signal()
+    batch_processing_clicked = Signal()
     def __init__(self, mainwindow, *args, **kwargs) -> None:
         super().__init__(mainwindow, *args, **kwargs)
         self.mainwindow: QMainWindow = mainwindow
@@ -105,6 +106,9 @@ class LeftBar(Widget):
         actionOpenArchive.triggered.connect(self.onOpenArchive)
         actionImportFolder = QAction(self.tr("Import Folder ... archives, PDFs, and images"), self)
         actionImportFolder.triggered.connect(self.onImportFolder)
+        actionBatchProcessing = QAction(self.tr("Batch Processing ..."), self)
+        actionBatchProcessing.setToolTip(self.tr('Process each image subfolder as a separate project with its own glossary.'))
+        self.batch_processing_clicked = actionBatchProcessing.triggered
 
         actionOpenProj = QAction(self.tr("Open Project ... *.json"), self)
         actionOpenProj.triggered.connect(self.onOpenProj)
@@ -136,7 +140,7 @@ class LeftBar(Widget):
         self.recentMenu = QMenu(self.tr("Open Recent"), self)
         
         openMenu = QMenu(self)
-        openMenu.addActions([actionOpenFolder, actionOpenArchive, actionImportFolder, actionOpenProj])
+        openMenu.addActions([actionOpenFolder, actionOpenArchive, actionImportFolder, actionBatchProcessing, actionOpenProj])
         openMenu.addMenu(self.recentMenu)
         openMenu.addSeparator()
         openMenu.addActions([
