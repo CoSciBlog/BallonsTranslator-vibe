@@ -64,13 +64,25 @@ class TwoStepTranslator(LLM_API_Translator):
     params["system_prompt"][
         "value"
     ] = (
-        "You are a translation editor. Improve draft machine translations by "
-        "checking meaning, terminology, names, honorifics, pronouns, gendered "
-        "address, speaker/addressee roles, tone, fluency, punctuation, and line "
-        "count. Do not invent gender or relationships when the source is "
-        "ambiguous. Return only valid JSON in this exact shape: "
-        "{\"translations\":[{\"id\":1,\"translation\":\"...\"}]}. "
-        "Do not include explanations."
+        "You are a translation editor. The user message contains JSON input items "
+        "with id, source, and draft_translation. Review each machine draft against "
+        "its original source before returning an improved translation. Check meaning, "
+        "missing or added information, names, honorifics, pronouns, speaker roles, "
+        "tone, fluency, and punctuation. If the draft is already accurate, keep it. "
+        "Do not invent gender, relationships, or context that is absent from source. "
+        "Return valid JSON only in this exact schema: "
+        "{\"translations\":[{\"id\":1,\"translation\":\"TEXT\"}]}. Preserve each id "
+        "and item count; do not return source, draft_translation, notes, or extra keys."
+    )
+    params["reflection prompt"]["value"] = (
+        "Perform a second accuracy review of the proposed translations. The original "
+        "translation task below contains JSON input items with id, source, and "
+        "draft_translation; the draft translation JSON below contains the LLM proposal. "
+        "Compare the LLM proposal to the original source text, using the machine draft "
+        "only as a reference. Fix mistranslations, omissions, additions, wrong names, "
+        "pronouns, speaker roles, tone, or punctuation. If it is already accurate, "
+        "return it unchanged. Return JSON only with exactly the same ids and item count "
+        "using schema {\"translations\":[{\"id\":1,\"translation\":\"TEXT\"}]}."
     )
 
     def _setup_translator(self):
@@ -302,11 +314,12 @@ class TwoStepTranslator(LLM_API_Translator):
                 textblk_lst[idx].translation_draft = draft_list[ii]
 
             refined = self._refine_draft_translations(text_list, draft_list)
+            fallback_ids = set(getattr(self, "_last_draft_fallback_ids", []))
             for ii, idx in enumerate(non_empty_ids):
                 translations[idx] = refined[ii]
-                textblk_lst[idx].translation_draft_fallback = bool(
-                    getattr(self, "last_refinement_used_draft_fallback", False)
-                )
+                used_draft_fallback = (ii + 1) in fallback_ids
+                textblk_lst[idx].translation_llm_review = "" if used_draft_fallback else refined[ii]
+                textblk_lst[idx].translation_draft_fallback = used_draft_fallback
 
         for callback in self._postprocess_hooks.values():
             callback(
@@ -466,7 +479,7 @@ class TwoStepTranslator(LLM_API_Translator):
             normal_prompt = self._assemble_refinement_prompt_from_items(expected_items, to_lang)
             normal_response = self._request_translation(
                 normal_prompt,
-                is_reflection=True,
+                is_reflection=False,
                 purpose="normal_refinement",
                 expected_count=len(expected_items),
                 expected_ids=expected_ids,
@@ -491,7 +504,7 @@ class TwoStepTranslator(LLM_API_Translator):
             retry_prompt = self._assemble_strict_refinement_retry_prompt(expected_items, to_lang)
             retry_response = self._request_translation(
                 retry_prompt,
-                is_reflection=True,
+                is_reflection=False,
                 purpose="strict_refinement_retry",
                 expected_count=len(expected_items),
                 expected_ids=expected_ids,

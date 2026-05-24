@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.66`
+Fork release: `1.4.0-vibe.67`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -39,7 +39,8 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Added readable English names to source-language selectors, for example `日本語 (Japanese)`, `Deutsch (German)`, and `Polski (Polish)`, while keeping the original internal language values.
 - Added a Translation Benchmark window from the Run menu to compare current-page translations from multiple translators or LLM configurations side by side.
 - Added an LLM model matrix benchmark for repeated `LLM_API_Translator` and `Two-Step Translator` runs across Ollama-style model lists.
-- Added saved Google/DeepL provider result fields to each text block so raw first-step drafts are persisted in the project JSON and shown through the `First step draft` field.
+- Added saved Google/DeepL provider result fields to each text block so raw first-step drafts are persisted in the project JSON and shown through the labelled machine-draft field.
+- Fixed Two-Step Translator reflection so an enabled review pass receives JSON containing the original source, Google/DeepL draft, and LLM proposal; the sidebar now persists separate machine-draft and LLM-review fields with provenance labels.
 - Changed project working folders so `mask`, `inpainted`, `upscaled`, `decensor_mask`, and `decensored` are created only when an output is actually written. Upscaling output is no longer created while upscaling is disabled.
 - Exposed `mask_dilation_size`, `mask_dilation_kernel`, and `inpaint_enlarge_ratio` for `lama_large_512px` in the Inpainter settings, with hover tooltips and runtime handling in the LaMa inpaint path.
 - Refined Settings hover tooltips so performance notes are shown only for options that affect runtime, memory, disk writes, network/API usage, or model behavior.
@@ -113,6 +114,16 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Headless automation for batch processing from the command line
 - GUI batch processing from `Open -> Batch Processing` for selecting a parent folder and running each immediate image subfolder as its own project
 - Multiple OCR, translator, and inpainting backends already wired into the desktop app
+
+### Two-Step Translation Provenance
+
+`Two-Step Translator` now records the stages separately in each text block:
+
+- `translation_draft`: the unedited first-step Google or DeepL machine result.
+- `translation_llm_review`: the LLM refinement/review output after comparison to the original source.
+- `translation`: the editable output used for typesetting and any subsequent manual changes.
+
+When `reflection` is enabled, the extra review request receives JSON input containing `id`, `source`, and `draft_translation`, together with the prior LLM proposal, and must return only `{"translations":[{"id":...,"translation":"..."}]}`. This keeps the review grounded in source text rather than merely paraphrasing an earlier translation.
 
 ## Censor Restoration / Decensor Inpaint
 

@@ -9,7 +9,7 @@ from .tooltip_utils import wrap_tooltip
 from utils.shared import CONFIG_COMBOBOX_LONG, size2width, CONFIG_COMBOBOX_SHORT, CONFIG_COMBOBOX_HEIGHT
 from utils.config import pcfg
 
-from qtpy.QtWidgets import QPlainTextEdit, QHBoxLayout, QVBoxLayout, QWidget, QLabel, QCheckBox, QLineEdit, QGridLayout, QPushButton
+from qtpy.QtWidgets import QPlainTextEdit, QHBoxLayout, QVBoxLayout, QWidget, QLabel, QCheckBox, QLineEdit, QGridLayout, QPushButton, QSizePolicy
 from qtpy.QtCore import Qt, Signal
 from qtpy.QtGui import QDoubleValidator
 
@@ -87,8 +87,9 @@ class ParamEditor(QPlainTextEdit):
             self.setFixedWidth(CONFIG_FIELD_WIDE)
             self.setFixedHeight(240)
         elif param_key_uses_tall_editor(param_key):
-            self.setFixedWidth(CONFIG_FIELD_WIDE)
-            self.setFixedHeight(180)
+            self.setMinimumWidth(CONFIG_FIELD_WIDE)
+            self.setMinimumHeight(270)
+            self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         else:
             self.setFixedWidth(CONFIG_COMBOBOX_LONG)
             self.setFixedHeight(100)

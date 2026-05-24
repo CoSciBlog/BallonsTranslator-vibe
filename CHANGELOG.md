@@ -55,6 +55,7 @@
 - Full language hover text and wider popups for compact language selectors.
 - Language placeholders for LLM `system_prompt` and `reflection prompt`: `{source_language}`, `{target_language}`, `{input_language}`, `{output_language}`, `{from_lang}`, and `{to_lang}`.
 - GUI batch processing from the Open menu that selects a parent folder, treats each immediate image subfolder as a separate project with its own glossary, ignores generated output folders, runs projects sequentially through the normal pipeline, and can optionally export each project as `.cbz` or `.pdf`.
+- Persisted `translation_llm_review` output and sidebar provenance labels for original source, Google/DeepL machine draft, LLM review, and editable translation output.
 
 ### Changed
 
@@ -68,7 +69,7 @@
 - Manual glossary entries are preserved and preferred over automatic entries.
 - Project glossaries now save to `glossary.json` in the image project folder instead of the global translator config or embedded `imgtrans` project JSON.
 - Direct Google/DeepL translation and Two-Step first-step translation now persist raw provider results in each project's `imgtrans_*.json`.
-- Google/DeepL provider results now appear only in `First step draft`; the separate text editor `Machine translator results` field was removed.
+- Google/DeepL provider results now appear in the labelled machine-draft field; the separate text editor `Machine translator results` field was removed.
 - Dynamic module parameter tooltips now use their module-provided descriptions without appending a generic performance note.
 - UI-only settings such as preset import/export, mouse-wheel protection, startup reopening, keyboard shortcuts, and display filters now avoid performance claims.
 - LLM translators now read glossary entries and the glossary prompt only from the current project's separate `glossary.json` data.
@@ -83,7 +84,9 @@
 - Model Downloads now runs downloads from `Download Selected` and `Download All` in a non-modal background window so the main app remains usable.
 - `Gloss Scan Current Manga` remains available from the Run menu, while the dedicated sidebar Gloss Scan button was removed to reduce left-sidebar clutter.
 - Translation, glossary, Two-Step refinement, reflection, and review prompts now emphasize names, pronouns, gendered wording, speaker/addressee roles, singular/plural first person, and formal/informal address.
-- Google/DeepL direct and Two-Step first-step translations now mirror their raw provider output into `translation_draft` so `First step draft` is the single visible raw machine-translation result.
+- Google/DeepL direct and Two-Step first-step translations now mirror their raw provider output into `translation_draft` so the labelled machine-draft field is the single visible raw machine-translation result.
+- Two-Step reflection now runs after initial LLM refinement when enabled, with JSON-grounded source and machine-draft context; prompt textareas are taller and can grow vertically with the settings layout.
+- Bumped the fork runtime version string to `1.4.0-vibe.67`.
 
 ### Fixed
 
@@ -95,6 +98,7 @@
 - Prevented partial refinement responses from discarding all usable ID-matched translations.
 - Improved Ollama request logging for local translation models.
 - Clarified separation between refinement, strict retry, reflection, and glossary prompts.
+- Fixed `Two-Step Translator` incorrectly marking its initial LLM refinement as reflection, which skipped the configurable `reflection prompt` review pass.
 - Bumped the fork runtime version string to `1.4.0-vibe.29`.
 - Reduced inconsistent character names and pronoun drift during review.
 - Prevented automatically extracted glossary entries from being carried into unrelated projects through `config/config.json`.

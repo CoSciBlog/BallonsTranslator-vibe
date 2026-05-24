@@ -36,6 +36,7 @@ class TextBlock:
     text: List = field(default_factory = lambda : [])
     translation: str = ""
     translation_draft: str = ""
+    translation_llm_review: str = ""
     translation_provider_results: Dict = field(default_factory = lambda: {})
     rich_text: str = ""
     _bounding_rect: List = None

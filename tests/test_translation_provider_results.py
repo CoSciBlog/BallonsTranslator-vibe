@@ -35,6 +35,7 @@ class TranslationProviderResultsTest(unittest.TestCase):
             "Google": "google result",
             "DeepL": "deepl result",
         }
+        block.translation_llm_review = "review result"
 
         dumped = block.to_dict()
         loaded = TextBlock(**dumped)
@@ -43,6 +44,7 @@ class TranslationProviderResultsTest(unittest.TestCase):
             loaded.translation_provider_results,
             {"Google": "google result", "DeepL": "deepl result"},
         )
+        self.assertEqual(loaded.translation_llm_review, "review result")
 
     def test_direct_google_results_are_stored_without_clearing_deepl(self):
         blocks = [

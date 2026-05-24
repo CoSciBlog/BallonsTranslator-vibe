@@ -282,6 +282,7 @@ class MergeBlkItemsCommand(QUndoCommand):
         self.target.blk.translation = self.new_translation
         self.target.blk.rich_text = ''
         self.target.blk.translation_draft = ''
+        self.target.blk.translation_llm_review = ''
         self.target.blk.translation_provider_results = {}
         self.target.blk.xyxy = [x, y, x + w, y + h]
         self.target.blk.set_lines_by_xywh(np.array([x, y, w, h]), angle=0, adjust_bbox=True)
@@ -590,6 +591,7 @@ class SceneTextManager(QObject):
         self.textEditList.addPairWidget(pair_widget)
         pair_widget.e_source.setPlainText(blk_item.blk.get_text())
         pair_widget.setDraftText(getattr(blk_item.blk, 'translation_draft', ''))
+        pair_widget.setLlmReviewText(getattr(blk_item.blk, 'translation_llm_review', ''))
         pair_widget.setProviderResults(getattr(blk_item.blk, 'translation_provider_results', {}))
         pair_widget.e_source.focus_in.connect(self.on_transwidget_focus_in)
         pair_widget.e_source.ensure_scene_visible.connect(self.on_ensure_textitem_svisible)
@@ -1243,6 +1245,7 @@ class SceneTextManager(QObject):
                 blk_item.blk.translation = ''
             blk_item.blk.text = [trans_pair.e_source.toPlainText()]
             blk_item.blk.translation_draft = trans_pair.e_draft.toPlainText()
+            blk_item.blk.translation_llm_review = trans_pair.e_llm.toPlainText()
             blk_item.blk._bounding_rect = blk_item.absBoundingRect()
             blk_item.updateBlkFormat()
             cbl.append(blk_item.blk)
@@ -1250,6 +1253,7 @@ class SceneTextManager(QObject):
     def updateTranslation(self):
         for blk_item, transwidget in zip(self.textblk_item_list, self.pairwidget_list):
             transwidget.setDraftText(getattr(blk_item.blk, 'translation_draft', ''))
+            transwidget.setLlmReviewText(getattr(blk_item.blk, 'translation_llm_review', ''))
             transwidget.setProviderResults(getattr(blk_item.blk, 'translation_provider_results', {}))
             transwidget.e_trans.setPlainText(blk_item.blk.translation)
             blk_item.setPlainText(blk_item.blk.translation)

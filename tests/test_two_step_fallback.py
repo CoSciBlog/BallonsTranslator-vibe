@@ -7,6 +7,7 @@ sys.path.append(APP_ROOT)
 
 from modules.translators.trans_llm_api import TranslationElement, TranslationResponse
 from modules.translators.trans_two_step import TwoStepTranslator
+from utils.textblock import TextBlock
 
 
 class FakeLogger:
@@ -42,6 +43,8 @@ class FakeTwoStepTranslator(TwoStepTranslator):
         self.lang_source = "Deutsch"
         self.lang_map = {"English": "English", "Deutsch": "German"}
         self.last_refinement_used_draft_fallback = False
+        self._preprocess_hooks = {}
+        self._postprocess_hooks = {}
 
     @property
     def fallback_to_first_step(self):
@@ -96,6 +99,7 @@ class TwoStepFallbackTest(unittest.TestCase):
         self.assertEqual(result, ["Refined"])
         self.assertFalse(translator.last_refinement_used_draft_fallback)
         self.assertEqual(len(translator.requests), 1)
+        self.assertFalse(translator.requests[0]["is_reflection"])
 
     def test_llm_can_copy_draft_without_marking_draft_fallback(self):
         response = TranslationResponse(
@@ -280,6 +284,33 @@ class TwoStepFallbackTest(unittest.TestCase):
         self.assertIn("If unsure, copy the draft unchanged", retry_prompt)
         self.assertNotIn("ORIGINAL TRANSLATION TASK", retry_prompt)
         self.assertNotIn("GlossaryResponse", normal_prompt)
+        self.assertIn('"source": "Quelle"', normal_prompt)
+        self.assertIn('"draft_translation": "Draft"', normal_prompt)
+
+    def test_text_blocks_keep_machine_draft_and_llm_review_separately(self):
+        response = TranslationResponse(
+            translations=[TranslationElement(id=1, translation="LLM review")]
+        )
+        translator = FakeTwoStepTranslator(["Machine draft"], responses=[response])
+        blocks = [TextBlock(text=["Quelle"])]
+
+        translator.translate_textblk_lst(blocks)
+
+        self.assertEqual(blocks[0].translation_draft, "Machine draft")
+        self.assertEqual(blocks[0].translation_llm_review, "LLM review")
+        self.assertEqual(blocks[0].translation, "LLM review")
+
+    def test_machine_fallback_is_not_labelled_as_llm_review(self):
+        empty = TranslationResponse(translations=[])
+        translator = FakeTwoStepTranslator(["Machine draft"], responses=[empty, empty])
+        blocks = [TextBlock(text=["Quelle"])]
+
+        translator.translate_textblk_lst(blocks)
+
+        self.assertEqual(blocks[0].translation, "Machine draft")
+        self.assertEqual(blocks[0].translation_draft, "Machine draft")
+        self.assertEqual(blocks[0].translation_llm_review, "")
+        self.assertTrue(blocks[0].translation_draft_fallback)
 
 
 if __name__ == "__main__":

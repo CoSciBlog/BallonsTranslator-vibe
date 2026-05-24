@@ -312,6 +312,7 @@ class BaseTranslator(BaseModule):
                 _translations = list(_translations) + draft_list[len(_translations):]
             for ii, idx in enumerate(non_empty_ids):
                 reviewed[idx] = _translations[ii]
+                textblk_lst[idx].translation_llm_review = _translations[ii]
 
         for callback_name, callback in self._postprocess_hooks.items():
             callback(translations=reviewed, textblocks=textblk_lst, translator=self)

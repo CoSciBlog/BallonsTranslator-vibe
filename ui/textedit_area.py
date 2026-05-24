@@ -15,8 +15,12 @@ from utils.logger import logger as LOGGER
 STYLE_TRANSPAIR_CHECKED = "background-color: rgba(30, 147, 229, 20%);"
 STYLE_TRANSPAIR_BOTTOM = "border-width: 5px; border-bottom-style: solid; border-color: rgb(30, 147, 229);"
 STYLE_TRANSPAIR_TOP = "border-width: 5px; border-top-style: solid; border-color: rgb(30, 147, 229);"
-STYLE_DRAFT_LABEL = "color: rgba(180, 200, 220, 80%); font-size: 11px;"
+STYLE_SOURCE_LABEL = "QLabel { color: #0075bf; font-weight: 600; }"
 STYLE_DRAFT_TEXT = "QTextEdit { background-color: rgba(30, 147, 229, 8%); }"
+STYLE_DRAFT_LABEL = "QLabel { color: #1382bb; font-weight: 600; }"
+STYLE_LLM_TEXT = "QTextEdit { background-color: rgba(33, 164, 110, 9%); }"
+STYLE_LLM_LABEL = "QLabel { color: #148055; font-weight: 600; }"
+STYLE_OUTPUT_LABEL = "QLabel { color: #6d4da6; font-weight: 600; }"
 
 try:
     from pynput.keyboard import Key, Controller
@@ -410,14 +414,26 @@ class TransPairWidget(Widget):
         super().__init__(*args, **kwargs)
         self.e_source = SourceTextEdit(idx, self, fold)
         self.e_draft = SourceTextEdit(idx, self, fold)
+        self.e_llm = SourceTextEdit(idx, self, fold)
         self.e_trans = TransTextEdit(idx, self, fold)
-        self.draft_label = QLabel(self.tr("First step draft"), self)
+        self.source_label = QLabel(self.tr("Original source"), self)
+        self.source_label.setStyleSheet(STYLE_SOURCE_LABEL)
+        self.draft_label = QLabel(self.tr("Machine draft (Google/DeepL)"), self)
         self.draft_label.setStyleSheet(STYLE_DRAFT_LABEL)
-        self.draft_label.setToolTip(self.tr("Google/DeepL translation result before LLM refinement. Use it to compare the raw draft with the final translation."))
+        self.draft_label.setToolTip(self.tr("Google/DeepL translation result before LLM refinement."))
         self.e_draft.setReadOnly(True)
-        self.e_draft.setToolTip(self.tr("Google/DeepL translation result before LLM refinement. This text is saved with the project and is hidden when no draft exists."))
-        self.e_draft.setPlaceholderText(self.tr("No first-step draft available."))
+        self.e_draft.setToolTip(self.tr("Machine translation saved before the LLM sees or revises it."))
+        self.e_draft.setPlaceholderText(self.tr("No machine draft available."))
         self.e_draft.setStyleSheet(STYLE_DRAFT_TEXT)
+        self.llm_label = QLabel(self.tr("LLM refinement / review"), self)
+        self.llm_label.setStyleSheet(STYLE_LLM_LABEL)
+        self.llm_label.setToolTip(self.tr("Result returned by the LLM after comparing the source and machine draft."))
+        self.e_llm.setReadOnly(True)
+        self.e_llm.setToolTip(self.tr("Saved LLM output before any later manual text editing."))
+        self.e_llm.setPlaceholderText(self.tr("No LLM review available."))
+        self.e_llm.setStyleSheet(STYLE_LLM_TEXT)
+        self.output_label = QLabel(self.tr("Editable translation output"), self)
+        self.output_label.setStyleSheet(STYLE_OUTPUT_LABEL)
         self.idx_label = RowIndexLabel(idx, self)
         self.idx_label.setText(str(idx + 1).zfill(2))   # showed index start from 1!
         self.submmit_idx = self.idx_label.submmit_idx.connect(self.on_idx_edited)
@@ -426,9 +442,13 @@ class TransPairWidget(Widget):
         self.checked = False
         vlayout = QVBoxLayout()
         vlayout.setAlignment(Qt.AlignTop)
+        vlayout.addWidget(self.source_label)
         vlayout.addWidget(self.e_source)
         vlayout.addWidget(self.draft_label)
         vlayout.addWidget(self.e_draft)
+        vlayout.addWidget(self.llm_label)
+        vlayout.addWidget(self.e_llm)
+        vlayout.addWidget(self.output_label)
         vlayout.addWidget(self.e_trans)
         vlayout.addWidget(SeparatorWidget(self))
         spacing = 7
@@ -445,6 +465,7 @@ class TransPairWidget(Widget):
 
         self.setAcceptDrops(True)
         self.setDraftText(getattr(textblock, "translation_draft", "") if textblock is not None else "")
+        self.setLlmReviewText(getattr(textblock, "translation_llm_review", "") if textblock is not None else "")
         self.setProviderResults(getattr(textblock, "translation_provider_results", {}) if textblock is not None else {})
 
     def setDraftText(self, text: str):
@@ -456,15 +477,26 @@ class TransPairWidget(Widget):
         self.draft_label.setVisible(show)
         self.e_draft.setVisible(show)
 
+    def setLlmReviewText(self, text: str):
+        text = text or ""
+        self.e_llm.block_all_signals(True)
+        self.e_llm.setPlainText(text)
+        self.e_llm.block_all_signals(False)
+        show = bool(text.strip())
+        self.llm_label.setVisible(show)
+        self.e_llm.setVisible(show)
+
     def setProviderResults(self, results: Dict[str, str]):
         if not isinstance(results, dict):
             results = {}
         for provider in ("Google", "DeepL Free", "DeepL"):
             value = results.get(provider)
             if value and str(value).strip():
+                self.draft_label.setText(self.tr("Machine draft") + f" - {provider}")
                 if not self.e_draft.toPlainText().strip():
                     self.setDraftText(str(value))
                 return
+        self.draft_label.setText(self.tr("Machine draft (Google/DeepL)"))
 
     def on_idx_edited(self, new_idx: int):
         new_idx -= 1
@@ -526,6 +558,7 @@ class TransPairWidget(Widget):
             self.idx_label.setText(str(idx + 1).zfill(2))
             self.e_source.idx = idx
             self.e_draft.idx = idx
+            self.e_llm.idx = idx
             self.e_trans.idx = idx
 
 
