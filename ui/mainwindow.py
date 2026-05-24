@@ -1,6 +1,6 @@
 import os.path as osp
 import json
-import os, re, traceback, sys
+import os, re, shutil, traceback, sys
 import numpy as np
 from typing import List, Union
 from pathlib import Path
@@ -51,6 +51,7 @@ from utils.archive_import import (
 from utils.archive_export import archive_export_filter, default_export_path, export_project
 from utils.io_utils import IMG_EXT
 from utils.batch_processing import collect_batch_project_dirs
+from utils.upscale import filename_has_upscale_marker
 from .canvas import Canvas
 from .configpanel import ConfigPanel
 from .module_manager import ModuleManager
@@ -58,7 +59,7 @@ from .textedit_area import SourceTextEdit, SelectTextMiniMenu, TransTextEdit
 from .drawingpanel import DrawingPanel
 from .scenetext_manager import SceneTextManager, TextPanel, PasteSrcItemsCommand
 from .mainwindowbars import TitleBar, LeftBar, BottomBar
-from .io_thread import ImgSaveThread, ImportDocThread, ExportDocThread
+from .io_thread import ImgSaveThread, ImportDocThread, ExportDocThread, ProjectUpscaleThread
 from .custom_widget import Widget, ViewWidget
 from .global_search_widget import GlobalSearchWidget
 from .glossary_widget import GlossaryWindow
@@ -173,6 +174,7 @@ class MainWindow(mainwindow_cls):
         self.imgtrans_progress_msgbox.setStyleSheet(styleSheet)
         self.export_doc_thread.progress_bar.setStyleSheet(styleSheet)
         self.import_doc_thread.progress_bar.setStyleSheet(styleSheet)
+        self.project_upscale_thread.progress_bar.setStyleSheet(styleSheet)
         return super().setStyleSheet(styleSheet)
 
     def setupThread(self):
@@ -181,6 +183,10 @@ class MainWindow(mainwindow_cls):
         self.export_doc_thread.fin_io.connect(self.on_fin_export_doc)
         self.import_doc_thread = ImportDocThread(self)
         self.import_doc_thread.fin_io.connect(self.on_fin_import_doc)
+        self.project_upscale_thread = ProjectUpscaleThread(self)
+        self.project_upscale_thread.progress_changed.connect(self.on_project_upscale_progress)
+        self.project_upscale_thread.upscale_finished.connect(self.on_project_upscale_finished)
+        self.project_upscale_thread.progress_bar.stop_clicked.connect(self.on_project_upscale_stop)
 
     def resetStyleSheet(self, reverse_icon: bool = False):
         theme = 'eva-dark' if pcfg.darkmode else 'eva-light'
@@ -1289,6 +1295,8 @@ class MainWindow(mainwindow_cls):
         self.titleBar.reinpaint_current_page_trigger.connect(self.run_reinpaint_current_page)
         self.titleBar.optimize_inpaint_current_page_trigger.connect(self.run_inpaint_optimize_current_page)
         self.titleBar.optimize_inpaint_all_pages_trigger.connect(self.run_inpaint_optimize_all_pages)
+        self.titleBar.upscale_project_2x_trigger.connect(self.run_project_upscale_2x)
+        self.titleBar.upscale_project_settings_trigger.connect(self.run_project_upscale_using_settings)
         self.titleBar.remove_current_page_masks_trigger.connect(self.remove_current_page_masks)
         self.titleBar.model_downloads_trigger.connect(self.show_model_download_window)
 
@@ -2418,6 +2426,101 @@ class MainWindow(mainwindow_cls):
             create_info_dialog(self.tr('No non-ignored pages are available for inpaint optimization.'))
             return
         self.module_manager.runInpaintOptimizationPipeline()
+
+    def run_project_upscale_2x(self):
+        self.run_project_upscale(2.0)
+
+    def run_project_upscale_using_settings(self):
+        self.configPanel.on_upscale_numeric_changed()
+        self.configPanel.on_upscale_quality_changed()
+        self.run_project_upscale(float(pcfg.upscale_factor))
+
+    def run_project_upscale(self, factor: float):
+        if self.imgtrans_proj.is_empty:
+            create_info_dialog(self.tr('Open a project before upscaling project images.'))
+            return
+        if self.module_manager.anyPipelineThreadRunning() or self.project_upscale_thread.isRunning():
+            create_info_dialog(self.tr('Another pipeline or upscaling task is already running. Please wait until it finishes.'))
+            return
+        if self.canvas.text_change_unsaved():
+            self.saveCurrentPage(update_scene_text=True, save_proj=True, restore_interface=True)
+
+        page_names = list(self.imgtrans_proj.pages.keys())
+        marked_pages = [page for page in page_names if filename_has_upscale_marker(page)]
+        if marked_pages:
+            msg = self.tr(
+                '{count} project page(s) already contain "upscaled" in the filename.\n\n'
+                'Choose Yes to upscale them again, No to skip them, or Cancel to stop.'
+            ).format(count=len(marked_pages))
+            answer = QMessageBox.question(
+                self,
+                self.tr('Already Upscaled Images Found'),
+                msg,
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No | QMessageBox.StandardButton.Cancel,
+            )
+            if answer == QMessageBox.StandardButton.Cancel:
+                return
+            if answer == QMessageBox.StandardButton.No:
+                page_names = [page for page in page_names if page not in marked_pages]
+        if not page_names:
+            create_info_dialog(self.tr('No project pages remain to upscale.'))
+            return
+
+        self.configPanel.on_upscale_numeric_changed()
+        self.configPanel.on_upscale_quality_changed()
+        started = self.project_upscale_thread.runUpscale(
+            self.imgtrans_proj.directory,
+            page_names,
+            factor,
+            pcfg.upscale_max_long_edge,
+            pcfg.upscale_skip_if_long_edge_above,
+            pcfg.upscale_quality,
+        )
+        if started:
+            self.project_upscale_thread.progress_bar.setTaskName(
+                self.tr('Upscaling project images ({factor}x): ').format(factor=f'{factor:g}')
+            )
+            self.project_upscale_thread.progress_bar.zero_progress()
+            self.project_upscale_thread.progress_bar.show()
+
+    def on_project_upscale_progress(self, current: int, total: int):
+        progress = int(current / max(total, 1) * 100)
+        self.project_upscale_thread.progress_bar.updateTaskProgress(progress, f' {current}/{total}')
+
+    def on_project_upscale_stop(self):
+        self.project_upscale_thread.requestStop()
+        self.project_upscale_thread.progress_bar.hide()
+
+    def on_project_upscale_finished(self, replacements, skipped, failures, stopped, staging_dir):
+        self.project_upscale_thread.progress_bar.hide()
+        if stopped:
+            create_info_dialog(self.tr('Project image upscaling was stopped. No source images were replaced.'))
+            return
+        if failures:
+            details = '\n'.join(f'- {name}: {reason}' for name, reason in failures[:8])
+            create_error_dialog(
+                RuntimeError(details),
+                self.tr('Project image upscaling failed. No source images were replaced.'),
+            )
+            return
+        if not replacements:
+            if staging_dir:
+                shutil.rmtree(staging_dir, ignore_errors=True)
+            create_info_dialog(self.tr('No project pages met the configured upscaling size limits.'))
+            return
+        try:
+            project_path = self.imgtrans_proj.proj_path
+            self.imgtrans_proj.replace_pages_with_upscaled_files(replacements)
+            self.openJsonProj(project_path)
+            msg = self.tr('Upscaled and replaced {count} project page(s).').format(count=len(replacements))
+            if skipped:
+                msg += self.tr('\nSkipped {count} page(s) because of configured size limits.').format(count=len(skipped))
+            create_info_dialog(msg)
+        except Exception as e:
+            create_error_dialog(e, self.tr('Failed to activate upscaled project images.'))
+        finally:
+            if staging_dir:
+                shutil.rmtree(staging_dir, ignore_errors=True)
 
     def remove_current_page_masks(self):
         if self.imgtrans_proj.is_empty or not self.imgtrans_proj.current_img:

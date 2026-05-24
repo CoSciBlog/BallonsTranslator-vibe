@@ -517,6 +517,14 @@ class TitleBar(Widget):
         optimizeInpaintAllAction.setToolTip(self.tr('Detect leftover text on all non-ignored inpainted pages and repair it with a second inpainting pass.'))
         self.optimize_inpaint_all_pages_trigger = optimizeInpaintAllAction.triggered
 
+        upscaleProject2xAction = QAction(self.tr('Upscale Project Images 2x'), self)
+        upscaleProject2xAction.setToolTip(self.tr('Replace all project pages with 2x upscaled files, using the Upscaling quality and size-limit settings.'))
+        self.upscale_project_2x_trigger = upscaleProject2xAction.triggered
+
+        upscaleProjectSettingsAction = QAction(self.tr('Upscale Project Images Using Settings'), self)
+        upscaleProjectSettingsAction.setToolTip(self.tr('Replace all project pages using the configured Upscaling factor, quality, and size limits.'))
+        self.upscale_project_settings_trigger = upscaleProjectSettingsAction.triggered
+
         removeMasksAction = QAction(self.tr('Remove All Masks Current Page'), self)
         removeMasksAction.setShortcut(QKeySequence('Ctrl+Shift+Backspace'))
         removeMasksAction.setToolTip(self.tr('Remove every mask on the current page and restore the inpainted pixels from the original image.'))
@@ -531,6 +539,8 @@ class TitleBar(Widget):
         toolsMenu.addAction(reinpaintAction)
         toolsMenu.addAction(optimizeInpaintCurrentAction)
         toolsMenu.addAction(optimizeInpaintAllAction)
+        toolsMenu.addAction(upscaleProject2xAction)
+        toolsMenu.addAction(upscaleProjectSettingsAction)
         toolsMenu.addAction(removeMasksAction)
         toolsMenu.addSeparator()
         toolsMenu.addAction(modelDownloadsAction)

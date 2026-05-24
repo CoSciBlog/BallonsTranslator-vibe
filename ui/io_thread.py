@@ -1,5 +1,7 @@
 import numpy as np
 import os.path as osp
+import shutil
+import tempfile
 import traceback
 
 from qtpy.QtCore import Qt, Signal, QUrl, QThread
@@ -7,9 +9,10 @@ from qtpy.QtGui import QImage, QPixmap
 from qtpy.QtWidgets import QDialog, QMessageBox, QFileDialog
 
 from utils.logger import logger as LOGGER
-from utils.io_utils import imread, imwrite
+from utils.io_utils import IMG_EXT, imread, imwrite
 from utils.message import create_error_dialog
 from utils.proj_imgtrans import ProjImgTrans
+from utils.upscale import effective_upscale_factor, project_upscale_filename, upscale_image
 from .custom_widget import ProgressMessageBox
 from .misc import pixmap2ndarray
 
@@ -173,7 +176,101 @@ class ImportDocThread(ImgTransProjFileIOThread):
         self.progress_bar.hide()
         self.fin_io.emit()
 
-    
+
+class ProjectUpscaleThread(ThreadBase):
+    progress_changed = Signal(int, int)
+    upscale_finished = Signal(object, object, object, bool, str)
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.progress_bar = ProgressMessageBox(self.tr('Upscaling project images: '))
+        self.stop_requested = False
+        self.directory = ''
+        self.img_list = []
+        self.factor = 2.0
+        self.max_long_edge = 0
+        self.skip_above = 0
+        self.quality = 'balanced'
+
+    def runUpscale(self, directory, img_list, factor, max_long_edge, skip_above, quality):
+        if self.isRunning():
+            return False
+        self.directory = directory
+        self.img_list = list(img_list)
+        self.factor = float(factor)
+        self.max_long_edge = int(max_long_edge)
+        self.skip_above = int(skip_above)
+        self.quality = quality
+        self.stop_requested = False
+        self.job = self._run_upscale
+        self.start()
+        return True
+
+    def requestStop(self):
+        self.stop_requested = True
+
+    def _run_upscale(self):
+        staging_dir = tempfile.mkdtemp(prefix='.upscale_staging_', dir=self.directory)
+        replacements = []
+        skipped = []
+        failures = []
+        total = len(self.img_list)
+        for index, source_name in enumerate(self.img_list):
+            if self.stop_requested:
+                shutil.rmtree(staging_dir, ignore_errors=True)
+                self.upscale_finished.emit([], skipped, failures, True, '')
+                return
+            try:
+                source_path = osp.join(self.directory, source_name)
+                image = imread(source_path)
+                height, width = image.shape[:2]
+                used_factor = effective_upscale_factor(
+                    width,
+                    height,
+                    self.factor,
+                    self.skip_above,
+                    self.max_long_edge,
+                )
+                if used_factor <= 1:
+                    skipped.append(source_name)
+                    continue
+
+                target_name = project_upscale_filename(source_name, self.factor)
+                target_path = osp.join(self.directory, target_name)
+                if source_name != target_name and osp.exists(target_path):
+                    failures.append((source_name, self.tr('Target file already exists: ') + target_name))
+                    continue
+
+                output, used_factor = upscale_image(image, used_factor, self.quality)
+                ext = osp.splitext(target_name)[1].lower()
+                if ext not in IMG_EXT:
+                    ext = '.png'
+                target_name = osp.splitext(target_name)[0] + ext
+                staged_path = osp.join(staging_dir, target_name)
+                imwrite(staged_path, output, ext=ext)
+                out_height, out_width = output.shape[:2]
+                replacements.append({
+                    'source_name': source_name,
+                    'target_name': target_name,
+                    'staged_path': staged_path,
+                    'used_factor': used_factor,
+                    'width': out_width,
+                    'height': out_height,
+                    'original_width': width,
+                    'original_height': height,
+                })
+            except Exception as e:
+                LOGGER.exception(f'Failed to upscale project image {source_name}.')
+                failures.append((source_name, str(e)))
+            finally:
+                self.progress_changed.emit(index + 1, total)
+
+        if failures:
+            shutil.rmtree(staging_dir, ignore_errors=True)
+            staging_dir = ''
+            replacements = []
+        self.upscale_finished.emit(replacements, skipped, failures, False, staging_dir)
+
 
 class MergeThread(ThreadBase):
     progress_changed = Signal(int, int)

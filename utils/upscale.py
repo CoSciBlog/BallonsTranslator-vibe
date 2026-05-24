@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Tuple
 
 import cv2
@@ -10,6 +11,16 @@ QUALITY_INTERPOLATION = {
     "quality": cv2.INTER_LANCZOS4,
     "animesharp": cv2.INTER_LANCZOS4,
 }
+
+
+def project_upscale_filename(imgname: str, factor: float) -> str:
+    factor_tag = f"{float(factor):.2f}".rstrip("0").rstrip(".").replace(".", "_")
+    source = Path(imgname)
+    return f"{source.stem}_upscaled_{factor_tag}x{source.suffix}"
+
+
+def filename_has_upscale_marker(imgname: str) -> bool:
+    return "upscaled" in Path(imgname).stem.lower()
 
 
 def effective_upscale_factor(

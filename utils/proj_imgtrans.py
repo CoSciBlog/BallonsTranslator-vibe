@@ -555,6 +555,94 @@ class ProjImgTrans:
         })
         return upscaled
 
+    @staticmethod
+    def _scale_textblock_for_source_replacement(blk: TextBlock, factor: float):
+        if factor <= 1:
+            return
+        blk.xyxy = [int(round(value * factor)) for value in blk.xyxy]
+        if blk.lines:
+            blk.lines = np.rint(np.asarray(blk.lines, dtype=np.float64) * factor).astype(np.int32).tolist()
+        if blk._bounding_rect is not None:
+            blk._bounding_rect = [int(round(value * factor)) for value in blk._bounding_rect]
+        if blk.distance is not None:
+            blk.distance = blk.distance * factor
+        if blk.vec is not None:
+            blk.vec = blk.vec * factor
+        if blk.norm > 0:
+            blk.norm *= factor
+        if blk.font_size > 0:
+            blk.font_size *= factor
+        if blk._detected_font_size > 0:
+            blk._detected_font_size *= factor
+        blk.region_mask = None
+        blk.region_inpaint_dict = None
+
+    def _remove_generated_page_outputs(self, imgname: str):
+        imgstem = osp.splitext(imgname)[0]
+        generated_dirs = [
+            self.mask_dir(),
+            self.inpainted_dir(),
+            self.upscaled_dir(),
+            self.decensor_mask_dir(),
+            self.decensored_dir(),
+            self.result_dir(),
+        ]
+        for directory in generated_dirs:
+            if not osp.isdir(directory):
+                continue
+            for filename in os.listdir(directory):
+                if osp.splitext(filename)[0] == imgstem:
+                    os.remove(osp.join(directory, filename))
+
+    def replace_pages_with_upscaled_files(self, replacements: List[Dict]):
+        if not replacements:
+            return
+        current_img = self.current_img
+        page_order = list(self.pages.keys())
+        replacement_by_name = {item['source_name']: item for item in replacements}
+
+        for item in replacements:
+            source_name = item['source_name']
+            target_name = item['target_name']
+            source_path = osp.join(self.directory, source_name)
+            target_path = osp.join(self.directory, target_name)
+            os.replace(item['staged_path'], target_path)
+            if source_path != target_path and osp.exists(source_path):
+                os.remove(source_path)
+
+            blocks = self.pages.pop(source_name, [])
+            used_factor = float(item['used_factor'])
+            for blk in blocks:
+                self._scale_textblock_for_source_replacement(blk, used_factor)
+            self.pages[target_name] = blocks
+
+            img_info = self._image_info.pop(source_name, {})
+            img_info.update({
+                'width': item['width'],
+                'height': item['height'],
+                'original_width': item['original_width'],
+                'original_height': item['original_height'],
+                'upscaled': True,
+                'upscale_factor': used_factor,
+                'finish_code': 0,
+            })
+            self._image_info[target_name] = img_info
+            if source_name in self.ignored_pages:
+                self.ignored_pages.remove(source_name)
+                self.ignored_pages.add(target_name)
+            self._remove_generated_page_outputs(source_name)
+
+        renamed_order = [
+            replacement_by_name[name]['target_name'] if name in replacement_by_name else name
+            for name in page_order
+        ]
+        self.pages = {name: self.pages[name] for name in renamed_order}
+        self._pagename2idx = {name: idx for idx, name in enumerate(renamed_order)}
+        self._idx2pagename = {idx: name for idx, name in enumerate(renamed_order)}
+        if current_img in replacement_by_name:
+            self.current_img = replacement_by_name[current_img]['target_name']
+        self.save(keep_exist_as_backup=True)
+
     def save_mask(self, img_name, mask: np.ndarray):
         self.ensure_dir(self.mask_dir())
         imwrite(self.get_mask_path(img_name), mask, ext=pcfg.intermediate_imgsave_ext, quality=pcfg.intermediate_imgsave_quality)

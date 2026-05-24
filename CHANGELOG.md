@@ -56,6 +56,7 @@
 - Language placeholders for LLM `system_prompt` and `reflection prompt`: `{source_language}`, `{target_language}`, `{input_language}`, `{output_language}`, `{from_lang}`, and `{to_lang}`.
 - GUI batch processing from the Open menu that selects a parent folder, treats each immediate image subfolder as a separate project with its own glossary, ignores generated output folders, runs projects sequentially through the normal pipeline, and can optionally export each project as `.cbz` or `.pdf`.
 - Persisted `translation_llm_review` output and sidebar provenance labels for original source, Google/DeepL machine draft, LLM review, and editable translation output.
+- Tools-menu project image upscaling actions for a fixed `2x` run or the configured Upscaling factor, with progress reporting, settings-based size/quality limits, and confirmation before re-upscaling files already marked `upscaled`.
 
 ### Changed
 
@@ -87,6 +88,8 @@
 - Google/DeepL direct and Two-Step first-step translations now mirror their raw provider output into `translation_draft` so the labelled machine-draft field is the single visible raw machine-translation result.
 - Two-Step reflection now runs after initial LLM refinement when enabled, with JSON-grounded source and machine-draft context; prompt textareas are taller and can grow vertically with the settings layout.
 - Bumped the fork runtime version string to `1.4.0-vibe.67`.
+- Project image upscaling now stages all generated replacements before changing page files, renames successful outputs with `_upscaled_<factor>x`, reloads the project after replacement, scales retained text-box geometry, and resets stale image-processing progress.
+- Bumped the fork runtime version string to `1.4.0-vibe.68`.
 
 ### Fixed
 
