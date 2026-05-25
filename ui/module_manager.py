@@ -561,6 +561,10 @@ class ImgtransThread(QThread):
         self.start()
 
     def _blktrans_pipeline(self, blk_list: List[TextBlock], tgt_img: np.ndarray, mode: int, blk_ids: List[int], tgt_mask):
+        if mode == -2:
+            self._review_textblocks(self.blktrans_page_key, blk_list)
+            self.finish_blktrans.emit(mode, blk_ids)
+            return
         if mode >= 0 and mode < 3:
             try:
                 self.ocr_thread.module.run_ocr(tgt_img, blk_list, split_textblk=True)
@@ -1435,7 +1439,7 @@ class ModuleManager(QObject):
             self.progress_msgbox.ocr_bar.show()
         if mode >= 2:
             self.progress_msgbox.inpaint_bar.show()
-        if mode != 0 and mode < 3:
+        if mode == -2 or (mode != 0 and mode < 3):
             self.progress_msgbox.translate_bar.show()
         self.progress_msgbox.zero_progress()
         self.progress_msgbox.show()

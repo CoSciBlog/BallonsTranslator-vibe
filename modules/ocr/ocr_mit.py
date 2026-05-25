@@ -8,11 +8,12 @@ from utils.textblock import collect_textblock_regions
 mit_params = {
     'chunk_size': {
         'type': 'selector',
-        'options': [8, 16, 24, 32],
-        'value': 16
+        'options': [4, 8, 16, 24, 32],
+        'value': 16,
+        'description': 'Number of line crops processed together. Larger batches improve GPU throughput but use more VRAM; reduce this if OCR runs out of memory or pages contain unusually wide text.',
     },
     'device': DEVICE_SELECTOR(not_supported=['privateuseone']),
-    'description': 'OCRMIT32px'
+    'description': 'MIT manga OCR backend. Chunk size trades GPU speed against memory consumption; model accuracy is fixed by the selected checkpoint.'
 }
 
 class MITModels(OCRBase):

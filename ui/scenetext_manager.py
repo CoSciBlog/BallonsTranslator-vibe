@@ -21,7 +21,7 @@ from utils.config import pcfg
 from utils import shared
 from utils.imgproc_utils import extract_ballon_region, rotate_polygons, get_connected_block_mask
 from utils.text_processing import seg_text, is_cjk
-from utils.text_layout import layout_text
+from utils.text_layout import fit_textbox_rect_to_bounds, layout_text
 from utils.textbox_merge import join_textbox_texts, union_xywh_rects
 from utils.text_cleanup import remove_translation_linebreaks
 
@@ -859,6 +859,7 @@ class SceneTextManager(QObject):
         img = self.imgtrans_proj.img_array
         if img is None:
             return
+        im_h, im_w = img.shape[:2]
 
         src_is_cjk = is_cjk(pcfg.module.translate_source)
         tgt_is_cjk = is_cjk(pcfg.module.translate_target)
@@ -888,7 +889,6 @@ class SceneTextManager(QObject):
             text = remove_translation_linebreaks(text)
 
         if mask is None:
-            im_h, im_w = img.shape[:2]
             bounding_rect = blkitem.absBoundingRect(max_h=im_h, max_w=im_w)
             if bounding_rect[2] <= 0 or bounding_rect[3] <= 0:
                 blkitem.setPlainText(text)
@@ -943,7 +943,7 @@ class SceneTextManager(QObject):
 
         adaptive_fntsize = False
         resize_ratio = 1
-        if self.auto_textlayout_flag and pcfg.let_fntsize_flag == 0 and pcfg.let_autolayout_flag:
+        if pcfg.let_fntsize_flag == 0 and pcfg.let_autolayout_flag:
             if blkitem.blk.src_is_vertical and blkitem.blk.vertical != blkitem.blk.src_is_vertical:
                 adaptive_fntsize = True
                 area_ratio = ballon_area / text_area
@@ -1031,9 +1031,22 @@ class SceneTextManager(QObject):
         if restore_charfmts:
             char_fmts = blkitem.get_char_fmts()        
         
-        ffmt = QFontMetricsF(blk_font)
-        maxw = max([ffmt.horizontalAdvance(t) for t in new_text.split('\n')])
-        blkitem.set_size(maxw * 1.5, xywh[3], set_layout_maxsize=True)
+        bubble_rect = None
+        if pcfg.let_autolayout_fit_bubble_flag and region_rect is not None:
+            bubble_rect = [
+                mask_xyxy[0] + region_rect[0],
+                mask_xyxy[1] + region_rect[1],
+                region_rect[2],
+                region_rect[3],
+            ]
+        safe_rect = fit_textbox_rect_to_bounds(
+            xywh,
+            im_w,
+            im_h,
+            bounds=bubble_rect,
+            inset=np.ceil(blkitem.padding()),
+        )
+        blkitem.setRect(QRectF(*safe_rect), padding=True, repaint=False)
         if pcfg.let_autolayout_no_linebreak_flag:
             new_text = remove_translation_linebreaks(new_text)
         blkitem.setPlainText(new_text)

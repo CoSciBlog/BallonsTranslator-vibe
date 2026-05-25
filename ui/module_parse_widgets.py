@@ -173,7 +173,7 @@ class ParamWidget(QWidget):
         layout.addStretch(-1)
 
         if 'description' in params:
-            self.setToolTip(params['description'])
+            self.setToolTip(wrap_tooltip(params['description']))
 
         for ii, param_key in enumerate(params):
             if param_key == 'description' or param_key.startswith('__'):

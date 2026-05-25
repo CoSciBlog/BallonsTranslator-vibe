@@ -4,6 +4,11 @@
 
 ### Added
 
+- Speech-bubble-aware Auto layout that automatically wraps/scales text, constrains generated text boxes to the detected bubble where possible, and prevents them from extending beyond page edges.
+- A text-box context-menu `Reflect / review selected translations` action that runs the active LLM-capable translator only on the selected boxes.
+- `manga_ocr` beam-size/output-length settings and expanded `mit48px` batch-size guidance for explicit accuracy, latency, and VRAM tradeoffs.
+- A Google Translate provider path aligned with Google's text translation endpoint, including optional automatic source-language detection for direct Google and Two-Step drafts.
+- Additional settings and context-menu hover descriptions for auto layout, OCR controls, and translation/review actions.
 - Zero-padded current/total page counter in the centered title bar, for example `001/217 pages`, updated as the selected page changes.
 - Batch Processing project progress bar and `Stop All` action for cancelling both the active pipeline and queued projects.
 - Batch Processing controls for multiple/direct folder paths, skipping previously processed work, source/target languages, fallback OCR, and optional permanent source-image upscaling with quality and size settings.

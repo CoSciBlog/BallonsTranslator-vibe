@@ -4,6 +4,39 @@ import numpy as np
 from .imgproc_utils import rotate_image
 from .textblock import TextBlock, TextAlignment
 
+
+def fit_textbox_rect_to_bounds(
+    rect: List[float],
+    image_width: int,
+    image_height: int,
+    bounds: List[float] = None,
+    inset: float = 0,
+) -> List[int]:
+    """Constrain an auto-layout content rectangle to the page and optional bubble."""
+    page_left, page_top = max(0.0, inset), max(0.0, inset)
+    page_right = max(page_left + 1, float(image_width) - inset)
+    page_bottom = max(page_top + 1, float(image_height) - inset)
+    if bounds is not None:
+        bx, by, bw, bh = bounds
+        page_left = max(page_left, float(bx) + inset)
+        page_top = max(page_top, float(by) + inset)
+        page_right = min(page_right, float(bx + bw) - inset)
+        page_bottom = min(page_bottom, float(by + bh) - inset)
+        if page_right <= page_left:
+            page_left, page_right = max(0.0, float(bx)), min(float(image_width), float(bx + bw))
+        if page_bottom <= page_top:
+            page_top, page_bottom = max(0.0, float(by)), min(float(image_height), float(by + bh))
+
+    x, y, width, height = [float(value) for value in rect]
+    available_width = max(1.0, page_right - page_left)
+    available_height = max(1.0, page_bottom - page_top)
+    width = min(max(1.0, width), available_width)
+    height = min(max(1.0, height), available_height)
+    x = min(max(x, page_left), page_right - width)
+    y = min(max(y, page_top), page_bottom - height)
+    return [int(round(x)), int(round(y)), int(round(width)), int(round(height))]
+
+
 class Line:
 
     def __init__(self, text: str = '', pos_x: int = 0, pos_y: int = 0, length: float = 0, spacing: int = 0) -> None:

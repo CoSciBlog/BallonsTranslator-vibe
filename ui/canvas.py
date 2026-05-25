@@ -169,6 +169,7 @@ class Canvas(QGraphicsScene):
     format_textblks = Signal()
     layout_textblks = Signal()
     merge_textblks = Signal()
+    review_textblks = Signal()
     reset_angle = Signal()
     squeeze_blk = Signal()
 
@@ -825,17 +826,30 @@ class Canvas(QGraphicsScene):
             menu.addSeparator()
 
             format_act = menu.addAction(self.tr("Apply font formatting"))
+            format_act.setToolTip(self.tr("Apply the current formatting preset to the selected text boxes."))
             layout_act = menu.addAction(self.tr("Auto layout"))
+            layout_act.setToolTip(self.tr("Fit, wrap, and scale selected translation text inside detected speech bubbles."))
             merge_act = menu.addAction(self.tr("Merge selected text boxes"))
+            merge_act.setToolTip(self.tr("Combine two or more selected regions into one text box."))
             merge_act.setEnabled(len(self.selected_text_items()) >= 2)
+            review_act = menu.addAction(self.tr("Reflect / review selected translations"))
+            review_act.setToolTip(self.tr("Use the active LLM-capable translator to revise only the selected translated text boxes against their source text."))
+            review_act.setEnabled(len(self.selected_text_items()) > 0)
             angle_act = menu.addAction(self.tr("Reset Angle"))
+            angle_act.setToolTip(self.tr("Reset rotation for selected text boxes."))
             squeeze_act = menu.addAction(self.tr("Squeeze"))
+            squeeze_act.setToolTip(self.tr("Shrink selected text boxes to their rendered text content."))
             menu.addSeparator()
             translate_act = menu.addAction(self.tr("translate"))
+            translate_act.setToolTip(self.tr("Translate the selected text boxes without rerunning OCR."))
             ocr_act = menu.addAction(self.tr("OCR"))
+            ocr_act.setToolTip(self.tr("Read source text again for the selected text boxes."))
             ocr_translate_act = menu.addAction(self.tr("OCR and translate"))
+            ocr_translate_act.setToolTip(self.tr("Read and translate only the selected text boxes."))
             ocr_translate_inpaint_act = menu.addAction(self.tr("OCR, translate and inpaint"))
+            ocr_translate_inpaint_act.setToolTip(self.tr("Read, translate, and remove original lettering only in the selected text boxes."))
             inpaint_act = menu.addAction(self.tr("inpaint"))
+            inpaint_act.setToolTip(self.tr("Remove original lettering only in the selected text boxes."))
 
             rst = menu.exec(pos)
             
@@ -857,6 +871,8 @@ class Canvas(QGraphicsScene):
                 self.layout_textblks.emit()
             elif rst == merge_act:
                 self.merge_textblks.emit()
+            elif rst == review_act:
+                self.review_textblks.emit()
             elif rst == angle_act:
                 self.reset_angle.emit()
             elif rst == squeeze_act:

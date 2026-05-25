@@ -13,37 +13,33 @@ class TranslateError(ProviderError):
     pass
 
 
-# --- Constants for Google Translate ---
 USER_AGENT_BROWSER = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36"
-# Use the API key from your example as a constant
-GOOGLE_API_KEY = "AIzaSyATBXajvzQLTDHEQbcpq0Ihe0vWDHmO520"
-GOOGLE_API_URL_BASE = "https://translate-pa.googleapis.com/v1"  # Base API URL
+GOOGLE_API_URL = "https://translate.googleapis.com/translate_a/single"
 
 
 class GoogleTranslateProviderPython:
-    """
-    Провайдер для взаимодействия с неофициальным Google Translate API (translateHtml).
-    Использует предопределенный API ключ.
-    """
-
-    api_url_path_segment = "/translateHtml"  # Path to the translation endpoint
+    """Lightweight client for Google's text translation JSON endpoint."""
 
     def __init__(self, timeout: int = 10):
         self.base_headers = {
-            "X-Goog-API-Key": GOOGLE_API_KEY,  # Use the constant
-            "Content-Type": "application/json+protobuf",
             "User-Agent": USER_AGENT_BROWSER,
         }
         self.fetch_opts = {"timeout": timeout}
         self.requests_session = requests.Session()
         self.requests_session.headers.update(self.base_headers)
 
-    def _request(self, method: str = "POST", json_payload: Dict = None):
-        actual_url = f"{GOOGLE_API_URL_BASE}{self.api_url_path_segment}"
-
+    def _request(self, text: str, target_language: str, source_language: str):
         try:
-            response = self.requests_session.request(
-                method, actual_url, json=json_payload, **self.fetch_opts
+            response = self.requests_session.get(
+                GOOGLE_API_URL,
+                params={
+                    "client": "gtx",
+                    "sl": source_language or "auto",
+                    "tl": target_language,
+                    "dt": "t",
+                    "q": text,
+                },
+                **self.fetch_opts,
             )
 
             if response.status_code >= 400:
@@ -78,11 +74,7 @@ class GoogleTranslateProviderPython:
     def translate(
         self, text_list: List[str], target_language: str, source_language: str = "auto"
     ) -> Dict[str, any]:
-        """
-        Переводит список текстов.
-        source_language: 'auto' или код языка (например, 'en')
-        target_language: код языка (например, 'ru')
-        """
+        """Translate text snippets, optionally auto-detecting the source language."""
         if not text_list:
             return {"lang": target_language, "translations": []}
 
@@ -92,27 +84,14 @@ class GoogleTranslateProviderPython:
                 translations_result.append("")
                 continue
 
-            payload = [[[text_item], source_language, target_language], "wt_lib"]
-
             try:
-                response_data = self._request(method="POST", json_payload=payload)
-
-                extracted_text = None
-                if (
-                    response_data
-                    and isinstance(response_data, list)
-                    and len(response_data) > 0
-                ):
-                    if isinstance(response_data[0], list) and len(response_data[0]) > 0:
-                        first_inner_item = response_data[0][0]
-                        if isinstance(first_inner_item, str):
-                            extracted_text = first_inner_item
-                        elif (
-                            isinstance(first_inner_item, list)
-                            and len(first_inner_item) > 0
-                            and isinstance(first_inner_item[0], str)
-                        ):
-                            extracted_text = first_inner_item[0]
+                response_data = self._request(text_item, target_language, source_language)
+                translated_segments = response_data[0] if response_data and isinstance(response_data, list) else []
+                extracted_text = ''.join(
+                    segment[0]
+                    for segment in translated_segments
+                    if isinstance(segment, list) and segment and isinstance(segment[0], str)
+                )
 
                 if extracted_text:
                     translations_result.append(html.unescape(extracted_text))
@@ -130,6 +109,11 @@ class TransGoogle(BaseTranslator):
     concate_text = False
     params: Dict = {
         "delay": 0.0,
+        "auto detect source language": {
+            "type": "checkbox",
+            "value": True,
+            "description": "Let Google detect the source language for each text block. Recommended for mixed or Traditional Chinese projects; disable only when forced source-language translation is intentional.",
+        },
     }
 
     def _setup_translator(self):
@@ -166,7 +150,11 @@ class TransGoogle(BaseTranslator):
             return []
 
         try:
-            source_lang_code = self.lang_map.get(self.lang_source, "auto")
+            source_lang_code = (
+                "auto"
+                if self.get_param_value("auto detect source language")
+                else self.lang_map.get(self.lang_source, "auto")
+            )
             target_lang_code = self.lang_map.get(self.lang_target, "en")
 
             response_data = self.internal_google_translator.translate(

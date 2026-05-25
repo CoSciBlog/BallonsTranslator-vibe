@@ -272,6 +272,7 @@ class MainWindow(mainwindow_cls):
         self.canvas.proj_savestate_changed.connect(self.on_savestate_changed)
         self.canvas.textstack_changed.connect(self.on_textstack_changed)
         self.canvas.run_blktrans.connect(self.on_run_blktrans)
+        self.canvas.review_textblks.connect(lambda: self.on_run_blktrans(-2))
         self.canvas.drop_open_folder.connect(self.dropOpenDir)
         self.canvas.originallayer_trans_slider = self.bottomBar.originalSlider
         self.canvas.textlayer_trans_slider = self.bottomBar.textlayerSlider
@@ -2274,6 +2275,9 @@ class MainWindow(mainwindow_cls):
             self.global_search_widget.set_document_edited()
 
     def on_run_blktrans(self, mode: int):
+        if mode == -2 and not self._translator_supports_review():
+            create_info_dialog(self.tr('Select ChatGPT, LLM_API_Translator, or Two-Step Translator before reviewing selected translations.'))
+            return
         blkitem_list = self.canvas.selected_text_items()
         self.translateBlkitemList(blkitem_list, mode)
 

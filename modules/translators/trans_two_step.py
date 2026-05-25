@@ -42,6 +42,11 @@ class TwoStepTranslator(LLM_API_Translator):
             "value": 0.5,
             "description": "Seconds to wait after each Google/DeepL first-step request. Increase this to reduce request bursts and lower the risk of temporary provider blocking; set to 0 for maximum speed.",
         },
+        "google auto detect source language": {
+            "type": "checkbox",
+            "value": True,
+            "description": "When Google is the first step, let it detect the source language. Recommended for mixed or Traditional Chinese source pages; disable only to enforce the selected source language.",
+        },
         "parallel first step during pipeline": {
             "type": "checkbox",
             "value": False,
@@ -127,6 +132,10 @@ class TwoStepTranslator(LLM_API_Translator):
             return 0.0
 
     @property
+    def google_auto_detect_source_language(self) -> bool:
+        return bool(self.get_param_value("google auto detect source language"))
+
+    @property
     def parallel_first_step_during_pipeline(self) -> bool:
         return bool(self.get_param_value("parallel first step during pipeline"))
 
@@ -201,7 +210,11 @@ class TwoStepTranslator(LLM_API_Translator):
         lang_map = self._google_lang_map()
         response = self.google_translator.translate(
             src_list,
-            source_language=lang_map.get(self.lang_source, "auto"),
+            source_language=(
+                "auto"
+                if self.google_auto_detect_source_language
+                else lang_map.get(self.lang_source, "auto")
+            ),
             target_language=lang_map.get(self.lang_target, "en"),
         )
         translations = response.get("translations", []) if response else []

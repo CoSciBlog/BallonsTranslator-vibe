@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README_EN.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.73`
+Fork release: `1.4.0-vibe.74`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -82,6 +82,9 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Extended Search/Replace with an opt-in `Include glossary` mode for project/reference terms, and made `Replace + Re-render` return to the page where it was started.
 - Refreshed the icon-only sidebar utility controls with larger icons, including a book icon for Glossary and an explicit `x2` upscale icon.
 - Wrapped long Settings checkbox descriptions so General and DL Module options no longer extend beyond the window or create horizontal scrolling.
+- Auto layout now wraps and scales translations inside detected speech bubbles and clamps generated text boxes to page edges, with a setting for bubble-bound layout.
+- Added right-click `Reflect / review selected translations` for selected text boxes when an LLM-capable translator is active.
+- Added `manga_ocr` accuracy/speed controls, clearer `mit48px` throughput guidance, and Google source auto-detection using the text translation endpoint for direct and Two-Step drafts.
 
 ## Features
 

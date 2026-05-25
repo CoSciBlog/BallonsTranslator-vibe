@@ -20,9 +20,13 @@ class MangaOcr:
         self.model.to(device)
 
     @torch.no_grad()
-    def __call__(self, img: np.ndarray):
+    def __call__(self, img: np.ndarray, num_beams: int = 1, max_new_tokens: int = 128):
         x = self.image_processor(img, return_tensors="pt").pixel_values.squeeze()
-        x = self.model.generate(x[None].to(self.model.device))[0].cpu()
+        x = self.model.generate(
+            x[None].to(self.model.device),
+            num_beams=max(1, int(num_beams)),
+            max_new_tokens=max(1, int(max_new_tokens)),
+        )[0].cpu()
         x = self.tokenizer.decode(x, skip_special_tokens=True)
         x = post_process(x)
         return x
@@ -44,7 +48,20 @@ def post_process(text):
 @register_OCR('manga_ocr')
 class MangaOCR(OCRBase):
     params = {
-        'device': DEVICE_SELECTOR()
+        'device': DEVICE_SELECTOR(),
+        'beam size': {
+            'type': 'selector',
+            'options': [1, 2, 4],
+            'value': 1,
+            'description': 'Number of candidate sequences explored while reading a bubble. Beam 1 is fastest; beam 2 or 4 can improve ambiguous Japanese text but increases OCR time.',
+        },
+        'max output characters': {
+            'type': 'selector',
+            'options': [64, 128, 256],
+            'value': 128,
+            'description': 'Maximum generated characters per detected region. Reduce this for short dialogue to finish sooner; raise it only when long captions are being cut off.',
+        },
+        'description': 'Japanese-oriented OCR for manga dialogue. Best for clean Japanese source text; use beam size for an accuracy/speed tradeoff.',
     }
     device = DEFAULT_DEVICE
 
@@ -67,7 +84,11 @@ class MangaOCR(OCRBase):
             self.model = MangaOcr(device=self.device)
 
     def ocr_img(self, img: np.ndarray) -> str:
-        return self.model(img)
+        return self.model(
+            img,
+            num_beams=self.get_param_value('beam size'),
+            max_new_tokens=self.get_param_value('max output characters'),
+        )
 
     def _ocr_blk_list(self, img: np.ndarray, blk_list: List[TextBlock], *args, **kwargs):
         im_h, im_w = img.shape[:2]
@@ -77,7 +98,7 @@ class MangaOCR(OCRBase):
                 x1 > 0 and y1 > 0 and x1 < x2 and y1 < y2: 
                 # Extract region and convert RGBA to RGB if necessary for model input
                 region = img[y1:y2, x1:x2]
-                blk.text = self.model(region)
+                blk.text = self.ocr_img(region)
             else:
                 self.logger.warning('invalid textbbox to target img')
                 blk.text = ['']
