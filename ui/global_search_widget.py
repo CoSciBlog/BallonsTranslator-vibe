@@ -16,6 +16,7 @@ from .io_thread import ThreadBase
 from utils import shared as C
 from utils.proj_imgtrans import ProjImgTrans
 from utils.text_cleanup import remove_translation_linebreaks
+from utils.glossary_replacement import count_glossary_matches, replace_glossary_matches
 
 SEARCHRST_FONTSIZE = 10.3
 
@@ -191,7 +192,7 @@ class GlobalReplaceThead(ThreadBase):
         self.searched_pattern: re.Pattern = None
         self.finished.connect(self.on_finished)
 
-    def replace(self, target: str):
+    def replace(self, target: str) -> bool:
         msg = QMessageBox()
         msg.setText(self.tr('Replace all occurrences?'))
         msg.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
@@ -201,6 +202,8 @@ class GlobalReplaceThead(ThreadBase):
             self.progress_bar.updateTaskProgress(0)
             self.progress_bar.show()
             self.start()
+            return True
+        return False
 
     def _search_proj(self, target: str):
         row_count = self.srt.rowCount()
@@ -286,6 +289,7 @@ class GlobalSearchWidget(Widget):
     replace_all = Signal()
     req_update_pagetext = Signal()
     req_move_page = Signal(str, bool)
+    glossary_replaced = Signal(dict, int)
 
     def __init__(self, parent: QWidget = None, *args, **kwargs) -> None:
         super().__init__(parent)
@@ -301,6 +305,8 @@ class GlobalSearchWidget(Widget):
         self.current_edit: SourceTextEdit = None
         self.current_cursor: QTextCursor = None
         self.result_pos = 0
+        self.glossary_match_count = 0
+        self._pending_glossary_target = None
 
         self.search_editor = SearchEditor(self, commit_latency=-1)
         self.search_editor.setPlaceholderText(self.tr('Find'))
@@ -327,6 +333,12 @@ class GlobalSearchWidget(Widget):
         self.regex_toggle.setToolTip(self.tr('Use Regular Expression'))
         self.regex_toggle.clicked.connect(self.on_regex_clicked)
 
+        self.include_glossary_toggle = QCheckBox(self.tr('Include glossary'), self)
+        self.include_glossary_toggle.setToolTip(
+            self.tr('Search and replace terms in project and reference glossary entries.')
+        )
+        self.include_glossary_toggle.clicked.connect(self.commit_search)
+
         self.range_combobox = QComboBox(self)
         self.range_combobox.addItems([self.tr('Translation'), self.tr('Source'), self.tr('All')])
         self.range_combobox.currentIndexChanged.connect(self.on_range_changed)
@@ -350,6 +362,7 @@ class GlobalSearchWidget(Widget):
         self.remove_all_linebreaks_btn.setToolTip(self.tr('Remove line breaks from translations on all pages.'))
         self.remove_all_linebreaks_btn.clicked.connect(self.on_remove_all_translation_linebreaks)
         self.replace_thread = GlobalReplaceThead()
+        self.replace_thread.finished.connect(self._on_replace_finished)
 
         for button in (
             self.replace_btn,
@@ -387,6 +400,7 @@ class GlobalSearchWidget(Widget):
         vlayout = QVBoxLayout(self)
         vlayout.addLayout(hlayout_bar1)
         vlayout.addLayout(hlayout_bar2)
+        vlayout.addWidget(self.include_glossary_toggle)
         vlayout.addWidget(self.result_label)
         vlayout.addWidget(self.search_tree)
         vlayout.addWidget(self.replace_btn)
@@ -452,6 +466,7 @@ class GlobalSearchWidget(Widget):
 
         self.req_update_pagetext.emit()
         self.counter_sum = 0
+        self.glossary_match_count = 0
 
         match_src = self.range_combobox.currentIndex() != 0
         match_trans = self.range_combobox.currentIndex() != 1
@@ -481,20 +496,58 @@ class GlobalSearchWidget(Widget):
                 pageitem = self.search_tree.addPage(pagename, page_match_counter, blkid2match)
                 pageitem.appendRows(page_rstitem_list)
 
+        if self.include_glossary_toggle.isChecked():
+            self.glossary_match_count = count_glossary_matches(
+                self.imgtrans_proj.glossary,
+                pattern,
+                match_src,
+                match_trans,
+            )
+            self.counter_sum += self.glossary_match_count
+
         self.search_tree.expandAll()
         self.updateResultText()
         self.replace_thread.searched_pattern = pattern
 
     def updateResultText(self):
         if self.counter_sum > 0:
-            self.result_label.setText(self.search_rst_str + str(self.counter_sum))
+            text = self.search_rst_str + str(self.counter_sum)
+            if self.glossary_match_count:
+                text += self.tr(' ({count} in glossary)').format(count=self.glossary_match_count)
+            self.result_label.setText(text)
         else:
             self.result_label.setText(self.no_result_str)
 
     def on_replace(self):
         if self.counter_sum < 1:
             return
-        self.replace_thread.replace(self.replace_editor.toPlainText())
+        self._pending_glossary_target = self.replace_editor.toPlainText()
+        if not self.replace_thread.replace(self._pending_glossary_target):
+            self._pending_glossary_target = None
+
+    def _replace_glossary(self, target: str) -> int:
+        if not self.include_glossary_toggle.isChecked():
+            return 0
+        replace_src = self.range_combobox.currentIndex() != 0
+        replace_trans = self.range_combobox.currentIndex() != 1
+        updated, count = replace_glossary_matches(
+            self.imgtrans_proj.glossary,
+            self.replace_thread.searched_pattern,
+            target,
+            replace_src,
+            replace_trans,
+        )
+        if count:
+            self.glossary_replaced.emit(updated, count)
+        return count
+
+    def _on_replace_finished(self):
+        if self._pending_glossary_target is None:
+            return
+        glossary_count = self._replace_glossary(self._pending_glossary_target)
+        self._pending_glossary_target = None
+        if glossary_count:
+            self.set_document_edited()
 
     def on_replace_rerender(self):
         if self.counter_sum < 1:
@@ -515,6 +568,7 @@ class GlobalSearchWidget(Widget):
         self.fin_page_counter = 0
         self.page_set = set()
         rerender_pages = []
+        original_page = self.imgtrans_proj.current_img
         for ii in range(self.num_pages):
             pagename = self.search_tree.sm.item(ii, 0).pagename
             self.page_set.add(pagename)
@@ -524,10 +578,11 @@ class GlobalSearchWidget(Widget):
                 rerender_pages.append([pagename, ii])
 
         # 20260418 优化全部替换并渲染全部文件界面卡顿问题
-        self.progress_bar.updateTaskProgress(0)
-        self.progress_bar.show()
-        # 新增：强制立即显示进度条弹窗
-        QApplication.processEvents()
+        if rerender_pages:
+            self.progress_bar.updateTaskProgress(0)
+            self.progress_bar.show()
+            # 新增：强制立即显示进度条弹窗
+            QApplication.processEvents()
 
         target = self.replace_editor.toPlainText()
 
@@ -553,11 +608,13 @@ class GlobalSearchWidget(Widget):
             # 这能防止程序未响应，并让后台保存线程（ImgSaveThread）发回的进度信号得以更新到进度条上。
             QApplication.processEvents()
 
-        if len(rerender_pages) > 0:
-            self.req_move_page.emit(pagename, True)
-            self.set_document_edited()
+        glossary_count = self._replace_glossary(target)
+        if rerender_pages:
+            self.req_move_page.emit(original_page, True)
             # 新增：确保最后一页的界面刷新不会卡顿
             QApplication.processEvents()
+        if rerender_pages or glossary_count:
+            self.set_document_edited()
         # 20260418 优化全部替换并渲染全部文件界面卡顿问题 end
 
     def _set_linebreak_result_text(self, changed_count: int):

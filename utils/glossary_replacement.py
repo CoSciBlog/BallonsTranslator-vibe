@@ -5,6 +5,7 @@ from typing import Dict, List, Tuple
 
 GlossaryEntry = Dict[str, str]
 Replacement = Tuple[str, str]
+GLOSSARY_ENTRY_FIELDS = ("entries", "reference_entries")
 
 
 def parse_glossary_entries(text: str) -> List[GlossaryEntry]:
@@ -67,6 +68,74 @@ def build_glossary_replacements(old_glossary: Dict[str, str], new_glossary: Dict
 
     replacements.sort(key=lambda item: len(item[0]), reverse=True)
     return replacements
+
+
+def count_glossary_matches(
+    glossary: Dict[str, str],
+    pattern: re.Pattern,
+    match_source: bool,
+    match_target: bool,
+) -> int:
+    if pattern is None:
+        return 0
+
+    count = 0
+    for field in GLOSSARY_ENTRY_FIELDS:
+        for entry in parse_glossary_entries((glossary or {}).get(field, "")):
+            if match_source:
+                count += sum(1 for _ in pattern.finditer(entry.get("source", "")))
+            if match_target:
+                count += sum(1 for _ in pattern.finditer(entry.get("target", "")))
+    return count
+
+
+def replace_glossary_matches(
+    glossary: Dict[str, str],
+    pattern: re.Pattern,
+    replacement: str,
+    replace_source: bool,
+    replace_target: bool,
+) -> Tuple[Dict[str, str], int]:
+    updated = dict(glossary or {})
+    if pattern is None:
+        return updated, 0
+
+    replacement_count = 0
+    for field in GLOSSARY_ENTRY_FIELDS:
+        original_text = updated.get(field, "")
+        lines = []
+        for line in (original_text or "").splitlines():
+            parsed = parse_glossary_entries(line)
+            if len(parsed) != 1:
+                lines.append(line)
+                continue
+
+            entry = parsed[0]
+            changed = False
+            if replace_source:
+                entry["source"], count = pattern.subn(replacement, entry["source"])
+                replacement_count += count
+                changed |= count > 0
+            if replace_target:
+                entry["target"], count = pattern.subn(replacement, entry["target"])
+                replacement_count += count
+                changed |= count > 0
+
+            if not changed:
+                lines.append(line)
+                continue
+
+            rendered = f'{entry["source"]} => {entry["target"]}'
+            category = entry.get("category", "")
+            note = entry.get("note", "")
+            if category:
+                rendered += f" [{category}]"
+            if note:
+                rendered += f" # {note}"
+            lines.append(rendered)
+        updated[field] = "\n".join(lines)
+
+    return updated, replacement_count
 
 
 def _term_pattern(term: str) -> re.Pattern:

@@ -501,6 +501,7 @@ class MainWindow(mainwindow_cls):
         self.global_search_widget.imgtrans_proj = self.imgtrans_proj
         self.global_search_widget.setupReplaceThread(self.st_manager.pairwidget_list, self.st_manager.textblk_item_list)
         self.global_search_widget.replace_thread.finished.connect(self.on_global_replace_finished)
+        self.global_search_widget.glossary_replaced.connect(self.on_global_search_glossary_replaced)
 
         self.configPanel.setupConfig()
         self.configPanel.save_config.connect(self.save_config)
@@ -1084,6 +1085,13 @@ class MainWindow(mainwindow_cls):
                     f'on {len(changed_pages)} page(s).'
                 )
             self.canvas.setProjSaveState(False)
+
+    def on_global_search_glossary_replaced(self, glossary: dict, replacement_count: int):
+        self.imgtrans_proj.glossary = self.imgtrans_proj.normalize_glossary(glossary)
+        self.sync_project_glossary_to_ui()
+        self.sync_project_glossary_to_translator()
+        if self.save_project_safely(self.tr('saving search/replace glossary'), notify_user=True):
+            LOGGER.info(f'Search/Replace updated {replacement_count} glossary occurrence(s).')
 
     def _set_pipeline_stage_state(self, detect: bool, ocr: bool, translate: bool, inpaint: bool):
         pcfg.module.enable_detect = detect

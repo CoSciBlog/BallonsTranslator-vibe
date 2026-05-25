@@ -1,5 +1,6 @@
 import unittest
 import os
+import re
 import sys
 
 APP_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -8,6 +9,8 @@ sys.path.append(APP_ROOT)
 from utils.glossary_replacement import (
     apply_glossary_replacements_to_text,
     build_glossary_replacements,
+    count_glossary_matches,
+    replace_glossary_matches,
 )
 
 
@@ -38,6 +41,35 @@ class GlossaryReplacementTest(unittest.TestCase):
 
         self.assertEqual(text, "<p>Tom and Jerry arrived.</p>")
         self.assertEqual(count, 1)
+
+    def test_counts_and_replaces_selected_glossary_columns(self):
+        glossary = {
+            "entries": "スイレン => Suinen [character] # heroine",
+            "reference_entries": "スイレン => Suinen [character]",
+        }
+        pattern = re.compile("Suinen")
+
+        self.assertEqual(count_glossary_matches(glossary, pattern, False, True), 2)
+        updated, count = replace_glossary_matches(glossary, pattern, "Suiren", False, True)
+
+        self.assertEqual(count, 2)
+        self.assertEqual(
+            updated["entries"],
+            "スイレン => Suiren [character] # heroine",
+        )
+        self.assertEqual(
+            updated["reference_entries"],
+            "スイレン => Suiren [character]",
+        )
+
+    def test_glossary_source_replacement_does_not_change_targets(self):
+        glossary = {"entries": "Alice => Alice [character]"}
+        pattern = re.compile("Alice")
+
+        updated, count = replace_glossary_matches(glossary, pattern, "Alicia", True, False)
+
+        self.assertEqual(count, 1)
+        self.assertEqual(updated["entries"], "Alicia => Alice [character]")
 
 
 if __name__ == "__main__":

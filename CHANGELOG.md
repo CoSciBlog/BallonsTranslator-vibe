@@ -68,6 +68,7 @@
 - `Auto (auto detect)` source selection for LLM/Two-Step translation and bilingual display labels for target-language selections.
 - Local SVG utility icons for the left-sidebar Censor Restoration, Re-Inpaint, Optimize Inpainting, Upscale 2x, and Region Merge actions.
 - A current-page Region Merge sidebar action that applies the stored General -> Post-merge mode, gap, and overlap settings.
+- Opt-in `Include glossary` support in Search/Replace for editing terms in project and reference glossary entries.
 
 ### Changed
 
@@ -109,6 +110,8 @@
 - Bumped the fork runtime version string to `1.4.0-vibe.70`.
 - Bumped the fork runtime version string to `1.4.0-vibe.71`.
 - Bumped the fork runtime version string to `1.4.0-vibe.72`.
+- Sidebar utility controls now use larger icons, with a book icon for Glossary and an explicit `x2` icon for the fixed-factor upscaler.
+- Bumped the fork runtime version string to `1.4.0-vibe.73`.
 
 ### Fixed
 
@@ -118,6 +121,7 @@
 - Kept Auto layout disabled text boxes from collapsing to very narrow detected text-line widths by preserving a wider balloon-based text box.
 - Improved Two-Step Translator LLM refinement handling for empty, partial, and malformed JSON responses.
 - Added strict LLM refinement retry before falling back to first-step drafts.
+- `Replace + Re-render` now returns to the page on which the operation was started instead of leaving the final rendered page selected.
 - Added safe ID-based partial merge for usable LLM refinement outputs.
 - Prevented partial refinement responses from discarding all usable ID-matched translations.
 - Improved Ollama request logging for local translation models.

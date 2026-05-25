@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.72`
+Fork release: `1.4.0-vibe.73`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -79,6 +79,8 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Improved Blackwell/RTX 50xx runtime repair so CUDA PyTorch wheels are force-reinstalled from the cu128 index instead of reusing an already-satisfied CPU Torch package, and runtime package installs now stream live progress output.
 - Normal starts now skip dependency and Runtime Manager checks after the first successful runtime setup. Checks run again on first start, `--update`, explicit `--repair-runtime`, or when `BALLOONTRANS_FORCE_RUNTIME_CHECK=1` is set.
 - Added global Search/Replace sidebar actions to remove translation line breaks from the current page or from every page in the project.
+- Extended Search/Replace with an opt-in `Include glossary` mode for project/reference terms, and made `Replace + Re-render` return to the page where it was started.
+- Refreshed the icon-only sidebar utility controls with larger icons, including a book icon for Glossary and an explicit `x2` upscale icon.
 - Wrapped long Settings checkbox descriptions so General and DL Module options no longer extend beyond the window or create horizontal scrolling.
 
 ## Features
@@ -216,7 +218,7 @@ For NVIDIA Blackwell/RTX 50xx systems, the auto profile uses the PyTorch cu128 w
 
 ## Project glossary
 
-The left sidebar includes a `Gloss` button with a glossary icon that opens the current project's glossary window. Entries, the glossary prompt, optional reference entries, and the optional reference prompt are saved in a separate `glossary.json` file inside the project's image folder, next to the project's `imgtrans_*.json` file, so each manga/comic project keeps its own terminology. The old Settings-page glossary text boxes are no longer used; edit glossary entries and prompts from the Glossary window. LLM translators use those entries for consistency, but category labels and notes such as `[CHARACTER]` or `[PLACE]` are treated as metadata and are not included in translation output. Automatic glossary extraction defaults to character/name entries and places only; optional translator checkboxes can enable organizations, titles, domain terms, honorifics, or catchphrases when needed. Automatically extracted names are merged without replacing existing manual glossary entries.
+The left sidebar includes a book-icon Glossary button that opens the current project's glossary window. Entries, the glossary prompt, optional reference entries, and the optional reference prompt are saved in a separate `glossary.json` file inside the project's image folder, next to the project's `imgtrans_*.json` file, so each manga/comic project keeps its own terminology. The old Settings-page glossary text boxes are no longer used; edit glossary entries and prompts from the Glossary window. LLM translators use those entries for consistency, but category labels and notes such as `[CHARACTER]` or `[PLACE]` are treated as metadata and are not included in translation output. Automatic glossary extraction defaults to character/name entries and places only; optional translator checkboxes can enable organizations, titles, domain terms, honorifics, or catchphrases when needed. Automatically extracted names are merged without replacing existing manual glossary entries.
 
 For LLM translators, `review speed mode` retains separate quality passes, combines glossary guidance into reflection for a faster single correction pass, keeps reflection only, or suppresses optional review calls. Automatic glossary extraction remains a separate request when enabled because it creates reusable glossary entries.
 
@@ -227,6 +229,8 @@ Use `Import Glossary` to merge entries from another `glossary.json` into the cur
 `Gloss Scan` is available as the `GScan` sidebar button and as `Run -> Gloss Scan Current Manga`. It temporarily runs text detection and OCR for the current non-ignored pages, skips inpainting, and then uses the selected `LLM_API_Translator` or `Two-Step Translator` settings to extract glossary entries from OCR text plus any existing official/reference translations in the text blocks. It appends likely names, places, organizations, titles, and terms to the current project's glossary without overwriting existing manual entries. Export that glossary from the Glossary window, then import it as a reference glossary in another manga or chapter when official names should guide later translation work.
 
 When an existing glossary entry's target text is changed, for example a character name is corrected, the app applies that target-term change to existing translations in the project, updates rich text where possible, saves `glossary.json` and the project JSON, and re-renders the affected result pages.
+
+Search/Replace has an `Include glossary` checkbox. When enabled, `Translation` also searches/replaces glossary target terms, `Source` handles source terms, and `All` handles both in the project and reference glossary entry lists. `Replace + Re-render` restores the page that was open when the operation began.
 
 Auto Glossary now extracts names/characters more conservatively: `name` entries are normalized to the `character` category, and interjections, SFX, punctuation, normal dialogue, questions, and commands are filtered so they are not saved as names or titles. Manual glossary entries remain dominant over automatic entries.
 
