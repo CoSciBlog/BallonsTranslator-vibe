@@ -62,6 +62,8 @@
 - Native Ollama `/api/chat` transport for `LLM_API_Translator` and `Two-Step Translator`, including the configurable `num ctx` runtime option for local model context length.
 - Per-request Ollama terminal metrics showing model load time, prompt-evaluation speed, and output-generation speed in tokens per second.
 - `Auto (auto detect)` source selection for LLM/Two-Step translation and bilingual display labels for target-language selections.
+- Local SVG utility icons for the left-sidebar Censor Restoration, Re-Inpaint, Optimize Inpainting, Upscale 2x, and Region Merge actions.
+- A current-page Region Merge sidebar action that applies the stored General -> Post-merge mode, gap, and overlap settings.
 
 ### Changed
 
@@ -101,6 +103,7 @@
 - Bumped the fork runtime version string to `1.4.0-vibe.69`.
 - Bumped the fork runtime version string to `1.4.0-vibe.70`.
 - Bumped the fork runtime version string to `1.4.0-vibe.71`.
+- Bumped the fork runtime version string to `1.4.0-vibe.72`.
 
 ### Fixed
 

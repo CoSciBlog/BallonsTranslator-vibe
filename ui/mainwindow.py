@@ -480,6 +480,7 @@ class MainWindow(mainwindow_cls):
 
         self.leftBar.run_imgtrans_clicked.connect(self.run_imgtrans)
         self.leftBar.run_gloss_scan_clicked.connect(self.run_gloss_scan_current_manga)
+        self.leftBar.run_region_merge_clicked.connect(self.run_merge_current_page_using_settings)
         self.leftBar.run_decensor_clicked.connect(self.run_decensor_current_page)
         self.leftBar.run_reinpaint_clicked.connect(self.run_reinpaint_current_page)
         self.leftBar.run_inpaint_optimize_clicked.connect(self.run_inpaint_optimize_current_page)
@@ -1534,7 +1535,13 @@ class MainWindow(mainwindow_cls):
         else:
             self.merge_dialog.show()
 
-    def run_merge_task(self, on_current=False):
+    def run_merge_current_page_using_settings(self):
+        self.run_merge_task(
+            on_current=True,
+            config=self.module_manager.post_merge_config_from_settings(),
+        )
+
+    def run_merge_task(self, on_current=False, config=None):
         from utils import merger
         from qtpy.QtWidgets import QMessageBox
         
@@ -1542,7 +1549,8 @@ class MainWindow(mainwindow_cls):
             QMessageBox.warning(self, self.tr("Warning"), self.tr("Please open a project first."))
             return
         
-        config = self.merge_dialog.get_config()
+        if config is None:
+            config = self.merge_dialog.get_config()
         
         if on_current:
             from utils.textblock import TextBlock

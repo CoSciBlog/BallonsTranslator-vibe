@@ -63,5 +63,52 @@ class TestMainWindowReInpaint(unittest.TestCase):
         self.assertEqual(dummy_manager.inpaint_thread.calls[0][1]["operation"], "reinpaint_current_page")
         self.assertEqual(dummy_manager.inpaint_thread.calls[0][1]["page_name"], "page.png")
 
+    def test_post_merge_config_uses_settings_values(self):
+        module_config = ui.module_manager.pcfg.module
+        original_values = (
+            module_config.post_merge_mode,
+            module_config.post_merge_max_vertical_gap,
+            module_config.post_merge_max_horizontal_gap,
+            module_config.post_merge_min_width_overlap_ratio,
+            module_config.post_merge_min_height_overlap_ratio,
+        )
+        try:
+            module_config.post_merge_mode = "HORIZONTAL_THEN_VERTICAL"
+            module_config.post_merge_max_vertical_gap = 41
+            module_config.post_merge_max_horizontal_gap = 52
+            module_config.post_merge_min_width_overlap_ratio = 63
+            module_config.post_merge_min_height_overlap_ratio = 74
+
+            method = ui.module_manager.ModuleManager.post_merge_config_from_settings
+            config = method(None)
+
+            self.assertEqual(config["MERGE_MODE"], "HORIZONTAL_THEN_VERTICAL")
+            self.assertEqual(config["VERTICAL_MERGE_PARAMS"]["max_vertical_gap"], 41)
+            self.assertEqual(config["HORIZONTAL_MERGE_PARAMS"]["max_horizontal_gap"], 52)
+            self.assertEqual(config["VERTICAL_MERGE_PARAMS"]["min_width_overlap_ratio"], 63)
+            self.assertEqual(config["HORIZONTAL_MERGE_PARAMS"]["min_height_overlap_ratio"], 74)
+        finally:
+            (
+                module_config.post_merge_mode,
+                module_config.post_merge_max_vertical_gap,
+                module_config.post_merge_max_horizontal_gap,
+                module_config.post_merge_min_width_overlap_ratio,
+                module_config.post_merge_min_height_overlap_ratio,
+            ) = original_values
+
+    def test_sidebar_region_merge_uses_settings_config(self):
+        config = {"MERGE_MODE": "VERTICAL"}
+        dummy_window = type("DummyWindow", (), {})()
+        dummy_window.module_manager = MagicMock()
+        dummy_window.module_manager.post_merge_config_from_settings.return_value = config
+        dummy_window.run_merge_task = MagicMock()
+
+        method = ui.mainwindow.MainWindow.run_merge_current_page_using_settings.__get__(
+            dummy_window, ui.mainwindow.MainWindow
+        )
+        method()
+
+        dummy_window.run_merge_task.assert_called_once_with(on_current=True, config=config)
+
 if __name__ == '__main__':
     unittest.main()

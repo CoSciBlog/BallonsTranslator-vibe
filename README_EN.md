@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.71`
+Fork release: `1.4.0-vibe.72`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -70,6 +70,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Added `Tools -> Upscale Project Images 2x` and `Tools -> Upscale Project Images Using Settings` to replace all eligible source pages with staged `_upscaled_<factor>x` outputs and reload the project with visible progress.
 - Added `Tools -> Batch Upscale Folders Using Settings...` to choose a parent directory and upscale every immediate source-image subfolder through the configured settings with the same modal progress, ETA, and Stop controls as the run pipeline.
 - Added a sidebar `x2` shortcut for the fixed-factor project upscaling action, using the same quality/limit settings and already-upscaled confirmation as `Tools -> Upscale Project Images 2x`.
+- Replaced abbreviated sidebar utility actions with local SVG icons and added a current-page Region Merge shortcut that uses the configured Post-merge thresholds.
 - Updated Ollama-backed LLM and Two-Step translation to use native `/api/chat` requests, with `num ctx` controlling the Ollama context window per request.
 - Added Ollama per-request terminal speed reporting, LLM/Two-Step `Auto (auto detect)` source selection, bilingual target-language labels, and a Translator-section LLM review/optimization switch.
 - Added glossary import/export, reference-glossary support, and a translated-folder glossary template builder for reusing official terminology across chapters.
@@ -256,6 +257,8 @@ Use `Tools -> Batch Upscale Folders Using Settings...` to select a parent folder
 
 The General settings page also places `Post-merge` near the top, before settings presets. It keeps concise labels for vertical gap, horizontal gap, and overlap thresholds while retaining the longer behavior descriptions in hover tooltips.
 
+The left sidebar Region Merge icon applies these persisted Post-merge mode, gap, and overlap values to nearby text boxes on the current page. Use `Tools -> Region Merge Tool` when label filters, reading directions, or other advanced dialog-only rules are needed.
+
 ## Intermediate image saving
 
 The General settings page lets you choose the intermediate image format for project-local masks, inpainted pages, and other working images. Supported formats are `PNG`, `JPG`, `WEBP`, and `JXL`. Intermediate images have their own quality field, separate from the final result image quality, so cache size and working-image fidelity can be tuned independently.
@@ -434,6 +437,7 @@ Notes:
 - Fork maintenance, archive import/export, launcher integration, Gloss Scan/reference glossary workflows, and documentation extension: this `BallonsTranslator-vibe` fork
 - Archive import uses Python standard-library ZIP handling and the user's locally installed `7z`/Pinokio-provided extractor for CBR files.
 - Archive export uses Python standard-library ZIP handling for `.cbz`/`.zip`, Pillow PDF writing for per-image PDF pages, and the user's locally installed `rar`/WinRAR command for `.cbr`.
+- Sidebar utility icons in `icons/leftbar_*.svg` are original SVG assets created for this fork; no external icon framework or additional icon license is included.
 
 ## License
 

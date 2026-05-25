@@ -1523,7 +1523,7 @@ class ModuleManager(QObject):
             return True
         return False
 
-    def _post_pipeline_merge_config(self) -> Dict:
+    def post_merge_config_from_settings(self) -> Dict:
         return {
             "MERGE_MODE": pcfg.module.post_merge_mode,
             "READING_DIRECTION": "LTR",
@@ -1585,7 +1585,7 @@ class ModuleManager(QObject):
         if not page_names:
             return
 
-        config = self._post_pipeline_merge_config()
+        config = self.post_merge_config_from_settings()
         changed_page_indices = []
         total_merged = 0
         for page_name in page_names:
