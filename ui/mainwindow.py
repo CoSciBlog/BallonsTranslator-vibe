@@ -49,7 +49,7 @@ from utils.archive_import import (
     is_archive_path,
 )
 from utils.archive_export import archive_export_filter, default_export_path, export_project
-from utils.io_utils import IMG_EXT
+from utils.io_utils import IMG_EXT, find_all_imgs
 from utils.batch_processing import collect_batch_project_dirs
 from utils.upscale import filename_has_upscale_marker
 from .canvas import Canvas
@@ -59,7 +59,13 @@ from .textedit_area import SourceTextEdit, SelectTextMiniMenu, TransTextEdit
 from .drawingpanel import DrawingPanel
 from .scenetext_manager import SceneTextManager, TextPanel, PasteSrcItemsCommand
 from .mainwindowbars import TitleBar, LeftBar, BottomBar
-from .io_thread import ImgSaveThread, ImportDocThread, ExportDocThread, ProjectUpscaleThread
+from .io_thread import (
+    BatchProjectUpscaleThread,
+    ExportDocThread,
+    ImgSaveThread,
+    ImportDocThread,
+    ProjectUpscaleThread,
+)
 from .custom_widget import Widget, ViewWidget
 from .global_search_widget import GlobalSearchWidget
 from .glossary_widget import GlossaryWindow
@@ -187,6 +193,9 @@ class MainWindow(mainwindow_cls):
         self.project_upscale_thread.progress_changed.connect(self.on_project_upscale_progress)
         self.project_upscale_thread.upscale_finished.connect(self.on_project_upscale_finished)
         self.project_upscale_thread.progress_bar.stop_clicked.connect(self.on_project_upscale_stop)
+        self.batch_project_upscale_thread = BatchProjectUpscaleThread(self)
+        self.batch_project_upscale_thread.progress_changed.connect(self.on_batch_project_upscale_progress)
+        self.batch_project_upscale_thread.upscale_finished.connect(self.on_batch_project_upscale_finished)
 
     def resetStyleSheet(self, reverse_icon: bool = False):
         theme = 'eva-dark' if pcfg.darkmode else 'eva-light'
@@ -455,6 +464,8 @@ class MainWindow(mainwindow_cls):
         module_manager.canvas_inpaint_finished.connect(self.on_reinpaint_current_page_finished)
         module_manager.setupThread(self.configPanel, self.imgtrans_progress_msgbox, self.ocr_postprocess, self.translate_preprocess, self.translate_postprocess)
         module_manager.progress_msgbox.showed.connect(self.on_imgtrans_progressbox_showed)
+        module_manager.progress_msgbox.stop_clicked.connect(self.on_batch_project_upscale_stop)
+        module_manager.progress_msgbox.force_stop_clicked.connect(self.on_batch_project_upscale_stop)
         module_manager.blktrans_pipeline_finished.connect(self.on_blktrans_finished)
         module_manager.imgtrans_thread.post_process_mask = self.drawingPanel.rectPanel.post_process_mask
         module_manager.inpaint_thread.finish_set_module.connect(self.on_finish_setinpainter)
@@ -1297,6 +1308,7 @@ class MainWindow(mainwindow_cls):
         self.titleBar.optimize_inpaint_all_pages_trigger.connect(self.run_inpaint_optimize_all_pages)
         self.titleBar.upscale_project_2x_trigger.connect(self.run_project_upscale_2x)
         self.titleBar.upscale_project_settings_trigger.connect(self.run_project_upscale_using_settings)
+        self.titleBar.batch_upscale_folders_trigger.connect(self.run_batch_project_upscale_using_settings)
         self.titleBar.remove_current_page_masks_trigger.connect(self.remove_current_page_masks)
         self.titleBar.model_downloads_trigger.connect(self.show_model_download_window)
 
@@ -2521,6 +2533,119 @@ class MainWindow(mainwindow_cls):
         finally:
             if staging_dir:
                 shutil.rmtree(staging_dir, ignore_errors=True)
+
+    def run_batch_project_upscale_using_settings(self):
+        if self.module_manager.anyPipelineThreadRunning() or self.batch_project_upscale_thread.isRunning():
+            create_info_dialog(self.tr('Another pipeline or batch upscaling task is already running. Please wait until it finishes.'))
+            return
+        if self.project_upscale_thread.isRunning():
+            create_info_dialog(self.tr('Project image upscaling is already running. Please wait until it finishes.'))
+            return
+
+        start_dir = getattr(self.imgtrans_proj, 'directory', '') or ''
+        root_dir = QFileDialog.getExistingDirectory(
+            self,
+            self.tr('Select Parent Folder for Batch Upscaling'),
+            start_dir,
+        )
+        if not root_dir:
+            return
+
+        project_dirs = collect_batch_project_dirs(root_dir)
+        if not project_dirs:
+            create_info_dialog(self.tr('No source-image subfolders found. Generated output folders are ignored.'))
+            return
+
+        jobs = []
+        marked_count = 0
+        for directory in project_dirs:
+            page_names = find_all_imgs(directory, abs_path=False, sort=True)
+            marked_count += sum(1 for page in page_names if filename_has_upscale_marker(page))
+            jobs.append((directory, page_names))
+        if marked_count:
+            answer = QMessageBox.question(
+                self,
+                self.tr('Already Upscaled Images Found'),
+                self.tr(
+                    '{count} image(s) in the selected source folders already contain "upscaled" in the filename.\n\n'
+                    'Choose Yes to upscale them again, No to skip them, or Cancel to stop.'
+                ).format(count=marked_count),
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No | QMessageBox.StandardButton.Cancel,
+            )
+            if answer == QMessageBox.StandardButton.Cancel:
+                return
+            if answer == QMessageBox.StandardButton.No:
+                jobs = [
+                    (directory, [page for page in page_names if not filename_has_upscale_marker(page)])
+                    for directory, page_names in jobs
+                ]
+                jobs = [(directory, page_names) for directory, page_names in jobs if page_names]
+        if not jobs:
+            create_info_dialog(self.tr('No source images remain to upscale.'))
+            return
+
+        if self.canvas.text_change_unsaved():
+            self.saveCurrentPage(update_scene_text=True, save_proj=True, restore_interface=True)
+        self.configPanel.on_upscale_numeric_changed()
+        self.configPanel.on_upscale_quality_changed()
+        started = self.batch_project_upscale_thread.runUpscale(
+            jobs,
+            float(pcfg.upscale_factor),
+            pcfg.upscale_max_long_edge,
+            pcfg.upscale_skip_if_long_edge_above,
+            pcfg.upscale_quality,
+        )
+        if not started:
+            return
+
+        self._batch_project_upscale_dirs = {osp.normcase(osp.abspath(directory)) for directory, _ in jobs}
+        progress_box = self.imgtrans_progress_msgbox
+        progress_box.hide_all_bars()
+        progress_box.detect_bar.description = self.tr('Batch Upscaling: ')
+        progress_box.detect_bar.show()
+        progress_box.zero_progress()
+        progress_box.show()
+
+    def on_batch_project_upscale_progress(self, current: int, total: int, folder_name: str):
+        progress = int(current / max(total, 1) * 100)
+        self.imgtrans_progress_msgbox.updateDetectProgress(progress, f' {current}/{total} - {folder_name}')
+
+    def on_batch_project_upscale_stop(self):
+        if self.batch_project_upscale_thread.isRunning():
+            self.batch_project_upscale_thread.requestStop()
+
+    def _restore_batch_project_upscale_progress(self):
+        self.imgtrans_progress_msgbox.hide()
+        self.imgtrans_progress_msgbox.detect_bar.description = self.tr('Detecting: ')
+        self.imgtrans_progress_msgbox.zero_progress()
+
+    def on_batch_project_upscale_finished(self, replaced_count, skipped_count, failures, stopped):
+        self._restore_batch_project_upscale_progress()
+        active_dir = osp.normcase(osp.abspath(getattr(self.imgtrans_proj, 'directory', '') or ''))
+        if active_dir and active_dir in getattr(self, '_batch_project_upscale_dirs', set()):
+            self.openJsonProj(self.imgtrans_proj.proj_path)
+        self._batch_project_upscale_dirs = set()
+
+        if stopped:
+            create_info_dialog(
+                self.tr('Batch upscaling stopped. Replaced {replaced} image(s) before stopping.').format(
+                    replaced=replaced_count,
+                )
+            )
+            return
+        if failures:
+            details = '\n'.join(f'- {name}: {reason}' for name, reason in failures[:8])
+            create_error_dialog(
+                RuntimeError(details),
+                self.tr(
+                    'Batch upscaling completed with errors after replacing {replaced} image(s).'
+                ).format(replaced=replaced_count),
+            )
+            return
+        msg = self.tr('Batch upscaling replaced {count} image(s).').format(count=replaced_count)
+        if skipped_count:
+            msg += self.tr('\nSkipped {count} image(s) because of configured size limits.').format(count=skipped_count)
+        create_info_dialog(msg)
 
     def remove_current_page_masks(self):
         if self.imgtrans_proj.is_empty or not self.imgtrans_proj.current_img:

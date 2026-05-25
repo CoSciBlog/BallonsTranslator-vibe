@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.68`
+Fork release: `1.4.0-vibe.69`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -68,6 +68,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Added comic export for `.cbz`, `.zip`, `.pdf`, and `.cbr` when a local RAR writer is installed.
 - Added GUI batch processing from the Open menu for processing each image subfolder as a separate project with its own `glossary.json`, selectable pipeline modules, optional `.cbz`/`.pdf` export, and an optional quit-on-finish mode.
 - Added `Tools -> Upscale Project Images 2x` and `Tools -> Upscale Project Images Using Settings` to replace all eligible source pages with staged `_upscaled_<factor>x` outputs and reload the project with visible progress.
+- Added `Tools -> Batch Upscale Folders Using Settings...` to choose a parent directory and upscale every immediate source-image subfolder through the configured settings with the same modal progress, ETA, and Stop controls as the run pipeline.
 - Added glossary import/export, reference-glossary support, and a translated-folder glossary template builder for reusing official terminology across chapters.
 - Added `Gloss Scan`, a current-manga glossary builder available from the Run menu. It detects text, runs OCR, then uses the selected `LLM_API_Translator` or `Two-Step Translator` settings, including Ollama/provider and glossary category settings, to build an exportable project/reference glossary without inpainting.
 - Improved Blackwell/RTX 50xx runtime repair so CUDA PyTorch wheels are force-reinstalled from the cu128 index instead of reusing an already-satisfied CPU Torch package, and runtime package installs now stream live progress output.
@@ -243,6 +244,8 @@ The source-language selector in Settings and the bottom translator bar now shows
 The General settings page starts with an `Upscaling` section. When `Upscale pages before detection` is enabled, each page can be upscaled into the project-local `upscaled` folder before text detection. Detection, OCR, mask creation, inpainting, canvas display, and export then use that high-resolution working image. The settings include labeled fields for upscale factor, maximum long-edge resolution, a long-edge threshold above which images are skipped, and speed/quality presets from `Fast` through `AnimeSharp`; detailed explanations remain available as hover tooltips.
 
 For permanent source-page replacement, use `Tools -> Upscale Project Images 2x` or `Tools -> Upscale Project Images Using Settings`. The first action forces only the factor to `2.0`; both actions use the configured maximum long edge, skip threshold, and quality preset. The second action also uses the configured factor. Generated page files are staged first and then written beside the original pages with names such as `001_upscaled_2x.png` or `001_upscaled_2_5x.png`; originals are removed only after successful generation, and the project reloads the new page files. If any current page filename already contains `upscaled`, the app asks whether those pages should be processed again or skipped. Existing text-box coordinates are scaled to the replacement image, while stale image-processing progress and generated page outputs are reset for a fresh pipeline run.
+
+Use `Tools -> Batch Upscale Folders Using Settings...` to select a parent folder containing multiple chapter/source-image folders. Each immediate subfolder containing image pages is processed with the configured factor, quality and size limits; generated folders named `mask`, `inpainted`, `result`, `upscaled`, `decensor_mask`, and `decensored` are excluded. The batch run uses the same modal progress placement and ETA/Stop controls as the normal run pipeline. Already marked `_upscaled_` images can be included again or skipped before processing begins.
 
 ## Post-merge settings
 

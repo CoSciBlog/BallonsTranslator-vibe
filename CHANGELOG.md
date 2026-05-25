@@ -57,6 +57,7 @@
 - GUI batch processing from the Open menu that selects a parent folder, treats each immediate image subfolder as a separate project with its own glossary, ignores generated output folders, runs projects sequentially through the normal pipeline, and can optionally export each project as `.cbz` or `.pdf`.
 - Persisted `translation_llm_review` output and sidebar provenance labels for original source, Google/DeepL machine draft, LLM review, and editable translation output.
 - Tools-menu project image upscaling actions for a fixed `2x` run or the configured Upscaling factor, with progress reporting, settings-based size/quality limits, and confirmation before re-upscaling files already marked `upscaled`.
+- Tools-menu batch upscaling for choosing a parent folder and replacing pages across its source-image subfolders with the configured Upscaling settings, using the modal run-pipeline progress view with ETA and Stop.
 
 ### Changed
 
@@ -90,6 +91,8 @@
 - Bumped the fork runtime version string to `1.4.0-vibe.67`.
 - Project image upscaling now stages all generated replacements before changing page files, renames successful outputs with `_upscaled_<factor>x`, reloads the project after replacement, scales retained text-box geometry, and resets stale image-processing progress.
 - Bumped the fork runtime version string to `1.4.0-vibe.68`.
+- Batch upscaling reuses the batch-project folder filter, so generated `mask`, `inpainted`, `result`, `upscaled`, `decensor_mask`, and `decensored` folders are not used as source-image projects.
+- Bumped the fork runtime version string to `1.4.0-vibe.69`.
 
 ### Fixed
 

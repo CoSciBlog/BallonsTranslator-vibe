@@ -13,6 +13,8 @@ sys.path.insert(0, APP_ROOT)
 from utils.proj_imgtrans import ProjImgTrans
 from utils.textblock import TextBlock
 from utils.upscale import filename_has_upscale_marker, project_upscale_filename
+from utils.batch_processing import collect_batch_project_dirs
+from ui.io_thread import BatchProjectUpscaleThread
 
 
 class ProjectUpscalingTest(unittest.TestCase):
@@ -60,6 +62,35 @@ class ProjectUpscalingTest(unittest.TestCase):
             self.assertEqual(project.current_img, target_name)
             self.assertFalse(osp.exists(matching_generated))
             self.assertTrue(osp.exists(unrelated_generated))
+
+    def test_batch_upscaling_processes_source_folders_and_leaves_generated_folders_untouched(self):
+        with tempfile.TemporaryDirectory() as root_dir:
+            source_dir = osp.join(root_dir, "Chapter 01")
+            generated_dir = osp.join(root_dir, "result")
+            os.makedirs(source_dir)
+            os.makedirs(generated_dir)
+            cv2.imwrite(osp.join(source_dir, "001.png"), np.zeros((12, 10, 3), dtype=np.uint8))
+            cv2.imwrite(osp.join(generated_dir, "001.png"), np.zeros((12, 10, 3), dtype=np.uint8))
+
+            jobs = [(directory, ["001.png"]) for directory in collect_batch_project_dirs(root_dir)]
+            self.assertEqual(jobs, [(source_dir, ["001.png"])])
+
+            thread = BatchProjectUpscaleThread()
+            completed = []
+            thread.upscale_finished.connect(lambda *args: completed.append(args))
+            thread.jobs = jobs
+            thread.factor = 2.0
+            thread.max_long_edge = 0
+            thread.skip_above = 0
+            thread.quality = "balanced"
+            thread._run_upscale()
+
+            self.assertTrue(completed)
+            self.assertEqual(completed[0][0], 1)
+            self.assertFalse(osp.exists(osp.join(source_dir, "001.png")))
+            self.assertTrue(osp.exists(osp.join(source_dir, "001_upscaled_2x.png")))
+            self.assertTrue(osp.exists(osp.join(generated_dir, "001.png")))
+            self.assertFalse(osp.exists(osp.join(generated_dir, "001_upscaled_2x.png")))
 
 
 if __name__ == "__main__":

@@ -525,6 +525,10 @@ class TitleBar(Widget):
         upscaleProjectSettingsAction.setToolTip(self.tr('Replace all project pages using the configured Upscaling factor, quality, and size limits.'))
         self.upscale_project_settings_trigger = upscaleProjectSettingsAction.triggered
 
+        batchUpscaleFoldersAction = QAction(self.tr('Batch Upscale Folders Using Settings...'), self)
+        batchUpscaleFoldersAction.setToolTip(self.tr('Choose a parent folder and replace pages in each source-image subfolder using the configured Upscaling settings.'))
+        self.batch_upscale_folders_trigger = batchUpscaleFoldersAction.triggered
+
         removeMasksAction = QAction(self.tr('Remove All Masks Current Page'), self)
         removeMasksAction.setShortcut(QKeySequence('Ctrl+Shift+Backspace'))
         removeMasksAction.setToolTip(self.tr('Remove every mask on the current page and restore the inpainted pixels from the original image.'))
@@ -541,6 +545,7 @@ class TitleBar(Widget):
         toolsMenu.addAction(optimizeInpaintAllAction)
         toolsMenu.addAction(upscaleProject2xAction)
         toolsMenu.addAction(upscaleProjectSettingsAction)
+        toolsMenu.addAction(batchUpscaleFoldersAction)
         toolsMenu.addAction(removeMasksAction)
         toolsMenu.addSeparator()
         toolsMenu.addAction(modelDownloadsAction)
