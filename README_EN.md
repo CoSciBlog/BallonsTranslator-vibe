@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.69`
+Fork release: `1.4.0-vibe.70`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -69,6 +69,8 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Added GUI batch processing from the Open menu for processing each image subfolder as a separate project with its own `glossary.json`, selectable pipeline modules, optional `.cbz`/`.pdf` export, and an optional quit-on-finish mode.
 - Added `Tools -> Upscale Project Images 2x` and `Tools -> Upscale Project Images Using Settings` to replace all eligible source pages with staged `_upscaled_<factor>x` outputs and reload the project with visible progress.
 - Added `Tools -> Batch Upscale Folders Using Settings...` to choose a parent directory and upscale every immediate source-image subfolder through the configured settings with the same modal progress, ETA, and Stop controls as the run pipeline.
+- Added a sidebar `x2` shortcut for the fixed-factor project upscaling action, using the same quality/limit settings and already-upscaled confirmation as `Tools -> Upscale Project Images 2x`.
+- Updated Ollama-backed LLM and Two-Step translation to use native `/api/chat` requests, with `num ctx` controlling the Ollama context window per request.
 - Added glossary import/export, reference-glossary support, and a translated-folder glossary template builder for reusing official terminology across chapters.
 - Added `Gloss Scan`, a current-manga glossary builder available from the Run menu. It detects text, runs OCR, then uses the selected `LLM_API_Translator` or `Two-Step Translator` settings, including Ollama/provider and glossary category settings, to build an exportable project/reference glossary without inpainting.
 - Improved Blackwell/RTX 50xx runtime repair so CUDA PyTorch wheels are force-reinstalled from the cu128 index instead of reusing an already-satisfied CPU Torch package, and runtime package installs now stream live progress output.
@@ -171,6 +173,8 @@ The Drawboard sidebar also includes a `Show translated text` checkbox. Enable it
 Enable `Run -> Enable Inpaint Optimization` to add a second detect-and-inpaint pass after normal inpainting. The optimizer scans the finished inpainted page for leftover text-like regions, merges the residual mask into the page mask, and repairs those regions with the active inpainter.
 
 Use the left sidebar `Opt` button or `Tools -> Optimize Inpainting Current Page` for the currently opened page. Use `Tools -> Optimize Inpainting All Pages` to scan all non-ignored pages after a project is already processed.
+
+The left sidebar also includes an `x2` button for the current project. It performs the same operation as `Tools -> Upscale Project Images 2x`: page images are scaled by factor `2.0`, while quality, maximum long edge and skip threshold are read from the Upscaling settings. If page names already contain `upscaled`, the confirmation dialog appears before processing.
 
 ## Pronoun and address review
 
@@ -277,11 +281,13 @@ These settings improve continuity for names, tone, and references when pages are
 
 The `Two-Step Translator` first creates Google, DeepL Free, or DeepL draft translations, then asks the configured LLM to refine those drafts. `fallback to first step` is the final fallback only: it uses first-step draft translations if the normal LLM refinement and the strict LLM retry both fail.
 
+When `Ollama` is selected, translation, refinement, reflection, and glossary calls use Ollama's native `/api/chat` endpoint. Set `num ctx` in translator settings to pass an explicit `options.num_ctx` context window; leave it at `0` to retain the Ollama server default. Existing saved endpoints ending in `/v1` continue to work and are normalized to the native endpoint.
+
 The strict retry is attempted before the final draft fallback when the LLM returns empty JSON, malformed JSON, a partial response, missing IDs, extra IDs, or a mismatched item count. Usable partial LLM results are merged by numeric ID only, never by list position, so a response for `id: 2` cannot be applied to `id: 1`.
 
 When Google, DeepL Free, or DeepL is used directly or as the Two-Step first step, the raw provider output is saved on each text block in `translation_provider_results` inside the project JSON and mirrored into `translation_draft`. The text editor sidebar shows this Google/DeepL result only as `First step draft`; the separate machine-translation-results field was removed.
 
-For local Ollama models such as `translategemma:12b` or `translategemma:27b`, disabling `reasoning` is usually faster and more stable for JSON output. Use moderate `max tokens` values, typically 2048-4096; values above 8192 are clamped for Ollama refinement requests. Smaller refinement chunks also improve JSON stability for local models.
+For local Ollama models such as `translategemma:12b` or `translategemma:27b`, disabling `reasoning` is usually faster and more stable for JSON output. Use moderate `max tokens` values, typically 2048-4096; values above 8192 are clamped for Ollama refinement requests. Raising `num ctx` permits longer prompt context but increases local memory use. Smaller refinement chunks also improve JSON stability for local models.
 
 ## LLM model matrix benchmark
 
@@ -292,7 +298,7 @@ Benchmark output is written under `benchmarks/results/` as JSON, CSV, and a Mark
 The same benchmark can be run from the command line:
 
 ```bash
-python scripts/benchmark_llm_model_matrix.py --models translategemma:12b,translategemma:27b,qwen3.5:9b --translator-types llm,two_step --runs-per-model 3 --provider Ollama --endpoint http://localhost:11434/v1 --texts "こんにちは||ありがとう"
+python scripts/benchmark_llm_model_matrix.py --models translategemma:12b,translategemma:27b,qwen3.5:9b --translator-types llm,two_step --runs-per-model 3 --provider Ollama --endpoint http://localhost:11434 --texts "こんにちは||ありがとう"
 ```
 
 ## Programmatic use

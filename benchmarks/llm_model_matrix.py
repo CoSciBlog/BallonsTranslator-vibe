@@ -48,7 +48,7 @@ class BenchmarkConfig:
     translator_types: List[str] = field(default_factory=lambda: ["llm", "two_step"])
     runs_per_model: int = 1
     provider: str = "Ollama"
-    endpoint: str = "http://localhost:11434/v1"
+    endpoint: str = "http://localhost:11434"
     max_tokens: int = 4096
     num_ctx: Optional[int] = None
     num_predict: Optional[int] = None

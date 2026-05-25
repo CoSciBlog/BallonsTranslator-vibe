@@ -40,7 +40,7 @@ def main() -> int:
     parser.add_argument("--runs-per-model", type=int, default=1)
     parser.add_argument("--warmup-runs", type=int, default=0)
     parser.add_argument("--provider", default="Ollama")
-    parser.add_argument("--endpoint", default="http://localhost:11434/v1")
+    parser.add_argument("--endpoint", default="http://localhost:11434")
     parser.add_argument("--max-tokens", type=int, default=4096)
     parser.add_argument("--num-predict", type=int, default=None)
     parser.add_argument("--num-ctx", type=int, default=None)

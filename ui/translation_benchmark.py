@@ -205,7 +205,7 @@ class TranslationBenchmarkWindow(QDialog):
         self.matrix_warmup_spin.setValue(0)
 
         self.matrix_provider_edit = QLineEdit("Ollama")
-        self.matrix_endpoint_edit = QLineEdit("http://localhost:11434/v1")
+        self.matrix_endpoint_edit = QLineEdit("http://localhost:11434")
 
         self.matrix_max_tokens_spin = QSpinBox()
         self.matrix_max_tokens_spin.setRange(1, 200000)

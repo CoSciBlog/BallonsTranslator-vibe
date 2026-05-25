@@ -60,7 +60,7 @@ class TwoStepTranslator(LLM_API_Translator):
     }
     params["provider"]["value"] = "Ollama"
     params["model"]["value"] = "OLLAMA: qwen3"
-    params["endpoint"]["value"] = "http://localhost:11434/v1"
+    params["endpoint"]["value"] = "http://localhost:11434"
     params["system_prompt"][
         "value"
     ] = (

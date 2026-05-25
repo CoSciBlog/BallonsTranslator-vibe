@@ -483,6 +483,7 @@ class MainWindow(mainwindow_cls):
         self.leftBar.run_decensor_clicked.connect(self.run_decensor_current_page)
         self.leftBar.run_reinpaint_clicked.connect(self.run_reinpaint_current_page)
         self.leftBar.run_inpaint_optimize_clicked.connect(self.run_inpaint_optimize_current_page)
+        self.leftBar.run_upscale_2x_clicked.connect(self.run_project_upscale_2x)
         self.leftBar.run_translate_clicked.connect(self.run_translate_only)
 
         self.titleBar.darkModeAction.setChecked(pcfg.darkmode)

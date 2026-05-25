@@ -3,6 +3,7 @@ import time
 import json
 import traceback
 import unicodedata
+from types import SimpleNamespace
 from typing import Any, List, Dict, Optional, Set, Tuple, Type
 
 import httpx
@@ -267,7 +268,7 @@ class LLM_API_Translator(BaseTranslator):
         },
         "endpoint": {
             "value": "",
-            "description": "Base URL for the API. Leave empty for provider default.",
+            "description": "Base URL for the API. Leave empty for provider default. Ollama uses its native /api/chat endpoint; an existing URL ending in /v1 is accepted and normalized automatically.",
         },
         "system_prompt": {
             "type": "editor",
@@ -308,7 +309,7 @@ class LLM_API_Translator(BaseTranslator):
         },
         "num ctx": {
             "value": 0,
-            "description": "Optional Ollama context window size. 0 lets the provider use its default.",
+            "description": "Ollama context window size passed as native options.num_ctx. 0 leaves the Ollama/server default unchanged. Larger contexts require more RAM/VRAM.",
         },
         "reflection": {
             "type": "checkbox",
@@ -478,7 +479,7 @@ class LLM_API_Translator(BaseTranslator):
             elif provider == "Grok":
                 endpoint = "https://api.x.ai/v1"
             elif provider == "Ollama":
-                endpoint = "http://localhost:11434/v1"
+                endpoint = "http://localhost:11434"
 
         proxy = self.proxy
         http_client = None
@@ -507,6 +508,9 @@ class LLM_API_Translator(BaseTranslator):
         )
 
         try:
+            if provider == "Ollama":
+                self.client = http_client
+                return True
             self.client = openai.OpenAI(
                 api_key=api_key_to_use, base_url=endpoint, http_client=http_client
             )
@@ -1934,6 +1938,8 @@ class LLM_API_Translator(BaseTranslator):
         return response_model.model_validate(raw_data)
 
     def _create_completion(self, api_args: Dict):
+        if self.provider == "Ollama":
+            return self._create_ollama_completion(api_args)
         try:
             return self.client.chat.completions.create(**api_args)
         except openai.BadRequestError as e:
@@ -1971,6 +1977,50 @@ class LLM_API_Translator(BaseTranslator):
                 return self.client.chat.completions.create(**retry_args)
             except Exception:
                 raise e
+
+    def _ollama_chat_endpoint(self) -> str:
+        endpoint = (self.endpoint or "http://localhost:11434").rstrip("/")
+        if endpoint.endswith("/api/chat"):
+            return endpoint
+        if endpoint.endswith("/v1"):
+            endpoint = endpoint[:-3].rstrip("/")
+        return f"{endpoint}/api/chat"
+
+    def _create_ollama_completion(self, api_args: Dict):
+        options = {
+            "temperature": api_args.get("temperature", self.temperature),
+            "top_p": api_args.get("top_p", self.top_p),
+            "num_predict": api_args.get("max_tokens", self.max_tokens),
+        }
+        extra_body = api_args.get("extra_body", {})
+        if extra_body.get("num_ctx", 0) > 0:
+            options["num_ctx"] = extra_body["num_ctx"]
+
+        payload = {
+            "model": api_args["model"],
+            "messages": api_args["messages"],
+            "stream": False,
+            "options": options,
+            "think": bool(extra_body.get("think", False)),
+        }
+        if api_args.get("response_format"):
+            payload["format"] = "json"
+
+        response = self.client.post(
+            self._ollama_chat_endpoint(),
+            json=payload,
+            timeout=120,
+        )
+        response.raise_for_status()
+        response_data = response.json()
+        content = response_data.get("message", {}).get("content", "")
+        total_tokens = int(response_data.get("prompt_eval_count", 0) or 0) + int(
+            response_data.get("eval_count", 0) or 0
+        )
+        return SimpleNamespace(
+            choices=[SimpleNamespace(message=SimpleNamespace(content=content))],
+            usage=SimpleNamespace(total_tokens=total_tokens),
+        )
 
     def _respect_delay(self):
         current_time = time.time()
