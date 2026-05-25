@@ -437,6 +437,8 @@ class TitleBar(Widget):
         self.normalsize = False
         self.proj_name = ''
         self.page_name = ''
+        self.page_index = None
+        self.page_count = 0
         self.save_state = ''
         self.setFixedHeight(TITLEBAR_HEIGHT)
         self.setMouseTracking(True)
@@ -773,7 +775,14 @@ class TitleBar(Widget):
         self.mPos = None
         return super().leaveEvent(e)
 
-    def setTitleContent(self, proj_name: str = None, page_name: str = None, save_state: str = None):
+    def setTitleContent(
+        self,
+        proj_name: str = None,
+        page_name: str = None,
+        save_state: str = None,
+        page_index: int = None,
+        page_count: int = None,
+    ):
         max_proj_len = 50
         max_page_len = 50
         if proj_name is not None:
@@ -784,9 +793,20 @@ class TitleBar(Widget):
             if len(page_name) > max_page_len:
                 page_name = page_name[:max_page_len-3] + '...'
             self.page_name = page_name
+        if page_index is not None:
+            self.page_index = page_index
+        if page_count is not None:
+            self.page_count = page_count
         if save_state is not None:
             self.save_state = save_state
         title = self.proj_name + ' - ' + self.page_name
+        if self.page_name and self.page_index is not None and self.page_count > 0:
+            digits = max(3, len(str(self.page_count)))
+            page_counter = self.tr('{current}/{total} pages').format(
+                current=str(self.page_index).zfill(digits),
+                total=str(self.page_count).zfill(digits),
+            )
+            title += '  ' + page_counter
         if self.save_state != '':
             title += ' - '  + self.save_state
         self.titleLabel.setText(title)

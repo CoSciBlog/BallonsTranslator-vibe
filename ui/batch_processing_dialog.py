@@ -12,10 +12,13 @@ from qtpy.QtWidgets import (
     QLabel,
     QLineEdit,
     QPushButton,
+    QDoubleSpinBox,
+    QSpinBox,
     QVBoxLayout,
 )
 
 from modules import GET_VALID_INPAINTERS, GET_VALID_OCR, GET_VALID_TEXTDETECTORS, GET_VALID_TRANSLATORS
+from modules.translators.base import LANGUAGE_ENGLISH_NAMES, lang_display_label, lang_display_to_key
 from utils.batch_processing import collect_batch_project_dirs
 from utils.config import pcfg
 
@@ -35,16 +38,27 @@ class BatchProcessingOptions:
     export_enabled: bool
     export_ext: str
     quit_when_finished: bool
+    skip_translated_pages: bool
+    skip_finished_projects: bool
+    upscale_enabled: bool
+    upscale_factor: float
+    upscale_max_long_edge: int
+    upscale_skip_if_long_edge_above: int
+    upscale_quality: str
+    source_language: str
+    target_language: str
+    ocr_fallback_enabled: bool
+    ocr_fallback: str
 
 
 class BatchProcessingDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle(self.tr('Batch Processing'))
-        self.setMinimumWidth(560)
+        self.setMinimumWidth(680)
 
         self.root_edit = QLineEdit()
-        self.root_edit.setReadOnly(True)
+        self.root_edit.setPlaceholderText(self.tr('Enter one or more folders separated by semicolons or new lines.'))
         self.root_edit.textChanged.connect(self.update_project_count)
         browse_btn = QPushButton(self.tr('Select Folder...'))
         browse_btn.clicked.connect(self.select_root_dir)
@@ -68,6 +82,40 @@ class BatchProcessingDialog(QDialog):
         self.ocr_combo = self._combo(GET_VALID_OCR(), pcfg.module.ocr)
         self.inpaint_combo = self._combo(GET_VALID_INPAINTERS(), pcfg.module.inpainter)
         self.translator_combo = self._combo(GET_VALID_TRANSLATORS(), pcfg.module.translator)
+        self.ocr_fallback_check = QCheckBox(self.tr('Fallback OCR when no text is recognized'))
+        fallback_ocr = 'mit48px' if 'mit48px' in GET_VALID_OCR() else pcfg.module.ocr
+        self.ocr_fallback_combo = self._combo(GET_VALID_OCR(), fallback_ocr)
+        self.ocr_fallback_combo.setEnabled(False)
+        self.ocr_fallback_check.toggled.connect(self.ocr_fallback_combo.setEnabled)
+
+        self.source_combo = QComboBox()
+        self.target_combo = QComboBox()
+        for language in LANGUAGE_ENGLISH_NAMES:
+            label = lang_display_label(language)
+            self.source_combo.addItem(label, language)
+            self.target_combo.addItem(label, language)
+        self.source_combo.setCurrentText(lang_display_label(pcfg.module.translate_source))
+        self.target_combo.setCurrentText(lang_display_label(pcfg.module.translate_target))
+
+        self.skip_pages_check = QCheckBox(self.tr('Skip pages already processed by the pipeline'))
+        self.skip_projects_check = QCheckBox(self.tr('Skip projects whose pages are already processed'))
+
+        self.upscale_check = QCheckBox(self.tr('Upscale and replace original pages before processing'))
+        self.upscale_factor = QDoubleSpinBox()
+        self.upscale_factor.setRange(1.0, 8.0)
+        self.upscale_factor.setSingleStep(0.5)
+        self.upscale_factor.setValue(float(pcfg.upscale_factor))
+        self.upscale_quality = self._combo(['fast', 'balanced', 'quality', 'animesharp'], pcfg.upscale_quality)
+        self.upscale_max_edge = QSpinBox()
+        self.upscale_max_edge.setRange(0, 100000)
+        self.upscale_max_edge.setValue(int(pcfg.upscale_max_long_edge))
+        self.upscale_skip_edge = QSpinBox()
+        self.upscale_skip_edge.setRange(0, 100000)
+        self.upscale_skip_edge.setValue(int(pcfg.upscale_skip_if_long_edge_above))
+        upscale_widgets = [self.upscale_factor, self.upscale_quality, self.upscale_max_edge, self.upscale_skip_edge]
+        for widget in upscale_widgets:
+            widget.setEnabled(False)
+        self.upscale_check.toggled.connect(lambda enabled: [widget.setEnabled(enabled) for widget in upscale_widgets])
 
         self.export_check = QCheckBox(self.tr('Export each finished project'))
         self.export_combo = QComboBox()
@@ -82,8 +130,18 @@ class BatchProcessingDialog(QDialog):
         form.addRow('', self.project_count_label)
         form.addRow(self.detect_check, self.textdet_combo)
         form.addRow(self.ocr_check, self.ocr_combo)
+        form.addRow(self.ocr_fallback_check, self.ocr_fallback_combo)
         form.addRow(self.inpaint_check, self.inpaint_combo)
         form.addRow(self.translate_check, self.translator_combo)
+        form.addRow(self.tr('Source language'), self.source_combo)
+        form.addRow(self.tr('Target language'), self.target_combo)
+        form.addRow('', self.skip_pages_check)
+        form.addRow('', self.skip_projects_check)
+        form.addRow('', self.upscale_check)
+        form.addRow(self.tr('Upscale factor'), self.upscale_factor)
+        form.addRow(self.tr('Upscale quality'), self.upscale_quality)
+        form.addRow(self.tr('Maximum long edge after upscale (0 = unlimited)'), self.upscale_max_edge)
+        form.addRow(self.tr('Skip upscale above long edge (0 = never)'), self.upscale_skip_edge)
         form.addRow(self.export_check, self.export_combo)
         form.addRow('', self.quit_check)
 
@@ -113,7 +171,8 @@ class BatchProcessingDialog(QDialog):
                     break
         selected = QFileDialog.getExistingDirectory(self, self.tr('Select Batch Folder'), start_dir)
         if selected:
-            self.root_edit.setText(selected)
+            entered = self.root_edit.text().strip()
+            self.root_edit.setText(f'{entered}; {selected}' if entered else selected)
 
     def update_project_count(self):
         project_dirs = collect_batch_project_dirs(self.root_edit.text())
@@ -129,7 +188,7 @@ class BatchProcessingDialog(QDialog):
     def accept(self):
         if not self.options().project_dirs:
             self.project_count_label.setText(
-                self.tr('Select a folder containing image project subfolders before starting.')
+                self.tr('Enter or select one or more folders containing source images before starting.')
             )
             return
         super().accept()
@@ -150,4 +209,15 @@ class BatchProcessingDialog(QDialog):
             export_enabled=self.export_check.isChecked(),
             export_ext=self.export_combo.currentText(),
             quit_when_finished=self.quit_check.isChecked(),
+            skip_translated_pages=self.skip_pages_check.isChecked(),
+            skip_finished_projects=self.skip_projects_check.isChecked(),
+            upscale_enabled=self.upscale_check.isChecked(),
+            upscale_factor=self.upscale_factor.value(),
+            upscale_max_long_edge=self.upscale_max_edge.value(),
+            upscale_skip_if_long_edge_above=self.upscale_skip_edge.value(),
+            upscale_quality=self.upscale_quality.currentText(),
+            source_language=lang_display_to_key(self.source_combo.currentText()),
+            target_language=lang_display_to_key(self.target_combo.currentText()),
+            ocr_fallback_enabled=self.ocr_fallback_check.isChecked(),
+            ocr_fallback=self.ocr_fallback_combo.currentText(),
         )

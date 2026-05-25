@@ -30,6 +30,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Refined the General settings layout, added a glossary icon, and added a sidebar translation-only run button.
 - Moved Upscaling and Post-merge settings to the top of General settings, with visible field labels and detailed hover tooltips.
 - Added page-list previews, a page context-menu toggle for ignoring pages in pipeline runs, and project JSON persistence for ignored pages.
+- Added a zero-padded current/total page counter beside the active page title in the window header.
 - Added LLM project-context settings for previous pages, optional next-page context, capped document context, and narrower automatic glossary category extraction.
 - Added a `Force Stop` control to the run progress dialog for terminating stuck pipeline or translation threads.
 - Added the missing `accelerate>=0.26.0` dependency required by `flux2-klein` GGUF loading.
@@ -160,7 +161,7 @@ The importer only writes into the derived project folder. If that folder already
 
 Use `Open -> Export as Comic Archive/PDF` after saving or running the project to export rendered result pages. `.cbz` and `.zip` are written directly with Python's standard ZIP support. `.pdf` writes one image per PDF page and uses each rendered image's own dimensions, so portrait, landscape, and mixed-size pages keep independent page boxes. `.cbr` export requires a local `rar` or WinRAR command line writer; if none is available, use `.cbz`, `.zip`, or `.pdf`.
 
-Use `Open -> Batch Processing` to choose a parent folder whose immediate subfolders are chapters/projects. The batch dialog lets you choose text detection, OCR, inpainting, and translation modules, enable or disable those pipeline stages, optionally export each finished project as `.cbz` or `.pdf`, and optionally quit the app when the batch is done. Generated subfolders such as `mask`, `result`, `inpainted`, and `upscaled` are ignored. Each accepted subfolder is opened and processed sequentially through the normal project pipeline, keeping its own project file and `glossary.json`; when the batch finishes without quit-on-finish, the first processed project is opened.
+Use `Open -> Batch Processing` to enter or select one or more chapter/project folders or parent folders, separated by semicolons or new lines. The dialog lets you choose pipeline modules and source/target languages, retry empty OCR output with a fallback OCR backend, skip already processed pages/projects, permanently upscale and replace originals with the chosen factor/quality/size limits before processing, optionally export each finished project as `.cbz` or `.pdf`, and optionally quit when complete. Generated output folders are ignored. A project-count progress bar remains visible above the per-stage progress bars; `Stop All` cancels the active pipeline and all queued projects.
 
 ## Re-Inpaint current page
 
@@ -263,7 +264,7 @@ The General settings page lets you choose the intermediate image format for proj
 
 ## Page pipeline ignore
 
-The Pages sidebar now shows page previews for the project list. Right-click a page and choose `Ignore Page in Pipeline` to skip that page during text detection, OCR, translation, and inpainting runs. Ignored pages are lightly highlighted in the list and saved in the project's `imgtrans_*.json` file under `ignored_pages`. Use the same context menu entry again to include the page in pipeline runs.
+The Pages sidebar now shows page previews for the project list. The centered window title shows the selected position and project size next to the active page name, for example `001/217 pages`. Right-click a page and choose `Ignore Page in Pipeline` to skip that page during text detection, OCR, translation, and inpainting runs. Ignored pages are lightly highlighted in the list and saved in the project's `imgtrans_*.json` file under `ignored_pages`. Use the same context menu entry again to include the page in pipeline runs.
 
 ## Translation-only run
 
@@ -443,6 +444,7 @@ The `LLM_API_Translator` and `Two-Step Translator` include glossary support for 
 - `Gloss Scan Current Manga` builds glossary candidates from detected OCR text and existing official/reference translations using the selected LLM or Two-Step/Ollama settings, without running normal translation or inpainting.
 - `auto glossary names`, `auto glossary places`, and the optional organization/title/term/honorific/catchphrase checkboxes control which categories can be captured automatically.
 - `glossary refinement pass` runs a second LLM pass after translation to align the translated batch with the current glossary.
+- `review speed mode` retains separate quality passes, combines glossary guidance into reflection for a faster single correction pass, keeps reflection only, or suppresses optional review calls. Automatic glossary extraction remains a separate request when enabled because it creates reusable glossary entries.
 - `glossary max entries` limits how many entries are kept so prompts do not grow without bound.
 - The review/reflection pass checks pronouns, address forms, and speaker/addressee references when enough context is available.
 - Character/name glossary entries and aliases are passed into review so inconsistent names can be normalized to the preferred target form.

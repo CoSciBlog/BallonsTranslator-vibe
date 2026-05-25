@@ -316,6 +316,17 @@ class LLM_API_Translator(BaseTranslator):
             "value": False,
             "description": "Run an additional LLM review pass after translation. This adds another LLM request for each batch, so translation is slower and uses more tokens.",
         },
+        "review speed mode": {
+            "type": "selector",
+            "options": [
+                "Thorough (separate passes)",
+                "Combined review (fast)",
+                "Reflection only (fastest)",
+                "No additional review",
+            ],
+            "value": "Thorough (separate passes)",
+            "description": "Controls optional correction requests. Combined review checks active glossary guidance during the reflection request and skips the separate glossary-refinement request. Auto glossary extraction remains a separate request when enabled.",
+        },
         "reflection prompt": {
             "type": "editor",
             "value": "Review the draft translation against the original source text. Check meaning, terminology, names, glossary terms, tone, fluency, punctuation, item count, pronouns, speaker/addressee references, gendered wording, singular/plural first person, and formal/informal address. Revise only where the translation can be improved. Return only the final improved JSON object in the required schema.",
@@ -386,7 +397,7 @@ class LLM_API_Translator(BaseTranslator):
         "glossary refinement pass": {
             "type": "checkbox",
             "value": True,
-            "description": "Extract or refine glossary entries with the LLM. This adds extra LLM requests, so it increases translation time and token/API usage.",
+            "description": "Run a dedicated follow-up pass to apply the current glossary to translations. This adds extra LLM requests; Combined review skips it and checks the glossary in reflection instead.",
         },
         "glossary max entries": {
             "value": 200,
@@ -588,7 +599,14 @@ class LLM_API_Translator(BaseTranslator):
 
     @property
     def reflection_enabled(self) -> bool:
-        return bool(self.get_param_value("reflection"))
+        return (
+            bool(self.get_param_value("reflection"))
+            and self.review_speed_mode != "No additional review"
+        )
+
+    @property
+    def review_speed_mode(self) -> str:
+        return str(self.get_param_value("review speed mode") or "Thorough (separate passes)")
 
     @property
     def reflection_prompt(self) -> str:
@@ -604,7 +622,10 @@ class LLM_API_Translator(BaseTranslator):
 
     @property
     def glossary_refinement_enabled(self) -> bool:
-        return bool(self.get_param_value("glossary refinement pass"))
+        return (
+            bool(self.get_param_value("glossary refinement pass"))
+            and self.review_speed_mode == "Thorough (separate passes)"
+        )
 
     def _param_int(self, param_key: str, default: int = 0) -> int:
         try:
@@ -1111,10 +1132,20 @@ class LLM_API_Translator(BaseTranslator):
     ) -> str:
         draft_json = draft_response.model_dump_json(indent=2)
         expected_ids = [item.id for item in draft_response.translations]
+        glossary_section = ""
+        if self.review_speed_mode != "Reflection only (fastest)":
+            glossary_section = self._review_glossary_prompt_section()
+        combined_instruction = ""
+        if self.review_speed_mode == "Combined review (fast)":
+            combined_instruction = (
+                "Apply the active glossary during this same review pass; "
+                "this pass replaces a dedicated glossary-refinement request.\n"
+            )
         return (
             f"{self._render_prompt_placeholders(self.reflection_prompt)}\n\n"
             f"{self._review_quality_rules(len(draft_response.translations), expected_ids)}"
-            f"{self._review_glossary_prompt_section()}"
+            f"{combined_instruction}"
+            f"{glossary_section}"
             "ORIGINAL TRANSLATION TASK:\n"
             f"{original_prompt}\n\n"
             "DRAFT TRANSLATION JSON:\n"

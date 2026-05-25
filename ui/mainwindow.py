@@ -312,6 +312,10 @@ class MainWindow(mainwindow_cls):
         self._gui_batch_queue = []
         self._gui_batch_first_project = ''
         self._gui_batch_active_project = ''
+        self._gui_batch_total = 0
+        self._gui_batch_completed = 0
+        self._gui_batch_cancel_requested = False
+        self._gui_batch_upscale_pending = False
         self._decensor_current_page_request = None
         self._reinpaint_current_page_request = None
 
@@ -466,6 +470,7 @@ class MainWindow(mainwindow_cls):
         module_manager.progress_msgbox.showed.connect(self.on_imgtrans_progressbox_showed)
         module_manager.progress_msgbox.stop_clicked.connect(self.on_batch_project_upscale_stop)
         module_manager.progress_msgbox.force_stop_clicked.connect(self.on_batch_project_upscale_stop)
+        module_manager.progress_msgbox.stop_all_clicked.connect(self.stop_all_gui_batch_processing)
         module_manager.blktrans_pipeline_finished.connect(self.on_blktrans_finished)
         module_manager.imgtrans_thread.post_process_mask = self.drawingPanel.rectPanel.post_process_mask
         module_manager.inpaint_thread.finish_set_module.connect(self.on_finish_setinpainter)
@@ -634,7 +639,7 @@ class MainWindow(mainwindow_cls):
         self.start_gui_batch_processing(dialog.options())
 
     def start_gui_batch_processing(self, options: BatchProcessingOptions):
-        project_dirs = collect_batch_project_dirs(options.root_dir)
+        project_dirs = options.project_dirs or collect_batch_project_dirs(options.root_dir)
         if not project_dirs:
             create_info_dialog(self.tr('No project folders with images found. Generated folders are ignored.'))
             return
@@ -646,7 +651,15 @@ class MainWindow(mainwindow_cls):
         self._gui_batch_queue = list(project_dirs)
         self._gui_batch_first_project = project_dirs[0]
         self._gui_batch_active_project = ''
+        self._gui_batch_total = len(project_dirs)
+        self._gui_batch_completed = 0
+        self._gui_batch_cancel_requested = False
+        self._gui_batch_upscale_pending = False
         self._apply_gui_batch_options(options)
+        self.imgtrans_progress_msgbox.set_batch_mode(True)
+        self._update_gui_batch_progress()
+        if options.upscale_enabled and self._start_gui_batch_upscale(options):
+            return
         self.run_next_gui_batch_project()
 
     def _apply_gui_batch_options(self, options: BatchProcessingOptions):
@@ -654,6 +667,8 @@ class MainWindow(mainwindow_cls):
         pcfg.module.ocr = options.ocr
         pcfg.module.inpainter = options.inpainter
         pcfg.module.translator = options.translator
+        pcfg.module.translate_source = options.source_language
+        pcfg.module.translate_target = options.target_language
 
         self.bottomBar.textdet_selector.setSelectedValue(options.textdetector)
         self.bottomBar.ocr_selector.setSelectedValue(options.ocr)
@@ -662,6 +677,9 @@ class MainWindow(mainwindow_cls):
 
         self.module_manager.setTextDetector(options.textdetector)
         self.module_manager.setOCR(options.ocr)
+        self.module_manager.setOCRFallback(
+            options.ocr_fallback if options.ocr_fallback_enabled and options.ocr_fallback != options.ocr else ''
+        )
         self.module_manager.setInpainter(options.inpainter)
         self.module_manager.setTranslator(options.translator)
         self._set_pipeline_stage_state(
@@ -671,8 +689,46 @@ class MainWindow(mainwindow_cls):
             options.enable_inpaint,
         )
 
+    def _update_gui_batch_progress(self):
+        if self._gui_batch_total:
+            value = int(self._gui_batch_completed / self._gui_batch_total * 100)
+            active = osp.basename(self._gui_batch_active_project) if self._gui_batch_active_project else ''
+            detail = f' {self._gui_batch_completed}/{self._gui_batch_total}'
+            if active:
+                detail += f' - {active}'
+            self.imgtrans_progress_msgbox.updateBatchProgress(value, detail)
+
+    def _start_gui_batch_upscale(self, options: BatchProcessingOptions) -> bool:
+        jobs = []
+        for directory in options.project_dirs:
+            pages = find_all_imgs(directory, abs_path=False, sort=True)
+            if pages:
+                jobs.append((directory, pages))
+        if not jobs:
+            return False
+        started = self.batch_project_upscale_thread.runUpscale(
+            jobs,
+            options.upscale_factor,
+            options.upscale_max_long_edge,
+            options.upscale_skip_if_long_edge_above,
+            options.upscale_quality,
+        )
+        if started:
+            self._gui_batch_upscale_pending = True
+            self._batch_project_upscale_dirs = {osp.normcase(osp.abspath(directory)) for directory, _ in jobs}
+            progress_box = self.imgtrans_progress_msgbox
+            progress_box.hide_all_bars()
+            progress_box.detect_bar.description = self.tr('Batch Upscaling: ')
+            progress_box.detect_bar.show()
+            progress_box.zero_progress()
+            progress_box.show()
+        return started
+
     def run_next_gui_batch_project(self):
         if not self._gui_batch_options:
+            return
+        if self._gui_batch_cancel_requested:
+            self.finish_gui_batch_processing(stopped=True)
             return
         if not self._gui_batch_queue:
             self.finish_gui_batch_processing()
@@ -684,9 +740,18 @@ class MainWindow(mainwindow_cls):
         self.OpenProj(project_dir)
         if self.imgtrans_proj.is_empty:
             LOGGER.warning(f'Batch project has no pages: {project_dir}')
+            self._gui_batch_completed += 1
+            self._update_gui_batch_progress()
             self.run_next_gui_batch_project()
             return
-        self.on_run_imgtrans()
+        started = self.on_run_imgtrans(continue_mode=(
+            self._gui_batch_options.skip_translated_pages or self._gui_batch_options.skip_finished_projects
+        ))
+        if not started:
+            LOGGER.info(f'Skipping batch project with no pending pages: {project_dir}')
+            self._gui_batch_completed += 1
+            self._update_gui_batch_progress()
+            self.run_next_gui_batch_project()
 
     def finish_current_gui_batch_project(self):
         options = self._gui_batch_options
@@ -704,20 +769,36 @@ class MainWindow(mainwindow_cls):
         except Exception as e:
             create_error_dialog(e, self.tr('Failed to finish batch project ') + self._gui_batch_active_project)
 
-    def finish_gui_batch_processing(self):
+    def finish_gui_batch_processing(self, stopped: bool = False):
         options = self._gui_batch_options
         first_project = self._gui_batch_first_project
         self._gui_batch_options = None
         self._gui_batch_queue = []
         self._gui_batch_first_project = ''
         self._gui_batch_active_project = ''
+        self._gui_batch_total = 0
+        self._gui_batch_completed = 0
+        self._gui_batch_cancel_requested = False
+        self._gui_batch_upscale_pending = False
+        self.module_manager.setOCRFallback('')
+        self.imgtrans_progress_msgbox.set_batch_mode(False)
 
-        if options and options.quit_when_finished:
+        if options and options.quit_when_finished and not stopped:
             self.close()
             return
         if first_project and osp.isdir(first_project):
             self.OpenProj(first_project)
-        create_info_dialog(self.tr('Batch processing finished.'))
+        create_info_dialog(self.tr('Batch processing stopped.') if stopped else self.tr('Batch processing finished.'))
+
+    def stop_all_gui_batch_processing(self):
+        if not self._gui_batch_options:
+            return
+        self._gui_batch_cancel_requested = True
+        self._gui_batch_queue = []
+        if self.batch_project_upscale_thread.isRunning():
+            self.batch_project_upscale_thread.requestStop()
+            return
+        self.module_manager.stopImgtransPipeline()
 
     def load_textstyle_from_proj_dir(self, from_proj=False):
         if from_proj:
@@ -1275,7 +1356,11 @@ class MainWindow(mainwindow_cls):
             self.canvas.clear_undostack(update_saved_step=True)
             self.canvas.updateCanvas()
             self.st_manager.updateSceneTextitems()
-            self.titleBar.setTitleContent(page_name=self.imgtrans_proj.current_img)
+            self.titleBar.setTitleContent(
+                page_name=self.imgtrans_proj.current_img,
+                page_index=self.imgtrans_proj.current_idx + 1,
+                page_count=self.imgtrans_proj.num_pages,
+            )
             self.module_manager.handle_page_changed()
             self.drawingPanel.handle_page_changed()
             
@@ -2026,7 +2111,12 @@ class MainWindow(mainwindow_cls):
         if shared.args.export_source_txt:
             self.on_export_txt('source')
         if self._gui_batch_options is not None:
+            if self._gui_batch_cancel_requested:
+                self.finish_gui_batch_processing(stopped=True)
+                return
             self.finish_current_gui_batch_project()
+            self._gui_batch_completed += 1
+            self._update_gui_batch_progress()
             self.run_next_gui_batch_project()
             return
         if shared.HEADLESS or shared.HEADLESS_CONTINUOUS:
@@ -2637,6 +2727,25 @@ class MainWindow(mainwindow_cls):
             self.openJsonProj(self.imgtrans_proj.proj_path)
         self._batch_project_upscale_dirs = set()
 
+        if self._gui_batch_upscale_pending:
+            self._gui_batch_upscale_pending = False
+            if stopped or self._gui_batch_cancel_requested:
+                self.finish_gui_batch_processing(stopped=True)
+                return
+            if failures:
+                details = '\n'.join(f'- {name}: {reason}' for name, reason in failures[:8])
+                create_error_dialog(
+                    RuntimeError(details),
+                    self.tr('Batch upscaling failed before translation. Batch processing was stopped.'),
+                )
+                self.finish_gui_batch_processing(stopped=True)
+                return
+            self.imgtrans_progress_msgbox.show_all_bars()
+            self.imgtrans_progress_msgbox.set_batch_mode(True)
+            self._update_gui_batch_progress()
+            self.run_next_gui_batch_project()
+            return
+
         if stopped:
             create_info_dialog(
                 self.tr('Batch upscaling stopped. Replaced {replaced} image(s) before stopping.').format(
@@ -2720,7 +2829,7 @@ class MainWindow(mainwindow_cls):
         processable_pages = self.imgtrans_proj.pipeline_pages(skip_ignored=True)
         if len(processable_pages) == 0:
             create_info_dialog(self.tr('All pages are ignored for pipeline runs.'))
-            return
+            return False
         
         # 继续模式：先检查哪些页面需要处理
         if continue_mode:
@@ -2728,7 +2837,7 @@ class MainWindow(mainwindow_cls):
                 if not self.imgtrans_proj.get_page_progress(page_name):
                     pages_to_process.append(page_name)
             if len(pages_to_process) == 0:
-                return
+                return False
         else:
             for page_name in processable_pages:
                 self.imgtrans_proj.set_page_progress(page_name, 0)
@@ -2766,6 +2875,7 @@ class MainWindow(mainwindow_cls):
         
         # 如果有指定pages_to_process或者是continue_mode，则传递页面列表
         self.module_manager.runImgtransPipeline(pages_to_process if (pages_to_process or continue_mode) else None)
+        return True
 
     def on_transpanel_changed(self):
         self.canvas.editor_index = self.rightComicTransStackPanel.currentIndex()

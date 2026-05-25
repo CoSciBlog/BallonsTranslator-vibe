@@ -393,6 +393,8 @@ class ImgtransThread(QThread):
         self.imgtrans_proj: ProjImgTrans = None
         self.stop_requested = False
         self.pages_to_process = None  # 需要处理的页面列表（用于继续运行模式）
+        self.ocr_fallback_name = ''
+        self.ocr_fallback = None
 
         self.translation_only = False
         self.review_only = False
@@ -433,6 +435,28 @@ class ImgtransThread(QThread):
     def _clear_translator_page_context(self):
         if self.translator is not None and hasattr(self.translator, 'clear_page_context'):
             self.translator.clear_page_context()
+
+    def configure_ocr_fallback(self, module_name: str = ''):
+        self.ocr_fallback_name = module_name or ''
+        self.ocr_fallback = None
+
+    def _run_ocr_with_fallback(self, img: np.ndarray, blk_list: List[TextBlock]):
+        self.ocr.run_ocr(img, blk_list)
+        if (
+            not self.ocr_fallback_name
+            or self.ocr_fallback_name == getattr(self.ocr, 'name', '')
+            or not blk_list
+            or any(not text_is_empty(blk.get_text()) for blk in blk_list)
+        ):
+            return
+        if self.ocr_fallback is None:
+            fallback_class = OCR.module_dict[self.ocr_fallback_name]
+            params = cfg_module.get_params('ocr').get(self.ocr_fallback_name)
+            self.ocr_fallback = fallback_class(**params) if params is not None else fallback_class()
+            if not pcfg.module.load_model_on_demand:
+                self.ocr_fallback.load_model()
+        LOGGER.info(f'OCR returned no text; retrying with fallback {self.ocr_fallback_name}.')
+        self.ocr_fallback.run_ocr(img, blk_list)
 
     def _translate_textblocks(self, imgname: str, blk_list: List[TextBlock]):
         try:
@@ -802,7 +826,7 @@ class ImgtransThread(QThread):
 
             if cfg_module.enable_ocr:
                 try:
-                    self.ocr.run_ocr(img, blk_list)
+                    self._run_ocr_with_fallback(img, blk_list)
                 except Exception as e:
                     create_error_dialog(e, self.tr('OCR Failed.'), 'OCRFailed')
                 self.ocr_counter += 1
@@ -1670,6 +1694,9 @@ class ModuleManager(QObject):
             LOGGER.warning('Terminating a running OCR thread.')
             self.ocr_thread.terminate()
         self.ocr_thread.setOCR(ocr)
+
+    def setOCRFallback(self, ocr: str = ''):
+        self.imgtrans_thread.configure_ocr_fallback(ocr)
 
     def on_finish_translate_page(self, page_key: str):
         self.finish_translate_page.emit(page_key)

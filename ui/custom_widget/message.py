@@ -166,10 +166,13 @@ class ProgressMessageBox(QDialog):
 class ImgtransProgressMessageBox(ProgressMessageBox):
     stop_clicked = Signal()
     force_stop_clicked = Signal()
+    stop_all_clicked = Signal()
     
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(None, *args, **kwargs)
         
+        self.batch_bar = TaskProgressBar(self.tr('Projects: '), True, self)
+        self.batch_bar.hide()
         self.detect_bar = TaskProgressBar(self.tr('Detecting: '), True, self)
         self.ocr_bar = TaskProgressBar(self.tr('OCR: '), True, self)
         self.inpaint_bar = TaskProgressBar(self.tr('Inpainting: '), True, self)
@@ -177,6 +180,7 @@ class ImgtransProgressMessageBox(ProgressMessageBox):
         self.translate_bar = TaskProgressBar(self.tr('Translating: '), True, self)
 
         layout = self.layout()
+        layout.addWidget(self.batch_bar)
         layout.addWidget(self.detect_bar)
         layout.addWidget(self.ocr_bar)
         layout.addWidget(self.inpaint_bar)
@@ -190,10 +194,15 @@ class ImgtransProgressMessageBox(ProgressMessageBox):
         self.force_stop_button = QPushButton(self.tr('Force Stop'), self)
         self.force_stop_button.setToolTip(self.tr('Forcefully terminate the running pipeline and translation threads if normal Stop is stuck.'))
         self.force_stop_button.clicked.connect(self.on_force_stop_clicked)
+        self.stop_all_button = QPushButton(self.tr('Stop All'), self)
+        self.stop_all_button.setToolTip(self.tr('Stop the current pipeline and cancel all remaining batch projects.'))
+        self.stop_all_button.clicked.connect(self.on_stop_all_clicked)
+        self.stop_all_button.hide()
         button_layout = QHBoxLayout()
         button_layout.addStretch()
         button_layout.addWidget(self.stop_button)
         button_layout.addWidget(self.force_stop_button)
+        button_layout.addWidget(self.stop_all_button)
         button_layout.addStretch()
         layout.addLayout(button_layout)
 
@@ -210,6 +219,22 @@ class ImgtransProgressMessageBox(ProgressMessageBox):
         self.stop_button.setEnabled(False)
         self.force_stop_button.setEnabled(False)
         self.force_stop_button.setText(self.tr('force stopping...'))
+
+    def on_stop_all_clicked(self):
+        self.stop_all_clicked.emit()
+        self.stop_button.setEnabled(False)
+        self.force_stop_button.setEnabled(False)
+        self.stop_all_button.setEnabled(False)
+        self.stop_all_button.setText(self.tr('stopping all...'))
+
+    def set_batch_mode(self, enabled: bool):
+        self.batch_bar.setVisible(enabled)
+        self.stop_all_button.setVisible(enabled)
+        if not enabled:
+            self.batch_bar.updateProgress(0)
+
+    def updateBatchProgress(self, value: int, msg: str = ''):
+        self.batch_bar.updateProgress(value, msg)
 
 
     def updateDetectProgress(self, value: int, msg: str = ''):
@@ -238,6 +263,8 @@ class ImgtransProgressMessageBox(ProgressMessageBox):
         self.stop_button.setText(self.tr('Stop'))
         self.force_stop_button.setEnabled(True)
         self.force_stop_button.setText(self.tr('Force Stop'))
+        self.stop_all_button.setEnabled(True)
+        self.stop_all_button.setText(self.tr('Stop All'))
 
     def show_all_bars(self):
         self.detect_bar.show()

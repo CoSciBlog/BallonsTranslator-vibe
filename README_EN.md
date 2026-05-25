@@ -30,6 +30,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Refined the General settings layout, added a glossary icon, and added a sidebar translation-only run button.
 - Moved Upscaling and Post-merge settings to the top of General settings, with visible field labels and detailed hover tooltips.
 - Added page-list previews, a page context-menu toggle for ignoring pages in pipeline runs, and project JSON persistence for ignored pages.
+- Added a zero-padded current/total page counter beside the active page title in the window header.
 - Added LLM project-context settings for previous pages, optional next-page context, capped document context, and narrower automatic glossary category extraction.
 - Added a `Force Stop` control to the run progress dialog for terminating stuck pipeline or translation threads.
 - Added the missing `accelerate>=0.26.0` dependency required by `flux2-klein` GGUF loading.
@@ -158,7 +159,7 @@ Use `Open -> Import Folder` or drag a folder onto the canvas to import a whole f
 
 Use `Open -> Export as Comic Archive/PDF` after saving or running the project to export rendered result pages. `.cbz` and `.zip` are written directly with Python's standard ZIP support. `.pdf` writes one image per PDF page and uses each rendered image's own dimensions, so portrait, landscape, and mixed-size pages keep independent page boxes. `.cbr` export requires a local `rar` or WinRAR command line writer; if none is available, use `.cbz`, `.zip`, or `.pdf`.
 
-Use `Open -> Batch Processing` to choose a parent folder whose immediate subfolders are chapters/projects. The batch dialog lets you choose text detection, OCR, inpainting, and translation modules, enable or disable those pipeline stages, optionally export each finished project as `.cbz` or `.pdf`, and optionally quit the app when the batch is done. Generated subfolders such as `mask`, `result`, `inpainted`, and `upscaled` are ignored. Each accepted subfolder is opened and processed sequentially through the normal project pipeline, keeping its own project file and `glossary.json`; when the batch finishes without quit-on-finish, the first processed project is opened.
+Use `Open -> Batch Processing` to enter or select one or more chapter/project folders or parent folders, separated by semicolons or new lines. The dialog lets you choose pipeline modules and source/target languages, retry empty OCR output with a fallback OCR backend, skip already processed pages/projects, permanently upscale and replace originals with the chosen factor/quality/size limits before processing, optionally export each finished project as `.cbz` or `.pdf`, and optionally quit when complete. Generated output folders are ignored. A project-count progress bar remains visible above the per-stage progress bars; `Stop All` cancels the active pipeline and all queued projects.
 
 ZIP and CBZ files use Python's built-in ZIP support. CBR files require a local `7z`-compatible extractor on `PATH`; Pinokio's Windows runtime normally provides one. PDF import uses PyMuPDF. If the derived project folder already contains supported images, the importer reuses it instead of overwriting existing work.
 
@@ -217,6 +218,8 @@ For NVIDIA Blackwell/RTX 50xx systems, the auto profile uses the PyTorch cu128 w
 
 The left sidebar includes a `Gloss` button with a glossary icon that opens the current project's glossary window. Entries, the glossary prompt, optional reference entries, and the optional reference prompt are saved in a separate `glossary.json` file inside the project's image folder, next to the project's `imgtrans_*.json` file, so each manga/comic project keeps its own terminology. The old Settings-page glossary text boxes are no longer used; edit glossary entries and prompts from the Glossary window. LLM translators use those entries for consistency, but category labels and notes such as `[CHARACTER]` or `[PLACE]` are treated as metadata and are not included in translation output. Automatic glossary extraction defaults to character/name entries and places only; optional translator checkboxes can enable organizations, titles, domain terms, honorifics, or catchphrases when needed. Automatically extracted names are merged without replacing existing manual glossary entries.
 
+For LLM translators, `review speed mode` retains separate quality passes, combines glossary guidance into reflection for a faster single correction pass, keeps reflection only, or suppresses optional review calls. Automatic glossary extraction remains a separate request when enabled because it creates reusable glossary entries.
+
 Use `Import Glossary` to merge entries from another `glossary.json` into the current editable table. Use `Import Reference` to load another chapter's glossary into the separate reference field; reference entries are included in translation and review prompts as supporting context, while explicit project entries take priority when terms conflict. `Export Glossary` writes the full glossary data, including reference entries, to a JSON file.
 
 `Build From Translated Folder` creates a reference glossary template from a folder that already contains translated project data, exported text/markdown, or existing `glossary.json` files. Enable `Include subfolders` when a volume or series folder contains chapter subfolders. The template builder scans existing translated text, extracts likely character names, places, organizations, and titles, and writes them as reference entries so official English names can guide later chapter translations.
@@ -265,7 +268,7 @@ The General settings page lets you choose the intermediate image format for proj
 
 ## Page pipeline ignore
 
-The Pages sidebar now shows page previews for the project list. Right-click a page and choose `Ignore Page in Pipeline` to skip that page during text detection, OCR, translation, and inpainting runs. Ignored pages are lightly highlighted in the list and saved in the project's `imgtrans_*.json` file under `ignored_pages`. Use the same context menu entry again to include the page in pipeline runs.
+The Pages sidebar now shows page previews for the project list. The centered window title shows the selected position and project size next to the active page name, for example `001/217 pages`. Right-click a page and choose `Ignore Page in Pipeline` to skip that page during text detection, OCR, translation, and inpainting runs. Ignored pages are lightly highlighted in the list and saved in the project's `imgtrans_*.json` file under `ignored_pages`. Use the same context menu entry again to include the page in pipeline runs.
 
 ## Translation-only run
 

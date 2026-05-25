@@ -444,6 +444,11 @@ class LamaInpainterMPE(InpainterBase):
 
         im_h, im_w = img.shape[:2]
         img_torch, mask_torch, rel_pos, direct, img_original, mask_original, pad_bottom, pad_right = self.inpaint_preprocess(img, mask)
+        if self.model is None:
+            self.logger.warning(f'{self.name} model was unloaded during inference setup; reloading before inpainting.')
+            self.load_model()
+        if self.model is None:
+            raise RuntimeError(f'{self.name} model could not be loaded before inpainting.')
         
         precision = TORCH_DTYPE_MAP[self.precision]
         if self.device in {'cuda'}:

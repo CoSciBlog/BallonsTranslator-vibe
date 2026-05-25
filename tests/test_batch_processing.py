@@ -8,7 +8,7 @@ from PIL import Image
 
 sys.path.insert(0, osp.dirname(osp.dirname(__file__)))
 
-from utils.batch_processing import collect_batch_project_dirs
+from utils.batch_processing import collect_batch_project_dirs, parse_batch_paths
 
 
 class BatchProcessingTest(unittest.TestCase):
@@ -43,6 +43,19 @@ class BatchProcessingTest(unittest.TestCase):
             self._write_image(osp.join(chapter, "001.png"))
 
             self.assertEqual(collect_batch_project_dirs(tmpdir), [chapter])
+
+    def test_accepts_direct_project_and_multiple_paths(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            project_a = osp.join(tmpdir, "Chapter A")
+            project_b = osp.join(tmpdir, "Chapter B")
+            os.makedirs(project_a)
+            os.makedirs(project_b)
+            self._write_image(osp.join(project_a, "001.png"))
+            self._write_image(osp.join(project_b, "001.png"))
+
+            entered = f'{project_a};\n"{project_b}";{project_a}'
+            self.assertEqual(parse_batch_paths(entered), [project_a, project_b])
+            self.assertEqual(collect_batch_project_dirs(entered), [project_a, project_b])
 
 
 if __name__ == "__main__":

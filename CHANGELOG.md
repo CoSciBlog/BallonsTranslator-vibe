@@ -4,6 +4,10 @@
 
 ### Added
 
+- Zero-padded current/total page counter in the centered title bar, for example `001/217 pages`, updated as the selected page changes.
+- Batch Processing project progress bar and `Stop All` action for cancelling both the active pipeline and queued projects.
+- Batch Processing controls for multiple/direct folder paths, skipping previously processed work, source/target languages, fallback OCR, and optional permanent source-image upscaling with quality and size settings.
+- LLM `review speed mode` for separate glossary correction, combined reflection/glossary checking, or reduced optional review requests.
 - Direct `.pdf` comic import from the Open menu, drag-and-drop, recent projects, and `--proj-dir`.
 - Multi-PDF import from the Open menu and drag-and-drop, combining selected PDFs into one ordered image project.
 - Source-folder import from `Open -> Import Folder` and drag-and-drop for folders containing `.cbr`, `.cbz`, `.zip`, `.pdf`, and nested image files.
@@ -98,6 +102,7 @@
 - Project image upscaling now stages all generated replacements before changing page files, renames successful outputs with `_upscaled_<factor>x`, reloads the project after replacement, scales retained text-box geometry, and resets stale image-processing progress.
 - Bumped the fork runtime version string to `1.4.0-vibe.68`.
 - Batch upscaling reuses the batch-project folder filter, so generated `mask`, `inpainted`, `result`, `upscaled`, `decensor_mask`, and `decensored` folders are not used as source-image projects.
+- GUI batch processing now accepts direct project paths as well as parent folders and can run source-replacement upscaling before the normal pipeline.
 - Two-Step Ollama requests now send JSON mode, thinking control, response limits, and context length through Ollama's native request fields; stored `/v1` endpoints are normalized automatically.
 - Moved the optional post-translation LLM review control into the Translator settings section and expanded Two-Step refinement/reflection instructions to actively naturalize Google/DeepL drafts while preserving source meaning.
 - Bumped the fork runtime version string to `1.4.0-vibe.69`.
@@ -107,6 +112,8 @@
 
 ### Fixed
 
+- Reloaded a `lama_large_512px` model if it is unloaded between preprocessing and inference instead of attempting to call `None`.
+- Retried OCR with the configured batch fallback backend when the selected backend recognizes no text.
 - Fixed startup with no project open after grouped import metadata support was added.
 - Kept Auto layout disabled text boxes from collapsing to very narrow detected text-line widths by preserving a wider balloon-based text box.
 - Improved Two-Step Translator LLM refinement handling for empty, partial, and malformed JSON responses.
