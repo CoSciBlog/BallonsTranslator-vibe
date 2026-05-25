@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README_EN.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.70`
+Fork release: `1.4.0-vibe.71`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -71,6 +71,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Added `Tools -> Batch Upscale Folders Using Settings...` to choose a parent directory and upscale every immediate source-image subfolder through the configured settings with the same modal progress, ETA, and Stop controls as the run pipeline.
 - Added a sidebar `x2` shortcut for the fixed-factor project upscaling action, using the same quality/limit settings and already-upscaled confirmation as `Tools -> Upscale Project Images 2x`.
 - Updated Ollama-backed LLM and Two-Step translation to use native `/api/chat` requests, with `num ctx` controlling the Ollama context window per request.
+- Added Ollama per-request terminal speed reporting, LLM/Two-Step `Auto (auto detect)` source selection, bilingual target-language labels, and a Translator-section LLM review/optimization switch.
 - Added glossary import/export, reference-glossary support, and a translated-folder glossary template builder for reusing official terminology across chapters.
 - Added `Gloss Scan`, a current-manga glossary builder available from the Run menu. It detects text, runs OCR, then uses the selected `LLM_API_Translator` or `Two-Step Translator` settings, including Ollama/provider and glossary category settings, to build an exportable project/reference glossary without inpainting.
 - Improved Blackwell/RTX 50xx runtime repair so CUDA PyTorch wheels are force-reinstalled from the cu128 index instead of reusing an already-satisfied CPU Torch package, and runtime package installs now stream live progress output.
@@ -178,7 +179,7 @@ The left sidebar also includes an `x2` button for the current project. It perfor
 
 ## Pronoun and address review
 
-LLM translation and review prompts now explicitly check names, pronouns, gendered wording, first-person singular/plural, speaker/addressee roles, and formal/informal address. Enable `Settings -> General -> Review pronouns after translation` to run an additional LLM review pass after translation for each page, using ChatGPT, `LLM_API_Translator`, or `Two-Step Translator`.
+LLM translation and review prompts now explicitly check names, pronouns, gendered wording, first-person singular/plural, speaker/addressee roles, and formal/informal address. Enable `Settings -> DL Module -> Translator -> Review and optimize translation with LLM` to run an additional LLM review pass after translation for each page, using ChatGPT, `LLM_API_Translator`, or `Two-Step Translator`.
 
 Use `Tools -> Model Downloads` to download optional or missing local models after setup. The first setup still downloads the common text detection, `manga_ocr`, `mit48px`, and LaMa inpainting assets, while optional backends such as `flux2-klein`, `aot`, and PaddleOCR-VL Manga are downloaded only from that window or when a backend with declared downloadable files is first loaded. Native PaddleOCR downloads its own runtime assets on first use, OneOCR still requires the local `oneocr.dll` and `oneocr.onemodel` files to be supplied manually, and Stariver OCR is API-based without a local model download.
 
@@ -277,15 +278,19 @@ These settings improve continuity for names, tone, and references when pages are
 
 ## Two-Step LLM refinement
 
-The `Two-Step Translator` first creates Google, DeepL Free, or DeepL draft translations, then asks the configured LLM to refine those drafts. `fallback to first step` is the final fallback only: it uses first-step draft translations if the normal LLM refinement and the strict LLM retry both fail.
+The `Two-Step Translator` first creates Google, DeepL Free, or DeepL draft translations, then asks the configured LLM to refine those drafts into natural dialogue. The LLM is instructed to treat the machine output as a starting point: it must preserve the source meaning and character voice while repairing literal or stiff phrasing, fluency, tone, and punctuation. `fallback to first step` is the final fallback only: it uses first-step draft translations if the normal LLM refinement and the strict LLM retry both fail.
 
 When `Ollama` is selected, translation, refinement, reflection, and glossary calls use Ollama's native `/api/chat` endpoint. Set `num ctx` in translator settings to pass an explicit `options.num_ctx` context window; leave it at `0` to retain the Ollama server default. Existing saved endpoints ending in `/v1` continue to work and are normalized to the native endpoint.
+
+Each native Ollama request now logs terminal performance metrics in the form `Ollama speed ... prompt=... tkn/s | output=... tkn/s`, together with total and model-load duration. The prompt rate covers processing the request context; the output rate is the generation speed of the translated result.
 
 The strict retry is attempted before the final draft fallback when the LLM returns empty JSON, malformed JSON, a partial response, missing IDs, extra IDs, or a mismatched item count. Usable partial LLM results are merged by numeric ID only, never by list position, so a response for `id: 2` cannot be applied to `id: 1`.
 
 When Google, DeepL Free, or DeepL is used directly or as the Two-Step first step, the raw provider output is saved on each text block in `translation_provider_results` inside the project JSON and mirrored into `translation_draft`. The text editor sidebar shows this Google/DeepL result only as `First step draft`; the separate machine-translation-results field was removed.
 
 For local Ollama models such as `translategemma:12b` or `translategemma:27b`, disabling `reasoning` is usually faster and more stable for JSON output. Use moderate `max tokens` values, typically 2048-4096; values above 8192 are clamped for Ollama refinement requests. Raising `num ctx` permits longer prompt context but increases local memory use. Smaller refinement chunks also improve JSON stability for local models.
+
+For `LLM_API_Translator` and `Two-Step Translator`, the source-language list includes `Auto (auto detect)`. Target-language lists show localized names together with their English meaning, for example `日本語 (Japanese)`.
 
 ## LLM model matrix benchmark
 

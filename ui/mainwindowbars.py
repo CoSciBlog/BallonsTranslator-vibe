@@ -891,11 +891,12 @@ class TranslatorSelectionWidget(Widget):
             self.src_selector.addItem(label, lang)
             self.src_selector.setItemData(self.src_selector.count() - 1, label, Qt.ItemDataRole.ToolTipRole)
         for lang in translator.supported_tgt_list:
-            self.tgt_selector.addItem(lang)
-            self.tgt_selector.setItemData(self.tgt_selector.count() - 1, lang_display_label(lang), Qt.ItemDataRole.ToolTipRole)
+            label = lang_display_label(lang)
+            self.tgt_selector.addItem(label, lang)
+            self.tgt_selector.setItemData(self.tgt_selector.count() - 1, label, Qt.ItemDataRole.ToolTipRole)
         self.selector.setCurrentText(translator.name)
         self.src_selector.setCurrentText(lang_display_label(translator.lang_source))
-        self.tgt_selector.setCurrentText(translator.lang_target)
+        self.tgt_selector.setCurrentText(lang_display_label(translator.lang_target))
         self.blockSignals(False)
 
 

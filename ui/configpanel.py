@@ -480,6 +480,10 @@ class ConfigPanel(Widget):
         dlConfigPanel.addTextLabel(label_translator)
         self.trans_config_panel = TranslatorConfigPanel(label_translator, scrollWidget=self)
         self.trans_sub_block = dlConfigPanel.addBlockWidget(self.trans_config_panel)
+        self.pronoun_review_checker, _ = dlConfigPanel.addCheckBox(
+            self.tr('Review and optimize translation with LLM'),
+            discription=self.tr('Runs an extra LLM review for natural wording, source accuracy, pronouns, speaker/addressee references, gendered wording, and formality. Adds LLM requests.'))
+        self.pronoun_review_checker.stateChanged.connect(self.on_pronoun_review_changed)
 
         generalConfigPanel.addTextLabel(label_upscaling)
         self.upscale_before_detection_checker, _ = generalConfigPanel.addCheckBox(
@@ -520,10 +524,6 @@ class ConfigPanel(Widget):
             self.tr('Merge nearby text boxes after pipeline'),
             discription=self.tr('Merges nearby boxes after translation using Region Merge Tool rules. Can reduce cleanup; adds a short post-processing pass.'))
         self.post_merge_checker.stateChanged.connect(self.on_post_merge_changed)
-        self.pronoun_review_checker, _ = generalConfigPanel.addCheckBox(
-            self.tr('Review pronouns after translation'),
-            discription=self.tr('Runs an extra LLM review for pronouns, speaker/addressee references, gendered wording, and formality. Adds LLM requests.'))
-        self.pronoun_review_checker.stateChanged.connect(self.on_pronoun_review_changed)
         self.post_merge_mode_combobox, _ = generalConfigPanel.addCombobox(
             [
                 self.tr('Vertical Merge'),

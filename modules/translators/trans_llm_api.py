@@ -426,6 +426,7 @@ class LLM_API_Translator(BaseTranslator):
 
     def _setup_translator(self):
         self.lang_map = {
+            "Auto": "Auto-detected source language",
             "简体中文": "Simplified Chinese",
             "繁體中文": "Traditional Chinese",
             "日本語": "Japanese",
@@ -465,6 +466,10 @@ class LLM_API_Translator(BaseTranslator):
         self.project_glossary_loaded = False
         self.context_project = None
         self.context_page_key = ""
+
+    @property
+    def supported_tgt_list(self) -> List[str]:
+        return [lang for lang in self.valid_lang_list if lang != "Auto"]
 
     def _initialize_client(self, api_key_to_use: str) -> bool:
         endpoint = self.endpoint
@@ -2014,9 +2019,27 @@ class LLM_API_Translator(BaseTranslator):
         response.raise_for_status()
         response_data = response.json()
         content = response_data.get("message", {}).get("content", "")
-        total_tokens = int(response_data.get("prompt_eval_count", 0) or 0) + int(
-            response_data.get("eval_count", 0) or 0
+        prompt_tokens = int(response_data.get("prompt_eval_count", 0) or 0)
+        output_tokens = int(response_data.get("eval_count", 0) or 0)
+        prompt_duration = float(response_data.get("prompt_eval_duration", 0) or 0) / 1_000_000_000
+        output_duration = float(response_data.get("eval_duration", 0) or 0) / 1_000_000_000
+        total_duration = float(response_data.get("total_duration", 0) or 0) / 1_000_000_000
+        load_duration = float(response_data.get("load_duration", 0) or 0) / 1_000_000_000
+        prompt_rate = prompt_tokens / prompt_duration if prompt_duration > 0 else 0.0
+        output_rate = output_tokens / output_duration if output_duration > 0 else 0.0
+        self.logger.info(
+            "Ollama speed model=%s | total=%.3fs load=%.3fs | prompt=%d tokens at %.2f tkn/s | output=%d tokens at %.2f tkn/s"
+            % (
+                api_args["model"],
+                total_duration,
+                load_duration,
+                prompt_tokens,
+                prompt_rate,
+                output_tokens,
+                output_rate,
+            )
         )
+        total_tokens = prompt_tokens + output_tokens
         return SimpleNamespace(
             choices=[SimpleNamespace(message=SimpleNamespace(content=content))],
             usage=SimpleNamespace(total_tokens=total_tokens),

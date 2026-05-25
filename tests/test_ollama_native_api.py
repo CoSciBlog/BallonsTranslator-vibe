@@ -18,7 +18,11 @@ class FakeResponse:
         return {
             "message": {"content": '{"translations":[{"id":1,"translation":"Hello"}]}'},
             "prompt_eval_count": 7,
+            "prompt_eval_duration": 100_000_000,
             "eval_count": 5,
+            "eval_duration": 250_000_000,
+            "total_duration": 500_000_000,
+            "load_duration": 50_000_000,
         }
 
 
@@ -31,9 +35,18 @@ class FakeHttpClient:
         return FakeResponse()
 
 
+class FakeLogger:
+    def __init__(self):
+        self.infos = []
+
+    def info(self, message):
+        self.infos.append(message)
+
+
 class NativeOllamaTranslator(LLM_API_Translator):
     def __init__(self, endpoint="http://localhost:11434/v1"):
         self.client = FakeHttpClient()
+        self.logger = FakeLogger()
         self._params = {
             "provider": "Ollama",
             "endpoint": endpoint,
@@ -74,6 +87,8 @@ class NativeOllamaTransportTest(unittest.TestCase):
         self.assertEqual(timeout, 120)
         self.assertEqual(completion.usage.total_tokens, 12)
         self.assertIn('"Hello"', completion.choices[0].message.content)
+        self.assertIn("prompt=7 tokens at 70.00 tkn/s", translator.logger.infos[0])
+        self.assertIn("output=5 tokens at 20.00 tkn/s", translator.logger.infos[0])
 
     def test_ollama_native_endpoint_is_accepted_directly(self):
         translator = NativeOllamaTranslator("http://server:11434/api/chat")
@@ -89,6 +104,20 @@ class NativeOllamaTransportTest(unittest.TestCase):
             "http://localhost:11434",
         )
         self.assertIn("num ctx", TwoStepTranslator.params)
+        self.assertIn(
+            "Google Translate or DeepL",
+            TwoStepTranslator.params["system_prompt"]["value"],
+        )
+        self.assertIn(
+            "natural to a native reader",
+            TwoStepTranslator.params["reflection prompt"]["value"],
+        )
+
+    def test_llm_two_step_source_supports_auto_but_target_does_not(self):
+        translator = LLM_API_Translator("Auto", "English")
+
+        self.assertIn("Auto", translator.supported_src_list)
+        self.assertNotIn("Auto", translator.supported_tgt_list)
 
 
 if __name__ == "__main__":

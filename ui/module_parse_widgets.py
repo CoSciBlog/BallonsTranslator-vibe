@@ -456,10 +456,11 @@ class TranslatorConfigPanel(ModuleConfigParseWidget):
 
         for lang in translator.supported_src_list:
             self.source_combobox.addItem(lang_display_label(lang), lang)
-        self.target_combobox.addItems(translator.supported_tgt_list)
+        for lang in translator.supported_tgt_list:
+            self.target_combobox.addItem(lang_display_label(lang), lang)
         self.module_combobox.setCurrentText(translator.name)
         self.source_combobox.setCurrentText(lang_display_label(translator.lang_source))
-        self.target_combobox.setCurrentText(translator.lang_target)
+        self.target_combobox.setCurrentText(lang_display_label(translator.lang_target))
         self.updateModuleParamWidget()
         self.source_combobox.blockSignals(False)
         self.target_combobox.blockSignals(False)

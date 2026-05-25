@@ -60,6 +60,8 @@
 - Tools-menu batch upscaling for choosing a parent folder and replacing pages across its source-image subfolders with the configured Upscaling settings, using the modal run-pipeline progress view with ETA and Stop.
 - Left-sidebar `x2` action for running the existing 2x project-image replacement workflow with Settings-page quality and size limits.
 - Native Ollama `/api/chat` transport for `LLM_API_Translator` and `Two-Step Translator`, including the configurable `num ctx` runtime option for local model context length.
+- Per-request Ollama terminal metrics showing model load time, prompt-evaluation speed, and output-generation speed in tokens per second.
+- `Auto (auto detect)` source selection for LLM/Two-Step translation and bilingual display labels for target-language selections.
 
 ### Changed
 
@@ -95,8 +97,10 @@
 - Bumped the fork runtime version string to `1.4.0-vibe.68`.
 - Batch upscaling reuses the batch-project folder filter, so generated `mask`, `inpainted`, `result`, `upscaled`, `decensor_mask`, and `decensored` folders are not used as source-image projects.
 - Two-Step Ollama requests now send JSON mode, thinking control, response limits, and context length through Ollama's native request fields; stored `/v1` endpoints are normalized automatically.
+- Moved the optional post-translation LLM review control into the Translator settings section and expanded Two-Step refinement/reflection instructions to actively naturalize Google/DeepL drafts while preserving source meaning.
 - Bumped the fork runtime version string to `1.4.0-vibe.69`.
 - Bumped the fork runtime version string to `1.4.0-vibe.70`.
+- Bumped the fork runtime version string to `1.4.0-vibe.71`.
 
 ### Fixed
 

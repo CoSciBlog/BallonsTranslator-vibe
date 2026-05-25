@@ -1894,7 +1894,9 @@ class MainWindow(mainwindow_cls):
 
     def on_trans_tgt_changed(self):
         sender = self.sender()
-        text = sender.currentText()
+        text = sender.currentData()
+        if text is None:
+            text = lang_display_to_key(sender.currentText())
         translator = self.module_manager.translator
         if translator is not None:
             translator.set_target(text)
@@ -1902,12 +1904,12 @@ class MainWindow(mainwindow_cls):
         combobox = self.configPanel.trans_config_panel.target_combobox
         if sender != combobox:
             combobox.blockSignals(True)
-            combobox.setCurrentText(text)
+            combobox.setCurrentText(lang_display_label(text))
             combobox.blockSignals(False)
         combobox = self.bottomBar.trans_selector.tgt_selector
         if sender != combobox:
             combobox.blockSignals(True)
-            combobox.setCurrentText(text)
+            combobox.setCurrentText(lang_display_label(text))
             combobox.blockSignals(False)
 
     def on_inpaint_changed(self):
