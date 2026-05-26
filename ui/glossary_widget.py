@@ -17,7 +17,7 @@ from qtpy.QtWidgets import (
 )
 
 from .custom_widget import NoBorderPushBtn
-from utils.glossary_replacement import parse_glossary_entries
+from utils.glossary_replacement import parse_glossary_entries, parse_preferred_targets, render_preferred_target
 from utils.glossary_template import build_glossary_from_translated_folder
 
 
@@ -25,6 +25,7 @@ class GlossaryWindow(QDialog):
     saved = Signal(dict)
 
     HEADERS = ("Source", "Target", "Category", "Note")
+    PREFERRED_HEADERS = ("Target term", "Category", "Note")
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -34,6 +35,7 @@ class GlossaryWindow(QDialog):
         self.project_glossary = {
             "entries": "",
             "prompt": "",
+            "preferred_targets": "",
             "reference_entries": "",
             "reference_prompt": "",
         }
@@ -47,6 +49,32 @@ class GlossaryWindow(QDialog):
                 "These entries are passed to LLM translators for consistent names, places, titles, and recurring terms."
             )
         )
+
+        self.preferred_label = QLabel(self.tr("Preferred target terms (before translation)"))
+        self.preferred_label.setToolTip(
+            self.tr(
+                "Enter names, places, titles, and other required spellings in the target language only. "
+                "LLM translation and review use these terms as consistency guidance."
+            )
+        )
+        self.preferred_model = QStandardItemModel()
+        self.preferred_model.setHorizontalHeaderLabels(
+            [self.tr(header) for header in self.PREFERRED_HEADERS]
+        )
+        self.preferred_table = QTableView(self)
+        self.preferred_table.setModel(self.preferred_model)
+        self.preferred_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.preferred_table.setMaximumHeight(170)
+        self.preferred_table.setToolTip(
+            self.tr(
+                "Target-language-only preferred terms. Example: NEMONA [character]. "
+                "Changing a saved target term updates matching translated text when the glossary is saved."
+            )
+        )
+        self.preferred_new_btn = NoBorderPushBtn(self.tr("New Target Term"), self)
+        self.preferred_new_btn.clicked.connect(self.add_empty_preferred_row)
+        self.preferred_del_btn = NoBorderPushBtn(self.tr("Delete Target Term"), self)
+        self.preferred_del_btn.clicked.connect(self.delete_selected_preferred_rows)
 
         self.model = QStandardItemModel()
         self.model.setHorizontalHeaderLabels([self.tr(header) for header in self.HEADERS])
@@ -119,6 +147,12 @@ class GlossaryWindow(QDialog):
 
         layout = QVBoxLayout(self)
         layout.addWidget(self.info_label)
+        layout.addWidget(self.preferred_label)
+        layout.addWidget(self.preferred_table)
+        preferred_buttons = QHBoxLayout()
+        preferred_buttons.addWidget(self.preferred_new_btn)
+        preferred_buttons.addWidget(self.preferred_del_btn)
+        layout.addLayout(preferred_buttons)
         layout.addWidget(self.table)
         edit_buttons = QHBoxLayout()
         for button in (self.new_btn, self.del_btn, self.import_btn, self.import_ref_btn, self.export_btn):
@@ -140,6 +174,9 @@ class GlossaryWindow(QDialog):
     def load_glossary(self, glossary: Dict[str, str]):
         self._loading = True
         self.project_glossary = dict(glossary or {})
+        self.preferred_model.removeRows(0, self.preferred_model.rowCount())
+        for entry in parse_preferred_targets(self.project_glossary.get("preferred_targets", "")):
+            self.add_preferred_row(entry, save=False)
         self.model.removeRows(0, self.model.rowCount())
         for entry in parse_glossary_entries(self.project_glossary.get("entries", "")):
             self.add_row(entry, save=False)
@@ -150,6 +187,21 @@ class GlossaryWindow(QDialog):
 
     def add_empty_row(self):
         self.add_row({"source": "", "target": "", "category": "term", "note": ""})
+
+    def add_empty_preferred_row(self):
+        self.add_preferred_row({"target": "", "category": "character", "note": ""})
+
+    def add_preferred_row(self, entry: Dict[str, str], save=True):
+        row = self.preferred_model.rowCount()
+        values = [
+            entry.get("target", ""),
+            entry.get("category", "term") or "term",
+            entry.get("note", ""),
+        ]
+        for col, value in enumerate(values):
+            self.preferred_model.setItem(row, col, QStandardItem(value))
+        if save and not self._loading:
+            self.project_glossary = self.collect_glossary()
 
     def add_row(self, entry: Dict[str, str], save=True):
         row = self.model.rowCount()
@@ -169,7 +221,25 @@ class GlossaryWindow(QDialog):
         for row in rows:
             self.model.removeRow(row)
 
+    def delete_selected_preferred_rows(self):
+        rows = sorted({idx.row() for idx in self.preferred_table.selectedIndexes()}, reverse=True)
+        for row in rows:
+            self.preferred_model.removeRow(row)
+
     def collect_glossary(self) -> Dict[str, str]:
+        preferred_lines: List[str] = []
+        for row in range(self.preferred_model.rowCount()):
+            values = []
+            for col in range(3):
+                item = self.preferred_model.item(row, col)
+                values.append(item.text().strip() if item is not None else "")
+            target, category, note = values
+            if target:
+                preferred_lines.append(
+                    render_preferred_target(
+                        {"target": target, "category": category, "note": note}
+                    )
+                )
         lines: List[str] = []
         for row in range(self.model.rowCount()):
             values = []
@@ -188,6 +258,7 @@ class GlossaryWindow(QDialog):
         return {
             "entries": "\n".join(lines),
             "prompt": self.prompt_editor.toPlainText().strip(),
+            "preferred_targets": "\n".join(preferred_lines),
             "reference_entries": self.reference_editor.toPlainText().strip(),
             "reference_prompt": self.reference_prompt_editor.toPlainText().strip(),
         }
@@ -207,6 +278,8 @@ class GlossaryWindow(QDialog):
             return
         try:
             glossary = self._read_glossary_file(path)
+            for entry in parse_preferred_targets(glossary.get("preferred_targets", "")):
+                self.add_preferred_row(entry)
             for entry in parse_glossary_entries(glossary.get("entries", "")):
                 self.add_row(entry)
             if glossary.get("prompt") and not self.prompt_editor.toPlainText().strip():
@@ -294,6 +367,7 @@ class GlossaryWindow(QDialog):
         return {
             "entries": payload.get("entries", payload.get("glossary", "")) or "",
             "prompt": payload.get("prompt", "") or "",
+            "preferred_targets": payload.get("preferred_targets", "") or "",
             "reference_entries": payload.get("reference_entries", payload.get("reference", "")) or "",
             "reference_prompt": payload.get("reference_prompt", "") or "",
         }

@@ -23,7 +23,10 @@ from utils import shared
 from utils.message import create_error_dialog, create_info_dialog
 from utils.glossary_replacement import (
     apply_glossary_replacements_to_text,
+    apply_replacements_to_glossary_targets,
+    apply_replacements_to_preferred_targets,
     build_glossary_replacements,
+    build_preferred_target_replacements,
 )
 from utils.glossary_template import (
     build_glossary_from_project_text,
@@ -1076,10 +1079,31 @@ class MainWindow(mainwindow_cls):
         old_glossary = self.imgtrans_proj.normalize_glossary(self.imgtrans_proj.glossary)
         if self.canvas.text_change_unsaved():
             self.st_manager.updateTextBlkList()
-        self.imgtrans_proj.glossary = self.imgtrans_proj.normalize_glossary(glossary)
+        updated_glossary = self.imgtrans_proj.normalize_glossary(glossary)
+        entry_replacements = build_glossary_replacements(old_glossary, updated_glossary)
+        updated_glossary, preferred_update_count = apply_replacements_to_preferred_targets(
+            updated_glossary, entry_replacements
+        )
+        preferred_replacements = build_preferred_target_replacements(
+            old_glossary, updated_glossary
+        )
+        updated_glossary, glossary_replacement_count = apply_replacements_to_glossary_targets(
+            updated_glossary, preferred_replacements
+        )
+        self.imgtrans_proj.glossary = updated_glossary
         changed_pages, replacement_count = self.apply_project_glossary_changes(old_glossary, self.imgtrans_proj.glossary)
         self.sync_project_glossary_to_translator()
         if self.save_project_safely(self.tr('saving project glossary'), notify_user=True):
+            if preferred_update_count:
+                LOGGER.info(
+                    f'Applied glossary target changes to {preferred_update_count} '
+                    'preferred target term occurrence(s).'
+                )
+            if glossary_replacement_count:
+                LOGGER.info(
+                    f'Applied preferred target term changes to {glossary_replacement_count} '
+                    'project/reference glossary target occurrence(s).'
+                )
             if changed_pages:
                 self.rerender_glossary_changed_pages(changed_pages)
                 LOGGER.info(
@@ -1199,6 +1223,10 @@ class MainWindow(mainwindow_cls):
 
     def apply_project_glossary_changes(self, old_glossary: dict, new_glossary: dict):
         replacements = build_glossary_replacements(old_glossary, new_glossary)
+        for replacement in build_preferred_target_replacements(old_glossary, new_glossary):
+            if replacement not in replacements:
+                replacements.append(replacement)
+        replacements.sort(key=lambda item: len(item[0]), reverse=True)
         if not replacements:
             return [], 0
 

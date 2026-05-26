@@ -6,6 +6,7 @@ from typing import Dict, List, Tuple
 GlossaryEntry = Dict[str, str]
 Replacement = Tuple[str, str]
 GLOSSARY_ENTRY_FIELDS = ("entries", "reference_entries")
+PREFERRED_TARGET_FIELD = "preferred_targets"
 
 
 def parse_glossary_entries(text: str) -> List[GlossaryEntry]:
@@ -32,6 +33,36 @@ def parse_glossary_entries(text: str) -> List[GlossaryEntry]:
             }
         )
     return entries
+
+
+def parse_preferred_targets(text: str) -> List[GlossaryEntry]:
+    entries = []
+    for line in (text or "").splitlines():
+        clean = line.strip()
+        if not clean or clean.startswith("#"):
+            continue
+        note = ""
+        if "#" in clean:
+            clean, note = [part.strip() for part in clean.split("#", 1)]
+        category = "term"
+        category_match = re.search(r"\[([^\]]+)\]\s*$", clean)
+        if category_match:
+            category = category_match.group(1).strip() or "term"
+            clean = clean[: category_match.start()].strip()
+        if clean:
+            entries.append({"target": clean, "category": category, "note": note})
+    return entries
+
+
+def render_preferred_target(entry: GlossaryEntry) -> str:
+    rendered = entry.get("target", "").strip()
+    category = entry.get("category", "").strip()
+    note = entry.get("note", "").strip()
+    if category:
+        rendered += f" [{category}]"
+    if note:
+        rendered += f" # {note}"
+    return rendered
 
 
 def _entry_key(entry: GlossaryEntry) -> str:
@@ -70,6 +101,70 @@ def build_glossary_replacements(old_glossary: Dict[str, str], new_glossary: Dict
     return replacements
 
 
+def build_preferred_target_replacements(
+    old_glossary: Dict[str, str], new_glossary: Dict[str, str]
+) -> List[Replacement]:
+    old_entries = parse_preferred_targets((old_glossary or {}).get(PREFERRED_TARGET_FIELD, ""))
+    new_entries = parse_preferred_targets((new_glossary or {}).get(PREFERRED_TARGET_FIELD, ""))
+    if len(old_entries) != len(new_entries):
+        return []
+
+    replacements: List[Replacement] = []
+    for old_entry, new_entry in zip(old_entries, new_entries):
+        if old_entry.get("category") != new_entry.get("category"):
+            continue
+        _append_replacement(
+            replacements,
+            old_entry.get("target", ""),
+            new_entry.get("target", ""),
+        )
+    replacements.sort(key=lambda item: len(item[0]), reverse=True)
+    return replacements
+
+
+def apply_replacements_to_glossary_targets(
+    glossary: Dict[str, str], replacements: List[Replacement]
+) -> Tuple[Dict[str, str], int]:
+    updated = dict(glossary or {})
+    count = 0
+    for field in GLOSSARY_ENTRY_FIELDS:
+        rendered_lines = []
+        for line in (updated.get(field, "") or "").splitlines():
+            parsed = parse_glossary_entries(line)
+            if len(parsed) != 1:
+                rendered_lines.append(line)
+                continue
+            entry = parsed[0]
+            entry["target"], replacements_made = apply_glossary_replacements_to_text(
+                entry["target"], replacements
+            )
+            count += replacements_made
+            rendered = f'{entry["source"]} => {entry["target"]}'
+            if entry.get("category"):
+                rendered += f' [{entry["category"]}]'
+            if entry.get("note"):
+                rendered += f' # {entry["note"]}'
+            rendered_lines.append(rendered)
+        updated[field] = "\n".join(rendered_lines)
+    return updated, count
+
+
+def apply_replacements_to_preferred_targets(
+    glossary: Dict[str, str], replacements: List[Replacement]
+) -> Tuple[Dict[str, str], int]:
+    updated = dict(glossary or {})
+    rendered_lines = []
+    count = 0
+    for entry in parse_preferred_targets(updated.get(PREFERRED_TARGET_FIELD, "")):
+        entry["target"], replacements_made = apply_glossary_replacements_to_text(
+            entry["target"], replacements
+        )
+        count += replacements_made
+        rendered_lines.append(render_preferred_target(entry))
+    updated[PREFERRED_TARGET_FIELD] = "\n".join(rendered_lines)
+    return updated, count
+
+
 def count_glossary_matches(
     glossary: Dict[str, str],
     pattern: re.Pattern,
@@ -86,6 +181,9 @@ def count_glossary_matches(
                 count += sum(1 for _ in pattern.finditer(entry.get("source", "")))
             if match_target:
                 count += sum(1 for _ in pattern.finditer(entry.get("target", "")))
+    if match_target:
+        for entry in parse_preferred_targets((glossary or {}).get(PREFERRED_TARGET_FIELD, "")):
+            count += sum(1 for _ in pattern.finditer(entry.get("target", "")))
     return count
 
 
@@ -134,6 +232,14 @@ def replace_glossary_matches(
                 rendered += f" # {note}"
             lines.append(rendered)
         updated[field] = "\n".join(lines)
+
+    if replace_target:
+        lines = []
+        for entry in parse_preferred_targets(updated.get(PREFERRED_TARGET_FIELD, "")):
+            entry["target"], count = pattern.subn(replacement, entry["target"])
+            replacement_count += count
+            lines.append(render_preferred_target(entry))
+        updated[PREFERRED_TARGET_FIELD] = "\n".join(lines)
 
     return updated, replacement_count
 

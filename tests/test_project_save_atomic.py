@@ -88,6 +88,7 @@ class ProjectSaveAtomicTest(unittest.TestCase):
             proj.glossary = {
                 "entries": "source => Cynthia [character]",
                 "prompt": "Use project terms only.",
+                "preferred_targets": "Cynthia [character]",
             }
 
             proj.save()
@@ -100,6 +101,7 @@ class ProjectSaveAtomicTest(unittest.TestCase):
             self.assertNotIn("glossary", project_json)
             self.assertEqual(glossary_json["entries"], "source => Cynthia [character]")
             self.assertEqual(glossary_json["prompt"], "Use project terms only.")
+            self.assertEqual(glossary_json["preferred_targets"], "Cynthia [character]")
 
     def test_project_load_prefers_separate_glossary_json_over_legacy_field(self):
         with tempfile.TemporaryDirectory() as tmpdir:

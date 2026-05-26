@@ -41,6 +41,10 @@ class PromptFakeTranslator(LLM_API_Translator):
         return "港町 => Harbor City [place] # official translation"
 
     @property
+    def glossary_preferred_targets(self):
+        return "TOMORI [character] # required spelling\nHarbor City [place]"
+
+    @property
     def glossary_reference_prompt(self):
         return "Prefer official reference spellings."
 
@@ -142,6 +146,8 @@ class LLMPromptSeparationTest(unittest.TestCase):
         self.assertIn("official/reference translation", prompt)
         self.assertIn("REFERENCE GLOSSARY", prompt)
         self.assertIn("Harbor City", prompt)
+        self.assertIn("REQUIRED TARGET-LANGUAGE TERMS", prompt)
+        self.assertIn("TOMORI", prompt)
         self.assertNotIn('"translations"', prompt)
 
     def test_glossary_usage_is_guidance_only(self):
@@ -150,6 +156,8 @@ class LLMPromptSeparationTest(unittest.TestCase):
         prompt = translator._glossary_prompt_section()
 
         self.assertIn("GLOSSARY", prompt)
+        self.assertIn("REQUIRED TARGET-LANGUAGE TERMS", prompt)
+        self.assertIn("TOMORI", prompt)
         self.assertIn("terminology guidance only", prompt)
         self.assertIn("never copy that metadata into the translation", prompt)
         self.assertNotIn("Extract a reusable translation glossary", prompt)
@@ -161,6 +169,7 @@ class LLMPromptSeparationTest(unittest.TestCase):
 
         self.assertIn("[character] 友利 -> Tomori", prompt)
         self.assertIn("[honorific] さん -> Mr./Ms.", prompt)
+        self.assertIn("[required character] TOMORI", prompt)
         self.assertNotIn("[term] Quelle", prompt)
         self.assertIn("Review glossary guidance enabled", translator.logger.infos[0])
 

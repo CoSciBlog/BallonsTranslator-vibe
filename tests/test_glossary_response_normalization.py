@@ -129,6 +129,7 @@ class GlossaryMergeTest(unittest.TestCase):
             def __init__(self):
                 self.project_glossary_text = ""
                 self.project_glossary_prompt = ""
+                self.project_glossary_preferred_targets = ""
 
             def get_param_value(self, param_key):
                 raise AssertionError(f"unexpected settings lookup: {param_key}")
@@ -142,6 +143,7 @@ class GlossaryMergeTest(unittest.TestCase):
             {
                 "entries": "Tomori => Tomori [character]",
                 "prompt": "Use project glossary terms.",
+                "preferred_targets": "TOMORI [character]",
                 "reference_entries": "Eden => Eden [place]",
                 "reference_prompt": "Use reference terms for continuity.",
             }
@@ -149,6 +151,7 @@ class GlossaryMergeTest(unittest.TestCase):
 
         self.assertEqual(translator.glossary_text, "Tomori => Tomori [character]")
         self.assertEqual(translator.glossary_prompt, "Use project glossary terms.")
+        self.assertEqual(translator.glossary_preferred_targets, "TOMORI [character]")
         self.assertEqual(translator.glossary_reference_text, "Eden => Eden [place]")
         self.assertEqual(translator.glossary_reference_prompt, "Use reference terms for continuity.")
 

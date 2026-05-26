@@ -10,6 +10,7 @@ import httpx
 import openai
 from pydantic import BaseModel, Field, ValidationError
 
+from utils.glossary_replacement import parse_preferred_targets
 from .base import BaseTranslator, register_translator
 
 
@@ -490,6 +491,7 @@ class LLM_API_Translator(BaseTranslator):
         self.client = None
         self.project_glossary_text = ""
         self.project_glossary_prompt = ""
+        self.project_glossary_preferred_targets = ""
         self.project_glossary_reference_text = ""
         self.project_glossary_reference_prompt = ""
         self.project_glossary_loaded = False
@@ -693,6 +695,10 @@ class LLM_API_Translator(BaseTranslator):
     @property
     def glossary_reference_text(self) -> str:
         return getattr(self, "project_glossary_reference_text", "") or ""
+
+    @property
+    def glossary_preferred_targets(self) -> str:
+        return getattr(self, "project_glossary_preferred_targets", "") or ""
 
     @property
     def glossary_prompt(self) -> str:
@@ -932,10 +938,19 @@ class LLM_API_Translator(BaseTranslator):
         if not self.use_glossary_enabled:
             return ""
         glossary = self.glossary_text.strip()
+        preferred_targets = self.glossary_preferred_targets.strip()
         reference = self.glossary_reference_text.strip()
-        if not glossary and not reference:
+        if not glossary and not preferred_targets and not reference:
             return ""
         sections = []
+        if preferred_targets:
+            sections.append(
+                "REQUIRED TARGET-LANGUAGE TERMS:\n"
+                "These names, places, titles, or recurring designations were provided before translation. "
+                "When the source refers to the corresponding entity, use exactly the listed target-language spelling. "
+                "They do not assert a source-language match by themselves; do not insert them when unrelated.\n"
+                f"{preferred_targets}"
+            )
         if glossary:
             sections.append(
                 "PROJECT GLOSSARY:\n"
@@ -957,16 +972,19 @@ class LLM_API_Translator(BaseTranslator):
         if isinstance(glossary, dict):
             self.project_glossary_text = glossary.get("entries", "") or ""
             self.project_glossary_prompt = glossary.get("prompt", "") or ""
+            self.project_glossary_preferred_targets = glossary.get("preferred_targets", "") or ""
             self.project_glossary_reference_text = glossary.get("reference_entries", "") or ""
             self.project_glossary_reference_prompt = glossary.get("reference_prompt", "") or ""
         elif isinstance(glossary, str):
             self.project_glossary_text = glossary
             self.project_glossary_prompt = ""
+            self.project_glossary_preferred_targets = ""
             self.project_glossary_reference_text = ""
             self.project_glossary_reference_prompt = ""
         else:
             self.project_glossary_text = ""
             self.project_glossary_prompt = ""
+            self.project_glossary_preferred_targets = ""
             self.project_glossary_reference_text = ""
             self.project_glossary_reference_prompt = ""
 
@@ -974,6 +992,7 @@ class LLM_API_Translator(BaseTranslator):
         return {
             "entries": self.glossary_text,
             "prompt": self.glossary_prompt,
+            "preferred_targets": self.glossary_preferred_targets,
             "reference_entries": self.glossary_reference_text,
             "reference_prompt": self.glossary_reference_prompt,
         }
@@ -1371,8 +1390,9 @@ class LLM_API_Translator(BaseTranslator):
 
     def _review_glossary_prompt_section(self) -> str:
         entries, stats = self._review_glossary_entries()
+        preferred_targets = parse_preferred_targets(self.glossary_preferred_targets)
         logger = getattr(self, "logger", None)
-        if not entries:
+        if not entries and not preferred_targets:
             if logger is not None:
                 logger.info("Review glossary guidance disabled or no relevant entries found.")
             return ""
@@ -1392,6 +1412,11 @@ class LLM_API_Translator(BaseTranslator):
             )
 
         lines = []
+        for entry in preferred_targets:
+            lines.append(
+                f"- [required {entry['category']}] {entry['target']}"
+                + (f"; notes: {entry['note']}" if entry.get("note") else "")
+            )
         for entry in entries:
             parts = [
                 f"- [{entry['category']}] {entry['source']} -> {entry['target']}"
@@ -1407,6 +1432,7 @@ class LLM_API_Translator(BaseTranslator):
         return (
             "RELEVANT GLOSSARY FOR REVIEW:\n"
             "Use these entries to keep character names, aliases, titles, honorifics, places, and organizations consistent. "
+            "Entries marked required contain target-language-only spellings supplied before translation; use them exactly when the referenced entity is present. "
             "Aliases should be normalized to the preferred target. Use honorifics and titles only when natural and supported by context. "
             "Do not output category labels, aliases, notes, confidence, or glossary metadata.\n"
             + "\n".join(lines)
@@ -1750,6 +1776,15 @@ class LLM_API_Translator(BaseTranslator):
             for i, (source, translation) in enumerate(zip(src_list, translations))
         ]
         existing_glossary = self.glossary_text.strip() or "(empty)"
+        preferred_targets = self.glossary_preferred_targets.strip()
+        preferred_section = (
+            "\n\nREQUIRED TARGET-LANGUAGE TERMS:\n"
+            "Use the exact listed target spelling if an extracted source term corresponds to one of these entities. "
+            "Do not create a conflicting alternate target spelling.\n"
+            f"{preferred_targets}"
+            if preferred_targets and self.use_glossary_enabled
+            else ""
+        )
         reference_glossary = self.glossary_reference_text.strip()
         reference_section = (
             f"\n\nREFERENCE GLOSSARY:\n{self.glossary_reference_prompt.strip()}\n{reference_glossary}"
@@ -1783,6 +1818,7 @@ class LLM_API_Translator(BaseTranslator):
             "Each entry must contain source, target, category, aliases, notes, and confidence. "
             "Category, aliases, notes, and confidence are metadata for the glossary only; they must never be copied into translations.\n\n"
             f"EXISTING GLOSSARY:\n{existing_glossary}"
+            f"{preferred_section}"
             f"{reference_section}\n\n"
             f"TRANSLATION PAIRS:\n{json.dumps(pairs, ensure_ascii=False, indent=2)}"
         )
@@ -1883,7 +1919,7 @@ class LLM_API_Translator(BaseTranslator):
         if (
             not self.glossary_refinement_enabled
             or not self.use_glossary_enabled
-            or not self.glossary_text.strip()
+            or not (self.glossary_text.strip() or self.glossary_preferred_targets.strip())
             or not src_list
         ):
             return translations

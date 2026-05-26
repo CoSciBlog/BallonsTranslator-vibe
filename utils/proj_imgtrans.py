@@ -179,6 +179,7 @@ class ProjImgTrans:
         return {
             'entries': '',
             'prompt': cls.DEFAULT_GLOSSARY_PROMPT,
+            'preferred_targets': '',
             'reference_entries': '',
             'reference_prompt': cls.DEFAULT_GLOSSARY_REFERENCE_PROMPT,
         }
@@ -192,10 +193,12 @@ class ProjImgTrans:
         if isinstance(glossary, dict):
             entries = glossary.get('entries', glossary.get('text', glossary.get('glossary', '')))
             prompt = glossary.get('prompt', default['prompt'])
+            preferred_targets = glossary.get('preferred_targets', '')
             reference_entries = glossary.get('reference_entries', glossary.get('reference', ''))
             reference_prompt = glossary.get('reference_prompt', default['reference_prompt'])
             default['entries'] = entries if isinstance(entries, str) else ''
             default['prompt'] = prompt if isinstance(prompt, str) else cls.DEFAULT_GLOSSARY_PROMPT
+            default['preferred_targets'] = preferred_targets if isinstance(preferred_targets, str) else ''
             default['reference_entries'] = reference_entries if isinstance(reference_entries, str) else ''
             default['reference_prompt'] = (
                 reference_prompt if isinstance(reference_prompt, str) else cls.DEFAULT_GLOSSARY_REFERENCE_PROMPT
