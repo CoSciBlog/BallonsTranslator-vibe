@@ -273,7 +273,7 @@ class LLM_API_Translator(BaseTranslator):
         },
         "system_prompt": {
             "type": "editor",
-            "value": 'You are an expert manga/comic translator and editor. Translate accurately and naturally while preserving speaker intent, character relationships, names, honorifics, pronouns, number, gender, and formal/informal address from the source and available context. Do not invent gender, pronouns, relationships, or names when the source is ambiguous; keep ambiguity natural in the target language. You MUST provide the output strictly in the specified JSON format, without any additional explanations or markdown formatting. Return only valid JSON in this exact shape: {"translations":[{"id":1,"translation":"Translated text here."}]}. The JSON object must have a single key \'translations\', which is a list of objects, each with an \'id\' (integer) and a \'translation\' (string).\n\nExample Output Schema:\n{"translations": [{"id": 1, "translation": "Translated text here."}]}',
+            "value": 'You are an expert manga/comic translator and editor. Translate accurately and naturally while preserving speaker intent, character relationships, names, honorifics, pronouns, number, gender, and formal/informal address from the source and available context. In dialogue, do not mechanically repeat a character name when natural target-language speech would use a pronoun, direct address, or an omitted subject; retain names where they identify, call to, contrast, or disambiguate the character. Do not invent gender, pronouns, relationships, or names when the source is ambiguous; keep ambiguity natural in the target language. You MUST provide the output strictly in the specified JSON format, without any additional explanations or markdown formatting. Return only valid JSON in this exact shape: {"translations":[{"id":1,"translation":"Translated text here."}]}. The JSON object must have a single key \'translations\', which is a list of objects, each with an \'id\' (integer) and a \'translation\' (string).\n\nExample Output Schema:\n{"translations": [{"id": 1, "translation": "Translated text here."}]}',
             "description": "System message to instruct the LLM on its role and required output format. Available placeholders: {source_language} / {input_language} / {from_lang} for the source language, and {target_language} / {output_language} / {to_lang} for the target language. JSON braces that do not match these names are left unchanged.",
         },
         "invalid repeat count": {
@@ -328,6 +328,10 @@ class LLM_API_Translator(BaseTranslator):
             "value": "Thorough (separate passes)",
             "description": "Controls optional correction requests. Combined review checks active glossary guidance during the reflection request and skips the separate glossary-refinement request. Auto glossary extraction remains a separate request when enabled.",
         },
+        "max review items per request": {
+            "value": 8,
+            "description": "Maximum text blocks sent in each manual or post-translation review request. Smaller batches make dialogue and pronoun corrections more reliable for local models, while larger batches use fewer requests and can retain more page-wide context.",
+        },
         "bubble text shortening": {
             "type": "selector",
             "options": [
@@ -348,7 +352,7 @@ class LLM_API_Translator(BaseTranslator):
         },
         "reflection prompt": {
             "type": "editor",
-            "value": "Review the draft translation against the original source text. Check meaning, terminology, names, glossary terms, tone, fluency, punctuation, item count, pronouns, speaker/addressee references, gendered wording, singular/plural first person, and formal/informal address. Revise only where the translation can be improved. Return only the final improved JSON object in the required schema.",
+            "value": "Review the draft translation against the original source text. Check meaning, terminology, names, glossary terms, tone, fluency, punctuation, item count, pronouns, speaker/addressee references, gendered wording, singular/plural first person, and formal/informal address. Correct mechanical name repetition when a natural pronoun, direct address, or omitted subject is supported by context; retain a name when it is needed for identification, emphasis, or clarity. Revise only where the translation can be improved. Return only the final improved JSON object in the required schema.",
             "description": "Instructions used for the optional reflection/revision API call. Available placeholders: {source_language} / {input_language} / {from_lang} for the source language, and {target_language} / {output_language} / {to_lang} for the target language. Reflection receives the original translation task and draft JSON automatically.",
         },
         "previous context pages": {
@@ -627,6 +631,10 @@ class LLM_API_Translator(BaseTranslator):
     @property
     def review_speed_mode(self) -> str:
         return str(self.get_param_value("review speed mode") or "Thorough (separate passes)")
+
+    @property
+    def max_review_items_per_request(self) -> int:
+        return max(self._param_int("max review items per request", default=8), 1)
 
     @property
     def reflection_prompt(self) -> str:
@@ -926,6 +934,7 @@ class LLM_API_Translator(BaseTranslator):
             "Preserve each id, item count, order, line intent, names, honorifics, pronouns, speaker/addressee roles, singular/plural first person, and formal/informal address. "
             "Do not turn a male character into a feminine pronoun/address, a female/girl character into a masculine pronoun/address, or I/me into we/us unless the source/context clearly says so. "
             "If gender or addressee form is unknown, keep the target wording neutral or as ambiguous as the language allows.\n\n"
+            f"{self._dialogue_naturalness_rules()}"
             f"{shortening_section}"
             f"{context_section}"
             f"{glossary_section}"
@@ -948,6 +957,7 @@ class LLM_API_Translator(BaseTranslator):
                 "REQUIRED TARGET-LANGUAGE TERMS:\n"
                 "These names, places, titles, or recurring designations were provided before translation. "
                 "When the source refers to the corresponding entity, use exactly the listed target-language spelling. "
+                "They do not require repeating a character name where fluent dialogue would naturally use a supported pronoun or direct address. "
                 "They do not assert a source-language match by themselves; do not insert them when unrelated.\n"
                 f"{preferred_targets}"
             )
@@ -1219,7 +1229,7 @@ class LLM_API_Translator(BaseTranslator):
             'Use exactly this schema: { "translations": [ {"id": 1, "translation": "reviewed translation"} ] }\n'
             f"Return exactly {len(expected_items)} items with these IDs: {expected_ids}.\n"
             "Preserve every id exactly. Do not add, remove, reorder, merge, or split items.\n"
-            "Use source text to catch mistranslations, missing meaning, wrong pronouns, wrong names, and inconsistent address forms.\n"
+            "Use source text to catch mistranslations, missing meaning, wrong pronouns, wrong names, inconsistent address forms, and mechanical name repetition.\n"
             "If the current translation is already good, return it unchanged.\n"
             "If unsure, return the current translation unchanged.\n"
             "Keep the same target language.\n"
@@ -1239,7 +1249,7 @@ class LLM_API_Translator(BaseTranslator):
             {"id": i + 1, "source": source, "draft_translation": draft}
             for i, (source, draft) in enumerate(zip(src_list, draft_list))
         ]
-        chunk_size = 20
+        chunk_size = self.max_review_items_per_request
         items_by_id: Dict[int, str] = {}
         for chunk in (
             expected_items[i : i + chunk_size]
@@ -1322,7 +1332,17 @@ class LLM_API_Translator(BaseTranslator):
             "- Check address forms and honorifics such as Mr./Ms., Herr/Frau, du/Sie, and similar forms when context or glossary supports them.\n"
             "- If gender, pronouns, or social address are unknown, do not invent that information.\n"
             "- Use glossary names, aliases, titles, and honorifics as guidance only; never write category labels, aliases, notes, confidence, or other metadata into translations.\n\n"
+            f"{self._dialogue_naturalness_rules()}"
             f"{self._bubble_text_shortening_rules()}"
+        )
+
+    def _dialogue_naturalness_rules(self) -> str:
+        return (
+            "NATURAL DIALOGUE AND REFERENCE RULES:\n"
+            "- Prefer idiomatic target-language dialogue over word-for-word repetition of names.\n"
+            "- When context clearly identifies the speaker, addressee, or person being discussed, use the natural target-language pronoun or direct address (for example you/du/Sie or he/she/they) or omit the subject when appropriate.\n"
+            "- Do not copy a character name from every source mention or machine draft into the final sentence merely to satisfy glossary spelling.\n"
+            "- Keep the name, title, or honorific when someone is being called, introduced, contrasted, emphasized, or disambiguated, or when replacing it would create ambiguity or invent gender/formality.\n\n"
         )
 
     def _bubble_text_shortening_rules(self) -> str:

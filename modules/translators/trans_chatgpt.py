@@ -38,11 +38,11 @@ class GPTTranslator(BaseTranslator):
         'override model': '',
         'prompt template': {
             'type': 'editor',
-            'value': 'Translate the following manga/comic text to {to_lang}. Preserve names, honorifics, speaker intent, pronouns, gendered wording, singular/plural first person, and formal/informal address. Do not invent gender or relationships when the source is ambiguous. If the text is already in {to_lang} or looks like gibberish, output it as it is:\n',
+            'value': 'Translate the following manga/comic text to {to_lang}. Preserve names, honorifics, speaker intent, pronouns, gendered wording, singular/plural first person, and formal/informal address. In dialogue, do not repeat a character name mechanically when a natural pronoun or direct address is clear from context; retain names where needed for address, emphasis, or clarity. Do not invent gender or relationships when the source is ambiguous. If the text is already in {to_lang} or looks like gibberish, output it as it is:\n',
         },
         'chat system template': {
             'type': 'editor',
-            'value': 'You are a professional manga/comic translation engine. Translate into colloquial, elegant, fluent {to_lang} without referencing machine translations. Only translate the text content; never add notes. Preserve names, honorifics, speaker/addressee roles, pronouns, gendered wording, singular/plural first person, and formal/informal address from the source/context. Do not turn a male character into a feminine pronoun/address, a female or girl character into a masculine pronoun/address, or I/me into we/us unless the source clearly requires it. If gender or address is unknown, keep it neutral or naturally ambiguous. If there is any issue in the text, output the text as is.\nTranslate to {to_lang}.',
+            'value': 'You are a professional manga/comic translation engine. Translate into colloquial, elegant, fluent {to_lang} without referencing machine translations. Only translate the text content; never add notes. Preserve names, honorifics, speaker/addressee roles, pronouns, gendered wording, singular/plural first person, and formal/informal address from the source/context. In natural dialogue, replace needless repeated character names with context-supported pronouns, direct address, or an omitted subject where the target language permits; keep names for calling, introduction, emphasis, or clarity. Do not turn a male character into a feminine pronoun/address, a female or girl character into a masculine pronoun/address, or I/me into we/us unless the source clearly requires it. If gender or address is unknown, keep it neutral or naturally ambiguous. If there is any issue in the text, output the text as is.\nTranslate to {to_lang}.',
         },
         
         'chat sample': {
@@ -289,6 +289,7 @@ class GPTTranslator(BaseTranslator):
             f"Review and correct the following existing manga/comic translations into {to_lang}. "
             "Use the source text to fix mistranslations, names, pronouns, gendered wording, speaker/addressee roles, singular/plural first person, address forms, and missing meaning. "
             "Do not turn a male character into a feminine pronoun/address, a female or girl character into a masculine pronoun/address, or I/me into we/us unless the source clearly requires it. "
+            "Replace needless repeated character names with natural pronouns or direct address when the context identifies the speaker or addressee; keep a name when needed for calling, emphasis, disambiguation, or ambiguity. "
             "If a current translation is already correct, output it unchanged. "
             "Return only the reviewed translations using the same <|n|> markers, with no notes.\n"
         )

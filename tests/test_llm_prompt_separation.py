@@ -116,6 +116,9 @@ class LLMPromptSeparationTest(unittest.TestCase):
         self.assertIn("Do not change I/me/my into we/us/our", prompt)
         self.assertIn("Do not change you into they/he/she", prompt)
         self.assertIn("address forms and honorifics", prompt)
+        self.assertIn("NATURAL DIALOGUE AND REFERENCE RULES", prompt)
+        self.assertIn("do not copy a character name from every source mention", prompt.lower())
+        self.assertIn("natural target-language pronoun or direct address", prompt)
         self.assertIn("same IDs", prompt)
         self.assertIn("same item count", prompt)
         self.assertIn("RELEVANT GLOSSARY FOR REVIEW", prompt)
@@ -160,7 +163,14 @@ class LLMPromptSeparationTest(unittest.TestCase):
         self.assertIn("TOMORI", prompt)
         self.assertIn("terminology guidance only", prompt)
         self.assertIn("never copy that metadata into the translation", prompt)
+        self.assertIn("do not require repeating a character name", prompt.lower())
         self.assertNotIn("Extract a reusable translation glossary", prompt)
+
+    def test_review_batch_default_prefers_focused_localization_passes(self):
+        self.assertEqual(
+            LLM_API_Translator.params["max review items per request"]["value"],
+            8,
+        )
 
     def test_review_glossary_context_filters_relevant_categories(self):
         translator = PromptFakeTranslator()

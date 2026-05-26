@@ -77,6 +77,9 @@ class TwoStepTranslator(LLM_API_Translator):
         "or added information, names, honorifics, pronouns, speaker roles, tone, fluency, "
         "awkward literal phrasing, and punctuation. Preserve character voice and emotion; "
         "rewrite stiff machine phrasing when a fluent native expression keeps the meaning. "
+        "Do not mechanically repeat a character name wherever the draft repeats it: use "
+        "natural pronouns or direct address when speaker/addressee context supports them, "
+        "while retaining names needed for calling, emphasis, or clarity. "
         "If the draft is already accurate and natural, keep it. "
         "When speech-bubble shortening settings are enabled, make overlong dialogue "
         "more compact without omitting essential meaning or character voice. "
@@ -94,6 +97,8 @@ class TwoStepTranslator(LLM_API_Translator):
         "additions, wrong names, pronouns, speaker roles, tone, punctuation, and any "
         "literal or unnatural phrasing. Prefer concise, fluent dialogue that sounds "
         "natural to a native reader without losing meaning, nuance, or emotional force. "
+        "Correct needless repeated character names into context-supported natural "
+        "pronouns or direct address, without inventing identity, gender, or formality. "
         "Respect enabled speech-bubble shortening guidance for overlong dialogue. "
         "If it is already accurate and natural, return it unchanged. Return JSON only "
         "with exactly the same ids and item count "
@@ -416,6 +421,7 @@ class TwoStepTranslator(LLM_API_Translator):
             "Do not reorder, merge, or include source/draft_translation/metadata.\n"
             "If the draft is acceptable, copy it unchanged.\n"
             "If unsure, copy the draft unchanged.\n\n"
+            f"{self._dialogue_naturalness_rules()}"
             f"INPUT:\n{json.dumps(expected_items, ensure_ascii=False, indent=2)}"
         )
 
