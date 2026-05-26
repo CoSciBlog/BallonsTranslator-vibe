@@ -1481,12 +1481,6 @@ class MainWindow(mainwindow_cls):
             shortcut.activated.connect(partial(self.drawingPanel.shortcutSetCurrentToolByName, tool_name))
             self.drawingPanel.setShortcutTip(tool_name, shortcut_key)
 
-        shortcutReInpaint = QShortcut(QKeySequence("Ctrl+Shift+I"), self)
-        shortcutReInpaint.activated.connect(self.run_reinpaint_current_page)
-
-        shortcutRemoveMasks = QShortcut(QKeySequence("Ctrl+Shift+Backspace"), self)
-        shortcutRemoveMasks.activated.connect(self.remove_current_page_masks)
-
     def shortcutNext(self):
         sender: QShortcut = self.sender()
         if isinstance(sender, QShortcut):
