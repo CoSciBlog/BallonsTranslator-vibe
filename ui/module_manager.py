@@ -1715,9 +1715,35 @@ class ModuleManager(QObject):
         self.inpaint(**inpaint_dict)
     
     def on_translatorparam_edited(self, param_key: str, param_content: dict):
-        if self.translator is not None:
+        selected_translator = self.translator_panel.module_combobox.currentText()
+        if self.translator is not None and self.translator.name == selected_translator:
             self.updateModuleSetupParam(self.translator, param_key, param_content)
             cfg_module.translator_params[self.translator.name] = self.translator.params
+        elif (
+            selected_translator in cfg_module.translator_params
+            and not param_content.get('flush', False)
+            and not param_content.get('select_path', False)
+        ):
+            params = cfg_module.translator_params[selected_translator]
+            if params is not None and param_key in params:
+                value = params[param_key]
+                content = param_content['content']
+                if isinstance(value, dict):
+                    try:
+                        value_type = value.get('data_type', type(value['value']))
+                        content = value_type(content)
+                    except (TypeError, ValueError):
+                        LOGGER.warning(
+                            f'Invalid param value {content} for {selected_translator}.{param_key}'
+                        )
+                    value['value'] = content
+                else:
+                    try:
+                        params[param_key] = type(value)(content)
+                    except (TypeError, ValueError):
+                        LOGGER.warning(
+                            f'Invalid param value {content} for {selected_translator}.{param_key}'
+                        )
 
     def on_inpainterparam_edited(self, param_key: str, param_content: dict):
         if self.inpainter is not None:

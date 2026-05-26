@@ -96,6 +96,34 @@ class TestMainWindowReInpaint(unittest.TestCase):
                 module_config.post_merge_min_height_overlap_ratio,
             ) = original_values
 
+    def test_translator_setting_updates_visible_profile_during_async_switch(self):
+        module_config = ui.module_manager.cfg_module
+        original_params = module_config.translator_params.get("LLM_API_Translator")
+        visible_params = {
+            "num ctx": {"value": 0, "data_type": int},
+        }
+        module_config.translator_params["LLM_API_Translator"] = visible_params
+        try:
+            dummy_manager = type("DummyManager", (), {})()
+            dummy_manager.translator_panel = MagicMock()
+            dummy_manager.translator_panel.module_combobox.currentText.return_value = (
+                "LLM_API_Translator"
+            )
+            dummy_manager.translator = MagicMock()
+            dummy_manager.translator.name = "Two-Step Translator"
+
+            method = ui.module_manager.ModuleManager.on_translatorparam_edited.__get__(
+                dummy_manager, ui.module_manager.ModuleManager
+            )
+            method("num ctx", {"content": "32768"})
+
+            self.assertEqual(visible_params["num ctx"]["value"], 32768)
+        finally:
+            if original_params is None:
+                module_config.translator_params.pop("LLM_API_Translator", None)
+            else:
+                module_config.translator_params["LLM_API_Translator"] = original_params
+
     def test_sidebar_region_merge_uses_settings_config(self):
         config = {"MERGE_MODE": "VERTICAL"}
         dummy_window = type("DummyWindow", (), {})()

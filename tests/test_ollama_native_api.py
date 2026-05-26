@@ -53,6 +53,9 @@ class NativeOllamaTranslator(LLM_API_Translator):
             "temperature": 0.1,
             "top p": 1.0,
             "max tokens": 4096,
+            "num ctx": 0,
+            "reasoning": False,
+            "reasoning level": "medium",
         }
 
     def get_param_value(self, param_key):
@@ -97,6 +100,21 @@ class NativeOllamaTransportTest(unittest.TestCase):
             translator._ollama_chat_endpoint(),
             "http://server:11434/api/chat",
         )
+
+    def test_num_ctx_setting_is_forwarded_to_native_ollama_options(self):
+        translator = NativeOllamaTranslator()
+        translator._params["num ctx"] = 32768
+
+        translator._create_completion(
+            {
+                "model": "translategemma:12b",
+                "messages": [{"role": "user", "content": "Translate."}],
+                "extra_body": translator._build_reasoning_extra_body(),
+            }
+        )
+
+        _, payload, _ = translator.client.requests[0]
+        self.assertEqual(payload["options"]["num_ctx"], 32768)
 
     def test_two_step_defaults_to_native_ollama_base_url_and_context_setting(self):
         self.assertEqual(
