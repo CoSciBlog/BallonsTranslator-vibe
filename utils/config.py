@@ -181,6 +181,7 @@ class ProgramConfig(Config):
     upscale_max_long_edge: int = 4096
     upscale_skip_if_long_edge_above: int = 2500
     upscale_quality: str = 'balanced'
+    upscale_artifact_reduction: str = 'off'
     decensor_after_pipeline: bool = False
     decensor_mask_mode: str = 'auto'
     decensor_mask_dilate: int = 8

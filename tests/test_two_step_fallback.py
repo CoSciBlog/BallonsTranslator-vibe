@@ -30,12 +30,13 @@ class FakeLogger:
 
 
 class FakeTwoStepTranslator(TwoStepTranslator):
-    def __init__(self, drafts, responses=None, errors=None, fallback=True, chunk_size=8):
+    def __init__(self, drafts, responses=None, errors=None, fallback=True, chunk_size=8, shortening="Off"):
         self._drafts = drafts
         self._responses = list(responses or [])
         self._errors = list(errors or [])
         self._fallback = fallback
         self._chunk_size = chunk_size
+        self._shortening = shortening
         self.requests = []
         self.glossary_updates = []
         self.logger = FakeLogger()
@@ -57,6 +58,18 @@ class FakeTwoStepTranslator(TwoStepTranslator):
     @property
     def max_refinement_items_per_request(self):
         return self._chunk_size
+
+    @property
+    def bubble_text_shortening(self):
+        return self._shortening
+
+    @property
+    def long_bubble_character_target(self):
+        return 60
+
+    @property
+    def extreme_bubble_character_target(self):
+        return 100
 
     def _first_step_translate(self, src_list):
         return list(self._drafts)
@@ -286,6 +299,18 @@ class TwoStepFallbackTest(unittest.TestCase):
         self.assertNotIn("GlossaryResponse", normal_prompt)
         self.assertIn('"source": "Quelle"', normal_prompt)
         self.assertIn('"draft_translation": "Draft"', normal_prompt)
+
+    def test_optional_bubble_shortening_guidance_is_added_to_refinement_prompt(self):
+        translator = FakeTwoStepTranslator(
+            ["Draft"], shortening="Shorten long and extremely long translations"
+        )
+        expected = translator._expected_refinement_items(["Quelle"], ["Draft"])
+
+        prompt = translator._assemble_refinement_prompt_from_items(expected, "English")
+
+        self.assertIn("SPEECH-BUBBLE LENGTH GUIDANCE", prompt)
+        self.assertIn("longer than about 60 characters", prompt)
+        self.assertIn("longer than about 100 characters", prompt)
 
     def test_text_blocks_keep_machine_draft_and_llm_review_separately(self):
         response = TranslationResponse(

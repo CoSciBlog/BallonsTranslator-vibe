@@ -536,7 +536,7 @@ class LamaLarge(LamaInpainterMPE):
                 'cross'
             ],
             'value': 'ellipse',
-            'description': 'Shape of the dilation kernel used for mask_dilation_size. Ellipse is usually safest for speech bubbles; rectangle expands more aggressively.'
+            'description': 'Shape of the dilation kernel used for mask_dilation_size. Ellipse is usually safest for speech bubbles; rectangle expands in all directions more aggressively; cross expands primarily along horizontal and vertical strokes and preserves corners better.'
         },
         'inpaint_enlarge_ratio': {
             'value': 1.7,

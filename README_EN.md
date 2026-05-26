@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.74`
+Fork release: `1.4.0-vibe.75`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -85,6 +85,9 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Auto layout now wraps and scales translations inside detected speech bubbles and clamps generated text boxes to page edges, with a setting for bubble-bound layout.
 - Added right-click `Reflect / review selected translations` for selected text boxes when an LLM-capable translator is active.
 - Added `manga_ocr` accuracy/speed controls, clearer `mit48px` throughput guidance, and Google source auto-detection using the text translation endpoint for direct and Two-Step drafts.
+- Added detailed ComicTextDetector field tooltips, a documented LaMa `cross` dilation-kernel choice, and a Settings preset refresh action.
+- Added optional compression-artifact cleanup before upscaling (`Off`, `Light`, `Medium`, or `Strong`) to reduce JPEG blocking/ringing before enlarged OCR and masks are generated.
+- Added optional speech-bubble shortening guidance for `LLM_API_Translator` and `Two-Step Translator`, with long and extreme character targets for concise dialogue without blind truncation.
 
 ## Features
 
@@ -257,7 +260,7 @@ The source-language selector in Settings and the bottom translator bar now shows
 
 ## Pre-detection upscaling
 
-The General settings page starts with an `Upscaling` section. When `Upscale pages before detection` is enabled, each page can be upscaled into the project-local `upscaled` folder before text detection. Detection, OCR, mask creation, inpainting, canvas display, and export then use that high-resolution working image. The settings include labeled fields for upscale factor, maximum long-edge resolution, a long-edge threshold above which images are skipped, and speed/quality presets from `Fast` through `AnimeSharp`; detailed explanations remain available as hover tooltips.
+The General settings page starts with an `Upscaling` section. When `Upscale pages before detection` is enabled, each page can be upscaled into the project-local `upscaled` folder before text detection. Detection, OCR, mask creation, inpainting, canvas display, and export then use that high-resolution working image. The settings include labeled fields for upscale factor, maximum long-edge resolution, a long-edge threshold above which images are skipped, speed/quality presets from `Fast` through `AnimeSharp`, and optional compression cleanup. Compression cleanup runs a line-preserving denoise step before enlargement to reduce JPEG blocks and ringing; use `Light` or `Medium` on compressed scans and reserve `Strong` for visibly damaged input because it can soften fine artwork.
 
 For permanent source-page replacement, use `Tools -> Upscale Project Images 2x` or `Tools -> Upscale Project Images Using Settings`. The first action forces only the factor to `2.0`; both actions use the configured maximum long edge, skip threshold, and quality preset. The second action also uses the configured factor. Generated page files are staged first and then written beside the original pages with names such as `001_upscaled_2x.png` or `001_upscaled_2_5x.png`; originals are removed only after successful generation, and the project reloads the new page files. If any current page filename already contains `upscaled`, the app asks whether those pages should be processed again or skipped. Existing text-box coordinates are scaled to the replacement image, while stale image-processing progress and generated page outputs are reset for a fresh pipeline run.
 
@@ -294,6 +297,8 @@ These settings improve continuity for names, tone, and references when pages are
 ## Two-Step LLM refinement
 
 The `Two-Step Translator` first creates Google, DeepL Free, or DeepL draft translations, then asks the configured LLM to refine those drafts into natural dialogue. The LLM is instructed to treat the machine output as a starting point: it must preserve the source meaning and character voice while repairing literal or stiff phrasing, fluency, tone, and punctuation. `fallback to first step` is the final fallback only: it uses first-step draft translations if the normal LLM refinement and the strict LLM retry both fail.
+
+`LLM_API_Translator` and `Two-Step Translator` expose `bubble text shortening`. When enabled, long or extremely long outputs receive explicit speech-bubble length guidance using configurable character targets. The model is asked to compact dialogue while preserving meaning, names, tone, and important context; output is not mechanically truncated.
 
 When `Ollama` is selected, translation, refinement, reflection, and glossary calls use Ollama's native `/api/chat` endpoint. Set `num ctx` in translator settings to pass an explicit `options.num_ctx` context window; leave it at `0` to retain the Ollama server default. Existing saved endpoints ending in `/v1` continue to work and are normalized to the native endpoint.
 

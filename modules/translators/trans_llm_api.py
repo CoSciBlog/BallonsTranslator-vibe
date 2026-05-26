@@ -327,6 +327,24 @@ class LLM_API_Translator(BaseTranslator):
             "value": "Thorough (separate passes)",
             "description": "Controls optional correction requests. Combined review checks active glossary guidance during the reflection request and skips the separate glossary-refinement request. Auto glossary extraction remains a separate request when enabled.",
         },
+        "bubble text shortening": {
+            "type": "selector",
+            "options": [
+                "Off",
+                "Shorten extremely long translations",
+                "Shorten long and extremely long translations",
+            ],
+            "value": "Off",
+            "description": "Ask the LLM to compress long dialogue for comic speech bubbles while preserving meaning, tone, names, and important details. This guides rewriting; it never blindly truncates text.",
+        },
+        "long bubble character target": {
+            "value": 90,
+            "description": "Approximate character target for long translations when full shortening is enabled. Lower values produce tighter dialogue but increase the risk of losing nuance.",
+        },
+        "extreme bubble character target": {
+            "value": 140,
+            "description": "Approximate character target for extremely long translations. Lines beyond this target are condensed in either shortening mode when possible without changing meaning.",
+        },
         "reflection prompt": {
             "type": "editor",
             "value": "Review the draft translation against the original source text. Check meaning, terminology, names, glossary terms, tone, fluency, punctuation, item count, pronouns, speaker/addressee references, gendered wording, singular/plural first person, and formal/informal address. Revise only where the translation can be improved. Return only the final improved JSON object in the required schema.",
@@ -613,6 +631,21 @@ class LLM_API_Translator(BaseTranslator):
         return self.get_param_value("reflection prompt")
 
     @property
+    def bubble_text_shortening(self) -> str:
+        return str(self.get_param_value("bubble text shortening") or "Off")
+
+    @property
+    def long_bubble_character_target(self) -> int:
+        return max(self._param_int("long bubble character target", default=90), 20)
+
+    @property
+    def extreme_bubble_character_target(self) -> int:
+        return max(
+            self._param_int("extreme bubble character target", default=140),
+            self.long_bubble_character_target,
+        )
+
+    @property
     def use_glossary_enabled(self) -> bool:
         return bool(self.get_param_value("use glossary"))
 
@@ -879,6 +912,7 @@ class LLM_API_Translator(BaseTranslator):
         input_json_str = json.dumps(input_elements, ensure_ascii=False, indent=2)
         glossary_section = self._glossary_prompt_section()
         context_section = self._translation_context_prompt_section()
+        shortening_section = self._bubble_text_shortening_rules()
 
         prompt = (
             f"Translate the following manga/comic text snippets from {from_lang} to {to_lang}. "
@@ -886,6 +920,7 @@ class LLM_API_Translator(BaseTranslator):
             "Preserve each id, item count, order, line intent, names, honorifics, pronouns, speaker/addressee roles, singular/plural first person, and formal/informal address. "
             "Do not turn a male character into a feminine pronoun/address, a female/girl character into a masculine pronoun/address, or I/me into we/us unless the source/context clearly says so. "
             "If gender or addressee form is unknown, keep the target wording neutral or as ambiguous as the language allows.\n\n"
+            f"{shortening_section}"
             f"{context_section}"
             f"{glossary_section}"
             f"INPUT:\n{input_json_str}"
@@ -1268,6 +1303,27 @@ class LLM_API_Translator(BaseTranslator):
             "- Check address forms and honorifics such as Mr./Ms., Herr/Frau, du/Sie, and similar forms when context or glossary supports them.\n"
             "- If gender, pronouns, or social address are unknown, do not invent that information.\n"
             "- Use glossary names, aliases, titles, and honorifics as guidance only; never write category labels, aliases, notes, confidence, or other metadata into translations.\n\n"
+            f"{self._bubble_text_shortening_rules()}"
+        )
+
+    def _bubble_text_shortening_rules(self) -> str:
+        mode = self.bubble_text_shortening
+        if mode == "Off":
+            return ""
+        long_target = self.long_bubble_character_target
+        extreme_target = self.extreme_bubble_character_target
+        if mode == "Shorten long and extremely long translations":
+            instruction = (
+                f"- If a translation is longer than about {long_target} characters, "
+                "rewrite it into concise comic dialogue when possible.\n"
+            )
+        else:
+            instruction = ""
+        return (
+            "SPEECH-BUBBLE LENGTH GUIDANCE:\n"
+            f"{instruction}"
+            f"- If a translation is longer than about {extreme_target} characters, aggressively condense phrasing to fit a speech bubble while preserving all essential meaning.\n"
+            "- Prefer natural contractions, remove redundant wording, and avoid explanatory additions; never delete plot-critical facts, names, commands, or emotional intent only to meet a target.\n\n"
         )
 
     def _review_glossary_entries(self) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:

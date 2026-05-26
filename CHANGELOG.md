@@ -9,6 +9,11 @@
 - `manga_ocr` beam-size/output-length settings and expanded `mit48px` batch-size guidance for explicit accuracy, latency, and VRAM tradeoffs.
 - A Google Translate provider path aligned with Google's text translation endpoint, including optional automatic source-language detection for direct Google and Two-Step drafts.
 - Additional settings and context-menu hover descriptions for auto layout, OCR controls, and translation/review actions.
+- Detailed ComicTextDetector hover descriptions for detection resolution, rearranged batches, thresholds, half precision, device, font-size controls, and mask dilation.
+- An expanded LaMa mask-dilation-kernel tooltip documenting the `cross` option.
+- A `Refresh presets` action for reloading available settings presets.
+- Optional pre-upscale compression-artifact cleanup levels to reduce JPEG blocking/ringing before enlargement.
+- Optional `LLM_API_Translator` and `Two-Step Translator` speech-bubble shortening guidance with separate long and extreme text targets.
 - Zero-padded current/total page counter in the centered title bar, for example `001/217 pages`, updated as the selected page changes.
 - Batch Processing project progress bar and `Stop All` action for cancelling both the active pipeline and queued projects.
 - Batch Processing controls for multiple/direct folder paths, skipping previously processed work, source/target languages, fallback OCR, and optional permanent source-image upscaling with quality and size settings.

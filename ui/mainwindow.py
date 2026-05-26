@@ -714,6 +714,7 @@ class MainWindow(mainwindow_cls):
             options.upscale_max_long_edge,
             options.upscale_skip_if_long_edge_above,
             options.upscale_quality,
+            options.upscale_artifact_reduction,
         )
         if started:
             self._gui_batch_upscale_pending = True
@@ -2558,6 +2559,7 @@ class MainWindow(mainwindow_cls):
     def run_project_upscale_using_settings(self):
         self.configPanel.on_upscale_numeric_changed()
         self.configPanel.on_upscale_quality_changed()
+        self.configPanel.on_upscale_artifact_reduction_changed()
         self.run_project_upscale(float(pcfg.upscale_factor))
 
     def run_project_upscale(self, factor: float):
@@ -2593,6 +2595,7 @@ class MainWindow(mainwindow_cls):
 
         self.configPanel.on_upscale_numeric_changed()
         self.configPanel.on_upscale_quality_changed()
+        self.configPanel.on_upscale_artifact_reduction_changed()
         started = self.project_upscale_thread.runUpscale(
             self.imgtrans_proj.directory,
             page_names,
@@ -2600,6 +2603,7 @@ class MainWindow(mainwindow_cls):
             pcfg.upscale_max_long_edge,
             pcfg.upscale_skip_if_long_edge_above,
             pcfg.upscale_quality,
+            pcfg.upscale_artifact_reduction,
         )
         if started:
             self.project_upscale_thread.progress_bar.setTaskName(
@@ -2701,12 +2705,14 @@ class MainWindow(mainwindow_cls):
             self.saveCurrentPage(update_scene_text=True, save_proj=True, restore_interface=True)
         self.configPanel.on_upscale_numeric_changed()
         self.configPanel.on_upscale_quality_changed()
+        self.configPanel.on_upscale_artifact_reduction_changed()
         started = self.batch_project_upscale_thread.runUpscale(
             jobs,
             float(pcfg.upscale_factor),
             pcfg.upscale_max_long_edge,
             pcfg.upscale_skip_if_long_edge_above,
             pcfg.upscale_quality,
+            pcfg.upscale_artifact_reduction,
         )
         if not started:
             return

@@ -45,6 +45,7 @@ class BatchProcessingOptions:
     upscale_max_long_edge: int
     upscale_skip_if_long_edge_above: int
     upscale_quality: str
+    upscale_artifact_reduction: str
     source_language: str
     target_language: str
     ocr_fallback_enabled: bool
@@ -106,13 +107,22 @@ class BatchProcessingDialog(QDialog):
         self.upscale_factor.setSingleStep(0.5)
         self.upscale_factor.setValue(float(pcfg.upscale_factor))
         self.upscale_quality = self._combo(['fast', 'balanced', 'quality', 'animesharp'], pcfg.upscale_quality)
+        self.upscale_artifact_reduction = self._combo(
+            ['off', 'light', 'medium', 'strong'], pcfg.upscale_artifact_reduction
+        )
         self.upscale_max_edge = QSpinBox()
         self.upscale_max_edge.setRange(0, 100000)
         self.upscale_max_edge.setValue(int(pcfg.upscale_max_long_edge))
         self.upscale_skip_edge = QSpinBox()
         self.upscale_skip_edge.setRange(0, 100000)
         self.upscale_skip_edge.setValue(int(pcfg.upscale_skip_if_long_edge_above))
-        upscale_widgets = [self.upscale_factor, self.upscale_quality, self.upscale_max_edge, self.upscale_skip_edge]
+        upscale_widgets = [
+            self.upscale_factor,
+            self.upscale_quality,
+            self.upscale_artifact_reduction,
+            self.upscale_max_edge,
+            self.upscale_skip_edge,
+        ]
         for widget in upscale_widgets:
             widget.setEnabled(False)
         self.upscale_check.toggled.connect(lambda enabled: [widget.setEnabled(enabled) for widget in upscale_widgets])
@@ -140,6 +150,7 @@ class BatchProcessingDialog(QDialog):
         form.addRow('', self.upscale_check)
         form.addRow(self.tr('Upscale factor'), self.upscale_factor)
         form.addRow(self.tr('Upscale quality'), self.upscale_quality)
+        form.addRow(self.tr('Compression artifact cleanup'), self.upscale_artifact_reduction)
         form.addRow(self.tr('Maximum long edge after upscale (0 = unlimited)'), self.upscale_max_edge)
         form.addRow(self.tr('Skip upscale above long edge (0 = never)'), self.upscale_skip_edge)
         form.addRow(self.export_check, self.export_combo)
@@ -216,6 +227,7 @@ class BatchProcessingDialog(QDialog):
             upscale_max_long_edge=self.upscale_max_edge.value(),
             upscale_skip_if_long_edge_above=self.upscale_skip_edge.value(),
             upscale_quality=self.upscale_quality.currentText(),
+            upscale_artifact_reduction=self.upscale_artifact_reduction.currentText(),
             source_language=lang_display_to_key(self.source_combo.currentText()),
             target_language=lang_display_to_key(self.target_combo.currentText()),
             ocr_fallback_enabled=self.ocr_fallback_check.isChecked(),

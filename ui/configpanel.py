@@ -480,9 +480,11 @@ class ConfigPanel(Widget):
         dlConfigPanel.addTextLabel(label_translator)
         self.trans_config_panel = TranslatorConfigPanel(label_translator, scrollWidget=self)
         self.trans_sub_block = dlConfigPanel.addBlockWidget(self.trans_config_panel)
-        self.pronoun_review_checker, _ = dlConfigPanel.addCheckBox(
+        self.pronoun_review_checker, review_subblock = checkbox_with_label(
             self.tr('Review and optimize translation with LLM'),
             discription=self.tr('Runs an extra LLM review for natural wording, source accuracy, pronouns, speaker/addressee references, gendered wording, and formality. Adds LLM requests.'))
+        keyword_index = self.trans_config_panel.vlayout.indexOf(self.trans_config_panel.replaceOCRkeywordBtn)
+        self.trans_config_panel.vlayout.insertWidget(keyword_index, review_subblock)
         self.pronoun_review_checker.stateChanged.connect(self.on_pronoun_review_changed)
 
         generalConfigPanel.addTextLabel(label_upscaling)
@@ -494,6 +496,7 @@ class ConfigPanel(Widget):
         upscale_max_edge_tip = self.tr('Maximum long-edge resolution after upscaling. Lower limits keep runs faster and lighter; higher limits preserve more detail but slow down later processing.')
         upscale_skip_edge_tip = self.tr('Pages whose original long edge is already above this value are not upscaled. Lower values skip more large pages and speed up runs; use 0 to always allow upscaling.')
         upscale_quality_tip = self.tr('Quality/speed preset for OpenCV upscaling. Fast is quickest, Quality and AnimeSharp are slower, and AnimeSharp adds stronger manga-style sharpening inspired by 2x-AnimeSharpV4.')
+        upscale_artifact_tip = self.tr('Optional cleanup applied before enlargement to reduce JPEG blocks and ringing. Light or Medium can improve compressed scans; Strong may soften fine line art and is slower.')
         self.upscale_factor_edit = self._compact_line_edit(upscale_factor_tip, placeholder='2.0')
         self.upscale_factor_edit.setValidator(QDoubleValidator(1.0, 8.0, 2, self.upscale_factor_edit))
         self.upscale_factor_edit.editingFinished.connect(self.on_upscale_numeric_changed)
@@ -511,11 +514,21 @@ class ConfigPanel(Widget):
         ])
         self.upscale_quality_combobox.setFixedHeight(CONFIG_COMBOBOX_HEIGHT)
         self.upscale_quality_combobox.activated.connect(self.on_upscale_quality_changed)
+        self.upscale_artifact_combobox = ConfigComboBox(scrollWidget=generalConfigPanel)
+        self.upscale_artifact_combobox.addItems([
+            self.tr('Off'),
+            self.tr('Light'),
+            self.tr('Medium'),
+            self.tr('Strong'),
+        ])
+        self.upscale_artifact_combobox.setFixedHeight(CONFIG_COMBOBOX_HEIGHT)
+        self.upscale_artifact_combobox.activated.connect(self.on_upscale_artifact_reduction_changed)
         upscale_row = self._compact_settings_row(
             self._labeled_compact_widget(self.tr('Factor'), self.upscale_factor_edit, upscale_factor_tip),
             self._labeled_compact_widget(self.tr('Max long edge'), self.upscale_max_edge_edit, upscale_max_edge_tip),
             self._labeled_compact_widget(self.tr('Skip above'), self.upscale_skip_edge_edit, upscale_skip_edge_tip),
             self._labeled_compact_widget(self.tr('Quality'), self.upscale_quality_combobox, upscale_quality_tip),
+            self._labeled_compact_widget(self.tr('Compression cleanup'), self.upscale_artifact_combobox, upscale_artifact_tip),
         )
         generalConfigPanel.addBlockWidget(upscale_row)
 
@@ -613,6 +626,8 @@ class ConfigPanel(Widget):
 
         self.settings_apply_preset_btn = QPushButton(self.tr('Apply preset'), self)
         self.settings_apply_preset_btn.setToolTip(self.tr('Load the selected settings preset into the current session and update the visible controls.'))
+        self.settings_refresh_presets_btn = QPushButton(self.tr('Refresh presets'), self)
+        self.settings_refresh_presets_btn.setToolTip(self.tr('Reload the list of available preset JSON files from the presets folder.'))
         self.settings_save_preset_btn = QPushButton(self.tr('Save current as preset'), self)
         self.settings_save_preset_btn.setToolTip(self.tr('Save the current settings as a named reusable preset.'))
         self.settings_import_preset_btn = QPushButton(self.tr('Import preset'), self)
@@ -629,6 +644,7 @@ class ConfigPanel(Widget):
         preset_buttons.setSpacing(8)
         for btn in [
             self.settings_apply_preset_btn,
+            self.settings_refresh_presets_btn,
             self.settings_save_preset_btn,
             self.settings_import_preset_btn,
             self.settings_export_preset_btn,
@@ -641,6 +657,9 @@ class ConfigPanel(Widget):
         generalConfigPanel.addBlockWidget(preset_container)
 
         self.settings_apply_preset_btn.clicked.connect(self.on_apply_settings_preset)
+        self.settings_refresh_presets_btn.clicked.connect(
+            lambda _checked=False: self.refresh_settings_presets()
+        )
         self.settings_save_preset_btn.clicked.connect(self.on_save_settings_preset)
         self.settings_import_preset_btn.clicked.connect(self.on_import_settings_preset)
         self.settings_export_preset_btn.clicked.connect(self.on_export_settings_preset)
@@ -971,6 +990,10 @@ class ConfigPanel(Widget):
         quality_map = ['fast', 'balanced', 'quality', 'animesharp']
         pcfg.upscale_quality = quality_map[self.upscale_quality_combobox.currentIndex()]
 
+    def on_upscale_artifact_reduction_changed(self):
+        strength_map = ['off', 'light', 'medium', 'strong']
+        pcfg.upscale_artifact_reduction = strength_map[self.upscale_artifact_combobox.currentIndex()]
+
     def on_upscale_numeric_changed(self):
         try:
             factor = float(self.upscale_factor_edit.text().strip())
@@ -1146,6 +1169,11 @@ class ConfigPanel(Widget):
         self.upscale_quality_combobox.setCurrentIndex(
             upscale_qualities.index(pcfg.upscale_quality)
             if pcfg.upscale_quality in upscale_qualities else 1
+        )
+        artifact_levels = ['off', 'light', 'medium', 'strong']
+        self.upscale_artifact_combobox.setCurrentIndex(
+            artifact_levels.index(pcfg.upscale_artifact_reduction)
+            if pcfg.upscale_artifact_reduction in artifact_levels else 0
         )
 
         self.detect_config_panel.keep_existing_checker.setChecked(pcfg.module.keep_exist_textlines)

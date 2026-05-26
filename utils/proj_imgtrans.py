@@ -541,7 +541,9 @@ class ProjImgTrans:
             })
             return img
 
-        upscaled, used_factor = upscale_image(img, factor, pcfg.upscale_quality)
+        upscaled, used_factor = upscale_image(
+            img, factor, pcfg.upscale_quality, pcfg.upscale_artifact_reduction
+        )
         self.ensure_dir(self.upscaled_dir())
         imwrite(target_path, upscaled, ext='.png')
         uh, uw = upscaled.shape[:2]

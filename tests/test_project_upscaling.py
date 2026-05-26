@@ -12,7 +12,7 @@ sys.path.insert(0, APP_ROOT)
 
 from utils.proj_imgtrans import ProjImgTrans
 from utils.textblock import TextBlock
-from utils.upscale import filename_has_upscale_marker, project_upscale_filename
+from utils.upscale import filename_has_upscale_marker, project_upscale_filename, reduce_compression_artifacts
 from utils.batch_processing import collect_batch_project_dirs
 from ui.io_thread import BatchProjectUpscaleThread
 
@@ -23,6 +23,16 @@ class ProjectUpscalingTest(unittest.TestCase):
         self.assertEqual(project_upscale_filename("001.jpg", 2.5), "001_upscaled_2_5x.jpg")
         self.assertTrue(filename_has_upscale_marker("001_UPSCALED_2x.png"))
         self.assertFalse(filename_has_upscale_marker("001.png"))
+
+    def test_compression_cleanup_is_optional_and_processes_enabled_images(self):
+        image = np.zeros((20, 20, 3), dtype=np.uint8)
+        image[::2, ::2] = 255
+
+        self.assertIs(reduce_compression_artifacts(image, "off"), image)
+        cleaned = reduce_compression_artifacts(image, "medium")
+
+        self.assertEqual(cleaned.shape, image.shape)
+        self.assertFalse(np.array_equal(cleaned, image))
 
     def test_replacing_project_page_renames_file_scales_geometry_and_resets_progress(self):
         with tempfile.TemporaryDirectory() as directory:

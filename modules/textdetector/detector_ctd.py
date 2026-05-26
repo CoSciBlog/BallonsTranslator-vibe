@@ -38,56 +38,68 @@ class ComicTextDetector(TextDetectorBase):
             'type': 'selector',
             'options': CTD_DETECT_SIZE_OPTIONS,
             'value': 1280,
-            'display_name': 'Detection Resolution'
+            'display_name': 'Detection Resolution',
+            'description': 'Resolution used by ComicTextDetector while locating text. Higher values can find smaller lettering more accurately, but increase detection time and GPU memory use.'
         }, 
         'det_rearrange_max_batches': {
             'type': 'selector',
             'options': [1, 2, 4, 6, 8, 12, 16, 24, 32], 
             'value': 4,
-            'display_name': 'Max Rearranged Detection Batches'
+            'display_name': 'Max Rearranged Detection Batches',
+            'description': 'Maximum batches used when rearranging text regions for detection. Higher values can process difficult or crowded layouts more completely, but use more memory and may run slower.'
         },
         'confidence threshold': {
             'type': 'line_editor',
             'value': 0.4,
             'data_type': float,
-            'display_name': 'Confidence Threshold'
+            'display_name': 'Confidence Threshold',
+            'description': 'Minimum detector confidence required to keep a text region. Lower values find more possible text but can create false boxes; higher values are stricter.'
         },
         'NMS threshold': {
             'type': 'line_editor',
             'value': 0.35,
             'data_type': float,
-            'display_name': 'NMS Threshold'
+            'display_name': 'NMS Threshold',
+            'description': 'Overlap threshold used to suppress duplicate detections. Lower values remove overlapping boxes more aggressively; higher values retain nearby candidates.'
         },
         'half precision': {
             'type': 'checkbox',
             'value': False,
-            'display_name': 'Half Precision'
+            'display_name': 'Half Precision',
+            'description': 'Use reduced-precision GPU inference to lower VRAM use and often improve speed. Disable if detections become unstable or the selected device does not support it well.'
         },
-        'device': DEVICE_SELECTOR(),
-        'description': 'ComicTextDetector',
+        'device': {
+            **DEVICE_SELECTOR(),
+            'description': 'Device used for text detection. CUDA is normally fastest when supported; CPU avoids GPU memory use but is usually slower.'
+        },
+        'description': 'ComicTextDetector locates manga/comic lettering and produces masks for OCR and inpainting. Hover an individual field for its accuracy and performance tradeoff.',
         'font size multiplier': {
             'type': 'line_editor',
             'value': 1.,
             'data_type': float,
-            'display_name': 'Font Size Multiplier'
+            'display_name': 'Font Size Multiplier',
+            'description': 'Multiplier applied to the font size estimated from detected source text. Increase it when rendered translations are consistently too small; decrease it when they overflow bubbles.'
         },
         'font size max': {
             'type': 'line_editor',
             'value': -1,
             'data_type': int,
-            'display_name': 'Maximum Font Size'
+            'display_name': 'Maximum Font Size',
+            'description': 'Upper limit for automatically detected font sizes in pixels. Use -1 for no maximum; reduce it to prevent unusually large rendered dialogue.'
         },
         'font size min': {
             'type': 'line_editor',
             'value': -1,
             'data_type': int,
-            'display_name': 'Minimum Font Size'
+            'display_name': 'Minimum Font Size',
+            'description': 'Lower limit for automatically detected font sizes in pixels. Use -1 for no minimum; raise it when small detections render unreadably.'
         },
         'mask dilate size': {
             'type': 'line_editor',
             'value': 2,
             'data_type': int,
-            'display_name': 'Mask Dilation Size'
+            'display_name': 'Mask Dilation Size',
+            'description': 'Number of pixels added around detected lettering in the generated mask. Larger values remove more text edges before inpainting, but can erase nearby artwork.'
         }
     }
     _load_model_keys = {'model'}

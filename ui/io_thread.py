@@ -184,6 +184,7 @@ def stage_upscaled_images(
     max_long_edge,
     skip_above,
     quality,
+    artifact_reduction='off',
     progress_callback=None,
     stop_requested=None,
 ):
@@ -216,7 +217,9 @@ def stage_upscaled_images(
                 failures.append((source_name, 'Target file already exists: ' + target_name))
                 continue
 
-            output, used_factor = upscale_image(image, used_factor, quality)
+            output, used_factor = upscale_image(
+                image, used_factor, quality, artifact_reduction
+            )
             ext = osp.splitext(target_name)[1].lower()
             if ext not in IMG_EXT:
                 ext = '.png'
@@ -262,8 +265,9 @@ class ProjectUpscaleThread(ThreadBase):
         self.max_long_edge = 0
         self.skip_above = 0
         self.quality = 'balanced'
+        self.artifact_reduction = 'off'
 
-    def runUpscale(self, directory, img_list, factor, max_long_edge, skip_above, quality):
+    def runUpscale(self, directory, img_list, factor, max_long_edge, skip_above, quality, artifact_reduction='off'):
         if self.isRunning():
             return False
         self.directory = directory
@@ -272,6 +276,7 @@ class ProjectUpscaleThread(ThreadBase):
         self.max_long_edge = int(max_long_edge)
         self.skip_above = int(skip_above)
         self.quality = quality
+        self.artifact_reduction = artifact_reduction
         self.stop_requested = False
         self.job = self._run_upscale
         self.start()
@@ -296,6 +301,7 @@ class ProjectUpscaleThread(ThreadBase):
             self.max_long_edge,
             self.skip_above,
             self.quality,
+            self.artifact_reduction,
             progress_callback=update_progress,
             stop_requested=lambda: self.stop_requested,
         )
@@ -313,9 +319,10 @@ class BatchProjectUpscaleThread(ThreadBase):
         self.max_long_edge = 0
         self.skip_above = 0
         self.quality = 'balanced'
+        self.artifact_reduction = 'off'
         self.stop_requested = False
 
-    def runUpscale(self, jobs, factor, max_long_edge, skip_above, quality):
+    def runUpscale(self, jobs, factor, max_long_edge, skip_above, quality, artifact_reduction='off'):
         if self.isRunning():
             return False
         self.jobs = [(directory, list(page_names)) for directory, page_names in jobs]
@@ -323,6 +330,7 @@ class BatchProjectUpscaleThread(ThreadBase):
         self.max_long_edge = int(max_long_edge)
         self.skip_above = int(skip_above)
         self.quality = quality
+        self.artifact_reduction = artifact_reduction
         self.stop_requested = False
         self.job = self._run_upscale
         self.start()
@@ -355,6 +363,7 @@ class BatchProjectUpscaleThread(ThreadBase):
                 self.max_long_edge,
                 self.skip_above,
                 self.quality,
+                self.artifact_reduction,
                 progress_callback=update_progress,
                 stop_requested=lambda: self.stop_requested,
             )

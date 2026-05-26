@@ -12,6 +12,31 @@ QUALITY_INTERPOLATION = {
     "animesharp": cv2.INTER_LANCZOS4,
 }
 
+ARTIFACT_REDUCTION_STRENGTH = {
+    "off": 0,
+    "light": 3,
+    "medium": 6,
+    "strong": 10,
+}
+
+
+def reduce_compression_artifacts(img: np.ndarray, strength: str = "off") -> np.ndarray:
+    """Reduce block/ringing artifacts before enlargement while retaining line art."""
+    denoise_strength = ARTIFACT_REDUCTION_STRENGTH.get((strength or "off").lower(), 0)
+    if img is None or denoise_strength <= 0:
+        return img
+    alpha = None
+    source = img
+    if img.ndim == 3 and img.shape[2] == 4:
+        source, alpha = img[:, :, :3], img[:, :, 3:4]
+    if source.ndim == 2:
+        cleaned = cv2.fastNlMeansDenoising(source, None, denoise_strength, 7, 21)
+    else:
+        cleaned = cv2.fastNlMeansDenoisingColored(
+            source, None, denoise_strength, denoise_strength, 7, 21
+        )
+    return np.concatenate([cleaned, alpha], axis=2) if alpha is not None else cleaned
+
 
 def project_upscale_filename(imgname: str, factor: float) -> str:
     factor_tag = f"{float(factor):.2f}".rstrip("0").rstrip(".").replace(".", "_")
@@ -44,6 +69,7 @@ def upscale_image(
     img: np.ndarray,
     factor: float,
     quality: str = "balanced",
+    artifact_reduction: str = "off",
 ) -> Tuple[np.ndarray, float]:
     if img is None or factor <= 1:
         return img, 1.0
@@ -54,6 +80,7 @@ def upscale_image(
     if new_width == width and new_height == height:
         return img, 1.0
 
+    img = reduce_compression_artifacts(img, artifact_reduction)
     quality = (quality or "balanced").lower()
     interpolation = QUALITY_INTERPOLATION.get(quality, cv2.INTER_CUBIC)
     result = cv2.resize(img, (new_width, new_height), interpolation=interpolation)
