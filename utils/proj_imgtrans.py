@@ -16,6 +16,28 @@ from . import shared
 from .exceptions import ImgnameNotInProjectException, ProjectLoadFailureException, ProjectDirNotExistException, ProjectNotSupportedException
 
 
+_COVER_TITLE_FILENAME_RE = re.compile(
+    r'(^|[\s_.\-()\[\]])(cover|front[\s_.\-]?cover|inside[\s_.\-]?cover|'
+    r'frontispiece|title[\s_.\-]?page|titlepage|表紙|扉絵)($|[\s_.\-()\[\]])',
+    re.IGNORECASE,
+)
+
+
+def cover_title_page_reason(imgname: str, image: np.ndarray = None, page_index: int = -1) -> str:
+    stem = osp.splitext(osp.basename(imgname))[0]
+    if _COVER_TITLE_FILENAME_RE.search(stem):
+        return 'filename identifies a cover or title page'
+    if page_index not in (0, 1) or image is None or image.ndim != 3 or image.shape[2] < 3:
+        return ''
+    bgr = image[:, :, :3]
+    hsv = cv2.cvtColor(bgr, cv2.COLOR_BGR2HSV)
+    colorful_pixels = (hsv[:, :, 1] >= 48) & (hsv[:, :, 2] >= 32)
+    colorful_ratio = float(np.count_nonzero(colorful_pixels)) / max(1, hsv.shape[0] * hsv.shape[1])
+    if colorful_ratio >= 0.12:
+        return f'opening page has substantial color content ({colorful_ratio:.1%})'
+    return ''
+
+
 def atomic_write_json(path: str, data, encoder=None) -> None:
     tmp_path = path + '.tmp'
     try:
@@ -151,6 +173,7 @@ class ProjImgTrans:
         self.proj_path: str = None
         self.glossary: Dict[str, str] = self.default_glossary()
         self.ignored_pages = set()
+        self.cover_title_pages: Dict[str, str] = {}
         self._save_lock = threading.RLock()
 
         self.current_img: str = None
@@ -286,6 +309,15 @@ class ProjImgTrans:
             p for p in self.ignored_pages
             if p in self.pages or p in self.not_found_pages
         }
+        cover_title_pages = proj_dict.get('cover_title_pages', {})
+        if isinstance(cover_title_pages, dict):
+            self.cover_title_pages = {
+                p: str(reason)
+                for p, reason in cover_title_pages.items()
+                if isinstance(p, str) and (p in self.pages or p in self.not_found_pages)
+            }
+        else:
+            self.cover_title_pages = {}
 
         for p in self.pages:
             if p not in self._image_info:
@@ -334,6 +366,24 @@ class ProjImgTrans:
         self.set_page_ignored(pagename, ignored)
         return ignored
 
+    def is_cover_title_page(self, pagename: str) -> bool:
+        return pagename in self.cover_title_pages
+
+    def update_cover_title_pages(self) -> bool:
+        detected = {}
+        for page_index, pagename in enumerate(self.pages):
+            reason = cover_title_page_reason(pagename, page_index=page_index)
+            if not reason and page_index in (0, 1):
+                try:
+                    reason = cover_title_page_reason(pagename, self.read_img(pagename), page_index)
+                except Exception as e:
+                    LOGGER.warning(f'Could not inspect page for cover/title classification: {pagename}: {e}')
+            if reason:
+                detected[pagename] = reason
+        changed = detected != self.cover_title_pages
+        self.cover_title_pages = detected
+        return changed
+
     def pipeline_pages(self, pages_to_process=None, skip_ignored: bool = True) -> List[str]:
         if pages_to_process is not None and len(pages_to_process) > 0:
             page_names = [page for page in pages_to_process if page in self.pages]
@@ -341,6 +391,8 @@ class ProjImgTrans:
             page_names = list(self.pages.keys())
         if skip_ignored:
             page_names = [page for page in page_names if page not in self.ignored_pages]
+            if pcfg.module.skip_cover_title_pages:
+                page_names = [page for page in page_names if page not in self.cover_title_pages]
         return page_names
 
     def set_page_progress(self, pagename, code):
@@ -444,6 +496,7 @@ class ProjImgTrans:
         self.set_current_img(None)
         self.glossary = self.default_glossary()
         self.ignored_pages = set()
+        self.cover_title_pages = {}
         imglist = find_all_imgs(self.directory, abs_path=False, sort=True)
         self.pages = {}
         self._pagename2idx = {}
@@ -490,6 +543,11 @@ class ProjImgTrans:
             'current_img': self.current_img,
             'image_info': image_info,
             'ignored_pages': sorted([page for page in self.ignored_pages if page in pages]),
+            'cover_title_pages': {
+                page: reason
+                for page, reason in self.cover_title_pages.items()
+                if page in pages
+            },
         }
 
     def read_img(self, imgname: str) -> np.ndarray:
@@ -635,6 +693,8 @@ class ProjImgTrans:
             if source_name in self.ignored_pages:
                 self.ignored_pages.remove(source_name)
                 self.ignored_pages.add(target_name)
+            if source_name in self.cover_title_pages:
+                self.cover_title_pages[target_name] = self.cover_title_pages.pop(source_name)
             self._remove_generated_page_outputs(source_name)
 
         renamed_order = [

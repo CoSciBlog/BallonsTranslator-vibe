@@ -953,11 +953,13 @@ class MainWindow(mainwindow_cls):
 
     def apply_page_list_item_state(self, item: QListWidgetItem, imgname: str):
         ignored = self.imgtrans_proj.is_page_ignored(imgname)
+        auto_cover_skipped = pcfg.module.skip_cover_title_pages and self.imgtrans_proj.is_cover_title_page(imgname)
+        skipped = ignored or auto_cover_skipped
         group = item.data(PageListView.PAGE_GROUP_ROLE) or ''
         source_type = item.data(PageListView.PAGE_SOURCE_TYPE_ROLE) or ''
         item.setData(PageListView.PAGE_IGNORED_ROLE, ignored)
         font = item.font()
-        font.setItalic(ignored)
+        font.setItalic(skipped)
         font.setBold(bool(group))
         item.setFont(font)
         tooltip = self.tr('Page preview')
@@ -968,12 +970,15 @@ class MainWindow(mainwindow_cls):
                 group=group,
                 page=imgname,
             )
-        if ignored:
+        if skipped:
             item.setBackground(QBrush(QColor(255, 214, 92, 72)))
-            item.setToolTip(
-                tooltip + '\n' +
-                self.tr('Ignored in pipeline runs: text detection, OCR, translation, and inpainting are skipped for this page.')
-            )
+            skip_reason = self.tr('Ignored in pipeline runs: text detection, OCR, translation, and inpainting are skipped for this page.')
+            if auto_cover_skipped and not ignored:
+                reason = self.imgtrans_proj.cover_title_pages.get(imgname, '')
+                skip_reason = self.tr('Automatically skipped as cover/title page: text detection, OCR, translation, and inpainting are skipped for this page.')
+                if reason:
+                    skip_reason += '\n' + reason
+            item.setToolTip(tooltip + '\n' + skip_reason)
         else:
             item.setBackground(QBrush())
             item.setToolTip(tooltip)
@@ -1149,6 +1154,14 @@ class MainWindow(mainwindow_cls):
         self._set_pipeline_stage_state(*self._gloss_scan_stage_backup)
         self._gloss_scan_stage_backup = None
 
+    def update_detected_cover_title_pages(self):
+        if self.imgtrans_proj.is_empty or not pcfg.module.skip_cover_title_pages:
+            return
+        detected_changed = self.imgtrans_proj.update_cover_title_pages()
+        self.updatePageList()
+        if detected_changed:
+            self.save_project_safely(self.tr('saving detected cover/title page state'), notify_user=False)
+
     def run_gloss_scan_current_manga(self):
         if self.imgtrans_proj.is_empty:
             create_info_dialog(self.tr('Open a project before running Gloss Scan.'))
@@ -1157,9 +1170,10 @@ class MainWindow(mainwindow_cls):
             create_info_dialog(self.tr('Another pipeline is already running. Please wait until it finishes.'))
             return
 
+        self.update_detected_cover_title_pages()
         page_names = self.imgtrans_proj.pipeline_pages(skip_ignored=True)
         if len(page_names) == 0:
-            create_info_dialog(self.tr('No non-ignored pages are available for Gloss Scan.'))
+            create_info_dialog(self.tr('No processable pages are available for Gloss Scan.'))
             return
 
         if self.bottomBar.textblockChecker.isChecked():
@@ -2381,6 +2395,7 @@ class MainWindow(mainwindow_cls):
         self.postprocess_mt_toggle = False
         self.st_manager.updateTextBlkList()
 
+        self.update_detected_cover_title_pages()
         page_names = self.imgtrans_proj.pipeline_pages(skip_ignored=True)
         if len(page_names) == 0:
             return
@@ -2423,6 +2438,7 @@ class MainWindow(mainwindow_cls):
             self.bottomBar.textblockChecker.click()
         self.postprocess_mt_toggle = False
         self.st_manager.updateTextBlkList()
+        self.update_detected_cover_title_pages()
         return True
 
     def run_review_current_page(self):
@@ -2439,7 +2455,7 @@ class MainWindow(mainwindow_cls):
             return
         page_names = self.imgtrans_proj.pipeline_pages(skip_ignored=True)
         if len(page_names) == 0:
-            create_info_dialog(self.tr('No non-ignored pages are available for translation review.'))
+            create_info_dialog(self.tr('No processable pages are available for translation review.'))
             return
         self.module_manager.runReviewPipeline()
 
@@ -2567,6 +2583,7 @@ class MainWindow(mainwindow_cls):
             return False
         if self.bottomBar.textblockChecker.isChecked():
             self.bottomBar.textblockChecker.click()
+        self.update_detected_cover_title_pages()
         return True
 
     def run_inpaint_optimize_current_page(self):
@@ -2583,7 +2600,7 @@ class MainWindow(mainwindow_cls):
             return
         page_names = self.imgtrans_proj.pipeline_pages(skip_ignored=True)
         if len(page_names) == 0:
-            create_info_dialog(self.tr('No non-ignored pages are available for inpaint optimization.'))
+            create_info_dialog(self.tr('No processable pages are available for inpaint optimization.'))
             return
         self.module_manager.runInpaintOptimizationPipeline()
 
@@ -2876,11 +2893,13 @@ class MainWindow(mainwindow_cls):
         self.postprocess_mt_toggle = False
 
         all_disabled = pcfg.module.all_stages_disabled()
+
+        self.update_detected_cover_title_pages()
         
         pages_to_process = []
         processable_pages = self.imgtrans_proj.pipeline_pages(skip_ignored=True)
         if len(processable_pages) == 0:
-            create_info_dialog(self.tr('All pages are ignored for pipeline runs.'))
+            create_info_dialog(self.tr('All pages are ignored or detected as cover/title pages for pipeline runs.'))
             return False
         
         # 继续模式：先检查哪些页面需要处理

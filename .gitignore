@@ -80,3 +80,8 @@ Ultralytics/settings.json
 # Local OCR/translation comparison projects and sample pages
 00test/
 00text/
+
+# Local verification and test-only launcher files
+tests/
+test.js
+requirements-test.txt

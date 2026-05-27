@@ -559,6 +559,21 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../ui/configpanel.py" line="430"/>
+        <source>Page filtering</source>
+        <translation>Seitenfilterung</translation>
+    </message>
+    <message>
+        <location filename="../ui/configpanel.py" line="539"/>
+        <source>Skip detected cover and title pages in pipeline</source>
+        <translation>Erkannte Cover- und Titelseiten in der Pipeline überspringen</translation>
+    </message>
+    <message>
+        <location filename="../ui/configpanel.py" line="540"/>
+        <source>Detects clearly named cover/title pages and color opening covers, then skips text detection, OCR, translation, and inpainting for them. Disable to process marked pages normally.</source>
+        <translation>Erkennt eindeutig benannte Cover-/Titelseiten und farbige Cover am Anfang und überspringt dafür Texterkennung, OCR, Übersetzung und Inpainting. Deaktivieren Sie die Option, um markierte Seiten normal zu verarbeiten.</translation>
+    </message>
+    <message>
         <location filename="../ui/configpanel.py" line="537"/>
         <source>Merge nearby text boxes after pipeline</source>
         <translation>In der Nähe befindliche Textfelder nach der Pipeline zusammenführen</translation>
@@ -2213,6 +2228,11 @@
         <translation>Seitenvorschau</translation>
     </message>
     <message>
+        <location filename="../ui/mainwindow.py" line="978"/>
+        <source>Automatically skipped as cover/title page: text detection, OCR, translation, and inpainting are skipped for this page.</source>
+        <translation>Automatisch als Cover-/Titelseite übersprungen: Texterkennung, OCR, Übersetzung und Inpainting werden für diese Seite übersprungen.</translation>
+    </message>
+    <message>
         <location filename="../ui/mainwindow.py" line="604"/>
         <source>Failed to import selected sources</source>
         <translation type="unfinished"></translation>
@@ -2535,6 +2555,21 @@ Fehlgeschlagen: {failed}/{total}</translation>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../ui/mainwindow.py" line="1176"/>
+        <source>No processable pages are available for Gloss Scan.</source>
+        <translation>Für den Gloss Scan sind keine verarbeitbaren Seiten verfügbar.</translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.py" line="2458"/>
+        <source>No processable pages are available for translation review.</source>
+        <translation>Für die Übersetzungsprüfung sind keine verarbeitbaren Seiten verfügbar.</translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.py" line="2603"/>
+        <source>No processable pages are available for inpaint optimization.</source>
+        <translation>Für die Inpaint-Optimierung sind keine verarbeitbaren Seiten verfügbar.</translation>
+    </message>
+    <message>
         <location filename="../ui/mainwindow.py" line="2414"/>
         <source>Open a project page before running Censor Restoration.</source>
         <translation type="unfinished"></translation>
@@ -2775,6 +2810,16 @@ Skipped {count} image(s) because of configured size limits.</source>
         <location filename="../ui/mainwindow.py" line="2849"/>
         <source>All pages are ignored for pipeline runs.</source>
         <translation>Bei Pipelineausführungen werden alle Seiten ignoriert.</translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.py" line="2902"/>
+        <source>All pages are ignored or detected as cover/title pages for pipeline runs.</source>
+        <translation>Für Pipeline-Ausführungen werden alle Seiten ignoriert oder als Cover-/Titelseiten erkannt.</translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.py" line="1163"/>
+        <source>saving detected cover/title page state</source>
+        <translation>Erkannte Cover-/Titelseiten werden gespeichert</translation>
     </message>
     <message>
         <location filename="../ui/mainwindow.py" line="2906"/>

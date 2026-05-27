@@ -427,6 +427,7 @@ class ConfigPanel(Widget):
         label_translator = self.tr('Translator')
         label_startup = self.tr('Startup')
         label_upscaling = self.tr('Upscaling')
+        label_page_filtering = self.tr('Page filtering')
         label_post_merge = self.tr('Post-merge')
         label_decensor = self.tr('Censor Restoration')
         label_typesetting = self.tr('Typesetting')
@@ -442,6 +443,7 @@ class ConfigPanel(Widget):
         ])
         generalTableItem.appendRows([
             TableItem(label_upscaling, CONFIG_FONTSIZE_TABLE),
+            TableItem(label_page_filtering, CONFIG_FONTSIZE_TABLE),
             TableItem(label_post_merge, CONFIG_FONTSIZE_TABLE),
             TableItem(label_decensor, CONFIG_FONTSIZE_TABLE),
             TableItem(label_settings_presets, CONFIG_FONTSIZE_TABLE),
@@ -531,6 +533,13 @@ class ConfigPanel(Widget):
             self._labeled_compact_widget(self.tr('Compression cleanup'), self.upscale_artifact_combobox, upscale_artifact_tip),
         )
         generalConfigPanel.addBlockWidget(upscale_row)
+
+        generalConfigPanel.addTextLabel(label_page_filtering)
+        self.skip_cover_title_pages_checker, _ = generalConfigPanel.addCheckBox(
+            self.tr('Skip detected cover and title pages in pipeline'),
+            discription=self.tr('Detects clearly named cover/title pages and color opening covers, then skips text detection, OCR, translation, and inpainting for them. Disable to process marked pages normally.'),
+        )
+        self.skip_cover_title_pages_checker.stateChanged.connect(self.on_skip_cover_title_pages_changed)
 
         generalConfigPanel.addTextLabel(label_post_merge)
         self.post_merge_checker, _ = generalConfigPanel.addCheckBox(
@@ -1031,6 +1040,9 @@ class ConfigPanel(Widget):
     def on_post_merge_changed(self):
         pcfg.module.post_merge_textboxes = self.post_merge_checker.isChecked()
 
+    def on_skip_cover_title_pages_changed(self):
+        pcfg.module.skip_cover_title_pages = self.skip_cover_title_pages_checker.isChecked()
+
     def on_pronoun_review_changed(self):
         pcfg.module.pronoun_review_after_translation = self.pronoun_review_checker.isChecked()
 
@@ -1188,6 +1200,7 @@ class ConfigPanel(Widget):
         self.let_autolayout_checker.setChecked(pcfg.let_autolayout_flag)
         self.let_autolayout_fit_bubble_checker.setChecked(pcfg.let_autolayout_fit_bubble_flag)
         self.let_autolayout_no_linebreak_checker.setChecked(pcfg.let_autolayout_no_linebreak_flag)
+        self.skip_cover_title_pages_checker.setChecked(pcfg.module.skip_cover_title_pages)
         self.post_merge_checker.setChecked(pcfg.module.post_merge_textboxes)
         self.pronoun_review_checker.setChecked(pcfg.module.pronoun_review_after_translation)
         post_merge_modes = ['VERTICAL', 'HORIZONTAL', 'VERTICAL_THEN_HORIZONTAL', 'HORIZONTAL_THEN_VERTICAL']

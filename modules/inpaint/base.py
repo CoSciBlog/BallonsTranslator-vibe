@@ -192,6 +192,16 @@ class InpainterBase(BaseModule):
                     inpainted[xyxy_e[1]:xyxy_e[3], xyxy_e[0]:xyxy_e[2]] = self.memory_safe_inpaint(im, msk)
 
                 mask[xyxy[1]:xyxy[3], xyxy[0]:xyxy[2]] = 0
+
+            # Detection masks can extend beyond text block rectangles or contain
+            # components without an associated OCR block. Process those pixels
+            # as well; otherwise they remain visible until a manual re-inpaint.
+            if np.any(mask > 0):
+                remaining_pixels = int(np.count_nonzero(mask))
+                self.logger.info(
+                    f'Inpainting {remaining_pixels} residual mask pixels outside text block regions.'
+                )
+                inpainted = self.memory_safe_inpaint(inpainted, mask)
             
             # Recombine with alpha if original was RGBA
             if original_alpha is not None:

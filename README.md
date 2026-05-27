@@ -62,7 +62,8 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Improved the Pinokio and `launch.py --update` update flows so Git and dependency refresh steps stream progress output instead of appearing idle.
 - Pinned setup tooling to `setuptools==71.1.0` so legacy packages such as `PyExecJS` install correctly during first setup.
 - Added `Tools -> Model Downloads` for downloading missing or optional local models on demand, and moved large optional models such as `flux2-klein`, `aot`, and PaddleOCR-VL Manga out of the automatic first-start download set.
-- Added a separate Pinokio test launcher and `requirements-test.txt` so test-only dependencies are installed only when tests are run.
+- Fixed normal Run inpainting so detector-mask pixels outside text block crop bounds are still repaired without a second manual Re-Inpaint pass.
+- Added an optional General setting to skip conservatively detected cover and title pages during automatic pipeline operations.
 - Added first-use local model downloads for backends that declare downloadable files, so optional models can be fetched when the selected backend is first loaded.
 - Cleaned up Save settings so image format and quality explanations stay in hover tooltips instead of visible labels, and wrapped long tooltip text for narrower screens.
 - Made the Model Downloads window explicitly non-modal so selected or all downloads continue in the background while the app remains usable.
@@ -187,6 +188,8 @@ Enable `Run -> Enable Inpaint Optimization` to add a second detect-and-inpaint p
 
 Use the left sidebar `Opt` button or `Tools -> Optimize Inpainting Current Page` for the currently opened page. Use `Tools -> Optimize Inpainting All Pages` to scan all non-ignored pages after a project is already processed.
 
+Normal `Run` inpainting also consumes detector-mask portions that extend outside an associated text block rectangle. This fixes the case where masked text fragments remained visible until `Re-Inpaint` was executed manually; optimization remains useful for new residual text detected after an inpaint result is produced.
+
 The left sidebar also includes an `x2` button for the current project. It performs the same operation as `Tools -> Upscale Project Images 2x`: page images are scaled by factor `2.0`, while quality, maximum long edge and skip threshold are read from the Upscaling settings. If page names already contain `upscaled`, the confirmation dialog appears before processing.
 
 ## Pronoun and address review
@@ -214,11 +217,9 @@ update.js
 # Remove the project venv so it can be recreated
 reset.js
 
-# Install test-only dependencies, then run the unittest suite
-test.js
 ```
 
-The launcher update flow tracks `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` on the `dev` branch. `update.js` now prints each Git and dependency-refresh step, streams Git/pip/uv output, and emits timed `still working` progress messages while longer update commands are running. The Windows batch launchers also create and reuse the same `env` virtual environment instead of the old bundled `ballontrans_pylibs_win` runtime. On first start, the launchers print the active setup step, stream pip/download output, and emit periodic `still working` progress messages while silent commands such as virtual-environment creation are running. Runtime Manager package installs inherit the terminal so pip download bars and wheel-install output stay visible. After `.runtime_profile.json` has been created, normal starts skip dependency and Runtime Manager checks; checks run again on `--update`, explicit `--repair-runtime`, or when `BALLOONTRANS_FORCE_RUNTIME_CHECK=1` is set. Runtime setup uses `requirements.txt`; test-only packages belong in `requirements-test.txt` and are installed only by `test.js`.
+The launcher update flow tracks `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` on the `dev` branch. `update.js` now prints each Git and dependency-refresh step, streams Git/pip/uv output, and emits timed `still working` progress messages while longer update commands are running. The Windows batch launchers also create and reuse the same `env` virtual environment instead of the old bundled `ballontrans_pylibs_win` runtime. On first start, the launchers print the active setup step, stream pip/download output, and emit periodic `still working` progress messages while silent commands such as virtual-environment creation are running. Runtime Manager package installs inherit the terminal so pip download bars and wheel-install output stay visible. After `.runtime_profile.json` has been created, normal starts skip dependency and Runtime Manager checks; checks run again on `--update`, explicit `--repair-runtime`, or when `BALLOONTRANS_FORCE_RUNTIME_CHECK=1` is set. Runtime setup uses `requirements.txt`.
 
 For NVIDIA Blackwell/RTX 50xx systems, the auto profile uses the PyTorch cu128 wheel index. If the base requirements previously installed a CPU Torch wheel, run `python launch.py --runtime-profile nvidia_blackwell_cu128 --repair-runtime`; the repair path force-reinstalls `torch`, `torchvision`, and `torchaudio` from the CUDA index before the health check.
 
@@ -279,6 +280,8 @@ The General settings page lets you choose the intermediate image format for proj
 ## Page pipeline ignore
 
 The Pages sidebar now shows page previews for the project list. The centered window title shows the selected position and project size next to the active page name, for example `001/217 pages`. Right-click a page and choose `Ignore Page in Pipeline` to skip that page during text detection, OCR, translation, and inpainting runs. Ignored pages are lightly highlighted in the list and saved in the project's `imgtrans_*.json` file under `ignored_pages`. Use the same context menu entry again to include the page in pipeline runs.
+
+Enable `Settings -> General -> Page filtering -> Skip detected cover and title pages in pipeline` to omit probable covers and title pages from automatic detection, OCR, translation, review, glossary scan, and inpainting/optimization runs. Detection is intentionally conservative: it recognizes explicit cover/title filenames and strongly colored first or second pages. Detected entries are stored in project JSON under `cover_title_pages` and become processable again when the setting is disabled.
 
 ## Translation-only run
 

@@ -1244,6 +1244,8 @@ class ModuleManager(QObject):
             LOGGER.info('proj file is empty, nothing to do')
             self.progress_msgbox.hide()
             return
+        if cfg_module.skip_cover_title_pages:
+            self.imgtrans_proj.update_cover_title_pages()
         process_pages = self.imgtrans_proj.pipeline_pages(pages_to_process, skip_ignored=True)
         if len(process_pages) == 0:
             LOGGER.info('No pages to process after applying ignored page filters')
@@ -1275,6 +1277,8 @@ class ModuleManager(QObject):
             LOGGER.info('proj file is empty, nothing to translate')
             self.progress_msgbox.hide()
             return
+        if cfg_module.skip_cover_title_pages:
+            self.imgtrans_proj.update_cover_title_pages()
         if len(self.imgtrans_proj.pipeline_pages(pages_to_process, skip_ignored=True)) == 0:
             LOGGER.info('No pages to translate after applying ignored page filters')
             self.progress_msgbox.hide()
@@ -1308,6 +1312,8 @@ class ModuleManager(QObject):
             self.progress_msgbox.hide()
             self.imgtrans_pipeline_finished.emit()
             return
+        if cfg_module.skip_cover_title_pages:
+            self.imgtrans_proj.update_cover_title_pages()
         if len(self.imgtrans_proj.pipeline_pages(pages_to_process, skip_ignored=True)) == 0:
             LOGGER.info('No pages to review after applying ignored page filters')
             self.progress_msgbox.hide()
@@ -1359,6 +1365,8 @@ class ModuleManager(QObject):
             self.progress_msgbox.hide()
             self.imgtrans_pipeline_finished.emit()
             return
+        if cfg_module.skip_cover_title_pages:
+            self.imgtrans_proj.update_cover_title_pages()
         if len(self.imgtrans_proj.pipeline_pages(pages_to_process, skip_ignored=True)) == 0:
             LOGGER.info('No pages to optimize after applying ignored page filters')
             self.progress_msgbox.hide()
