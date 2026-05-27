@@ -315,6 +315,21 @@ class TwoStepFallbackTest(unittest.TestCase):
         self.assertIn("longer than about 60 characters", prompt)
         self.assertIn("longer than about 100 characters", prompt)
 
+    def test_selected_shortening_uses_two_step_refinement_prompt_and_retry(self):
+        translator = FakeTwoStepTranslator(["Draft"])
+        expected = translator._expected_refinement_items(["Quelle"], ["Draft"])
+
+        normal_prompt = translator._assemble_refinement_prompt_from_items(
+            expected, "English", force_shorten=True
+        )
+        retry_prompt = translator._assemble_strict_refinement_retry_prompt(
+            expected, "English", force_shorten=True
+        )
+
+        self.assertIn("SHORTENING TASK", normal_prompt)
+        self.assertIn("SHORTENING TASK", retry_prompt)
+        self.assertIn("Make it shorter than the current translation", normal_prompt)
+
     def test_text_blocks_keep_machine_draft_and_llm_review_separately(self):
         response = TranslationResponse(
             translations=[TranslationElement(id=1, translation="LLM review")]

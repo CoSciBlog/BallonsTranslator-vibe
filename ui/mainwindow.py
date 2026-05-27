@@ -276,6 +276,7 @@ class MainWindow(mainwindow_cls):
         self.canvas.textstack_changed.connect(self.on_textstack_changed)
         self.canvas.run_blktrans.connect(self.on_run_blktrans)
         self.canvas.review_textblks.connect(lambda: self.on_run_blktrans(-2))
+        self.canvas.shorten_textblks.connect(lambda: self.on_run_blktrans(-3))
         self.canvas.drop_open_folder.connect(self.dropOpenDir)
         self.canvas.originallayer_trans_slider = self.bottomBar.originalSlider
         self.canvas.textlayer_trans_slider = self.bottomBar.textlayerSlider
@@ -2301,6 +2302,9 @@ class MainWindow(mainwindow_cls):
         if mode == -2 and not self._translator_supports_review():
             create_info_dialog(self.tr('Select ChatGPT, LLM_API_Translator, or Two-Step Translator before reviewing selected translations.'))
             return
+        if mode == -3 and not self._translator_supports_shortening():
+            create_info_dialog(self.tr('Select LLM_API_Translator or Two-Step Translator before rewriting and shortening selected translations.'))
+            return
         blkitem_list = self.canvas.selected_text_items()
         self.translateBlkitemList(blkitem_list, mode)
 
@@ -2399,6 +2403,14 @@ class MainWindow(mainwindow_cls):
             translator is not None
             and hasattr(translator, 'supports_translation_review')
             and translator.supports_translation_review()
+        )
+
+    def _translator_supports_shortening(self) -> bool:
+        translator = self.module_manager.translator
+        return (
+            translator is not None
+            and hasattr(translator, 'supports_translation_shortening')
+            and translator.supports_translation_shortening()
         )
 
     def _prepare_review_run(self) -> bool:

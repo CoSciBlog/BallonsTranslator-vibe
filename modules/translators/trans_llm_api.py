@@ -1218,11 +1218,21 @@ class LLM_API_Translator(BaseTranslator):
             '{"translations":[{"id":1,"translation":"Reviewed translation"}]}.'
         )
 
+    def _forced_shortening_prompt_section(self) -> str:
+        return (
+            "SHORTENING TASK:\n"
+            "- Rewrite each selected translation as concise, natural speech-bubble dialogue.\n"
+            "- Make it shorter than the current translation whenever that can be done without losing essential meaning, tone, names, commands, or emotional intent.\n"
+            "- Remove redundancy and explanatory padding; use compact idiomatic phrasing and contractions where appropriate.\n"
+            "- This shortening request applies even if the optional automatic bubble-shortening setting is off.\n\n"
+        )
+
     def _build_manual_review_prompt(
-        self, expected_items: List[Dict[str, Any]], to_lang: str
+        self, expected_items: List[Dict[str, Any]], to_lang: str, force_shorten: bool = False
     ) -> str:
         expected_ids = [item["id"] for item in expected_items]
         from_lang = self.lang_map.get(self.lang_source, self.lang_source)
+        shorten_instruction = self._forced_shortening_prompt_section() if force_shorten else ""
         return (
             f"Review and correct existing translations from {from_lang} to {to_lang}.\n"
             "Return valid JSON only. No markdown. No explanations. No comments. Never return {}.\n"
@@ -1234,6 +1244,7 @@ class LLM_API_Translator(BaseTranslator):
             "If unsure, return the current translation unchanged.\n"
             "Keep the same target language.\n"
             "Do not include source, draft_translation, category labels, glossary metadata, notes, or comments in the final output.\n\n"
+            f"{shorten_instruction}"
             f"{self._review_quality_rules(len(expected_items), expected_ids)}"
             f"{self._translation_context_prompt_section()}"
             f"{self._review_glossary_prompt_section()}"
@@ -1241,6 +1252,14 @@ class LLM_API_Translator(BaseTranslator):
         )
 
     def review_translations(self, src_list: List[str], draft_list: List[str]) -> List[str]:
+        return self._run_manual_review(src_list, draft_list)
+
+    def rewrite_and_shorten_translations(self, src_list: List[str], draft_list: List[str]) -> List[str]:
+        return self._run_manual_review(src_list, draft_list, force_shorten=True)
+
+    def _run_manual_review(
+        self, src_list: List[str], draft_list: List[str], force_shorten: bool = False
+    ) -> List[str]:
         if not src_list:
             return []
 
@@ -1255,7 +1274,7 @@ class LLM_API_Translator(BaseTranslator):
             expected_items[i : i + chunk_size]
             for i in range(0, len(expected_items), chunk_size)
         ):
-            prompt = self._build_manual_review_prompt(chunk, to_lang)
+            prompt = self._build_manual_review_prompt(chunk, to_lang, force_shorten=force_shorten)
             expected_ids = [item["id"] for item in chunk]
             response = self._request_translation(
                 prompt,

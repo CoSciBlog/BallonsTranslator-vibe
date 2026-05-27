@@ -481,6 +481,14 @@ class ImgtransThread(QThread):
         finally:
             self._clear_translator_page_context()
 
+    def _shorten_textblocks(self, imgname: str, blk_list: List[TextBlock]):
+        try:
+            if imgname:
+                self._set_translator_page_context(imgname)
+            self.translator.rewrite_and_shorten_textblk_lst(blk_list)
+        finally:
+            self._clear_translator_page_context()
+
     def runImgtransPipeline(self, imgtrans_proj: ProjImgTrans, pages_to_process=None):
         self.imgtrans_proj = imgtrans_proj
         self.pages_to_process = pages_to_process  # 保存需要处理的页面列表
@@ -563,6 +571,10 @@ class ImgtransThread(QThread):
     def _blktrans_pipeline(self, blk_list: List[TextBlock], tgt_img: np.ndarray, mode: int, blk_ids: List[int], tgt_mask):
         if mode == -2:
             self._review_textblocks(self.blktrans_page_key, blk_list)
+            self.finish_blktrans.emit(mode, blk_ids)
+            return
+        if mode == -3:
+            self._shorten_textblocks(self.blktrans_page_key, blk_list)
             self.finish_blktrans.emit(mode, blk_ids)
             return
         if mode >= 0 and mode < 3:
@@ -1439,7 +1451,7 @@ class ModuleManager(QObject):
             self.progress_msgbox.ocr_bar.show()
         if mode >= 2:
             self.progress_msgbox.inpaint_bar.show()
-        if mode == -2 or (mode != 0 and mode < 3):
+        if mode in (-3, -2) or (mode != 0 and mode < 3):
             self.progress_msgbox.translate_bar.show()
         self.progress_msgbox.zero_progress()
         self.progress_msgbox.show()

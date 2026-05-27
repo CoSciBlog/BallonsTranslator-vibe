@@ -170,6 +170,7 @@ class Canvas(QGraphicsScene):
     layout_textblks = Signal()
     merge_textblks = Signal()
     review_textblks = Signal()
+    shorten_textblks = Signal()
     reset_angle = Signal()
     squeeze_blk = Signal()
 
@@ -835,6 +836,9 @@ class Canvas(QGraphicsScene):
             review_act = menu.addAction(self.tr("Reflect / review selected translations"))
             review_act.setToolTip(self.tr("Use the active LLM-capable translator to revise only the selected translated text boxes against their source text."))
             review_act.setEnabled(len(self.selected_text_items()) > 0)
+            shorten_act = menu.addAction(self.tr("Rewrite and shorten selected translations"))
+            shorten_act.setToolTip(self.tr("Use the active LLM API or Two-Step translator settings to rewrite selected translations as shorter speech-bubble text."))
+            shorten_act.setEnabled(len(self.selected_text_items()) > 0)
             angle_act = menu.addAction(self.tr("Reset Angle"))
             angle_act.setToolTip(self.tr("Reset rotation for selected text boxes."))
             squeeze_act = menu.addAction(self.tr("Squeeze"))
@@ -873,6 +877,8 @@ class Canvas(QGraphicsScene):
                 self.merge_textblks.emit()
             elif rst == review_act:
                 self.review_textblks.emit()
+            elif rst == shorten_act:
+                self.shorten_textblks.emit()
             elif rst == angle_act:
                 self.reset_angle.emit()
             elif rst == squeeze_act:

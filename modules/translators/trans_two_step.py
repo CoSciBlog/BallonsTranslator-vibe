@@ -375,10 +375,11 @@ class TwoStepTranslator(LLM_API_Translator):
         ]
 
     def _assemble_refinement_prompt_from_items(
-        self, expected_items: List[Dict[str, Any]], to_lang: str
+        self, expected_items: List[Dict[str, Any]], to_lang: str, force_shorten: bool = False
     ) -> str:
         from_lang = self.lang_map.get(self.lang_source, self.lang_source)
         expected_ids = [item["id"] for item in expected_items]
+        shorten_instruction = self._forced_shortening_prompt_section() if force_shorten else ""
         return (
             f"Improve draft translations from {from_lang} to {to_lang}.\n"
             "Return valid JSON only. No markdown. No explanations. No comments. Never return {}.\n"
@@ -394,6 +395,7 @@ class TwoStepTranslator(LLM_API_Translator):
             "Do not turn a male character into a feminine pronoun/address, a female or girl character into a masculine pronoun/address, or I/me into we/us unless the source/context clearly requires it.\n"
             "Do not include source, draft_translation, category labels, glossary metadata, notes, or comments in the final output.\n"
             "The number of returned translations must equal the number of input items.\n\n"
+            f"{shorten_instruction}"
             f"{self._review_quality_rules(len(expected_items), expected_ids)}"
             f"{self._translation_context_prompt_section()}"
             f"{self._review_glossary_prompt_section()}"
@@ -401,17 +403,19 @@ class TwoStepTranslator(LLM_API_Translator):
         )
 
     def _assemble_refinement_prompt(
-        self, src_list: List[str], draft_list: List[str], to_lang: str
+        self, src_list: List[str], draft_list: List[str], to_lang: str, force_shorten: bool = False
     ) -> str:
         return self._assemble_refinement_prompt_from_items(
             self._expected_refinement_items(src_list, draft_list),
             to_lang,
+            force_shorten=force_shorten,
         )
 
     def _assemble_strict_refinement_retry_prompt(
-        self, expected_items: List[Dict[str, Any]], to_lang: str
+        self, expected_items: List[Dict[str, Any]], to_lang: str, force_shorten: bool = False
     ) -> str:
         expected_ids = [item["id"] for item in expected_items]
+        shorten_instruction = self._forced_shortening_prompt_section() if force_shorten else ""
         return (
             f"Fix the previous LLM refinement response for {to_lang}.\n"
             "JSON only. Never return {}.\n"
@@ -421,6 +425,7 @@ class TwoStepTranslator(LLM_API_Translator):
             "Do not reorder, merge, or include source/draft_translation/metadata.\n"
             "If the draft is acceptable, copy it unchanged.\n"
             "If unsure, copy the draft unchanged.\n\n"
+            f"{shorten_instruction}"
             f"{self._dialogue_naturalness_rules()}"
             f"INPUT:\n{json.dumps(expected_items, ensure_ascii=False, indent=2)}"
         )
@@ -498,14 +503,16 @@ class TwoStepTranslator(LLM_API_Translator):
         return not missing_ids and not extra_ids and len(actual_ids) == len(expected_ids)
 
     def _request_refinement_chunk(
-        self, expected_items: List[Dict[str, Any]], to_lang: str
+        self, expected_items: List[Dict[str, Any]], to_lang: str, force_shorten: bool = False
     ) -> Tuple[Optional[TranslationResponse], Optional[TranslationResponse]]:
         expected_ids = [int(item["id"]) for item in expected_items]
         normal_response = None
         retry_response = None
 
         try:
-            normal_prompt = self._assemble_refinement_prompt_from_items(expected_items, to_lang)
+            normal_prompt = self._assemble_refinement_prompt_from_items(
+                expected_items, to_lang, force_shorten=force_shorten
+            )
             normal_response = self._request_translation(
                 normal_prompt,
                 is_reflection=False,
@@ -530,7 +537,9 @@ class TwoStepTranslator(LLM_API_Translator):
 
         try:
             self.logger.info("strict_refinement_retry retry started")
-            retry_prompt = self._assemble_strict_refinement_retry_prompt(expected_items, to_lang)
+            retry_prompt = self._assemble_strict_refinement_retry_prompt(
+                expected_items, to_lang, force_shorten=force_shorten
+            )
             retry_response = self._request_translation(
                 retry_prompt,
                 is_reflection=False,
@@ -556,7 +565,9 @@ class TwoStepTranslator(LLM_API_Translator):
         draft_list = self._first_step_translate(src_list)
         return self._refine_draft_translations(src_list, draft_list)
 
-    def _refine_draft_translations(self, src_list: List[str], draft_list: List[str]) -> List[str]:
+    def _refine_draft_translations(
+        self, src_list: List[str], draft_list: List[str], force_shorten: bool = False
+    ) -> List[str]:
         to_lang = self.lang_map.get(self.lang_target, self.lang_target)
         glossary_drafts = [
             draft or source for source, draft in zip(src_list, draft_list)
@@ -568,7 +579,9 @@ class TwoStepTranslator(LLM_API_Translator):
         translations: List[str] = []
 
         for chunk in self._chunk_expected_items(expected_items):
-            normal_response, retry_response = self._request_refinement_chunk(chunk, to_lang)
+            normal_response, retry_response = self._request_refinement_chunk(
+                chunk, to_lang, force_shorten=force_shorten
+            )
             chunk_translations = self.merge_refinement_with_drafts(
                 chunk,
                 normal_response,
@@ -600,3 +613,6 @@ class TwoStepTranslator(LLM_API_Translator):
 
     def review_translations(self, src_list: List[str], draft_list: List[str]) -> List[str]:
         return self._refine_draft_translations(src_list, draft_list)
+
+    def rewrite_and_shorten_translations(self, src_list: List[str], draft_list: List[str]) -> List[str]:
+        return self._refine_draft_translations(src_list, draft_list, force_shorten=True)

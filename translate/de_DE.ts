@@ -251,6 +251,16 @@
     </message>
     <message>
         <location filename="../ui/canvas.py" line="838"/>
+        <source>Rewrite and shorten selected translations</source>
+        <translation>Ausgewählte Übersetzungen überarbeiten und kürzen</translation>
+    </message>
+    <message>
+        <location filename="../ui/canvas.py" line="839"/>
+        <source>Use the active LLM API or Two-Step translator settings to rewrite selected translations as shorter speech-bubble text.</source>
+        <translation>Die aktiven Einstellungen des LLM-API- oder Two-Step-Übersetzers verwenden, um ausgewählte Übersetzungen als kürzeren Sprechblasentext zu überarbeiten.</translation>
+    </message>
+    <message>
+        <location filename="../ui/canvas.py" line="838"/>
         <source>Reset Angle</source>
         <translation>Winkel zurücksetzen</translation>
     </message>
@@ -2473,6 +2483,11 @@ Fehlgeschlagen: {failed}/{total}</translation>
         <location filename="../ui/mainwindow.py" line="2280"/>
         <source>Select ChatGPT, LLM_API_Translator, or Two-Step Translator before reviewing selected translations.</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.py" line="2283"/>
+        <source>Select LLM_API_Translator or Two-Step Translator before rewriting and shortening selected translations.</source>
+        <translation>Wähle vor dem Überarbeiten und Kürzen ausgewählter Übersetzungen LLM_API_Translator oder Two-Step Translator aus.</translation>
     </message>
     <message>
         <location filename="../ui/mainwindow.py" line="2308"/>

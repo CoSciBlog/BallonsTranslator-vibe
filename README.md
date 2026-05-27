@@ -85,6 +85,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Wrapped long Settings checkbox descriptions so General and DL Module options no longer extend beyond the window or create horizontal scrolling.
 - Auto layout now wraps and scales translations inside detected speech bubbles and clamps generated text boxes to page edges, with a setting for bubble-bound layout.
 - Added right-click `Reflect / review selected translations` for selected text boxes when an LLM-capable translator is active.
+- Added right-click `Rewrite and shorten selected translations` for compact speech-bubble rewrites of selected text boxes using the active `LLM_API_Translator` or `Two-Step Translator` provider, model, context, and glossary settings.
 - Added `manga_ocr` accuracy/speed controls, clearer `mit48px` throughput guidance, and Google source auto-detection using the text translation endpoint for direct and Two-Step drafts.
 - Added detailed ComicTextDetector field tooltips, a documented LaMa `cross` dilation-kernel choice, and a Settings preset refresh action.
 - Added optional compression-artifact cleanup before upscaling (`Off`, `Light`, `Medium`, or `Strong`) to reduce JPEG blocking/ringing before enlarged OCR and masks are generated.

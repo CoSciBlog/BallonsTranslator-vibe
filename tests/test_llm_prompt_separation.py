@@ -172,6 +172,19 @@ class LLMPromptSeparationTest(unittest.TestCase):
             8,
         )
 
+    def test_selected_shortening_prompt_is_explicit_even_without_auto_shortening(self):
+        translator = PromptFakeTranslator()
+
+        prompt = translator._build_manual_review_prompt(
+            [{"id": 1, "source": "Quelle", "draft_translation": "A verbose draft."}],
+            "English",
+            force_shorten=True,
+        )
+
+        self.assertIn("SHORTENING TASK", prompt)
+        self.assertIn("Make it shorter than the current translation", prompt)
+        self.assertIn("applies even if the optional automatic bubble-shortening setting is off", prompt)
+
     def test_review_glossary_context_filters_relevant_categories(self):
         translator = PromptFakeTranslator()
 

@@ -288,10 +288,25 @@ class BaseTranslator(BaseModule):
     def supports_translation_review(self) -> bool:
         return type(self).review_translations is not BaseTranslator.review_translations
 
+    def rewrite_and_shorten_translations(self, src_list: List[str], draft_list: List[str]) -> List[str]:
+        raise NotImplementedError(f'{self.name} does not support LLM speech-bubble shortening.')
+
+    def supports_translation_shortening(self) -> bool:
+        return type(self).rewrite_and_shorten_translations is not BaseTranslator.rewrite_and_shorten_translations
+
     def review_textblk_lst(self, textblk_lst: List[TextBlock]):
         '''
         Review existing translations without rerunning OCR, inpainting, or first-step translation.
         '''
+        self._revise_textblk_lst(textblk_lst, self.review_translations)
+
+    def rewrite_and_shorten_textblk_lst(self, textblk_lst: List[TextBlock]):
+        '''
+        Rewrite existing translations into shorter speech-bubble text without rerunning OCR or inpainting.
+        '''
+        self._revise_textblk_lst(textblk_lst, self.rewrite_and_shorten_translations)
+
+    def _revise_textblk_lst(self, textblk_lst: List[TextBlock], revise):
         non_empty_ids = []
         text_list = []
         draft_list = []
@@ -305,7 +320,7 @@ class BaseTranslator(BaseModule):
                 draft_list.append(blk.translation or source)
 
         if len(text_list) > 0:
-            _translations = self.review_translations(text_list, draft_list)
+            _translations = revise(text_list, draft_list)
             if _translations is None:
                 _translations = []
             if len(_translations) < len(non_empty_ids):
