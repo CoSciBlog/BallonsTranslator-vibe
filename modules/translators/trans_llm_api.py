@@ -868,6 +868,12 @@ class LLM_API_Translator(BaseTranslator):
 
         current_index = page_names.index(page_key)
         sections = []
+        current_block = self._page_context_text(page_key, include_translation=True)
+        if current_block:
+            sections.append(
+                "CURRENT PAGE CONTEXT:\n" + current_block
+            )
+
         previous_count = self.previous_context_pages
 
         if previous_count > 0:
@@ -910,9 +916,11 @@ class LLM_API_Translator(BaseTranslator):
 
         context = (
             "PROJECT CONTEXT FOR CONSISTENCY ONLY:\n"
-            "Use this context to keep names, references, tone, and continuity "
-            "consistent. Do not translate or output these context lines unless "
-            "they are part of the INPUT items.\n\n"
+            "Use current, previous, next, and document context to keep names, "
+            "speaker/addressee roles, direct address, tone, and continuity consistent. "
+            "When surrounding lines show a character is being spoken to directly, do not "
+            "rewrite that address as third-person narration. Do not translate or output "
+            "these context lines unless they are part of the INPUT items.\n\n"
             + "\n\n".join(sections)
         )
         return self._truncate_context_section(context).rstrip() + "\n\n"
@@ -1346,10 +1354,12 @@ class LLM_API_Translator(BaseTranslator):
             "- Check pronoun consistency against the available source and context.\n"
             "- Explicitly verify that male characters are not translated with feminine pronouns/address, female or girl characters are not translated with masculine pronouns/address, and a singular speaker is not changed into we/us/our.\n"
             "- Check speaker and addressee references, including whether first person and second person are preserved.\n"
+            "- Do not turn direct address to the listener into third-person wording about that listener; if a speech bubble addresses someone by name/title or as you, keep it as direct address unless the source is clearly talking about them to someone else.\n"
             "- Do not change I/me/my into we/us/our unless the source clearly means plural first person.\n"
             "- Do not change you into they/he/she or the wrong form of address unless the source clearly requires it.\n"
             "- Check address forms and honorifics such as Mr./Ms., Herr/Frau, du/Sie, and similar forms when context or glossary supports them.\n"
             "- If gender, pronouns, or social address are unknown, do not invent that information.\n"
+            "- Preserve every meaning-bearing part of the source, including explicit, vulgar, intimate, sensitive, or uncomfortable wording; do not sanitize, censor, soften, skip, summarize away, or forget content.\n"
             "- Use glossary names, aliases, titles, and honorifics as guidance only; never write category labels, aliases, notes, confidence, or other metadata into translations.\n\n"
             f"{self._dialogue_naturalness_rules()}"
             f"{self._bubble_text_shortening_rules()}"
@@ -1360,6 +1370,7 @@ class LLM_API_Translator(BaseTranslator):
             "NATURAL DIALOGUE AND REFERENCE RULES:\n"
             "- Prefer idiomatic target-language dialogue over word-for-word repetition of names.\n"
             "- When context clearly identifies the speaker, addressee, or person being discussed, use the natural target-language pronoun or direct address (for example you/du/Sie or he/she/they) or omit the subject when appropriate.\n"
+            "- If the line is spoken to someone present in the scene, keep it as direct speech to that person; avoid third-person paraphrases such as the girl/she/he/they when the source is addressing you, a named addressee, or a visible listener.\n"
             "- Do not copy a character name from every source mention or machine draft into the final sentence merely to satisfy glossary spelling.\n"
             "- Keep the name, title, or honorific when someone is being called, introduced, contrasted, emphasized, or disambiguated, or when replacing it would create ambiguity or invent gender/formality.\n\n"
         )

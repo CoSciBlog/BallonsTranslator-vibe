@@ -393,6 +393,8 @@ class TwoStepTranslator(LLM_API_Translator):
             "Keep the same target language.\n"
             "Verify pronouns, gendered wording, speaker/addressee roles, singular/plural first person, and formal/informal address against the source, draft, project context, and glossary.\n"
             "Do not turn a male character into a feminine pronoun/address, a female or girl character into a masculine pronoun/address, or I/me into we/us unless the source/context clearly requires it.\n"
+            "Do not turn direct address to the listener into third-person wording about that listener; if a speech bubble addresses someone by name/title or as you, keep it as direct address unless the source is clearly talking about them to someone else.\n"
+            "Preserve every meaning-bearing part of the source, including explicit, vulgar, intimate, sensitive, or uncomfortable wording; do not sanitize, censor, soften, skip, summarize away, or forget content.\n"
             "Do not include source, draft_translation, category labels, glossary metadata, notes, or comments in the final output.\n"
             "The number of returned translations must equal the number of input items.\n\n"
             f"{shorten_instruction}"
@@ -426,7 +428,9 @@ class TwoStepTranslator(LLM_API_Translator):
             "If the draft is acceptable, copy it unchanged.\n"
             "If unsure, copy the draft unchanged.\n\n"
             f"{shorten_instruction}"
-            f"{self._dialogue_naturalness_rules()}"
+            f"{self._review_quality_rules(len(expected_items), expected_ids)}"
+            f"{self._translation_context_prompt_section()}"
+            f"{self._review_glossary_prompt_section()}"
             f"INPUT:\n{json.dumps(expected_items, ensure_ascii=False, indent=2)}"
         )
 
