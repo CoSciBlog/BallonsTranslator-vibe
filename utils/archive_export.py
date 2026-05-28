@@ -10,7 +10,8 @@ from typing import List, Sequence, Tuple
 
 from PIL import Image
 
-from .io_utils import IMG_EXT, find_all_imgs
+from .config import pcfg
+from .io_utils import IMG_EXT, find_all_imgs, imread, imwrite
 from .logger import logger as LOGGER
 
 
@@ -71,11 +72,38 @@ def _find_result_image_for_page(project, page_name: str) -> str:
     return candidates[0]
 
 
+def _materialize_ignored_result_images(project) -> List[str]:
+    ignored_pages = getattr(project, 'ignored_pages', set()) or set()
+    created = []
+    for page_name in project.pages.keys():
+        if page_name not in ignored_pages:
+            continue
+        if _find_result_image_for_page(project, page_name):
+            continue
+
+        source_path = osp.join(project.directory, page_name)
+        if not osp.isfile(source_path):
+            raise ArchiveExportError(f'Missing source image for ignored page: {page_name}')
+
+        img = imread(source_path)
+        if img is None:
+            raise ArchiveExportError(f'Could not read ignored page source image: {page_name}')
+
+        target_path = project.get_result_path(page_name)
+        imwrite(target_path, img, ext=pcfg.imgsave_ext, quality=pcfg.imgsave_quality)
+        created.append(page_name)
+    if created:
+        LOGGER.info(f'Copied {len(created)} ignored page(s) to result output for export.')
+    return created
+
+
 def result_images_for_project(project) -> List[Tuple[str, str]]:
     if project is None or getattr(project, 'directory', None) is None:
         raise ArchiveExportError('No project is open.')
     if getattr(project, 'is_empty', False):
         raise ArchiveExportError('The current project has no pages to export.')
+
+    _materialize_ignored_result_images(project)
 
     missing = []
     images = []
