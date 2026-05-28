@@ -1235,12 +1235,41 @@ class LLM_API_Translator(BaseTranslator):
             "- This shortening request applies even if the optional automatic bubble-shortening setting is off.\n\n"
         )
 
+    def _address_review_prompt_section(self) -> str:
+        return (
+            "ADDRESS AND PRONOUN REVIEW TASK:\n"
+            "- Focus on who is speaking, who is being addressed, and who is being discussed.\n"
+            "- Use all source and translation context from the current page to decide whether a line is direct address or third-person reference.\n"
+            "- Do not turn direct address into third-person wording. If someone says or implies you, keep it as direct address in the target language.\n"
+            "- Correct wrong pronouns, wrong gendered address, wrong singular/plural first person, and unnatural repeated names.\n"
+            "- Keep names and titles when they are being called, introduced, emphasized, contrasted, or needed for clarity.\n\n"
+        )
+
+    def _uncensored_review_prompt_section(self) -> str:
+        return (
+            "UNCENSORED COMPLETENESS REVIEW TASK:\n"
+            "- Compare every source item against the current translation and restore anything omitted, softened, sanitized, skipped, or summarized away.\n"
+            "- Translate explicit, vulgar, intimate, sensitive, violent, embarrassing, or uncomfortable wording faithfully when it is present in the source.\n"
+            "- Do not refuse, moralize, censor, euphemize, or replace source meaning with vague placeholders.\n"
+            "- Preserve all names, sounds, interjections, reactions, commands, and short fragments; do not drop small bubbles just because they look minor.\n"
+            "- Keep the output natural in the target language while preserving the full source meaning and tone.\n\n"
+        )
+
     def _build_manual_review_prompt(
-        self, expected_items: List[Dict[str, Any]], to_lang: str, force_shorten: bool = False
+        self,
+        expected_items: List[Dict[str, Any]],
+        to_lang: str,
+        force_shorten: bool = False,
+        review_mode: str = "standard",
     ) -> str:
         expected_ids = [item["id"] for item in expected_items]
         from_lang = self.lang_map.get(self.lang_source, self.lang_source)
         shorten_instruction = self._forced_shortening_prompt_section() if force_shorten else ""
+        mode_instruction = ""
+        if review_mode == "address":
+            mode_instruction = self._address_review_prompt_section()
+        elif review_mode == "uncensored":
+            mode_instruction = self._uncensored_review_prompt_section()
         return (
             f"Review and correct existing translations from {from_lang} to {to_lang}.\n"
             "Return valid JSON only. No markdown. No explanations. No comments. Never return {}.\n"
@@ -1253,6 +1282,7 @@ class LLM_API_Translator(BaseTranslator):
             "Keep the same target language.\n"
             "Do not include source, draft_translation, category labels, glossary metadata, notes, or comments in the final output.\n\n"
             f"{shorten_instruction}"
+            f"{mode_instruction}"
             f"{self._review_quality_rules(len(expected_items), expected_ids)}"
             f"{self._translation_context_prompt_section()}"
             f"{self._review_glossary_prompt_section()}"
@@ -1262,11 +1292,21 @@ class LLM_API_Translator(BaseTranslator):
     def review_translations(self, src_list: List[str], draft_list: List[str]) -> List[str]:
         return self._run_manual_review(src_list, draft_list)
 
+    def review_address_translations(self, src_list: List[str], draft_list: List[str]) -> List[str]:
+        return self._run_manual_review(src_list, draft_list, review_mode="address")
+
+    def review_uncensored_translations(self, src_list: List[str], draft_list: List[str]) -> List[str]:
+        return self._run_manual_review(src_list, draft_list, review_mode="uncensored")
+
     def rewrite_and_shorten_translations(self, src_list: List[str], draft_list: List[str]) -> List[str]:
         return self._run_manual_review(src_list, draft_list, force_shorten=True)
 
     def _run_manual_review(
-        self, src_list: List[str], draft_list: List[str], force_shorten: bool = False
+        self,
+        src_list: List[str],
+        draft_list: List[str],
+        force_shorten: bool = False,
+        review_mode: str = "standard",
     ) -> List[str]:
         if not src_list:
             return []
@@ -1282,7 +1322,12 @@ class LLM_API_Translator(BaseTranslator):
             expected_items[i : i + chunk_size]
             for i in range(0, len(expected_items), chunk_size)
         ):
-            prompt = self._build_manual_review_prompt(chunk, to_lang, force_shorten=force_shorten)
+            prompt = self._build_manual_review_prompt(
+                chunk,
+                to_lang,
+                force_shorten=force_shorten,
+                review_mode=review_mode,
+            )
             expected_ids = [item["id"] for item in chunk]
             response = self._request_translation(
                 prompt,

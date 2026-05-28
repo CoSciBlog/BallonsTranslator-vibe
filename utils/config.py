@@ -151,6 +151,7 @@ class ProgramConfig(Config):
     let_autolayout_fit_bubble_flag: bool = True
     let_autolayout_no_linebreak_flag: bool = False
     let_uppercase_flag: bool = True
+    let_text_case: str = 'upper'
     let_show_only_custom_fonts_flag: bool = False
     let_textstyle_indep_flag: bool = False
     text_styles_path: str = osp.join(shared.DEFAULT_TEXTSTYLE_DIR, 'default.json')
@@ -233,6 +234,9 @@ class ProgramConfig(Config):
             if module_cfg['translator'] in repl_pairs:
                 module_cfg['translator'] = repl_pairs[module_cfg['translator']]
 
+        if 'let_text_case' not in config_dict:
+            config_dict['let_text_case'] = 'upper' if config_dict.get('let_uppercase_flag', True) else 'normal'
+
         return ProgramConfig(**config_dict)
     
 
@@ -240,6 +244,35 @@ pcfg = ProgramConfig()
 text_styles: List[FontFormat] = []
 active_format: FontFormat = None
 CONFIG_PRESET_DIR = osp.join(shared.PROGRAM_PATH, 'config', 'presets')
+CONFIG_SAMPLE_PATH = osp.join(shared.PROGRAM_PATH, 'config.sample')
+_sample_config_cache = None
+
+
+def load_sample_config_dict() -> dict:
+    global _sample_config_cache
+    if _sample_config_cache is not None:
+        return _sample_config_cache
+    if not osp.exists(CONFIG_SAMPLE_PATH):
+        _sample_config_cache = {}
+        return _sample_config_cache
+    try:
+        with open(CONFIG_SAMPLE_PATH, 'r', encoding='utf8') as f:
+            _sample_config_cache = json.loads(f.read())
+    except Exception as e:
+        LOGGER.warning(f'Failed to read config.sample: {e}')
+        _sample_config_cache = {}
+    return _sample_config_cache
+
+
+def sample_module_param_value(module_config_key: str, module_name: str, param_key: str, fallback=None):
+    sample = load_sample_config_dict()
+    try:
+        value = sample['module'][module_config_key][module_name][param_key]
+        if isinstance(value, dict) and 'value' in value:
+            return value['value']
+        return value
+    except Exception:
+        return fallback
 
 def load_textstyle_from(p: str, raise_exception = False):
 

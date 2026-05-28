@@ -171,6 +171,11 @@ def ffmt_change_line_spacing_type(param_name: str, values: float, act_ffmt: Font
     for blkitem, value in zip(blkitems, values):
         blkitem.setLineSpacingType(value, restore_cursor=restore_cursor)
 
+@font_formating(push_undostack=True)
+def ffmt_change_text_case(param_name: str, values: str, act_ffmt: FontFormat, is_global: bool, blkitems: List[TextBlkItem], **kwargs):
+    for blkitem, value in zip(blkitems, values):
+        blkitem.setTextCase(value)
+
 
 @font_formating(push_undostack=True)
 def ffmt_change_shadow_offset(param_name: str, values: float, act_ffmt: FontFormat, is_global: bool, blkitems: List[TextBlkItem], **kwargs):

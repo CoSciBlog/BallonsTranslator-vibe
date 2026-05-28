@@ -81,6 +81,7 @@ class FontFormat(Config):
     gradient_end_color: List = field(default_factory=lambda: [255, 255, 255])
     gradient_angle: float = 0.
     gradient_size: float = 1.0
+    text_case: str = 'normal'
     _style_name: str = ''
     line_spacing_type: int = LineSpacingType.Proportional
 

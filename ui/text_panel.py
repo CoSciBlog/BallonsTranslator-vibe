@@ -2,7 +2,7 @@ import copy
 import sys
 from typing import List
 
-from qtpy.QtWidgets import QLineEdit, QSizePolicy, QHBoxLayout, QVBoxLayout, QFrame, QFontComboBox, QApplication, QPushButton, QLabel, QGroupBox, QCheckBox, QSlider
+from qtpy.QtWidgets import QLineEdit, QSizePolicy, QHBoxLayout, QVBoxLayout, QFrame, QFontComboBox, QApplication, QPushButton, QLabel, QGroupBox, QCheckBox, QSlider, QComboBox
 from qtpy.QtCore import Signal, Qt
 from qtpy.QtGui import QFocusEvent, QMouseEvent, QTextCursor, QKeyEvent
 
@@ -295,6 +295,13 @@ class FontFormatPanel(Widget):
         self.verticalChecker.setObjectName("FontVerticalChecker")
         self.verticalChecker.clicked.connect(lambda : self.on_param_changed('vertical', self.verticalChecker.isChecked()))
 
+        self.textCaseBox = QComboBox(self)
+        self.textCaseBox.addItem(self.tr("Normal"), "normal")
+        self.textCaseBox.addItem(self.tr("UPPERCASE"), "upper")
+        self.textCaseBox.addItem(self.tr("lowercase"), "lower")
+        self.textCaseBox.setToolTip(self.tr("Force rendered text case for this font format."))
+        self.textCaseBox.currentIndexChanged.connect(self.on_text_case_changed)
+
         self.strokeWidthBox = SizeComboBox([0, 10], 'stroke_width', self)
         self.strokeWidthBox.addItems(["0.1"])
         self.strokeWidthBox.setToolTip(self.tr("Change stroke width"))
@@ -396,6 +403,7 @@ class FontFormatPanel(Widget):
         hl3.setAlignment(Qt.AlignmentFlag.AlignCenter)
         hl3.addLayout(stroke_hlayout)
         hl3.addLayout(lettersp_hlayout)
+        hl3.addWidget(self.textCaseBox)
         hl3.setContentsMargins(3, 0, 3, 0)
         hl3.setSpacing(13)
         hl4 = QHBoxLayout()
@@ -470,9 +478,13 @@ class FontFormatPanel(Widget):
             mul = 0.01
         self.lineSpacingBox.setValue(self.lineSpacingBox.value() + delta * mul)
 
+    def on_text_case_changed(self):
+        self.on_param_changed('text_case', self.textCaseBox.currentData())
+
     def set_active_format(self, font_format: FontFormat, multi_size=False):
         C.active_format = font_format
         self.familybox.blockSignals(True)
+        self.textCaseBox.blockSignals(True)
         font_size = round(font_format.font_size, 1)
         if int(font_size) == font_size:
             font_size = str(int(font_size))
@@ -492,8 +504,12 @@ class FontFormatPanel(Widget):
         self.formatBtnGroup.underlineBtn.setChecked(font_format.underline)
         self.formatBtnGroup.italicBtn.setChecked(font_format.italic)
         self.alignBtnGroup.setAlignment(font_format.alignment)
+        text_case = getattr(font_format, 'text_case', 'normal')
+        case_index = self.textCaseBox.findData(text_case)
+        self.textCaseBox.setCurrentIndex(case_index if case_index >= 0 else 0)
         
         self.familybox.blockSignals(False)
+        self.textCaseBox.blockSignals(False)
         self.textadvancedfmt_panel.set_active_format(font_format)
 
     def set_globalfmt_title(self):

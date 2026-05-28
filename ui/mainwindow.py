@@ -17,6 +17,7 @@ from qtpy.QtGui import QContextMenuEvent, QTextCursor, QGuiApplication, QIcon, Q
 
 from utils.logger import logger as LOGGER
 from utils.text_processing import is_cjk, full_len, half_len
+from utils.text_case import apply_text_case
 from utils.imgproc_utils import enlarge_window
 from utils.textblock import TextBlock, TextAlignment
 from utils import shared
@@ -276,6 +277,8 @@ class MainWindow(mainwindow_cls):
         self.canvas.textstack_changed.connect(self.on_textstack_changed)
         self.canvas.run_blktrans.connect(self.on_run_blktrans)
         self.canvas.review_textblks.connect(lambda: self.on_run_blktrans(-2))
+        self.canvas.review_address_textblks.connect(lambda: self.on_run_blktrans(-4))
+        self.canvas.review_uncensored_textblks.connect(lambda: self.on_run_blktrans(-5))
         self.canvas.shorten_textblks.connect(lambda: self.on_run_blktrans(-3))
         self.canvas.drop_open_folder.connect(self.dropOpenDir)
         self.canvas.originallayer_trans_slider = self.bottomBar.originalSlider
@@ -2188,8 +2191,10 @@ class MainWindow(mainwindow_cls):
 
         for blk in blk_list:
             blk.translation = self.mtSubWidget.sub_text(blk.translation)
-            if pcfg.let_uppercase_flag:
-                blk.translation = blk.translation.upper()
+            blk.translation = apply_text_case(
+                blk.translation,
+                getattr(pcfg, 'let_text_case', 'upper' if pcfg.let_uppercase_flag else 'normal'),
+            )
 
     def on_pagtrans_finished(self, page_index: int):
         blk_list = self.imgtrans_proj.get_blklist_byidx(page_index)
@@ -2316,6 +2321,12 @@ class MainWindow(mainwindow_cls):
         if mode == -2 and not self._translator_supports_review():
             create_info_dialog(self.tr('Select ChatGPT, LLM_API_Translator, or Two-Step Translator before reviewing selected translations.'))
             return
+        if mode == -4 and not self._translator_supports_address_review():
+            create_info_dialog(self.tr('Select LLM_API_Translator or Two-Step Translator before reviewing address and pronouns.'))
+            return
+        if mode == -5 and not self._translator_supports_uncensored_review():
+            create_info_dialog(self.tr('Select LLM_API_Translator or Two-Step Translator before running uncensored translation review.'))
+            return
         if mode == -3 and not self._translator_supports_shortening():
             create_info_dialog(self.tr('Select LLM_API_Translator or Two-Step Translator before rewriting and shortening selected translations.'))
             return
@@ -2418,6 +2429,22 @@ class MainWindow(mainwindow_cls):
             translator is not None
             and hasattr(translator, 'supports_translation_review')
             and translator.supports_translation_review()
+        )
+
+    def _translator_supports_address_review(self) -> bool:
+        translator = self.module_manager.translator
+        return (
+            translator is not None
+            and hasattr(translator, 'supports_address_review')
+            and translator.supports_address_review()
+        )
+
+    def _translator_supports_uncensored_review(self) -> bool:
+        translator = self.module_manager.translator
+        return (
+            translator is not None
+            and hasattr(translator, 'supports_uncensored_review')
+            and translator.supports_uncensored_review()
         )
 
     def _translator_supports_shortening(self) -> bool:
@@ -3005,6 +3032,8 @@ class MainWindow(mainwindow_cls):
     def on_export_doc(self):
         if self.canvas.text_change_unsaved():
             self.st_manager.updateTextBlkList()
+        self.saveCurrentPage(update_scene_text=False, save_proj=True, restore_interface=True, save_rst_only=False)
+        self._wait_for_image_saves()
         self.export_doc_thread.exportAsDoc(self.imgtrans_proj)
 
     def _wait_for_image_saves(self):
@@ -3045,6 +3074,9 @@ class MainWindow(mainwindow_cls):
 
     def on_export_txt(self, dump_target, suffix='.txt'):
         try:
+            if self.canvas.text_change_unsaved():
+                self.st_manager.updateTextBlkList()
+            self.save_project_safely(self.tr('text export'), notify_user=False)
             self.imgtrans_proj.dump_txt(dump_target=dump_target, suffix=suffix)
             create_info_dialog(self.tr('Text file exported to ') + self.imgtrans_proj.dump_txt_path(dump_target, suffix))
         except Exception as e:

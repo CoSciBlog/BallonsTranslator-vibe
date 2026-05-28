@@ -288,6 +288,18 @@ class BaseTranslator(BaseModule):
     def supports_translation_review(self) -> bool:
         return type(self).review_translations is not BaseTranslator.review_translations
 
+    def review_address_translations(self, src_list: List[str], draft_list: List[str]) -> List[str]:
+        raise NotImplementedError(f'{self.name} does not support LLM address/pronoun review.')
+
+    def supports_address_review(self) -> bool:
+        return type(self).review_address_translations is not BaseTranslator.review_address_translations
+
+    def review_uncensored_translations(self, src_list: List[str], draft_list: List[str]) -> List[str]:
+        raise NotImplementedError(f'{self.name} does not support uncensored LLM translation review.')
+
+    def supports_uncensored_review(self) -> bool:
+        return type(self).review_uncensored_translations is not BaseTranslator.review_uncensored_translations
+
     def rewrite_and_shorten_translations(self, src_list: List[str], draft_list: List[str]) -> List[str]:
         raise NotImplementedError(f'{self.name} does not support LLM speech-bubble shortening.')
 
@@ -299,6 +311,18 @@ class BaseTranslator(BaseModule):
         Review existing translations without rerunning OCR, inpainting, or first-step translation.
         '''
         self._revise_textblk_lst(textblk_lst, self.review_translations)
+
+    def review_address_textblk_lst(self, textblk_lst: List[TextBlock]):
+        '''
+        Review selected translations for speaker/addressee, pronouns, and direct address.
+        '''
+        self._revise_textblk_lst(textblk_lst, self.review_address_translations)
+
+    def review_uncensored_textblk_lst(self, textblk_lst: List[TextBlock]):
+        '''
+        Review selected translations for omissions, sanitization, and censorship.
+        '''
+        self._revise_textblk_lst(textblk_lst, self.review_uncensored_translations)
 
     def rewrite_and_shorten_textblk_lst(self, textblk_lst: List[TextBlock]):
         '''

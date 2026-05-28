@@ -618,5 +618,11 @@ class TwoStepTranslator(LLM_API_Translator):
     def review_translations(self, src_list: List[str], draft_list: List[str]) -> List[str]:
         return self._refine_draft_translations(src_list, draft_list)
 
+    def review_address_translations(self, src_list: List[str], draft_list: List[str]) -> List[str]:
+        return self._run_manual_review(src_list, draft_list, review_mode="address")
+
+    def review_uncensored_translations(self, src_list: List[str], draft_list: List[str]) -> List[str]:
+        return self._run_manual_review(src_list, draft_list, review_mode="uncensored")
+
     def rewrite_and_shorten_translations(self, src_list: List[str], draft_list: List[str]) -> List[str]:
         return self._refine_draft_translations(src_list, draft_list, force_shorten=True)

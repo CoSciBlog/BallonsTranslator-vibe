@@ -1092,6 +1092,7 @@ class ConfigPanel(Widget):
 
     def on_uppercase_changed(self):
         pcfg.let_uppercase_flag = self.let_uppercase_checker.isChecked()
+        pcfg.let_text_case = 'upper' if pcfg.let_uppercase_flag else 'normal'
 
     def on_textstyle_indep_changed(self):
         pcfg.let_textstyle_indep_flag = self.let_textstyle_indep_checker.isChecked()
@@ -1220,6 +1221,8 @@ class ConfigPanel(Widget):
         self.decensor_save_debug_checker.setChecked(pcfg.decensor_save_debug_masks)
         self.selectext_minimenu_checker.setChecked(pcfg.textselect_mini_menu)
         self.let_uppercase_checker.setChecked(pcfg.let_uppercase_flag)
+        pcfg.let_text_case = getattr(pcfg, 'let_text_case', 'upper' if pcfg.let_uppercase_flag else 'normal')
+        self.let_uppercase_checker.setChecked(pcfg.let_text_case == 'upper')
         self.let_textstyle_indep_checker.setChecked(pcfg.let_textstyle_indep_flag)
         self.saladict_shortcut.setKeySequence(pcfg.saladict_shortcut)
         self.searchurl_combobox.setCurrentText(pcfg.search_url)

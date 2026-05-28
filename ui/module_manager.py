@@ -489,6 +489,22 @@ class ImgtransThread(QThread):
         finally:
             self._clear_translator_page_context()
 
+    def _review_address_textblocks(self, imgname: str, blk_list: List[TextBlock]):
+        try:
+            if imgname:
+                self._set_translator_page_context(imgname)
+            self.translator.review_address_textblk_lst(blk_list)
+        finally:
+            self._clear_translator_page_context()
+
+    def _review_uncensored_textblocks(self, imgname: str, blk_list: List[TextBlock]):
+        try:
+            if imgname:
+                self._set_translator_page_context(imgname)
+            self.translator.review_uncensored_textblk_lst(blk_list)
+        finally:
+            self._clear_translator_page_context()
+
     def runImgtransPipeline(self, imgtrans_proj: ProjImgTrans, pages_to_process=None):
         self.imgtrans_proj = imgtrans_proj
         self.pages_to_process = pages_to_process  # 保存需要处理的页面列表
@@ -575,6 +591,14 @@ class ImgtransThread(QThread):
             return
         if mode == -3:
             self._shorten_textblocks(self.blktrans_page_key, blk_list)
+            self.finish_blktrans.emit(mode, blk_ids)
+            return
+        if mode == -4:
+            self._review_address_textblocks(self.blktrans_page_key, blk_list)
+            self.finish_blktrans.emit(mode, blk_ids)
+            return
+        if mode == -5:
+            self._review_uncensored_textblocks(self.blktrans_page_key, blk_list)
             self.finish_blktrans.emit(mode, blk_ids)
             return
         if mode >= 0 and mode < 3:

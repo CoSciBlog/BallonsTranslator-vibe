@@ -7,7 +7,7 @@ from utils.logger import logger as LOGGER
 from .custom_widget import ConfigComboBox, ParamComboBox, NoBorderPushBtn, ParamNameLabel
 from .tooltip_utils import wrap_tooltip
 from utils.shared import CONFIG_COMBOBOX_LONG, size2width, CONFIG_COMBOBOX_SHORT, CONFIG_COMBOBOX_HEIGHT
-from utils.config import pcfg
+from utils.config import pcfg, sample_module_param_value
 
 from qtpy.QtWidgets import QPlainTextEdit, QHBoxLayout, QVBoxLayout, QWidget, QLabel, QCheckBox, QLineEdit, QGridLayout, QPushButton, QSizePolicy
 from qtpy.QtCore import Qt, Signal
@@ -162,8 +162,10 @@ class ParamWidget(QWidget):
 
     paramwidget_edited = Signal(str, dict)
 
-    def __init__(self, params, scrollWidget: QWidget = None, *args, **kwargs) -> None:
+    def __init__(self, params, scrollWidget: QWidget = None, module_config_key: str = '', module_name: str = '', *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
+        self.module_config_key = module_config_key
+        self.module_name = module_name
         layout = QHBoxLayout(self)
         self.param_layout = param_layout = QGridLayout()
         param_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
@@ -185,6 +187,7 @@ class ParamWidget(QWidget):
             is_str = isinstance(params[param_key], str)
             is_digital = isinstance(params[param_key], float) or isinstance(params[param_key], int)
             param_widget = None
+            reset_btn = None
 
             if isinstance(params[param_key], bool):
                 param_widget = ParamCheckBox(param_key)
@@ -232,6 +235,13 @@ class ParamWidget(QWidget):
                 elif param_type == 'editor':
                     param_widget = ParamEditor(param_key)
                     param_widget.setText(value)
+                    key_l = param_key.lower()
+                    if 'prompt' in key_l or 'glossary' in key_l:
+                        reset_value = sample_module_param_value(self.module_config_key, self.module_name, param_key, None)
+                        if reset_value is not None:
+                            reset_btn = QPushButton(self.tr('Reset'))
+                            reset_btn.setToolTip(self.tr('Reset this prompt to config.sample default.'))
+                            reset_btn.clicked.connect(lambda checked=False, w=param_widget, k=param_key, v=reset_value: self.on_resetbtn_clicked(w, k, v))
 
                 elif param_type == 'checkbox':
                     param_widget = ParamCheckBox(param_key)
@@ -266,7 +276,7 @@ class ParamWidget(QWidget):
                 widget_idx = 1
             if param_widget is not None:
                 pw_lo = None
-                if hasattr(param_widget, 'flush_btn') or hasattr(param_widget, 'path_select_btn'):
+                if hasattr(param_widget, 'flush_btn') or hasattr(param_widget, 'path_select_btn') or reset_btn is not None:
                     pw_lo = QHBoxLayout()
                     pw_lo.addWidget(param_widget)
                 if hasattr(param_widget, 'flush_btn'):
@@ -275,6 +285,8 @@ class ParamWidget(QWidget):
                 if hasattr(param_widget, 'path_select_btn'):
                     pw_lo.addWidget(param_widget.path_select_btn)
                     param_widget.pathbtn_clicked.connect(self.on_pathbtn_clicked)
+                if reset_btn is not None:
+                    pw_lo.addWidget(reset_btn)
                 if pw_lo is None:
                     param_layout.addWidget(param_widget, ii, widget_idx)
                 else:
@@ -292,6 +304,11 @@ class ParamWidget(QWidget):
         paramw: ParamComboBox = self.sender()
         content_dict = {'content': '', 'widget': paramw, 'select_path': True}
         self.paramwidget_edited.emit(paramw.param_key, content_dict)
+
+    def on_resetbtn_clicked(self, param_widget, param_key: str, value):
+        param_widget.setText(value)
+        content_dict = {'content': value}
+        self.paramwidget_edited.emit(param_key, content_dict)
 
     def on_paramwidget_edited(self, param_key, param_content):
         content_dict = {'content': param_content}
@@ -314,9 +331,10 @@ class ModuleParseWidgets(QWidget):
 class ModuleConfigParseWidget(QWidget):
     module_changed = Signal(str)
     paramwidget_edited = Signal(str, dict)
-    def __init__(self, module_name: str, get_valid_module_keys: Callable, scrollWidget: QWidget, add_from: int = 1, *args, **kwargs) -> None:
+    def __init__(self, module_name: str, get_valid_module_keys: Callable, scrollWidget: QWidget, add_from: int = 1, module_config_key: str = '', *args, **kwargs) -> None:
         super().__init__( *args, **kwargs)
         self.get_valid_module_keys = get_valid_module_keys
+        self.module_config_key = module_config_key
         self.module_combobox = ConfigComboBox(scrollWidget=scrollWidget)
         self.params_layout = QHBoxLayout()
         self.params_layout.setContentsMargins(0, 0, 0, 0)
@@ -389,7 +407,7 @@ class ModuleConfigParseWidget(QWidget):
             if widget is None:
                 # lazy load widgets
                 params = self.module_dict[module]
-                widget = ParamWidget(params, scrollWidget=self)
+                widget = ParamWidget(params, scrollWidget=self, module_config_key=self.module_config_key, module_name=module)
                 widget.paramwidget_edited.connect(self.paramwidget_edited)
                 self.param_widget_map[module] = widget
                 self.params_layout.addWidget(widget)
@@ -409,7 +427,7 @@ class TranslatorConfigPanel(ModuleConfigParseWidget):
     show_OCR_keyword_window = Signal()
 
     def __init__(self, module_name, scrollWidget: QWidget = None, *args, **kwargs) -> None:
-        super().__init__(module_name, GET_VALID_TRANSLATORS, scrollWidget=scrollWidget, *args, **kwargs)
+        super().__init__(module_name, GET_VALID_TRANSLATORS, scrollWidget=scrollWidget, module_config_key='translator_params', *args, **kwargs)
         self.translator_changed = self.module_changed
     
         self.source_combobox = ConfigComboBox(scrollWidget=scrollWidget)
@@ -469,7 +487,7 @@ class TranslatorConfigPanel(ModuleConfigParseWidget):
 
 class InpaintConfigPanel(ModuleConfigParseWidget):
     def __init__(self, module_name: str, scrollWidget: QWidget = None, *args, **kwargs) -> None:
-        super().__init__(module_name, GET_VALID_INPAINTERS, scrollWidget = scrollWidget, *args, **kwargs)
+        super().__init__(module_name, GET_VALID_INPAINTERS, scrollWidget = scrollWidget, module_config_key='inpainter_params', *args, **kwargs)
         self.inpainter_changed = self.module_changed
         self.setInpainter = self.setModule
         self.needInpaintChecker = ParamCheckerBox(self.tr('Let the program decide whether it is necessary to use the selected inpaint method.'))
@@ -487,7 +505,7 @@ class InpaintConfigPanel(ModuleConfigParseWidget):
 
 class TextDetectConfigPanel(ModuleConfigParseWidget):
     def __init__(self, module_name: str, scrollWidget: QWidget = None, *args, **kwargs) -> None:
-        super().__init__(module_name, GET_VALID_TEXTDETECTORS, scrollWidget = scrollWidget, *args, **kwargs)
+        super().__init__(module_name, GET_VALID_TEXTDETECTORS, scrollWidget = scrollWidget, module_config_key='textdetector_params', *args, **kwargs)
         self.detector_changed = self.module_changed
         self.setDetector = self.setModule
         self.keep_existing_checker = QCheckBox(text=self.tr('Keep Existing Lines'))
@@ -497,7 +515,7 @@ class TextDetectConfigPanel(ModuleConfigParseWidget):
 
 class OCRConfigPanel(ModuleConfigParseWidget):
     def __init__(self, module_name: str, scrollWidget: QWidget = None, *args, **kwargs) -> None:
-        super().__init__(module_name, GET_VALID_OCR, scrollWidget = scrollWidget, *args, **kwargs)
+        super().__init__(module_name, GET_VALID_OCR, scrollWidget = scrollWidget, module_config_key='ocr_params', *args, **kwargs)
         self.ocr_changed = self.module_changed
         self.setOCR = self.setModule
         self.restoreEmptyOCRChecker = QCheckBox(self.tr("Delete and restore region where OCR return empty string."), self)

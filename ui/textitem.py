@@ -11,6 +11,7 @@ from qtpy.QtGui import (QGradient, QKeyEvent, QFont, QTextCursor, QPixmap, QPain
 from utils.textblock import TextBlock, FontFormat, TextAlignment, LineSpacingType
 from utils.imgproc_utils import xywh2xyxypoly, rotate_polygons
 from utils.fontformat import FontFormat, px2pt, pt2px
+from utils.text_case import apply_text_case
 from .misc import td_pattern, table_pattern
 from .scene_textlayout import VerticalTextDocumentLayout, HorizontalTextDocumentLayout, SceneTextLayout
 from .text_graphical_effect import apply_shadow_effect
@@ -246,6 +247,13 @@ class TextBlkItem(QGraphicsTextItem):
         self.setShadow(font_fmt, repaint=False)
         self.setStrokeWidth(font_fmt.stroke_width, repaint_background=False)
         self.repaint_background()
+
+    def _format_text_case(self, text: str) -> str:
+        text_case = getattr(self.fontformat, 'text_case', 'normal')
+        return apply_text_case(text, text_case)
+
+    def setPlainText(self, text: str):
+        return super().setPlainText(self._format_text_case(text))
 
     def setCenterTransform(self):
         center = self.boundingRect().center()
@@ -1043,7 +1051,17 @@ class TextBlkItem(QGraphicsTextItem):
     def setPlainTextAndKeepUndoStack(self, text: str):
         cursor = QTextCursor(self.document())
         cursor.select(QTextCursor.SelectionType.Document)
-        cursor.insertText(text)
+        cursor.insertText(self._format_text_case(text))
+
+    def setTextCase(self, value: str):
+        if value not in {"normal", "upper", "lower"}:
+            value = "normal"
+        old_text = self.toPlainText()
+        self.fontformat.text_case = value
+        new_text = self._format_text_case(old_text)
+        if new_text != old_text:
+            self.setPlainTextAndKeepUndoStack(new_text)
+        self.repaint_background()
 
     def squeezeBoundingRect(self, cond_on_alignment: bool = False, repaint=True):
         mh, mw = self.layout.minSize()
