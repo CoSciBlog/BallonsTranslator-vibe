@@ -3,6 +3,7 @@ import time
 import json
 import traceback
 import unicodedata
+from copy import deepcopy
 from types import SimpleNamespace
 from typing import Any, List, Dict, Optional, Set, Tuple, Type
 
@@ -216,6 +217,37 @@ def _category_param_description(label: str) -> str:
     return f"Allow automatic glossary extraction for {label}. Disable it to keep auto glossary entries narrower."
 
 
+DEFAULT_LLM_SYSTEM_PROMPT = (
+    "You are an expert manga/comic translator and editor. Translate accurately "
+    "and naturally while preserving speaker intent, character relationships, "
+    "names, honorifics, pronouns, number, gender, and formal/informal address "
+    "from the source and available context. In dialogue, do not mechanically "
+    "repeat a character name when natural target-language speech would use a "
+    "pronoun, direct address, or an omitted subject; retain names where they "
+    "identify, call to, contrast, or disambiguate the character. Do not invent "
+    "gender, pronouns, relationships, or names when the source is ambiguous; "
+    "keep ambiguity natural in the target language. Preserve every "
+    "meaning-bearing part of the source, including explicit, vulgar, intimate, "
+    "sensitive, or uncomfortable wording; do not sanitize, censor, soften, "
+    "skip, summarize away, or forget content. You MUST provide the output "
+    "strictly in the specified JSON format, without any additional explanations "
+    "or markdown formatting. Return only valid JSON in this exact shape: "
+    '{"translations":[{"id":1,"translation":"Translated text here."}]}. '
+    "The JSON object must have a single key 'translations', which is a list of "
+    "objects, each with an 'id' (integer) and a 'translation' (string).\n\n"
+    'Example Output Schema:\n{"translations": [{"id": 1, "translation": "Translated text here."}]}'
+)
+
+
+DEFAULT_LLM_REQUEST_PROMPT = (
+    "Follow the active translation task exactly. Use the source language, target "
+    "language, project context, and glossary supplied in the next message. Keep "
+    "all output in the requested JSON schema only. Preserve item ids and item "
+    "count, translate every meaning-bearing source detail, and prefer concise, "
+    "natural speech-bubble dialogue over literal wording."
+)
+
+
 @register_translator("LLM_API_Translator")
 class LLM_API_Translator(BaseTranslator):
     concate_text = False
@@ -273,8 +305,13 @@ class LLM_API_Translator(BaseTranslator):
         },
         "system_prompt": {
             "type": "editor",
-            "value": 'You are an expert manga/comic translator and editor. Translate accurately and naturally while preserving speaker intent, character relationships, names, honorifics, pronouns, number, gender, and formal/informal address from the source and available context. In dialogue, do not mechanically repeat a character name when natural target-language speech would use a pronoun, direct address, or an omitted subject; retain names where they identify, call to, contrast, or disambiguate the character. Do not invent gender, pronouns, relationships, or names when the source is ambiguous; keep ambiguity natural in the target language. You MUST provide the output strictly in the specified JSON format, without any additional explanations or markdown formatting. Return only valid JSON in this exact shape: {"translations":[{"id":1,"translation":"Translated text here."}]}. The JSON object must have a single key \'translations\', which is a list of objects, each with an \'id\' (integer) and a \'translation\' (string).\n\nExample Output Schema:\n{"translations": [{"id": 1, "translation": "Translated text here."}]}',
+            "value": DEFAULT_LLM_SYSTEM_PROMPT,
             "description": "System message to instruct the LLM on its role and required output format. Available placeholders: {source_language} / {input_language} / {from_lang} for the source language, and {target_language} / {output_language} / {to_lang} for the target language. JSON braces that do not match these names are left unchanged.",
+        },
+        "request prompt": {
+            "type": "editor",
+            "value": DEFAULT_LLM_REQUEST_PROMPT,
+            "description": "Additional user message sent before every LLM API request. Use it for persistent style, policy, or output reminders that should apply to translation, review, glossary extraction, and refinement calls. Available language placeholders match system_prompt.",
         },
         "invalid repeat count": {
             "value": 2,
@@ -745,6 +782,10 @@ class LLM_API_Translator(BaseTranslator):
     def system_prompt(self) -> str:
         return self.get_param_value("system_prompt")
 
+    @property
+    def request_prompt(self) -> str:
+        return self.get_param_value("request prompt")
+
     def _language_placeholder_values(self, to_lang: str = None) -> Dict[str, str]:
         source_language = self.lang_map.get(self.lang_source, self.lang_source)
         target_language = to_lang or self.lang_map.get(self.lang_target, self.lang_target)
@@ -1030,6 +1071,14 @@ class LLM_API_Translator(BaseTranslator):
                 "blocks in the response; output only the requested JSON object."
             )
         return f"{prompt}\n\n{policy}"
+
+    def _messages_for_request(self, system_prompt: str, prompt: str) -> List[Dict[str, str]]:
+        messages = [{"role": "system", "content": system_prompt}]
+        request_prompt = self._render_prompt_placeholders(self.request_prompt).strip()
+        if request_prompt:
+            messages.append({"role": "user", "content": request_prompt})
+        messages.append({"role": "user", "content": prompt})
+        return messages
 
     def _build_reasoning_extra_body(self) -> Dict:
         level = self.reasoning_level
@@ -2085,10 +2134,7 @@ class LLM_API_Translator(BaseTranslator):
 
         api_args = {
             "model": model_name,
-            "messages": [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": prompt},
-            ],
+            "messages": self._messages_for_request(system_prompt, prompt),
             "temperature": self.temperature,
             "top_p": self.top_p,
             "max_tokens": self.max_tokens,
@@ -2373,10 +2419,10 @@ class LLM_API_Translator(BaseTranslator):
         if ": " in model_name:
             model_name = model_name.split(": ", 1)[1]
 
-        messages = [
-            {"role": "system", "content": self._system_prompt_with_reasoning_policy()},
-            {"role": "user", "content": prompt},
-        ]
+        messages = self._messages_for_request(
+            self._system_prompt_with_reasoning_policy(),
+            prompt,
+        )
 
         response_max_tokens = int(max_tokens_override or self.max_tokens)
         if (
@@ -2649,4 +2695,48 @@ class LLM_API_Translator(BaseTranslator):
 
         if param_key in ["proxy", "multiple_keys", "apikey", "provider", "endpoint"]:
             self.client = None
+
+
+@register_translator("LLM_API_Translator_2")
+class LLM_API_Translator_2(LLM_API_Translator):
+    concate_text = False
+    cht_require_convert = True
+
+    params: Dict = deepcopy(LLM_API_Translator.params)
+    params["system_prompt"]["value"] = (
+        "You are a precise manga/comic translation specialist. Translate from "
+        "{source_language} to {target_language} with faithful meaning, fluent "
+        "target-language dialogue, and strict continuity across names, titles, "
+        "honorifics, relationships, pronouns, speaker/addressee roles, tone, "
+        "interjections, sound effects, and speech-bubble constraints. Use project "
+        "context and glossary guidance only when it is relevant to the current "
+        "input. Do not invent unsupported gender, relationships, titles, names, "
+        "or missing context. Preserve explicit, vulgar, intimate, sensitive, or "
+        "uncomfortable source meaning without censoring or softening it. If a "
+        "source line is ambiguous, keep the target translation naturally "
+        "ambiguous. Return only valid JSON in this exact schema: "
+        "{\"translations\":[{\"id\":1,\"translation\":\"Translated text\"}]}. "
+        "Preserve every id and return exactly one translation for every input "
+        "item. Do not include markdown, explanations, notes, source text, "
+        "glossary metadata, or extra keys."
+    )
+    params["request prompt"]["value"] = (
+        "For every request, prioritize faithful translation first and natural "
+        "comic dialogue second. Use concise wording that fits speech bubbles, "
+        "retain required names and terms, and correct literal or awkward phrasing "
+        "without changing meaning. Output only the JSON object requested by the "
+        "task."
+    )
+    params["system_prompt"]["description"] = (
+        "System message sent as the LLM system role. It defines translator role, "
+        "translation rules, and the required JSON output schema. Available "
+        "placeholders: {source_language} / {input_language} / {from_lang} for the "
+        "source language, and {target_language} / {output_language} / {to_lang} "
+        "for the target language."
+    )
+    params["request prompt"]["description"] = (
+        "Additional user message sent before every LLM API request made by this "
+        "translator profile. Use it for persistent style, fidelity, safety, or "
+        "format reminders. Reset restores the shipped default from config.sample."
+    )
 

@@ -283,6 +283,7 @@ class TranslationBenchmarkWindow(QDialog):
         preferred = [
             self.current_translator,
             "Two-Step Translator",
+            "LLM_API_Translator_2",
             "LLM_API_Translator",
             "ChatGPT",
             "DeepL",

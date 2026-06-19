@@ -79,6 +79,8 @@
 - Local SVG utility icons for the left-sidebar Censor Restoration, Re-Inpaint, Optimize Inpainting, Upscale 2x, and Region Merge actions.
 - A current-page Region Merge sidebar action that applies the stored General -> Post-merge mode, gap, and overlap settings.
 - Opt-in `Include glossary` support in Search/Replace for editing terms in project and reference glossary entries.
+- `LLM_API_Translator_2`, a second independent LLM API translator profile with separate provider/model/API settings, resettable prompt defaults, review support, glossary extraction support, and benchmark visibility.
+- A resettable `request prompt` for LLM API translators that is sent as an additional user message before every LLM request.
 
 ### Changed
 
@@ -86,6 +88,7 @@
 - Shortened visible Settings descriptions for Auto layout, custom fonts, Censor Restoration debug masks, Post-merge, Upscaling, pronoun review, and DL Module memory controls while keeping detailed hover text available.
 - Search/Replace sidebar actions now use shorter visible labels with detailed tooltips so the sidebar keeps a stable width.
 - LLM Settings hover text for `system_prompt` and `reflection prompt` now documents the supported language placeholders.
+- LLM API translator prompt handling now separates `system_prompt` as the system-role instruction, `request prompt` as persistent per-request user guidance, and `reflection prompt` as the optional review instruction.
 - Automatic first-start model downloads now also skip optional `aot`, PaddleOCR-VL Manga, native PaddleOCR, OneOCR, and Stariver OCR entries. Backends with known downloadable files remain available through `Tools -> Model Downloads`; native PaddleOCR downloads on first use, OneOCR requires manually supplied local files, and Stariver OCR is API-only.
 - Existing translation, OCR, and inpainting workflows are unchanged.
 - Review now uses character and honorific glossary entries as guidance.
@@ -122,6 +125,7 @@
 - Bumped the fork runtime version string to `1.4.0-vibe.72`.
 - Sidebar utility controls now use larger icons, with a book icon for Glossary and an explicit `x2` icon for the fixed-factor upscaler.
 - Bumped the fork runtime version string to `1.4.0-vibe.73`.
+- Bumped the fork runtime version string to `1.4.0-vibe.76`.
 
 ### Fixed
 

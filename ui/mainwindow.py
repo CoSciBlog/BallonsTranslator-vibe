@@ -1030,7 +1030,7 @@ class MainWindow(mainwindow_cls):
             return translator
 
         translator_name = pcfg.module.translator
-        if translator_name not in {"LLM_API_Translator", "Two-Step Translator"}:
+        if translator_name not in {"LLM_API_Translator", "LLM_API_Translator_2", "Two-Step Translator"}:
             return None
         try:
             translator_cls = TRANSLATORS.module_dict[translator_name]
@@ -1048,7 +1048,7 @@ class MainWindow(mainwindow_cls):
     def _run_llm_gloss_scan(self, pages: List[str], old_glossary: dict) -> int:
         translator = self._gloss_scan_llm_translator()
         if translator is None or not hasattr(translator, '_update_glossary_from_batch'):
-            LOGGER.info('Gloss Scan LLM extraction skipped: select LLM_API_Translator or Two-Step Translator in Settings.')
+            LOGGER.info('Gloss Scan LLM extraction skipped: select LLM_API_Translator, LLM_API_Translator_2, or Two-Step Translator in Settings.')
             return 0
 
         pairs = collect_project_translation_pairs(self.imgtrans_proj, pages=pages)
@@ -2319,16 +2319,16 @@ class MainWindow(mainwindow_cls):
 
     def on_run_blktrans(self, mode: int):
         if mode == -2 and not self._translator_supports_review():
-            create_info_dialog(self.tr('Select ChatGPT, LLM_API_Translator, or Two-Step Translator before reviewing selected translations.'))
+            create_info_dialog(self.tr('Select ChatGPT, LLM_API_Translator, LLM_API_Translator_2, or Two-Step Translator before reviewing selected translations.'))
             return
         if mode == -4 and not self._translator_supports_address_review():
-            create_info_dialog(self.tr('Select LLM_API_Translator or Two-Step Translator before reviewing address and pronouns.'))
+            create_info_dialog(self.tr('Select LLM_API_Translator, LLM_API_Translator_2, or Two-Step Translator before reviewing address and pronouns.'))
             return
         if mode == -5 and not self._translator_supports_uncensored_review():
-            create_info_dialog(self.tr('Select LLM_API_Translator or Two-Step Translator before running uncensored translation review.'))
+            create_info_dialog(self.tr('Select LLM_API_Translator, LLM_API_Translator_2, or Two-Step Translator before running uncensored translation review.'))
             return
         if mode == -3 and not self._translator_supports_shortening():
-            create_info_dialog(self.tr('Select LLM_API_Translator or Two-Step Translator before rewriting and shortening selected translations.'))
+            create_info_dialog(self.tr('Select LLM_API_Translator, LLM_API_Translator_2, or Two-Step Translator before rewriting and shortening selected translations.'))
             return
         blkitem_list = self.canvas.selected_text_items()
         self.translateBlkitemList(blkitem_list, mode)
@@ -2459,7 +2459,7 @@ class MainWindow(mainwindow_cls):
         if self.imgtrans_proj.is_empty:
             return False
         if not self._translator_supports_review():
-            create_info_dialog(self.tr('Select ChatGPT, LLM_API_Translator, or Two-Step Translator before running translation review.'))
+            create_info_dialog(self.tr('Select ChatGPT, LLM_API_Translator, LLM_API_Translator_2, or Two-Step Translator before running translation review.'))
             return False
         if self.bottomBar.textblockChecker.isChecked():
             self.bottomBar.textblockChecker.click()

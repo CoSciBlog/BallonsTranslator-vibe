@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.75`
+Fork release: `1.4.0-vibe.76`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -88,6 +88,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Added detailed ComicTextDetector field tooltips, a documented LaMa `cross` dilation-kernel choice, and a Settings preset refresh action.
 - Added optional compression-artifact cleanup before upscaling (`Off`, `Light`, `Medium`, or `Strong`) to reduce JPEG blocking/ringing before enlarged OCR and masks are generated.
 - Added optional speech-bubble shortening guidance for `LLM_API_Translator` and `Two-Step Translator`, with long and extreme character targets for concise dialogue without blind truncation.
+- Added `LLM_API_Translator_2` as a second independently configurable LLM API translation profile, including its own system prompt, per-request prompt, resettable defaults, review support, glossary extraction support, and translation benchmark visibility.
 
 ## Features
 
@@ -290,7 +291,9 @@ The run progress dialog now has both `Stop` and `Force Stop`. `Stop` requests a 
 
 ## LLM context translation
 
-The `LLM_API_Translator` and `Two-Step Translator` can pass project context into each LLM request. `previous context pages` includes source text and existing translations from earlier pages, `include next context page` adds the next page when text is available, and `document context pages` adds a capped source-text window from the broader project. `context max characters` limits the combined context so smaller models are not overloaded.
+The `LLM_API_Translator`, `LLM_API_Translator_2`, and `Two-Step Translator` can pass project context into each LLM request. `previous context pages` includes source text and existing translations from earlier pages, `include next context page` adds the next page when text is available, and `document context pages` adds a capped source-text window from the broader project. `context max characters` limits the combined context so smaller models are not overloaded.
+
+`system_prompt` is sent as the LLM system message. It defines the model's role, the translation rules, and the required JSON response schema. `request prompt` is sent as an additional user message before every LLM API request from that translator profile; use it for persistent style, fidelity, format, or speech-bubble guidance that should apply to translation, review, glossary extraction, and refinement calls. `reflection prompt` is used only when reflection/review is enabled; it tells the model how to compare draft output against the source and return corrected JSON. Prompt editors whose names contain `prompt` include a `Reset` button that restores the shipped default from `config.sample`.
 
 These settings improve continuity for names, tone, and references when pages are translated in reading order. They do not change the output mapping: the current page or selected text boxes are still the only items returned in the JSON translation response.
 
