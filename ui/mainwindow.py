@@ -55,6 +55,7 @@ from utils.archive_import import (
 from utils.archive_export import archive_export_filter, default_export_path, export_project
 from utils.io_utils import IMG_EXT, find_all_imgs
 from utils.batch_processing import collect_batch_project_dirs
+from utils.batch_completion import run_completion_action
 from utils.upscale import filename_has_upscale_marker
 from .canvas import Canvas
 from .configpanel import ConfigPanel
@@ -834,12 +835,28 @@ class MainWindow(mainwindow_cls):
         self.module_manager.setOCRFallback('')
         self.imgtrans_progress_msgbox.set_batch_mode(False)
 
+        completion_action_started = False
+        if options and not stopped:
+            completion_action_started = self._run_gui_batch_completion_action(options)
         if options and options.quit_when_finished and not stopped:
             self.close()
             return
         if first_project and osp.isdir(first_project):
             self.OpenProj(first_project)
-        create_info_dialog(self.tr('Batch processing stopped.') if stopped else self.tr('Batch processing finished.'))
+        if not completion_action_started:
+            create_info_dialog(self.tr('Batch processing stopped.') if stopped else self.tr('Batch processing finished.'))
+
+    def _run_gui_batch_completion_action(self, options: BatchProcessingOptions) -> bool:
+        try:
+            return run_completion_action(
+                getattr(options, 'completion_action', ''),
+                getattr(options, 'completion_command', ''),
+                logger=LOGGER,
+            )
+        except Exception as e:
+            LOGGER.error(traceback.format_exc())
+            create_error_dialog(e, self.tr('Failed to run batch completion action.'))
+            return False
 
     def stop_all_gui_batch_processing(self):
         if not self._gui_batch_options:

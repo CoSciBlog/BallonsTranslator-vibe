@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README_EN.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.78`
+Fork release: `1.4.0-vibe.79`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -40,6 +40,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Added readable English names to source-language selectors, for example `日本語 (Japanese)`, `Deutsch (German)`, and `Polski (Polish)`, while keeping the original internal language values.
 - Added `English` to the Batch Processing source- and target-language selectors and made the dialog restore saved language choices by internal language key.
 - Added an optional Batch Processing Re-Inpaint step that reapplies saved inpaint and censor masks to finished pages before export.
+- Added Batch Processing completion actions for shutting down, restarting, hibernating, sleeping, or running a custom command/program after a successful batch run.
 - Added a Translation Benchmark window from the Run menu to compare current-page translations from multiple translators or LLM configurations side by side.
 - Added an LLM model matrix benchmark for repeated `LLM_API_Translator` and `Two-Step Translator` runs across Ollama-style model lists.
 - Added saved Google/DeepL provider result fields to each text block so raw first-step drafts are persisted in the project JSON and shown through the labelled machine-draft field.
@@ -175,7 +176,7 @@ The importer only writes into the derived project folder. If that folder already
 
 Use `Open -> Export as Comic Archive/PDF` after saving or running the project to export rendered result pages. `.cbz` and `.zip` are written directly with Python's standard ZIP support. `.pdf` writes one image per PDF page and uses each rendered image's own dimensions, so portrait, landscape, and mixed-size pages keep independent page boxes. `.cbr` export requires a local `rar` or WinRAR command line writer; if none is available, use `.cbz`, `.zip`, or `.pdf`.
 
-Use `Open -> Batch Processing` to enter or select one or more chapter/project folders or parent folders, separated by semicolons or new lines. The dialog lets you choose pipeline modules and source/target languages, including `English` for both source and target, retry empty OCR output with a fallback OCR backend, skip already processed pages/projects, permanently upscale and replace originals with the chosen factor/quality/size limits before processing, optionally re-run inpainting with saved text/censor masks after each project, optionally export each finished project as `.cbz` or `.pdf`, and optionally quit when complete. Generated output folders are ignored. A project-count progress bar remains visible above the per-stage progress bars; `Stop All` cancels the active pipeline and all queued projects.
+Use `Open -> Batch Processing` to enter or select one or more chapter/project folders or parent folders, separated by semicolons or new lines. The dialog lets you choose pipeline modules and source/target languages, including `English` for both source and target, retry empty OCR output with a fallback OCR backend, skip already processed pages/projects, permanently upscale and replace originals with the chosen factor/quality/size limits before processing, optionally re-run inpainting with saved text/censor masks after each project, optionally export each finished project as `.cbz` or `.pdf`, optionally quit when complete, and optionally run a completion action after a successful batch. Completion actions include doing nothing, shutting down, restarting, hibernating, sleeping, or running a custom command/program. Generated output folders are ignored. A project-count progress bar remains visible above the per-stage progress bars; `Stop All` cancels the active pipeline and all queued projects.
 
 ## Re-Inpaint current page
 

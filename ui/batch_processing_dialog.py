@@ -20,6 +20,14 @@ from qtpy.QtWidgets import (
 from modules import GET_VALID_INPAINTERS, GET_VALID_OCR, GET_VALID_TEXTDETECTORS, GET_VALID_TRANSLATORS
 from modules.translators.base import LANGUAGE_ENGLISH_NAMES, lang_display_label, lang_display_to_key
 from utils.batch_processing import collect_batch_project_dirs
+from utils.batch_completion import (
+    COMPLETION_ACTION_CUSTOM,
+    COMPLETION_ACTION_HIBERNATE,
+    COMPLETION_ACTION_NONE,
+    COMPLETION_ACTION_RESTART,
+    COMPLETION_ACTION_SHUTDOWN,
+    COMPLETION_ACTION_SLEEP,
+)
 from utils.config import pcfg
 
 
@@ -51,6 +59,8 @@ class BatchProcessingOptions:
     ocr_fallback_enabled: bool
     ocr_fallback: str
     reinpaint_enabled: bool
+    completion_action: str
+    completion_command: str
 
 
 class BatchProcessingDialog(QDialog):
@@ -145,6 +155,20 @@ class BatchProcessingDialog(QDialog):
 
         self.quit_check = QCheckBox(self.tr('Quit application when finished'))
 
+        self.completion_action_combo = QComboBox()
+        self.completion_action_combo.addItem(self.tr('Do nothing'), COMPLETION_ACTION_NONE)
+        self.completion_action_combo.addItem(self.tr('Shut down PC'), COMPLETION_ACTION_SHUTDOWN)
+        self.completion_action_combo.addItem(self.tr('Restart PC'), COMPLETION_ACTION_RESTART)
+        self.completion_action_combo.addItem(self.tr('Hibernate'), COMPLETION_ACTION_HIBERNATE)
+        self.completion_action_combo.addItem(self.tr('Sleep'), COMPLETION_ACTION_SLEEP)
+        self.completion_action_combo.addItem(self.tr('Run custom command/program'), COMPLETION_ACTION_CUSTOM)
+        self.completion_command_edit = QLineEdit()
+        self.completion_command_edit.setPlaceholderText(
+            self.tr('Program path or command to run after batch completion')
+        )
+        self.completion_command_edit.setEnabled(False)
+        self.completion_action_combo.currentIndexChanged.connect(self._update_completion_command_state)
+
         form = QFormLayout()
         form.addRow(self.tr('Batch folder'), root_layout)
         form.addRow('', self.project_count_label)
@@ -166,6 +190,8 @@ class BatchProcessingDialog(QDialog):
         form.addRow(self.tr('Skip upscale above long edge (0 = never)'), self.upscale_skip_edge)
         form.addRow(self.export_check, self.export_combo)
         form.addRow('', self.quit_check)
+        form.addRow(self.tr('After batch finishes'), self.completion_action_combo)
+        form.addRow(self.tr('Command/program'), self.completion_command_edit)
 
         self.buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         self.buttons.accepted.connect(self.accept)
@@ -188,6 +214,11 @@ class BatchProcessingDialog(QDialog):
             index = combo.findText(lang_display_label(language))
         if index >= 0:
             combo.setCurrentIndex(index)
+
+    def _update_completion_command_state(self):
+        self.completion_command_edit.setEnabled(
+            self.completion_action_combo.currentData() == COMPLETION_ACTION_CUSTOM
+        )
 
     def select_root_dir(self):
         start_dir = self.root_edit.text()
@@ -218,6 +249,15 @@ class BatchProcessingDialog(QDialog):
         if not self.options().project_dirs:
             self.project_count_label.setText(
                 self.tr('Enter or select one or more folders containing source images before starting.')
+            )
+            return
+        if (
+            self.completion_action_combo.currentData() == COMPLETION_ACTION_CUSTOM
+            and not self.completion_command_edit.text().strip()
+        ):
+            self.completion_command_edit.setFocus()
+            self.completion_command_edit.setPlaceholderText(
+                self.tr('Enter a command or program path before starting.')
             )
             return
         super().accept()
@@ -251,4 +291,6 @@ class BatchProcessingDialog(QDialog):
             ocr_fallback_enabled=self.ocr_fallback_check.isChecked(),
             ocr_fallback=self.ocr_fallback_combo.currentText(),
             reinpaint_enabled=self.reinpaint_check.isChecked(),
+            completion_action=self.completion_action_combo.currentData(),
+            completion_command=self.completion_command_edit.text().strip(),
         )
