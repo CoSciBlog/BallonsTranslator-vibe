@@ -51,3 +51,43 @@ def mask_bounding_rect(mask: np.ndarray) -> Optional[Tuple[int, int, int, int]]:
         return None
     x, y, w, h = cv2.boundingRect(points)
     return x, y, x + w, y + h
+
+
+def reinpaint_project_page(project, inpainter, page_name: str, dilate: int = 0, logger=None) -> bool:
+    if inpainter is None:
+        if logger is not None:
+            logger.info('Batch Re-Inpaint skipped because no inpainter is loaded.')
+        return False
+
+    source_img = project.load_inpainted_by_imgname(page_name)
+    if source_img is None:
+        source_img = project.ensure_upscaled_img(page_name)
+    if source_img is None:
+        if logger is not None:
+            logger.info(f'Batch Re-Inpaint skipped {page_name}: source image could not be loaded.')
+        return False
+
+    try:
+        text_mask = project.load_mask_by_imgname(page_name)
+    except Exception:
+        if logger is not None:
+            logger.warning(f'Could not load stored inpaint mask for {page_name}.', exc_info=True)
+        text_mask = None
+    try:
+        decensor_mask = project.load_decensor_mask_by_imgname(page_name)
+    except Exception:
+        if logger is not None:
+            logger.warning(f'Could not load stored decensor mask for {page_name}.', exc_info=True)
+        decensor_mask = None
+
+    mask = combine_inpaint_masks([text_mask, decensor_mask], source_img.shape[:2], dilate=dilate)
+    if mask is None or not np.any(mask > 0):
+        if logger is not None:
+            logger.info(f'Batch Re-Inpaint skipped {page_name}: no saved inpaint masks found.')
+        return False
+
+    inpainted = inpainter.inpaint(source_img, mask, project.pages.get(page_name, []))
+    project.save_inpainted(page_name, inpainted)
+    if page_name == getattr(project, 'current_img', None):
+        project.inpainted_array = inpainted
+    return True

@@ -18,6 +18,7 @@
 - Batch Processing project progress bar and `Stop All` action for cancelling both the active pipeline and queued projects.
 - Batch Processing controls for multiple/direct folder paths, skipping previously processed work, source/target languages, fallback OCR, and optional permanent source-image upscaling with quality and size settings.
 - `English` as a selectable source and target language in Batch Processing.
+- Optional Batch Processing Re-Inpaint step that reapplies saved text and censor masks to finished project pages before export.
 - LLM `review speed mode` for separate glossary correction, combined reflection/glossary checking, or reduced optional review requests.
 - Direct `.pdf` comic import from the Open menu, drag-and-drop, recent projects, and `--proj-dir`.
 - Multi-PDF import from the Open menu and drag-and-drop, combining selected PDFs into one ordered image project.
@@ -129,6 +130,7 @@
 - Bumped the fork runtime version string to `1.4.0-vibe.76`.
 - Batch Processing language selectors now restore saved source/target choices by internal language key instead of relying only on display text.
 - Bumped the fork runtime version string to `1.4.0-vibe.77`.
+- Bumped the fork runtime version string to `1.4.0-vibe.78`.
 
 ### Fixed
 

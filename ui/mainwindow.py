@@ -40,7 +40,7 @@ from modules.translators import TRANSLATORS, lang_display_label, lang_display_to
 from modules import GET_VALID_TEXTDETECTORS, GET_VALID_INPAINTERS, GET_VALID_TRANSLATORS, GET_VALID_OCR
 from .misc import parse_stylesheet, set_html_family, QKEY
 from utils.config import ProgramConfig, pcfg, save_config, text_styles, save_text_styles, load_textstyle_from, FontFormat
-from utils.reinpaint import combine_inpaint_masks, mask_bounding_rect
+from utils.reinpaint import combine_inpaint_masks, mask_bounding_rect, reinpaint_project_page
 from utils.proj_imgtrans import ProjImgTrans
 from utils.archive_import import (
     ARCHIVE_EXT,
@@ -772,12 +772,53 @@ class MainWindow(mainwindow_cls):
                 self.st_manager.updateTextBlkList()
             self.saveCurrentPage(update_scene_text=False, save_proj=True, restore_interface=True)
             self._wait_for_image_saves()
+            if options.reinpaint_enabled:
+                self._run_gui_batch_reinpaint_step()
+                self._wait_for_image_saves()
             if options.export_enabled:
                 output_path = default_export_path(self.imgtrans_proj.directory, options.export_ext)
                 exported_path = export_project(self.imgtrans_proj, output_path)
                 LOGGER.info(f'Batch export written to {exported_path}')
         except Exception as e:
             create_error_dialog(e, self.tr('Failed to finish batch project ') + self._gui_batch_active_project)
+
+    def _batch_reinpaint_page(self, page_name: str) -> bool:
+        return reinpaint_project_page(
+            self.imgtrans_proj,
+            self.module_manager.inpainter,
+            page_name,
+            dilate=pcfg.drawpanel.reinpaint_dilate_ksize,
+            logger=LOGGER,
+        )
+
+    def _run_gui_batch_reinpaint_step(self) -> int:
+        pages = self.imgtrans_proj.pipeline_pages(skip_ignored=True)
+        if not pages:
+            return 0
+        progress_box = self.imgtrans_progress_msgbox
+        progress_box.inpaint_bar.show()
+        progress_box.updateInpaintProgress(0, self.tr('Batch Re-Inpaint: '))
+        QApplication.processEvents()
+
+        repaired_count = 0
+        total = len(pages)
+        for index, page_name in enumerate(pages, start=1):
+            if self._gui_batch_cancel_requested:
+                break
+            if self._batch_reinpaint_page(page_name):
+                repaired_count += 1
+            progress_box.updateInpaintProgress(int(index / total * 100), self.tr('Batch Re-Inpaint: '))
+            QApplication.processEvents()
+
+        LOGGER.info(
+            f'Batch Re-Inpaint reapplied masks on {repaired_count}/{total} page(s) '
+            f'in {self.imgtrans_proj.directory}.'
+        )
+        if self.imgtrans_proj.current_img:
+            self.imgtrans_proj.set_current_img(self.imgtrans_proj.current_img)
+            self.canvas.updateCanvas()
+        self.save_project_safely(self.tr('batch re-inpaint'), notify_user=False)
+        return repaired_count
 
     def finish_gui_batch_processing(self, stopped: bool = False):
         options = self._gui_batch_options

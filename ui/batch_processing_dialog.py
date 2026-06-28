@@ -50,6 +50,7 @@ class BatchProcessingOptions:
     target_language: str
     ocr_fallback_enabled: bool
     ocr_fallback: str
+    reinpaint_enabled: bool
 
 
 class BatchProcessingDialog(QDialog):
@@ -100,6 +101,15 @@ class BatchProcessingDialog(QDialog):
 
         self.skip_pages_check = QCheckBox(self.tr('Skip pages already processed by the pipeline'))
         self.skip_projects_check = QCheckBox(self.tr('Skip projects whose pages are already processed'))
+        self.reinpaint_check = QCheckBox(self.tr('Re-run inpainting after each project'))
+        self.reinpaint_check.setToolTip(self.tr(
+            'After a project finishes, apply saved inpaint and censor masks again to the current inpainted pages. '
+            'This can clean up remaining text edges before export, but adds another inpainting pass.'
+        ))
+        self.reinpaint_check.setChecked(False)
+        self.reinpaint_check.setEnabled(self.inpaint_check.isChecked())
+        self.inpaint_check.toggled.connect(self.reinpaint_check.setEnabled)
+        self.inpaint_check.toggled.connect(lambda enabled: self.reinpaint_check.setChecked(False) if not enabled else None)
 
         self.upscale_check = QCheckBox(self.tr('Upscale and replace original pages before processing'))
         self.upscale_factor = QDoubleSpinBox()
@@ -147,6 +157,7 @@ class BatchProcessingDialog(QDialog):
         form.addRow(self.tr('Target language'), self.target_combo)
         form.addRow('', self.skip_pages_check)
         form.addRow('', self.skip_projects_check)
+        form.addRow('', self.reinpaint_check)
         form.addRow('', self.upscale_check)
         form.addRow(self.tr('Upscale factor'), self.upscale_factor)
         form.addRow(self.tr('Upscale quality'), self.upscale_quality)
@@ -239,4 +250,5 @@ class BatchProcessingDialog(QDialog):
             target_language=lang_display_to_key(self.target_combo.currentText()),
             ocr_fallback_enabled=self.ocr_fallback_check.isChecked(),
             ocr_fallback=self.ocr_fallback_combo.currentText(),
+            reinpaint_enabled=self.reinpaint_check.isChecked(),
         )
