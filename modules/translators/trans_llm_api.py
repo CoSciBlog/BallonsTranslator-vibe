@@ -1111,6 +1111,48 @@ class LLM_API_Translator(BaseTranslator):
         return cleaned.strip()
 
     @staticmethod
+    def _recover_list_response_data(json_text: str, list_key: str, logger=None) -> Optional[Dict[str, List[Any]]]:
+        key_match = re.search(rf'"{re.escape(list_key)}"\s*:\s*\[', json_text)
+        if key_match:
+            index = key_match.end()
+        else:
+            index = json_text.find("[") + 1 if json_text.lstrip().startswith("[") else 0
+        if index <= 0:
+            return None
+
+        decoder = json.JSONDecoder()
+        items = []
+        length = len(json_text)
+        while index < length:
+            while index < length and json_text[index] in " \t\r\n,":
+                index += 1
+            if index >= length or json_text[index] == "]":
+                break
+            try:
+                item, index = decoder.raw_decode(json_text, index)
+            except json.JSONDecodeError:
+                break
+            items.append(item)
+
+        if not items:
+            return None
+        if logger is not None:
+            logger.warning(
+                f"Recovered {len(items)} complete {list_key} item(s) from malformed or truncated JSON response."
+            )
+        return {list_key: items}
+
+    @classmethod
+    def _loads_json_with_list_recovery(cls, json_text: str, list_key: str, logger=None) -> Any:
+        try:
+            return json.loads(json_text)
+        except json.JSONDecodeError as parse_error:
+            recovered = cls._recover_list_response_data(json_text, list_key, logger)
+            if recovered is not None:
+                return recovered
+            raise parse_error
+
+    @staticmethod
     def _normalize_translation_entry(entry: Any, fallback_id: int = 0) -> Optional[Dict]:
         if not isinstance(entry, dict):
             return None
@@ -2199,7 +2241,8 @@ class LLM_API_Translator(BaseTranslator):
             if start != -1 and end != -1 and end > start:
                 json_to_parse = json_to_parse[start : end + 1]
 
-        raw_data = json.loads(json_to_parse)
+        list_key = "entries" if response_model is GlossaryResponse else "translations"
+        raw_data = self._loads_json_with_list_recovery(json_to_parse, list_key, self.logger)
         self.logger.debug(f"Raw JSON content from API: {raw_content}")
         if response_model is GlossaryResponse:
             raw_data = self._normalize_glossary_response_data(raw_data, self.logger)
@@ -2516,7 +2559,11 @@ class LLM_API_Translator(BaseTranslator):
                     if start != -1 and end != -1 and end > start:
                         json_to_parse = json_to_parse[start : end + 1]
             try:
-                data_to_validate = json.loads(json_to_parse)
+                data_to_validate = self._loads_json_with_list_recovery(
+                    json_to_parse,
+                    "translations",
+                    self.logger,
+                )
                 self.logger.debug(f"Raw JSON content from API: {raw_content}")
                 data_to_validate = self._normalize_translation_response_data(
                     data_to_validate,
@@ -2531,7 +2578,11 @@ class LLM_API_Translator(BaseTranslator):
                     f"Initial Pydantic validation failed: {e}. Attempting to fix simple dictionary or list format."
                 )
                 try:
-                    simple_data = json.loads(json_to_parse)
+                    simple_data = self._loads_json_with_list_recovery(
+                        json_to_parse,
+                        "translations",
+                        self.logger,
+                    )
                     fixed_translations = []
 
                     if isinstance(simple_data, dict) and all(
