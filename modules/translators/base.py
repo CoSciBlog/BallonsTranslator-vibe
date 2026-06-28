@@ -51,6 +51,7 @@ LANGUAGE_ENGLISH_NAMES = {
     '\u7b80\u4f53\u4e2d\u6587': 'Simplified Chinese',
     '\u7e41\u9ad4\u4e2d\u6587': 'Traditional Chinese',
     '\u65e5\u672c\u8a9e': 'Japanese',
+    'English': 'English',
     '\ud55c\uad6d\uc5b4': 'Korean',
     'Ti\u1ebfng Vi\u1ec7t': 'Vietnamese',
     '\u010de\u0161tina': 'Czech',

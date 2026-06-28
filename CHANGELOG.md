@@ -17,6 +17,7 @@
 - Zero-padded current/total page counter in the centered title bar, for example `001/217 pages`, updated as the selected page changes.
 - Batch Processing project progress bar and `Stop All` action for cancelling both the active pipeline and queued projects.
 - Batch Processing controls for multiple/direct folder paths, skipping previously processed work, source/target languages, fallback OCR, and optional permanent source-image upscaling with quality and size settings.
+- `English` as a selectable source and target language in Batch Processing.
 - LLM `review speed mode` for separate glossary correction, combined reflection/glossary checking, or reduced optional review requests.
 - Direct `.pdf` comic import from the Open menu, drag-and-drop, recent projects, and `--proj-dir`.
 - Multi-PDF import from the Open menu and drag-and-drop, combining selected PDFs into one ordered image project.
@@ -126,6 +127,8 @@
 - Sidebar utility controls now use larger icons, with a book icon for Glossary and an explicit `x2` icon for the fixed-factor upscaler.
 - Bumped the fork runtime version string to `1.4.0-vibe.73`.
 - Bumped the fork runtime version string to `1.4.0-vibe.76`.
+- Batch Processing language selectors now restore saved source/target choices by internal language key instead of relying only on display text.
+- Bumped the fork runtime version string to `1.4.0-vibe.77`.
 
 ### Fixed
 

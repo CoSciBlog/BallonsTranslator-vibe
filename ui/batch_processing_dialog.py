@@ -95,8 +95,8 @@ class BatchProcessingDialog(QDialog):
             label = lang_display_label(language)
             self.source_combo.addItem(label, language)
             self.target_combo.addItem(label, language)
-        self.source_combo.setCurrentText(lang_display_label(pcfg.module.translate_source))
-        self.target_combo.setCurrentText(lang_display_label(pcfg.module.translate_target))
+        self._set_language_combo(self.source_combo, pcfg.module.translate_source)
+        self._set_language_combo(self.target_combo, pcfg.module.translate_target)
 
         self.skip_pages_check = QCheckBox(self.tr('Skip pages already processed by the pipeline'))
         self.skip_projects_check = QCheckBox(self.tr('Skip projects whose pages are already processed'))
@@ -170,6 +170,13 @@ class BatchProcessingDialog(QDialog):
         if current in values:
             combo.setCurrentText(current)
         return combo
+
+    def _set_language_combo(self, combo: QComboBox, language: str):
+        index = combo.findData(language)
+        if index < 0:
+            index = combo.findText(lang_display_label(language))
+        if index >= 0:
+            combo.setCurrentIndex(index)
 
     def select_root_dir(self):
         start_dir = self.root_edit.text()
