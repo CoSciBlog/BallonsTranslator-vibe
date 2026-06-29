@@ -479,6 +479,10 @@ class LLM_API_Translator(BaseTranslator):
             "value": 15,
             "description": "Timeout between retry attempts (seconds).",
         },
+        "request timeout": {
+            "value": 300,
+            "description": "Maximum seconds to wait for one LLM API response. Local reasoning models can need several minutes when JSON mode, reflection, glossary extraction, large max tokens, or a large num ctx are enabled.",
+        },
         "proxy": {
             "value": "",
             "description": "Proxy address (e.g., http(s)://user:password@host:port or socks4/5://user:password@host:port)",
@@ -773,6 +777,10 @@ class LLM_API_Translator(BaseTranslator):
     @property
     def retry_timeout(self) -> int:
         return int(self.get_param_value("retry timeout"))
+
+    @property
+    def request_timeout(self) -> int:
+        return max(self._param_int("request timeout", default=300), 30)
 
     @property
     def proxy(self) -> str:
@@ -1454,14 +1462,28 @@ class LLM_API_Translator(BaseTranslator):
                 review_mode=review_mode,
             )
             expected_ids = [item["id"] for item in chunk]
-            response = self._request_translation(
-                prompt,
-                is_reflection=True,
-                purpose="manual_review",
-                expected_count=len(chunk),
-                expected_ids=expected_ids,
-                max_tokens_override=min(max(self.max_tokens, 2048), 8192),
-            )
+            try:
+                response = self._request_translation(
+                    prompt,
+                    is_reflection=True,
+                    purpose="manual_review",
+                    expected_count=len(chunk),
+                    expected_ids=expected_ids,
+                    max_tokens_override=min(max(self.max_tokens, 2048), 8192),
+                )
+            except (
+                openai.RateLimitError,
+                openai.APIConnectionError,
+                openai.APITimeoutError,
+                openai.InternalServerError,
+                openai.APIStatusError,
+                httpx.RequestError,
+            ) as e:
+                self.logger.warning(
+                    "Manual LLM review failed; keeping existing draft translations for this chunk. "
+                    f"{type(e).__name__}: {e}"
+                )
+                continue
             if response is not None:
                 response = self._clean_translation_response(response)
                 for item in response.translations:
@@ -2355,7 +2377,7 @@ class LLM_API_Translator(BaseTranslator):
         response = self.client.post(
             self._ollama_chat_endpoint(),
             json=payload,
-            timeout=120,
+            timeout=self.request_timeout,
         )
         response.raise_for_status()
         response_data = response.json()

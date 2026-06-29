@@ -84,6 +84,7 @@
 - Opt-in `Include glossary` support in Search/Replace for editing terms in project and reference glossary entries.
 - `LLM_API_Translator_2`, a second independent LLM API translator profile with separate provider/model/API settings, resettable prompt defaults, review support, glossary extraction support, and benchmark visibility.
 - A resettable `request prompt` for LLM API translators that is sent as an additional user message before every LLM request.
+- Configurable `request timeout` for LLM API translators so slow local Ollama reasoning models can finish long JSON responses instead of hitting the old fixed 120-second HTTP timeout.
 
 ### Changed
 
@@ -137,9 +138,12 @@
 - Bumped the fork runtime version string to `1.4.0-vibe.79`.
 - Bumped the fork runtime version string to `1.4.0-vibe.80`.
 - Bumped the fork runtime version string to `1.4.0-vibe.81`.
+- Documented Ollama reasoning-model settings for remote endpoints such as `http://10.10.13.1:11434/v1/`, including timeout, `max tokens`, `num ctx`, and review-pass tradeoffs.
+- Bumped the fork runtime version string to `1.4.0-vibe.82`.
 
 ### Fixed
 
+- Post-translation LLM review now keeps the existing draft translations for a chunk when an API timeout or retryable provider error occurs, preventing optional review failures from aborting an otherwise completed translation pipeline.
 - Reloaded a `lama_large_512px` model if it is unloaded between preprocessing and inference instead of attempting to call `None`.
 - Retried OCR with the configured batch fallback backend when the selected backend recognizes no text.
 - Fixed startup with no project open after grouped import metadata support was added.

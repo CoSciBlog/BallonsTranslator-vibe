@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.81`
+Fork release: `1.4.0-vibe.82`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -86,6 +86,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Added global Search/Replace sidebar actions to remove translation line breaks from the current page or from every page in the project.
 - Extended Search/Replace with an opt-in `Include glossary` mode for project/reference terms, and made `Replace + Re-render` return to the page where it was started.
 - Refreshed the icon-only sidebar utility controls with larger icons, including a book icon for Glossary and an explicit `x2` upscale icon.
+- Added a configurable LLM request timeout for slow local Ollama reasoning models and made post-translation LLM review keep existing draft translations when a review request times out.
 - Wrapped long Settings checkbox descriptions so General and DL Module options no longer extend beyond the window or create horizontal scrolling.
 - Auto layout now wraps and scales translations inside detected speech bubbles and clamps generated text boxes to page edges, with a setting for bubble-bound layout.
 - Added right-click `Reflect / review selected translations` for selected text boxes when an LLM-capable translator is active.
@@ -310,13 +311,15 @@ The `Two-Step Translator` first creates Google, DeepL Free, or DeepL draft trans
 
 When `Ollama` is selected, translation, refinement, reflection, and glossary calls use Ollama's native `/api/chat` endpoint. Set `num ctx` in translator settings to pass an explicit `options.num_ctx` context window; leave it at `0` to retain the Ollama server default. Existing saved endpoints ending in `/v1` continue to work and are normalized to the native endpoint.
 
+`request timeout` controls how long one LLM API call may run before it is treated as failed. Local reasoning models can exceed the old fixed 120-second limit when `reasoning`, `reflection`, automatic glossary extraction, high `max tokens`, or large `num ctx` values are enabled. For a remote Ollama server, keep the model endpoint in Settings, for example `http://10.10.13.1:11434/v1/`; the app normalizes it to the native Ollama API internally. If a reasoning model such as Qwen3.5/Gemma times out, raise `request timeout` to 300-600 seconds, reduce `max tokens` to 2048-4096 for translation, disable unnecessary review/glossary passes, or use `review speed mode` to combine or skip extra review requests.
+
 Each native Ollama request now logs terminal performance metrics in the form `Ollama speed ... prompt=... tkn/s | output=... tkn/s`, together with total and model-load duration. The prompt rate covers processing the request context; the output rate is the generation speed of the translated result.
 
 The strict retry is attempted before the final draft fallback when the LLM returns empty JSON, malformed JSON, a partial response, missing IDs, extra IDs, or a mismatched item count. Usable partial LLM results are merged by numeric ID only, never by list position, so a response for `id: 2` cannot be applied to `id: 1`.
 
 When Google, DeepL Free, or DeepL is used directly or as the Two-Step first step, the raw provider output is saved on each text block in `translation_provider_results` inside the project JSON and mirrored into `translation_draft`. The text editor sidebar shows this Google/DeepL result only as `First step draft`; the separate machine-translation-results field was removed.
 
-For local Ollama models such as `translategemma:12b` or `translategemma:27b`, disabling `reasoning` is usually faster and more stable for JSON output. Use moderate `max tokens` values, typically 2048-4096; values above 8192 are clamped for Ollama refinement requests. Raising `num ctx` permits longer prompt context but increases local memory use. Smaller refinement chunks also improve JSON stability for local models.
+For local Ollama models such as `translategemma:12b`, `translategemma:27b`, or Qwen/Gemma reasoning checkpoints, disabling `reasoning` is usually faster and more stable for JSON output. Use moderate `max tokens` values, typically 2048-4096; values above 8192 are clamped for Ollama refinement requests. Raising `num ctx` permits longer prompt context but increases local memory use. Smaller refinement chunks also improve JSON stability for local models.
 
 For `LLM_API_Translator` and `Two-Step Translator`, the source-language list includes `Auto (auto detect)`. Target-language lists show localized names together with their English meaning, for example `日本語 (Japanese)`.
 

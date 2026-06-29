@@ -1,5 +1,19 @@
 # Changelogs
 
+### 2026-06-29
+[v1.4.0-vibe.82] Ollama reasoning timeout handling
+Added:
+1. Added a configurable LLM `request timeout` so slow local Ollama reasoning models can finish long JSON responses.
+
+Changed:
+1. Documented remote Ollama endpoint guidance and recommended `max tokens`, `num ctx`, timeout, and review-pass settings for Qwen/Gemma reasoning models.
+
+Fixed:
+1. Post-translation LLM review now keeps existing draft translations when an optional review request times out or hits a retryable provider error.
+
+Version:
+1. Bumped the fork runtime version string to `1.4.0-vibe.82`.
+
 ### 2026-05-22
 [v1.4.0-vibe.65] LLM prompt placeholder tooltips
 Added:
