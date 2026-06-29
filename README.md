@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README_EN.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.80`
+Fork release: `1.4.0-vibe.81`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -42,6 +42,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Added an optional Batch Processing Re-Inpaint step that reapplies saved inpaint and censor masks to finished pages before export.
 - Added Batch Processing completion actions for shutting down, restarting, hibernating, sleeping, or running a custom command/program after a successful batch run.
 - Recovered complete LLM translation and glossary items from malformed or truncated JSON responses so Batch Processing, review passes, and glossary updates can continue when a local model emits a broken trailing item.
+- Coerced non-string LLM translation fields such as duplicate candidate lists into strings before validation, preventing review passes from failing on otherwise usable responses.
 - Added a Translation Benchmark window from the Run menu to compare current-page translations from multiple translators or LLM configurations side by side.
 - Added an LLM model matrix benchmark for repeated `LLM_API_Translator` and `Two-Step Translator` runs across Ollama-style model lists.
 - Added saved Google/DeepL provider result fields to each text block so raw first-step drafts are persisted in the project JSON and shown through the labelled machine-draft field.

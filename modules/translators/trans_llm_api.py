@@ -1153,6 +1153,37 @@ class LLM_API_Translator(BaseTranslator):
             raise parse_error
 
     @staticmethod
+    def _coerce_translation_text(value: Any, logger=None) -> str:
+        if isinstance(value, str):
+            return value
+        if isinstance(value, list):
+            parts = []
+            seen = set()
+            for item in value:
+                text = LLM_API_Translator._coerce_translation_text(item, logger=None).strip()
+                if not text or text in seen:
+                    continue
+                parts.append(text)
+                seen.add(text)
+            if logger is not None:
+                logger.warning("Coerced list-valued translation field to string.")
+            return "\n".join(parts)
+        if isinstance(value, dict):
+            for key in ("translation", "draft_translation", "text", "value", "content"):
+                if key in value:
+                    if logger is not None:
+                        logger.warning("Coerced object-valued translation field to string.")
+                    return LLM_API_Translator._coerce_translation_text(value.get(key), logger=None)
+            if logger is not None:
+                logger.warning("Serialized object-valued translation field to string.")
+            return json.dumps(value, ensure_ascii=False)
+        if value is None:
+            return ""
+        if logger is not None:
+            logger.warning(f"Coerced {type(value).__name__}-valued translation field to string.")
+        return str(value)
+
+    @staticmethod
     def _normalize_translation_entry(entry: Any, fallback_id: int = 0) -> Optional[Dict]:
         if not isinstance(entry, dict):
             return None
@@ -1168,6 +1199,9 @@ class LLM_API_Translator(BaseTranslator):
             normalized["translation"] = normalized.get("draft_translation") or ""
         if "translation" not in normalized:
             return None
+        normalized["translation"] = LLM_API_Translator._coerce_translation_text(
+            normalized.get("translation")
+        )
         return normalized
 
     @classmethod

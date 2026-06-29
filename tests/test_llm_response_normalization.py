@@ -78,6 +78,46 @@ class LLMResponseNormalizationTest(unittest.TestCase):
 
         self.assertEqual(normalized, {"translations": []})
 
+    def test_list_valued_translation_is_coerced_to_string(self):
+        response = self.validate(
+            {
+                "translations": [
+                    {
+                        "id": 5,
+                        "translation": ["Se-sensei...?", "Se-sensei...?"],
+                    }
+                ]
+            }
+        )
+
+        self.assertEqual(response.translations[0].translation, "Se-sensei...?")
+
+    def test_multiple_list_translation_candidates_are_joined_without_duplicates(self):
+        response = self.validate(
+            {
+                "translations": [
+                    {
+                        "id": 1,
+                        "translation": ["First line", "Second line", "First line"],
+                    }
+                ]
+            }
+        )
+
+        self.assertEqual(response.translations[0].translation, "First line\nSecond line")
+
+    def test_non_string_translation_scalars_are_coerced_to_string(self):
+        response = self.validate({"translations": [{"id": 1, "translation": 1234}]})
+
+        self.assertEqual(response.translations[0].translation, "1234")
+
+    def test_object_translation_uses_nested_translation_text(self):
+        response = self.validate(
+            {"translations": [{"id": 1, "translation": {"text": "Nested text"}}]}
+        )
+
+        self.assertEqual(response.translations[0].translation, "Nested text")
+
     def test_malformed_truncated_translation_json_recovers_complete_items(self):
         raw_json = (
             '{"translations":[{"id":1,"translation":"I don\'t like you at all... or do I?"},'

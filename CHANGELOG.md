@@ -88,6 +88,7 @@
 ### Changed
 
 - LLM translation, manual review, reflection, glossary extraction, and glossary refinement now recover complete list items from malformed or truncated JSON before falling back to retry or draft handling.
+- LLM translation, reflection, manual review, and glossary-refinement responses now coerce non-string `translation` fields, including duplicate candidate lists, into strings before schema validation.
 - Settings checkbox descriptions now wrap beside the checkbox instead of using unwrapped checkbox captions, preventing long General and DL Module option text from extending beyond the window.
 - Shortened visible Settings descriptions for Auto layout, custom fonts, Censor Restoration debug masks, Post-merge, Upscaling, pronoun review, and DL Module memory controls while keeping detailed hover text available.
 - Search/Replace sidebar actions now use shorter visible labels with detailed tooltips so the sidebar keeps a stable width.
@@ -135,6 +136,7 @@
 - Bumped the fork runtime version string to `1.4.0-vibe.78`.
 - Bumped the fork runtime version string to `1.4.0-vibe.79`.
 - Bumped the fork runtime version string to `1.4.0-vibe.80`.
+- Bumped the fork runtime version string to `1.4.0-vibe.81`.
 
 ### Fixed
 
