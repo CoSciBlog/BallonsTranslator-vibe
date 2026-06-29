@@ -27,13 +27,21 @@ class GPTTranslator(BaseTranslator):
         'model': {
             'type': 'selector',
             'options': [
+                'gpt-5.5',
+                'gpt-5.4',
+                'gpt-5.4-mini',
+                'gpt-5.4-nano',
+                'gpt-4.1',
+                'gpt-4.1-mini',
+                'gpt-4.1-nano',
                 'gpt-4o',
+                'gpt-4o-mini',
                 'gpt-4-turbo',
                 'gpt3',
                 'gpt35-turbo',
                 'gpt4',
             ],
-            'value': 'gpt-4o'
+            'value': 'gpt-5.5'
         },
         'override model': '',
         'prompt template': {

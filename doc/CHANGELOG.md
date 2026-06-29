@@ -1,6 +1,18 @@
 # Changelogs
 
 ### 2026-06-29
+[v1.4.0-vibe.83] ChatGPT/OpenAI model selector refresh
+Added:
+1. Added newer OpenAI model choices to `ChatGPT`, `ChatGPT_exp`, `LLM_API_Translator`, and `LLM_API_Translator_2`: `gpt-5.5`, `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano`, and the `gpt-4.1` family.
+
+Changed:
+1. Changed the shipped OpenAI defaults to `gpt-5.5` while preserving saved local settings and explicit override-model values.
+2. Updated README and changelog documentation.
+
+Version:
+1. Bumped the fork runtime version string to `1.4.0-vibe.83`.
+
+### 2026-06-29
 [v1.4.0-vibe.82] Ollama reasoning timeout handling
 Added:
 1. Added a configurable LLM `request timeout` so slow local Ollama reasoning models can finish long JSON responses.

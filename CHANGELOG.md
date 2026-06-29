@@ -4,6 +4,7 @@
 
 ### Added
 
+- Newer OpenAI model options for the `ChatGPT`, `ChatGPT_exp`, `LLM_API_Translator`, and `LLM_API_Translator_2` selectors, including `gpt-5.5`, `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano`, and the `gpt-4.1` family.
 - Speech-bubble-aware Auto layout that automatically wraps/scales text, constrains generated text boxes to the detected bubble where possible, and prevents them from extending beyond page edges.
 - A text-box context-menu `Reflect / review selected translations` action that runs the active LLM-capable translator only on the selected boxes.
 - `manga_ocr` beam-size/output-length settings and expanded `mit48px` batch-size guidance for explicit accuracy, latency, and VRAM tradeoffs.
@@ -88,6 +89,8 @@
 
 ### Changed
 
+- Default OpenAI model selections now use `gpt-5.5`; existing saved local settings and explicit override-model values are preserved.
+- Bumped the fork runtime version string to `1.4.0-vibe.83`.
 - LLM translation, manual review, reflection, glossary extraction, and glossary refinement now recover complete list items from malformed or truncated JSON before falling back to retry or draft handling.
 - LLM translation, reflection, manual review, and glossary-refinement responses now coerce non-string `translation` fields, including duplicate candidate lists, into strings before schema validation.
 - Settings checkbox descriptions now wrap beside the checkbox instead of using unwrapped checkbox captions, preventing long General and DL Module option text from extending beyond the window.

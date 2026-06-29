@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.82`
+Fork release: `1.4.0-vibe.83`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -95,6 +95,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Added optional compression-artifact cleanup before upscaling (`Off`, `Light`, `Medium`, or `Strong`) to reduce JPEG blocking/ringing before enlarged OCR and masks are generated.
 - Added optional speech-bubble shortening guidance for `LLM_API_Translator` and `Two-Step Translator`, with long and extreme character targets for concise dialogue without blind truncation.
 - Added `LLM_API_Translator_2` as a second independently configurable LLM API translation profile, including its own system prompt, per-request prompt, resettable defaults, review support, glossary extraction support, and translation benchmark visibility.
+- Updated ChatGPT/OpenAI model selectors with newer OpenAI IDs: `gpt-5.5`, `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano`, and the `gpt-4.1` family. New default OpenAI selections use `gpt-5.5`; saved local settings may keep their previous model until changed in Settings.
 
 ## Features
 

@@ -271,6 +271,11 @@ class LLM_API_Translator(BaseTranslator):
         "model": {
             "type": "selector",
             "options": [
+                "OAI: gpt-5.5",
+                "OAI: gpt-5.4",
+                "OAI: gpt-5.4-mini",
+                "OAI: gpt-5.4-nano",
+                "OAI: gpt-4.1-nano",
                 "OAI: gpt-4o",
                 "OAI: gpt-4.1",
                 "OAI: gpt-4.1-mini",
@@ -292,8 +297,8 @@ class LLM_API_Translator(BaseTranslator):
                 "OLLAMA: gemma3",
                 "OLLAMA: (override model field)",
             ],
-            "value": "OAI: gpt-4o",
-            "description": "Select a model that supports structured JSON output, or use the override field for newer model IDs.",
+            "value": "OAI: gpt-5.5",
+            "description": "Select a model that supports structured JSON output, or use the override field for preview, partner, or newly released model IDs.",
         },
         "override model": {
             "value": "",
