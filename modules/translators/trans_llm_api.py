@@ -255,9 +255,9 @@ class LLM_API_Translator(BaseTranslator):
     params: Dict = {
         "provider": {
             "type": "selector",
-            "options": ["OpenAI", "Google", "Grok", "OpenRouter", "LLM Studio", "Ollama"],
+            "options": ["OpenAI", "Gemini", "Google", "Grok", "OpenRouter", "LLM Studio", "Ollama"],
             "value": "OpenAI",
-            "description": "Select the LLM provider. Translation speed depends on provider latency, queueing, rate limits, JSON support, and for local providers the CPU/GPU and model size.",
+            "description": "Select the LLM provider. Gemini uses Google's OpenAI-compatible Gemini API endpoint. Translation speed depends on provider latency, queueing, rate limits, JSON support, and for local providers the CPU/GPU and model size.",
         },
         "apikey": {
             "value": "",
@@ -282,9 +282,12 @@ class LLM_API_Translator(BaseTranslator):
                 "OAI: o4-mini",
                 "OAI: gpt-4-turbo",
                 "OAI: gpt-3.5-turbo",
-                "GGL: gemini-1.5-pro-latest",
+                "GGL: gemini-2.5-pro",
                 "GGL: gemini-2.5-flash",
                 "GGL: gemini-2.5-flash-lite",
+                "GGL: gemini-2.0-flash",
+                "GGL: gemini-1.5-pro-latest",
+                "GGL: (override model field)",
                 "XAI: grok-4",
                 "XAI: grok-3",
                 "XAI: grok-3-mini",
@@ -298,7 +301,7 @@ class LLM_API_Translator(BaseTranslator):
                 "OLLAMA: (override model field)",
             ],
             "value": "OAI: gpt-5.5",
-            "description": "Select a model that supports structured JSON output, or use the override field for preview, partner, or newly released model IDs.",
+            "description": "Select a model that supports structured JSON output, or use the override field for preview, partner, Gemini, or newly released model IDs.",
         },
         "override model": {
             "value": "",
@@ -306,7 +309,7 @@ class LLM_API_Translator(BaseTranslator):
         },
         "endpoint": {
             "value": "",
-            "description": "Base URL for the API. Leave empty for provider default. Ollama uses its native /api/chat endpoint; an existing URL ending in /v1 is accepted and normalized automatically.",
+            "description": "Base URL for the API. Leave empty for provider default. Gemini/Google defaults to Google's OpenAI-compatible Gemini API endpoint. Ollama uses its native /api/chat endpoint; an existing URL ending in /v1 is accepted and normalized automatically.",
         },
         "system_prompt": {
             "type": "editor",
@@ -556,7 +559,7 @@ class LLM_API_Translator(BaseTranslator):
         endpoint = self.endpoint
         provider = self.provider
         if not endpoint:
-            if provider == "Google":
+            if provider in {"Gemini", "Google"}:
                 endpoint = "https://generativelanguage.googleapis.com/v1beta/openai"
             elif provider == "OpenAI":
                 endpoint = "https://api.openai.com/v1"
@@ -1109,7 +1112,7 @@ class LLM_API_Translator(BaseTranslator):
         if provider == "LLM Studio":
             extra_body["reasoning"] = {"effort": level}
             extra_body["think"] = True
-        if provider in ["Google", "Grok"]:
+        if provider in ["Gemini", "Google", "Grok"]:
             extra_body["reasoning_effort"] = level
         return extra_body
 
@@ -2248,7 +2251,7 @@ class LLM_API_Translator(BaseTranslator):
                 "type": "json_schema",
                 "json_schema": {"schema": response_model.model_json_schema()},
             }
-        elif self.json_mode_enabled and self.provider in ["OpenAI", "Grok", "Google", "OpenRouter", "Ollama"]:
+        elif self.json_mode_enabled and self.provider in ["OpenAI", "Gemini", "Grok", "Google", "OpenRouter", "Ollama"]:
             api_args["response_format"] = {"type": "json_object"}
 
         if self.provider == "OpenAI":
@@ -2553,7 +2556,7 @@ class LLM_API_Translator(BaseTranslator):
                 "type": "json_schema",
                 "json_schema": {"schema": TranslationResponse.model_json_schema()},
             }
-        elif self.json_mode_enabled and self.provider in ["OpenAI", "Grok", "Google", "OpenRouter", "Ollama"]:
+        elif self.json_mode_enabled and self.provider in ["OpenAI", "Gemini", "Grok", "Google", "OpenRouter", "Ollama"]:
             self.logger.debug(f"Using 'json_object' mode for {self.provider}.")
             api_args["response_format"] = {"type": "json_object"}
 

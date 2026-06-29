@@ -1,6 +1,19 @@
 # Changelogs
 
 ### 2026-06-29
+[v1.4.0-vibe.84] Gemini translation provider refresh
+Added:
+1. Added an explicit `Gemini` provider option for `LLM_API_Translator` and `LLM_API_Translator_2`.
+2. Added Gemini model presets for translation: `gemini-2.5-pro`, `gemini-2.5-flash`, `gemini-2.5-flash-lite`, `gemini-2.0-flash`, and `GGL: (override model field)`.
+
+Changed:
+1. Gemini/Google translation requests now share Google's OpenAI-compatible Gemini API endpoint when no custom endpoint is set.
+2. Updated README and changelog documentation.
+
+Version:
+1. Bumped the fork runtime version string to `1.4.0-vibe.84`.
+
+### 2026-06-29
 [v1.4.0-vibe.83] ChatGPT/OpenAI model selector refresh
 Added:
 1. Added newer OpenAI model choices to `ChatGPT`, `ChatGPT_exp`, `LLM_API_Translator`, and `LLM_API_Translator_2`: `gpt-5.5`, `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano`, and the `gpt-4.1` family.
