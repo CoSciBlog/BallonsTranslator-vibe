@@ -4,6 +4,7 @@
 
 ### Added
 
+- `Auto` source-language selection for the legacy `ChatGPT` and `ChatGPT_exp` translators, matching the LLM translator auto-detect source flow while keeping `Auto` out of target-language selectors.
 - Newer OpenAI model options for the `ChatGPT`, `ChatGPT_exp`, `LLM_API_Translator`, and `LLM_API_Translator_2` selectors, including `gpt-5.5`, `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano`, and the `gpt-4.1` family.
 - Explicit `Gemini` provider option for `LLM_API_Translator` and `LLM_API_Translator_2`, using Google's OpenAI-compatible Gemini endpoint for translation.
 - Gemini model presets: `gemini-2.5-pro`, `gemini-2.5-flash`, `gemini-2.5-flash-lite`, `gemini-2.0-flash`, plus a Gemini override-model entry for newer IDs.
@@ -94,6 +95,7 @@
 - Default OpenAI model selections now use `gpt-5.5`; existing saved local settings and explicit override-model values are preserved.
 - Bumped the fork runtime version string to `1.4.0-vibe.83`.
 - Bumped the fork runtime version string to `1.4.0-vibe.84`.
+- Bumped the fork runtime version string to `1.4.0-vibe.85`.
 - LLM translation, manual review, reflection, glossary extraction, and glossary refinement now recover complete list items from malformed or truncated JSON before falling back to retry or draft handling.
 - LLM translation, reflection, manual review, and glossary-refinement responses now coerce non-string `translation` fields, including duplicate candidate lists, into strings before schema validation.
 - Settings checkbox descriptions now wrap beside the checkbox instead of using unwrapped checkbox captions, preventing long General and DL Module option text from extending beyond the window.

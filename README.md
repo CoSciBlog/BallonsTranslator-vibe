@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README_EN.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.84`
+Fork release: `1.4.0-vibe.85`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -100,6 +100,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Added `LLM_API_Translator_2` as a second independently configurable LLM API translation profile, including its own system prompt, per-request prompt, resettable defaults, review support, glossary extraction support, and translation benchmark visibility.
 - Updated ChatGPT/OpenAI model selectors with newer OpenAI IDs: `gpt-5.5`, `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano`, and the `gpt-4.1` family. New default OpenAI selections use `gpt-5.5`; saved local settings may keep their previous model until changed in Settings.
 - Added an explicit `Gemini` LLM provider option for translation, backed by Google's OpenAI-compatible Gemini API endpoint. Gemini model presets now include `gemini-2.5-pro`, `gemini-2.5-flash`, `gemini-2.5-flash-lite`, `gemini-2.0-flash`, and an override entry for newer Gemini model IDs.
+- Added `Auto` as a source-language option for the legacy `ChatGPT` and `ChatGPT_exp` translators while keeping `Auto` out of their target-language selectors.
 
 ## Features
 

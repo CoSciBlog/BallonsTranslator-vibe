@@ -50,6 +50,7 @@ class GPTTranslatorExp(BaseTranslator):
 
     def _setup_translator(self):
         self.logger.debug("Setting up translator with initial parameters.")
+        self.lang_map['Auto'] = 'Auto-detected source language'
         self.lang_map['简体中文'] = 'Simplified Chinese'
         self.lang_map['繁體中文'] = 'Traditional Chinese'
         self.lang_map['日本語'] = 'Japanese'
@@ -77,6 +78,10 @@ class GPTTranslatorExp(BaseTranslator):
         self.token_count = 0
         self.token_count_last = 0
         self.logger.debug("Translator setup completed.")
+
+    @property
+    def supported_tgt_list(self) -> List[str]:
+        return [lang for lang in self.valid_lang_list if lang != 'Auto']
 
     @property
     def model(self) -> str:

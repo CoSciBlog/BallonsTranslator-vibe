@@ -1,6 +1,19 @@
 # Changelogs
 
 ### 2026-06-29
+[v1.4.0-vibe.85] ChatGPT auto source language
+Added:
+1. Added `Auto` as a source-language option for the legacy `ChatGPT` translator.
+2. Added the same `Auto` source-language option for `ChatGPT_exp`.
+
+Changed:
+1. Kept `Auto` out of both target-language selectors.
+2. Updated README and changelog documentation.
+
+Version:
+1. Bumped the fork runtime version string to `1.4.0-vibe.85`.
+
+### 2026-06-29
 [v1.4.0-vibe.84] Gemini translation provider refresh
 Added:
 1. Added an explicit `Gemini` provider option for `LLM_API_Translator` and `LLM_API_Translator_2`.
