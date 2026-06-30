@@ -3,11 +3,11 @@
 
 ## BallonTranslator
 
-[Chino](/README.md) | [Inglês](/README_EN.md) | [pt-BR](../doc/README_PT-BR.md) | [Ruso](../doc/README_RU.md) | [Japonés](../doc/README_JA.md) | [Indonesio](../doc/README_ID.md) | [Vietnamita](../doc/README_VI.md) | [Koreano](../doc/README_KO.md) | Español | [Français](../doc/README_FR.md) 
+[简体中文](/README.md) | [English](/README_EN.md) | [Русский](/doc/README_RU.md) | [日本語](/doc/README_JA.md) | [Español](/doc/README_ES.md) | [Français](/doc/README_FR.md) | [pt-BR](/doc/README_PT-BR.md) | [한국어](/doc/README_KO.md) | [Indonesia](/doc/README_ID.md) | [Tiếng Việt](/doc/README_VI.md) 
 
 BallonTranslator es otra herramienta asistida por ordenador, basada en el aprendizaje profundo, para traducir cómics/manga.
 
-<img src="../doc/src/ui0.jpg" div align=center>
+<img src="https://github.com/user-attachments/assets/2140c402-dda2-47bc-9e7f-83ed41ce78af" div align=center>
 
 <p align=center>
   <strong>Vista previa</strong>
@@ -32,128 +32,57 @@ BallonTranslator es otra herramienta asistida por ordenador, basada en el aprend
 ## Instalación
 
 ### En Windows
-Si no quieres instalar Python y Git manualmente y tienes acceso a Internet:  
-Descarga `BallonsTranslator_dev_src_with_gitpython.7z` desde [MEGA](https://mega.nz/folder/gmhmACoD#dkVlZ2nphOkU5-2ACb5dKw) o [Google Drive](https://drive.google.com/drive/folders/1uElIYRLNakJj-YS0Kd3r3HE-wzeEvrWd?usp=sharing), descomprime y ejecuta `launch_win.bat`.  
-Ejecute `scripts/local_gitpull.bat` para obtener la última actualización.
 
-### Ejecutar el código fuente
-Instale [Python](https://www.python.org/downloads/release/python-31011) **<= 3.12** (no utilice la versión de Microsoft Store) y [Git](https://git-scm.com/downloads).
+**Método A (Configuración automática del entorno local en un clic, requiere PowerShell)**:
+El script instalará `BallonsTranslator` en el directorio donde lo ejecute:
+```powershell
+irm https://raw.githubusercontent.com/dmMaze/BallonsTranslator/dev/scripts/install.ps1 | iex
+```
+O ejecute el siguiente comando en el símbolo del sistema clásico (`cmd.exe`):
+```cmd
+powershell -NoProfile -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/dmMaze/BallonsTranslator/dev/scripts/install.ps1 | iex"
+```
 
+**Método B (Descargar paquete preconfigurado)**:
+Descargue `Ballonstranslator_win_minium.zip` desde [GitHub Releases](https://github.com/dmMaze/BallonsTranslator/releases), extráigalo y haga doble clic en `launch_win.bat` para iniciar la aplicación.
+
+Estos métodos no son compatibles con Windows 7; los usuarios de Windows 7 deben instalar [Python 3.8](https://www.python.org/downloads/release/python-3810/) manualmente y ejecutar desde el código fuente.
+
+Si ve errores relacionados con `msvcp140.dll`, `c10.dll` o `[WinError 1114]`, instale o actualice [Microsoft Visual C++ Redistributable x64](https://aka.ms/vc14/vc_redist.x64.exe) (Visual Studio 2015-2022; [notas oficiales de descarga](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist)).
+
+## macOS / Linux
+
+El script instalará `BallonsTranslator` en el directorio donde lo ejecute:
 ```bash
-# Clonar este repositorio
-$ git clone https://github.com/dmMaze/BallonsTranslator.git ; cd BallonsTranslator
-
-# Iniciar la aplicación
-$ python3 launch.py
-
-# Actualizar la aplicación
-$ python3 launch.py --update
+curl -fLO https://raw.githubusercontent.com/dmMaze/BallonsTranslator/dev/scripts/install.sh && chmod +x install.sh && ./install.sh
 ```
 
-En la primera ejecución, se instalarán las librerías necesarias y las plantillas se descargarán automáticamente. Si las descargas fallan, tendrás que descargar la carpeta **data** (o los archivos que faltan mencionados en el terminal) desde [MEGA](https://mega.nz/folder/gmhmACoD#dkVlZ2nphOkU5-2ACb5dKw) o [Google Drive](https://drive.google.com/drive/folders/1uElIYRLNakJj-YS0Kd3r3HE-wzeEvrWd?usp=sharing) y guardarla en la ruta correspondiente de la carpeta de código fuente.
+Si `curl` no está disponible, descargue el script con `wget -O ...` en su lugar. La aplicación se inicia automáticamente después de la instalación; más tarde, use `cd BallonsTranslator && ./launch.sh` para iniciarla de nuevo.
 
-## Creación de la aplicación para macOS (compatible con chips Intel y Apple Silicon)
-[Referencia](doc/macOS_app.md)
-Pueden ocurrir algunos problemas; por ahora, se recomienda ejecutar el código fuente directamente.
-
-*Nota: macOS también puede ejecutar el código fuente si la aplicación no funciona.*
-
-![录屏2023-09-11 14 26 49](https://github.com/hyrulelinks/BallonsTranslator/assets/134026642/647c0fa0-ed37-49d6-bbf4-8a8697bc873e)
-
-#### 1. Preparación
--  Descargue las bibliotecas y plantillas de [MEGA](https://mega.nz/folder/gmhmACoD#dkVlZ2nphOkU5-2ACb5dKw) o [Google Drive](https://drive.google.com/drive/folders/1uElIYRLNakJj-YS0Kd3r3HE-wzeEvrWd?usp=sharing).
-
-<img width="1268" alt="截屏2023-09-08 13 44 55_7g32SMgxIf" src="https://github.com/dmMaze/BallonsTranslator/assets/134026642/40fbb9b8-a788-4a6e-8e69-0248abaee21a">
-
--  Coloca todos los recursos descargados en una carpeta llamada `data`. La estructura final del directorio debería ser la siguiente:
-  
-```
-data
-├── libs
-│   └── patchmatch_inpaint.dll
-└── models
-    ├── aot_inpainter.ckpt
-    ├── comictextdetector.pt
-    ├── comictextdetector.pt.onnx
-    ├── lama_mpe.ckpt
-    ├── manga-ocr-base
-    │   ├── README.md
-    │   ├── config.json
-    │   ├── preprocessor_config.json
-    │   ├── pytorch_model.bin
-    │   ├── special_tokens_map.json
-    │   ├── tokenizer_config.json
-    │   └── vocab.txt
-    ├── mit32px_ocr.ckpt
-    ├── mit48pxctc_ocr.ckpt
-    └── pkuseg
-        ├── postag
-        │   ├── features.pkl
-        │   └── weights.npz
-        ├── postag.zip
-        └── spacy_ontonotes
-            ├── features.msgpack
-            └── weights.npz
-
-7 directorios, 23 ficheros
-```
-
-- Instale la herramienta de línea de comandos pyenv para gestionar las versiones de Python. Se recomienda la instalación a través de Homebrew.
-
-```
-# Instalación mediante Homebrew
-brew install pyenv
-
-# Instalación mediante script oficial
-curl https://pyenv.run | bash
-
-# Configuración del entorno shell tras la instalación
-echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.zshrc
-echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.zshrc
-echo 'eval "$(pyenv init -)"' >> ~/.zshrc
-```
-
-#### 2. Creación de la aplicación
-```
-# Introduzca el directorio de trabajo `data`.
-cd data
-
-# Clonar la rama `dev` del repositorio
-git clone -b dev https://github.com/dmMaze/BallonsTranslator.git
-
-# Introduzca el directorio de trabajo `BallonsTranslator`.
-cd BallonsTranslator
-
-# Ejecute el script de construcción, que le pedirá la contraseña en el paso pyinstaller, introduzca la contraseña y pulse enter
-sh scripts/build-macos-app.sh
-```
-
-> 📌 La aplicación empaquetada se encuentra en ./data/BallonsTranslator/dist/BallonsTranslator.app. Arrastre la aplicación a la carpeta de aplicaciones de macOS para instalarla. Listo para usar sin ajustes adicionales de Python.
-
-
-</details>
+La aplicación comprueba las dependencias principales al iniciar. Cuando seleccione un módulo que necesite bibliotecas adicionales, la aplicación le pedirá instalar las dependencias opcionales que falten (también puede activar la instalación automática en los ajustes).
 
 # Utilización
 
 **Se recomienda ejecutar el programa en un terminal en caso de que se produzca un fallo y no se proporcione información, como se muestra en el siguiente gif.**
-<img src="../doc/src/run.gif">  
+<img src="https://github.com/user-attachments/assets/ee92fbdc-718c-4e04-a876-0eff3ee2a989">  
 
 - En la primera ejecución, selecciona el traductor y establece los idiomas de origen y destino haciendo clic en el icono de configuración.
 - Abre una carpeta que contenga las imágenes del cómic (manga/manhua/manhwa) que necesites traducir haciendo clic en el icono de la carpeta.
 - Haz clic en el botón «Ejecutar» y espera a que se complete el proceso.
 
 Los formatos de fuente, como el tamaño y el color, son determinados automáticamente por el programa en este proceso. Puede predeterminar estos formatos cambiando las opciones correspondientes de "decidir por el programa" a "utilizar configuración global" en el panel Configuración->Diagramación. (La configuración global son los formatos que se muestran en el panel de formato de fuente de la derecha cuando no está editando ningún bloque de texto en la escena).
+<img src="https://github.com/user-attachments/assets/fb8a8b2c-54e4-4579-8319-42a172296c80">
 
 ## Edición de imágenes
 
 ### Herramienta para pintar
-<img src="../doc/src/imgedit_inpaint.gif">
+<img src="https://github.com/user-attachments/assets/de0bc35d-6651-4f2f-985c-cfe9bfafb124">
 <p align = "center">
   <strong>Modo de edición de imágenes, herramienta Inpainting</strong>
 </p>
 
 ### Herramienta rectángulo
-<img src="../doc/src/rect_tool.gif">
+<img src="https://github.com/user-attachments/assets/6c47f46f-ffd3-41fd-b667-5442be304c79">
 <p align = "center">
   <strong>Herramienta rectángulo</strong>
 </p>
@@ -161,17 +90,17 @@ Los formatos de fuente, como el tamaño y el color, son determinados automática
 Para 'borrar' los resultados de inpainting no deseados, utilice la herramienta inpainting o la herramienta rectángulo con el **botón derecho del ratón** pulsado. El resultado depende de la precisión con la que el algoritmo ("método 1" y "método 2" en el gif) extrae la máscara de texto. El rendimiento puede ser peor con texto y fondos complejos.
 
 ## Edición de texto
-<img src="../doc/src/textedit.gif">
+<img src="https://github.com/user-attachments/assets/0f688abe-41f7-416a-85c8-e0dd6968fd00">
 <p align = "center">
   <strong>Modo de edición de texto</strong>
 </p>
 
-<img src="../doc/src/multisel_autolayout.gif" div align=center>
+<img src="https://github.com/user-attachments/assets/6d31c8a5-b909-4339-8036-7fc3ba2f014c" div align=center>
 <p align=center>
   <strong>Formato de texto por lotes y maquetación automática</strong>
 </p>
 
-<img src="../doc/src/ocrselected.gif" div align=center>
+<img src="https://github.com/user-attachments/assets/1b76c164-1454-4aa7-b60c-9fbdb0968350" div align=center>
 <p align=center>
   <strong>OCR y traducción de áreas seleccionadas</strong>
 </p>
@@ -192,7 +121,7 @@ Para 'borrar' los resultados de inpainting no deseados, utilice la herramienta i
 * Ajuste la sombra y la transparencia del texto en el panel de estilo de texto -> Efecto.
 * ```Alt+Arrow Keys``` o ```Alt+WASD``` (```pageDown``` o ```pageUp``` mientras estás en el modo de edición de texto) para cambiar entre bloques de texto.
 
-<img src="../doc/src/configpanel.png">
+<img src="https://github.com/user-attachments/assets/084a250d-6a31-4344-94c0-2a5f4ba64b96">
 
 ## Modo Headless (ejecución sin interfaz gráfica)
 

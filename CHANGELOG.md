@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### Upstream Integration
+
+- Merged upstream `dmMaze/BallonsTranslator` through `v1.5.5` / `upstream/dev` commit `73b8817c85e647a7b4ae1df2b9be611cdd96c98d`.
+- Migrated the fork to upstream's `ballontranslator` Python package layout and `resources` asset/translation layout while preserving Vibe-specific modules, dialogs, utility icons, and project workflows.
+- Added upstream launch/runtime infrastructure including `pyproject.toml`, `ballontranslator.launch`, lazy module metadata support, core requirement repair, network mirror helpers, updater helpers, Torch install helpers, and upstream unit tests.
+- Updated Pinokio and Windows launchers for the new package layout and removed dependencies on the deleted `scripts/launch_step.py` and `tools/runtime_manager.py` paths.
+- Added compatibility aliases for legacy `utils`, `modules`, and `ui` imports so migrated Vibe modules continue to load during the package transition.
+- Bumped the fork runtime version string to `1.5.5-vibe.86`.
+
 ### Added
 
 - `Auto` source-language selection for the legacy `ChatGPT` and `ChatGPT_exp` translators, matching the LLM translator auto-detect source flow while keeping `Auto` out of target-language selectors.

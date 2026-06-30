@@ -1,10 +1,10 @@
 ## BallonTranslator
 
-[Chinês](/README.md) | [Inglês](/README_EN.md) | pt-BR | [Russo](../doc/README_RU.md) | [Japonês](../doc/README_JA.md) | [Indonésio](../doc/README_ID.md) | [Vietnamita](../doc/README_VI.md) | [한국어](../doc/README_KO.md) | [Español](../doc/README_ES.md) | [Français](../doc/README_FR.md)
+[简体中文](/README.md) | [English](/README_EN.md) | [Русский](/doc/README_RU.md) | [日本語](/doc/README_JA.md) | [Español](/doc/README_ES.md) | [Français](/doc/README_FR.md) | [pt-BR](/doc/README_PT-BR.md) | [한국어](/doc/README_KO.md) | [Indonesia](/doc/README_ID.md) | [Tiếng Việt](/doc/README_VI.md)
 
 BallonTranslator é mais uma ferramenta auxiliada por computador, alimentada por deep learning, para a tradução de quadrinhos/mangás.
 
-<img src="../doc/src/ui0.jpg" div align=center>
+<img src="https://github.com/user-attachments/assets/2140c402-dda2-47bc-9e7f-83ed41ce78af" div align=center>
 
 <p align=center>
 **Pré-Visualização**
@@ -29,126 +29,59 @@ BallonTranslator é mais uma ferramenta auxiliada por computador, alimentada por
 ## Instalação
 
 ### No Windows
-Se você não deseja instalar o Python e o Git manualmente e tem acesso à Internet:  
-Baixe o BallonsTranslator_dev_src_with_gitpython.7z do [MEGA](https://mega.nz/folder/gmhmACoD#dkVlZ2nphOkU5-2ACb5dKw) ou [Google Drive](https://drive.google.com/drive/folders/1uElIYRLNakJj-YS0Kd3r3HE-wzeEvrWd?usp=sharing), descompacte e execute launch_win.bat.  
-Execute scripts/local_gitpull.bat para obter a atualização mais recente.
 
-### Executando o código-fonte
-Instale o [Python](https://www.python.org/downloads/release/python-31011) **<= 3.12** (não utilize a versão da Microsoft Store) e o [Git](https://git-scm.com/downloads).
+### No Windows
 
+**Método A (Configuração automática do ambiente local em um clique, requer PowerShell)**:
+O script instalará `BallonsTranslator` no diretório onde você o executar:
+```powershell
+irm https://raw.githubusercontent.com/dmMaze/BallonsTranslator/dev/scripts/install.ps1 | iex
+```
+Ou execute o seguinte comando no Prompt de Comando clássico (`cmd.exe`):
+```cmd
+powershell -NoProfile -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/dmMaze/BallonsTranslator/dev/scripts/install.ps1 | iex"
+```
+
+**Método B (Baixar pacote pré-configurado)**:
+Baixe `Ballonstranslator_win_minium.zip` em [GitHub Releases](https://github.com/dmMaze/BallonsTranslator/releases), extraia-o e clique duas vezes em `launch_win.bat` para iniciar o aplicativo.
+
+Esses métodos não oferecem suporte ao Windows 7; usuários do Windows 7 devem instalar o [Python 3.8](https://www.python.org/downloads/release/python-3810/) manualmente e executar a partir do código-fonte.
+
+Se aparecerem erros envolvendo `msvcp140.dll`, `c10.dll` ou `[WinError 1114]`, instale ou atualize o [Microsoft Visual C++ Redistributable x64](https://aka.ms/vc14/vc_redist.x64.exe) (Visual Studio 2015-2022; [notas oficiais de download](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist)).
+
+## macOS / Linux
+
+O script instalará `BallonsTranslator` no diretório onde você o executar:
 ```bash
-# Clone este repositório
-$ git clone https://github.com/dmMaze/BallonsTranslator.git ; cd BallonsTranslator
-
-# Inicie o aplicativo
-$ python3 launch.py
+curl -fLO https://raw.githubusercontent.com/dmMaze/BallonsTranslator/dev/scripts/install.sh && chmod +x install.sh && ./install.sh
 ```
 
-Na primeira execução, as bibliotecas necessárias serão instaladas e os modelos serão baixados automaticamente. Se os downloads falharem, você precisará baixar a pasta **data** (ou os arquivos ausentes mencionados no terminal) do [MEGA](https://mega.nz/folder/gmhmACoD#dkVlZ2nphOkU5-2ACb5dKw) ou [Google Drive](https://drive.google.com/drive/folders/1uElIYRLNakJj-YS0Kd3r3HE-wzeEvrWd?usp=sharing) e salvá-la no caminho correspondente na pasta do código-fonte.
+Se `curl` não estiver disponível, baixe o script com `wget -O ...`. O aplicativo inicia automaticamente após a instalação; depois, use `cd BallonsTranslator && ./launch.sh` para iniciá-lo novamente.
 
-## Construindo o aplicativo para macOS (compatível com chips Intel e Apple Silicon)
-
-*Observação: o macOS também pode executar o código-fonte caso o aplicativo não funcione.*
-
-![录屏2023-09-11 14 26 49](https://github.com/hyrulelinks/BallonsTranslator/assets/134026642/647c0fa0-ed37-49d6-bbf4-8a8697bc873e)
-
-#### 1. Preparação
--  Baixe as bibliotecas e modelos do [MEGA](https://mega.nz/folder/gmhmACoD#dkVlZ2nphOkU5-2ACb5dKw) ou [Google Drive](https://drive.google.com/drive/folders/1uElIYRLNakJj-YS0Kd3r3HE-wzeEvrWd?usp=sharing).
-
-<img width="1268" alt="截屏2023-09-08 13 44 55_7g32SMgxIf" src="https://github.com/dmMaze/BallonsTranslator/assets/134026642/40fbb9b8-a788-4a6e-8e69-0248abaee21a">
-
--  Coloque todos os recursos baixados em uma pasta chamada `data`. A estrutura final do diretório deve ser semelhante a esta:
-  
-```
-data
-├── libs
-│   └── patchmatch_inpaint.dll
-└── models
-    ├── aot_inpainter.ckpt
-    ├── comictextdetector.pt
-    ├── comictextdetector.pt.onnx
-    ├── lama_mpe.ckpt
-    ├── manga-ocr-base
-    │   ├── README.md
-    │   ├── config.json
-    │   ├── preprocessor_config.json
-    │   ├── pytorch_model.bin
-    │   ├── special_tokens_map.json
-    │   ├── tokenizer_config.json
-    │   └── vocab.txt
-    ├── mit32px_ocr.ckpt
-    ├── mit48pxctc_ocr.ckpt
-    └── pkuseg
-        ├── postag
-        │   ├── features.pkl
-        │   └── weights.npz
-        ├── postag.zip
-        └── spacy_ontonotes
-            ├── features.msgpack
-            └── weights.npz
-
-7 diretórios, 23 arquivos
-```
-
-- Instale a ferramenta de linha de comando pyenv para gerenciar as versões do Python. Recomenda-se a instalação via Homebrew.
-
-```
-# Instalar via Homebrew
-brew install pyenv
-
-# Instalar via script oficial
-curl https://pyenv.run | bash
-
-# Configurar o ambiente shell após a instalação
-echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.zshrc
-echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.zshrc
-echo 'eval "$(pyenv init -)"' >> ~/.zshrc
-```
-
-#### 2. Construindo o aplicativo
-```
-# Entre no diretório de trabalho `data`
-cd data
-
-# Clone o branch `dev` do repositório
-git clone -b dev https://github.com/dmMaze/BallonsTranslator.git
-
-# Entre no diretório de trabalho `BallonsTranslator`
-cd BallonsTranslator
-
-# Execute o script de construção, que solicitará a senha na etapa pyinstaller, insira a senha e pressione enter
-sh scripts/build-macos-app.sh
-```
-
-> 📌 O aplicativo empacotado está em ./data/BallonsTranslator/dist/BallonsTranslator.app. Arraste o aplicativo para a pasta de aplicativos do macOS para instalar. Pronto para usar sem configurações extras do Python.
-
-
-</details>
-
-Para usar o Sugoi translator (apenas japonês-inglês), baixe o [modelo offline](https://drive.google.com/drive/folders/1KnDlfUM9zbnYFTo6iCbnBaBKabXfnVJm) e mova a pasta "sugoi_translator" para BallonsTranslator/ballontranslator/data/models.
-
+O aplicativo verifica as dependências principais na inicialização. Ao selecionar um módulo que precisa de bibliotecas extras, o aplicativo solicitará a instalação das dependências opcionais ausentes (você também pode ativar a instalação automática nas configurações).
 
 # Utilização
 
 **É recomendado executar o programa em um terminal caso ocorra alguma falha e não sejam fornecidas informações, como mostrado no gif a seguir.**
-<img src="../doc/src/run.gif">  
+<img src="https://github.com/user-attachments/assets/ee92fbdc-718c-4e04-a876-0eff3ee2a989">  
 
 - Na primeira execução, selecione o tradutor e defina os idiomas de origem e destino clicando no ícone de configurações.
 - Abra uma pasta contendo as imagens do quadrinho (mangá/manhua/manhwa) que precisa de tradução clicando no ícone de pasta.
 - Clique no botão `Run` e aguarde a conclusão do processo.
 
 Os formatos de fonte, como tamanho e cor, são determinados automaticamente pelo programa neste processo. Você pode pré-determinar esses formatos alterando as opções correspondentes de "decidir pelo programa" para "usar configuração global" no painel de configurações->Diagramação. (As configurações globais são os formatos exibidos no painel de formatação de fonte à direita quando você não está editando nenhum bloco de texto na cena.)
+<img src="https://github.com/user-attachments/assets/fb8a8b2c-54e4-4579-8319-42a172296c80">
 
 ## Edição de Imagem
 
 ### Ferramenta de Inpainting
-<img src="../doc/src/imgedit_inpaint.gif">
+<img src="https://github.com/user-attachments/assets/de0bc35d-6651-4f2f-985c-cfe9bfafb124">
 <p align = "center">
 **Modo de edição de imagem, ferramenta de Inpainting**
 </p>
 
 ### Ferramenta Retângulo
-<img src="../doc/src/rect_tool.gif">
+<img src="https://github.com/user-attachments/assets/6c47f46f-ffd3-41fd-b667-5442be304c79">
 <p align = "center">
 **Ferramenta Retângulo**
 </p>
@@ -156,17 +89,17 @@ Os formatos de fonte, como tamanho e cor, são determinados automaticamente pelo
 Para 'apagar' resultados indesejados de inpainting, use a ferramenta de inpainting ou a ferramenta retângulo com o **botão direito do mouse** pressionado. O resultado depende da precisão com que o algoritmo ("método 1" e "método 2" no gif) extrai a máscara de texto. O desempenho pode ser pior em textos e fundos complexos.
 
 ## Edição de Texto
-<img src="../doc/src/textedit.gif">
+<img src="https://github.com/user-attachments/assets/0f688abe-41f7-416a-85c8-e0dd6968fd00">
 <p align = "center">
 **Modo de edição de texto**
 </p>
 
-<img src="../doc/src/multisel_autolayout.gif" div align=center>
+<img src="https://github.com/user-attachments/assets/6d31c8a5-b909-4339-8036-7fc3ba2f014c" div align=center>
 <p align=center>
 **Formatação de texto em lote e layout automático**
 </p>
 
-<img src="../doc/src/ocrselected.gif" div align=center>
+<img src="https://github.com/user-attachments/assets/1b76c164-1454-4aa7-b60c-9fbdb0968350" div align=center>
 <p align=center>
 **OCR e tradução de área selecionada**
 </p>
@@ -186,7 +119,7 @@ Para 'apagar' resultados indesejados de inpainting, use a ferramenta de inpainti
 * Para edição de texto: negrito - `Ctrl+B`, sublinhado - `Ctrl+U`, itálico - `Ctrl+I`.
 * Defina a sombra e a transparência do texto no painel de estilo de texto -> Efeito.
 
-<img src="../doc/src/configpanel.png">
+<img src="https://github.com/user-attachments/assets/084a250d-6a31-4344-94c0-2a5f4ba64b96">
 
 ## Modo Headless (Executar sem interface gráfica)
 

@@ -2,7 +2,7 @@ module.exports = {
   version: "7.0",
   title: "BallonsTranslator Vibe",
   description: "AI-assisted comic and manga image translator with OCR, inpainting, text detection, and translation tools.",
-  icon: "icons/bottombar_translate.svg",
+  icon: "resources/icons/bottombar_translate.svg",
   menu: async (kernel, info) => {
     const installed = info.exists("env")
     const running = {

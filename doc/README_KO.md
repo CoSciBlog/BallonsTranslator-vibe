@@ -2,11 +2,11 @@
 > **번역 결과물을 공개적으로 공유할 때 숙련된 번역가가 번역이나 교정에 참여하지 않았다면, 기계 번역임을 잘 보이는 곳에 표시해 주세요.**
 
 # BallonTranslator
-[简体中文](/README.md) | [English](/README_EN.md) | [pt-BR](../doc/README_PT-BR.md) | [Русский](../doc/README_RU.md) | [日本語](../doc/README_JA.md) | [Indonesia](../doc/README_ID.md) | [Tiếng Việt](../doc/README_VI.md) | 한국어 | [Español](../doc/README_ES.md) | [Français](../doc/README_FR.md)
+[简体中文](/README.md) | [English](/README_EN.md) | [Русский](/doc/README_RU.md) | [日本語](/doc/README_JA.md) | [Español](/doc/README_ES.md) | [Français](/doc/README_FR.md) | [pt-BR](/doc/README_PT-BR.md) | [한국어](/doc/README_KO.md) | [Indonesia](/doc/README_ID.md) | [Tiếng Việt](/doc/README_VI.md)
 
 딥러닝으로 구동되는 또 다른 컴퓨터 지원 만화/만화 번역 툴.
 
-<img src="./src/ui0.jpg" div align=center>
+<img src="https://github.com/user-attachments/assets/2140c402-dda2-47bc-9e7f-83ed41ce78af" div align=center>
 
 <p align=center>
 미리보기
@@ -31,124 +31,58 @@
 # 설치
 
 ## Windows에서
-Python 및 Git을 직접 설치하고 싶지 않으며 인터넷이 가능하다면:
-다음 링크에서 BallonsTranslator_dev_src_with_gitpython.7z 를 다운로드 하세요. [MEGA](https://mega.nz/folder/gmhmACoD#dkVlZ2nphOkU5-2ACb5dKw) or [Google Drive](https://drive.google.com/drive/folders/1uElIYRLNakJj-YS0Kd3r3HE-wzeEvrWd?usp=sharing) 그 후 launch_win.bat 를 실행합니다.
-scripts/local_gitpull.bat를 실행하여 최신 업데이트를 받으세요.
-이 제공된 패키지는 Windows 7에서 실행할 수 없습니다. Win 7 사용자는 [Python 3.8](https://www.python.org/downloads/release/python-3810/)를 설치하고 소스 코드를 실행해야합니다.
 
-## 소스 코드를 실행
+### Windows의 경우
 
-[Python] 설치 (https://www.python.org/downloads/release/python-31011) **<= 3.12** (Microsoft 스토어에서 설치 한 것을 사용하지 마세요) 및 [Git](https://git-scm.com/downloads).
+**방법 A (원클릭 로컬 환경 설정, PowerShell 필요)**:
+이 스크립트는 실행한 디렉터리에 `BallonsTranslator`를 설치합니다:
+```powershell
+irm https://raw.githubusercontent.com/dmMaze/BallonsTranslator/dev/scripts/install.ps1 | iex
+```
+또는 일반 명령 프롬프트 (`cmd.exe`)에서 다음 명령을 실행합니다:
+```cmd
+powershell -NoProfile -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/dmMaze/BallonsTranslator/dev/scripts/install.ps1 | iex"
+```
 
+**방법 B (사전 구성된 패키지 다운로드)**:
+[GitHub Releases](https://github.com/dmMaze/BallonsTranslator/releases)에서 `Ballonstranslator_win_minium.zip`을 다운로드하고 압축을 푼 뒤 `launch_win.bat`를 더블 클릭하여 실행합니다.
+
+이 방법들은 Windows 7을 지원하지 않습니다. Windows 7 사용자는 [Python 3.8](https://www.python.org/downloads/release/python-3810/)을 수동으로 설치하고 소스 코드에서 실행해야 합니다.
+
+`msvcp140.dll`, `c10.dll` 또는 `[WinError 1114]` 관련 오류가 보이면 [Microsoft Visual C++ Redistributable x64](https://aka.ms/vc14/vc_redist.x64.exe)(Visual Studio 2015-2022; [공식 다운로드 참고 사항](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist))를 설치하거나 업데이트하세요.
+
+## macOS / Linux
+
+이 스크립트는 실행한 디렉터리에 `BallonsTranslator`를 설치합니다:
 ```bash
-# 이 레포 복사
-$ git clone https://github.com/dmMaze/BallonsTranslator.git ; cd BallonsTranslator
-
-# 앱 실행
-$ python3 launch.py
+curl -fLO https://raw.githubusercontent.com/dmMaze/BallonsTranslator/dev/scripts/install.sh && chmod +x install.sh && ./install.sh
 ```
 
-처음 시작하면 필요한 라이브러리 및 모델을 자동으로 다운로드 하여 설치합니다. 다운로드가 실패한 경우, 다음 링크에서 **data** 폴더(또는 터미널에 표기된 누락된 파일)를 다운로드해야 합니다. [MEGA](https://mega.nz/folder/gmhmACoD#dkVlZ2nphOkU5-2ACb5dKw) 또는 [Google Drive](https://drive.google.com/drive/folders/1uElIYRLNakJj-YS0Kd3r3HE-wzeEvrWd?usp=sharing) 그리고 해당되는 소스코드 폴더에 저장하세요.
+`curl`을 사용할 수 없으면 대신 `wget -O ...`로 스크립트를 다운로드하세요. 설치 후 앱이 자동으로 시작됩니다. 이후에는 `cd BallonsTranslator && ./launch.sh`를 사용해 다시 실행할 수 있습니다.
 
-## macOS 애플리케이션 빌드 (Intel 및 Apple 실리콘 칩 모두 호환)
-<i>Note macOS는 작동하지 않을 경우 소스 코드를 실행할 수 있습니다.</i>
-
-![녹화화면2023-09-11 14 26 49](https://github.com/hyrulelinks/BallonsTranslator/assets/134026642/647c0fa0-ed37-49d6-bbf4-8a8697bc873e)
-
-#### 1. 준비
--   다음 링크에서 라이브러리 및 모델을 다운로드 합니다. [MEGA](https://mega.nz/folder/gmhmACoD#dkVlZ2nphOkU5-2ACb5dKw "MEGA") 또는 [Google Drive](https://drive.google.com/drive/folders/1uElIYRLNakJj-YS0Kd3r3HE-wzeEvrWd?usp=sharing)
-
-
-<img width="1268" alt="截屏2023-09-08 13 44 55_7g32SMgxIf" src="https://github.com/dmMaze/BallonsTranslator/assets/134026642/40fbb9b8-a788-4a6e-8e69-0248abaee21a">
-
--  다운로드한 모든 리소스를 data 폴더에 넣습니다. 최종 디렉터리 트리 구조는 다음과 같습니다:
-
-```
-data
-├── libs
-│   └── patchmatch_inpaint.dll
-└── models
-    ├── aot_inpainter.ckpt
-    ├── comictextdetector.pt
-    ├── comictextdetector.pt.onnx
-    ├── lama_mpe.ckpt
-    ├── manga-ocr-base
-    │   ├── README.md
-    │   ├── config.json
-    │   ├── preprocessor_config.json
-    │   ├── pytorch_model.bin
-    │   ├── special_tokens_map.json
-    │   ├── tokenizer_config.json
-    │   └── vocab.txt
-    ├── mit32px_ocr.ckpt
-    ├── mit48pxctc_ocr.ckpt
-    └── pkuseg
-        ├── postag
-        │   ├── features.pkl
-        │   └── weights.npz
-        ├── postag.zip
-        └── spacy_ontonotes
-            ├── features.msgpack
-            └── weights.npz
-
-7 디렉토리, 23 파일
-```
-
--  파이썬 버전들을 관리하기 위해 pyenv 명령줄 도구를 설치합니다. 홈브류를 통해 설치하는 것을 추천합니다.
-```
-# 홈브류를 통해 설치합니다.
-brew install pyenv
-
-# 공식 스크립트를 통해 설치합니다.
-curl https://pyenv.run | bash
-
-# 설치 후 셀 환경변수를 설정합니다.
-echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.zshrc
-echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.zshrc
-echo 'eval "$(pyenv init -)"' >> ~/.zshrc
-```
-
-
-#### 2、응용 프로그램 빌드
-```
-# 작업 경로인 `data` 입력
-cd data
-
-# 레포의 `dev` 브렌치를 복제합니다
-git clone -b dev https://github.com/dmMaze/BallonsTranslator.git
-
-# 작업 경로인 `BallonsTranslator` 를 입력합니다
-cd BallonsTranslator
-
-# 빌드 스크립트를 실행하면, pyinstaller 단계에서 비밀번호를 물어봅니다. 비밀번호를 입력하고 엔터를 누릅니다.
-sh scripts/build-macos-app.sh
-```
-> 📌패키지 응용 프로그램은 ./data/BallonsTranslator/dist/BallonsTranslator.app 에 있으며, macOS 애플리케이션 폴더에 앱을 드래그하여 설치합니다. 추가 Python config 없이  사용할 수 있습니다.
-
-
-</details> 
+앱은 시작 시 핵심 의존성을 확인합니다. 추가 라이브러리가 필요한 모듈을 선택하면 누락된 선택 의존성 설치를 안내합니다(설정에서 자동 설치도 활성화할 수 있습니다).
 
 # 사용법
 
 **충돌시 관련 정보를 남기기 위해 터미널 에서 프로그램을 실행하는 것이 좋습니다. 다음 GIF를 참조하십시오.**
-<img src="./src/run.gif">  
+<img src="https://github.com/user-attachments/assets/ee92fbdc-718c-4e04-a876-0eff3ee2a989">  
 - 프로그램을 처음 실행하는 경우, 설정 아이콘을 클릭하여 번역기를 선택하고 소스 및 대상 언어를 설정하십시오.
 - 폴더 아이콘을 클릭하여 번역이 필요한 만화(코믹,망가 등)의 이미지를 포함하는 폴더를 엽니다.
 - '실행`버튼을 클릭하고 프로세스를 완료합니다.
 
 이 과정에서 글꼴 크기 및 색상과 같은 글꼴 형식은 프로그램에 의해 자동으로 결정되며, 설정 패널->글꼴 설정에서 해당 옵션을 “프로그램이 결정”에서 “전역 설정 사용”으로 변경하여 해당 형식을 미리 결정할 수 있습니다. (전역 설정은 장면에서 텍스트 블록을 편집하지 않을 때 오른쪽 글꼴 형식 패널에 표시되는 스타일 입니다.)
-<img src="./src/global_font_format.png">  
+<img src="https://github.com/user-attachments/assets/fb8a8b2c-54e4-4579-8319-42a172296c80">  
 
 ## 이미지 편집
 
 ### 인페인트 도구
-<img src="./src/imgedit_inpaint.gif">
+<img src="https://github.com/user-attachments/assets/de0bc35d-6651-4f2f-985c-cfe9bfafb124">
 <p align = "center">
 이미지 편집 모드, 인페인팅 도구
 </p>
 
 ### 글상자 도구
-<img src="./src/rect_tool.gif">
+<img src="https://github.com/user-attachments/assets/6c47f46f-ffd3-41fd-b667-5442be304c79">
 <p align = "center">
 글상자 도구
 </p>
@@ -157,17 +91,17 @@ sh scripts/build-macos-app.sh
 결과는 알고리즘('방법 1' 및 '방법 2'의 GIF)이 텍스트 마스크를 얼마나 정확하게 추출하는지에 따라 달라집니다. 복잡한 텍스트 및 배경에서는 성능이 저하될 수 있습니다.  
 
 ## 텍스트 편집
-<img src="./src/textedit.gif">
+<img src="https://github.com/user-attachments/assets/0f688abe-41f7-416a-85c8-e0dd6968fd00">
 <p align = "center">
 텍스트 편집 모드
 </p>
 
-<img src="./src/multisel_autolayout.gif" div align=center>
+<img src="https://github.com/user-attachments/assets/6d31c8a5-b909-4339-8036-7fc3ba2f014c" div align=center>
 <p align=center>
 일괄 텍스트 포맷팅 및 자동 레이아웃
 </p>
 
-<img src="./src/ocrselected.gif" div align=center>
+<img src="https://github.com/user-attachments/assets/1b76c164-1454-4aa7-b60c-9fbdb0968350" div align=center>
 <p align=center>
 선택 영역 OCR 및 번역
 </p>
@@ -188,7 +122,7 @@ sh scripts/build-macos-app.sh
 * 텍스트 스타일 패널 -> 효과에서 텍스트 그림자 및 투명도를 설정합니다.  
 * ```Alt+Arrow Keys``` 및 ```Alt+WASD``` (또는 텍스트 편집 모드에서 ```pageDown``` 및 ```pageUp```) 로 텍스트 블록 사이를 전환합니다.
   
-<img src="./src/configpanel.png">
+<img src="https://github.com/user-attachments/assets/084a250d-6a31-4344-94c0-2a5f4ba64b96">
 
 ## 헤드리스 모드 (GUI 없이 실행)
 ``` python

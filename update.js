@@ -14,9 +14,9 @@ module.exports = {
           PYTHONUNBUFFERED: "1"
         },
         message: [
-          `python -u scripts/launch_step.py "Configuring update repository" -- git remote set-url origin ${repo}`,
-          `python -u scripts/launch_step.py "Fetching BallonsTranslator-vibe updates" -- git fetch --progress origin ${branch}`,
-          `python -u scripts/launch_step.py "Fast-forwarding local checkout" -- git pull --ff-only --progress origin ${branch}`
+          `git remote set-url origin ${repo}`,
+          `git fetch --progress origin ${branch}`,
+          `git pull --ff-only --progress origin ${branch}`
         ]
       }
     },
@@ -31,8 +31,9 @@ module.exports = {
           PIP_PROGRESS_BAR: "on"
         },
         message: [
-          "python -u scripts/launch_step.py \"Refreshing pip, wheel, and compatible setuptools\" -- python -m pip install --upgrade pip wheel setuptools==71.1.0 --progress-bar on",
-          "python -u scripts/launch_step.py \"Refreshing BallonsTranslator requirements\" -- uv pip install -r requirements.txt"
+          "python -m pip install --upgrade pip wheel setuptools==71.1.0 --progress-bar on",
+          "uv pip install -r requirements.txt",
+          "python -m pip install -e . --no-deps"
         ]
       }
     },

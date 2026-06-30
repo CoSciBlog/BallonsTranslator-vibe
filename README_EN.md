@@ -7,8 +7,8 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.85`
-Upstream base: `BallonsTranslator 1.4.0`
+Fork release: `1.5.5-vibe.86`
+Upstream base: `BallonsTranslator 1.5.5`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
 BallonsTranslator is a desktop tool for comic and manga translation with OCR, text detection, inpainting, translation, and interactive text editing.
@@ -18,9 +18,11 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 ## What changed in this fork
 
 - Added Pinokio launcher scripts in the project root: `install.js`, `start.js`, `update.js`, `reset.js`, `pinokio.js`, and `pinokio.json`.
+- Merged upstream `dmMaze/BallonsTranslator` through `v1.5.5`, including the new `ballontranslator` package layout, `resources` asset layout, launch-time core requirement repair, lazy module metadata infrastructure, updater helpers, Torch installation helpers, and upstream documentation/test refreshes.
+- Kept the Vibe-specific archive import/export, batch processing, glossary, LLM review/refinement, re-inpaint, decensor, project upscaling, benchmark, OpenAI/Gemini/Ollama, and Pinokio launcher workflows during the upstream package migration.
 - Switched the launcher and Windows helper flow to a shared project virtual environment at `./env` instead of the old bundled `ballontrans_pylibs_win` runtime.
 - Pointed the built-in update flow at the `CoSciBlog/BallonsTranslator-vibe` fork on the `dev` branch.
-- Introduced a fork-aware application version scheme so this build is distinguishable from upstream releases: `1.4.0-vibe.1`.
+- Introduced a fork-aware application version scheme so this build is distinguishable from upstream releases, currently `1.5.5-vibe.86`.
 - Replaced the mixed-language root `README.md` with the English documentation and refreshed the English README for this fork.
 - Documented that translated output and some documentation assets are machine-translated and should be disclosed as such when redistributed.
 - Fixed `manga_ocr` startup with current Transformers releases by using the image processor API required by the local `manga-ocr-base` vision model.
@@ -463,7 +465,7 @@ Notes:
 
 - Upstream project: [dmMaze/BallonsTranslator](https://github.com/dmMaze/BallonsTranslator)
 - AI-modified downstream variant referenced by the project: [thomaswantstobeaskeleton/BallonsTranslator-Pro](https://github.com/thomaswantstobeaskeleton/BallonsTranslator-Pro)
-- Fork maintenance, archive import/export, launcher integration, Gloss Scan/reference glossary workflows, and documentation extension: this `BallonsTranslator-vibe` fork
+- Fork maintenance, upstream `1.5.5` integration, package-layout migration, archive import/export, launcher integration, Gloss Scan/reference glossary workflows, and documentation extension: this `BallonsTranslator-vibe` fork
 - Archive import uses Python standard-library ZIP handling and the user's locally installed `7z`/Pinokio-provided extractor for CBR files.
 - Archive export uses Python standard-library ZIP handling for `.cbz`/`.zip`, Pillow PDF writing for per-image PDF pages, and the user's locally installed `rar`/WinRAR command for `.cbr`.
 - Sidebar utility icons in `icons/leftbar_*.svg` are original SVG assets created for this fork; no external icon framework or additional icon license is included.

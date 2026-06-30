@@ -1,9 +1,9 @@
 # BallonTranslator
-[简体中文](/README.md) | [English](/README_EN.md) | [pt-BR](../doc/README_PT-BR.md) | [Русский](../doc/README_RU.md) | [日本語](../doc/README_JA.md) | [Indonesia](../doc/README_ID.md) | Tiếng Việt | [한국어](../doc/README_KO.md) | [Español](../doc/README_ES.md) | [Français](../doc/README_FR.md)
+[简体中文](/README.md) | [English](/README_EN.md) | [Русский](/doc/README_RU.md) | [日本語](/doc/README_JA.md) | [Español](/doc/README_ES.md) | [Français](/doc/README_FR.md) | [pt-BR](/doc/README_PT-BR.md) | [한국어](/doc/README_KO.md) | [Indonesia](/doc/README_ID.md) | [Tiếng Việt](/doc/README_VI.md)
 
 Lại thêm một công cụ, phần mềm dịch truyện siu xịn khác có áp dụng ML/AI.
 
-<img src="./src/ui0.jpg" div align=center>
+<img src="https://github.com/user-attachments/assets/2140c402-dda2-47bc-9e7f-83ed41ce78af" div align=center>
 
 <p align=center>
 preview
@@ -29,125 +29,58 @@ preview
 
 ## Trên Windows
 
-Nếu bạn lười cài Python và Git nhưng vẫn có thể truy cập vào Internet, thì có thể tải BallonsTranslator_dev_src_with_gitpython.7z từ [MEGA](https://mega.nz/folder/gmhmACoD#dkVlZ2nphOkU5-2ACb5dKw) hoặc nà [Google Drive](https://drive.google.com/drive/folders/1uElIYRLNakJj-YS0Kd3r3HE-wzeEvrWd?usp=sharing), unzip nó rùi chạy ```launch_win.bat```.
-Chạy file ```scripts/local_gitpull.bat``` để cập nhật bản mới nhất nhoa.
+### Trên Windows
 
-## Chạy mã nguồn (từ github)
+**Phương pháp A (Cài đặt môi trường cục bộ bằng một cú nhấp chuột, yêu cầu PowerShell)**:
+Tệp lệnh sẽ cài đặt `BallonsTranslator` trong thư mục nơi bạn chạy nó:
+```powershell
+irm https://raw.githubusercontent.com/dmMaze/BallonsTranslator/dev/scripts/install.ps1 | iex
+```
+Hoặc chạy lệnh sau trong Command Prompt (`cmd.exe`):
+```cmd
+powershell -NoProfile -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/dmMaze/BallonsTranslator/dev/scripts/install.ps1 | iex"
+```
 
-*Phù hợp cho mấy bạn sài linux như tui hehe.*
+**Phương pháp B (Tải xuống gói cấu hình sẵn)**:
+Tải xuống `Ballonstranslator_win_minium.zip` từ [GitHub Releases](https://github.com/dmMaze/BallonsTranslator/releases), giải nén rồi nhấp đúp vào `launch_win.bat` để khởi động ứng dụng.
 
-Cài [Python](https://www.python.org/downloads/release/python-31011) **<= 3.12** (Đừng cóa mà sài cái bản có sẵn trên Microsoft Store) và [Git](https://git-scm.com/downloads).
+Các phương pháp này không hỗ trợ Windows 7; người dùng Windows 7 phải cài đặt [Python 3.8](https://www.python.org/downloads/release/python-3810/) thủ công và chạy từ mã nguồn.
 
+Nếu bạn thấy lỗi liên quan đến `msvcp140.dll`, `c10.dll` hoặc `[WinError 1114]`, hãy cài đặt hoặc cập nhật [Microsoft Visual C++ Redistributable x64](https://aka.ms/vc14/vc_redist.x64.exe) (Visual Studio 2015-2022; [ghi chú tải xuống chính thức](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist)).
+
+## macOS / Linux
+
+Tệp lệnh sẽ cài đặt `BallonsTranslator` trong thư mục nơi bạn chạy nó:
 ```bash
-# Clone this repo
-$ git clone https://github.com/dmMaze/BallonsTranslator.git ; cd BallonsTranslator
-
-# Launch the app
-$ python3 launch.py
+curl -fLO https://raw.githubusercontent.com/dmMaze/BallonsTranslator/dev/scripts/install.sh && chmod +x install.sh && ./install.sh
 ```
 
-**Lưu ý:** Lần đầu tiên khởi chạy, app sẽ tự động cài đặt các thư viện và tải xuống các models. Nếu tải xuống không thành công, bạn sẽ cần tải xuống thư mục **data** (hoặc các tệp bị thiếu được báo lỗi trong terminal) từ [MEGA](https://mega.nz/folder/gmhmACoD#dkVlZ2nphOkU5-2ACb5dKw) hoặc [Google Drive](https://drive.google.com/drive/folders/1uElIYRLNakJj-YS0Kd3r3HE-wzeEvrWd?usp=sharing) rùi lưu nó ở đường dẫn tương ứng trong thư mục mã nguồn.
+Nếu không có `curl`, hãy tải script bằng `wget -O ...`. Ứng dụng sẽ tự khởi động sau khi cài đặt; những lần sau dùng `cd BallonsTranslator && ./launch.sh` để mở lại.
 
-## Chạy ứng dụng trên MacOS (tương thích với cả chip Intel và Apple Silicon)
-<i>Lưu ý MacOS cũng có thể chạy cách bên trên nếu cách này không hoạt động.</i>  
-
-![录屏2023-09-11 14 26 49](https://github.com/hyrulelinks/BallonsTranslator/assets/134026642/647c0fa0-ed37-49d6-bbf4-8a8697bc873e)
-
-#### 1. Chuẩn bị
--   Tải libs và models từ [MEGA](https://mega.nz/folder/gmhmACoD#dkVlZ2nphOkU5-2ACb5dKw "MEGA") hoặc [Google Drive](https://drive.google.com/drive/folders/1uElIYRLNakJj-YS0Kd3r3HE-wzeEvrWd?usp=sharing)
-
-
-<img width="1268" alt="截屏2023-09-08 13 44 55_7g32SMgxIf" src="https://github.com/dmMaze/BallonsTranslator/assets/134026642/40fbb9b8-a788-4a6e-8e69-0248abaee21a">
-
--  Chuyển tất cả các tài nguyên đã tải xuống vào thư mục ```data``` (chưa có thì tự tạo nhá), cấu trúc cây thư mục cuối cùng sẽ trông như nè:
-
-```
-data
-├── libs
-│   └── patchmatch_inpaint.dll
-└── models
-    ├── aot_inpainter.ckpt
-    ├── comictextdetector.pt
-    ├── comictextdetector.pt.onnx
-    ├── lama_mpe.ckpt
-    ├── manga-ocr-base
-    │   ├── README.md
-    │   ├── config.json
-    │   ├── preprocessor_config.json
-    │   ├── pytorch_model.bin
-    │   ├── special_tokens_map.json
-    │   ├── tokenizer_config.json
-    │   └── vocab.txt
-    ├── mit32px_ocr.ckpt
-    ├── mit48pxctc_ocr.ckpt
-    └── pkuseg
-        ├── postag
-        │   ├── features.pkl
-        │   └── weights.npz
-        ├── postag.zip
-        └── spacy_ontonotes
-            ├── features.msgpack
-            └── weights.npz
-
-7 directories, 23 files
-```
-
--  Cài đặt pyenv command line tool để quản lý các phiên bản Python. Nên cài qua Homebrew.
-```
-# Install via Homebrew
-brew install pyenv
-
-# Install via official script
-curl https://pyenv.run | bash
-
-# Set shell environment after install
-echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.zshrc
-echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.zshrc
-echo 'eval "$(pyenv init -)"' >> ~/.zshrc
-```
-
-
-#### 2. Chạy ứng dụng
-```
-# Enter the `data` working directory
-cd data
-
-# Clone the `dev` branch of the repo
-git clone -b dev https://github.com/dmMaze/BallonsTranslator.git
-
-# Enter the `BallonsTranslator` working directory
-cd BallonsTranslator
-
-# Run the build script, will ask for password at pyinstaller step, enter password and press enter
-sh scripts/build-macos-app.sh
-```
-> 📌 Ứng dụng được build ra file chạy ở đường dẫn ```./data/BallonsTranslator/dist/BallonsTranslator.app```, kéo cái ```BallonsTranslator.app``` vô thư mục macOS application để cài đặt. Sẵn sàng sử dụng lun mà không cần cấu hình thêm cho Python.
-
-</details>
-
-Để sài Sugoi translator(Japanese-English only), tải [offline model](https://drive.google.com/drive/folders/1KnDlfUM9zbnYFTo6iCbnBaBKabXfnVJm), chuyển "sugoi_translator" vào ```BallonsTranslator/ballontranslator/data/models```.
+Ứng dụng kiểm tra các phụ thuộc cốt lõi khi khởi động. Khi bạn chọn một mô-đun cần thư viện bổ sung, ứng dụng sẽ nhắc cài các phụ thuộc tùy chọn còn thiếu (bạn cũng có thể bật tự động cài đặt trong phần cài đặt).
 
 # Cách sử dụng
 
 **Bạn nên chạy chương trình trong terminal trong trường hợp nó bị crashed và không để lại log, hãy xem gif sau.**
-<img src="./src/run.gif">
+<img src="https://github.com/user-attachments/assets/ee92fbdc-718c-4e04-a876-0eff3ee2a989">
 
 - Lần đầu tiên chạy ứng dụng, hãy chọn Chương trình dịch, cài Ngôn ngữ gốc và Ngôn ngữ dịch bằng cách nhấp vào biểu tượng Cài đặt.
 - Mở một thư mục chứa hình ảnh của truyện cần dịch (Manga/Manhua/Manhwa) bằng cách nhấp vào biểu tượng Thư mục.
 - Nhấp vào nút `Run` và chờ quá trình hoàn thành.
 
 Các định dạng phông chữ như kích thước và màu phông chữ được xác định tự động bởi chương trình, bạn có thể xác định trước các định dạng đó bằng cách thay đổi tùy chọn tương ứng từ "decide by program" sang "use global setting" trong Bảng cấu hình (Config Panel) -> Lettering. (Global setting, cấu hình toàn bộ, là những định dạng được hiển thị ở bảng định dạng phía bên phải màn hình, khi bạn đang không chỉnh sửa bất kỳ văn bản nào trong textblock).
+<img src="https://github.com/user-attachments/assets/fb8a8b2c-54e4-4579-8319-42a172296c80">
 
 ## Chỉnh sửa hình ảnh
 
 ### Inpaint Tool
-<img src="./src/imgedit_inpaint.gif">
+<img src="https://github.com/user-attachments/assets/de0bc35d-6651-4f2f-985c-cfe9bfafb124">
 <p align = "center">
 Chế độ Chỉnh sửa hình ảnh, Inpainting Tool
 </p>
 
 ### rect tool
-<img src="./src/rect_tool.gif">
+<img src="https://github.com/user-attachments/assets/6c47f46f-ffd3-41fd-b667-5442be304c79">
 <p align = "center">
 Chế độ Chỉnh sửa hình ảnh, Rect Tool
 </p>
@@ -156,17 +89,17 @@ Chế độ Chỉnh sửa hình ảnh, Rect Tool
 Kết quả sẽ phụ thuộc vào độ chính xác của thuật toán trích xuất ra text mask (lớp mask chữ) (theo "Phương pháp 1" và "Phương pháp 2" trong GIF). Nếu văn bản & nền phức tạp thì kết quả tách có thể chưa tốt lắm.
 
 ## Chỉnh sửa văn bản
-<img src="./src/textedit.gif">
+<img src="https://github.com/user-attachments/assets/0f688abe-41f7-416a-85c8-e0dd6968fd00">
 <p align = "center">
 Chế độ Chỉnh sửa văn bản
 </p>
 
-<img src="./src/multisel_autolayout.gif" div align=center>
+<img src="https://github.com/user-attachments/assets/6d31c8a5-b909-4339-8036-7fc3ba2f014c" div align=center>
 <p align=center>
 Định dạng văn bản hàng loạt & Bố cục tự động
 </p>
 
-<img src="./src/ocrselected.gif" div align=center>
+<img src="https://github.com/user-attachments/assets/1b76c164-1454-4aa7-b60c-9fbdb0968350" div align=center>
 <p align=center>
 OCR & Chỉ dịch văn bản đã chọn
 </p>
@@ -186,7 +119,7 @@ OCR & Chỉ dịch văn bản đã chọn
 * Trong chỉnh sửa văn bản: **bold** - ```Ctrl+B```, <u>underline</u> - ```Ctrl+U```, *italics* - ```Ctrl+I``` 
 * Cài đặt đổ bóng và độ trong suốt chữ ở text style panel -> Effect.  
   
-<img src="./src/configpanel.png">
+<img src="https://github.com/user-attachments/assets/084a250d-6a31-4344-94c0-2a5f4ba64b96">
 
 ## Headless mode (Run without GUI)
 ``` python
