@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.5.5-vibe.90`
+Fork release: `1.5.5-vibe.91`
 Upstream base: `BallonsTranslator 1.5.5`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -22,11 +22,12 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Kept the Vibe-specific archive import/export, batch processing, glossary, LLM review/refinement, re-inpaint, decensor, project upscaling, benchmark, OpenAI/Gemini/Ollama, and Pinokio launcher workflows during the upstream package migration.
 - Switched the launcher and Windows helper flow to a shared project virtual environment at `./env` instead of the old bundled `ballontrans_pylibs_win` runtime.
 - Pointed the built-in update flow at the `CoSciBlog/BallonsTranslator-vibe` fork on the `dev` branch.
-- Introduced a fork-aware application version scheme so this build is distinguishable from upstream releases, currently `1.5.5-vibe.90`.
+- Introduced a fork-aware application version scheme so this build is distinguishable from upstream releases, currently `1.5.5-vibe.91`.
 - Fixed the 1.5 settings startup path by restoring the missing Inpainter mask-filter checkbox expected by the configuration panel.
 - Fixed the 1.5 text-panel startup path by restoring the shared view-widget registration fallback.
 - Fixed additional 1.5 startup regressions in view registration, module parameter widgets, persisted config defaults, Decensor signal wiring, and migrated icon paths.
 - Moved Translation Benchmark into the Tools menu and expanded it into a persistent current-page benchmark model list with Google and DeepL comparison baselines.
+- Restored Vibe settings controls in the 1.5 package layout, including settings presets, module on-demand loading, and intermediate JPG/WEBP/JXL quality controls.
 - Replaced the mixed-language root `README.md` with the English documentation and refreshed the English README for this fork.
 - Documented that translated output and some documentation assets are machine-translated and should be disclosed as such when redistributed.
 - Fixed `manga_ocr` startup with current Transformers releases by using the image processor API required by the local `manga-ocr-base` vision model.
@@ -49,7 +50,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Added Batch Processing completion actions for shutting down, restarting, hibernating, sleeping, or running a custom command/program after a successful batch run.
 - Recovered complete LLM translation and glossary items from malformed or truncated JSON responses so Batch Processing, review passes, and glossary updates can continue when a local model emits a broken trailing item.
 - Coerced non-string LLM translation fields such as duplicate candidate lists into strings before validation, preventing review passes from failing on otherwise usable responses.
-- Added a Translation Benchmark window from the Run menu to compare current-page translations from multiple translators or LLM configurations side by side.
+- Added a Translation Benchmark window from the Tools menu to compare current-page translations from multiple translators or LLM configurations side by side.
 - Added an LLM model matrix benchmark for repeated `LLM_API_Translator` and `Two-Step Translator` runs across Ollama-style model lists.
 - Added saved Google/DeepL provider result fields to each text block so raw first-step drafts are persisted in the project JSON and shown through the labelled machine-draft field.
 - Fixed Two-Step Translator reflection so an enabled review pass receives JSON containing the original source, Google/DeepL draft, and LLM proposal; the sidebar now persists separate machine-draft and LLM-review fields with provenance labels.
@@ -292,6 +293,10 @@ The left sidebar Region Merge icon applies these persisted Post-merge mode, gap,
 
 The General settings page lets you choose the intermediate image format for project-local masks, inpainted pages, and other working images. Supported formats are `PNG`, `JPG`, `WEBP`, and `JXL`. Intermediate images have their own quality field, separate from the final result image quality, so cache size and working-image fidelity can be tuned independently.
 
+## Settings presets
+
+The General settings tree includes a Settings presets page for saving, applying, importing, and exporting reusable application settings snapshots. Imported presets are applied immediately and saved through the normal configuration path so module selections, image output formats, translator settings, and UI preferences can be repeated across installs.
+
 ## Page pipeline ignore
 
 The Pages sidebar now shows page previews for the project list. The centered window title shows the selected position and project size next to the active page name, for example `001/217 pages`. Right-click a page and choose `Ignore Page in Pipeline` to skip that page during text detection, OCR, translation, and inpainting runs. Ignored pages are lightly highlighted in the list and saved in the project's `imgtrans_*.json` file under `ignored_pages`. Use the same context menu entry again to include the page in pipeline runs.
@@ -334,7 +339,7 @@ For `LLM_API_Translator` and `Two-Step Translator`, the source-language list inc
 
 ## LLM model matrix benchmark
 
-The Translation Benchmark window in the Run menu can run an LLM model matrix on the current page. It tests `LLM_API_Translator`, `Two-Step Translator`, or both against multiple models, with repeated runs per model and optional warmup runs. This is useful for local Ollama models such as `translategemma:12b`, `translategemma:27b`, or `qwen3.5:9b`.
+The Translation Benchmark window in the Tools menu can run an LLM model matrix on the current page. It tests `LLM_API_Translator`, `Two-Step Translator`, or both against multiple models, with repeated runs per model and optional warmup runs. This is useful for local Ollama models such as `translategemma:12b`, `translategemma:27b`, or `qwen3.5:9b`.
 
 Benchmark output is written under `benchmarks/results/` as JSON, CSV, and a Markdown summary. The files include duration, success/failure, errors, request counts, JSON parse errors, retry and fallback counters, model name, provider, translator type, token counts when available, and Two-Step refinement timings when available. API keys are not written to the result files.
 

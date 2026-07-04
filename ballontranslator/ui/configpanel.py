@@ -5,13 +5,25 @@ from qtpy.QtWidgets import (
     QApplication, QPushButton, QLayout, QGridLayout, QHBoxLayout, QVBoxLayout,
     QTreeView, QWidget, QLabel, QSizePolicy, QSpacerItem, QCheckBox,
     QSplitter, QScrollArea, QLineEdit, QDialog, QStackedWidget, QMessageBox,
-    QListWidget, QSpinBox, QProgressDialog, QFileDialog, QListWidgetItem
+    QListWidget, QSpinBox, QProgressDialog, QFileDialog, QListWidgetItem,
+    QInputDialog
 )
 from qtpy.QtCore import Qt, Signal, QSize, QEvent, QItemSelection
 from qtpy.QtGui import QStandardItem, QStandardItemModel, QMouseEvent, QFont, QIntValidator, QValidator, QFocusEvent
 
 from .custom_widget import ConfigComboBox, Widget
-from ballontranslator.utils.config import pcfg
+from ballontranslator.utils.config import (
+    pcfg,
+    save_config,
+    export_program_config,
+    import_program_config,
+    list_config_presets,
+    save_config_preset,
+    load_config_preset,
+    import_config_preset,
+    export_config_preset,
+    CONFIG_PRESET_DIR,
+)
 from ballontranslator.utils.version import APP_VERSION
 from ballontranslator.utils.network_mirrors import (
     HUGGINGFACE_MIRROR_OPTIONS,
@@ -373,6 +385,7 @@ class ConfigPanel(QDialog):
         label_inpaint = self.tr('Inpainter')
         label_translator = self.tr('Translator')
         label_application = self.tr('Application')
+        label_settings_presets = self.tr('Settings presets')
         label_typesetting = self.tr('Typesetting')
         label_spellcheck = self.tr('Spell Checker')
 
@@ -381,6 +394,7 @@ class ConfigPanel(QDialog):
         ocrConfigPanel = self.addConfigBlock(label_text_ocr, moduleTableItem, 'ocr')
         inpaintConfigPanel = self.addConfigBlock(label_inpaint, moduleTableItem, 'inpainter')
         translatorConfigPanel = self.addConfigBlock(label_translator, moduleTableItem, 'translator')
+        settingsPresetConfigPanel = self.addConfigBlock(label_settings_presets, generalTableItem, 'settings_presets')
         applicationConfigPanel = self.addConfigBlock(label_application, generalTableItem, 'application')
         typesettingConfigPanel = self.addConfigBlock(label_typesetting, generalTableItem, 'typesetting')
         spellcheckConfigPanel = self.addConfigBlock(label_spellcheck, generalTableItem, 'spellcheck')
@@ -393,6 +407,12 @@ class ConfigPanel(QDialog):
             discription=self.tr('Install missing Python packages automatically when a selected module requires them.'),
         )
         self.package_auto_install_checker.stateChanged.connect(self.on_package_auto_install_changed)
+        moduleConfigPanel.vlayout.addWidget(msublock)
+        self.load_model_checker, msublock = checkbox_with_label(
+            self.tr('Load models on demand'),
+            discription=self.tr('Load selected module models only when they are used.'),
+        )
+        self.load_model_checker.stateChanged.connect(self.on_load_model_changed)
         moduleConfigPanel.vlayout.addWidget(msublock)
         module_actions = QWidget()
         module_actions_layout = QHBoxLayout(module_actions)
@@ -427,6 +447,51 @@ class ConfigPanel(QDialog):
         self.trans_config_panel = TranslatorConfigPanel(label_translator, scrollWidget=self)
         self.trans_config_panel.module_label.hide()
         self.trans_sub_block = translatorConfigPanel.addBlockWidget(self.trans_config_panel)
+
+        self.settings_preset_combobox, preset_sublock = settingsPresetConfigPanel.addCombobox(
+            [],
+            self.tr('Preset'),
+            discription=self.tr('Saved settings snapshots. Applying one replaces the current application settings.'),
+            fix_size=False,
+        )
+        self.settings_preset_combobox.setFixedWidth(CONFIG_COMBOBOX_LONG)
+
+        self.settings_apply_preset_btn = QPushButton(self.tr('Apply preset'), self)
+        self.settings_apply_preset_btn.setToolTip(self.tr('Load the selected settings preset into the current session.'))
+        self.settings_save_preset_btn = QPushButton(self.tr('Save current as preset'), self)
+        self.settings_save_preset_btn.setToolTip(self.tr('Save the current settings as a named reusable preset.'))
+        self.settings_import_preset_btn = QPushButton(self.tr('Import preset'), self)
+        self.settings_import_preset_btn.setToolTip(self.tr('Copy a settings preset JSON file into the local preset library.'))
+        self.settings_export_preset_btn = QPushButton(self.tr('Export selected preset'), self)
+        self.settings_export_preset_btn.setToolTip(self.tr('Export the selected preset to a JSON file.'))
+        self.settings_export_current_btn = QPushButton(self.tr('Export current settings'), self)
+        self.settings_export_current_btn.setToolTip(self.tr('Export the current settings directly to a JSON file.'))
+        self.settings_import_current_btn = QPushButton(self.tr('Import settings file'), self)
+        self.settings_import_current_btn.setToolTip(self.tr('Load a settings JSON file immediately without first saving it as a preset.'))
+
+        preset_buttons = QHBoxLayout()
+        preset_buttons.setContentsMargins(0, 0, 0, 0)
+        preset_buttons.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        for btn in [
+            self.settings_apply_preset_btn,
+            self.settings_save_preset_btn,
+            self.settings_import_preset_btn,
+            self.settings_export_preset_btn,
+            self.settings_export_current_btn,
+            self.settings_import_current_btn,
+        ]:
+            btn.setFixedHeight(PUSHBTN_FIXED_HEIGHT)
+            preset_buttons.addWidget(btn)
+        preset_buttons.addStretch()
+        preset_sublock.layout().addLayout(preset_buttons)
+
+        self.settings_apply_preset_btn.clicked.connect(self.on_apply_settings_preset)
+        self.settings_save_preset_btn.clicked.connect(self.on_save_settings_preset)
+        self.settings_import_preset_btn.clicked.connect(self.on_import_settings_preset)
+        self.settings_export_preset_btn.clicked.connect(self.on_export_settings_preset)
+        self.settings_export_current_btn.clicked.connect(self.on_export_current_settings)
+        self.settings_import_current_btn.clicked.connect(self.on_import_current_settings)
+        self.refresh_settings_presets()
 
         self.open_on_startup_checker, _ = applicationConfigPanel.addCheckBox(self.tr('Reopen last project on startup'))
         self.open_on_startup_checker.stateChanged.connect(self.on_open_onstartup_changed)
@@ -620,8 +685,16 @@ class ConfigPanel(QDialog):
         sublock.layout().insertStretch(-1)
         imsave_sublock.layout().addWidget(sublock)
 
-        self.intermediate_imgformat_combobox, intermediate_imsave_sublock = applicationConfigPanel.addCombobox(['PNG', 'JXL'], self.tr('Intermediate image format'))
+        self.intermediate_imgformat_combobox, intermediate_imsave_sublock = applicationConfigPanel.addCombobox(['PNG', 'JPG', 'WEBP', 'JXL'], self.tr('Intermediate image format'))
         self.intermediate_imgformat_combobox.activated.connect(self.on_intermediate_imgformat_changed)
+        self.intermediate_imgquality_edit = PercentageLineEdit('100')
+        self.intermediate_imgquality_edit.setFixedWidth(CONFIG_COMBOBOX_SHORT)
+        self.intermediate_imgquality_edit.finish_edited.connect(self.on_intermediate_quality_changed)
+
+        sublock = ConfigSubBlock(self.intermediate_imgquality_edit, self.tr('Quality'), vertical_layout=False)
+        sublock.layout().setAlignment(Qt.AlignmentFlag.AlignLeft)
+        sublock.layout().insertStretch(-1)
+        intermediate_imsave_sublock.layout().addWidget(sublock)
 
         splitter = QSplitter(Qt.Orientation.Horizontal)
         splitter.addWidget(self.configTable)
@@ -642,6 +715,9 @@ class ConfigPanel(QDialog):
 
     def on_package_auto_install_changed(self):
         pcfg.package_manager.auto_install_missing_packages = self.package_auto_install_checker.isChecked()
+
+    def on_load_model_changed(self):
+        pcfg.module.load_model_on_demand = self.load_model_checker.isChecked()
 
     def on_keepline_clicked(self):
         pcfg.module.keep_exist_textlines = self.detect_config_panel.keep_existing_checker.isChecked()
@@ -675,6 +751,95 @@ class ConfigPanel(QDialog):
 
     def on_check_update_onstartup_changed(self):
         pcfg.check_update_on_startup = self.check_update_on_startup_checker.isChecked()
+
+    def refresh_settings_presets(self, selected: str = None):
+        current = selected or self.settings_preset_combobox.currentText()
+        self.settings_preset_combobox.blockSignals(True)
+        self.settings_preset_combobox.clear()
+        presets = list_config_presets()
+        self.settings_preset_combobox.addItems(presets)
+        if current in presets:
+            self.settings_preset_combobox.setCurrentText(current)
+        self.settings_preset_combobox.blockSignals(False)
+        has_presets = len(presets) > 0
+        self.settings_apply_preset_btn.setEnabled(has_presets)
+        self.settings_export_preset_btn.setEnabled(has_presets)
+
+    def _apply_imported_config(self, config, source_label: str):
+        pcfg.merge(config)
+        save_config()
+        self.setupConfig()
+        self.settings_imported.emit()
+        QMessageBox.information(self, self.tr('Settings'), self.tr('Settings loaded from ') + source_label)
+
+    def on_apply_settings_preset(self):
+        preset_name = self.settings_preset_combobox.currentText()
+        if not preset_name:
+            return
+        try:
+            self._apply_imported_config(load_config_preset(preset_name), preset_name)
+        except Exception as e:
+            QMessageBox.warning(self, self.tr('Settings'), self.tr('Failed to load settings preset: ') + str(e))
+
+    def on_save_settings_preset(self):
+        preset_name, ok = QInputDialog.getText(self, self.tr('Settings preset'), self.tr('Preset name'))
+        if not ok or not preset_name.strip():
+            return
+        try:
+            preset_path = save_config_preset(preset_name)
+            selected = os.path.splitext(os.path.basename(preset_path))[0]
+            self.refresh_settings_presets(selected)
+            QMessageBox.information(self, self.tr('Settings'), self.tr('Settings preset saved.'))
+        except Exception as e:
+            QMessageBox.warning(self, self.tr('Settings'), self.tr('Failed to save settings preset: ') + str(e))
+
+    def on_import_settings_preset(self):
+        path, _ = QFileDialog.getOpenFileName(self, self.tr('Import settings preset'), CONFIG_PRESET_DIR, self.tr('JSON Files (*.json)'))
+        if not path:
+            return
+        try:
+            preset_name = import_config_preset(path)
+            self.refresh_settings_presets(preset_name)
+            QMessageBox.information(self, self.tr('Settings'), self.tr('Settings preset imported.'))
+        except Exception as e:
+            QMessageBox.warning(self, self.tr('Settings'), self.tr('Failed to import settings preset: ') + str(e))
+
+    def on_export_settings_preset(self):
+        preset_name = self.settings_preset_combobox.currentText()
+        if not preset_name:
+            return
+        path, _ = QFileDialog.getSaveFileName(self, self.tr('Export settings preset'), preset_name + '.json', self.tr('JSON Files (*.json)'))
+        if not path:
+            return
+        if not path.lower().endswith('.json'):
+            path += '.json'
+        try:
+            if export_config_preset(preset_name, path):
+                QMessageBox.information(self, self.tr('Settings'), self.tr('Settings preset exported.'))
+            else:
+                QMessageBox.warning(self, self.tr('Settings'), self.tr('Failed to export settings preset.'))
+        except Exception as e:
+            QMessageBox.warning(self, self.tr('Settings'), self.tr('Failed to export settings preset: ') + str(e))
+
+    def on_export_current_settings(self):
+        path, _ = QFileDialog.getSaveFileName(self, self.tr('Export current settings'), 'ballonstranslator-settings.json', self.tr('JSON Files (*.json)'))
+        if not path:
+            return
+        if not path.lower().endswith('.json'):
+            path += '.json'
+        if export_program_config(path):
+            QMessageBox.information(self, self.tr('Settings'), self.tr('Settings exported.'))
+        else:
+            QMessageBox.warning(self, self.tr('Settings'), self.tr('Failed to export settings.'))
+
+    def on_import_current_settings(self):
+        path, _ = QFileDialog.getOpenFileName(self, self.tr('Import settings file'), CONFIG_PRESET_DIR, self.tr('JSON Files (*.json)'))
+        if not path:
+            return
+        try:
+            self._apply_imported_config(import_program_config(path), path)
+        except Exception as e:
+            QMessageBox.warning(self, self.tr('Settings'), self.tr('Failed to import settings: ') + str(e))
 
     def on_spellcheck_changed(self):
         enabled = self.spellcheck_checker.isChecked()
@@ -868,6 +1033,9 @@ class ConfigPanel(QDialog):
     def on_edit_quality_changed(self, value: str):
         pcfg.imgsave_quality = int(value)
 
+    def on_intermediate_quality_changed(self, value: str):
+        pcfg.intermediate_imgsave_quality = int(value)
+
     def on_fontcolor_flag_changed(self):
         pcfg.let_fntcolor_flag = self.let_fntcolor_combox.currentIndex()
 
@@ -1057,8 +1225,11 @@ class ConfigPanel(QDialog):
         self.rst_imgformat_combobox.setCurrentText(pcfg.imgsave_ext.replace('.', '').upper())
         self.intermediate_imgformat_combobox.setCurrentText(pcfg.intermediate_imgsave_ext.replace('.', '').upper())
         self.rst_imgquality_edit.setText(str(pcfg.imgsave_quality))
+        self.intermediate_imgquality_edit.setText(str(pcfg.intermediate_imgsave_quality))
         self.empty_runcache_checker.setChecked(pcfg.module.empty_runcache)
         self.package_auto_install_checker.setChecked(pcfg.package_manager.auto_install_missing_packages)
+        self.load_model_checker.setChecked(pcfg.module.load_model_on_demand)
         self.let_show_only_custom_fonts.setChecked(pcfg.let_show_only_custom_fonts_flag)
+        self.refresh_settings_presets()
 
         self.blockSignals(False)
