@@ -19,6 +19,7 @@
 - Bumped the fork runtime version string to `1.5.5-vibe.93`.
 - Bumped the fork runtime version string to `1.5.5-vibe.94`.
 - Bumped the fork runtime version string to `1.5.5-vibe.95`.
+- Bumped the fork runtime version string to `1.5.5-vibe.96`.
 
 ### Added
 - `Auto` source-language selection for the legacy `ChatGPT` and `ChatGPT_exp` translators, matching the LLM translator auto-detect source flow while keeping `Auto` out of target-language selectors.
@@ -55,6 +56,7 @@
 - Settings layout now uses wrapping labels, responsive module parameter fields, and bounded prompt editors to prevent long translator prompts and controls from stretching or dominating the settings pane.
 - Fixed Settings parameter label row heights so wrapped or measured labels do not overlap adjacent OCR controls such as `beam size`.
 - Fixed the Settings parameter-grid row index used while disabling GPU-only `device` options on CPU systems, preventing `device` from overlapping the following `beam size` row.
+- Hardened Settings parameter-grid row placement by using explicit row indices and updated long module checkbox rows to render as a left checkbox with wrapping label text.
 - Direct `.pdf` comic import from the Open menu, drag-and-drop, recent projects, and `--proj-dir`.
 - Multi-PDF import from the Open menu and drag-and-drop, combining selected PDFs into one ordered image project.
 - Source-folder import from `Open -> Import Folder` and drag-and-drop for folders containing `.cbr`, `.cbz`, `.zip`, `.pdf`, and nested image files.

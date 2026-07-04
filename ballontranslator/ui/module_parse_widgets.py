@@ -133,10 +133,14 @@ class ParamCheckerBox(QWidget):
         self.checker = QCheckBox()
         name_label = ParamNameLabel(param_key)
         self.name_label = name_label
+        self.name_label.setWordWrap(True)
+        self.name_label.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
         hlayout = QHBoxLayout(self)
-        hlayout.addWidget(name_label)
+        hlayout.setContentsMargins(0, 0, 0, 0)
+        hlayout.setSpacing(8)
         hlayout.addWidget(self.checker)
-        hlayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        hlayout.addWidget(name_label, 1)
+        hlayout.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
         self.checker.stateChanged.connect(self.on_checker_changed)
 
     def on_checker_changed(self):
@@ -201,7 +205,7 @@ class ParamWidget(QWidget):
         if 'description' in params:
             self.setToolTip(wrap_tooltip(params['description']))
 
-        for ii, param_key in enumerate(params):
+        for row_idx, param_key in enumerate(params):
             if param_key == 'description' or param_key.startswith('__'):
                 continue
             display_param_name = param_key
@@ -303,7 +307,7 @@ class ParamWidget(QWidget):
                 label_align = Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop
                 if param_widget is not None and not isinstance(param_widget, QPlainTextEdit):
                     label_align = Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
-                param_layout.addWidget(param_label, ii, 0, label_align)
+                param_layout.addWidget(param_label, row_idx, 0, label_align)
                 widget_idx = 1
             if param_widget is not None:
                 pw_lo = None
@@ -322,9 +326,9 @@ class ParamWidget(QWidget):
                     reset_btn.setFixedHeight(32)
                     pw_lo.addWidget(reset_btn, 0, Qt.AlignmentFlag.AlignTop)
                 if pw_lo is None:
-                    param_layout.addWidget(param_widget, ii, widget_idx)
+                    param_layout.addWidget(param_widget, row_idx, widget_idx)
                 else:
-                    param_layout.addLayout(pw_lo, ii, widget_idx)
+                    param_layout.addLayout(pw_lo, row_idx, widget_idx)
             else:
                 v = params[param_key]
                 raise ValueError(f"Failed to initialize widget for key-value pair: {param_key}-{v}")
