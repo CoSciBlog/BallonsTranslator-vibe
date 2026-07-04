@@ -574,6 +574,10 @@ class TitleBar(Widget):
         modelDownloadsAction = QAction(self.tr('Model Downloads'), self)
         modelDownloadsAction.setToolTip(self.tr('Download optional or missing local OCR, detection, inpainting, and translator model files.'))
         self.model_downloads_trigger = modelDownloadsAction.triggered
+
+        translationBenchmarkAction = QAction(self.tr('Translation Benchmark'), self)
+        translationBenchmarkAction.setToolTip(self.tr('Benchmark the current page with configured LLM models plus Google or DeepL baselines.'))
+        self.translation_benchmark_trigger = translationBenchmarkAction.triggered
         
         toolsMenu = QMenu(self.toolsToolBtn)
         toolsMenu.addAction(mergeToolAction)
@@ -585,6 +589,7 @@ class TitleBar(Widget):
         toolsMenu.addAction(batchUpscaleFoldersAction)
         toolsMenu.addAction(removeMasksAction)
         toolsMenu.addSeparator()
+        toolsMenu.addAction(translationBenchmarkAction)
         toolsMenu.addAction(modelDownloadsAction)
         self.toolsToolBtn.setMenu(toolsMenu)
         self.toolsToolBtn.setPopupMode(QToolButton.InstantPopup)
@@ -632,11 +637,9 @@ class TitleBar(Widget):
         glossScanAction = QAction(self.tr('Gloss Scan Current Manga'), self)
         reviewCurrentPageAction = QAction(self.tr('Review Current Page'), self)
         reviewAllPagesAction = QAction(self.tr('Review All Pages'), self)
-        translationBenchmarkAction = QAction(self.tr('Translation Benchmark'), self)
         glossScanAction.setToolTip(self.tr('Detect text and run OCR on the current manga, then build a reusable glossary without translation or inpainting.'))
         reviewCurrentPageAction.setToolTip(self.tr('Review and correct existing translations on the current page with the active LLM translator settings.'))
         reviewAllPagesAction.setToolTip(self.tr('Review and correct existing translations on all non-ignored pages with the active LLM translator settings.'))
-        translationBenchmarkAction.setToolTip(self.tr('Compare the current page translation with multiple translators or LLM configurations in a side-by-side table.'))
         runMenu = QMenu(self.runToolBtn)
         runMenu.addActions(stageActions)
         runMenu.addSeparator()
@@ -646,7 +649,7 @@ class TitleBar(Widget):
         runMenu.addSeparator()
         runMenu.addAction(glossScanAction)
         runMenu.addSeparator()
-        runMenu.addActions([reviewCurrentPageAction, reviewAllPagesAction, translationBenchmarkAction])
+        runMenu.addActions([reviewCurrentPageAction, reviewAllPagesAction])
         self.runToolBtn.setMenu(runMenu)
         self.runToolBtn.setPopupMode(QToolButton.InstantPopup)
         self.run_trigger = runAction.triggered
@@ -655,7 +658,6 @@ class TitleBar(Widget):
         self.gloss_scan_trigger = glossScanAction.triggered
         self.review_current_page_trigger = reviewCurrentPageAction.triggered
         self.review_all_pages_trigger = reviewAllPagesAction.triggered
-        self.translation_benchmark_trigger = translationBenchmarkAction.triggered
 
         self.iconLabel = QLabel(self)
         if not C.ON_MACOS:

@@ -13,6 +13,7 @@
 - Bumped the fork runtime version string to `1.5.5-vibe.87`.
 - Bumped the fork runtime version string to `1.5.5-vibe.88`.
 - Bumped the fork runtime version string to `1.5.5-vibe.89`.
+- Bumped the fork runtime version string to `1.5.5-vibe.90`.
 
 ### Added
 - `Auto` source-language selection for the legacy `ChatGPT` and `ChatGPT_exp` translators, matching the LLM translator auto-detect source flow while keeping `Auto` out of target-language selectors.
@@ -36,6 +37,10 @@
 - Optional Batch Processing Re-Inpaint step that reapplies saved text and censor masks to finished project pages before export.
 - Batch Processing completion actions for doing nothing, shutting down, restarting, hibernating, sleeping, or running a custom command/program after a successful batch run.
 - LLM `review speed mode` for separate glossary correction, combined reflection/glossary checking, or reduced optional review requests.
+- Translation Benchmark now lives in the Tools menu and uses the current page's source text for persistent, sequential benchmark profiles.
+- Translation Benchmark profiles can be added, edited, duplicated, and removed through a modal model dialog and are saved in `config/translation_benchmark.json`.
+- Translation Benchmark profiles support per-model settings for LLM translator type, provider, endpoint, model, per-block translation, reasoning, temperature, top p, frequency penalty, presence penalty, system prompt, and request prompt.
+- Translation Benchmark can include Google and DeepL baseline translations beside configured LLM model results.
 - Direct `.pdf` comic import from the Open menu, drag-and-drop, recent projects, and `--proj-dir`.
 - Multi-PDF import from the Open menu and drag-and-drop, combining selected PDFs into one ordered image project.
 - Source-folder import from `Open -> Import Folder` and drag-and-drop for folders containing `.cbr`, `.cbz`, `.zip`, `.pdf`, and nested image files.
