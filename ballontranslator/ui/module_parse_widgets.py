@@ -10,7 +10,7 @@ from utils.shared import CONFIG_COMBOBOX_LONG, size2width, CONFIG_COMBOBOX_SHORT
 from utils.config import pcfg, sample_module_param_value
 
 from qtpy.QtWidgets import QPlainTextEdit, QHBoxLayout, QVBoxLayout, QWidget, QLabel, QCheckBox, QLineEdit, QGridLayout, QPushButton, QSizePolicy
-from qtpy.QtCore import Qt, Signal
+from qtpy.QtCore import Qt, Signal, QRect
 from qtpy.QtGui import QDoubleValidator
 
 
@@ -23,6 +23,15 @@ CONFIG_FIELD_WIDE = int(CONFIG_COMBOBOX_LONG * 1.45)
 CONFIG_EDITOR_HEIGHT = 170
 CONFIG_EDITOR_COMPACT_HEIGHT = 110
 CONFIG_PARAM_LABEL_WIDTH = 260
+
+
+def wrapped_label_height(label: QLabel, width: int) -> int:
+    rect = label.fontMetrics().boundingRect(
+        QRect(0, 0, width, 1000),
+        Qt.TextFlag.TextWordWrap,
+        label.text(),
+    )
+    return max(CONFIG_COMBOBOX_HEIGHT + 8, rect.height() + 8)
 
 
 def param_key_uses_wide_field(param_key: str) -> bool:
@@ -288,6 +297,7 @@ class ParamWidget(QWidget):
                 param_label.setWordWrap(True)
                 param_label.setMinimumWidth(CONFIG_PARAM_LABEL_WIDTH)
                 param_label.setMaximumWidth(CONFIG_PARAM_LABEL_WIDTH)
+                param_label.setMinimumHeight(wrapped_label_height(param_label, CONFIG_PARAM_LABEL_WIDTH))
                 if tooltip:
                     param_label.setToolTip(tooltip)
                 label_align = Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop
