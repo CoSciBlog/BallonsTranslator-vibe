@@ -10,9 +10,9 @@
 - Updated Pinokio and Windows launchers for the new package layout and removed dependencies on the deleted `scripts/launch_step.py` and `tools/runtime_manager.py` paths.
 - Added compatibility aliases for legacy `utils`, `modules`, and `ui` imports so migrated Vibe modules continue to load during the package transition.
 - Bumped the fork runtime version string to `1.5.5-vibe.86`.
+- Bumped the fork runtime version string to `1.5.5-vibe.87`.
 
 ### Added
-
 - `Auto` source-language selection for the legacy `ChatGPT` and `ChatGPT_exp` translators, matching the LLM translator auto-detect source flow while keeping `Auto` out of target-language selectors.
 - Newer OpenAI model options for the `ChatGPT`, `ChatGPT_exp`, `LLM_API_Translator`, and `LLM_API_Translator_2` selectors, including `gpt-5.5`, `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano`, and the `gpt-4.1` family.
 - Explicit `Gemini` provider option for `LLM_API_Translator` and `LLM_API_Translator_2`, using Google's OpenAI-compatible Gemini endpoint for translation.
@@ -160,6 +160,7 @@
 
 ### Fixed
 
+- Restored the Inpainter settings checkbox for filtering inpaint masks by detected text boxes after the 1.5 settings-panel migration.
 - Post-translation LLM review now keeps the existing draft translations for a chunk when an API timeout or retryable provider error occurs, preventing optional review failures from aborting an otherwise completed translation pipeline.
 - Reloaded a `lama_large_512px` model if it is unloaded between preprocessing and inference instead of attempting to call `None`.
 - Retried OCR with the configured batch fallback backend when the selected backend recognizes no text.

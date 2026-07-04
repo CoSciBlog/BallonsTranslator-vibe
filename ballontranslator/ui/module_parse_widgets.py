@@ -494,6 +494,9 @@ class InpaintConfigPanel(ModuleConfigParseWidget):
         self.needInpaintChecker.setToolTip(self.tr('When enabled, the app decides per region whether inpainting is needed before rendering translated text.'))
         self.needInpaintChecker.name_label.setToolTip(self.needInpaintChecker.toolTip())
         self.vlayout.addWidget(self.needInpaintChecker)
+        self.filter_mask_by_bboxes_checker = QCheckBox(self.tr('Filter inpaint mask by text boxes'))
+        self.filter_mask_by_bboxes_checker.setToolTip(self.tr('Limit the inpaint mask to detected text-box regions before running the inpainter.'))
+        self.vlayout.addWidget(self.filter_mask_by_bboxes_checker)
 
     def showEvent(self, e) -> None:
         self.p_layout.insertWidget(1, self.module_combobox)

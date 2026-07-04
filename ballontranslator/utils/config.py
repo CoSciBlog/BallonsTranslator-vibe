@@ -49,6 +49,7 @@ class ModuleConfig(Config):
     pronoun_review_after_translation: bool = False
 
     check_need_inpaint: bool = True
+    filter_mask_by_bboxes: bool = False
     load_model_on_demand: bool = False
     empty_runcache: bool = False
     finish_code: int = 15
