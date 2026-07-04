@@ -345,6 +345,7 @@ class ConfigPanel(QDialog):
     unload_models = Signal()
     prepare_selected_modules = Signal()
     check_update = Signal()
+    settings_imported = Signal()
     reload_textstyle = Signal(bool)
     show_only_custom_font = Signal(bool)
 

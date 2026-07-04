@@ -360,7 +360,7 @@ class ModuleConfigParseWidget(QWidget):
         self.visibleWidget: QWidget = None
         self.module_dict: dict = {}
 
-    def addModulesParamWidgets(self, module_dict: dict):
+    def addModulesParamWidgets(self, module_dict: dict, current_module: str = None):
         invalid_module_keys = []
         valid_modulekeys = self.get_valid_module_keys()
 
@@ -389,6 +389,8 @@ class ModuleConfigParseWidget(QWidget):
 
         num_widgets_after = len(self.param_widget_map)
         if num_widgets_before == 0 and num_widgets_after > 0:
+            if current_module in self.param_widget_map:
+                self.module_combobox.setCurrentText(current_module)
             self.on_module_changed()
             self.module_combobox.currentTextChanged.connect(self.on_module_changed)
 

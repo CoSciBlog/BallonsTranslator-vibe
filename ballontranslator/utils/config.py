@@ -126,10 +126,26 @@ class DrawPanelConfig(Config):
     show_translated_text: bool = False
 
 @nested_dataclass
+class MirrorConfig(Config):
+    huggingface: str = None
+    pypi: str = None
+
+
+@nested_dataclass
+class PackageManagerConfig(Config):
+    installer_backend: str = 'pip'
+    extra_install_args: List = field(default_factory=lambda: list())
+    auto_install_missing_packages: bool = False
+    package_import_names: Dict = field(default_factory=lambda: dict())
+
+
+@nested_dataclass
 class ProgramConfig(Config):
 
     module: ModuleConfig = field(default_factory=lambda: ModuleConfig())
     drawpanel: DrawPanelConfig = field(default_factory=lambda: DrawPanelConfig())
+    mirrors: MirrorConfig = field(default_factory=lambda: MirrorConfig())
+    package_manager: PackageManagerConfig = field(default_factory=lambda: PackageManagerConfig())
     global_fontformat: FontFormat = field(default_factory=lambda: FontFormat())
     recent_proj_list: List = field(default_factory=lambda: list())
     show_page_list: bool = False
@@ -139,6 +155,12 @@ class ProgramConfig(Config):
     mask_transparency: float = 0.
     original_transparency: float = 0.
     open_recent_on_startup: bool = True 
+    check_update_on_startup: bool = True
+    spellcheck_enabled: bool = False
+    spellcheck_on_source_enabled: bool = False
+    spellcheck_distance: int = 1
+    spellcheck_repo_dicts: str = ''
+    spellcheck_external_dict_path: str = ''
 
     let_fntsize_flag: int = 0
     let_fntstroke_flag: int = 0

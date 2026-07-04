@@ -183,4 +183,4 @@ def dump_cache():
 
 config_name_to_view_widget = {}
 action_to_view_config_name = {}
-register_view_widget: lambda *args, **kwargs: None
+register_view_widget = lambda *args, **kwargs: None

@@ -11,6 +11,8 @@
 - Added compatibility aliases for legacy `utils`, `modules`, and `ui` imports so migrated Vibe modules continue to load during the package transition.
 - Bumped the fork runtime version string to `1.5.5-vibe.86`.
 - Bumped the fork runtime version string to `1.5.5-vibe.87`.
+- Bumped the fork runtime version string to `1.5.5-vibe.88`.
+- Bumped the fork runtime version string to `1.5.5-vibe.89`.
 
 ### Added
 - `Auto` source-language selection for the legacy `ChatGPT` and `ChatGPT_exp` translators, matching the LLM translator auto-detect source flow while keeping `Auto` out of target-language selectors.
@@ -161,6 +163,11 @@
 ### Fixed
 
 - Restored the Inpainter settings checkbox for filtering inpaint masks by detected text boxes after the 1.5 settings-panel migration.
+- Restored the shared view-widget registration fallback so text-style panels can initialize before `MainWindow` replaces the callback.
+- Restored module-parameter widget compatibility with saved module selections during settings initialization.
+- Restored missing persistent config defaults for update checks, spell checking, network mirrors, and package-manager settings.
+- Restored Decensor pipeline signal wiring and manager entry point after the 1.5 module-manager merge.
+- Updated Vibe toolbar icon paths for the migrated `resources/icons` layout.
 - Post-translation LLM review now keeps the existing draft translations for a chunk when an API timeout or retryable provider error occurs, preventing optional review failures from aborting an otherwise completed translation pipeline.
 - Reloaded a `lama_large_512px` model if it is unloaded between preprocessing and inference instead of attempting to call `None`.
 - Retried OCR with the configured batch fallback backend when the selected backend recognizes no text.

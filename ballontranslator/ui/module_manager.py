@@ -31,6 +31,11 @@ from ballontranslator.utils.py_package_manager import (
     MissingModuleRequirements,
     collect_missing_module_requirements,
 )
+from ballontranslator.utils.decensor import (
+    build_decensor_mask,
+    select_decensor_input_image,
+    write_decensor_debug_outputs,
+)
 from .custom_widget import ImgtransProgressMessageBox, ParamComboBox, ProgressMessageBox
 from .configpanel import ConfigPanel
 from ballontranslator.utils.proj_imgtrans import ProjImgTrans
@@ -879,6 +884,7 @@ class ModuleManager(QObject):
     imgtrans_pipeline_finished = Signal()
     blktrans_pipeline_finished = Signal(int, list)
     page_trans_finished = Signal(int)
+    page_decensor_finished = Signal(int)
     module_selection_changed = Signal(str, str)
 
     run_canvas_inpaint = False
@@ -1629,6 +1635,64 @@ class ModuleManager(QObject):
         self.progress_msgbox.zero_progress()
         self.progress_msgbox.show_fitted()
         self.imgtrans_thread.runImgtransPipeline(self.imgtrans_proj, pages_to_process)
+
+    def runDecensorPipeline(self, pages_to_process=None):
+        self._prepare_modules_then(
+            [('inpainter', cfg_module.inpainter)],
+            lambda: self._runDecensorPipeline(pages_to_process),
+        )
+
+    def _runDecensorPipeline(self, pages_to_process=None):
+        """Detect censor masks, inpaint them, and save per-page decensor outputs.
+
+        Example:
+            >>> hasattr(ModuleManager, 'runDecensorPipeline')
+            True
+        """
+        if self.prepare_msgbox is not None and self.prepare_msgbox.isVisible():
+            self.prepare_msgbox.done(0)
+        if self.imgtrans_proj is None or self.imgtrans_proj.is_empty:
+            return
+        if pages_to_process is None:
+            pages_to_process = self.imgtrans_proj.pipeline_pages(skip_ignored=True)
+        pages_to_process = [p for p in pages_to_process if p in self.imgtrans_proj.pages]
+        if len(pages_to_process) == 0:
+            return
+
+        self.progress_msgbox.hide_all_bars()
+        self.progress_msgbox.decensor_bar.show()
+        self.progress_msgbox.zero_progress()
+        self.progress_msgbox.show_fitted()
+        total = len(pages_to_process)
+        for idx, page_name in enumerate(pages_to_process, start=1):
+            self.progress_msgbox.updateDecensorProgress(int((idx - 1) / total * 100), page_name)
+            try:
+                img, source_name = select_decensor_input_image(self.imgtrans_proj, page_name)
+                result = build_decensor_mask(
+                    img,
+                    mode=pcfg.decensor_mask_mode,
+                    dilate=pcfg.decensor_mask_dilate,
+                    min_area_ratio=pcfg.decensor_min_area_ratio,
+                    return_debug=pcfg.decensor_save_debug_masks,
+                )
+                if pcfg.decensor_save_debug_masks:
+                    mask, _mode, debug = result
+                    debug_dir = osp.join(self.imgtrans_proj.decensor_mask_dir(), '_debug', osp.splitext(page_name)[0])
+                    write_decensor_debug_outputs(debug_dir, debug, img, mask)
+                else:
+                    mask, _mode = result
+                self.imgtrans_proj.save_decensor_mask(page_name, mask)
+                if np.any(mask > 0):
+                    decensored = self.inpaint_thread.inpainter.inpaint(img, mask)
+                else:
+                    decensored = img.copy()
+                self.imgtrans_proj.save_decensored(page_name, decensored)
+                self.page_decensor_finished.emit(self.imgtrans_proj.pagename2idx(page_name))
+                LOGGER.info(f'Censor Restoration finished for {page_name} from {source_name}')
+            except Exception:
+                LOGGER.warning(f'Censor Restoration failed for {page_name}.', exc_info=True)
+        self.progress_msgbox.updateDecensorProgress(100)
+        self.progress_msgbox.hide()
     
     def stopImgtransPipeline(self):
         """停止图像翻译流程"""

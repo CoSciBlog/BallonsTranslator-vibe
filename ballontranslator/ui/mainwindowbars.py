@@ -8,6 +8,7 @@ from qtpy.QtGui import QMouseEvent, QKeySequence, QActionGroup, QIcon
 
 from modules.translators import BaseTranslator, lang_display_label
 from .custom_widget import Widget, PaintQSlider, SmallComboBox, ConfigClickableLabel
+from .misc import themed_icon_path
 from utils.shared import TITLEBAR_HEIGHT, WINDOW_BORDER_WIDTH, BOTTOMBAR_HEIGHT, LEFTBAR_WIDTH, LEFTBTN_WIDTH
 from .framelesswindow import FramelessMoveResize
 from utils.config import pcfg
@@ -181,7 +182,7 @@ class LeftBar(Widget):
         self.runTranslateBtn.setObjectName('RunButton')
         self.runTranslateBtn.setText(self.tr('Trans'))
         self.runTranslateBtn.setToolTip(self.tr('Translate only: run translation on existing text boxes without text detection, OCR, or inpainting.'))
-        self.runTranslateBtn.setIcon(QIcon('icons/bottombar_translate.svg'))
+        self.runTranslateBtn.setIcon(QIcon(themed_icon_path('bottombar_translate.svg')))
         self.runTranslateBtn.setIconSize(QSize(17, 17))
         font = self.runTranslateBtn.font()
         font.setPixelSize(9)
@@ -195,7 +196,7 @@ class LeftBar(Widget):
         self.glossaryBtn.setObjectName('RunButton')
         self.glossaryBtn.setAccessibleName(self.tr('Glossary'))
         self.glossaryBtn.setToolTip(self.tr('Glossary: open the current project glossary.'))
-        self.glossaryBtn.setIcon(QIcon('icons/leftbar_glossary.svg'))
+        self.glossaryBtn.setIcon(QIcon(themed_icon_path('leftbar_glossary.svg')))
         self.glossaryBtn.setIconSize(utility_icon_size)
         self.glossaryBtn.setFixedSize(LEFTBTN_WIDTH, LEFTBTN_WIDTH)
         self.glossaryBtn.clicked.connect(self.glossary_clicked)
@@ -204,7 +205,7 @@ class LeftBar(Widget):
         self.runRegionMergeBtn.setObjectName('RunButton')
         self.runRegionMergeBtn.setAccessibleName(self.tr('Merge nearby text boxes'))
         self.runRegionMergeBtn.setToolTip(self.tr('Merge nearby text boxes on the current page using the configured Post-merge settings.'))
-        self.runRegionMergeBtn.setIcon(QIcon('icons/leftbar_merge.svg'))
+        self.runRegionMergeBtn.setIcon(QIcon(themed_icon_path('leftbar_merge.svg')))
         self.runRegionMergeBtn.setIconSize(utility_icon_size)
         font = self.runRegionMergeBtn.font()
         font.setPixelSize(8)
@@ -216,7 +217,7 @@ class LeftBar(Widget):
         self.runDecensorBtn.setObjectName('RunButton')
         self.runDecensorBtn.setAccessibleName(self.tr('Censor Restoration'))
         self.runDecensorBtn.setToolTip(self.tr('Censor Restoration: detect censored regions on the current page and repair them with inpainting.'))
-        self.runDecensorBtn.setIcon(QIcon('icons/leftbar_decensor.svg'))
+        self.runDecensorBtn.setIcon(QIcon(themed_icon_path('leftbar_decensor.svg')))
         self.runDecensorBtn.setIconSize(utility_icon_size)
         font = self.runDecensorBtn.font()
         font.setPixelSize(10)
@@ -228,7 +229,7 @@ class LeftBar(Widget):
         self.runReInpaintBtn.setObjectName('RunButton')
         self.runReInpaintBtn.setAccessibleName(self.tr('Re-run Inpainting'))
         self.runReInpaintBtn.setToolTip(self.tr('Re-run Inpainting: apply all existing inpaint masks again on the current page.'))
-        self.runReInpaintBtn.setIcon(QIcon('icons/leftbar_reinpaint.svg'))
+        self.runReInpaintBtn.setIcon(QIcon(themed_icon_path('leftbar_reinpaint.svg')))
         self.runReInpaintBtn.setIconSize(utility_icon_size)
         font = self.runReInpaintBtn.font()
         font.setPixelSize(10)
@@ -240,7 +241,7 @@ class LeftBar(Widget):
         self.runInpaintOptimizeBtn.setObjectName('RunButton')
         self.runInpaintOptimizeBtn.setAccessibleName(self.tr('Optimize Inpainting'))
         self.runInpaintOptimizeBtn.setToolTip(self.tr('Optimize Inpainting: detect leftover text on the current inpainted page and repair it again.'))
-        self.runInpaintOptimizeBtn.setIcon(QIcon('icons/leftbar_optimize.svg'))
+        self.runInpaintOptimizeBtn.setIcon(QIcon(themed_icon_path('leftbar_optimize.svg')))
         self.runInpaintOptimizeBtn.setIconSize(utility_icon_size)
         font = self.runInpaintOptimizeBtn.font()
         font.setPixelSize(10)
@@ -252,7 +253,7 @@ class LeftBar(Widget):
         self.runUpscale2xBtn.setObjectName('RunButton')
         self.runUpscale2xBtn.setAccessibleName(self.tr('Upscale 2x'))
         self.runUpscale2xBtn.setToolTip(self.tr('Upscale 2x: replace project pages with 2x images using the configured Upscaling quality and size limits.'))
-        self.runUpscale2xBtn.setIcon(QIcon('icons/leftbar_upscale.svg'))
+        self.runUpscale2xBtn.setIcon(QIcon(themed_icon_path('leftbar_upscale.svg')))
         self.runUpscale2xBtn.setIconSize(utility_icon_size)
         font = self.runUpscale2xBtn.font()
         font.setPixelSize(10)
@@ -816,7 +817,7 @@ class SmallConfigPutton(QPushButton):
     pass
 
 
-CFG_ICON  = QIcon('icons/leftbar_config_activate.svg')
+CFG_ICON  = QIcon(themed_icon_path('leftbar_config_activate.svg'))
 
 
 class SelectionWithConfigWidget(Widget):
