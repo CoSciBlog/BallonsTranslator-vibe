@@ -248,10 +248,10 @@ class ParamWidget(QWidget):
 
                     if param_key == 'device' and DEFAULT_DEVICE == 'cpu':
                         param_dict['value'] = 'cpu'
-                        for ii, device in enumerate(param_dict['options']):
+                        for option_idx, device in enumerate(param_dict['options']):
                             if device in GPUINTENSIVE_SET:
                                 model = param_widget.model()
-                                item = model.item(ii, 0)
+                                item = model.item(option_idx, 0)
                                 item.setEnabled(False)
                     param_widget.setCurrentText(str(value))
                     param_widget.setEditable(param_dict.get('editable', False))
