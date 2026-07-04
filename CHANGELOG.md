@@ -16,6 +16,7 @@
 - Bumped the fork runtime version string to `1.5.5-vibe.90`.
 - Bumped the fork runtime version string to `1.5.5-vibe.91`.
 - Bumped the fork runtime version string to `1.5.5-vibe.92`.
+- Bumped the fork runtime version string to `1.5.5-vibe.93`.
 
 ### Added
 - `Auto` source-language selection for the legacy `ChatGPT` and `ChatGPT_exp` translators, matching the LLM translator auto-detect source flow while keeping `Auto` out of target-language selectors.
@@ -49,6 +50,7 @@
 - Translation Benchmark model dialogs now initialize from the active Translator settings page values and refresh provider/model options when the selected benchmark translator changes.
 - Translation Benchmark defaults now enable the Google baseline and leave the DeepL baseline opt-in.
 - Local `config/translation_benchmark.json` is ignored as per-install benchmark state.
+- Settings layout now uses wrapping labels, responsive module parameter fields, and bounded prompt editors to prevent long translator prompts and controls from stretching or dominating the settings pane.
 - Direct `.pdf` comic import from the Open menu, drag-and-drop, recent projects, and `--proj-dir`.
 - Multi-PDF import from the Open menu and drag-and-drop, combining selected PDFs into one ordered image project.
 - Source-folder import from `Open -> Import Folder` and drag-and-drop for folders containing `.cbr`, `.cbz`, `.zip`, `.pdf`, and nested image files.

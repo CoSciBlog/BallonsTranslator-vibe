@@ -114,6 +114,7 @@ class ConfigTextLabel(QLabel):
     def __init__(self, text: str, fontsize: int, font_weight: int = None, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.setText(text)
+        self.setWordWrap(True)
         font = self.font()
         if font_weight is not None:
             font.setWeight(font_weight)
@@ -193,7 +194,7 @@ class ConfigBlock(Widget):
         self.vlayout.setSpacing(0)
         self.vlayout.setSizeConstraint(LAYOUT_SET_MINIMUM_SIZE)
         self.setContentsMargins(0, 0, 0, 0)
-        self.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
+        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
 
     def addLineEdit(self, name: str = None, discription: str = None, vertical_layout: bool = False):
         le = QLineEdit()
@@ -244,9 +245,8 @@ class ConfigContent(QStackedWidget):
         scroll_layout = QHBoxLayout(scroll_content)
         scroll_layout.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
         scroll_layout.setSizeConstraint(LAYOUT_SET_MINIMUM_SIZE)
-        scroll_layout.setContentsMargins(0, 0, 0, 0)
-        scroll_layout.addWidget(block, 0, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
-        scroll_layout.addStretch()
+        scroll_layout.setContentsMargins(12, 10, 12, 10)
+        scroll_layout.addWidget(block, 1, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
         scroll_area.setWidget(scroll_content)
         self.addWidget(scroll_area)
         self.section_index[section_key] = self.count() - 1

@@ -20,6 +20,9 @@ WIDE_PARAM_KEYWORDS = (
 )
 EDITOR_PARAM_KEYWORDS = ('prompt', 'template', 'glossary', 'sample')
 CONFIG_FIELD_WIDE = int(CONFIG_COMBOBOX_LONG * 1.45)
+CONFIG_EDITOR_HEIGHT = 170
+CONFIG_EDITOR_COMPACT_HEIGHT = 110
+CONFIG_PARAM_LABEL_WIDTH = 260
 
 
 def param_key_uses_wide_field(param_key: str) -> bool:
@@ -65,7 +68,11 @@ class ParamLineEditor(QLineEdit):
         width = size2width(size)
         if not force_digital and param_key_uses_wide_field(param_key):
             width = max(width, CONFIG_FIELD_WIDE)
-        self.setFixedWidth(width)
+            self.setMinimumWidth(CONFIG_COMBOBOX_LONG)
+            self.setMaximumWidth(width)
+            self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        else:
+            self.setFixedWidth(width)
         self.setFixedHeight(max(CONFIG_COMBOBOX_HEIGHT, 34))
         self.textChanged.connect(self.on_text_changed)
 
@@ -87,12 +94,14 @@ class ParamEditor(QPlainTextEdit):
             self.setFixedWidth(CONFIG_FIELD_WIDE)
             self.setFixedHeight(240)
         elif param_key_uses_tall_editor(param_key):
-            self.setMinimumWidth(CONFIG_FIELD_WIDE)
-            self.setMinimumHeight(270)
-            self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+            self.setMinimumWidth(CONFIG_COMBOBOX_LONG)
+            self.setMaximumWidth(CONFIG_FIELD_WIDE)
+            self.setMinimumHeight(CONFIG_EDITOR_HEIGHT)
+            self.setMaximumHeight(260)
+            self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         else:
             self.setFixedWidth(CONFIG_COMBOBOX_LONG)
-            self.setFixedHeight(100)
+            self.setFixedHeight(CONFIG_EDITOR_COMPACT_HEIGHT)
         # self.setFixedHeight(CONFIG_COMBOBOX_HEIGHT)
         self.textChanged.connect(self.on_text_changed)
 
@@ -166,13 +175,19 @@ class ParamWidget(QWidget):
         super().__init__(*args, **kwargs)
         self.module_config_key = module_config_key
         self.module_name = module_name
+        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
         layout = QHBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
         self.param_layout = param_layout = QGridLayout()
         param_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
         param_layout.setContentsMargins(0, 0, 0, 0)
+        param_layout.setHorizontalSpacing(14)
+        param_layout.setVerticalSpacing(8)
+        param_layout.setColumnMinimumWidth(0, CONFIG_PARAM_LABEL_WIDTH)
+        param_layout.setColumnStretch(0, 0)
+        param_layout.setColumnStretch(1, 1)
         param_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
-        layout.addLayout(param_layout)
-        layout.addStretch(-1)
+        layout.addLayout(param_layout, 1)
 
         if 'description' in params:
             self.setToolTip(wrap_tooltip(params['description']))
@@ -270,15 +285,23 @@ class ParamWidget(QWidget):
             widget_idx = 0
             if require_label:
                 param_label = ParamNameLabel(display_param_name)
+                param_label.setWordWrap(True)
+                param_label.setMinimumWidth(CONFIG_PARAM_LABEL_WIDTH)
+                param_label.setMaximumWidth(CONFIG_PARAM_LABEL_WIDTH)
                 if tooltip:
                     param_label.setToolTip(tooltip)
-                param_layout.addWidget(param_label, ii, 0)
+                label_align = Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop
+                if param_widget is not None and not isinstance(param_widget, QPlainTextEdit):
+                    label_align = Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
+                param_layout.addWidget(param_label, ii, 0, label_align)
                 widget_idx = 1
             if param_widget is not None:
                 pw_lo = None
                 if hasattr(param_widget, 'flush_btn') or hasattr(param_widget, 'path_select_btn') or reset_btn is not None:
                     pw_lo = QHBoxLayout()
-                    pw_lo.addWidget(param_widget)
+                    pw_lo.setContentsMargins(0, 0, 0, 0)
+                    pw_lo.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+                    pw_lo.addWidget(param_widget, 1)
                 if hasattr(param_widget, 'flush_btn'):
                     pw_lo.addWidget(param_widget.flush_btn)
                     param_widget.flushbtn_clicked.connect(self.on_flushbtn_clicked)
@@ -286,7 +309,8 @@ class ParamWidget(QWidget):
                     pw_lo.addWidget(param_widget.path_select_btn)
                     param_widget.pathbtn_clicked.connect(self.on_pathbtn_clicked)
                 if reset_btn is not None:
-                    pw_lo.addWidget(reset_btn)
+                    reset_btn.setFixedHeight(32)
+                    pw_lo.addWidget(reset_btn, 0, Qt.AlignmentFlag.AlignTop)
                 if pw_lo is None:
                     param_layout.addWidget(param_widget, ii, widget_idx)
                 else:
@@ -354,7 +378,7 @@ class ModuleConfigParseWidget(QWidget):
         self.param_widget_map = {}
         layout.addLayout(p_layout) 
         layout.addLayout(self.params_layout)
-        layout.setSpacing(30)
+        layout.setSpacing(16)
         self.vlayout = layout
 
         self.visibleWidget: QWidget = None
@@ -439,15 +463,15 @@ class TranslatorConfigPanel(ModuleConfigParseWidget):
         self.replacePreMTkeywordBtn = NoBorderPushBtn(self.tr("Keyword substitution for machine translation source text"), self)
         self.replacePreMTkeywordBtn.setToolTip(self.tr("Configure replacements that run before machine translation reads the source text."))
         self.replacePreMTkeywordBtn.clicked.connect(self.show_pre_MT_keyword_window)
-        self.replacePreMTkeywordBtn.setFixedWidth(500)
+        self.replacePreMTkeywordBtn.setMaximumWidth(CONFIG_FIELD_WIDE)
         self.replaceMTkeywordBtn = NoBorderPushBtn(self.tr("Keyword substitution for machine translation"), self)
         self.replaceMTkeywordBtn.setToolTip(self.tr("Configure replacements that run on machine translation output."))
         self.replaceMTkeywordBtn.clicked.connect(self.show_MT_keyword_window)
-        self.replaceMTkeywordBtn.setFixedWidth(500)
+        self.replaceMTkeywordBtn.setMaximumWidth(CONFIG_FIELD_WIDE)
         self.replaceOCRkeywordBtn = NoBorderPushBtn(self.tr("Keyword substitution for source text"), self)
         self.replaceOCRkeywordBtn.setToolTip(self.tr("Configure replacements that run on OCR/source text before translation."))
         self.replaceOCRkeywordBtn.clicked.connect(self.show_OCR_keyword_window)
-        self.replaceOCRkeywordBtn.setFixedWidth(500)
+        self.replaceOCRkeywordBtn.setMaximumWidth(CONFIG_FIELD_WIDE)
         self.translateByTextblockBox = ParamCheckerBox(self.tr('Translate each text block individually'))
         self.translateByTextblockBox.setToolTip(self.tr('Translate every detected text block as a separate request instead of batching them together. This can improve isolation for providers that struggle with batches, but it usually slows translation because it creates many more requests.'))
         self.translateByTextblockBox.name_label.setToolTip(self.translateByTextblockBox.toolTip())
