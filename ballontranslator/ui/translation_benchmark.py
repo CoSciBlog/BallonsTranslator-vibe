@@ -65,7 +65,7 @@ class BenchmarkProfile:
 class BenchmarkSettings:
     profiles: List[BenchmarkProfile] = field(default_factory=list)
     include_google: bool = True
-    include_deepl: bool = True
+    include_deepl: bool = False
 
 
 def _param_value(params: Dict[str, Any], key: str, default=None):
@@ -91,12 +91,30 @@ def _default_params_for(translator_key: str) -> Dict[str, Any]:
     return copy.deepcopy(LLM_API_Translator.params)
 
 
+def _params_from_current_settings(translator_key: str) -> Dict[str, Any]:
+    params = _default_params_for(translator_key)
+    current_params = pcfg.module.translator_params.get(translator_key) or {}
+    for key, value in current_params.items():
+        if isinstance(value, dict) and isinstance(params.get(key), dict):
+            params[key].update(copy.deepcopy(value))
+        else:
+            params[key] = copy.deepcopy(value)
+    return params
+
+
+def _param_options(params: Dict[str, Any], key: str) -> List[str]:
+    value = params.get(key)
+    if isinstance(value, dict):
+        return [str(option) for option in value.get("options", [])]
+    return []
+
+
 def _profile_from_current(translator_key: str = None) -> BenchmarkProfile:
     valid = GET_VALID_TRANSLATORS()
     translator_key = translator_key or pcfg.module.translator
     if translator_key not in LLM_TRANSLATOR_KEYS:
         translator_key = "LLM_API_Translator" if "LLM_API_Translator" in valid else LLM_TRANSLATOR_KEYS[0]
-    params = copy.deepcopy(pcfg.module.translator_params.get(translator_key) or _default_params_for(translator_key))
+    params = _params_from_current_settings(translator_key)
     model = _param_value(params, "override model", "") or _param_value(params, "model", "")
     return BenchmarkProfile(
         name=f"{translator_key}: {model or 'current'}",
@@ -125,7 +143,7 @@ def load_benchmark_settings() -> BenchmarkSettings:
         return BenchmarkSettings(
             profiles=profiles or [_profile_from_current()],
             include_google=bool(data.get("include_google", True)),
-            include_deepl=bool(data.get("include_deepl", True)),
+            include_deepl=bool(data.get("include_deepl", False)),
         )
     except Exception:
         LOGGER.warning("Failed to load translation benchmark settings.", exc_info=True)
@@ -160,9 +178,12 @@ class BenchmarkProfileDialog(QDialog):
         self.name_edit = QLineEdit()
         self.translator_combo = QComboBox()
         self.translator_combo.addItems([key for key in LLM_TRANSLATOR_KEYS if key in GET_VALID_TRANSLATORS()])
-        self.provider_edit = QLineEdit()
+        self.translator_combo.currentTextChanged.connect(self._on_translator_changed)
+        self.provider_combo = QComboBox()
+        self.provider_combo.setEditable(True)
         self.endpoint_edit = QLineEdit()
-        self.model_edit = QLineEdit()
+        self.model_combo = QComboBox()
+        self.model_combo.setEditable(True)
         self.each_block_checker = QCheckBox(self.tr("Translate each text block individually"))
         self.reasoning_checker = QCheckBox(self.tr("Reasoning"))
 
@@ -191,9 +212,9 @@ class BenchmarkProfileDialog(QDialog):
         form = QFormLayout()
         form.addRow(self.tr("Name"), self.name_edit)
         form.addRow(self.tr("Translator"), self.translator_combo)
-        form.addRow(self.tr("Provider"), self.provider_edit)
+        form.addRow(self.tr("Provider"), self.provider_combo)
         form.addRow(self.tr("Endpoint"), self.endpoint_edit)
-        form.addRow(self.tr("Model"), self.model_edit)
+        form.addRow(self.tr("Model"), self.model_combo)
         form.addRow("", self.each_block_checker)
         form.addRow("", self.reasoning_checker)
         form.addRow(self.tr("Temperature"), self.temperature_spin)
@@ -211,12 +232,38 @@ class BenchmarkProfileDialog(QDialog):
         layout.addLayout(form)
         layout.addWidget(buttons)
 
+    def _set_combo_items(self, combo: QComboBox, items: List[str], value: str) -> None:
+        combo.blockSignals(True)
+        combo.clear()
+        combo.addItems(items)
+        combo.setCurrentText(value)
+        combo.blockSignals(False)
+
+    def _load_translator_options(self, translator_key: str, profile: BenchmarkProfile) -> None:
+        params = _params_from_current_settings(translator_key)
+        self._set_combo_items(
+            self.provider_combo,
+            _param_options(params, "provider"),
+            profile.provider or str(_param_value(params, "provider", "") or ""),
+        )
+        self._set_combo_items(
+            self.model_combo,
+            _param_options(params, "model"),
+            profile.model or str(_param_value(params, "override model", "") or _param_value(params, "model", "") or ""),
+        )
+
+    def _on_translator_changed(self, translator_key: str) -> None:
+        if not translator_key:
+            return
+        self._load_profile(_profile_from_current(translator_key))
+
     def _load_profile(self, profile: BenchmarkProfile) -> None:
+        self.translator_combo.blockSignals(True)
         self.name_edit.setText(profile.name)
         self.translator_combo.setCurrentText(profile.translator)
-        self.provider_edit.setText(profile.provider)
+        self.translator_combo.blockSignals(False)
+        self._load_translator_options(profile.translator, profile)
         self.endpoint_edit.setText(profile.endpoint)
-        self.model_edit.setText(profile.model)
         self.each_block_checker.setChecked(profile.translate_each_text_block)
         self.reasoning_checker.setChecked(profile.reasoning)
         self.temperature_spin.setValue(profile.temperature)
@@ -228,12 +275,12 @@ class BenchmarkProfileDialog(QDialog):
 
     def selected_profile(self) -> BenchmarkProfile:
         name = self.name_edit.text().strip()
-        model = self.model_edit.text().strip()
+        model = self.model_combo.currentText().strip()
         translator = self.translator_combo.currentText() or "LLM_API_Translator"
         return BenchmarkProfile(
             name=name or f"{translator}: {model or 'current'}",
             translator=translator,
-            provider=self.provider_edit.text().strip() or "Ollama",
+            provider=self.provider_combo.currentText().strip() or str(_param_value(_params_from_current_settings(translator), "provider", "Ollama") or "Ollama"),
             endpoint=self.endpoint_edit.text().strip(),
             model=model,
             translate_each_text_block=self.each_block_checker.isChecked(),
@@ -497,10 +544,15 @@ class TranslationBenchmarkWindow(QDialog):
         self.refresh_profile_list()
 
     def _params_for_profile(self, profile: BenchmarkProfile) -> Dict[str, Any]:
-        params = copy.deepcopy(pcfg.module.translator_params.get(profile.translator) or _default_params_for(profile.translator))
+        params = _params_from_current_settings(profile.translator)
         _set_param(params, "provider", profile.provider)
         _set_param(params, "endpoint", profile.endpoint)
-        _set_param(params, "override model", profile.model)
+        model_options = _param_options(params, "model")
+        if profile.model in model_options:
+            _set_param(params, "model", profile.model)
+            _set_param(params, "override model", "")
+        else:
+            _set_param(params, "override model", profile.model)
         _set_param(params, "temperature", profile.temperature)
         _set_param(params, "top p", profile.top_p)
         _set_param(params, "frequency penalty", profile.frequency_penalty)
