@@ -85,6 +85,17 @@ from .keywordsubwidget import KeywordSubWidget
 from . import shared_widget as SW
 from .custom_widget import MessageBox, FrameLessMessageBox, ImgtransProgressMessageBox
 
+
+def _shared_arg_enabled(name: str) -> bool:
+    """Return a launcher flag while tolerating GUI starts without parsed args.
+
+    >>> _shared_arg_enabled('missing_option')
+    False
+    """
+
+    return bool(getattr(getattr(shared, 'args', None), name, False))
+
+
 class PageListView(QListWidget):
 
     reveal_file = Signal(str)
@@ -2214,9 +2225,9 @@ class MainWindow(mainwindow_cls):
             self.sync_translator_glossary_to_project(update_ui=True)
         if pcfg.module.empty_runcache and not (shared.HEADLESS or shared.HEADLESS_CONTINUOUS):
             self.module_manager.unload_all_models()
-        if shared.args.export_translation_txt:
+        if _shared_arg_enabled('export_translation_txt'):
             self.on_export_txt('translation')
-        if shared.args.export_source_txt:
+        if _shared_arg_enabled('export_source_txt'):
             self.on_export_txt('source')
         if self._gui_batch_options is not None:
             if self._gui_batch_cancel_requested:

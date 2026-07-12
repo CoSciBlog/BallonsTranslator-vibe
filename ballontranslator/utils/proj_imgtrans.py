@@ -150,10 +150,20 @@ def parse_txt_translation(file_path: str):
 
 
 class TextBlkEncoder(NumpyEncoder):
+    """Serialize project text blocks across supported import aliases.
+
+    >>> TextBlkEncoder().default(TextBlock([0, 0, 1, 1], text=['x']))['text']
+    ['x']
+    """
+
     def default(self, obj):
-        if isinstance(obj, TextBlock):
+        if isinstance(obj, TextBlock) or (
+            obj.__class__.__name__ == 'TextBlock' and callable(getattr(obj, 'to_dict', None))
+        ):
+            # TextBlock can be imported through both package and legacy top-level
+            # paths; duck-typing keeps project saves stable across those aliases.
             return obj.to_dict()
-        elif isinstance(obj, FontFormat):
+        elif isinstance(obj, FontFormat) or obj.__class__.__name__ == 'FontFormat':
             return vars(obj)
         return NumpyEncoder.default(self, obj)
 
