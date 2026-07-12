@@ -232,7 +232,13 @@ def _replace_stylesheet_icon_url(matched, theme: str) -> str:
         return f'url({themed_icon_url(filename, theme)})'
     return f'url({icon_url(filename)})'
 
-def parse_stylesheet(theme: str = '') -> str:
+def parse_stylesheet(theme: str = '', reverse_icon: bool = False) -> str:
+    """Build the Qt stylesheet for the selected theme.
+
+    >>> isinstance(parse_stylesheet('eva-light', reverse_icon=False), str)
+    True
+    """
+
     with open(shared.STYLESHEET_PATH, "r", encoding='utf-8') as f:
         stylesheet = f.read()
     with open(shared.THEME_PATH, 'r', encoding='utf8') as f:

@@ -9,6 +9,7 @@ APP_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(APP_ROOT)
 
 from ballontranslator.ui import mainwindow
+from ballontranslator.ui.misc import parse_stylesheet
 
 
 class MainWindowArgsTest(unittest.TestCase):
@@ -21,6 +22,12 @@ class MainWindowArgsTest(unittest.TestCase):
             self.assertTrue(mainwindow._shared_arg_enabled("export_translation_txt"))
         finally:
             mainwindow.shared.args = old_args
+
+    def test_parse_stylesheet_accepts_legacy_reverse_icon_argument(self):
+        stylesheet = parse_stylesheet("eva-light", reverse_icon=False)
+
+        self.assertIsInstance(stylesheet, str)
+        self.assertIn("QWidget", stylesheet)
 
 
 if __name__ == "__main__":
