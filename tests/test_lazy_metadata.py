@@ -110,6 +110,14 @@ class DemoDetector:
             self.assertTrue(ysgyolo.params['model path']['options'])
         self.assertIn('ysgyolo', GET_VALID_TEXTDETECTORS())
 
+    def test_mit48px_resolves_without_legacy_mit32px_module(self):
+        from ballontranslator.modules import OCR
+
+        with mock.patch('ballontranslator.modules.base.refresh_torch_device_info'):
+            module = OCR.resolve_module('mit48px')
+
+        self.assertEqual(module.__name__, 'OCRMIT48px')
+
 
 if __name__ == '__main__':
     unittest.main()

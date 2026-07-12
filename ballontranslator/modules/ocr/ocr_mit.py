@@ -43,7 +43,6 @@ class MITModels(OCRBase):
         super().updateParam(param_key, param_content)
 
 
-from .mit32px import OCR32pxModel
 @register_OCR('mit32px')
 class OCRMIT32px(MITModels):
 
@@ -58,10 +57,11 @@ class OCRMIT32px(MITModels):
     }]
 
     def _load_model(self):
+        from .mit32px import OCR32pxModel
+
         self.model = OCR32pxModel(r'data/models/mit32px_ocr.ckpt', self.device)
 
 
-from .mit48px_ctc import OCR48pxCTC
 @register_OCR('mit48px_ctc')
 class OCRMIT48pxCTC(MITModels):
 
@@ -76,10 +76,11 @@ class OCRMIT48pxCTC(MITModels):
     }]
 
     def _load_model(self):
+        from .mit48px_ctc import OCR48pxCTC
+
         self.model = OCR48pxCTC(r'data/models/mit48pxctc_ocr.ckpt', self.device)
 
 
-from .mit48px import Model48pxOCR
 OCR48PXMODEL_PATH = r'data/models/ocr_ar_48px.ckpt'
 @register_OCR('mit48px')
 class OCRMIT48px(MITModels):
@@ -93,4 +94,6 @@ class OCRMIT48px(MITModels):
     }]
 
     def _load_model(self):
+        from .mit48px import Model48pxOCR
+
         self.model = Model48pxOCR(OCR48PXMODEL_PATH, self.device)
