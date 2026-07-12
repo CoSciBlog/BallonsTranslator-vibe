@@ -20,6 +20,7 @@
 - Bumped the fork runtime version string to `1.5.5-vibe.94`.
 - Bumped the fork runtime version string to `1.5.5-vibe.95`.
 - Bumped the fork runtime version string to `1.5.5-vibe.96`.
+- Changed the fork runtime version string to the PEP 440-compatible local version `1.5.5+vibe.97` so current packaging tools accept the project metadata.
 
 ### Added
 - `Auto` source-language selection for the legacy `ChatGPT` and `ChatGPT_exp` translators, matching the LLM translator auto-detect source flow while keeping `Auto` out of target-language selectors.
