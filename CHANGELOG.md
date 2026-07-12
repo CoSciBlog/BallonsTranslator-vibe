@@ -23,6 +23,8 @@
 - Changed the fork runtime version string to the PEP 440-compatible local version `1.5.5+vibe.97` so current packaging tools accept the project metadata.
 - Bumped the fork runtime version string to `1.5.5+vibe.98`.
 - Deferred MIT OCR model imports until model load so `mit48px` remains selectable when the legacy `mit32px` implementation file is absent.
+- Merged upstream `dmMaze/BallonsTranslator` through `v1.5.7` / `upstream/dev` commit `a8fa6bf1a41751b9278b32641f3509bf0e24c848`.
+- Bumped the fork runtime version string to `1.5.7+vibe.99`.
 
 ### Added
 - `Auto` source-language selection for the legacy `ChatGPT` and `ChatGPT_exp` translators, matching the LLM translator auto-detect source flow while keeping `Auto` out of target-language selectors.

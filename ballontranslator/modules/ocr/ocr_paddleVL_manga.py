@@ -12,13 +12,14 @@ MODEL_DIR = Path(MODEL_PATH)
 
 @register_OCR('PaddleOCRVLManga')
 class PaddleOCRVLManga(OCRBase):
-    dependencies = ['torch', 'torchvision', 'transformers==4.57.6']
+    dependencies = ['torch', 'torchvision', 'transformers==4.57.6', 'einops']
 
     params = {
         'device': DEVICE_SELECTOR(),
         "max_new_tokens": {
             "value": 512,
-            "description": "Max generation tokens"
+            "description": "Max generation tokens",
+            "display_name": "Max New Tokens"
         }
     }
     device = DEFAULT_DEVICE

@@ -16,8 +16,10 @@ from .version import get_current_version
 
 RELEASES_URL = 'https://github.com/dmMaze/BallonsTranslator/releases'
 LATEST_RELEASE_API_URL = 'https://api.github.com/repos/dmMaze/BallonsTranslator/releases/latest'
+RELEASE_RESPONSE_CACHE_FILENAME = 'github_release_response.json'
 UPDATE_BRANCH = 'userspace_update'
-SOURCE_UPDATE_DIRS = ('ballontranslator', 'resources')
+SOURCE_UPDATE_DIRS = ('ballontranslator', 'resources', 'config/llm_profile_builtin')
+SOURCE_UPDATE_FILES = ('pyproject.toml', 'requirements.txt', 'launch_win.bat', 'launch.sh')
 
 
 @dataclass
@@ -38,8 +40,6 @@ class UpdateResult:
     latest_version: str
     release_url: str = ''
     zip_path: str = ''
-    backup_path: str = ''
-    git_message: str = ''
     release_info: Optional[ReleaseInfo] = None
 
 
@@ -129,6 +129,9 @@ def release_info_from_api_payload(payload: dict) -> ReleaseInfo:
     ('1.4.1', 'z', 'notes')
     """
 
+    if not isinstance(payload, dict):
+        raise RuntimeError('GitHub release response was not a JSON object.')
+
     tag_name = payload.get('tag_name') or ''
     zip_url = payload.get('zipball_url') or ''
     html_url = payload.get('html_url') or RELEASES_URL
@@ -178,8 +181,22 @@ class BallonsTranslatorUpdater:
         True
         """
 
+        return self._result_for_release(self.query_latest_release())
+
+    def preview_cached_release(self) -> UpdateResult:
+        """Return cached release information without contacting GitHub.
+
+        Equal or older cached releases use the ``preview`` status so the UI
+        can display their notes without offering an unsafe update action.
+        """
+
+        result = self._result_for_release(self.query_cached_release())
+        if result.status == 'up_to_date':
+            result.status = 'preview'
+        return result
+
+    def _result_for_release(self, release_info: ReleaseInfo) -> UpdateResult:
         current_version = get_current_version(str(self.program_path))
-        release_info = self.query_latest_release()
         self._notify('compare_versions', 15, f'{current_version} -> {release_info.version}')
         if not is_remote_newer(current_version, release_info.version):
             return UpdateResult(
@@ -201,9 +218,9 @@ class BallonsTranslatorUpdater:
 
     def apply_update(self, release_info: ReleaseInfo, current_version: str = None) -> UpdateResult:
         current_version = current_version or get_current_version(str(self.program_path))
+        self.backup_source()
         zip_path = self.download_source_zip(release_info)
-        backup_path = self.backup_source(current_version)
-        git_message = self.prepare_git_worktree(release_info.version)
+        self.prepare_git_worktree(release_info.version)
         self.install_source_zip(zip_path)
         self._notify('done', 100, release_info.version)
         return UpdateResult(
@@ -212,8 +229,6 @@ class BallonsTranslatorUpdater:
             latest_version=release_info.version,
             release_url=release_info.html_url,
             zip_path=str(zip_path),
-            backup_path=str(backup_path),
-            git_message=git_message,
             release_info=release_info,
         )
 
@@ -231,7 +246,53 @@ class BallonsTranslatorUpdater:
                 payload = json.loads(response.read().decode('utf8'))
         except (OSError, URLError, json.JSONDecodeError) as e:
             raise RuntimeError(f'Failed to query GitHub releases at {RELEASES_URL}: {e}') from e
-        return release_info_from_api_payload(payload)
+        release_info = release_info_from_api_payload(payload)
+        self._cache_release_response(payload)
+        return release_info
+
+    def query_cached_release(self) -> ReleaseInfo:
+        """Load release metadata without contacting GitHub.
+
+        This boundary powers ``--show_release_info`` while leaving the normal
+        update-check query path unchanged.
+        """
+
+        self._notify('load_cached_release', 5, str(self.release_response_cache_path))
+        return release_info_from_api_payload(self._read_cached_release_response())
+
+    @property
+    def release_response_cache_path(self) -> Path:
+        return self.cache_dir / RELEASE_RESPONSE_CACHE_FILENAME
+
+    def _read_cached_release_response(self) -> dict:
+        cache_path = self.release_response_cache_path
+        try:
+            with cache_path.open('r', encoding='utf8') as f:
+                payload = json.load(f)
+            if not isinstance(payload, dict):
+                raise ValueError('cached release response is not a JSON object')
+            return payload
+        except (OSError, ValueError) as e:
+            raise RuntimeError(
+                f'Failed to load cached GitHub release response at {cache_path}. '
+                'Run a normal update check once to create it.'
+            ) from e
+
+    def _cache_release_response(self, payload: dict) -> None:
+        cache_path = self.release_response_cache_path
+        temp_path = cache_path.with_suffix(cache_path.suffix + '.tmp')
+        try:
+            self.cache_dir.mkdir(parents=True, exist_ok=True)
+            with temp_path.open('w', encoding='utf8') as f:
+                json.dump(payload, f, ensure_ascii=False, indent=2)
+                f.write('\n')
+            os.replace(temp_path, cache_path)
+        except OSError as e:
+            LOGGER.warning(f'Failed to cache GitHub release response at {cache_path}: {e}')
+            try:
+                temp_path.unlink(missing_ok=True)
+            except OSError:
+                pass
 
     def download_source_zip(self, release_info: ReleaseInfo) -> Path:
         from .download_util import download_url_to_file
@@ -246,26 +307,49 @@ class BallonsTranslatorUpdater:
         )
         return zip_path
 
-    def backup_source(self, current_version: str) -> Path:
-        version_tag = normalize_version_tag(current_version)
-        backup_path = self.cache_dir / f'ballontranslator_{version_tag}'
-        if backup_path.exists():
-            LOGGER.info(f'Updater source backup already exists: {backup_path}')
-            self._notify('backup_skip', 65, backup_path.name)
-            return backup_path
+    def backup_source(self) -> Path:
+        """Replace the snapshot of every updater-managed installed path.
 
-        self.cache_dir.mkdir(parents=True, exist_ok=True)
-        backup_path.mkdir()
-        for dirname in SOURCE_UPDATE_DIRS:
-            source_path = self.program_path / dirname
-            if not source_path.is_dir():
-                raise RuntimeError(f'Cannot back up missing source directory: {source_path}')
-            self._notify('backup_source', 65, dirname)
-            shutil.copytree(source_path, backup_path / dirname)
+        >>> updater = BallonsTranslatorUpdater(program_path='/tmp/app', cache_dir='/tmp/cache')
+        >>> (updater.cache_dir / 'last_version').name
+        'last_version'
+        """
 
-        pyproject_path = self.program_path / 'pyproject.toml'
-        if pyproject_path.exists():
-            shutil.copy2(pyproject_path, backup_path / 'pyproject.toml')
+        backup_path = self.cache_dir / 'last_version'
+        staging_path = self.cache_dir / '.last_version_tmp'
+        for path in (backup_path, staging_path):
+            if path.is_symlink() or path.is_file():
+                path.unlink()
+            elif path.exists():
+                shutil.rmtree(path)
+        staging_path.mkdir(parents=True)
+
+        try:
+            for dirname in SOURCE_UPDATE_DIRS:
+                source_path = self.program_path / dirname
+                if not source_path.exists():
+                    continue
+                if not source_path.is_dir():
+                    raise RuntimeError(f'Cannot back up non-directory source path: {source_path}')
+                target_path = staging_path / dirname
+                target_path.parent.mkdir(parents=True, exist_ok=True)
+                self._notify('backup_source', 10, dirname)
+                shutil.copytree(source_path, target_path)
+
+            for filename in SOURCE_UPDATE_FILES:
+                source_path = self.program_path / filename
+                if not source_path.exists():
+                    continue
+                if not source_path.is_file():
+                    raise RuntimeError(f'Cannot back up non-file source path: {source_path}')
+                target_path = staging_path / filename
+                target_path.parent.mkdir(parents=True, exist_ok=True)
+                self._notify('backup_source', 10, filename)
+                shutil.copy2(source_path, target_path)
+            staging_path.rename(backup_path)
+        except Exception:
+            shutil.rmtree(staging_path, ignore_errors=True)
+            raise
         return backup_path
 
     def prepare_git_worktree(self, latest_version: str) -> str:
@@ -303,12 +387,11 @@ class BallonsTranslatorUpdater:
             self._safe_extract(archive, extract_root)
 
         release_root = self._find_release_root(extract_root)
-        self._notify('replace_source', 90, ', '.join(SOURCE_UPDATE_DIRS))
+        self._notify('replace_source', 90, ', '.join(SOURCE_UPDATE_DIRS + SOURCE_UPDATE_FILES))
         for dirname in SOURCE_UPDATE_DIRS:
             self._replace_directory(release_root / dirname, self.program_path / dirname)
-        release_pyproject = release_root / 'pyproject.toml'
-        if release_pyproject.exists():
-            self._replace_file(release_pyproject, self.program_path / 'pyproject.toml')
+        for filename in SOURCE_UPDATE_FILES:
+            self._replace_file(release_root / filename, self.program_path / filename)
         try:
             self._cleanup_downloaded_source(zip_path, extract_root)
         except Exception as e:
@@ -369,8 +452,15 @@ class BallonsTranslatorUpdater:
                 path.unlink()
 
     def _replace_directory(self, source: Path, target: Path) -> None:
+        if not source.exists():
+            LOGGER.info(f'Update archive no longer includes source directory; removing target: {target}')
+            if target.is_dir():
+                shutil.rmtree(target)
+            return
         if not source.is_dir():
             raise RuntimeError(f'Update archive is missing source directory: {source}')
+        # Nested update dirs must create their parent without replacing the parent itself.
+        target.parent.mkdir(parents=True, exist_ok=True)
         temp_target = target.with_name(f'.{target.name}_update_tmp')
         old_target = target.with_name(f'.{target.name}_old_tmp')
         for path in (temp_target, old_target):
@@ -394,6 +484,8 @@ class BallonsTranslatorUpdater:
                 shutil.rmtree(temp_target)
 
     def _replace_file(self, source: Path, target: Path) -> None:
+        if not source.is_file():
+            raise RuntimeError(f'Update archive is missing source file: {source}')
         temp_target = target.with_name(f'.{target.name}.update_tmp')
         shutil.copy2(source, temp_target)
         os.replace(temp_target, target)

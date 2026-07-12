@@ -22,6 +22,34 @@ STYLE_LLM_TEXT = "QTextEdit { background-color: rgba(33, 164, 110, 9%); }"
 STYLE_LLM_LABEL = "QLabel { color: #148055; font-weight: 600; }"
 STYLE_OUTPUT_LABEL = "QLabel { color: #6d4da6; font-weight: 600; }"
 
+
+class FloatingSuggestionLabel(Widget):
+    """Spellcheck suggestion popup with app-level deactivate filtering.
+
+    >>> FloatingSuggestionLabel  # doctest: +ELLIPSIS
+    <class '...FloatingSuggestionLabel'>
+    """
+
+    def __init__(self, editor):
+        super().__init__(parent=editor)
+        self.editor = editor
+        app = QApplication.instance()
+        if app is not None:
+            app.installEventFilter(self)
+        self.hide()
+
+    def eventFilter(self, watched, event):
+        app = QApplication.instance()
+        if watched is not app:
+            return super().eventFilter(watched, event)
+        try:
+            if event.type() == QEvent.Type.ApplicationDeactivate:
+                self.hide()
+        except RuntimeError:
+            pass
+        return super().eventFilter(watched, event)
+
+
 try:
     from pynput.keyboard import Key, Controller
     keyboard = Controller()

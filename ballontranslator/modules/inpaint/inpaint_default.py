@@ -286,7 +286,8 @@ class AOTInpainter(InpainterBase):
                 1024, 
                 2048
             ], 
-            'value': 2048
+            'value': 2048,
+            'display_name': 'Inpaint Size'
         }, 
         'device': DEVICE_SELECTOR(),
         'description': 'manga-image-translator inpainter'
@@ -391,7 +392,8 @@ class LamaInpainterMPE(InpainterBase):
                 1024, 
                 2048
             ], 
-            'value': 2048
+            'value': 2048,
+            'display_name': 'Inpaint Size'
         },
         'device': DEVICE_SELECTOR(not_supported=['privateuseone'])
     }
@@ -521,6 +523,7 @@ class LamaLarge(LamaInpainterMPE):
                 2048
             ], 
             'value': 1536,
+            'display_name': 'Inpaint Size'
         },
         'device': DEVICE_SELECTOR(not_supported=['privateuseone']),
         'precision': {
@@ -600,7 +603,8 @@ class Flux2Klein(InpainterBase):
                 1536,
                 2048
             ], 
-            'value': 1024
+            'value': 1024,
+            'display_name': 'Max Resolution'
         }, 
         'device': DEVICE_SELECTOR(),
         'step': 8

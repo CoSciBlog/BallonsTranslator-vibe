@@ -54,7 +54,8 @@ class ColorPickerLabel(QLabel):
         btn = event.button()
         if btn == Qt.MouseButton.LeftButton:
             self.changingColor.emit()
-            color = QColorDialog.getColor()
+            initial_color = self.color if self.color is not None else QColor(255, 255, 255)
+            color = QColorDialog.getColor(initial_color, self.window())
             is_valid = color.isValid()
             if is_valid:
                 self.setPickerColor(color)
@@ -125,7 +126,7 @@ class ConfigClickableLabel(ClickableLabel):
             return QLabel.mouseReleaseEvent(self, e)
         return super().mouseReleaseEvent(e)
 
-    
+
 class CheckableLabel(QLabel):
 
     checkStateChanged = Signal(bool)

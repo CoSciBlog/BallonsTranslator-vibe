@@ -6,6 +6,7 @@ import shutil
 import subprocess
 import sys
 import time
+from pathlib import Path
 from urllib.parse import unquote, urlparse
 from dataclasses import dataclass
 from typing import Callable, Iterable, List, Optional, Tuple
@@ -51,7 +52,11 @@ class _InstallerProgressState:
     speed: float = 0.0
 
 
-def resolve_backend(backend: str = 'auto', env: Optional[dict] = None) -> str:
+def resolve_backend(
+    backend: str = 'auto',
+    env: Optional[dict] = None,
+    python_executable: str = '',
+) -> str:
     """Resolve the installer backend used for command generation.
 
     >>> resolve_backend('pip')
@@ -62,15 +67,42 @@ def resolve_backend(backend: str = 'auto', env: Optional[dict] = None) -> str:
 
     if backend != 'auto':
         return backend if backend in BACKENDS else 'auto'
-    env = env or os.environ
-    if shutil.which('uv', path=env.get('PATH')):
+    if _find_uv_executable(env, python_executable):
         return 'uv'
     return 'pip'
+
+
+def _find_uv_executable(env: Optional[dict] = None, python_executable: str = '') -> str:
+    """Return a usable uv executable for the current installer environment.
+
+    >>> import tempfile
+    >>> root = Path(tempfile.mkdtemp())
+    >>> python_path = root / 'python.exe'
+    >>> uv_path = root / 'uv.exe'
+    >>> _ = python_path.write_text('', encoding='utf8')
+    >>> _ = uv_path.write_text('', encoding='utf8')
+    >>> _find_uv_executable({'PATH': ''}, str(python_path)) == str(uv_path)
+    True
+    """
+
+    env = env or os.environ
+    found = shutil.which('uv', path=env.get('PATH'))
+    if found:
+        return found
+
+    python_path = Path(python_executable or sys.executable)
+    executable_dir = python_path.parent
+    for filename in ('uv.exe', 'uv.cmd', 'uv.bat', 'uv'):
+        candidate = executable_dir / filename
+        if candidate.is_file():
+            return str(candidate)
+    return ''
 
 
 def build_install_command(
     requirements: Iterable[str] = (),
     requirements_file: str = '',
+    constraint_files: Iterable[str] = (),
     backend: str = 'auto',
     extra_args: str = '',
     env: Optional[dict] = None,
@@ -81,15 +113,19 @@ def build_install_command(
 
     >>> build_install_command(['openai>=2.8.1'], backend='pip', python_executable='python')[:5]
     ['python', '-m', 'pip', 'install', 'openai>=2.8.1']
-    >>> build_install_command(['betterproto'], backend='uv', python_executable='python')[:5]
-    ['uv', 'pip', 'install', '--python', 'python']
+    >>> build_install_command(['betterproto'], backend='uv', python_executable='python')[1:5]
+    ['pip', 'install', '--python', 'python']
     >>> build_install_command(['torch', 'torch'], backend='pip', python_executable='python').count('torch')
     1
+    >>> '-c' in build_install_command(['onnxruntime'], constraint_files=['constraints.txt'], backend='pip', python_executable='python')
+    True
     """
 
     reqs = [req for req in dict.fromkeys(requirements) if req]
     if requirements_file:
         reqs.extend(['-r', requirements_file])
+    constraints = [path for path in dict.fromkeys(constraint_files) if path]
+    constraint_args = [arg for path in constraints for arg in ('-c', path)]
     extra = shlex.split(extra_args or '')
     env = env or os.environ
     index_url = env.get('INDEX_URL')
@@ -98,19 +134,20 @@ def build_install_command(
     find_links_args = ['-f', find_links] if find_links else []
     python_executable = python_executable or sys.executable
     python_prefix = python_prefix or sys.prefix
-    resolved_backend = resolve_backend(backend, env=env)
+    resolved_backend = resolve_backend(backend, env=env, python_executable=python_executable)
 
     if resolved_backend == 'uv':
+        uv_executable = _find_uv_executable(env, python_executable) or 'uv'
         return [
-            'uv', 'pip', 'install', '--python', python_executable,
-            *reqs, *find_links_args, *index_args, *extra,
+            uv_executable, 'pip', 'install', '--python', python_executable,
+            *reqs, *constraint_args, *find_links_args, *index_args, *extra,
         ]
     progress_args = _pip_progress_args(extra, env, python_executable)
     if resolved_backend == 'conda-pip':
         return [
             'conda', 'run', '-p', python_prefix,
             python_executable, '-m', 'pip', 'install',
-            *reqs, *progress_args, *find_links_args, *index_args, *extra,
+            *reqs, *constraint_args, *progress_args, *find_links_args, *index_args, *extra,
         ]
     return [
         python_executable,
@@ -118,6 +155,7 @@ def build_install_command(
         'pip',
         'install',
         *reqs,
+        *constraint_args,
         '--prefer-binary',
         '--disable-pip-version-check',
         '--no-warn-script-location',
@@ -191,6 +229,7 @@ def _pip_supports_raw_progress(python_executable: str, env: dict) -> bool:
 def install(
     requirements: Iterable[str] = (),
     requirements_file: str = '',
+    constraint_files: Iterable[str] = (),
     backend: str = 'auto',
     extra_args: str = '',
     env: Optional[dict] = None,
@@ -210,6 +249,7 @@ def install(
     command = build_install_command(
         requirements=requirements,
         requirements_file=requirements_file,
+        constraint_files=constraint_files,
         backend=backend,
         extra_args=extra_args,
         env=install_env,

@@ -99,6 +99,7 @@ TRANSLATE_DIR = osp.join(RESOURCE_DIR, 'translate')
 DISPLAY_LANGUAGE_MAP = {
     "English": "English",
     "简体中文": "zh_CN",
+    "繁體中文": "zh_TW",
     "Русский": "ru_RU",
     "Português (Brasil)": "pt_BR",
     "한국어": "ko_KR",
@@ -119,6 +120,24 @@ DEFAULT_DISPLAY_LANG = 'English'
 USE_PYSIDE6 = False
 ON_MACOS = sys.platform == 'darwin'
 ON_WINDOWS = sys.platform == 'win32'
+
+def _detect_apple_silicon() -> bool:
+    if not ON_MACOS:
+        return False
+    import platform
+    if platform.machine().lower() in {'arm64', 'aarch64'}:
+        return True
+    try:
+        import subprocess
+        out = subprocess.run(
+            ['sysctl', '-n', 'hw.optional.arm64'],
+            capture_output=True, text=True, timeout=2,
+        )
+        return out.stdout.strip() == '1'
+    except Exception:
+        return False
+
+ON_APPLE_SILICON = _detect_apple_silicon()
 HEADLESS = False
 HEADLESS_CONTINUOUS = False
 DEBUG = False
@@ -152,6 +171,12 @@ showed_exception = set()
 create_errdialog_in_mainthread = lambda *args, **kwargs: None
 
 create_infodialog_in_mainthread = lambda *args, **kwargs: None
+
+show_llm_key_dialog_in_mainthread = lambda *args, **kwargs: None
+
+show_llm_model_dialog_in_mainthread = lambda *args, **kwargs: None
+
+show_llm_base_url_dialog_in_mainthread = lambda *args, **kwargs: None
 
 def load_cache():
     global cache_data
