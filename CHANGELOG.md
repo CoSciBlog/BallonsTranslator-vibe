@@ -30,6 +30,8 @@
 - Fixed pipeline-finish export flag handling for GUI launches where `shared.args` has not been initialized.
 - Bumped the fork runtime version string to `1.5.7+vibe.101`.
 - Restored `parse_stylesheet(theme, reverse_icon)` compatibility so startup no longer fails during main-window stylesheet setup after the upstream theme-cache merge.
+- Bumped the fork runtime version string to `1.5.7+vibe.102`.
+- Updated the image-translation progress dialog to show only active pipeline stages, hiding Decensoring unless the decensor pipeline is actually running.
 
 ### Added
 - `Auto` source-language selection for the legacy `ChatGPT` and `ChatGPT_exp` translators, matching the LLM translator auto-detect source flow while keeping `Auto` out of target-language selectors.

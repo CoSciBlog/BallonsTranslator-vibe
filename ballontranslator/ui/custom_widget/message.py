@@ -241,6 +241,29 @@ class ImgtransProgressMessageBox(ProgressMessageBox):
 
         self.setFixedWidth(self.sizeHint().width())
 
+    def set_visible_stage_bars(
+        self,
+        *,
+        detect: bool = False,
+        ocr: bool = False,
+        inpaint: bool = False,
+        translate: bool = False,
+        decensor: bool = False,
+    ):
+        """Show only the pipeline stages that are active for the current run.
+
+        >>> box = object.__new__(ImgtransProgressMessageBox)  # doctest: +SKIP
+        >>> callable(getattr(ImgtransProgressMessageBox, 'set_visible_stage_bars'))
+        True
+        """
+
+        self.detect_bar.setVisible(detect)
+        self.ocr_bar.setVisible(ocr)
+        self.inpaint_bar.setVisible(inpaint)
+        self.translate_bar.setVisible(translate)
+        self.decensor_bar.setVisible(decensor)
+        self.fit_to_content()
+
     def fit_to_content(self):
         # Hidden stage bars affect height, so recompute before each RUN display.
         layout = self.layout()
@@ -308,16 +331,14 @@ class ImgtransProgressMessageBox(ProgressMessageBox):
         self.stop_all_button.setEnabled(True)
         self.stop_all_button.setText(self.tr('Stop All'))
 
-    def show_all_bars(self):
-        self.detect_bar.show()
-        self.ocr_bar.show()
-        self.translate_bar.show()
-        self.inpaint_bar.show()
-        self.decensor_bar.show()
+    def show_all_bars(self, include_decensor: bool = False):
+        self.set_visible_stage_bars(
+            detect=True,
+            ocr=True,
+            inpaint=True,
+            translate=True,
+            decensor=include_decensor,
+        )
 
     def hide_all_bars(self):
-        self.detect_bar.hide()
-        self.ocr_bar.hide()
-        self.translate_bar.hide()
-        self.inpaint_bar.hide()
-        self.decensor_bar.hide()
+        self.set_visible_stage_bars()

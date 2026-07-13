@@ -1765,10 +1765,13 @@ class ModuleManager(QObject):
     def _startImgtransPipeline(self, pages_to_process=None):
         if self.prepare_msgbox is not None and self.prepare_msgbox.isVisible():
             self.prepare_msgbox.done(0)
-        self.progress_msgbox.detect_bar.setVisible(cfg_module.enable_detect)
-        self.progress_msgbox.ocr_bar.setVisible(cfg_module.enable_ocr)
-        self.progress_msgbox.translate_bar.setVisible(cfg_module.enable_translate)
-        self.progress_msgbox.inpaint_bar.setVisible(cfg_module.enable_inpaint)
+        self.progress_msgbox.set_visible_stage_bars(
+            detect=cfg_module.enable_detect,
+            ocr=cfg_module.enable_ocr,
+            inpaint=cfg_module.enable_inpaint,
+            translate=cfg_module.enable_translate,
+            decensor=False,
+        )
         self.progress_msgbox.zero_progress()
         self.progress_msgbox.show_fitted()
         self.imgtrans_thread.runImgtransPipeline(self.imgtrans_proj, pages_to_process)
@@ -1796,8 +1799,7 @@ class ModuleManager(QObject):
         if len(pages_to_process) == 0:
             return
 
-        self.progress_msgbox.hide_all_bars()
-        self.progress_msgbox.decensor_bar.show()
+        self.progress_msgbox.set_visible_stage_bars(decensor=True)
         self.progress_msgbox.zero_progress()
         self.progress_msgbox.show_fitted()
         total = len(pages_to_process)
@@ -1853,13 +1855,11 @@ class ModuleManager(QObject):
     def _startBlktransPipeline(self, blk_list: List[TextBlock], tgt_img: np.ndarray, mode: int, blk_ids: List[int], tgt_mask):
         if self.prepare_msgbox is not None and self.prepare_msgbox.isVisible():
             self.prepare_msgbox.done(0)
-        self.progress_msgbox.hide_all_bars()
-        if mode >= 0 and mode < 3:
-            self.progress_msgbox.ocr_bar.show()
-        if mode >= 2:
-            self.progress_msgbox.inpaint_bar.show()
-        if mode != 0 and mode < 3:
-            self.progress_msgbox.translate_bar.show()
+        self.progress_msgbox.set_visible_stage_bars(
+            ocr=mode >= 0 and mode < 3,
+            inpaint=mode >= 2,
+            translate=mode != 0 and mode < 3,
+        )
         self.progress_msgbox.zero_progress()
         self.progress_msgbox.show_fitted()
         self.imgtrans_thread.runBlktransPipeline(blk_list, tgt_img, mode, blk_ids, tgt_mask)
