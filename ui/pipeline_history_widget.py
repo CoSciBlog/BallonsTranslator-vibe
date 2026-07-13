@@ -17,19 +17,21 @@ class PipelineHistoryWindow(QDialog):
     HEADERS = [
         'Started',
         'Pipeline',
+        'Step',
         'Status',
         'Duration',
         'Pages',
-        'Translator',
+        'Module',
         'LLM / Model',
         'Provider',
+        'Reasoning',
     ]
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self.imgtrans_proj: ProjImgTrans = None
         self.setWindowTitle(self.tr('Pipeline History'))
-        self.resize(980, 520)
+        self.resize(1180, 560)
 
         self.path_label = QLabel()
         self.path_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
@@ -73,28 +75,94 @@ class PipelineHistoryWindow(QDialog):
 
         self.path_label.setText(self.imgtrans_proj.pipeline_history_path())
         entries = self.imgtrans_proj.load_pipeline_history().get('entries', [])
-        entries = list(reversed(entries))
+        rows = []
+        for entry in reversed(entries):
+            rows.extend(self._entry_rows(entry))
         self.table.setSortingEnabled(False)
-        self.table.setRowCount(len(entries))
-        for row, entry in enumerate(entries):
-            modules = entry.get('modules', {}) if isinstance(entry, dict) else {}
-            translator = modules.get('translator', {}) if isinstance(modules, dict) else {}
-            values = [
-                entry.get('started_at', ''),
-                entry.get('pipeline', entry.get('process', '')),
-                entry.get('status', ''),
-                self._format_duration(entry.get('duration_seconds')),
-                str(entry.get('page_count', '')),
-                translator.get('name', ''),
-                translator.get('effective_model', translator.get('model', '')),
-                translator.get('provider', ''),
-            ]
+        self.table.setRowCount(len(rows))
+        for row, values in enumerate(rows):
             for column, value in enumerate(values):
                 item = QTableWidgetItem(str(value))
                 item.setToolTip(str(value))
                 self.table.setItem(row, column, item)
         self.table.setSortingEnabled(True)
         self.table.resizeColumnsToContents()
+
+    @classmethod
+    def _entry_rows(cls, entry):
+        if not isinstance(entry, dict):
+            return []
+        common = [
+            entry.get('started_at', ''),
+            entry.get('pipeline', entry.get('process', '')),
+        ]
+        summary = common + [
+            'Pipeline',
+            entry.get('status', ''),
+            cls._format_duration(entry.get('duration_seconds')),
+            str(entry.get('page_count', '')),
+            '',
+            '',
+            '',
+            '',
+        ]
+        rows = [summary]
+        for step in cls._history_steps(entry):
+            if not step.get('enabled'):
+                continue
+            module = step.get('module', {})
+            if not isinstance(module, dict):
+                module = {}
+            provider = str(module.get('provider', ''))
+            reasoning = ''
+            if provider.casefold() == 'ollama':
+                reasoning = cls.tristate_text(module.get('reasoning'))
+            rows.append(common + [
+                step.get('label', step.get('step', '')),
+                step.get('status', entry.get('status', '')),
+                cls._format_duration(step.get('duration_seconds')),
+                str(entry.get('page_count', '')),
+                module.get('name', ''),
+                module.get('effective_model', module.get('model', '')),
+                provider,
+                reasoning,
+            ])
+        return rows
+
+    @staticmethod
+    def _history_steps(entry):
+        steps = entry.get('steps')
+        if isinstance(steps, list):
+            return [step for step in steps if isinstance(step, dict)]
+
+        stages = entry.get('stages', {})
+        modules = entry.get('modules', {})
+        if not isinstance(stages, dict):
+            stages = {}
+        if not isinstance(modules, dict):
+            modules = {}
+        definitions = [
+            ('text_detection', 'Text Detection', 'detect', 'textdetector'),
+            ('ocr', 'OCR', 'ocr', 'ocr'),
+            ('translate', 'Translate', 'translate', 'translator'),
+            ('inpaint', 'Inpaint', 'inpaint', 'inpainter'),
+        ]
+        return [
+            {
+                'step': step,
+                'label': label,
+                'enabled': bool(stages.get(stage_key)),
+                'status': entry.get('status', ''),
+                'module': modules.get(module_key, {}),
+            }
+            for step, label, stage_key, module_key in definitions
+        ]
+
+    @staticmethod
+    def tristate_text(value) -> str:
+        if value is None or value == '':
+            return ''
+        return 'Yes' if bool(value) else 'No'
 
     @staticmethod
     def _format_duration(value) -> str:

@@ -1,5 +1,19 @@
 # Changelogs
 
+### 2026-07-14
+[v1.4.0-vibe.89] Pipeline history step entries
+Added:
+1. Stored Text Detection, OCR, Translate, and Inpaint as individual entries within each pipeline-history run.
+2. Added a Reasoning column that shows the saved Ollama reasoning state.
+
+Changed:
+1. Updated `pipeline_history.json` to schema version 2 while keeping schema-version-1 histories readable.
+2. Updated the history window to show a pipeline summary plus separate enabled-step rows with module/model/provider values.
+3. Updated README and changelog documentation.
+
+Version:
+1. Bumped the fork runtime version string to `1.4.0-vibe.89`.
+
 ### 2026-07-13
 [v1.4.0-vibe.88] Hide Decensor UI
 Changed:

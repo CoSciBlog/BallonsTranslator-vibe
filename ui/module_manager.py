@@ -1264,7 +1264,16 @@ class ModuleManager(QObject):
             return {}
         info = {'name': getattr(module, 'name', module.__class__.__name__)}
         params = getattr(module, 'params', None) or {}
-        for key in ['provider', 'model', 'override model', 'endpoint', 'version', 'device']:
+        for key in [
+            'provider',
+            'model',
+            'override model',
+            'endpoint',
+            'version',
+            'device',
+            'reasoning',
+            'reasoning level',
+        ]:
             if key not in params:
                 continue
             try:
@@ -1288,8 +1297,55 @@ class ModuleManager(QObject):
             'inpainter': self._module_history_info(self.inpainter),
         }
 
+    @staticmethod
+    def _pipeline_history_stages(pipeline_name: str) -> Dict:
+        if pipeline_name in {'translation_only_pipeline', 'llm_review_pipeline'}:
+            return {
+                'detect': False,
+                'ocr': False,
+                'translate': True,
+                'inpaint': False,
+                'inpaint_optimization': False,
+            }
+        if pipeline_name == 'inpaint_optimization_pipeline':
+            return {
+                'detect': False,
+                'ocr': False,
+                'translate': False,
+                'inpaint': True,
+                'inpaint_optimization': True,
+            }
+        return {
+            'detect': bool(cfg_module.enable_detect),
+            'ocr': bool(cfg_module.enable_ocr),
+            'translate': bool(cfg_module.enable_translate),
+            'inpaint': bool(cfg_module.enable_inpaint),
+            'inpaint_optimization': bool(cfg_module.enable_inpaint_optimization),
+        }
+
+    @staticmethod
+    def _pipeline_history_steps(stages: Dict, modules: Dict) -> List[Dict]:
+        definitions = [
+            ('text_detection', 'Text Detection', 'detect', 'textdetector'),
+            ('ocr', 'OCR', 'ocr', 'ocr'),
+            ('translate', 'Translate', 'translate', 'translator'),
+            ('inpaint', 'Inpaint', 'inpaint', 'inpainter'),
+        ]
+        return [
+            {
+                'step': step,
+                'label': label,
+                'enabled': bool(stages.get(stage_key)),
+                'status': 'running' if stages.get(stage_key) else 'skipped',
+                'module': modules.get(module_key, {}),
+            }
+            for step, label, stage_key, module_key in definitions
+        ]
+
     def _start_pipeline_history(self, pipeline_name: str, pages_to_process, process_pages: List[str]):
         self.active_pipeline_started_at = time.time()
+        stages = self._pipeline_history_stages(pipeline_name)
+        modules = self._pipeline_history_modules()
         entry = {
             'pipeline': pipeline_name,
             'process': pipeline_name,
@@ -1299,14 +1355,9 @@ class ModuleManager(QObject):
             'page_count': len(process_pages),
             'pages_requested': list(pages_to_process) if pages_to_process else None,
             'pages_processed': list(process_pages),
-            'stages': {
-                'detect': bool(cfg_module.enable_detect),
-                'ocr': bool(cfg_module.enable_ocr),
-                'translate': bool(cfg_module.enable_translate),
-                'inpaint': bool(cfg_module.enable_inpaint),
-                'inpaint_optimization': bool(cfg_module.enable_inpaint_optimization),
-            },
-            'modules': self._pipeline_history_modules(),
+            'stages': stages,
+            'modules': modules,
+            'steps': self._pipeline_history_steps(stages, modules),
         }
         self.active_pipeline_history_id = self.imgtrans_proj.append_pipeline_history(entry)
         LOGGER.info(f'Pipeline history started: {pipeline_name} ({self.active_pipeline_history_id})')
@@ -1315,11 +1366,23 @@ class ModuleManager(QObject):
         if not self.active_pipeline_history_id:
             return
         started_at = self.active_pipeline_started_at or time.time()
+        modules = self._pipeline_history_modules()
+        stages = self._pipeline_history_stages('')
+        history = self.imgtrans_proj.load_pipeline_history()
+        for entry in reversed(history.get('entries', [])):
+            if entry.get('id') == self.active_pipeline_history_id:
+                stages = entry.get('stages', stages)
+                break
+        steps = self._pipeline_history_steps(stages, modules)
+        for step in steps:
+            if step['enabled']:
+                step['status'] = status
         updates = {
             'status': status,
             'finished_at': ProjImgTrans.utc_now_iso(),
             'duration_seconds': round(max(0.0, time.time() - started_at), 3),
-            'modules': self._pipeline_history_modules(),
+            'modules': modules,
+            'steps': steps,
         }
         if self.imgtrans_proj.update_pipeline_history_entry(self.active_pipeline_history_id, updates):
             LOGGER.info(

@@ -204,15 +204,15 @@ class ProjImgTrans:
     def load_pipeline_history(self) -> Dict:
         history_path = self.pipeline_history_path()
         if not osp.exists(history_path):
-            return {'schema_version': 1, 'entries': []}
+            return {'schema_version': 2, 'entries': []}
         try:
             with open(history_path, 'r', encoding='utf8') as f:
                 data = json.loads(f.read())
         except Exception as e:
             LOGGER.warning(f'Failed to load pipeline history {history_path}: {e}')
-            return {'schema_version': 1, 'entries': []}
+            return {'schema_version': 2, 'entries': []}
         if not isinstance(data, dict):
-            return {'schema_version': 1, 'entries': []}
+            return {'schema_version': 2, 'entries': []}
         entries = data.get('entries', [])
         if not isinstance(entries, list):
             entries = []
@@ -223,6 +223,7 @@ class ProjImgTrans:
 
     def append_pipeline_history(self, entry: Dict) -> str:
         history = self.load_pipeline_history()
+        history['schema_version'] = max(2, int(history.get('schema_version', 1) or 1))
         entry_id = entry.get('id') or f'pipeline-{time.time_ns()}'
         entry['id'] = entry_id
         history['entries'].append(entry)

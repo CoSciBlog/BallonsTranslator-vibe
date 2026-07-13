@@ -4,6 +4,7 @@
 
 ### Added
 
+- Pipeline-history step entries for Text Detection, OCR, Translate, and Inpaint, including each step's selected module/model values and Ollama reasoning state.
 - `Auto` source-language selection for the legacy `ChatGPT` and `ChatGPT_exp` translators, matching the LLM translator auto-detect source flow while keeping `Auto` out of target-language selectors.
 - Newer OpenAI model options for the `ChatGPT`, `ChatGPT_exp`, `LLM_API_Translator`, and `LLM_API_Translator_2` selectors, including `gpt-5.5`, `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano`, and the `gpt-4.1` family.
 - Explicit `Gemini` provider option for `LLM_API_Translator` and `LLM_API_Translator_2`, using Google's OpenAI-compatible Gemini endpoint for translation.
@@ -96,6 +97,8 @@
 
 ### Changed
 
+- Updated pipeline-history storage to schema version 2 and expanded legacy schema-version-1 runs into per-step rows when displayed.
+- Bumped the fork runtime version string to `1.4.0-vibe.89`.
 - Default OpenAI model selections now use `gpt-5.5`; existing saved local settings and explicit override-model values are preserved.
 - Bumped the fork runtime version string to `1.4.0-vibe.83`.
 - Bumped the fork runtime version string to `1.4.0-vibe.84`.
