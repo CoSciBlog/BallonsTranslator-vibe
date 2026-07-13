@@ -2363,6 +2363,9 @@ class LLM_API_Translator(BaseTranslator):
         return f"{endpoint}/api/chat"
 
     def _create_ollama_completion(self, api_args: Dict):
+        return self._create_ollama_completion_with_retry(api_args, allow_reasoning_retry=True)
+
+    def _create_ollama_completion_with_retry(self, api_args: Dict, allow_reasoning_retry: bool):
         options = {
             "temperature": api_args.get("temperature", self.temperature),
             "top_p": api_args.get("top_p", self.top_p),
@@ -2387,6 +2390,23 @@ class LLM_API_Translator(BaseTranslator):
             json=payload,
             timeout=self.request_timeout,
         )
+        if response.status_code == 400 and allow_reasoning_retry and payload.get("think"):
+            self.logger.warning(
+                "Ollama rejected request with think enabled: %s. Retrying without think."
+                % response.text
+            )
+            retry_args = dict(api_args)
+            retry_extra_body = dict(retry_args.get("extra_body", {}))
+            retry_extra_body.pop("think", None)
+            if retry_extra_body:
+                retry_args["extra_body"] = retry_extra_body
+            else:
+                retry_args.pop("extra_body", None)
+            return self._create_ollama_completion_with_retry(
+                retry_args, allow_reasoning_retry=False
+            )
+        if response.status_code >= 400:
+            self.logger.error("Ollama API request failed: %s" % response.text)
         response.raise_for_status()
         response_data = response.json()
         content = response_data.get("message", {}).get("content", "")
