@@ -1,6 +1,6 @@
 from typing import List, Union, Tuple
 
-from qtpy.QtWidgets import QApplication, QPushButton, QKeySequenceEdit, QLayout, QGridLayout, QHBoxLayout, QVBoxLayout, QTreeView, QWidget, QLabel, QSizePolicy, QSpacerItem, QCheckBox, QSplitter, QScrollArea, QLineEdit, QFileDialog, QInputDialog, QMessageBox, QDialog
+from qtpy.QtWidgets import QApplication, QPushButton, QKeySequenceEdit, QLayout, QGridLayout, QHBoxLayout, QVBoxLayout, QTreeView, QWidget, QLabel, QSizePolicy, QSpacerItem, QCheckBox, QSplitter, QScrollArea, QLineEdit, QFileDialog, QInputDialog, QMessageBox, QDialog, QStackedWidget
 from qtpy.QtCore import Qt, Signal, QSize, QEvent, QItemSelection
 from qtpy.QtGui import QStandardItem, QStandardItemModel, QMouseEvent, QFont, QIntValidator, QDoubleValidator, QValidator, QFocusEvent
 
@@ -400,12 +400,14 @@ class ConfigPanel(QDialog):
 
     def _compact_settings_row(self, *widgets: QWidget) -> QWidget:
         row = QWidget()
-        layout = QHBoxLayout(row)
+        layout = QGridLayout(row)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(8)
-        for widget in widgets:
-            layout.addWidget(widget)
-        layout.addStretch(1)
+        columns = 3
+        for index, widget in enumerate(widgets):
+            layout.addWidget(widget, index // columns, index % columns)
+        for column in range(columns):
+            layout.setColumnStretch(column, 1)
         return row
 
     def _labeled_compact_widget(self, label: str, widget: QWidget, tooltip: str) -> QWidget:
@@ -430,9 +432,11 @@ class ConfigPanel(QDialog):
         self.setWindowTitle(self.tr('Settings'))
         self.setWindowModality(Qt.WindowModality.NonModal)
         self.setSizeGripEnabled(True)
-        self.resize(900, 720)
-        self.setMinimumSize(720, 520)
+        self.resize(1180, 760)
+        self.setMinimumSize(860, 600)
         self.configTable = ConfigTable()
+        self.configTable.setMinimumWidth(220)
+        self.configTable.setMaximumWidth(300)
         self.configTable.tableitem_pressed.connect(self.onTableItemPressed)
         self.configContent = ConfigContent()
         dlConfigPanel, dltableitem = self.addConfigBlock(self.tr('DL Module'))
@@ -445,6 +449,7 @@ class ConfigPanel(QDialog):
         label_startup = self.tr('Startup')
         label_upscaling = self.tr('Upscaling')
         label_page_filtering = self.tr('Page filtering')
+        label_pipeline = self.tr('Pipeline')
         label_post_merge = self.tr('Post-merge')
         label_typesetting = self.tr('Typesetting')
         label_save = self.tr('Save')
@@ -460,6 +465,7 @@ class ConfigPanel(QDialog):
         generalTableItem.appendRows([
             TableItem(label_upscaling, CONFIG_FONTSIZE_TABLE),
             TableItem(label_page_filtering, CONFIG_FONTSIZE_TABLE),
+            TableItem(label_pipeline, CONFIG_FONTSIZE_TABLE),
             TableItem(label_post_merge, CONFIG_FONTSIZE_TABLE),
             TableItem(label_settings_presets, CONFIG_FONTSIZE_TABLE),
             TableItem(label_startup, CONFIG_FONTSIZE_TABLE),
@@ -470,9 +476,9 @@ class ConfigPanel(QDialog):
         
         self.load_model_checker, msublock = checkbox_with_label(self.tr('Load models on demand'), discription=self.tr('Loads models only when needed. Saves idle RAM/VRAM; first use or module switch takes longer.'))
         self.load_model_checker.stateChanged.connect(self.on_load_model_changed)
-        dlConfigPanel.vlayout.addWidget(msublock)
+        dlConfigPanel.addSublock(msublock)
         self.empty_runcache_checker, msublock = checkbox_with_label(self.tr('Empty cache after RUN'), discription=self.tr('Releases framework caches after each RUN. Helps long sessions; repeated runs may need warm-up again.'))
-        dlConfigPanel.vlayout.addWidget(msublock)
+        dlConfigPanel.addSublock(msublock)
         self.empty_runcache_checker.stateChanged.connect(self.on_runcache_changed)
         self.unload_model_btn = QPushButton(parent=self)
         self.unload_model_btn.setMaximumWidth(500)
@@ -556,6 +562,19 @@ class ConfigPanel(QDialog):
         )
         self.skip_cover_title_pages_checker.stateChanged.connect(self.on_skip_cover_title_pages_changed)
 
+        generalConfigPanel.addTextLabel(label_pipeline)
+        self.translate_after_image_processing_checker, _ = generalConfigPanel.addCheckBox(
+            self.tr('Translate after image processing'),
+            discription=self.tr(
+                'Finish text detection, OCR, and inpainting for every page before starting '
+                'translation. This avoids overlapping translation with image processing and '
+                'can reduce concurrent RAM, VRAM, and API load, but usually increases total run time.'
+            ),
+        )
+        self.translate_after_image_processing_checker.stateChanged.connect(
+            self.on_translate_after_image_processing_changed
+        )
+
         generalConfigPanel.addTextLabel(label_post_merge)
         self.post_merge_checker, _ = generalConfigPanel.addCheckBox(
             self.tr('Merge nearby text boxes after pipeline'),
@@ -631,10 +650,10 @@ class ConfigPanel(QDialog):
         self.settings_import_current_btn = QPushButton(self.tr('Import settings file'), self)
         self.settings_import_current_btn.setToolTip(self.tr('Load a settings JSON file immediately without first saving it as a preset.'))
 
-        preset_buttons = QHBoxLayout()
+        preset_buttons = QGridLayout()
         preset_buttons.setContentsMargins(0, 0, 0, 0)
         preset_buttons.setSpacing(8)
-        for btn in [
+        for index, btn in enumerate([
             self.settings_apply_preset_btn,
             self.settings_refresh_presets_btn,
             self.settings_save_preset_btn,
@@ -642,9 +661,10 @@ class ConfigPanel(QDialog):
             self.settings_export_preset_btn,
             self.settings_export_current_btn,
             self.settings_import_current_btn,
-        ]:
-            preset_buttons.addWidget(btn)
-        preset_buttons.addStretch(1)
+        ]):
+            preset_buttons.addWidget(btn, index // 3, index % 3)
+        for column in range(3):
+            preset_buttons.setColumnStretch(column, 1)
         preset_layout.addLayout(preset_buttons)
         generalConfigPanel.addBlockWidget(preset_container)
 
@@ -844,11 +864,13 @@ class ConfigPanel(QDialog):
         self.searchurl_combobox.setFixedWidth(CONFIG_COMBOBOX_LONG)
         self.searchurl_combobox.currentTextChanged.connect(self.on_searchurl_changed)
 
+        self.configPages = self._build_config_pages()
         splitter = QSplitter(Qt.Orientation.Horizontal)
         splitter.addWidget(self.configTable)
-        splitter.addWidget(self.configContent)
-        splitter.setStretchFactor(0, 1)
-        splitter.setStretchFactor(1, 3)
+        splitter.addWidget(self.configPages)
+        splitter.setStretchFactor(0, 0)
+        splitter.setStretchFactor(1, 1)
+        splitter.setSizes([250, 930])
         hlayout = QHBoxLayout(self)
 
         hlayout.addWidget(splitter)
@@ -856,6 +878,49 @@ class ConfigPanel(QDialog):
         hlayout.setContentsMargins(0, 0, 0, 0)
 
         self.configTable.expandAll()
+        first_header = self.configTable.tm.item(0, 0)
+        if first_header is not None:
+            self.configTable.setCurrentIndex(first_header.index())
+            self.onTableItemPressed(0, -1)
+
+    def _build_config_pages(self) -> QStackedWidget:
+        pages = QStackedWidget(self)
+        self._config_page_indexes = {}
+        for idx0, block in enumerate(self.configContent.config_block_list):
+            sections = [(-1, block.header, [])]
+            sections.extend(
+                (idx1, label, []) for idx1, label in enumerate(block.label_list)
+            )
+            section_map = {idx1: widgets for idx1, _label, widgets in sections}
+            for subblock in block.subblock_list:
+                section_map.setdefault(subblock.idx1, []).append(subblock)
+
+            for idx1, title, widgets in sections:
+                page = self._create_config_page(title, widgets)
+                self._config_page_indexes[(idx0, idx1)] = pages.addWidget(page)
+        self.configContent.setParent(self)
+        self.configContent.hide()
+        return pages
+
+    def _create_config_page(self, title: QWidget, widgets: List[QWidget]) -> QScrollArea:
+        scroll = QScrollArea(self)
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QScrollArea.Shape.NoFrame)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        content = Widget()
+        layout = QVBoxLayout(content)
+        layout.setContentsMargins(24, 20, 24, 24)
+        layout.setSpacing(8)
+        layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        layout.addWidget(title)
+        for widget in widgets:
+            layout.addWidget(widget)
+        layout.addStretch(1)
+        scroll.setWidget(content)
+        for widget in content.findChildren(QWidget):
+            if hasattr(widget, 'setScrollWidget'):
+                widget.setScrollWidget(scroll)
+        return scroll
 
     def refresh_settings_presets(self, selected: str = None):
         current = selected or self.settings_preset_combobox.currentText()
@@ -967,7 +1032,9 @@ class ConfigPanel(QDialog):
         self.configContent.deactiveLabel()
 
     def onTableItemPressed(self, idx0, idx1):
-        self.configContent.setActiveLabel(idx0, idx1)
+        page_index = self._config_page_indexes.get((idx0, idx1))
+        if page_index is not None:
+            self.configPages.setCurrentIndex(page_index)
 
     def showConfigDialog(self):
         self._installOutsideClickFilter()
@@ -1092,6 +1159,11 @@ class ConfigPanel(QDialog):
 
     def on_skip_cover_title_pages_changed(self):
         pcfg.module.skip_cover_title_pages = self.skip_cover_title_pages_checker.isChecked()
+
+    def on_translate_after_image_processing_changed(self):
+        pcfg.module.translate_after_image_processing = (
+            self.translate_after_image_processing_checker.isChecked()
+        )
 
     def on_pronoun_review_changed(self):
         pcfg.module.pronoun_review_after_translation = self.pronoun_review_checker.isChecked()
@@ -1235,6 +1307,9 @@ class ConfigPanel(QDialog):
         self.let_autolayout_fit_bubble_checker.setChecked(pcfg.let_autolayout_fit_bubble_flag)
         self.let_autolayout_no_linebreak_checker.setChecked(pcfg.let_autolayout_no_linebreak_flag)
         self.skip_cover_title_pages_checker.setChecked(pcfg.module.skip_cover_title_pages)
+        self.translate_after_image_processing_checker.setChecked(
+            pcfg.module.translate_after_image_processing
+        )
         self.post_merge_checker.setChecked(pcfg.module.post_merge_textboxes)
         self.pronoun_review_checker.setChecked(pcfg.module.pronoun_review_after_translation)
         post_merge_modes = ['VERTICAL', 'HORIZONTAL', 'VERTICAL_THEN_HORIZONTAL', 'HORIZONTAL_THEN_VERTICAL']

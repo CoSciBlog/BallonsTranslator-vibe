@@ -1,6 +1,23 @@
 # Changelogs
 
 ### 2026-07-14
+[v1.4.0-vibe.90] Settings pages and pipeline order
+Added:
+1. Added `General -> Pipeline -> Translate after image processing` to defer translation until detection, OCR, and inpainting finish for all selected pages.
+
+Changed:
+1. Replaced the single long Settings page with an independent scrollable page for every navigation category and section.
+2. Reflowed wide multi-value settings and preset actions into compact multi-row grids.
+3. Increased the default Settings size while retaining a practical minimum size and a constrained navigation width.
+4. Updated README and changelog documentation.
+
+Fixed:
+1. Kept full-pipeline translation completion tracking active when OCR is disabled and existing text boxes are translated.
+
+Version:
+1. Bumped the fork runtime version string to `1.4.0-vibe.90`.
+
+### 2026-07-14
 [v1.4.0-vibe.89] Pipeline history step entries
 Added:
 1. Stored Text Detection, OCR, Translate, and Inpaint as individual entries within each pipeline-history run.

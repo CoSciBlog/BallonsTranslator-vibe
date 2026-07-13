@@ -807,10 +807,14 @@ class ImgtransThread(QThread):
         low_vram_trans = False
         background_first_step_trans = False
         unload_before_llm_refinement = False
+        translate_after_image_processing = bool(
+            cfg_module.translate_after_image_processing
+        )
         if self.translator is not None:
             low_vram_trans = self.translator.low_vram_mode
             background_first_step_trans = bool(
-                hasattr(self.translator, 'pipeline_pretranslation_enabled')
+                not translate_after_image_processing
+                and hasattr(self.translator, 'pipeline_pretranslation_enabled')
                 and self.translator.pipeline_pretranslation_enabled()
             )
             unload_before_llm_refinement = bool(
@@ -819,6 +823,7 @@ class ImgtransThread(QThread):
             )
             self.parallel_trans = not self.translator.is_computational_intensive() \
                 and not low_vram_trans \
+                and not translate_after_image_processing \
                 and not background_first_step_trans
         else:
             self.parallel_trans = False
@@ -918,7 +923,7 @@ class ImgtransThread(QThread):
                     self.translate_thread.push_pagekey_queue(imgname)
                 elif self.parallel_trans:
                     self.translate_thread.push_pagekey_queue(imgname)
-                elif not low_vram_trans:
+                elif not low_vram_trans and not translate_after_image_processing:
                     self._translate_textblocks(imgname, blk_list)
                     self.translate_counter += 1
                     self.update_translate_progress.emit(self.translate_counter)
@@ -943,7 +948,11 @@ class ImgtransThread(QThread):
                 if len(blk_removed) > 0:
                     self.imgtrans_proj.load_mask_by_imgname
         
-        if cfg_module.enable_translate and (low_vram_trans or background_first_step_trans):
+        if cfg_module.enable_translate and (
+            low_vram_trans
+            or background_first_step_trans
+            or translate_after_image_processing
+        ):
             if background_first_step_trans:
                 while self.translate_thread.isRunning():
                     if self.stop_requested:
@@ -1061,9 +1070,7 @@ class ImgtransThread(QThread):
             return self.translate_counter == self.num_pages
         if self.review_only:
             return self.translate_counter == self.num_pages
-        if self.imgtrans_proj is None \
-            or not cfg_module.enable_ocr \
-            or not cfg_module.enable_translate:
+        if self.imgtrans_proj is None or not cfg_module.enable_translate:
             return True
         if self.parallel_trans:
             # 检查翻译计数器是否达到需要处理的页面数

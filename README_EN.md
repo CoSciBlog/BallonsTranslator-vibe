@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.89`
+Fork release: `1.4.0-vibe.90`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -26,6 +26,8 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Fixed `manga_ocr` startup with current Transformers releases by using the image processor API required by the local `manga-ocr-base` vision model.
 - Added a project glossary window, project-level glossary persistence in each project's `glossary.json`, and a custom glossary prompt for LLM translation guidance.
 - Added project-level pipeline history in `pipeline_history.json`, with a left-sidebar history window that lists Text Detection, OCR, Translate, and Inpaint as separate step entries. Each step keeps its module/model values, and Ollama translation entries show whether reasoning was enabled.
+- Reworked Settings into separate navigation pages for every category and section instead of one long shared page, with denser responsive grids for multi-value controls and preset actions.
+- Added `General -> Pipeline -> Translate after image processing` to defer translation until text detection, OCR, and inpainting have finished for every page.
 - Changed Settings to open in a separate non-modal window, following the upstream 1.5.x layout behavior while keeping the Vibe-specific settings intact.
 - Added an optional settings safety switch that prevents mouse wheel changes on combo boxes and spin boxes, plus wider input fields for long API keys, URLs, and prompts.
 - Added optional pre-detection page upscaling with factor, quality, maximum size, and skip-threshold settings.
@@ -267,6 +269,12 @@ Use `Tools -> Batch Upscale Folders Using Settings...` to select a parent folder
 The General settings page also places `Post-merge` near the top, before settings presets. It keeps concise labels for vertical gap, horizontal gap, and overlap thresholds while retaining the longer behavior descriptions in hover tooltips.
 
 The left sidebar Region Merge icon applies these persisted Post-merge mode, gap, and overlap values to nearby text boxes on the current page. Use `Tools -> Region Merge Tool` when label filters, reading directions, or other advanced dialog-only rules are needed.
+
+## Settings pages and pipeline order
+
+The Settings navigation opens each category or section on its own scrollable page. Text Detection, OCR, Inpaint, Translator, Upscaling, Page filtering, Pipeline, Post-merge, presets, Startup, Typesetting, Save, and SalaDict no longer share one continuous scroll surface. Wide multi-value controls and preset actions use compact multi-row grids to remain usable at smaller window sizes and high display scaling.
+
+Enable `Settings -> General -> Pipeline -> Translate after image processing` when translation must begin only after detection, OCR, and inpainting have completed for all selected pages. This disables translation/image-processing overlap, including the Two-Step background first pass. It can reduce simultaneous RAM, VRAM, and API usage, but normally increases total pipeline time. Leave it disabled to retain the faster page-by-page or parallel behavior supported by the selected translator.
 
 ## Intermediate image saving
 

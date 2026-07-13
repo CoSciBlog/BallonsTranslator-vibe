@@ -4,6 +4,7 @@
 
 ### Added
 
+- A global `Translate after image processing` pipeline option that runs translation only after detection, OCR, and inpainting finish for all selected pages.
 - Pipeline-history step entries for Text Detection, OCR, Translate, and Inpaint, including each step's selected module/model values and Ollama reasoning state.
 - `Auto` source-language selection for the legacy `ChatGPT` and `ChatGPT_exp` translators, matching the LLM translator auto-detect source flow while keeping `Auto` out of target-language selectors.
 - Newer OpenAI model options for the `ChatGPT`, `ChatGPT_exp`, `LLM_API_Translator`, and `LLM_API_Translator_2` selectors, including `gpt-5.5`, `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano`, and the `gpt-4.1` family.
@@ -97,6 +98,9 @@
 
 ### Changed
 
+- Replaced the single long Settings scroll page with separate pages for every navigation category and section.
+- Reflowed wide Settings controls and preset actions into compact multi-row grids for smaller windows and high-DPI displays.
+- Bumped the fork runtime version string to `1.4.0-vibe.90`.
 - Updated pipeline-history storage to schema version 2 and expanded legacy schema-version-1 runs into per-step rows when displayed.
 - Bumped the fork runtime version string to `1.4.0-vibe.89`.
 - Default OpenAI model selections now use `gpt-5.5`; existing saved local settings and explicit override-model values are preserved.
@@ -161,6 +165,7 @@
 
 ### Fixed
 
+- Full pipeline completion no longer treats translation as already finished merely because OCR is disabled; existing text boxes can still be translated, including in deferred mode.
 - Post-translation LLM review now keeps the existing draft translations for a chunk when an API timeout or retryable provider error occurs, preventing optional review failures from aborting an otherwise completed translation pipeline.
 - Reloaded a `lama_large_512px` model if it is unloaded between preprocessing and inference instead of attempting to call `None`.
 - Retried OCR with the configured batch fallback backend when the selected backend recognizes no text.
