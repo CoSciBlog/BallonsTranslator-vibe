@@ -1,3 +1,4 @@
+import json
 from typing import List, Callable
 
 from modules import GET_VALID_INPAINTERS, GET_VALID_TEXTDETECTORS, GET_VALID_TRANSLATORS, GET_VALID_OCR, \
@@ -8,10 +9,12 @@ from .custom_widget import ConfigComboBox, ParamComboBox, NoBorderPushBtn, Param
 from .tooltip_utils import wrap_tooltip
 from utils.shared import CONFIG_COMBOBOX_LONG, size2width, CONFIG_COMBOBOX_SHORT, CONFIG_COMBOBOX_HEIGHT
 from utils.config import pcfg, sample_module_param_value
+from utils.ollama import OLLAMA_DEFAULT_ENDPOINT, ollama_tags_endpoint
 
-from qtpy.QtWidgets import QPlainTextEdit, QHBoxLayout, QVBoxLayout, QWidget, QLabel, QCheckBox, QLineEdit, QGridLayout, QPushButton, QSizePolicy
-from qtpy.QtCore import Qt, Signal
+from qtpy.QtWidgets import QPlainTextEdit, QHBoxLayout, QVBoxLayout, QWidget, QLabel, QCheckBox, QLineEdit, QGridLayout, QPushButton, QSizePolicy, QTableWidget, QTableWidgetItem, QComboBox, QAbstractItemView, QHeaderView
+from qtpy.QtCore import Qt, Signal, QUrl, QTimer
 from qtpy.QtGui import QDoubleValidator
+from qtpy.QtNetwork import QNetworkAccessManager, QNetworkRequest
 
 
 WIDE_PARAM_KEYWORDS = (
@@ -158,6 +161,190 @@ class ParamPushButton(QPushButton):
         self.paramwidget_edited.emit(self.param_key, '')
 
 
+class OllamaModelManager(QWidget):
+    paramwidget_edited = Signal(str, dict)
+    model_selected = Signal(str)
+
+    def __init__(self, param_key: str, preferences: dict, parent=None):
+        super().__init__(parent)
+        self.param_key = param_key
+        self.preferences = self._normalize_preferences(preferences)
+        self.endpoint_getter = lambda: OLLAMA_DEFAULT_ENDPOINT
+        self.provider_getter = lambda: ''
+        self._updating = False
+        self._reply = None
+        self.network_manager = QNetworkAccessManager(self)
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 8, 0, 8)
+        layout.setSpacing(8)
+        title = ParamNameLabel(self.tr('Installed Ollama models'))
+        title.setToolTip(self.tr(
+            'Queries the configured Ollama server. Favorites and ratings are saved '
+            'separately for this translator profile.'
+        ))
+        layout.addWidget(title)
+
+        actions = QHBoxLayout()
+        self.refresh_button = QPushButton(self.tr('Refresh models'))
+        self.use_button = QPushButton(self.tr('Use selected model'))
+        self.status_label = QLabel()
+        actions.addWidget(self.refresh_button)
+        actions.addWidget(self.use_button)
+        actions.addWidget(self.status_label, 1)
+        layout.addLayout(actions)
+
+        self.table = QTableWidget(0, 3)
+        self.table.setHorizontalHeaderLabels([
+            self.tr('Favorite'), self.tr('Model'), self.tr('Rating')
+        ])
+        self.table.setAlternatingRowColors(True)
+        self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        self.table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
+        self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.table.verticalHeader().setVisible(False)
+        header = self.table.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
+        self.table.setMinimumHeight(190)
+        self.table.setMinimumWidth(CONFIG_FIELD_WIDE)
+        layout.addWidget(self.table)
+
+        self.refresh_button.clicked.connect(self.refresh_models)
+        self.use_button.clicked.connect(self.use_selected_model)
+        self.table.doubleClicked.connect(lambda _index: self.use_selected_model())
+        self._update_availability()
+
+    @staticmethod
+    def _normalize_preferences(preferences) -> dict:
+        if not isinstance(preferences, dict):
+            return {}
+        normalized = {}
+        for model, values in preferences.items():
+            if not isinstance(values, dict):
+                values = {}
+            try:
+                rating = max(1, min(5, int(values.get('rating', 3))))
+            except (TypeError, ValueError):
+                rating = 3
+            normalized[str(model)] = {
+                'favorite': bool(values.get('favorite', False)),
+                'rating': rating,
+            }
+        return normalized
+
+    def configure(self, endpoint_getter, provider_getter):
+        self.endpoint_getter = endpoint_getter
+        self.provider_getter = provider_getter
+        self._update_availability()
+
+    def _update_availability(self):
+        enabled = str(self.provider_getter()).casefold() == 'ollama'
+        self.refresh_button.setEnabled(enabled and self._reply is None)
+        self.use_button.setEnabled(enabled and self.table.rowCount() > 0)
+        if not enabled:
+            self.status_label.setText(self.tr('Select Ollama as provider.'))
+        elif self.table.rowCount() == 0 and self._reply is None:
+            self.status_label.setText(self.tr('Refresh to query installed models.'))
+
+    def refresh_models(self):
+        if str(self.provider_getter()).casefold() != 'ollama' or self._reply is not None:
+            return
+        self.status_label.setText(self.tr('Querying Ollama...'))
+        self.refresh_button.setEnabled(False)
+        self._reply = self.network_manager.get(
+            QNetworkRequest(QUrl(ollama_tags_endpoint(self.endpoint_getter())))
+        )
+        timer = QTimer(self._reply)
+        timer.setSingleShot(True)
+        timer.timeout.connect(self._reply.abort)
+        timer.start(8000)
+        self._reply.finished.connect(self._on_models_finished)
+
+    def _on_models_finished(self):
+        reply = self._reply
+        self._reply = None
+        try:
+            payload = json.loads(bytes(reply.readAll()).decode('utf-8'))
+            if not isinstance(payload, dict) or not isinstance(payload.get('models'), list):
+                raise ValueError('Invalid Ollama /api/tags response')
+            models = payload['models']
+            names = sorted({
+                str(model.get('name') or model.get('model')).strip()
+                for model in models
+                if isinstance(model, dict) and (model.get('name') or model.get('model'))
+            })
+            self._set_models(names)
+            self.status_label.setText(self.tr('%d installed model(s).') % len(names))
+        except Exception as error:
+            detail = reply.errorString()
+            if not detail or detail == 'Unknown error':
+                detail = str(error)
+            self.status_label.setText(self.tr('Ollama query failed: ') + detail)
+        finally:
+            reply.deleteLater()
+            self._update_availability()
+
+    def _set_models(self, names):
+        for name in names:
+            self.preferences.setdefault(name, {'favorite': False, 'rating': 3})
+        ordered = sorted(
+            names,
+            key=lambda name: (
+                not self.preferences[name]['favorite'],
+                -self.preferences[name]['rating'],
+                name.casefold(),
+            ),
+        )
+        self._updating = True
+        self.table.setRowCount(len(ordered))
+        for row, name in enumerate(ordered):
+            favorite = QCheckBox()
+            favorite.setChecked(self.preferences[name]['favorite'])
+            favorite.stateChanged.connect(
+                lambda _state, model=name, checkbox=favorite:
+                self._set_favorite(model, checkbox.isChecked())
+            )
+            container = QWidget()
+            container_layout = QHBoxLayout(container)
+            container_layout.setContentsMargins(0, 0, 0, 0)
+            container_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            container_layout.addWidget(favorite)
+            self.table.setCellWidget(row, 0, container)
+            self.table.setItem(row, 1, QTableWidgetItem(name))
+
+            rating = QComboBox()
+            rating.addItems(['1', '2', '3', '4', '5'])
+            rating.setCurrentText(str(self.preferences[name]['rating']))
+            rating.currentTextChanged.connect(
+                lambda value, model=name: self._set_rating(model, value)
+            )
+            self.table.setCellWidget(row, 2, rating)
+        self._updating = False
+        if ordered:
+            self.table.selectRow(0)
+        self.paramwidget_edited.emit(self.param_key, dict(self.preferences))
+
+    def _set_favorite(self, model: str, favorite: bool):
+        if self._updating:
+            return
+        self.preferences[model]['favorite'] = bool(favorite)
+        self.paramwidget_edited.emit(self.param_key, dict(self.preferences))
+
+    def _set_rating(self, model: str, rating):
+        if self._updating:
+            return
+        self.preferences[model]['rating'] = max(1, min(5, int(rating)))
+        self.paramwidget_edited.emit(self.param_key, dict(self.preferences))
+
+    def use_selected_model(self):
+        row = self.table.currentRow()
+        item = self.table.item(row, 1) if row >= 0 else None
+        if item is not None:
+            self.model_selected.emit(item.text())
+
+
 class ParamWidget(QWidget):
 
     paramwidget_edited = Signal(str, dict)
@@ -173,6 +360,8 @@ class ParamWidget(QWidget):
         param_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
         layout.addLayout(param_layout)
         layout.addStretch(-1)
+        self.param_widget_map = {}
+        self.ollama_model_manager = None
 
         if 'description' in params:
             self.setToolTip(wrap_tooltip(params['description']))
@@ -261,6 +450,11 @@ class ParamWidget(QWidget):
                 elif param_type == 'check_group':
                     param_widget = ParamCheckGroup(param_key, check_group=value)
 
+                elif param_type == 'ollama_models':
+                    param_widget = OllamaModelManager(param_key, value)
+                    self.ollama_model_manager = param_widget
+                    require_label = False
+
                 if param_widget is not None:
                     param_widget.paramwidget_edited.connect(self.on_paramwidget_edited)
 
@@ -275,6 +469,7 @@ class ParamWidget(QWidget):
                 param_layout.addWidget(param_label, ii, 0)
                 widget_idx = 1
             if param_widget is not None:
+                self.param_widget_map[param_key] = param_widget
                 pw_lo = None
                 if hasattr(param_widget, 'flush_btn') or hasattr(param_widget, 'path_select_btn') or reset_btn is not None:
                     pw_lo = QHBoxLayout()
@@ -294,6 +489,61 @@ class ParamWidget(QWidget):
             else:
                 v = params[param_key]
                 raise ValueError(f"Failed to initialize widget for key-value pair: {param_key}-{v}")
+
+        if self.ollama_model_manager is not None:
+            provider_widget = self.param_widget_map.get('provider')
+            endpoint_widget = self.param_widget_map.get('endpoint')
+            model_widget = self.param_widget_map.get('model')
+            override_widget = self.param_widget_map.get('override model')
+            endpoint_value = endpoint_widget.text().strip() if endpoint_widget is not None else ''
+            if (
+                endpoint_widget is not None
+                and provider_widget is not None
+                and provider_widget.currentText().casefold() == 'ollama'
+                and endpoint_value.rstrip('/') in {
+                    '',
+                    'http://localhost:11434',
+                    'http://localhost:11434/v1',
+                }
+            ):
+                endpoint_widget.setText(OLLAMA_DEFAULT_ENDPOINT)
+                params['endpoint']['value'] = OLLAMA_DEFAULT_ENDPOINT
+            self.ollama_model_manager.configure(
+                endpoint_getter=lambda: endpoint_widget.text().strip()
+                if endpoint_widget is not None else OLLAMA_DEFAULT_ENDPOINT,
+                provider_getter=lambda: provider_widget.currentText()
+                if provider_widget is not None else '',
+            )
+            if provider_widget is not None:
+                provider_widget.currentTextChanged.connect(
+                    lambda value: self._on_llm_provider_changed(
+                        value, endpoint_widget
+                    )
+                )
+            if model_widget is not None and override_widget is not None:
+                self.ollama_model_manager.model_selected.connect(
+                    lambda model: self._select_ollama_model(
+                        model_widget, override_widget, model
+                    )
+                )
+
+    @staticmethod
+    def _select_ollama_model(model_widget, override_widget, model: str):
+        model_widget.setCurrentText('OLLAMA: (override model field)')
+        override_widget.setText(model)
+
+    def _on_llm_provider_changed(self, provider: str, endpoint_widget):
+        if (
+            provider.casefold() == 'ollama'
+            and endpoint_widget is not None
+            and endpoint_widget.text().strip().rstrip('/') in {
+                '',
+                'http://localhost:11434',
+                'http://localhost:11434/v1',
+            }
+        ):
+            endpoint_widget.setText(OLLAMA_DEFAULT_ENDPOINT)
+        self.ollama_model_manager._update_availability()
             
     def on_flushbtn_clicked(self):
         paramw: ParamComboBox = self.sender()

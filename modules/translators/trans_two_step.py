@@ -11,6 +11,7 @@ from pydantic import ValidationError
 from .base import register_translator
 from .trans_google import GoogleTranslateProviderPython, ProviderError
 from .trans_llm_api import LLM_API_Translator, TranslationResponse
+from utils.ollama import OLLAMA_DEFAULT_ENDPOINT
 
 
 DEEPL_FREE_API_URL = "https://api-free.deepl.com/v2/translate"
@@ -65,7 +66,7 @@ class TwoStepTranslator(LLM_API_Translator):
     }
     params["provider"]["value"] = "Ollama"
     params["model"]["value"] = "OLLAMA: qwen3"
-    params["endpoint"]["value"] = "http://localhost:11434"
+    params["endpoint"]["value"] = OLLAMA_DEFAULT_ENDPOINT
     params["system_prompt"][
         "value"
     ] = (

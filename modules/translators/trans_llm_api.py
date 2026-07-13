@@ -12,6 +12,7 @@ import openai
 from pydantic import BaseModel, Field, ValidationError
 
 from utils.glossary_replacement import parse_preferred_targets
+from utils.ollama import OLLAMA_DEFAULT_ENDPOINT, ollama_chat_endpoint
 from .base import BaseTranslator, register_translator
 
 
@@ -308,8 +309,13 @@ class LLM_API_Translator(BaseTranslator):
             "description": "Specify a custom model name to override the selected model.",
         },
         "endpoint": {
-            "value": "",
-            "description": "Base URL for the API. Leave empty for provider default. Gemini/Google defaults to Google's OpenAI-compatible Gemini API endpoint. Ollama uses its native /api/chat endpoint; an existing URL ending in /v1 is accepted and normalized automatically.",
+            "value": OLLAMA_DEFAULT_ENDPOINT,
+            "description": "Base URL for the API. Ollama defaults to http://127.0.0.1:11434/v1 and uses its native /api/chat endpoint internally. The Ollama default is ignored for other providers, which keep their own default endpoints unless this value is changed.",
+        },
+        "ollama model preferences": {
+            "type": "ollama_models",
+            "value": {},
+            "description": "Query locally installed Ollama models, mark favorites, and store a personal rating from 1 to 5 in this translator profile.",
         },
         "system_prompt": {
             "type": "editor",
@@ -568,7 +574,7 @@ class LLM_API_Translator(BaseTranslator):
             elif provider == "Grok":
                 endpoint = "https://api.x.ai/v1"
             elif provider == "Ollama":
-                endpoint = "http://localhost:11434"
+                endpoint = OLLAMA_DEFAULT_ENDPOINT
 
         proxy = self.proxy
         http_client = None
@@ -639,7 +645,14 @@ class LLM_API_Translator(BaseTranslator):
 
     @property
     def endpoint(self) -> Optional[str]:
-        return self.get_param_value("endpoint") or None
+        endpoint = self.get_param_value("endpoint") or None
+        if (
+            self.provider != "Ollama"
+            and endpoint
+            and endpoint.rstrip('/') == OLLAMA_DEFAULT_ENDPOINT.rstrip('/')
+        ):
+            return None
+        return endpoint
 
     @property
     def temperature(self) -> float:
@@ -2355,12 +2368,7 @@ class LLM_API_Translator(BaseTranslator):
                 raise e
 
     def _ollama_chat_endpoint(self) -> str:
-        endpoint = (self.endpoint or "http://localhost:11434").rstrip("/")
-        if endpoint.endswith("/api/chat"):
-            return endpoint
-        if endpoint.endswith("/v1"):
-            endpoint = endpoint[:-3].rstrip("/")
-        return f"{endpoint}/api/chat"
+        return ollama_chat_endpoint(self.endpoint or OLLAMA_DEFAULT_ENDPOINT)
 
     def _create_ollama_completion(self, api_args: Dict):
         return self._create_ollama_completion_with_retry(api_args, allow_reasoning_retry=True)

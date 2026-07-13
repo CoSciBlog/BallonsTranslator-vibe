@@ -4,6 +4,8 @@
 
 ### Added
 
+- Installed Ollama model lists for `LLM_API_Translator`, `LLM_API_Translator_2`, and `Two-Step Translator`, queried asynchronously from `/api/tags`.
+- Per-profile Ollama model favorites and 1-5 ratings persisted in `config.json`, plus direct selection of a listed model as the active override.
 - A global `Translate after image processing` pipeline option that runs translation only after detection, OCR, and inpainting finish for all selected pages.
 - Pipeline-history step entries for Text Detection, OCR, Translate, and Inpaint, including each step's selected module/model values and Ollama reasoning state.
 - `Auto` source-language selection for the legacy `ChatGPT` and `ChatGPT_exp` translators, matching the LLM translator auto-detect source flow while keeping `Auto` out of target-language selectors.
@@ -98,6 +100,8 @@
 
 ### Changed
 
+- Set the LLM translator Ollama endpoint default to `http://127.0.0.1:11434/v1` and centralized normalization for `/v1`, `/api/chat`, and `/api/tags` URLs.
+- Bumped the fork runtime version string to `1.4.0-vibe.91`.
 - Replaced the single long Settings scroll page with separate pages for every navigation category and section.
 - Reflowed wide Settings controls and preset actions into compact multi-row grids for smaller windows and high-DPI displays.
 - Bumped the fork runtime version string to `1.4.0-vibe.90`.

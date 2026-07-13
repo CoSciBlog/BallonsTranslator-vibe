@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.90`
+Fork release: `1.4.0-vibe.91`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -28,6 +28,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Added project-level pipeline history in `pipeline_history.json`, with a left-sidebar history window that lists Text Detection, OCR, Translate, and Inpaint as separate step entries. Each step keeps its module/model values, and Ollama translation entries show whether reasoning was enabled.
 - Reworked Settings into separate navigation pages for every category and section instead of one long shared page, with denser responsive grids for multi-value controls and preset actions.
 - Added `General -> Pipeline -> Translate after image processing` to defer translation until text detection, OCR, and inpainting have finished for every page.
+- Added an installed-model browser to all LLM API translator profiles for querying Ollama, selecting a model, marking favorites, and storing personal 1-5 ratings.
 - Changed Settings to open in a separate non-modal window, following the upstream 1.5.x layout behavior while keeping the Vibe-specific settings intact.
 - Added an optional settings safety switch that prevents mouse wheel changes on combo boxes and spin boxes, plus wider input fields for long API keys, URLs, and prompts.
 - Added optional pre-detection page upscaling with factor, quality, maximum size, and skip-threshold settings.
@@ -306,7 +307,9 @@ The `Two-Step Translator` first creates Google, DeepL Free, or DeepL draft trans
 
 `LLM_API_Translator` and `Two-Step Translator` expose `bubble text shortening`. When enabled, long or extremely long outputs receive explicit speech-bubble length guidance using configurable character targets. The model is asked to compact dialogue while preserving meaning, names, tone, and important context; output is not mechanically truncated.
 
-When `Ollama` is selected, translation, refinement, reflection, and glossary calls use Ollama's native `/api/chat` endpoint. Set `num ctx` in translator settings to pass an explicit `options.num_ctx` context window; leave it at `0` to retain the Ollama server default. Existing saved endpoints ending in `/v1` continue to work and are normalized to the native endpoint.
+When `Ollama` is selected, translation, refinement, reflection, and glossary calls use Ollama's native `/api/chat` endpoint. The default endpoint is `http://127.0.0.1:11434/v1`; URLs ending in `/v1` or `/api/chat` are normalized automatically. This Ollama default is ignored when another provider is selected, so OpenAI, Gemini, Google, Grok, and OpenRouter retain their provider defaults. Set `num ctx` in translator settings to pass an explicit `options.num_ctx` context window; leave it at `0` to retain the Ollama server default.
+
+The `Installed Ollama models` panel is available in `LLM_API_Translator`, `LLM_API_Translator_2`, and `Two-Step Translator`. `Refresh models` queries the configured server's `/api/tags` endpoint asynchronously. Each returned model can be marked as a favorite and rated from 1 to 5; these values are stored under `ollama model preferences` in that translator profile inside `config.json`. Favorites and higher-rated models appear first after refreshing. Select a row and use `Use selected model`, or double-click it, to set the Ollama override model for the profile.
 
 `request timeout` controls how long one LLM API call may run before it is treated as failed. Local reasoning models can exceed the old fixed 120-second limit when `reasoning`, `reflection`, automatic glossary extraction, high `max tokens`, or large `num ctx` values are enabled. For a remote Ollama server, keep the model endpoint in Settings, for example `http://10.10.13.1:11434/v1/`; the app normalizes it to the native Ollama API internally. If a reasoning model such as Qwen3.5/Gemma times out, raise `request timeout` to 300-600 seconds, reduce `max tokens` to 2048-4096 for translation, disable unnecessary review/glossary passes, or use `review speed mode` to combine or skip extra review requests.
 
@@ -329,7 +332,7 @@ Benchmark output is written under `benchmarks/results/` as JSON, CSV, and a Mark
 The same benchmark can be run from the command line:
 
 ```bash
-python scripts/benchmark_llm_model_matrix.py --models translategemma:12b,translategemma:27b,qwen3.5:9b --translator-types llm,two_step --runs-per-model 3 --provider Ollama --endpoint http://localhost:11434 --texts "こんにちは||ありがとう"
+python scripts/benchmark_llm_model_matrix.py --models translategemma:12b,translategemma:27b,qwen3.5:9b --translator-types llm,two_step --runs-per-model 3 --provider Ollama --endpoint http://127.0.0.1:11434/v1 --texts "こんにちは||ありがとう"
 ```
 
 ## Programmatic use

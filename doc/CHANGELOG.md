@@ -1,6 +1,21 @@
 # Changelogs
 
 ### 2026-07-14
+[v1.4.0-vibe.91] Ollama model preferences
+Added:
+1. Added installed Ollama model lists to both LLM API translator profiles and the Two-Step Translator.
+2. Added per-model favorites and ratings from 1 to 5, persisted per translator profile in `config.json`.
+3. Added direct selection of a listed Ollama model as the profile's override model.
+
+Changed:
+1. Set the Ollama endpoint default to `http://127.0.0.1:11434/v1`.
+2. Centralized Ollama URL normalization for native chat and installed-model queries.
+3. Updated README and changelog documentation.
+
+Version:
+1. Bumped the fork runtime version string to `1.4.0-vibe.91`.
+
+### 2026-07-14
 [v1.4.0-vibe.90] Settings pages and pipeline order
 Added:
 1. Added `General -> Pipeline -> Translate after image processing` to defer translation until detection, OCR, and inpainting finish for all selected pages.
