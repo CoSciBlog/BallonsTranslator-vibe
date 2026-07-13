@@ -4,6 +4,7 @@ cd /d "%~dp0"
 
 set "VENV_DIR=%~dp0env"
 set "PYTHON=%VENV_DIR%\Scripts\python.exe"
+set "STEP_RUNNER=%~dp0scripts\launch_step.py"
 set "PADDLE_PATH=%VENV_DIR%\Lib\site-packages\torch\lib"
 set "PATH=%PADDLE_PATH%;%VENV_DIR%\Scripts;PortableGit\cmd;%PATH%"
 set "ERROR_REPORTING=FALSE"
@@ -22,8 +23,7 @@ echo.
 
 if exist "%PYTHON%" goto :check_pip
 
-echo Creating Python virtual environment in "%VENV_DIR%"...
-python -m venv "%VENV_DIR%"
+python "%STEP_RUNNER%" "Creating Python virtual environment in %VENV_DIR%" -- python -m venv "%VENV_DIR%"
 if %ERRORLEVEL% == 0 goto :install_requirements
 echo Couldn't create Python virtual environment
 goto :show_stdout_stderr
@@ -36,17 +36,15 @@ echo Couldn't launch pip from virtual environment
 goto :show_stdout_stderr
 
 :install_requirements
-"%PYTHON%" -m pip install --upgrade pip wheel setuptools==71.1.0 --progress-bar on
+"%PYTHON%" "%STEP_RUNNER%" "Installing/upgrading pip, wheel, and compatible setuptools" -- "%PYTHON%" -m pip install --upgrade pip wheel setuptools==71.1.0 --progress-bar on
 if not %ERRORLEVEL% == 0 goto :show_stdout_stderr
-"%PYTHON%" -m pip install -r requirements.txt --progress-bar on
-if not %ERRORLEVEL% == 0 goto :show_stdout_stderr
-"%PYTHON%" -m pip install -e . --no-deps
+"%PYTHON%" "%STEP_RUNNER%" "Installing BallonsTranslator requirements from requirements.txt" -- "%PYTHON%" -m pip install -r requirements.txt --progress-bar on
 if not %ERRORLEVEL% == 0 goto :show_stdout_stderr
 goto :launch
 
 :launch
-echo Starting BallonsTranslator Vibe...
-"%PYTHON%" -u launch.py %*
+echo Starting BallonsTranslator Vibe with AMD nightly mode...
+"%PYTHON%" -u launch.py --nightly %*
 pause
 exit /b
 

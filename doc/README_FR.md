@@ -1,17 +1,15 @@
-<h1 align="center">BallonsTranslator</h1>
+> [!IMPORTANT]  
+> **Si vous partagez publiquement le résultat traduit et qu'aucun traducteur humain expérimenté n'a participé à la traduction ou à la relecture, veuillez indiquer clairement qu'il s'agit d'une traduction automatique.**
 
-<p align="center">BallonTranslator est un autre outil assisté par ordinateur, basé sur l'apprentissage profond (deep learning), permettant de traduire des comics/mangas.</p>
+# BallonTranslator
+[简体中文](/README.md) | [English](/README_EN.md) | [pt-BR](../doc/README_PT-BR.md) | [Русский](../doc/README_RU.md) | [日本語](../doc/README_JA.md) | [Indonesia](../doc/README_ID.md) | [Tiếng Việt](../doc/README_VI.md) | [한국어](../doc/README_KO.md) | [Español](../doc/README_ES.md) | Français
 
-<p align="center">
-  <img
-    width="320"
-    alt="Spinning fox animation"
-    src="https://github.com/user-attachments/assets/fe44e9a6-c7da-4bc5-8421-87fd6c38a0ba"
-  />
-</p>
+BallonTranslator est un autre outil assisté par ordinateur, basé sur l'apprentissage profond (deep learning), permettant de traduire des comics/mangas.
 
-<p align="center">
-  <a href="/README.md">简体中文</a> | <a href="/README_EN.md">English</a> | <a href="/doc/README_RU.md">Русский</a> | <a href="/doc/README_JA.md">日本語</a> | <a href="/doc/README_ES.md">Español</a> | Français | <a href="/doc/README_PT-BR.md">pt-BR</a> | <a href="/doc/README_KO.md">한국어</a> | <a href="/doc/README_ID.md">Indonesia</a> | <a href="/doc/README_VI.md">Tiếng Việt</a>
+<img src="../doc/src/ui0.jpg" div align=center>
+
+<p align=center>
+aperçu
 </p>
 
 Prend en charge le formatage riche du texte et les préréglages de style. Les textes traduits peuvent être édités interactivement.
@@ -21,9 +19,6 @@ Prend en charge rechercher & remplacer
 Prend en charge l’export/import vers/depuis des documents Word
 
 # Fonctionnalités
-> [!IMPORTANT]
-> **Si vous partagez publiquement le résultat traduit et qu'aucun traducteur humain expérimenté n'a participé à la traduction ou à la relecture, veuillez indiquer clairement qu'il s'agit d'une traduction automatique.**
-
 * Traduction entièrement automatisée
   - Prend en charge la détection, la reconnaissance, la suppression et la traduction automatiques du texte. Les performances globales dépendent de ces modules.
   - La composition typographique est basée sur l'estimation du formatage du texte original.
@@ -42,58 +37,127 @@ Prend en charge l’export/import vers/depuis des documents Word
 # Installation
 
 ## Sous Windows
+Si vous ne souhaitez pas installer Python et Git vous-même et que vous avez accès à Internet :
+Téléchargez BallonsTranslator_dev_src_with_gitpython.7z depuis [MEGA](https://mega.nz/folder/gmhmACoD#dkVlZ2nphOkU5-2ACb5dKw) ou [Google Drive](https://drive.google.com/drive/folders/1uElIYRLNakJj-YS0Kd3r3HE-wzeEvrWd?usp=sharing), décompressez et lancez launch_win.bat. 
+Exécutez scripts/local_gitpull.bat pour obtenir la dernière mise à jour.
+Notez que ces paquets fournis ne fonctionnent pas sous Windows 7, les utilisateurs de Win7 doivent installer [Python 3.8](https://www.python.org/downloads/release/python-3810/) et exécuter le code source.
 
-### Sur Windows
+## Exécuter le code source
 
-**Méthode A (Configuration automatique de l'environnement local en un clic, nécessite PowerShell)** :
-Le script installe `BallonsTranslator` dans le répertoire où vous l'exécutez :
-```powershell
-irm https://raw.githubusercontent.com/dmMaze/BallonsTranslator/dev/scripts/install.ps1 | iex
-```
-Ou exécutez la commande suivante dans l'invite de commande classique (`cmd.exe`) :
-```cmd
-powershell -NoProfile -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/dmMaze/BallonsTranslator/dev/scripts/install.ps1 | iex"
-```
+Installez [Python](https://www.python.org/downloads/release/python-31011) **<= 3.12** (ne pas utiliser celui du Microsoft Store) et [Git](https://git-scm.com/downloads).
 
-**Méthode B (Télécharger le paquet préconfiguré)** :
-Téléchargez `Ballonstranslator_win_minium.zip` depuis [GitHub Releases](https://github.com/dmMaze/BallonsTranslator/releases), extrayez-le et double-cliquez sur `launch_win.bat` pour démarrer l'application.
-
-Ces méthodes ne prennent pas en charge Windows 7 ; les utilisateurs de Windows 7 doivent installer [Python 3.8](https://www.python.org/downloads/release/python-3810/) manuellement et exécuter depuis le code source.
-
-Si vous voyez des erreurs liées à `msvcp140.dll`, `c10.dll` ou `[WinError 1114]`, installez ou mettez à jour [Microsoft Visual C++ Redistributable x64](https://aka.ms/vc14/vc_redist.x64.exe) (Visual Studio 2015-2022 ; [notes officielles de téléchargement](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist)).
-
-## macOS / Linux
-
-Le script installe `BallonsTranslator` dans le répertoire où vous l'exécutez :
 ```bash
-curl -fLO https://raw.githubusercontent.com/dmMaze/BallonsTranslator/dev/scripts/install.sh && chmod +x install.sh && ./install.sh
+# Clonez ce dépôt
+$ git clone https://github.com/dmMaze/BallonsTranslator.git ; cd BallonsTranslator
+
+# Lancez l'application
+$ python3 launch.py
+
+# Mettre à jour l'application
+$ python3 launch.py --update
 ```
 
-Si `curl` n'est pas disponible, téléchargez plutôt le script avec `wget -O ...`. L'application démarre automatiquement après l'installation ; ensuite, utilisez `cd BallonsTranslator && ./launch.sh` pour la relancer.
+Lors du premier lancement, le programme installera automatiquement les bibliothèques requises et téléchargera les modèles. Si les téléchargements échouent, il faudra récupérer le dossier **data** (ou les fichiers manquants indiqués dans le terminal) depuis [MEGA](https://mega.nz/folder/gmhmACoD#dkVlZ2nphOkU5-2ACb5dKw) ou [Google Drive](https://drive.google.com/drive/folders/1uElIYRLNakJj-YS0Kd3r3HE-wzeEvrWd?usp=sharing) et les placer au bon endroit dans le dossier du code source.
 
-L'application vérifie les dépendances principales au démarrage. Lorsque vous sélectionnez un module qui nécessite des bibliothèques supplémentaires, l'application vous proposera d'installer les dépendances optionnelles manquantes (vous pouvez aussi activer l'installation automatique dans les paramètres).
+## Construire l'application macOS (compatible Intel et puces Apple Silicon)
+[Reference](../doc/macOS_app.md)  
+Quelques problèmes peuvent survenir, exécuter directement le code source est pour l’instant recommandé.
+
+<i>Remarque : macOS peut également exécuter le code source si l'application ne fonctionne pas.</i>
+
+![录屏2023-09-11 14 26 49](https://github.com/hyrulelinks/BallonsTranslator/assets/134026642/647c0fa0-ed37-49d6-bbf4-8a8697bc873e)
+
+#### 1. Préparation
+-   Téléchargez les bibliothèques et les modèles depuis [MEGA](https://mega.nz/folder/gmhmACoD#dkVlZ2nphOkU5-2ACb5dKw "MEGA") ou [Google Drive](https://drive.google.com/drive/folders/1uElIYRLNakJj-YS0Kd3r3HE-wzeEvrWd?usp=sharing)
+
+
+<img width="1268" alt="截屏2023-09-08 13 44 55_7g32SMgxIf" src="https://github.com/dmMaze/BallonsTranslator/assets/134026642/40fbb9b8-a788-4a6e-8e69-0248abaee21a">
+
+-  Placez toutes les ressources téléchargées dans un dossier nommé data. L'arborescence finale des dossiers doit ressembler à ceci :
+
+```
+data
+├── libs
+│   └── patchmatch_inpaint.dll
+└── models
+    ├── aot_inpainter.ckpt
+    ├── comictextdetector.pt
+    ├── comictextdetector.pt.onnx
+    ├── lama_mpe.ckpt
+    ├── manga-ocr-base
+    │   ├── README.md
+    │   ├── config.json
+    │   ├── preprocessor_config.json
+    │   ├── pytorch_model.bin
+    │   ├── special_tokens_map.json
+    │   ├── tokenizer_config.json
+    │   └── vocab.txt
+    ├── mit32px_ocr.ckpt
+    ├── mit48pxctc_ocr.ckpt
+    └── pkuseg
+        ├── postag
+        │   ├── features.pkl
+        │   └── weights.npz
+        ├── postag.zip
+        └── spacy_ontonotes
+            ├── features.msgpack
+            └── weights.npz
+
+7 dossiers, 23 fichiers
+```
+
+-  Installez l’outil en ligne de commande pyenv pour gérer les versions de Python. Il est recommandé de l’installer via Homebrew.
+```
+# Installation via Homebrew
+brew install pyenv
+
+# Installation via le script officiel
+curl https://pyenv.run | bash
+
+# Configuration de l'environnement shell après installation
+echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.zshrc
+echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.zshrc
+echo 'eval "$(pyenv init -)"' >> ~/.zshrc
+```
+
+
+#### 2、Construire l'application
+```
+# Se placer dans le répertoire de travail `data`
+cd data
+
+# Cloner la branche `dev` du dépôt
+git clone -b dev https://github.com/dmMaze/BallonsTranslator.git
+
+# Entrer dans le répertoire `BallonsTranslator`
+cd BallonsTranslator
+
+# Lancer le script de construction, demandera le mot de passe lors de l'étape pyinstaller, entrez le mot de passe et validez
+sh scripts/build-macos-app.sh
+```
+> 📌L'application empaquetée se trouve dans ./data/BallonsTranslator/dist/BallonsTranslator.app. Glissez l'application dans le dossier Applications de macOS pour l’installer. Prête à l’emploi sans configuration Python supplémentaire.
+</details> 
 
 # Utilisation
 
 **Il est conseillé de lancer le programme dans un terminal pour voir les messages en cas de plantage, voir le gif suivant.**
-<img src="https://github.com/user-attachments/assets/ee92fbdc-718c-4e04-a876-0eff3ee2a989">  
+<img src="../doc/src/run.gif">  
 - La première fois que vous lancez l'application, veuillez sélectionner le traducteur et définir les langues source et cible en cliquant sur l'icône des paramètres.
 - Ouvrez un dossier contenant les images du manga/manhua/manhwa/comic à traduire en cliquant sur l’icône dossier.
 - Cliquez sur le bouton `Run` et attendez la fin du processus.
 
 Les formats de police, tels que la taille et la couleur, sont déterminés automatiquement par le programme au cours de ce processus. Vous pouvez prédéfinir ces formats en modifiant les options correspondantes de « Déterminer par programme » à « Utiliser les paramètres globaux » dans le panneau de configuration -> Composition typographique. (Les paramètres globaux sont les formats affichés dans le panneau de format de police de droite lorsque vous ne modifiez aucun bloc de texte dans la scène.)
-<img src="https://github.com/user-attachments/assets/fb8a8b2c-54e4-4579-8319-42a172296c80">
 
 ## Édition d’image
 
 ### Outil de retouche
-<img src="https://github.com/user-attachments/assets/de0bc35d-6651-4f2f-985c-cfe9bfafb124">
+<img src="../doc/src/imgedit_inpaint.gif">
 <p align = "center">
 Mode d'édition d'image, outil de retouche
 </p>
 
 ### Outil Rect
-<img src="https://github.com/user-attachments/assets/6c47f46f-ffd3-41fd-b667-5442be304c79">
+<img src="../doc/src/rect_tool.gif">
 <p align = "center">
 Outil Rect
 </p>
@@ -102,17 +166,17 @@ Pour « effacer » les résultats indésirables de la retouche, utilisez l'outil
 Le résultat dépend de la précision avec laquelle l'algorithme (méthode 1 et méthode 2 dans le gif) extrait le masque de texte. Il peut être moins performant sur des textes et des arrière-plans complexes.  
 
 ## Édition de texte
-<img src="https://github.com/user-attachments/assets/0f688abe-41f7-416a-85c8-e0dd6968fd00">
+<img src="../doc/src/textedit.gif">
 <p align = "center">
 Mode édition de texte
 </p>
 
-<img src="https://github.com/user-attachments/assets/6d31c8a5-b909-4339-8036-7fc3ba2f014c" div align=center>
+<img src="../doc/src/multisel_autolayout.gif" div align=center>
 <p align=center>
 Formatage de texte en lot & auto-mise en page
 </p>
 
-<img src="https://github.com/user-attachments/assets/1b76c164-1454-4aa7-b60c-9fbdb0968350" div align=center>
+<img src="../doc/src/ocrselected.gif" div align=center>
 <p align=center>
 OCR & traduction d’une zone sélectionnée
 </p>
@@ -133,7 +197,7 @@ OCR & traduction d’une zone sélectionnée
 * Définissez l'ombre et la transparence du texte dans le panneau Style de texte -> Effet.
 * ```Alt+Touches fléchées``` ou ```Alt+WASD``` (```pageDown``` ou ```pageUp``` en mode édition de texte) pour passer d'un bloc de texte à l'autre.
   
-<img src="https://github.com/user-attachments/assets/084a250d-6a31-4344-94c0-2a5f4ba64b96">
+<img src="../doc/src/configpanel.png">
 
 ## Mode sans interface (exécution sans interface graphique)
 ``` python

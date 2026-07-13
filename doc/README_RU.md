@@ -1,23 +1,18 @@
-<h1 align="center">BallonsTranslator</h1>
+> [!IMPORTANT]   
+> **Если вы публично делитесь переведенным результатом, и опытный переводчик-человек не участвовал в тщательном переводе или проверке, пожалуйста, отметьте его как машинный перевод в заметном месте. Если на нормальном русском. Если вы не способны сделать минимальную проверку качества, перед публикацией, или вы не умеете в тайп, то укажите в описании к загражуемой манге, что это "машинный" перевод. Большинство русских сервисов тупо забанит вам аккаунт после попытки залива "машинного" перевода. Уделите хоть каплю внимания редактуре.**
 
-<p align="center">Еще один инструмент для компьютерного перевода комиксов/манги на основе глубокого обучения.</p>
+# BallonTranslator
+[简体中文](/README.md) | [English](/README_EN.md) | [pt-BR](../doc/README_PT-BR.md) | Русский | [日本語](../doc/README_JA.md) | [Indonesia](../doc/README_ID.md) | [Tiếng Việt](../doc/README_VI.md) | [한국어](../doc/README_KO.md) | [Español](../doc/README_ES.md) | [Français](../doc/README_FR.md)
 
-<p align="center">
-  <img
-    width="320"
-    alt="Spinning fox animation"
-    src="https://github.com/user-attachments/assets/fe44e9a6-c7da-4bc5-8421-87fd6c38a0ba"
-  />
-</p>
+Еще один инструмент для компьютерного перевода комиксов/манги на основе глубокого обучения.
 
-<p align="center">
-  <a href="/README.md">简体中文</a> | <a href="/README_EN.md">English</a> | Русский | <a href="/doc/README_JA.md">日本語</a> | <a href="/doc/README_ES.md">Español</a> | <a href="/doc/README_FR.md">Français</a> | <a href="/doc/README_PT-BR.md">pt-BR</a> | <a href="/doc/README_KO.md">한국어</a> | <a href="/doc/README_ID.md">Indonesia</a> | <a href="/doc/README_VI.md">Tiếng Việt</a>
+<img src="src/ui0.jpg" div align=center>
+
+<p align=center>
+предпросмотр
 </p>
 
 # Особенности
-> [!IMPORTANT]
-> **Если вы публично делитесь переведенным результатом, и опытный переводчик-человек не участвовал в тщательном переводе или проверке, пожалуйста, отметьте его как машинный перевод в заметном месте. Если на нормальном русском. Если вы не способны сделать минимальную проверку качества, перед публикацией, или вы не умеете в тайп, то укажите в описании к загражуемой манге, что это "машинный" перевод. Большинство русских сервисов тупо забанит вам аккаунт после попытки залива "машинного" перевода. Уделите хоть каплю внимания редактуре.**
-
 * Полностью автоматизированный перевод  
   - Поддерживает автоматическое обнаружение текста, распознавание, удаление и перевод. Общая производительность зависит от этих модулей.
   - Верстка основана на оценке форматирования оригинального текста.
@@ -36,56 +31,122 @@
 # Установка
 
 ## На Windows
+Если вы не хотите устанавливать Python и Git самостоятельно и у вас есть доступ к Интернету:  
+Скачайте BallonsTranslator_dev_src_with_gitpython.7z с [MEGA](https://mega.nz/folder/gmhmACoD#dkVlZ2nphOkU5-2ACb5dKw) или [Google Drive](https://drive.google.com/drive/folders/1uElIYRLNakJj-YS0Kd3r3HE-wzeEvrWd?usp=sharing), распакуйте его и запустите launch_win.bat.   
+Запустите scripts/local_gitpull.bat, чтобы получить последнее обновление.
 
-**Способ А (Автоматическая настройка локального окружения в один клик, требуется PowerShell)**:
-Скрипт установит `BallonsTranslator` в каталог, из которого вы его запустите:
-```powershell
-irm https://raw.githubusercontent.com/dmMaze/BallonsTranslator/dev/scripts/install.ps1 | iex
-```
-Или выполните следующую команду в классической командной строке (`cmd.exe`):
-```cmd
-powershell -NoProfile -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/dmMaze/BallonsTranslator/dev/scripts/install.ps1 | iex"
-```
+## Запуск исходного кода
 
-**Способ Б (Загрузка готовой портативной сборки)**:
-Скачайте `Ballonstranslator_win_minium.zip` со страницы [GitHub Releases](https://github.com/dmMaze/BallonsTranslator/releases), распакуйте его и запустите `launch_win.bat`.
+Установите [Python](https://www.python.org/downloads/release/python-31011) **<= 3.12** (не используйте версию, установленную из Microsoft Store) и [Git](https://git-scm.com/downloads).
 
-Эти способы не поддерживают Windows 7; пользователям Windows 7 необходимо вручную установить [Python 3.8](https://www.python.org/downloads/release/python-3810/) и запускать приложение из исходного кода.
-
-Если появляются ошибки, связанные с `msvcp140.dll`, `c10.dll` или `[WinError 1114]`, установите или обновите [Microsoft Visual C++ Redistributable x64](https://aka.ms/vc14/vc_redist.x64.exe) (Visual Studio 2015-2022; [официальное руководство](https://learn.microsoft.com/ru-ru/cpp/windows/latest-supported-vc-redist)).
-
-## macOS / Linux
-
-Скрипт установит `BallonsTranslator` в каталог, из которого вы его запустите:
 ```bash
-curl -fLO https://raw.githubusercontent.com/dmMaze/BallonsTranslator/dev/scripts/install.sh && chmod +x install.sh && ./install.sh
+# Клонируйте этот репозиторий
+$ git clone https://github.com/dmMaze/BallonsTranslator.git ; cd BallonsTranslator
+
+# Запустите приложение
+$ python3 launch.py
 ```
 
-Если `curl` недоступен, вы можете использовать `wget -O ...`. Программа запустится автоматически после установки; для последующих запусков используйте `cd BallonsTranslator && ./launch.sh`.
+Обратите внимание, что при первом запуске будут автоматически установлены необходимые библиотеки и загружены модели. Если загрузки не удались, вам нужно будет скачать папку **data** (или отсутствующие файлы, упомянутые в терминале) с [MEGA](https://mega.nz/folder/gmhmACoD#dkVlZ2nphOkU5-2ACb5dKw) или [Google Drive](https://drive.google.com/drive/folders/1uElIYRLNakJj-YS0Kd3r3HE-wzeEvrWd?usp=sharing) и сохранить ее в соответствующем пути в папке с исходным кодом.
 
-При запуске приложение проверяет основные зависимости. Когда вы выбираете модуль, которому нужны дополнительные библиотеки, приложение предложит установить отсутствующие опциональные зависимости (автоустановку также можно включить в настройках).
+## Сборка приложения для macOS (совместимо как с процессорами Intel, так и с Apple Silicon)
+<i>Обратите внимание, что macOS также может запускать исходный код, если это не работает.</i>  
+
+![запись экрана 2023-09-11 14 26 49](https://github.com/hyrulelinks/BallonsTranslator/assets/134026642/647c0fa0-ed37-49d6-bbf4-8a8697bc873e)
+
+#### 1. Подготовка
+-   Загрузите библиотеки и модели с [MEGA](https://mega.nz/folder/gmhmACoD#dkVlZ2nphOkU5-2ACb5dKw "MEGA") или [Google Drive](https://drive.google.com/drive/folders/1uElIYRLNakJj-YS0Kd3r3HE-wzeEvrWd?usp=sharing)
+
+
+<img width="1268" alt="скриншот 2023-09-08 13 44 55_7g32SMgxIf" src="https://github.com/dmMaze/BallonsTranslator/assets/134026642/40fbb9b8-a788-4a6e-8e69-0248abaee21a">
+
+-  Поместите все загруженные ресурсы в папку с названием data, конечная структура каталога должна выглядеть так:
+
+```
+data
+├── libs
+│   └── patchmatch_inpaint.dll
+└── models
+    ├── aot_inpainter.ckpt
+    ├── comictextdetector.pt
+    ├── comictextdetector.pt.onnx
+    ├── lama_mpe.ckpt
+    ├── manga-ocr-base
+    │   ├── README.md
+    │   ├── config.json
+    │   ├── preprocessor_config.json
+    │   ├── pytorch_model.bin
+    │   ├── special_tokens_map.json
+    │   ├── tokenizer_config.json
+    │   └── vocab.txt
+    ├── mit32px_ocr.ckpt
+    ├── mit48pxctc_ocr.ckpt
+    └── pkuseg
+        ├── postag
+        │   ├── features.pkl
+        │   └── weights.npz
+        ├── postag.zip
+        └── spacy_ontonotes
+            ├── features.msgpack
+            └── weights.npz
+
+7 директорий, 23 файла
+```
+
+-  Установите инструмент командной строки pyenv для управления версиями Python. Рекомендуется установка через Homebrew.
+```
+# Установка через Homebrew
+brew install pyenv
+
+# Установка через официальный скрипт
+curl https://pyenv.run | bash
+
+# Настройка окружения оболочки после установки
+echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.zshrc
+echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.zshrc
+echo 'eval "$(pyenv init -)"' >> ~/.zshrc
+```
+
+
+#### 2. Сборка приложения
+```
+# Перейдите в рабочую директорию `data`
+cd data
+
+# Клонируйте ветку `dev` репозитория
+git clone -b dev https://github.com/dmMaze/BallonsTranslator.git
+
+# Перейдите в рабочую директорию `BallonsTranslator`
+cd BallonsTranslator
+
+# Запустите скрипт сборки, на этапе pyinstaller потребуется ввести пароль, введите пароль и нажмите enter
+sh scripts/build-macos-app.sh
+```
+> 📌Упакованное приложение находится в ./data/BallonsTranslator/dist/BallonsTranslator.app, перетащите приложение в папку приложений macOS для установки. Готово к использованию без дополнительной настройки Python.
+
+
+</details> 
 
 # Использование
 
 **Рекомендуется запускать программу в терминале на случай, если она аварийно завершится и не оставит никакой информации, см. следующий gif.**
-<img src="https://github.com/user-attachments/assets/ee92fbdc-718c-4e04-a876-0eff3ee2a989">  
+<img src="doc/src/run.gif">  
 - При первом запуске приложения, пожалуйста, выберите переводчик и установите исходный и целевой языки, нажав на значок настроек.
 - Откройте папку, содержащую изображения комикса (манги/маньхуа/манхвы), которые нуждаются в переводе, нажав на значок папки.
 - Нажмите кнопку `Run` и дождитесь завершения процесса.
 
 Форматы шрифта, такие как размер и цвет, определяются программой автоматически в этом процессе. Вы можете предопределить эти форматы, изменив соответствующие опции с "decide by program" на "use global setting" в панели конфигурации->Typesetting. (глобальные настройки - это те форматы, которые отображаются на правой панели форматирования шрифта, когда вы не редактируете ни один текстовый блок на сцене)
-<img src="https://github.com/user-attachments/assets/fb8a8b2c-54e4-4579-8319-42a172296c80">
 
 ## Редактирование изображений
 
 ### Инструмент ретуши
-<img src="https://github.com/user-attachments/assets/de0bc35d-6651-4f2f-985c-cfe9bfafb124">
+<img src="src/imgedit_inpaint.gif">
 <p align = "center">
 Режим редактирования изображения, инструмент ретуши
 </p>
 
 ### Инструмент прямоугольника
-<img src="https://github.com/user-attachments/assets/6c47f46f-ffd3-41fd-b667-5442be304c79">
+<img src="src/rect_tool.gif">
 <p align = "center">
 Инструмент прямоугольника
 </p>
@@ -94,17 +155,17 @@ curl -fLO https://raw.githubusercontent.com/dmMaze/BallonsTranslator/dev/scripts
 Результат зависит от того, насколько точно алгоритм ("метод 1" и "метод 2" на gif) извлекает маску текста. Он может работать хуже на сложном тексте и фоне.  
 
 ## Редактирование текста
-<img src="https://github.com/user-attachments/assets/0f688abe-41f7-416a-85c8-e0dd6968fd00">
+<img src="src/textedit.gif">
 <p align = "center">
 Режим редактирования текста
 </p>
 
-<img src="https://github.com/user-attachments/assets/6d31c8a5-b909-4339-8036-7fc3ba2f014c" div align=center>
+<img src="src/multisel_autolayout.gif" div align=center>
 <p align=center>
 Пакетное форматирование текста и автоматическая компоновка
 </p>
 
-<img src="https://github.com/user-attachments/assets/1b76c164-1454-4aa7-b60c-9fbdb0968350" div align=center>
+<img src="src/ocrselected.gif" div align=center>
 <p align=center>
 OCR и перевод выбранной области
 </p>
@@ -125,7 +186,7 @@ OCR и перевод выбранной области
 * Установите тень текста и прозрачность на панели стиля текста -> Effect.  
 * ```Alt+Стрелки``` или ```Alt+WASD``` (```pageDown``` или ```pageUp``` в режиме редактирования текста) для переключения между текстовыми блоками.
   
-<img src="https://github.com/user-attachments/assets/084a250d-6a31-4344-94c0-2a5f4ba64b96">
+<img src="src/configpanel.png">
 
 ## Режим без графического интерфейса (Запуск без GUI)
 ``` python

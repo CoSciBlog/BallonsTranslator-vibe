@@ -2,38 +2,8 @@
 
 ## Unreleased
 
-### Upstream Integration
-
-- Merged upstream `dmMaze/BallonsTranslator` through `v1.5.5` / `upstream/dev` commit `73b8817c85e647a7b4ae1df2b9be611cdd96c98d`.
-- Migrated the fork to upstream's `ballontranslator` Python package layout and `resources` asset/translation layout while preserving Vibe-specific modules, dialogs, utility icons, and project workflows.
-- Added upstream launch/runtime infrastructure including `pyproject.toml`, `ballontranslator.launch`, lazy module metadata support, core requirement repair, network mirror helpers, updater helpers, Torch install helpers, and upstream unit tests.
-- Updated Pinokio and Windows launchers for the new package layout and removed dependencies on the deleted `scripts/launch_step.py` and `tools/runtime_manager.py` paths.
-- Added compatibility aliases for legacy `utils`, `modules`, and `ui` imports so migrated Vibe modules continue to load during the package transition.
-- Bumped the fork runtime version string to `1.5.5-vibe.86`.
-- Bumped the fork runtime version string to `1.5.5-vibe.87`.
-- Bumped the fork runtime version string to `1.5.5-vibe.88`.
-- Bumped the fork runtime version string to `1.5.5-vibe.89`.
-- Bumped the fork runtime version string to `1.5.5-vibe.90`.
-- Bumped the fork runtime version string to `1.5.5-vibe.91`.
-- Bumped the fork runtime version string to `1.5.5-vibe.92`.
-- Bumped the fork runtime version string to `1.5.5-vibe.93`.
-- Bumped the fork runtime version string to `1.5.5-vibe.94`.
-- Bumped the fork runtime version string to `1.5.5-vibe.95`.
-- Bumped the fork runtime version string to `1.5.5-vibe.96`.
-- Changed the fork runtime version string to the PEP 440-compatible local version `1.5.5+vibe.97` so current packaging tools accept the project metadata.
-- Bumped the fork runtime version string to `1.5.5+vibe.98`.
-- Deferred MIT OCR model imports until model load so `mit48px` remains selectable when the legacy `mit32px` implementation file is absent.
-- Merged upstream `dmMaze/BallonsTranslator` through `v1.5.7` / `upstream/dev` commit `a8fa6bf1a41751b9278b32641f3509bf0e24c848`.
-- Bumped the fork runtime version string to `1.5.7+vibe.99`.
-- Bumped the fork runtime version string to `1.5.7+vibe.100`.
-- Fixed project saves after interrupted pipeline runs when text-block instances were imported through both package and legacy module aliases.
-- Fixed pipeline-finish export flag handling for GUI launches where `shared.args` has not been initialized.
-- Bumped the fork runtime version string to `1.5.7+vibe.101`.
-- Restored `parse_stylesheet(theme, reverse_icon)` compatibility so startup no longer fails during main-window stylesheet setup after the upstream theme-cache merge.
-- Bumped the fork runtime version string to `1.5.7+vibe.102`.
-- Updated the image-translation progress dialog to show only active pipeline stages, hiding Decensoring unless the decensor pipeline is actually running.
-
 ### Added
+
 - `Auto` source-language selection for the legacy `ChatGPT` and `ChatGPT_exp` translators, matching the LLM translator auto-detect source flow while keeping `Auto` out of target-language selectors.
 - Newer OpenAI model options for the `ChatGPT`, `ChatGPT_exp`, `LLM_API_Translator`, and `LLM_API_Translator_2` selectors, including `gpt-5.5`, `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano`, and the `gpt-4.1` family.
 - Explicit `Gemini` provider option for `LLM_API_Translator` and `LLM_API_Translator_2`, using Google's OpenAI-compatible Gemini endpoint for translation.
@@ -55,20 +25,6 @@
 - Optional Batch Processing Re-Inpaint step that reapplies saved text and censor masks to finished project pages before export.
 - Batch Processing completion actions for doing nothing, shutting down, restarting, hibernating, sleeping, or running a custom command/program after a successful batch run.
 - LLM `review speed mode` for separate glossary correction, combined reflection/glossary checking, or reduced optional review requests.
-- Translation Benchmark now lives in the Tools menu and uses the current page's source text for persistent, sequential benchmark profiles.
-- Translation Benchmark profiles can be added, edited, duplicated, and removed through a modal model dialog and are saved in `config/translation_benchmark.json`.
-- Translation Benchmark profiles support per-model settings for LLM translator type, provider, endpoint, model, per-block translation, reasoning, temperature, top p, frequency penalty, presence penalty, system prompt, and request prompt.
-- Translation Benchmark can include Google and DeepL baseline translations beside configured LLM model results.
-- Restored the Settings presets page in the migrated 1.5 settings tree, with apply/save/import/export actions for reusable application settings snapshots.
-- Restored the Module Actions `Load models on demand` setting in the migrated 1.5 settings panel.
-- Restored the migrated 1.5 Application settings UI for intermediate images so `PNG`, `JPG`, `WEBP`, and `JXL` all appear with an independent quality field.
-- Translation Benchmark model dialogs now initialize from the active Translator settings page values and refresh provider/model options when the selected benchmark translator changes.
-- Translation Benchmark defaults now enable the Google baseline and leave the DeepL baseline opt-in.
-- Local `config/translation_benchmark.json` is ignored as per-install benchmark state.
-- Settings layout now uses wrapping labels, responsive module parameter fields, and bounded prompt editors to prevent long translator prompts and controls from stretching or dominating the settings pane.
-- Fixed Settings parameter label row heights so wrapped or measured labels do not overlap adjacent OCR controls such as `beam size`.
-- Fixed the Settings parameter-grid row index used while disabling GPU-only `device` options on CPU systems, preventing `device` from overlapping the following `beam size` row.
-- Hardened Settings parameter-grid row placement by using explicit row indices and updated long module checkbox rows to render as a left checkbox with wrapping label text.
 - Direct `.pdf` comic import from the Open menu, drag-and-drop, recent projects, and `--proj-dir`.
 - Multi-PDF import from the Open menu and drag-and-drop, combining selected PDFs into one ordered image project.
 - Source-folder import from `Open -> Import Folder` and drag-and-drop for folders containing `.cbr`, `.cbz`, `.zip`, `.pdf`, and nested image files.
@@ -195,12 +151,6 @@
 
 ### Fixed
 
-- Restored the Inpainter settings checkbox for filtering inpaint masks by detected text boxes after the 1.5 settings-panel migration.
-- Restored the shared view-widget registration fallback so text-style panels can initialize before `MainWindow` replaces the callback.
-- Restored module-parameter widget compatibility with saved module selections during settings initialization.
-- Restored missing persistent config defaults for update checks, spell checking, network mirrors, and package-manager settings.
-- Restored Decensor pipeline signal wiring and manager entry point after the 1.5 module-manager merge.
-- Updated Vibe toolbar icon paths for the migrated `resources/icons` layout.
 - Post-translation LLM review now keeps the existing draft translations for a chunk when an API timeout or retryable provider error occurs, preventing optional review failures from aborting an otherwise completed translation pipeline.
 - Reloaded a `lama_large_512px` model if it is unloaded between preprocessing and inference instead of attempting to call `None`.
 - Retried OCR with the configured batch fallback backend when the selected backend recognizes no text.

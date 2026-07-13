@@ -36,7 +36,6 @@ benchmarks/results/
 **/benchmark_*_summary.md
 ballontrans_pylibs_win
 config/config.json
-config/translation_benchmark.json
 config/presets/*.json
 localtmp*
 

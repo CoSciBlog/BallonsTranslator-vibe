@@ -1,17 +1,12 @@
-<h1 align="center">BallonsTranslator</h1>
+# BallonTranslator
+[简体中文](/README.md) | [English](/README_EN.md) | [pt-BR](../doc/README_PT-BR.md) | [Русский](../doc/README_RU.md) | 日本語 | [Indonesia](../doc/README_ID.md) | [Tiếng Việt](../doc/README_VI.md) | [한국어](../doc/README_KO.md) | [Español](../doc/README_ES.md) | [Français](../doc/README_FR.md)
 
-<p align="center">ディープラーニングを活用したマンガ翻訳支援ツール。</p>
+ディープラーニングを活用したマンガ翻訳支援ツール。
 
-<p align="center">
-  <img
-    width="320"
-    alt="Spinning fox animation"
-    src="https://github.com/user-attachments/assets/fe44e9a6-c7da-4bc5-8421-87fd6c38a0ba"
-  />
-</p>
+<img src="./src/ui0.jpg" div align=center>
 
-<p align="center">
-  <a href="/README.md">简体中文</a> | <a href="/README_EN.md">English</a> | <a href="/doc/README_RU.md">Русский</a> | 日本語 | <a href="/doc/README_ES.md">Español</a> | <a href="/doc/README_FR.md">Français</a> | <a href="/doc/README_PT-BR.md">pt-BR</a> | <a href="/doc/README_KO.md">한국어</a> | <a href="/doc/README_ID.md">Indonesia</a> | <a href="/doc/README_VI.md">Tiếng Việt</a>
+<p align=center>
+プレビュー
 </p>
 
 # 特徴
@@ -27,57 +22,52 @@
 * テキストの編集
   リッチテキストフォーマットをサポートし、翻訳されたテキストはインタラクティブに編集することができます。
 
-# インストール
+# 使用方法
 
-### Windowsの場合
+Windowsユーザーは、[腾讯云](https://share.weiyun.com/xoRhz9i4)または[MEGA](https://mega.nz/folder/gmhmACoD#dkVlZ2nphOkU5-2ACb5dKw) or [Google Drive](https://drive.google.com/drive/folders/1uElIYRLNakJj-YS0Kd3r3HE-wzeEvrWd?usp=sharing)(note: you also need to download latest Ballonstranslator-1.3.xx from GitHub release and extract it to overwrite **Ballontranslator-1.3.0-core** or older installation to get the app updated.)
 
-**方法 A (PowerShellを使用したワンクリック環境構築。PowerShellが必要)**:
-このスクリプトは、実行したディレクトリに `BallonsTranslator` をインストールします：
-```powershell
-irm https://raw.githubusercontent.com/dmMaze/BallonsTranslator/dev/scripts/install.ps1 | iex
-```
-または、通常のコマンドプロンプト (`cmd.exe`) で次のコマンドを実行します：
-```cmd
-powershell -NoProfile -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/dmMaze/BallonsTranslator/dev/scripts/install.ps1 | iex"
-```
+## ソースコードの実行
 
-**方法 B (事前構成済みパッケージのダウンロード)**:
-[GitHub Releases](https://github.com/dmMaze/BallonsTranslator/releases) から `Ballonstranslator_win_minium.zip` をダウンロードし、展開して `launch_win.bat` をダブルクリックして起動します。
-
-これらの方法は Windows 7 をサポートしていません。Windows 7 のユーザーは手動で [Python 3.8](https://www.python.org/downloads/release/python-3810/) をインストールし、ソースコードから実行する必要があります。
-
-`msvcp140.dll`、`c10.dll`、`[WinError 1114]` に関するエラーが表示された場合は、[Microsoft Visual C++ Redistributable x64](https://aka.ms/vc14/vc_redist.x64.exe) (Visual Studio 2015-2022; [公式ダウンロードノート](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist)) をインストールまたは更新してください。
-
-## macOS / Linux
-
-このスクリプトは、実行したディレクトリに `BallonsTranslator` をインストールします：
 ```bash
-curl -fLO https://raw.githubusercontent.com/dmMaze/BallonsTranslator/dev/scripts/install.sh && chmod +x install.sh && ./install.sh
+# このリポジトリのクローン
+$ git clone https://github.com/dmMaze/BallonsTranslator.git ; cd BallonsTranslator
+
+# macOSの場合、requirements_macOS.txtをインストール
+$ pip install -r requirements.txt
 ```
 
-`curl` が使用できない場合は、代わりに `wget -O ...` でスクリプトをダウンロードしてください。インストール後にアプリは自動的に起動します。次回以降は `cd BallonsTranslator && ./launch.sh` で再起動できます。
+NVIDIA GPUをお持ちの場合、GPUアクセラレーションを有効にするためにpytorch-cudaをインストールします。
 
-アプリは起動時にコア依存関係を確認します。追加ライブラリが必要なモジュールを選択すると、不足している任意依存関係のインストールを促します（設定で自動インストールを有効にすることもできます）。
+```bash
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu116
+```
+
+[MEGA](https://mega.nz/folder/gmhmACoD#dkVlZ2nphOkU5-2ACb5dKw) or [Google Drive](https://drive.google.com/drive/folders/1uElIYRLNakJj-YS0Kd3r3HE-wzeEvrWd?usp=sharing)  から **data** フォルダをダウンロードし、BallonsTranslator/ballontranslatorに移動して、最後に以下を実行します
+```bash
+python ballontranslator
+```
+
+
+Sugoi Translator（日英のみ）を使用するには、[オフラインモデル](https://drive.google.com/drive/folders/1KnDlfUM9zbnYFTo6iCbnBaBKabXfnVJm)をダウンロードし、"sugoi_translator"をBallonsTranslator/ballontranslator/data/modelsに移動してください。
 
 ## 完全自動翻訳
 **万が一、プログラムがクラッシュして情報が残らなかった場合に備えて、以下のgifを参考に、ターミナルで実行することをお勧めします。**また、初回実行時に希望するトランスレータを選択し、ソース言語とターゲット言語を設定してください。翻訳が必要な画像が入ったフォルダを開き、
 「実行」ボタンをクリックして処理が完了するのを待ちます。
-<img src="https://github.com/user-attachments/assets/ee92fbdc-718c-4e04-a876-0eff3ee2a989">
+<img src="./src/run.gif">
 
 このとき、フォントサイズや色などのフォントフォーマットはプログラムによって自動的に決定されますが、panel->Letteringで、対応するオプションを"decide by program"から"use global setting"に変更すれば、これらのフォーマットを事前に決定できます（グローバル設定とは、シーン内の
 テキストブロックを編集していないときに右フォントフォーマットパネルで表示されるフォーマットのことです）。
-<img src="https://github.com/user-attachments/assets/fb8a8b2c-54e4-4579-8319-42a172296c80">
 
 ## 画像編集
 
 ### 修復ツール
-<img src="https://github.com/user-attachments/assets/de0bc35d-6651-4f2f-985c-cfe9bfafb124">
+<img src="./src/imgedit_inpaint.gif">
 <p align = "center">
 画像編集モード、修復ツール
 </p>
 
 ### 長方形ツール
-<img src="https://github.com/user-attachments/assets/6c47f46f-ffd3-41fd-b667-5442be304c79">
+<img src="./src/rect_tool.gif">
 <p align = "center">
 長方形ツール
 </p>
@@ -86,19 +76,14 @@ curl -fLO https://raw.githubusercontent.com/dmMaze/BallonsTranslator/dev/scripts
 結果はアルゴリズム(gifの"方法1"と"方法2")がどれだけ正確にテキストマスクを抽出するかに依存します。複雑なテキストと背景の場合、パフォーマンスが低下する可能性があります。
 
 ## テキスト編集
-<img src="https://github.com/user-attachments/assets/0f688abe-41f7-416a-85c8-e0dd6968fd00">
+<img src="./src/textedit.gif">
 <p align = "center">
 テキスト編集モード
 </p>
 
-<img src="https://github.com/user-attachments/assets/6d31c8a5-b909-4339-8036-7fc3ba2f014c" div align=center>
+<img src="./src/multisel_autolayout.gif" div align=center>
 <p align=center>
 テキストの一括書式設定と自動レイアウト
-</p>
-
-<img src="https://github.com/user-attachments/assets/1b76c164-1454-4aa7-b60c-9fbdb0968350" div align=center>
-<p align=center>
-選択範囲の OCR と翻訳
 </p>
 
 ## ショートカット
@@ -111,7 +96,7 @@ curl -fLO https://raw.githubusercontent.com/dmMaze/BallonsTranslator/dev/scripts
 * 設定パネルで自動モジュールのパラメータを設定します。
 * 画像のサイズを変更するには、Ctrl + +/。
 
-<img src="https://github.com/user-attachments/assets/084a250d-6a31-4344-94c0-2a5f4ba64b96">
+<img src="./src/configpanel.png">
 
 
 # Automation modules
