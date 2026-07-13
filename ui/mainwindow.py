@@ -205,7 +205,10 @@ class MainWindow(mainwindow_cls):
 
     def resetStyleSheet(self, reverse_icon: bool = False):
         theme = 'eva-dark' if pcfg.darkmode else 'eva-light'
-        self.setStyleSheet(parse_stylesheet(theme, reverse_icon))
+        style_sheet = parse_stylesheet(theme, reverse_icon)
+        self.setStyleSheet(style_sheet)
+        if hasattr(self, 'configPanel'):
+            self.configPanel.setStyleSheet(style_sheet)
 
     def setupUi(self):
         screen_size = QGuiApplication.primaryScreen().geometry().size()
@@ -351,7 +354,6 @@ class MainWindow(mainwindow_cls):
         self.comicTransSplitter.addWidget(self.rightComicTransStackPanel)
 
         self.centralStackWidget.addWidget(self.comicTransSplitter)
-        self.centralStackWidget.addWidget(self.configPanel)
 
         self.selectext_minimenu = self.st_manager.selectext_minimenu = SelectTextMiniMenu(self.app, self)
         self.selectext_minimenu.block_current_editor.connect(self.st_manager.on_block_current_editor)
@@ -575,7 +577,8 @@ class MainWindow(mainwindow_cls):
             self.leftStackWidget.hide()
 
     def setupConfigUI(self):
-        self.centralStackWidget.setCurrentIndex(1)
+        self.centralStackWidget.setCurrentIndex(0)
+        self.configPanel.showConfigDialog()
 
     def set_display_lang(self, lang: str):
         self.retranslateUI()

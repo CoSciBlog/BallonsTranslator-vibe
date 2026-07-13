@@ -1,6 +1,16 @@
 # Changelogs
 
 ### 2026-07-13
+[v1.4.0-vibe.87] Settings window
+Changed:
+1. Settings now open in a separate non-modal window, following the upstream 1.5.x Settings behavior.
+2. Kept the Vibe-specific settings, section focus shortcuts, theme handling, and save-on-hide behavior intact.
+3. Updated README and changelog documentation.
+
+Version:
+1. Bumped the fork runtime version string to `1.4.0-vibe.87`.
+
+### 2026-07-13
 [v1.4.0-vibe.86] Pipeline history
 Added:
 1. Added project-local pipeline history saved to `pipeline_history.json`.

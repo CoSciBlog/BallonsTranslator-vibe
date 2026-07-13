@@ -1,6 +1,6 @@
 from typing import List, Union, Tuple
 
-from qtpy.QtWidgets import QPushButton, QKeySequenceEdit, QLayout, QGridLayout, QHBoxLayout, QVBoxLayout, QTreeView, QWidget, QLabel, QSizePolicy, QSpacerItem, QCheckBox, QSplitter, QScrollArea, QLineEdit, QFileDialog, QInputDialog, QMessageBox
+from qtpy.QtWidgets import QApplication, QPushButton, QKeySequenceEdit, QLayout, QGridLayout, QHBoxLayout, QVBoxLayout, QTreeView, QWidget, QLabel, QSizePolicy, QSpacerItem, QCheckBox, QSplitter, QScrollArea, QLineEdit, QFileDialog, QInputDialog, QMessageBox, QDialog
 from qtpy.QtCore import Qt, Signal, QSize, QEvent, QItemSelection
 from qtpy.QtGui import QStandardItem, QStandardItemModel, QMouseEvent, QFont, QIntValidator, QDoubleValidator, QValidator, QFocusEvent
 
@@ -21,6 +21,16 @@ from utils import shared as C
 from utils.shared import CONFIG_FONTSIZE_CONTENT, CONFIG_FONTSIZE_HEADER, CONFIG_FONTSIZE_TABLE, CONFIG_COMBOBOX_SHORT, CONFIG_COMBOBOX_LONG, CONFIG_COMBOBOX_MIDEAN, CONFIG_COMBOBOX_HEIGHT
 from .module_parse_widgets import InpaintConfigPanel, TextDetectConfigPanel, TranslatorConfigPanel, OCRConfigPanel
 from .tooltip_utils import wrap_tooltip
+
+PRESERVE_ACTIVE_WIDGET_CLASS_NAMES = {
+    'FrameLessMessageBox',
+    'ImgtransProgressMessageBox',
+    'KeywordSubWidget',
+    'MessageBox',
+    'PipelineHistoryWindow',
+    'ProgressMessageBox',
+    'TranslationBenchmarkWindow',
+}
 
 class CustomIntValidator(QIntValidator):
 
@@ -373,7 +383,7 @@ class ConfigTable(QTreeView):
             self.tableitem_pressed.emit(idx0, idx1)
 
 
-class ConfigPanel(Widget):
+class ConfigPanel(QDialog):
 
     save_config = Signal()
     settings_imported = Signal()
@@ -414,7 +424,14 @@ class ConfigPanel(Widget):
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
+        self._outside_click_filter_installed = False
         self.setObjectName("ConfigPanel")
+        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+        self.setWindowTitle(self.tr('Settings'))
+        self.setWindowModality(Qt.WindowModality.NonModal)
+        self.setSizeGripEnabled(True)
+        self.resize(900, 720)
+        self.setMinimumSize(720, 520)
         self.configTable = ConfigTable()
         self.configTable.tableitem_pressed.connect(self.onTableItemPressed)
         self.configContent = ConfigContent()
@@ -986,6 +1003,73 @@ class ConfigPanel(Widget):
     def onTableItemPressed(self, idx0, idx1):
         self.configContent.setActiveLabel(idx0, idx1)
 
+    def showConfigDialog(self):
+        self._installOutsideClickFilter()
+        self.show()
+        self.raise_()
+        self.activateWindow()
+
+    def _installOutsideClickFilter(self):
+        if self._outside_click_filter_installed:
+            return
+        app = QApplication.instance()
+        if app is not None:
+            app.installEventFilter(self)
+            self._outside_click_filter_installed = True
+
+    def _removeOutsideClickFilter(self):
+        if not self._outside_click_filter_installed:
+            return
+        app = QApplication.instance()
+        if app is not None:
+            app.removeEventFilter(self)
+        self._outside_click_filter_installed = False
+
+    def eventFilter(self, watched, event):
+        if not self.isVisible() or not isinstance(watched, QWidget):
+            return super().eventFilter(watched, event)
+        if event.type() == QEvent.Type.MouseButtonPress:
+            if (
+                QApplication.activePopupWidget() is None
+                and not self._widgetInsidePanel(watched)
+                and not self._activeWidgetInWhitelist()
+            ):
+                self.hide()
+        return super().eventFilter(watched, event)
+
+    def _widgetInsidePanel(self, widget) -> bool:
+        while widget is not None:
+            if widget is self:
+                return True
+            widget = widget.parentWidget()
+        return False
+
+    def _activeWidgetInWhitelist(self) -> bool:
+        return any(
+            self._widgetInWhitelist(widget)
+            for widget in (
+                QApplication.activeWindow(),
+                QApplication.activeModalWidget(),
+                QApplication.focusWidget(),
+            )
+        )
+
+    def _widgetInWhitelist(self, widget) -> bool:
+        while widget is not None:
+            if self._isWhitelistedWidget(widget):
+                return True
+            window = widget.window()
+            if window is not widget and self._isWhitelistedWidget(window):
+                return True
+            widget = widget.parentWidget()
+        return False
+
+    def _isWhitelistedWidget(self, widget) -> bool:
+        return (
+            isinstance(widget, QMessageBox)
+            or widget.__class__.__name__ in PRESERVE_ACTIVE_WIDGET_CLASS_NAMES
+        )
+
     def on_open_onstartup_changed(self):
         pcfg.open_recent_on_startup = self.open_on_startup_checker.isChecked()
 
@@ -1145,26 +1229,31 @@ class ConfigPanel(Widget):
         self.show_only_custom_font.emit(pcfg.let_show_only_custom_fonts_flag)
 
     def focusOnTranslator(self):
+        self.showConfigDialog()
         idx0, idx1 = self.trans_sub_block.idx0, self.trans_sub_block.idx1
         self.configTable.setCurrentItem(idx0, idx1)
         self.configTable.tableitem_pressed.emit(idx0, idx1)
 
     def focusOnInpaint(self):
+        self.showConfigDialog()
         idx0, idx1 = self.inpaint_sub_block.idx0, self.inpaint_sub_block.idx1
         self.configTable.setCurrentItem(idx0, idx1)
         self.configTable.tableitem_pressed.emit(idx0, idx1)
 
     def focusOnDetect(self):
+        self.showConfigDialog()
         idx0, idx1 = self.detect_sub_block.idx0, self.detect_sub_block.idx1
         self.configTable.setCurrentItem(idx0, idx1)
         self.configTable.tableitem_pressed.emit(idx0, idx1)
 
     def focusOnOCR(self):
+        self.showConfigDialog()
         idx0, idx1 = self.ocr_sub_block.idx0, self.ocr_sub_block.idx1
         self.configTable.setCurrentItem(idx0, idx1)
         self.configTable.tableitem_pressed.emit(idx0, idx1)
 
     def hideEvent(self, e) -> None:
+        self._removeOutsideClickFilter()
         self.save_config.emit()
         return super().hideEvent(e)
         

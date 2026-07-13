@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.86`
+Fork release: `1.4.0-vibe.87`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -26,6 +26,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Fixed `manga_ocr` startup with current Transformers releases by using the image processor API required by the local `manga-ocr-base` vision model.
 - Added a project glossary window, project-level glossary persistence in each project's `glossary.json`, and a custom glossary prompt for LLM translation guidance.
 - Added project-level pipeline history in `pipeline_history.json`, with a left-sidebar history window for comparing run duration, process type, and translation/LLM model settings.
+- Changed Settings to open in a separate non-modal window, following the upstream 1.5.x layout behavior while keeping the Vibe-specific settings intact.
 - Added an optional settings safety switch that prevents mouse wheel changes on combo boxes and spin boxes, plus wider input fields for long API keys, URLs, and prompts.
 - Added optional pre-detection page upscaling with factor, quality, maximum size, and skip-threshold settings.
 - Refined the General settings layout, added a glossary icon, and added a sidebar translation-only run button.

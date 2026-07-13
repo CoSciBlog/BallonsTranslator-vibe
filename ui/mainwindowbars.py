@@ -418,8 +418,10 @@ class LeftBar(Widget):
             self.imgTransChecked.emit()
         elif checker_type == 'config':
             if self.configChecker.isChecked():
-                self.imgTransChecker.setChecked(False)
                 self.configChecked.emit()
+                self.configChecker.blockSignals(True)
+                self.configChecker.setChecked(False)
+                self.configChecker.blockSignals(False)
             else:
                 self.imgTransChecker.setChecked(True)
                 
