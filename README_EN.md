@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.87`
+Fork release: `1.4.0-vibe.88`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -37,7 +37,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Added a `Force Stop` control to the run progress dialog for terminating stuck pipeline or translation threads.
 - Added the missing `accelerate>=0.26.0` dependency required by `flux2-klein` GGUF loading.
 - Expanded intermediate image saving to `PNG`, `JPG`, `WEBP`, and `JXL` with a separate quality setting.
-- Reintroduced Censor Restoration / Decensor Inpaint controls in General settings and added a current-page sidebar action.
+- Temporarily removed Censor Restoration / Decensor Inpaint controls from General settings and the left sidebar while that workflow is being repaired.
 - Added a `Ri` sidebar action, Drawboard Re-Inpaint settings tab, Tools-menu action, and `Ctrl+Shift+I` shortcut to re-run inpainting for the current page with existing masks.
 - Added readable English names to source-language selectors, for example `日本語 (Japanese)`, `Deutsch (German)`, and `Polski (Polish)`, while keeping the original internal language values.
 - Added `English` to the Batch Processing source- and target-language selectors and made the dialog restore saved language choices by internal language key.
@@ -126,10 +126,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
   - inpainting brush style cleanup
   - optional second-pass inpaint optimization for the current page, all non-ignored pages, or full pipeline runs
   - support for long-strip and webtoon-style pages
-- Censor Restoration / Decensor Inpaint workflow:
-  - works on the currently selected page when invoked by the app workflow
-  - automatically builds masks for simple black or white censor bars and block-like censor regions
-  - repairs the mask with the configured inpainting backend as a plausible inpaint reconstruction
+- Censor Restoration / Decensor Inpaint workflow is temporarily hidden from Settings and the left sidebar while it is being repaired.
 - Comic archive import and export:
   - opens `.cbz`, `.cbr`, `.zip`, and `.pdf` files directly
   - imports one or more PDF/archive files from the Open menu or by drag-and-drop
@@ -154,20 +151,7 @@ When `reflection` is enabled, the extra review request receives JSON input conta
 
 ## Censor Restoration / Decensor Inpaint
 
-Censor Restoration / Decensor Inpaint works on the currently opened page from the left sidebar `Dc` button. It automatically creates a mask for simple black or white censor bars and block-like censor regions, then repairs that masked area with the existing inpainting backend. The result is a plausible inpaint reconstruction and does not recreate source data.
-
-The detection settings are available under `Settings -> General -> Censor Restoration`. You can choose the mask mode, adjust mask padding, and tune the minimum detected area ratio.
-
-If the app reports `No repair mask found`, enable debug mask output when developing or tune the detector thresholds and area settings. The Censor Restoration pipeline also exposes a manual-mask entry point so an existing repair mask can be used by integration code without relying on automatic detection.
-
-Use this feature only for material where you have the necessary rights. Do not use it for real people, minors, or misleading reconstructions. Output quality depends on the image, detected mask, and selected inpainting backend.
-
-Known limitations:
-
-- Complex mosaic censorship is not detected reliably yet.
-- Automatic detection can produce false positives or false negatives.
-- Difficult structures can create visible inpainting artifacts.
-- Semantic or prompt-based inpainting is not a standard part of this MVP.
+Censor Restoration / Decensor Inpaint is temporarily hidden from General settings and the left sidebar because the current workflow is not reliable enough. Project files and existing repair-mask folders are left untouched so the workflow can be repaired without losing prior data.
 
 ## Comic archive import and export
 
@@ -185,7 +169,7 @@ ZIP and CBZ files use Python's built-in ZIP support. CBR files require a local `
 
 ## Re-Inpaint current page
 
-The left sidebar includes a `Ri` button below `Gloss` and `Dc`. It re-runs inpainting for the currently opened page only, using the page's existing text/manual inpaint mask plus any explicit Censor Restoration mask saved for that same page. Masks from other pages, debug masks, thumbnails, and exported result images are not used.
+The left sidebar includes a `Ri` button below the project utility actions. It re-runs inpainting for the currently opened page only, using the page's existing text/manual inpaint mask plus any explicit repair mask saved for that same page. Masks from other pages, debug masks, thumbnails, and exported result images are not used.
 
 The same action is available from `Tools -> Re-run Inpainting Current Page` and the `Ctrl+Shift+I` shortcut. The Drawboard has a Re-Inpaint settings tab with the current inpainter selector and a dedicated `Dilate` slider, matching the rectangle repair tool's dilation behavior. Re-Inpaint now keeps the page metadata attached to the inpaint result, so the progress dialog can close when the current-page result finishes. This is useful after changing the inpainting model or editing masks manually. Batch Processing can also run a project-wide Re-Inpaint pass after the normal pipeline and before export; it prefers each page's existing `inpainted` image as the source and combines saved text masks with censor-restoration masks.
 
@@ -264,7 +248,7 @@ Settings hover text now calls out runtime impact only when an option affects pro
 
 UI-only settings such as preset import/export, keyboard shortcuts, mouse-wheel protection, startup reopening, and display filters now use neutral descriptions without performance claims. Detector, OCR, Inpainter, and Translator parameter hints use only the descriptions provided by each module.
 
-Long checkbox descriptions in Settings are rendered as wrapping text beside the checkbox instead of as unwrapped checkbox captions. This keeps options such as Auto layout, custom fonts, Censor Restoration debug masks, Post-merge, Upscaling, and DL Module cache controls inside the visible Settings pane.
+Long checkbox descriptions in Settings are rendered as wrapping text beside the checkbox instead of as unwrapped checkbox captions. This keeps options such as Auto layout, custom fonts, Post-merge, Upscaling, and DL Module cache controls inside the visible Settings pane.
 
 ## Source language labels
 

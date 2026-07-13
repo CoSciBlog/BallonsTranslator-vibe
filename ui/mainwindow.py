@@ -501,7 +501,6 @@ class MainWindow(mainwindow_cls):
         self.leftBar.run_imgtrans_clicked.connect(self.run_imgtrans)
         self.leftBar.run_gloss_scan_clicked.connect(self.run_gloss_scan_current_manga)
         self.leftBar.run_region_merge_clicked.connect(self.run_merge_current_page_using_settings)
-        self.leftBar.run_decensor_clicked.connect(self.run_decensor_current_page)
         self.leftBar.run_reinpaint_clicked.connect(self.run_reinpaint_current_page)
         self.leftBar.run_inpaint_optimize_clicked.connect(self.run_inpaint_optimize_current_page)
         self.leftBar.run_upscale_2x_clicked.connect(self.run_project_upscale_2x)

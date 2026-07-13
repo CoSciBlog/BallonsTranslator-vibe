@@ -1,6 +1,17 @@
 # Changelogs
 
 ### 2026-07-13
+[v1.4.0-vibe.88] Hide Decensor UI
+Changed:
+1. Temporarily removed Censor Restoration / Decensor Inpaint from General settings.
+2. Removed the left-sidebar Censor Restoration action while the workflow is being repaired.
+3. Kept existing project data and backend code paths intact for later repair work.
+4. Updated README and changelog documentation.
+
+Version:
+1. Bumped the fork runtime version string to `1.4.0-vibe.88`.
+
+### 2026-07-13
 [v1.4.0-vibe.87] Settings window
 Changed:
 1. Settings now open in a separate non-modal window, following the upstream 1.5.x Settings behavior.
