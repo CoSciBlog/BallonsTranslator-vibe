@@ -1,4 +1,5 @@
 import os, json, shutil, re, time, threading, docx, docx2txt, piexif, cv2
+from datetime import datetime, timezone
 from docx.shared import Inches
 from docx import Document
 import piexif.helper
@@ -196,6 +197,52 @@ class ProjImgTrans:
 
     def glossary_path(self) -> str:
         return osp.join(self.directory, 'glossary.json')
+
+    def pipeline_history_path(self) -> str:
+        return osp.join(self.directory, 'pipeline_history.json')
+
+    def load_pipeline_history(self) -> Dict:
+        history_path = self.pipeline_history_path()
+        if not osp.exists(history_path):
+            return {'schema_version': 1, 'entries': []}
+        try:
+            with open(history_path, 'r', encoding='utf8') as f:
+                data = json.loads(f.read())
+        except Exception as e:
+            LOGGER.warning(f'Failed to load pipeline history {history_path}: {e}')
+            return {'schema_version': 1, 'entries': []}
+        if not isinstance(data, dict):
+            return {'schema_version': 1, 'entries': []}
+        entries = data.get('entries', [])
+        if not isinstance(entries, list):
+            entries = []
+        return {'schema_version': int(data.get('schema_version', 1) or 1), 'entries': entries}
+
+    def save_pipeline_history(self, history: Dict) -> None:
+        atomic_write_json(self.pipeline_history_path(), history)
+
+    def append_pipeline_history(self, entry: Dict) -> str:
+        history = self.load_pipeline_history()
+        entry_id = entry.get('id') or f'pipeline-{time.time_ns()}'
+        entry['id'] = entry_id
+        history['entries'].append(entry)
+        self.save_pipeline_history(history)
+        return entry_id
+
+    def update_pipeline_history_entry(self, entry_id: str, updates: Dict) -> bool:
+        if not entry_id:
+            return False
+        history = self.load_pipeline_history()
+        for entry in reversed(history['entries']):
+            if entry.get('id') == entry_id:
+                entry.update(updates)
+                self.save_pipeline_history(history)
+                return True
+        return False
+
+    @staticmethod
+    def utc_now_iso() -> str:
+        return datetime.now(timezone.utc).isoformat(timespec='seconds').replace('+00:00', 'Z')
 
     @classmethod
     def default_glossary(cls) -> Dict[str, str]:

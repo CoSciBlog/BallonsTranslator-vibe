@@ -1147,6 +1147,8 @@ class ModuleManager(QObject):
         self.check_inpaint_fin_timer.timeout.connect(self.check_inpaint_th_finished)
         self.pipeline_pages_to_process = None
         self.post_pipeline_merge_done = False
+        self.active_pipeline_history_id = None
+        self.active_pipeline_started_at = None
 
     def setupThread(self, config_panel: ConfigPanel, imgtrans_progress_msgbox: ImgtransProgressMessageBox, ocr_postprocess: Callable = None, translate_preprocess: Callable = None, translate_postprocess: Callable = None):
         self.textdetect_thread = TextDetectThread()
@@ -1173,6 +1175,7 @@ class ModuleManager(QObject):
         self.imgtrans_thread.finish_blktrans_stage.connect(self.on_finish_blktrans_stage)
         self.imgtrans_thread.finish_blktrans.connect(self.on_finish_blktrans)
         self.imgtrans_thread.pipeline_stopped.connect(self.on_imgtrans_thread_stopped)
+        self.imgtrans_thread.finished.connect(self.on_imgtrans_thread_finished)
 
         self.translator_panel = translator_panel = config_panel.trans_config_panel        
         translator_params = merge_config_module_params(cfg_module.translator_params, GET_VALID_TRANSLATORS(), TRANSLATORS.get)
@@ -1256,6 +1259,76 @@ class ModuleManager(QObject):
         if self.translate_thread.isRunning():
             self.translate_thread.quit()
 
+    def _module_history_info(self, module: BaseModule) -> Dict:
+        if module is None:
+            return {}
+        info = {'name': getattr(module, 'name', module.__class__.__name__)}
+        params = getattr(module, 'params', None) or {}
+        for key in ['provider', 'model', 'override model', 'endpoint', 'version', 'device']:
+            if key not in params:
+                continue
+            try:
+                value = module.get_param_value(key)
+            except Exception:
+                continue
+            if key == 'override model' and not value:
+                continue
+            info[key.replace(' ', '_')] = value
+        if 'model' in info and 'override_model' in info:
+            info['effective_model'] = info['override_model']
+        elif 'model' in info:
+            info['effective_model'] = info['model']
+        return info
+
+    def _pipeline_history_modules(self) -> Dict:
+        return {
+            'textdetector': self._module_history_info(self.textdetector),
+            'ocr': self._module_history_info(self.ocr),
+            'translator': self._module_history_info(self.translator),
+            'inpainter': self._module_history_info(self.inpainter),
+        }
+
+    def _start_pipeline_history(self, pipeline_name: str, pages_to_process, process_pages: List[str]):
+        self.active_pipeline_started_at = time.time()
+        entry = {
+            'pipeline': pipeline_name,
+            'process': pipeline_name,
+            'status': 'running',
+            'started_at': ProjImgTrans.utc_now_iso(),
+            'duration_seconds': None,
+            'page_count': len(process_pages),
+            'pages_requested': list(pages_to_process) if pages_to_process else None,
+            'pages_processed': list(process_pages),
+            'stages': {
+                'detect': bool(cfg_module.enable_detect),
+                'ocr': bool(cfg_module.enable_ocr),
+                'translate': bool(cfg_module.enable_translate),
+                'inpaint': bool(cfg_module.enable_inpaint),
+                'inpaint_optimization': bool(cfg_module.enable_inpaint_optimization),
+            },
+            'modules': self._pipeline_history_modules(),
+        }
+        self.active_pipeline_history_id = self.imgtrans_proj.append_pipeline_history(entry)
+        LOGGER.info(f'Pipeline history started: {pipeline_name} ({self.active_pipeline_history_id})')
+
+    def _finish_pipeline_history(self, status: str):
+        if not self.active_pipeline_history_id:
+            return
+        started_at = self.active_pipeline_started_at or time.time()
+        updates = {
+            'status': status,
+            'finished_at': ProjImgTrans.utc_now_iso(),
+            'duration_seconds': round(max(0.0, time.time() - started_at), 3),
+            'modules': self._pipeline_history_modules(),
+        }
+        if self.imgtrans_proj.update_pipeline_history_entry(self.active_pipeline_history_id, updates):
+            LOGGER.info(
+                f'Pipeline history finished: {self.active_pipeline_history_id} '
+                f'status={status} duration={updates["duration_seconds"]}s'
+            )
+        self.active_pipeline_history_id = None
+        self.active_pipeline_started_at = None
+
     def check_inpaint_th_finished(self):
         if self.inpaint_thread.isRunning():
             return
@@ -1274,8 +1347,10 @@ class ModuleManager(QObject):
         if len(process_pages) == 0:
             LOGGER.info('No pages to process after applying ignored page filters')
             self.progress_msgbox.hide()
+            self._finish_pipeline_history('completed')
             self.imgtrans_pipeline_finished.emit()
             return
+        self._start_pipeline_history('image_translation_pipeline', pages_to_process, process_pages)
         self.last_finished_index = -1
         self.pipeline_pages_to_process = pages_to_process
         self.post_pipeline_merge_done = False
@@ -1284,6 +1359,7 @@ class ModuleManager(QObject):
         if cfg_module.all_stages_disabled() and self.imgtrans_proj is not None and self.imgtrans_proj.num_pages > 0:
             for page_name in process_pages:
                 self.page_trans_finished.emit(self.imgtrans_proj.pagename2idx(page_name))
+            self._finish_pipeline_history('completed')
             self.imgtrans_pipeline_finished.emit()
             return
         
@@ -1308,6 +1384,8 @@ class ModuleManager(QObject):
             self.progress_msgbox.hide()
             self.imgtrans_pipeline_finished.emit()
             return
+        process_pages = self.imgtrans_proj.pipeline_pages(pages_to_process, skip_ignored=True)
+        self._start_pipeline_history('translation_only_pipeline', pages_to_process, process_pages)
         self.last_finished_index = -1
         self.pipeline_pages_to_process = pages_to_process
         self.post_pipeline_merge_done = False
@@ -1343,6 +1421,8 @@ class ModuleManager(QObject):
             self.progress_msgbox.hide()
             self.imgtrans_pipeline_finished.emit()
             return
+        process_pages = self.imgtrans_proj.pipeline_pages(pages_to_process, skip_ignored=True)
+        self._start_pipeline_history('llm_review_pipeline', pages_to_process, process_pages)
         self.last_finished_index = -1
         self.pipeline_pages_to_process = pages_to_process
         self.post_pipeline_merge_done = False
@@ -1365,6 +1445,8 @@ class ModuleManager(QObject):
         if self.anyPipelineThreadRunning():
             LOGGER.warning('Stopping existing pipeline before starting decensor.')
             self.forceStopImgtransPipeline(emit_finished=False)
+        process_pages = self.imgtrans_proj.pipeline_pages(pages_to_process, skip_ignored=False)
+        self._start_pipeline_history('decensor_pipeline', pages_to_process, process_pages)
         self.last_finished_index = -1
         self.pipeline_pages_to_process = pages_to_process
         self.post_pipeline_merge_done = False
@@ -1399,6 +1481,8 @@ class ModuleManager(QObject):
         if self.anyPipelineThreadRunning():
             LOGGER.warning('Stopping existing pipeline before starting inpaint optimization.')
             self.forceStopImgtransPipeline(emit_finished=False)
+        process_pages = self.imgtrans_proj.pipeline_pages(pages_to_process, skip_ignored=True)
+        self._start_pipeline_history('inpaint_optimization_pipeline', pages_to_process, process_pages)
         self.last_finished_index = -1
         self.pipeline_pages_to_process = pages_to_process
         self.post_pipeline_merge_done = False
@@ -1471,6 +1555,7 @@ class ModuleManager(QObject):
         self.inpaint_thread.inpainting = False
         self.block_set_inpainter = False
         self.progress_msgbox.hide()
+        self._finish_pipeline_history('force_stopped')
         if was_canvas_inpaint:
             self.inpaint_thread.inpaint_failed.emit()
         if emit_finished:
@@ -1687,6 +1772,7 @@ class ModuleManager(QObject):
             if not self.imgtrans_thread.translation_only and not self.imgtrans_thread.review_only:
                 self.apply_post_pipeline_textbox_merge()
             self.progress_msgbox.hide()
+            self._finish_pipeline_history('completed')
             self.imgtrans_pipeline_finished.emit()
             self.imgtrans_thread.translation_only = False
             self.imgtrans_thread.review_only = False
@@ -1697,11 +1783,16 @@ class ModuleManager(QObject):
         """线程完成时确保关闭进度对话框"""
         # 线程完成了，直接关闭窗口
         self.progress_msgbox.hide()
+        self._finish_pipeline_history('stopped')
         self.imgtrans_pipeline_finished.emit()
         self.imgtrans_thread.translation_only = False
         self.imgtrans_thread.review_only = False
         self.imgtrans_thread.decensor_only = False
         self.imgtrans_thread.inpaint_optimization_only = False
+
+    def on_imgtrans_thread_finished(self):
+        if self.active_pipeline_history_id:
+            self._finish_pipeline_history('failed')
 
     def setTranslator(self, translator: str = None):
         if translator is None:

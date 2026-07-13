@@ -74,6 +74,7 @@ from .io_thread import (
 from .custom_widget import Widget, ViewWidget
 from .global_search_widget import GlobalSearchWidget
 from .glossary_widget import GlossaryWindow
+from .pipeline_history_widget import PipelineHistoryWindow
 from .translation_benchmark import TranslationBenchmarkWindow
 from .model_downloads import ModelDownloadWindow
 from .batch_processing_dialog import BatchProcessingDialog, BatchProcessingOptions
@@ -220,6 +221,7 @@ class MainWindow(mainwindow_cls):
         self.leftBar.configChecked.connect(self.setupConfigUI)
         self.leftBar.globalSearchChecker.clicked.connect(self.on_set_gsearch_widget)
         self.leftBar.glossary_clicked.connect(self.show_project_glossary_window)
+        self.leftBar.pipeline_history_clicked.connect(self.show_pipeline_history_window)
         self.leftBar.open_dir.connect(self.OpenProj)
         self.leftBar.open_paths.connect(self.OpenProj)
         self.leftBar.open_json_proj.connect(self.openJsonProj)
@@ -314,6 +316,8 @@ class MainWindow(mainwindow_cls):
         self.glossaryWindow = GlossaryWindow(self)
         self.glossaryWindow.saved.connect(self.on_project_glossary_saved)
         self.glossaryWindow.hide()
+        self.pipelineHistoryWindow = PipelineHistoryWindow(self)
+        self.pipelineHistoryWindow.hide()
         self._gloss_scan_pending = False
         self._gloss_scan_stage_backup = None
         self._gloss_scan_pages = None
@@ -1141,6 +1145,15 @@ class MainWindow(mainwindow_cls):
         self.glossaryWindow.show()
         self.glossaryWindow.raise_()
         self.glossaryWindow.activateWindow()
+
+    def show_pipeline_history_window(self):
+        if self.imgtrans_proj is None or self.imgtrans_proj.directory is None:
+            create_info_dialog(self.tr('Open a project before viewing pipeline history.'))
+            return
+        self.pipelineHistoryWindow.set_project(self.imgtrans_proj)
+        self.pipelineHistoryWindow.show()
+        self.pipelineHistoryWindow.raise_()
+        self.pipelineHistoryWindow.activateWindow()
 
     def on_project_glossary_saved(self, glossary: dict):
         old_glossary = self.imgtrans_proj.normalize_glossary(self.imgtrans_proj.glossary)

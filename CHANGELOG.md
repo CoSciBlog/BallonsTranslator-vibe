@@ -82,6 +82,8 @@
 - Left-sidebar `x2` action for running the existing 2x project-image replacement workflow with Settings-page quality and size limits.
 - Native Ollama `/api/chat` transport for `LLM_API_Translator` and `Two-Step Translator`, including the configurable `num ctx` runtime option for local model context length.
 - Per-request Ollama terminal metrics showing model load time, prompt-evaluation speed, and output-generation speed in tokens per second.
+- Project-local pipeline history saved to `pipeline_history.json`, recording pipeline/process type, start/end time, duration, page count, enabled stages, and active detector/OCR/translator/inpainter settings.
+- Left-sidebar `Hist` button that opens a Pipeline History window for comparing project runs and the LLM or translation model used.
 - `Auto (auto detect)` source selection for LLM/Two-Step translation and bilingual display labels for target-language selections.
 - Local SVG utility icons for the left-sidebar Censor Restoration, Re-Inpaint, Optimize Inpainting, Upscale 2x, and Region Merge actions.
 - A current-page Region Merge sidebar action that applies the stored General -> Post-merge mode, gap, and overlap settings.
@@ -96,6 +98,7 @@
 - Bumped the fork runtime version string to `1.4.0-vibe.83`.
 - Bumped the fork runtime version string to `1.4.0-vibe.84`.
 - Bumped the fork runtime version string to `1.4.0-vibe.85`.
+- Bumped the fork runtime version string to `1.4.0-vibe.86`.
 - LLM translation, manual review, reflection, glossary extraction, and glossary refinement now recover complete list items from malformed or truncated JSON before falling back to retry or draft handling.
 - LLM translation, reflection, manual review, and glossary-refinement responses now coerce non-string `translation` fields, including duplicate candidate lists, into strings before schema validation.
 - Settings checkbox descriptions now wrap beside the checkbox instead of using unwrapped checkbox captions, preventing long General and DL Module option text from extending beyond the window.

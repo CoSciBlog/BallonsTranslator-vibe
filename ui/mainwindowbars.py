@@ -74,6 +74,7 @@ class LeftBar(Widget):
     run_inpaint_optimize_clicked = Signal()
     run_upscale_2x_clicked = Signal()
     run_translate_clicked = Signal()
+    pipeline_history_clicked = Signal()
     export_comic_clicked = Signal()
     batch_processing_clicked = Signal()
     def __init__(self, mainwindow, *args, **kwargs) -> None:
@@ -191,6 +192,17 @@ class LeftBar(Widget):
 
         utility_icon_size = QSize(23, 23)
 
+        self.pipelineHistoryBtn = QPushButton()
+        self.pipelineHistoryBtn.setObjectName('RunButton')
+        self.pipelineHistoryBtn.setText(self.tr('Hist'))
+        self.pipelineHistoryBtn.setAccessibleName(self.tr('Pipeline History'))
+        self.pipelineHistoryBtn.setToolTip(self.tr('Pipeline History: show completed pipeline and process runs for this project.'))
+        font = self.pipelineHistoryBtn.font()
+        font.setPixelSize(9)
+        self.pipelineHistoryBtn.setFont(font)
+        self.pipelineHistoryBtn.setFixedSize(LEFTBTN_WIDTH, LEFTBTN_WIDTH)
+        self.pipelineHistoryBtn.clicked.connect(self.pipeline_history_clicked)
+
         self.glossaryBtn = QPushButton()
         self.glossaryBtn.setObjectName('RunButton')
         self.glossaryBtn.setAccessibleName(self.tr('Glossary'))
@@ -265,6 +277,7 @@ class LeftBar(Widget):
         vlayout.addWidget(self.showPageListLabel)
         vlayout.addWidget(self.globalSearchChecker)
         vlayout.addWidget(self.glossaryBtn)
+        vlayout.addWidget(self.pipelineHistoryBtn)
         vlayout.addWidget(self.runRegionMergeBtn)
         vlayout.addWidget(self.runDecensorBtn)
         vlayout.addWidget(self.runReInpaintBtn)

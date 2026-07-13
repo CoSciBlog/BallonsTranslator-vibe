@@ -1,5 +1,19 @@
 # Changelogs
 
+### 2026-07-13
+[v1.4.0-vibe.86] Pipeline history
+Added:
+1. Added project-local pipeline history saved to `pipeline_history.json`.
+2. Added a left-sidebar `Hist` button that opens a Pipeline History window.
+
+Changed:
+1. Pipeline history records the process type, start and finish time, duration, page count, enabled stages, and active detector/OCR/translator/inpainter settings.
+2. Translation entries include the selected translator plus LLM provider/model details where available.
+3. Updated README and changelog documentation.
+
+Version:
+1. Bumped the fork runtime version string to `1.4.0-vibe.86`.
+
 ### 2026-06-29
 [v1.4.0-vibe.85] ChatGPT auto source language
 Added:
