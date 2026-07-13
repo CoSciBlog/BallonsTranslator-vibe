@@ -7,7 +7,7 @@ from .ctd import CTDModel
 
 CTD_ONNX_PATH = 'data/models/comictextdetector.pt.onnx'
 CTD_TORCH_PATH = 'data/models/comictextdetector.pt'
-CTD_DETECT_SIZE_OPTIONS = [896, 1024, 1152, 1280, 1400, 1536, 1600, 1792, 2048, 2400]
+CTD_DETECT_SIZE_OPTIONS = [896, 1024, 1152, 1280, 1408, 1536, 1600, 1792, 2048, 2432]
 
 def load_ctd_model(
     model_path,

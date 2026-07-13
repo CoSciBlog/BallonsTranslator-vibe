@@ -1,5 +1,6 @@
 import json
 from .basemodel import TextDetBase, TextDetBaseDNN
+import math
 import os.path as osp
 from tqdm import tqdm
 import numpy as np
@@ -19,6 +20,16 @@ from pathlib import Path
 from typing import Union, List, Tuple, Callable
 
 CTD_MODEL_PATH = r'data/models/comictextdetector.pt'
+CTD_MODEL_STRIDE = 64
+
+
+def normalize_detect_size(detect_size, stride: int = CTD_MODEL_STRIDE):
+    def _normalize(size: int) -> int:
+        return int(math.ceil(int(size) / stride) * stride)
+
+    if isinstance(detect_size, int):
+        return _normalize(detect_size)
+    return tuple(_normalize(size) for size in detect_size)
 
 def det_rearrange_forward(
     img: np.ndarray, 
@@ -35,6 +46,8 @@ def det_rearrange_forward(
     Returns:
         DBNet output, mask or None, None if rearrangement is not required
     '''
+
+    tgt_size = normalize_detect_size(tgt_size)
 
     def _unrearrange(patch_lst: List[np.ndarray], transpose: bool, channel=1, pad_num=0):
         _psize = _h = patch_lst[0].shape[-1]
@@ -206,6 +219,7 @@ def model2annotations(model_path, img_dir_list, save_dir, save_json=False):
 def preprocess_img(img, detect_size=(1024, 1024), device='cpu', bgr2rgb=True, half=False, to_tensor=True):
     if isinstance(detect_size, int):
         detect_size = (detect_size, detect_size)
+    detect_size = normalize_detect_size(detect_size)
     
     if bgr2rgb:
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -314,13 +328,17 @@ class TextDetector:
     @torch.no_grad()
     def __call__(self, img, refine_mode=REFINEMASK_INPAINT, keep_undetected_mask=False) -> Tuple[np.ndarray, np.ndarray, List[TextBlock]]:
         
-        detect_size = self.detect_size if not self.backend == 'opencv' else 1024
+        detect_size = normalize_detect_size(self.detect_size) if not self.backend == 'opencv' else 1024
         im_h, im_w = img.shape[:2]
         lines_map, mask = det_rearrange_forward(img, self.det_batch_forward_ctd, detect_size, self.det_rearrange_max_batches, self.device)
         blks = []
         resize_ratio = [1, 1]
         if lines_map is None:
             img_in, ratio, dw, dh = preprocess_img(img, bgr2rgb=False, detect_size=detect_size, device=self.device, half=self.half, to_tensor=self.backend=='torch')
+            if self.backend == 'torch':
+                input_h, input_w = img_in.shape[-2:]
+            else:
+                input_h, input_w = img_in.shape[:2]
             blks, mask, lines_map = self.net(img_in)
             if self.backend == 'opencv':
                 if mask.shape[1] == 2:     # some version of opencv spit out reversed result
@@ -328,7 +346,7 @@ class TextDetector:
                     mask = lines_map
                     lines_map = tmp
             mask = mask.squeeze()
-            resize_ratio = (im_w / (detect_size - dw), im_h / (detect_size - dh))
+            resize_ratio = (im_w / (input_w - dw), im_h / (input_h - dh))
             blks = postprocess_yolo(blks, self.conf_thresh, self.nms_thresh, resize_ratio)
             mask = mask[..., :mask.shape[0]-dh, :mask.shape[1]-dw]
             lines_map = lines_map[..., :lines_map.shape[2]-dh, :lines_map.shape[3]-dw]
