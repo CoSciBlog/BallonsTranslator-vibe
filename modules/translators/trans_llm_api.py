@@ -506,6 +506,11 @@ class LLM_API_Translator(BaseTranslator):
             "description": "Frequency penalty (OpenAI).",
         },
         "presence penalty": {"value": 0.0, "description": "Presence penalty (OpenAI)."},
+        "unload vision models before llm": {
+            "value": True,
+            "description": "Defer LLM translation until text detection, OCR, and inpainting have finished, then unload those vision models before the first LLM request. This frees RAM/VRAM for local LLMs and can prevent slowdowns or OOM on memory-limited GPUs, but disables translation overlap and adds model reload overhead on later runs.",
+            "type": "checkbox",
+        },
         "low vram mode": {
             'value': False,
             'description': 'Use this for local single-device runs that crash from VRAM exhaustion. It is a memory-safety option, not a speed boost; it prevents translation from running in parallel with the image pipeline and can increase total runtime.',
@@ -653,6 +658,13 @@ class LLM_API_Translator(BaseTranslator):
         ):
             return None
         return endpoint
+
+    @property
+    def unload_vision_models_before_llm(self) -> bool:
+        return bool(self.get_param_value("unload vision models before llm"))
+
+    def should_unload_before_llm_refinement(self) -> bool:
+        return self.unload_vision_models_before_llm
 
     @property
     def temperature(self) -> float:

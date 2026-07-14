@@ -824,7 +824,8 @@ class ImgtransThread(QThread):
             self.parallel_trans = not self.translator.is_computational_intensive() \
                 and not low_vram_trans \
                 and not translate_after_image_processing \
-                and not background_first_step_trans
+                and not background_first_step_trans \
+                and not unload_before_llm_refinement
         else:
             self.parallel_trans = False
         if self.parallel_trans and cfg_module.enable_translate:
@@ -952,6 +953,7 @@ class ImgtransThread(QThread):
             low_vram_trans
             or background_first_step_trans
             or translate_after_image_processing
+            or unload_before_llm_refinement
         ):
             if background_first_step_trans:
                 while self.translate_thread.isRunning():

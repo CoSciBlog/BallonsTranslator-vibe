@@ -56,7 +56,7 @@ class TwoStepTranslator(LLM_API_Translator):
         "unload vision models before llm": {
             "type": "checkbox",
             "value": True,
-            "description": "When parallel first-step translation is enabled, unload text detection, OCR, and inpainting models before final Ollama/LLM refinement. This frees RAM/VRAM for local LLMs and can prevent slowdowns or OOM on memory-limited GPUs, but unloading/reloading adds overhead.",
+            "description": "Defer final LLM refinement until text detection, OCR, and inpainting have finished, then unload those vision models before the first LLM request. This frees RAM/VRAM for local LLMs and can prevent slowdowns or OOM on memory-limited GPUs, but disables final-translation overlap and adds model reload overhead on later runs.",
         },
         "max refinement items per request": {
             "value": 8,
@@ -148,15 +148,8 @@ class TwoStepTranslator(LLM_API_Translator):
     def parallel_first_step_during_pipeline(self) -> bool:
         return bool(self.get_param_value("parallel first step during pipeline"))
 
-    @property
-    def unload_vision_models_before_llm(self) -> bool:
-        return bool(self.get_param_value("unload vision models before llm"))
-
     def pipeline_pretranslation_enabled(self) -> bool:
         return self.parallel_first_step_during_pipeline
-
-    def should_unload_before_llm_refinement(self) -> bool:
-        return self.unload_vision_models_before_llm
 
     def _draft_cache_key(self, src_list: List[str]) -> Tuple[str, str, str, Tuple[str, ...]]:
         return (

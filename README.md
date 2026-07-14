@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README_EN.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.94`
+Fork release: `1.4.0-vibe.95`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -459,7 +459,7 @@ The `Two-Step Translator` can now overlap its first machine-translation step wit
 
 `LLM_API_Translator` and `Two-Step Translator` expose `bubble text shortening`. When enabled, long or extremely long outputs receive explicit speech-bubble length guidance using configurable character targets. The model is asked to remove redundant phrasing and prefer compact dialogue while retaining meaning, names, tone, and important context; output is not mechanically truncated.
 
-The final Ollama/LLM refinement still runs only after detection, OCR, and inpainting have finished. If `unload vision models before llm` is enabled, text detection, OCR, and inpainting models are unloaded before the final LLM calls, freeing RAM/VRAM for a local Ollama or LLM Studio model. This is useful on single-GPU systems where the vision models and LLM compete for the same memory.
+`LLM_API_Translator`, `LLM_API_Translator_2`, and `Two-Step Translator` expose `unload vision models before llm`. When enabled, LLM translation or final refinement is deferred until detection, OCR, and inpainting have finished; those three vision modules are then unloaded before the first LLM request. This frees RAM/VRAM for a local Ollama or LLM Studio model on single-GPU systems. Disable it to allow translation to overlap with image processing when memory capacity is sufficient.
 
 The first-step Google/DeepL result is saved per text block as a draft and shown in the text editor sidebar as `First step draft` when available. This makes it possible to compare the raw machine translation with the final LLM-refined result while editing.
 

@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.94`
+Fork release: `1.4.0-vibe.95`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -306,6 +306,8 @@ These settings improve continuity for names, tone, and references when pages are
 The `Two-Step Translator` first creates Google, DeepL Free, or DeepL draft translations, then asks the configured LLM to refine those drafts into natural dialogue. The LLM is instructed to treat the machine output as a starting point: it must preserve the source meaning and character voice while repairing literal or stiff phrasing, fluency, tone, and punctuation. `fallback to first step` is the final fallback only: it uses first-step draft translations if the normal LLM refinement and the strict LLM retry both fail.
 
 `LLM_API_Translator` and `Two-Step Translator` expose `bubble text shortening`. When enabled, long or extremely long outputs receive explicit speech-bubble length guidance using configurable character targets. The model is asked to compact dialogue while preserving meaning, names, tone, and important context; output is not mechanically truncated.
+
+`LLM_API_Translator`, `LLM_API_Translator_2`, and `Two-Step Translator` expose `unload vision models before llm`. When enabled, LLM translation or final refinement is deferred until detection, OCR, and inpainting have finished; those three vision modules are then unloaded before the first LLM request. This frees RAM/VRAM for a local Ollama or LLM Studio model on single-GPU systems. Disable it to allow translation to overlap with image processing when memory capacity is sufficient.
 
 When `Ollama` is selected, translation, refinement, reflection, and glossary calls use Ollama's native `/api/chat` endpoint. The default endpoint is `http://127.0.0.1:11434/v1`; URLs ending in `/v1` or `/api/chat` are normalized automatically. This Ollama default is ignored when another provider is selected, so OpenAI, Gemini, Google, Grok, and OpenRouter retain their provider defaults. Set `num ctx` in translator settings to pass an explicit `options.num_ctx` context window; leave it at `0` to retain the Ollama server default.
 

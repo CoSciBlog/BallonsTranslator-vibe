@@ -100,6 +100,8 @@
 
 ### Changed
 
+- Added `unload vision models before llm` to both LLM API translator profiles and made the pipeline defer their LLM requests until detector, OCR, and inpainting models have been unloaded.
+- Bumped the fork runtime version string to `1.4.0-vibe.95`.
 - Improved selection accessibility in item views and the Ollama model browser with high-contrast selected text, full-row visual synchronization, model-specific accessible names, and refreshed translations.
 - Bumped the fork runtime version string to `1.4.0-vibe.94`.
 - Changed the Translator settings page to a single-column form, placing each label above its control and preventing the Ollama model browser from forcing input fields beyond the visible page width.

@@ -6,7 +6,7 @@ import unittest
 APP_ROOT = osp.dirname(osp.dirname(osp.abspath(__file__)))
 sys.path.append(APP_ROOT)
 
-from modules.translators.trans_llm_api import LLM_API_Translator
+from modules.translators.trans_llm_api import LLM_API_Translator, LLM_API_Translator_2
 from modules.translators.trans_two_step import TwoStepTranslator
 from utils.ollama import (
     OLLAMA_DEFAULT_ENDPOINT,
@@ -129,6 +129,14 @@ class NativeOllamaTransportTest(unittest.TestCase):
 
         self.assertIsNone(translator.endpoint)
 
+    def test_vision_model_unload_setting_controls_pipeline_hook(self):
+        translator = NativeOllamaTranslator()
+        translator._params["unload vision models before llm"] = True
+        self.assertTrue(translator.should_unload_before_llm_refinement())
+
+        translator._params["unload vision models before llm"] = False
+        self.assertFalse(translator.should_unload_before_llm_refinement())
+
     def test_num_ctx_setting_is_forwarded_to_native_ollama_options(self):
         translator = NativeOllamaTranslator()
         translator._params["num ctx"] = 32768
@@ -167,6 +175,15 @@ class NativeOllamaTransportTest(unittest.TestCase):
         self.assertEqual(
             LLM_API_Translator.params["ollama model preferences"]["value"],
             {},
+        )
+        self.assertTrue(
+            LLM_API_Translator.params["unload vision models before llm"]["value"]
+        )
+        self.assertTrue(
+            LLM_API_Translator_2.params["unload vision models before llm"]["value"]
+        )
+        self.assertTrue(
+            TwoStepTranslator.params["unload vision models before llm"]["value"]
         )
 
     def test_ollama_endpoint_helpers_normalize_openai_and_native_urls(self):
