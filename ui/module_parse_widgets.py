@@ -191,8 +191,9 @@ class OllamaModelManager(QWidget):
         self.status_label = QLabel()
         actions.addWidget(self.refresh_button)
         actions.addWidget(self.use_button)
-        actions.addWidget(self.status_label, 1)
+        actions.addStretch(1)
         layout.addLayout(actions)
+        layout.addWidget(self.status_label)
 
         self.table = QTableWidget(0, 3)
         self.table.setHorizontalHeaderLabels([
@@ -208,7 +209,7 @@ class OllamaModelManager(QWidget):
         header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
         header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
         self.table.setMinimumHeight(190)
-        self.table.setMinimumWidth(CONFIG_FIELD_WIDE)
+        self.table.setFixedWidth(CONFIG_COMBOBOX_LONG)
         layout.addWidget(self.table)
 
         self.refresh_button.clicked.connect(self.refresh_models)
@@ -354,10 +355,20 @@ class ParamWidget(QWidget):
 
     paramwidget_edited = Signal(str, dict)
 
-    def __init__(self, params, scrollWidget: QWidget = None, module_config_key: str = '', module_name: str = '', *args, **kwargs) -> None:
+    def __init__(
+        self,
+        params,
+        scrollWidget: QWidget = None,
+        module_config_key: str = '',
+        module_name: str = '',
+        single_column: bool = False,
+        *args,
+        **kwargs,
+    ) -> None:
         super().__init__(*args, **kwargs)
         self.module_config_key = module_config_key
         self.module_name = module_name
+        self.single_column = single_column
         layout = QHBoxLayout(self)
         self.param_layout = param_layout = QGridLayout()
         param_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
@@ -371,6 +382,7 @@ class ParamWidget(QWidget):
         if 'description' in params:
             self.setToolTip(wrap_tooltip(params['description']))
 
+        layout_row = 0
         for ii, param_key in enumerate(params):
             if param_key == 'description' or param_key.startswith('__'):
                 continue
@@ -463,16 +475,26 @@ class ParamWidget(QWidget):
                 if param_widget is not None:
                     param_widget.paramwidget_edited.connect(self.on_paramwidget_edited)
 
+            if self.single_column:
+                if isinstance(param_widget, ParamLineEditor):
+                    param_widget.setFixedWidth(CONFIG_COMBOBOX_LONG)
+                elif isinstance(param_widget, ParamEditor):
+                    param_widget.setFixedWidth(CONFIG_COMBOBOX_LONG)
+
             tooltip = wrap_tooltip(description)
             if tooltip and param_widget is not None:
                 param_widget.setToolTip(tooltip)
             widget_idx = 0
+            widget_row = layout_row
             if require_label:
                 param_label = ParamNameLabel(display_param_name)
                 if tooltip:
                     param_label.setToolTip(tooltip)
-                param_layout.addWidget(param_label, ii, 0)
-                widget_idx = 1
+                param_layout.addWidget(param_label, widget_row, 0)
+                if self.single_column:
+                    widget_row += 1
+                else:
+                    widget_idx = 1
             if param_widget is not None:
                 self.param_widget_map[param_key] = param_widget
                 pw_lo = None
@@ -488,12 +510,13 @@ class ParamWidget(QWidget):
                 if reset_btn is not None:
                     pw_lo.addWidget(reset_btn)
                 if pw_lo is None:
-                    param_layout.addWidget(param_widget, ii, widget_idx)
+                    param_layout.addWidget(param_widget, widget_row, widget_idx)
                 else:
-                    param_layout.addLayout(pw_lo, ii, widget_idx)
+                    param_layout.addLayout(pw_lo, widget_row, widget_idx)
             else:
                 v = params[param_key]
                 raise ValueError(f"Failed to initialize widget for key-value pair: {param_key}-{v}")
+            layout_row = widget_row + 1
 
         if self.ollama_model_manager is not None:
             provider_widget = self.param_widget_map.get('provider')
@@ -591,15 +614,26 @@ class ModuleParseWidgets(QWidget):
 class ModuleConfigParseWidget(QWidget):
     module_changed = Signal(str)
     paramwidget_edited = Signal(str, dict)
-    def __init__(self, module_name: str, get_valid_module_keys: Callable, scrollWidget: QWidget, add_from: int = 1, module_config_key: str = '', *args, **kwargs) -> None:
+    def __init__(
+        self,
+        module_name: str,
+        get_valid_module_keys: Callable,
+        scrollWidget: QWidget,
+        add_from: int = 1,
+        module_config_key: str = '',
+        single_column: bool = False,
+        *args,
+        **kwargs,
+    ) -> None:
         super().__init__( *args, **kwargs)
         self.get_valid_module_keys = get_valid_module_keys
         self.module_config_key = module_config_key
+        self.single_column = single_column
         self.module_combobox = ConfigComboBox(scrollWidget=scrollWidget)
         self.params_layout = QHBoxLayout()
         self.params_layout.setContentsMargins(0, 0, 0, 0)
 
-        p_layout = QHBoxLayout()
+        p_layout = QVBoxLayout() if single_column else QHBoxLayout()
         p_layout.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
         self.module_label = ParamNameLabel(module_name)
         module_tooltip = self.tr('Select which module implementation is used for this step. Different modules can be much faster or slower depending on CPU/GPU support, model size, and network/API latency.')
@@ -607,7 +641,8 @@ class ModuleConfigParseWidget(QWidget):
         self.module_combobox.setToolTip(module_tooltip)
         p_layout.addWidget(self.module_label)
         p_layout.addWidget(self.module_combobox)
-        p_layout.addStretch(-1)
+        if not single_column:
+            p_layout.addStretch(-1)
         self.p_layout = p_layout
 
         layout = QVBoxLayout(self)
@@ -667,7 +702,13 @@ class ModuleConfigParseWidget(QWidget):
             if widget is None:
                 # lazy load widgets
                 params = self.module_dict[module]
-                widget = ParamWidget(params, scrollWidget=self, module_config_key=self.module_config_key, module_name=module)
+                widget = ParamWidget(
+                    params,
+                    scrollWidget=self,
+                    module_config_key=self.module_config_key,
+                    module_name=module,
+                    single_column=self.single_column,
+                )
                 widget.paramwidget_edited.connect(self.paramwidget_edited)
                 self.param_widget_map[module] = widget
                 self.params_layout.addWidget(widget)
@@ -687,7 +728,15 @@ class TranslatorConfigPanel(ModuleConfigParseWidget):
     show_OCR_keyword_window = Signal()
 
     def __init__(self, module_name, scrollWidget: QWidget = None, *args, **kwargs) -> None:
-        super().__init__(module_name, GET_VALID_TRANSLATORS, scrollWidget=scrollWidget, module_config_key='translator_params', *args, **kwargs)
+        super().__init__(
+            module_name,
+            GET_VALID_TRANSLATORS,
+            scrollWidget=scrollWidget,
+            module_config_key='translator_params',
+            single_column=True,
+            *args,
+            **kwargs,
+        )
         self.translator_changed = self.module_changed
     
         self.source_combobox = ConfigComboBox(scrollWidget=scrollWidget)
@@ -710,8 +759,8 @@ class TranslatorConfigPanel(ModuleConfigParseWidget):
         self.translateByTextblockBox.setToolTip(self.tr('Translate every detected text block as a separate request instead of batching them together. This can improve isolation for providers that struggle with batches, but it usually slows translation because it creates many more requests.'))
         self.translateByTextblockBox.name_label.setToolTip(self.translateByTextblockBox.toolTip())
 
-        st_layout = QHBoxLayout()
-        st_layout.setSpacing(15)
+        st_layout = QVBoxLayout()
+        st_layout.setSpacing(6)
         st_layout.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
         st_layout.addWidget(ParamNameLabel(self.tr('Source')))
         st_layout.addWidget(self.source_combobox)
