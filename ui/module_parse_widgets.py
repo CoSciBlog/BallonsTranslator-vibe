@@ -204,6 +204,8 @@ class OllamaModelManager(QWidget):
         self.table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
         self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.table.verticalHeader().setVisible(False)
+        self.table.setAccessibleName(self.tr('Installed Ollama models'))
+        self.table.setAccessibleDescription(title.toolTip())
         header = self.table.horizontalHeader()
         header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
         header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
@@ -215,6 +217,7 @@ class OllamaModelManager(QWidget):
         self.refresh_button.clicked.connect(self.refresh_models)
         self.use_button.clicked.connect(self.use_selected_model)
         self.table.doubleClicked.connect(lambda _index: self.use_selected_model())
+        self.table.itemSelectionChanged.connect(self._sync_selected_row_styles)
         self._update_availability()
 
     @staticmethod
@@ -308,6 +311,7 @@ class OllamaModelManager(QWidget):
         for row, name in enumerate(ordered):
             favorite = QCheckBox()
             favorite.setChecked(self.preferences[name]['favorite'])
+            favorite.setAccessibleName(self.tr('Favorite') + ': ' + name)
             favorite.stateChanged.connect(
                 lambda _state, model=name, checkbox=favorite:
                 self._set_favorite(model, checkbox.isChecked())
@@ -318,11 +322,15 @@ class OllamaModelManager(QWidget):
             container_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
             container_layout.addWidget(favorite)
             self.table.setCellWidget(row, 0, container)
-            self.table.setItem(row, 1, QTableWidgetItem(name))
+            model_item = QTableWidgetItem(name)
+            model_item.setToolTip(name)
+            model_item.setData(Qt.ItemDataRole.AccessibleTextRole, name)
+            self.table.setItem(row, 1, model_item)
 
             rating = QComboBox()
             rating.addItems(['1', '2', '3', '4', '5'])
             rating.setCurrentText(str(self.preferences[name]['rating']))
+            rating.setAccessibleName(self.tr('Rating') + ': ' + name)
             rating.currentTextChanged.connect(
                 lambda value, model=name: self._set_rating(model, value)
             )
@@ -330,7 +338,25 @@ class OllamaModelManager(QWidget):
         self._updating = False
         if ordered:
             self.table.selectRow(0)
+        self._sync_selected_row_styles()
         self.paramwidget_edited.emit(self.param_key, dict(self.preferences))
+
+    def _sync_selected_row_styles(self):
+        selected_rows = {index.row() for index in self.table.selectionModel().selectedRows()}
+        for row in range(self.table.rowCount()):
+            selected = row in selected_rows
+            container = self.table.cellWidget(row, 0)
+            rating = self.table.cellWidget(row, 2)
+            widgets = [container, rating]
+            if container is not None:
+                widgets.extend(container.findChildren(QCheckBox))
+            for widget in widgets:
+                if widget is None:
+                    continue
+                widget.setProperty('ollamaRowSelected', selected)
+                widget.style().unpolish(widget)
+                widget.style().polish(widget)
+                widget.update()
 
     def _set_favorite(self, model: str, favorite: bool):
         if self._updating:

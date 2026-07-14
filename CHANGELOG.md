@@ -100,6 +100,8 @@
 
 ### Changed
 
+- Improved selection accessibility in item views and the Ollama model browser with high-contrast selected text, full-row visual synchronization, model-specific accessible names, and refreshed translations.
+- Bumped the fork runtime version string to `1.4.0-vibe.94`.
 - Changed the Translator settings page to a single-column form, placing each label above its control and preventing the Ollama model browser from forcing input fields beyond the visible page width.
 - Bumped the fork runtime version string to `1.4.0-vibe.93`.
 - Existing LLM translator configurations now migrate Ollama profiles to `http://127.0.0.1:11434/v1`, add the model-preferences store, and query installed models when their settings are opened or switched to Ollama.

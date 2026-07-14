@@ -4,6 +4,18 @@ QWidget {
     background-color: @qwidgetBackgroundColor;
 }
 
+QAbstractItemView {
+    selection-background-color: @selectionBackgroundColor;
+    selection-color: @selectionForegroundColor;
+}
+
+QWidget[ollamaRowSelected="true"],
+QCheckBox[ollamaRowSelected="true"],
+QComboBox[ollamaRowSelected="true"] {
+    color: @selectionForegroundColor;
+    background-color: @selectionBackgroundColor;
+}
+
 SeparatorWidget {
     border-color: @borderColor;
 }

@@ -4,175 +4,235 @@
 <context>
     <name>BatchProcessingDialog</name>
     <message>
-        <location filename="../ui/batch_processing_dialog.py" line="58"/>
+        <location filename="../ui/batch_processing_dialog.py" line="69"/>
         <source>Batch Processing</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/batch_processing_dialog.py" line="62"/>
+        <location filename="../ui/batch_processing_dialog.py" line="73"/>
         <source>Enter one or more folders separated by semicolons or new lines.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/batch_processing_dialog.py" line="64"/>
+        <location filename="../ui/batch_processing_dialog.py" line="75"/>
         <source>Select Folder...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/batch_processing_dialog.py" line="71"/>
+        <location filename="../ui/batch_processing_dialog.py" line="82"/>
         <source>No batch folder selected.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/batch_processing_dialog.py" line="73"/>
+        <location filename="../ui/batch_processing_dialog.py" line="84"/>
         <source>Text detection</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/batch_processing_dialog.py" line="74"/>
+        <location filename="../ui/batch_processing_dialog.py" line="85"/>
         <source>OCR</source>
         <translation type="unfinished">OCR</translation>
     </message>
     <message>
-        <location filename="../ui/batch_processing_dialog.py" line="75"/>
+        <location filename="../ui/batch_processing_dialog.py" line="86"/>
         <source>Inpainting</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/batch_processing_dialog.py" line="76"/>
+        <location filename="../ui/batch_processing_dialog.py" line="87"/>
         <source>Translation</source>
         <translation type="unfinished">Traduction</translation>
     </message>
     <message>
-        <location filename="../ui/batch_processing_dialog.py" line="86"/>
+        <location filename="../ui/batch_processing_dialog.py" line="97"/>
         <source>Fallback OCR when no text is recognized</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/batch_processing_dialog.py" line="101"/>
+        <location filename="../ui/batch_processing_dialog.py" line="112"/>
         <source>Skip pages already processed by the pipeline</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/batch_processing_dialog.py" line="102"/>
+        <location filename="../ui/batch_processing_dialog.py" line="113"/>
         <source>Skip projects whose pages are already processed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/batch_processing_dialog.py" line="104"/>
+        <location filename="../ui/batch_processing_dialog.py" line="114"/>
+        <source>Re-run inpainting after each project</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/batch_processing_dialog.py" line="116"/>
+        <source>After a project finishes, apply saved inpaint and censor masks again to the current inpainted pages. This can clean up remaining text edges before export, but adds another inpainting pass.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/batch_processing_dialog.py" line="124"/>
         <source>Upscale and replace original pages before processing</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/batch_processing_dialog.py" line="130"/>
+        <location filename="../ui/batch_processing_dialog.py" line="150"/>
         <source>Export each finished project</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/batch_processing_dialog.py" line="136"/>
+        <location filename="../ui/batch_processing_dialog.py" line="156"/>
         <source>Quit application when finished</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/batch_processing_dialog.py" line="139"/>
+        <location filename="../ui/batch_processing_dialog.py" line="159"/>
+        <source>Do nothing</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/batch_processing_dialog.py" line="160"/>
+        <source>Shut down PC</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/batch_processing_dialog.py" line="161"/>
+        <source>Restart PC</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/batch_processing_dialog.py" line="162"/>
+        <source>Hibernate</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/batch_processing_dialog.py" line="163"/>
+        <source>Sleep</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/batch_processing_dialog.py" line="164"/>
+        <source>Run custom command/program</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/batch_processing_dialog.py" line="167"/>
+        <source>Program path or command to run after batch completion</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/batch_processing_dialog.py" line="173"/>
         <source>Batch folder</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/batch_processing_dialog.py" line="146"/>
+        <location filename="../ui/batch_processing_dialog.py" line="180"/>
         <source>Source language</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/batch_processing_dialog.py" line="147"/>
+        <location filename="../ui/batch_processing_dialog.py" line="181"/>
         <source>Target language</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/batch_processing_dialog.py" line="151"/>
+        <location filename="../ui/batch_processing_dialog.py" line="186"/>
         <source>Upscale factor</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/batch_processing_dialog.py" line="152"/>
+        <location filename="../ui/batch_processing_dialog.py" line="187"/>
         <source>Upscale quality</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/batch_processing_dialog.py" line="153"/>
+        <location filename="../ui/batch_processing_dialog.py" line="188"/>
         <source>Compression artifact cleanup</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/batch_processing_dialog.py" line="154"/>
+        <location filename="../ui/batch_processing_dialog.py" line="189"/>
         <source>Maximum long edge after upscale (0 = unlimited)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/batch_processing_dialog.py" line="155"/>
+        <location filename="../ui/batch_processing_dialog.py" line="190"/>
         <source>Skip upscale above long edge (0 = never)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/batch_processing_dialog.py" line="183"/>
+        <location filename="../ui/batch_processing_dialog.py" line="193"/>
+        <source>After batch finishes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/batch_processing_dialog.py" line="194"/>
+        <source>Command/program</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/batch_processing_dialog.py" line="232"/>
         <source>Select Batch Folder</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/batch_processing_dialog.py" line="192"/>
+        <location filename="../ui/batch_processing_dialog.py" line="241"/>
         <source>{count} project folders will be processed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/batch_processing_dialog.py" line="196"/>
+        <location filename="../ui/batch_processing_dialog.py" line="245"/>
         <source>No project folders with images found. Generated folders are ignored.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/batch_processing_dialog.py" line="202"/>
+        <location filename="../ui/batch_processing_dialog.py" line="251"/>
         <source>Enter or select one or more folders containing source images before starting.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/batch_processing_dialog.py" line="260"/>
+        <source>Enter a command or program path before starting.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>BottomBar</name>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="958"/>
+        <location filename="../ui/mainwindowbars.py" line="959"/>
         <source>Text Detector</source>
         <translation>Détecteur de texte</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="959"/>
+        <location filename="../ui/mainwindowbars.py" line="960"/>
         <source>OCR</source>
         <translation>OCR</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="960"/>
+        <location filename="../ui/mainwindowbars.py" line="961"/>
         <source>Inpaint</source>
         <translation>Retoucher</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="966"/>
+        <location filename="../ui/mainwindowbars.py" line="967"/>
         <source>Enable/disable paint mode</source>
         <translation>Activer/désactiver le mode retouche</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="970"/>
+        <location filename="../ui/mainwindowbars.py" line="971"/>
         <source>Enable/disable text edit mode</source>
         <translation>Activer/désactiver le mode d&apos;édition de texte</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="974"/>
+        <location filename="../ui/mainwindowbars.py" line="975"/>
         <source>Show and edit text block bounding boxes.</source>
         <translation>Afficher et modifier les cadres de délimitation des blocs de texte.</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="977"/>
+        <location filename="../ui/mainwindowbars.py" line="978"/>
         <source>Original image opacity</source>
         <translation>Opacité de l&apos;image d&apos;origine</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="981"/>
+        <location filename="../ui/mainwindowbars.py" line="982"/>
         <source>Text layer opacity</source>
         <translation>Opacité du calque</translation>
     </message>
@@ -180,718 +240,703 @@
 <context>
     <name>Canvas</name>
     <message>
-        <location filename="../ui/canvas.py" line="813"/>
+        <location filename="../ui/canvas.py" line="816"/>
         <source>Copy</source>
         <translation>Copier</translation>
     </message>
     <message>
-        <location filename="../ui/canvas.py" line="815"/>
+        <location filename="../ui/canvas.py" line="818"/>
         <source>Paste</source>
         <translation>Coller</translation>
     </message>
     <message>
-        <location filename="../ui/canvas.py" line="817"/>
+        <location filename="../ui/canvas.py" line="820"/>
         <source>Delete</source>
         <translation>Supprimer</translation>
     </message>
     <message>
-        <location filename="../ui/canvas.py" line="819"/>
+        <location filename="../ui/canvas.py" line="822"/>
         <source>Copy source text</source>
         <translation>Texte source</translation>
     </message>
     <message>
-        <location filename="../ui/canvas.py" line="821"/>
+        <location filename="../ui/canvas.py" line="824"/>
         <source>Paste source text</source>
         <translation>Coller la source:</translation>
     </message>
     <message>
-        <location filename="../ui/canvas.py" line="823"/>
+        <location filename="../ui/canvas.py" line="826"/>
         <source>Delete and Recover removed text</source>
         <translation>Supprimer et récupérer le texte supprimé</translation>
     </message>
     <message>
-        <location filename="../ui/canvas.py" line="828"/>
+        <location filename="../ui/canvas.py" line="831"/>
         <source>Apply font formatting</source>
         <translation>Appliquer la mise en forme de police</translation>
     </message>
     <message>
-        <location filename="../ui/canvas.py" line="829"/>
+        <location filename="../ui/canvas.py" line="832"/>
         <source>Apply the current formatting preset to the selected text boxes.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/canvas.py" line="830"/>
+        <location filename="../ui/canvas.py" line="833"/>
         <source>Auto layout</source>
         <translation>Mise en page automatique</translation>
     </message>
     <message>
-        <location filename="../ui/canvas.py" line="831"/>
+        <location filename="../ui/canvas.py" line="834"/>
         <source>Fit, wrap, and scale selected translation text inside detected speech bubbles.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/canvas.py" line="832"/>
+        <location filename="../ui/canvas.py" line="835"/>
         <source>Merge selected text boxes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/canvas.py" line="833"/>
+        <location filename="../ui/canvas.py" line="836"/>
         <source>Combine two or more selected regions into one text box.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/canvas.py" line="835"/>
+        <location filename="../ui/canvas.py" line="838"/>
         <source>Reflect / review selected translations</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/canvas.py" line="836"/>
+        <location filename="../ui/canvas.py" line="839"/>
         <source>Use the active LLM-capable translator to revise only the selected translated text boxes against their source text.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/canvas.py" line="838"/>
-        <source>Reset Angle</source>
-        <translation>Réinitialiser l&apos;angle</translation>
-    </message>
-    <message>
-        <location filename="../ui/canvas.py" line="839"/>
-        <source>Reset rotation for selected text boxes.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/canvas.py" line="840"/>
-        <source>Squeeze</source>
-        <translation>Appuyer</translation>
-    </message>
-    <message>
         <location filename="../ui/canvas.py" line="841"/>
-        <source>Shrink selected text boxes to their rendered text content.</source>
+        <source>Review address and pronouns</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/canvas.py" line="843"/>
-        <source>translate</source>
-        <translation>traduire</translation>
+        <location filename="../ui/canvas.py" line="842"/>
+        <source>Use current-page context to correct direct address, pronouns, names, titles, and speaker/listener references.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/canvas.py" line="844"/>
-        <source>Translate the selected text boxes without rerunning OCR.</source>
+        <source>Uncensored review / retranslate</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/canvas.py" line="845"/>
-        <source>OCR</source>
-        <translation>OCR</translation>
-    </message>
-    <message>
-        <location filename="../ui/canvas.py" line="846"/>
-        <source>Read source text again for the selected text boxes.</source>
+        <source>Check selected translations again for omissions, skipped text, sanitization, or censored wording.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/canvas.py" line="847"/>
+        <source>Rewrite and shorten selected translations</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/canvas.py" line="848"/>
+        <source>Use the active LLM API or Two-Step translator settings to rewrite selected translations as shorter speech-bubble text.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/canvas.py" line="850"/>
+        <source>Reset Angle</source>
+        <translation>Réinitialiser l&apos;angle</translation>
+    </message>
+    <message>
+        <location filename="../ui/canvas.py" line="851"/>
+        <source>Reset rotation for selected text boxes.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/canvas.py" line="852"/>
+        <source>Squeeze</source>
+        <translation>Appuyer</translation>
+    </message>
+    <message>
+        <location filename="../ui/canvas.py" line="853"/>
+        <source>Shrink selected text boxes to their rendered text content.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/canvas.py" line="855"/>
+        <source>translate</source>
+        <translation>traduire</translation>
+    </message>
+    <message>
+        <location filename="../ui/canvas.py" line="856"/>
+        <source>Translate the selected text boxes without rerunning OCR.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/canvas.py" line="857"/>
+        <source>OCR</source>
+        <translation>OCR</translation>
+    </message>
+    <message>
+        <location filename="../ui/canvas.py" line="858"/>
+        <source>Read source text again for the selected text boxes.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/canvas.py" line="859"/>
         <source>OCR and translate</source>
         <translation>OCR et traduction</translation>
     </message>
     <message>
-        <location filename="../ui/canvas.py" line="848"/>
+        <location filename="../ui/canvas.py" line="860"/>
         <source>Read and translate only the selected text boxes.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/canvas.py" line="849"/>
+        <location filename="../ui/canvas.py" line="861"/>
         <source>OCR, translate and inpaint</source>
         <translation>OCR, traduction et retouche</translation>
     </message>
     <message>
-        <location filename="../ui/canvas.py" line="850"/>
+        <location filename="../ui/canvas.py" line="862"/>
         <source>Read, translate, and remove original lettering only in the selected text boxes.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/canvas.py" line="851"/>
+        <location filename="../ui/canvas.py" line="863"/>
         <source>inpaint</source>
         <translation>retouche</translation>
     </message>
     <message>
-        <location filename="../ui/canvas.py" line="852"/>
+        <location filename="../ui/canvas.py" line="864"/>
         <source>Remove original lettering only in the selected text boxes.</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>ColorPickerLabel</name>
-    <message>
-        <location filename="../ui/custom_widget/label.py" line="64"/>
-        <source>Apply Color</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>ConfigPanel</name>
     <message>
-        <location filename="../ui/configpanel.py" line="421"/>
+        <location filename="../ui/configpanel.py" line="442"/>
         <source>DL Module</source>
         <translation>Module DL</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="422"/>
+        <location filename="../ui/configpanel.py" line="443"/>
         <source>General</source>
         <translation>Général</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="424"/>
+        <location filename="../ui/configpanel.py" line="445"/>
         <source>Text Detection</source>
         <translation>Détection de texte</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="425"/>
-        <location filename="../ui/configpanel.py" line="473"/>
+        <location filename="../ui/configpanel.py" line="446"/>
+        <location filename="../ui/configpanel.py" line="496"/>
         <source>OCR</source>
         <translation>OCR</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="426"/>
+        <location filename="../ui/configpanel.py" line="447"/>
         <source>Inpaint</source>
         <translation>Retoucher</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="427"/>
+        <location filename="../ui/configpanel.py" line="448"/>
         <source>Translator</source>
         <translation>Traducteur</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="428"/>
+        <location filename="../ui/configpanel.py" line="449"/>
         <source>Startup</source>
         <translation>Démarrage</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="429"/>
+        <location filename="../ui/configpanel.py" line="450"/>
         <source>Upscaling</source>
         <translation>Mise à l&apos;échelle</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="430"/>
+        <location filename="../ui/configpanel.py" line="453"/>
         <source>Post-merge</source>
         <translation>Post-fusion</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="431"/>
-        <source>Censor Restoration</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/configpanel.py" line="432"/>
+        <location filename="../ui/configpanel.py" line="454"/>
         <source>Typesetting</source>
         <translation>Composition typographique</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="433"/>
+        <location filename="../ui/configpanel.py" line="455"/>
         <source>Save</source>
         <translation>Sauvegarder</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="434"/>
+        <location filename="../ui/configpanel.py" line="456"/>
         <source>SalaDict</source>
         <translation>SalaDict</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="435"/>
+        <location filename="../ui/configpanel.py" line="457"/>
         <source>Settings presets</source>
         <translation>Paramètres prédéfinis</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="454"/>
+        <location filename="../ui/configpanel.py" line="477"/>
         <source>Load models on demand</source>
         <translation>Charger les modèles à la demande</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="454"/>
+        <location filename="../ui/configpanel.py" line="477"/>
         <source>Loads models only when needed. Saves idle RAM/VRAM; first use or module switch takes longer.</source>
         <translation>Charge les modèles uniquement quand nécessaire. Économise RAM/VRAM au repos; la première utilisation ou le changement de module prend plus de temps.</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="457"/>
+        <location filename="../ui/configpanel.py" line="480"/>
         <source>Empty cache after RUN</source>
         <translation>Vider le cache après l&apos;exécution</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="457"/>
+        <location filename="../ui/configpanel.py" line="480"/>
         <source>Releases framework caches after each RUN. Helps long sessions; repeated runs may need warm-up again.</source>
         <translation>Libère les caches du framework après chaque RUN. Aide les longues sessions; les exécutions répétées peuvent devoir se réchauffer.</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="462"/>
+        <location filename="../ui/configpanel.py" line="485"/>
         <source>Unload All Models</source>
         <translation>Décharger tous les modèles</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="463"/>
+        <location filename="../ui/configpanel.py" line="486"/>
         <source>Immediately unload loaded detection, OCR, inpaint, and translation models from memory. This frees RAM/VRAM now, but the next run is slower while models are loaded again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="468"/>
+        <location filename="../ui/configpanel.py" line="491"/>
         <source>Detector</source>
         <translation>Détecteur</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="477"/>
+        <location filename="../ui/configpanel.py" line="500"/>
         <source>Inpainter</source>
         <translation>Retoucheur</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="484"/>
+        <location filename="../ui/configpanel.py" line="507"/>
         <source>Review and optimize translation with LLM</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="485"/>
+        <location filename="../ui/configpanel.py" line="508"/>
         <source>Runs an extra LLM review for natural wording, source accuracy, pronouns, speaker/addressee references, gendered wording, and formality. Adds LLM requests.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="492"/>
+        <location filename="../ui/configpanel.py" line="515"/>
         <source>Upscale pages before detection</source>
         <translation>Pages haut de gamme avant détection</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="493"/>
+        <location filename="../ui/configpanel.py" line="516"/>
         <source>Creates a high-resolution working copy before detection. Can improve OCR and masks; uses more RAM/VRAM and slows later steps.</source>
         <translation>Crée une copie de travail haute résolution avant la détection. Peut améliorer OCR et masques; utilise plus de RAM/VRAM et ralentit les étapes suivantes.</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="495"/>
+        <location filename="../ui/configpanel.py" line="518"/>
         <source>Resolution multiplier for pages that pass the size limits. Higher values can improve small text recognition, but each step runs slower and uses more memory. Example: 2.0 for 2x.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="496"/>
+        <location filename="../ui/configpanel.py" line="519"/>
         <source>Maximum long-edge resolution after upscaling. Lower limits keep runs faster and lighter; higher limits preserve more detail but slow down later processing.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="497"/>
+        <location filename="../ui/configpanel.py" line="520"/>
         <source>Pages whose original long edge is already above this value are not upscaled. Lower values skip more large pages and speed up runs; use 0 to always allow upscaling.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="498"/>
+        <location filename="../ui/configpanel.py" line="521"/>
         <source>Quality/speed preset for OpenCV upscaling. Fast is quickest, Quality and AnimeSharp are slower, and AnimeSharp adds stronger manga-style sharpening inspired by 2x-AnimeSharpV4.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="499"/>
+        <location filename="../ui/configpanel.py" line="522"/>
         <source>Optional cleanup applied before enlargement to reduce JPEG blocks and ringing. Light or Medium can improve compressed scans; Strong may soften fine line art and is slower.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="510"/>
+        <location filename="../ui/configpanel.py" line="533"/>
         <source>Fast</source>
         <translation>Rapide</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="511"/>
+        <location filename="../ui/configpanel.py" line="534"/>
         <source>Balanced</source>
         <translation>Équilibré</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="512"/>
-        <location filename="../ui/configpanel.py" line="530"/>
-        <location filename="../ui/configpanel.py" line="812"/>
+        <location filename="../ui/configpanel.py" line="535"/>
+        <location filename="../ui/configpanel.py" line="553"/>
+        <location filename="../ui/configpanel.py" line="824"/>
         <source>Quality</source>
         <translation>Qualité</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="513"/>
+        <location filename="../ui/configpanel.py" line="536"/>
         <source>AnimeSharp</source>
         <translation>AnimeSharp</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="519"/>
+        <location filename="../ui/configpanel.py" line="542"/>
         <source>Off</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="520"/>
+        <location filename="../ui/configpanel.py" line="543"/>
         <source>Light</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="521"/>
+        <location filename="../ui/configpanel.py" line="544"/>
         <source>Medium</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="522"/>
+        <location filename="../ui/configpanel.py" line="545"/>
         <source>Strong</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="527"/>
+        <location filename="../ui/configpanel.py" line="550"/>
         <source>Factor</source>
         <translation>Facteur</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="528"/>
+        <location filename="../ui/configpanel.py" line="551"/>
         <source>Max long edge</source>
         <translation>Bord long maximum</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="529"/>
+        <location filename="../ui/configpanel.py" line="552"/>
         <source>Skip above</source>
         <translation>Passer ci-dessus</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="531"/>
+        <location filename="../ui/configpanel.py" line="554"/>
         <source>Compression cleanup</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="537"/>
-        <source>Merge nearby text boxes after pipeline</source>
-        <translation>Fusionner les zones de texte à proximité après le pipeline</translation>
-    </message>
-    <message>
-        <location filename="../ui/configpanel.py" line="538"/>
-        <source>Merges nearby boxes after translation using Region Merge Tool rules. Can reduce cleanup; adds a short post-processing pass.</source>
-        <translation>Fusionne les boîtes proches après traduction avec les règles de Region Merge Tool. Peut réduire les retouches; ajoute un court post-traitement.</translation>
-    </message>
-    <message>
-        <location filename="../ui/configpanel.py" line="542"/>
-        <source>Vertical Merge</source>
-        <translation>Fusion verticale</translation>
-    </message>
-    <message>
-        <location filename="../ui/configpanel.py" line="543"/>
-        <source>Horizontal Merge</source>
-        <translation>Fusion horizontale</translation>
-    </message>
-    <message>
-        <location filename="../ui/configpanel.py" line="544"/>
-        <source>Vertical then Horizontal</source>
-        <translation>Vertical puis horizontal</translation>
-    </message>
-    <message>
-        <location filename="../ui/configpanel.py" line="545"/>
-        <source>Horizontal then Vertical</source>
-        <translation>Horizontal puis vertical</translation>
-    </message>
-    <message>
-        <location filename="../ui/configpanel.py" line="547"/>
-        <source>Post-pipeline merge mode</source>
-        <translation>Mode de fusion post-pipeline</translation>
-    </message>
-    <message>
-        <location filename="../ui/configpanel.py" line="548"/>
-        <source>Direction used when automatically merging translated text boxes after the pipeline finishes. Broader merge passes can slightly increase post-processing time.</source>
+        <location filename="../ui/configpanel.py" line="560"/>
+        <source>Skip detected cover and title pages in pipeline</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="607"/>
-        <source>Saved settings snapshots. Applying one replaces the current application settings with the values stored in the preset.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/configpanel.py" line="628"/>
-        <source>Load the selected settings preset into the current session and update the visible controls.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/configpanel.py" line="629"/>
-        <source>Refresh presets</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/configpanel.py" line="630"/>
-        <source>Reload the list of available preset JSON files from the presets folder.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/configpanel.py" line="716"/>
-        <source>Choose whether the main text color is detected from the original image or forced to use the global font color setting.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/configpanel.py" line="726"/>
-        <source>Choose whether the text outline (stroke) color is detected from the original image or forced to use the global stroke color setting.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/configpanel.py" line="736"/>
-        <source>Choose whether special text effects such as outlines or drop shadows are detected per region or forced to match the global effect settings.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/configpanel.py" line="746"/>
-        <source>Choose whether paragraph text alignment is detected per region or forced to use the global alignment setting.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/configpanel.py" line="756"/>
-        <source>Choose whether the text direction is detected automatically per region or forced to follow the global writing direction setting.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/configpanel.py" line="766"/>
-        <source>Choose whether existing region fonts are preserved or entirely replaced by the global font family setting.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/configpanel.py" line="776"/>
-        <source>Wraps and scales translated text to fit the detected speech bubble. Longer translations are broken across lines instead of expanding into very wide text boxes.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/configpanel.py" line="780"/>
-        <source>Limit auto-layout boxes to speech bubbles</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/configpanel.py" line="781"/>
-        <source>Keeps automatically laid-out text boxes within the detected speech-bubble area and always inside the page edge. Disable only for captions or sound effects that intentionally extend outside a bubble.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/configpanel.py" line="785"/>
-        <source>Optimizes box size without persisting line breaks in project text. Rendering can still wrap inside the constrained text box.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/configpanel.py" line="789"/>
-        <source>Convert rendered translation text to uppercase.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/configpanel.py" line="794"/>
-        <source>Store text style presets separately per project.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/configpanel.py" line="839"/>
-        <source>Show the SalaDict mini menu when text is selected.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/configpanel.py" line="845"/>
-        <source>Keyboard shortcut for SalaDict lookup.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/configpanel.py" line="850"/>
-        <source>Search URL used by SalaDict lookups.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/configpanel.py" line="550"/>
-        <source>Maximum pixel distance between stacked boxes for automatic vertical merging. Larger values may merge more boxes and add a small amount of processing time.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/configpanel.py" line="551"/>
-        <source>Maximum pixel distance between side-by-side boxes for automatic horizontal merging. Larger values may merge more boxes and add a small amount of processing time.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/configpanel.py" line="552"/>
-        <source>Minimum horizontal overlap required when merging boxes above or below each other. Higher values are stricter and can avoid extra merge work.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/configpanel.py" line="553"/>
-        <source>Minimum vertical overlap required when merging boxes next to each other. Higher values are stricter and can avoid extra merge work.</source>
+        <location filename="../ui/configpanel.py" line="561"/>
+        <source>Detects clearly named cover/title pages and color opening covers, then skips text detection, OCR, translation, and inpainting for them. Disable to process marked pages normally.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/configpanel.py" line="567"/>
-        <source>Vertical gap</source>
-        <translation>Écart vertical</translation>
-    </message>
-    <message>
-        <location filename="../ui/configpanel.py" line="568"/>
-        <source>Horizontal gap</source>
-        <translation>Écart horizontal</translation>
+        <source>Translate after image processing</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/configpanel.py" line="569"/>
-        <source>Horizontal overlap %</source>
-        <translation>% de chevauchement horizontal</translation>
-    </message>
-    <message>
-        <location filename="../ui/configpanel.py" line="570"/>
-        <source>Vertical overlap %</source>
-        <translation>% de chevauchement vertical</translation>
-    </message>
-    <message>
-        <location filename="../ui/configpanel.py" line="575"/>
-        <source>Mask detector used by Censor Restoration / Decensor Inpaint. Auto combines supported detectors and is slower than a single mode, but usually needs less manual retrying.</source>
+        <source>Finish text detection, OCR, and inpainting for every page before starting translation. This avoids overlapping translation with image processing and can reduce concurrent RAM, VRAM, and API load, but usually increases total run time.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="576"/>
-        <source>Pixels added around detected censor regions before inpainting. Higher values repair more surrounding edge artifacts, but larger masks make inpainting slower.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/configpanel.py" line="577"/>
-        <source>Minimum detected region size relative to the page area. Increasing it ignores small false positives and can speed up restoration by reducing unnecessary masks.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/configpanel.py" line="578"/>
-        <source>Saves input, candidate masks, overlays, and a report under debug/censor_restoration. Useful for troubleshooting; writes extra files.</source>
-        <translation>Enregistre l’entrée, les masques candidats, les overlays et un rapport dans debug/censor_restoration. Utile au dépannage; écrit des fichiers supplémentaires.</translation>
+        <location filename="../ui/configpanel.py" line="580"/>
+        <source>Merge nearby text boxes after pipeline</source>
+        <translation>Fusionner les zones de texte à proximité après le pipeline</translation>
     </message>
     <message>
         <location filename="../ui/configpanel.py" line="581"/>
-        <source>Auto</source>
-        <translation type="unfinished">Auto </translation>
+        <source>Merges nearby boxes after translation using Region Merge Tool rules. Can reduce cleanup; adds a short post-processing pass.</source>
+        <translation>Fusionne les boîtes proches après traduction avec les règles de Region Merge Tool. Peut réduire les retouches; ajoute un court post-traitement.</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="582"/>
-        <source>Bars</source>
+        <location filename="../ui/configpanel.py" line="585"/>
+        <source>Vertical Merge</source>
+        <translation>Fusion verticale</translation>
+    </message>
+    <message>
+        <location filename="../ui/configpanel.py" line="586"/>
+        <source>Horizontal Merge</source>
+        <translation>Fusion horizontale</translation>
+    </message>
+    <message>
+        <location filename="../ui/configpanel.py" line="587"/>
+        <source>Vertical then Horizontal</source>
+        <translation>Vertical puis horizontal</translation>
+    </message>
+    <message>
+        <location filename="../ui/configpanel.py" line="588"/>
+        <source>Horizontal then Vertical</source>
+        <translation>Horizontal puis vertical</translation>
+    </message>
+    <message>
+        <location filename="../ui/configpanel.py" line="590"/>
+        <source>Post-pipeline merge mode</source>
+        <translation>Mode de fusion post-pipeline</translation>
+    </message>
+    <message>
+        <location filename="../ui/configpanel.py" line="591"/>
+        <source>Direction used when automatically merging translated text boxes after the pipeline finishes. Broader merge passes can slightly increase post-processing time.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="583"/>
-        <source>Green</source>
+        <location filename="../ui/configpanel.py" line="618"/>
+        <source>Saved settings snapshots. Applying one replaces the current application settings with the values stored in the preset.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="584"/>
-        <source>Mosaic</source>
+        <location filename="../ui/configpanel.py" line="639"/>
+        <source>Load the selected settings preset into the current session and update the visible controls.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/configpanel.py" line="640"/>
+        <source>Refresh presets</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/configpanel.py" line="641"/>
+        <source>Reload the list of available preset JSON files from the presets folder.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/configpanel.py" line="728"/>
+        <source>Choose whether the main text color is detected from the original image or forced to use the global font color setting.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/configpanel.py" line="738"/>
+        <source>Choose whether the text outline (stroke) color is detected from the original image or forced to use the global stroke color setting.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/configpanel.py" line="748"/>
+        <source>Choose whether special text effects such as outlines or drop shadows are detected per region or forced to match the global effect settings.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/configpanel.py" line="758"/>
+        <source>Choose whether paragraph text alignment is detected per region or forced to use the global alignment setting.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/configpanel.py" line="768"/>
+        <source>Choose whether the text direction is detected automatically per region or forced to follow the global writing direction setting.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/configpanel.py" line="778"/>
+        <source>Choose whether existing region fonts are preserved or entirely replaced by the global font family setting.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/configpanel.py" line="788"/>
+        <source>Wraps and scales translated text to fit the detected speech bubble. Longer translations are broken across lines instead of expanding into very wide text boxes.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/configpanel.py" line="792"/>
+        <source>Limit auto-layout boxes to speech bubbles</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/configpanel.py" line="793"/>
+        <source>Keeps automatically laid-out text boxes within the detected speech-bubble area and always inside the page edge. Disable only for captions or sound effects that intentionally extend outside a bubble.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/configpanel.py" line="797"/>
+        <source>Optimizes box size without persisting line breaks in project text. Rendering can still wrap inside the constrained text box.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/configpanel.py" line="801"/>
+        <source>Convert rendered translation text to uppercase.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/configpanel.py" line="806"/>
+        <source>Store text style presets separately per project.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/configpanel.py" line="851"/>
+        <source>Show the SalaDict mini menu when text is selected.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/configpanel.py" line="857"/>
+        <source>Keyboard shortcut for SalaDict lookup.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/configpanel.py" line="862"/>
+        <source>Search URL used by SalaDict lookups.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/configpanel.py" line="593"/>
+        <source>Maximum pixel distance between stacked boxes for automatic vertical merging. Larger values may merge more boxes and add a small amount of processing time.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/configpanel.py" line="594"/>
+        <source>Maximum pixel distance between side-by-side boxes for automatic horizontal merging. Larger values may merge more boxes and add a small amount of processing time.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/configpanel.py" line="595"/>
-        <source>Mask mode</source>
+        <source>Minimum horizontal overlap required when merging boxes above or below each other. Higher values are stricter and can avoid extra merge work.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/configpanel.py" line="596"/>
-        <source>Mask padding</source>
+        <source>Minimum vertical overlap required when merging boxes next to each other. Higher values are stricter and can avoid extra merge work.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="597"/>
-        <source>Min area ratio</source>
-        <translation type="unfinished"></translation>
+        <location filename="../ui/configpanel.py" line="610"/>
+        <source>Vertical gap</source>
+        <translation>Écart vertical</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="601"/>
-        <source>Save Censor Restoration debug masks</source>
-        <translation type="unfinished"></translation>
+        <location filename="../ui/configpanel.py" line="611"/>
+        <source>Horizontal gap</source>
+        <translation>Écart horizontal</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="617"/>
+        <location filename="../ui/configpanel.py" line="612"/>
+        <source>Horizontal overlap %</source>
+        <translation>% de chevauchement horizontal</translation>
+    </message>
+    <message>
+        <location filename="../ui/configpanel.py" line="613"/>
+        <source>Vertical overlap %</source>
+        <translation>% de chevauchement vertical</translation>
+    </message>
+    <message>
+        <source>Saves input, candidate masks, overlays, and a report under debug/censor_restoration. Useful for troubleshooting; writes extra files.</source>
+        <translation type="vanished">Enregistre l’entrée, les masques candidats, les overlays et un rapport dans debug/censor_restoration. Utile au dépannage; écrit des fichiers supplémentaires.</translation>
+    </message>
+    <message>
+        <source>Auto</source>
+        <translation type="obsolete">Auto </translation>
+    </message>
+    <message>
+        <location filename="../ui/configpanel.py" line="628"/>
         <source>Preset</source>
         <translation>Préréglage</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="627"/>
+        <location filename="../ui/configpanel.py" line="638"/>
         <source>Apply preset</source>
         <translation>Appliquer le préréglage</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="631"/>
+        <location filename="../ui/configpanel.py" line="642"/>
         <source>Save current as preset</source>
         <translation>Enregistrer le courant comme préréglage</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="633"/>
+        <location filename="../ui/configpanel.py" line="644"/>
         <source>Import preset</source>
         <translation>Importer un préréglage</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="635"/>
+        <location filename="../ui/configpanel.py" line="646"/>
         <source>Export selected preset</source>
         <translation>Exporter le préréglage sélectionné</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="637"/>
-        <location filename="../ui/configpanel.py" line="937"/>
+        <location filename="../ui/configpanel.py" line="648"/>
+        <location filename="../ui/configpanel.py" line="994"/>
         <source>Export current settings</source>
         <translation>Exporter les paramètres actuels</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="639"/>
-        <location filename="../ui/configpanel.py" line="948"/>
+        <location filename="../ui/configpanel.py" line="650"/>
+        <location filename="../ui/configpanel.py" line="1005"/>
         <source>Import settings file</source>
         <translation>Fichier de paramètres d&apos;importation</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="671"/>
+        <location filename="../ui/configpanel.py" line="683"/>
         <source>Reopen last project on startup</source>
         <translation>Rouvrir le dernier projet au démarrage</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="675"/>
+        <location filename="../ui/configpanel.py" line="687"/>
         <source>Prevent mouse wheel changes on input fields</source>
         <translation>Empêcher les changements de molette de la souris sur les champs de saisie</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="680"/>
+        <location filename="../ui/configpanel.py" line="692"/>
         <source>decide by program</source>
         <translation>Décider par programme</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="681"/>
+        <location filename="../ui/configpanel.py" line="693"/>
         <source>use global setting</source>
         <translation>Utiliser le réglage global</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="693"/>
+        <location filename="../ui/configpanel.py" line="705"/>
         <source>Font Size</source>
         <translation>Taille de police</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="704"/>
+        <location filename="../ui/configpanel.py" line="716"/>
         <source>Stroke Size</source>
         <translation>Taille du contour</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="714"/>
+        <location filename="../ui/configpanel.py" line="726"/>
         <source>Font Color</source>
         <translation>Couleur de police</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="724"/>
+        <location filename="../ui/configpanel.py" line="736"/>
         <source>Stroke Color</source>
         <translation>Couleur du contour</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="734"/>
+        <location filename="../ui/configpanel.py" line="746"/>
         <source>Effect</source>
         <translation>Résultat</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="744"/>
+        <location filename="../ui/configpanel.py" line="756"/>
         <source>Alignment</source>
         <translation>Alignement</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="754"/>
+        <location filename="../ui/configpanel.py" line="766"/>
         <source>Writing-mode</source>
         <translation>Mode de gravure</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="764"/>
+        <location filename="../ui/configpanel.py" line="776"/>
         <source>Keep existing</source>
         <translation>Conserver l&apos;existant</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="764"/>
+        <location filename="../ui/configpanel.py" line="776"/>
         <source>Always use global setting</source>
         <translation>Toujours utiliser le paramètre global</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="764"/>
+        <location filename="../ui/configpanel.py" line="776"/>
         <source>Font Family</source>
         <translation>Famille de Polices</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="775"/>
+        <location filename="../ui/configpanel.py" line="787"/>
         <source>Auto layout</source>
         <translation>Mise en page automatique</translation>
     </message>
@@ -900,181 +945,192 @@
         <translation type="vanished">Découpe les traductions pour les adapter à la bulle détectée. Réduit souvent les retours ligne manuels; peut ajouter un peu de temps de mise en page.</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="788"/>
+        <location filename="../ui/configpanel.py" line="800"/>
         <source>To uppercase</source>
         <translation>En majuscule</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="793"/>
+        <location filename="../ui/configpanel.py" line="805"/>
         <source>Independent text styles for each project</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="798"/>
+        <location filename="../ui/configpanel.py" line="810"/>
         <source>Show only custom fonts</source>
         <translation>Afficher uniquement les polices personnalisées</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="799"/>
+        <location filename="../ui/configpanel.py" line="811"/>
         <source>Shows only fonts from the project fonts folder. Easier to scan and faster with many installed system fonts.</source>
         <translation>Affiche seulement les polices du dossier fonts du projet. Plus facile à parcourir et plus rapide avec beaucoup de polices système.</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="803"/>
+        <location filename="../ui/configpanel.py" line="815"/>
         <source>Final exported image format. PNG is lossless but can be larger and slower to write; JPG is smaller and often faster; WEBP/JXL can save space but may take longer to encode.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="804"/>
+        <location filename="../ui/configpanel.py" line="816"/>
         <source>Result image format</source>
         <translation>Format de l&apos;image du résultat</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="810"/>
+        <location filename="../ui/configpanel.py" line="822"/>
         <source>Final image quality for lossy formats. Higher quality keeps more detail but can write larger files and may export slower.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="817"/>
+        <location filename="../ui/configpanel.py" line="829"/>
         <source>Format for project working images such as masks and inpainted pages. PNG is safest but can use more disk space; JPG/WEBP/JXL can reduce disk usage but may add encoding time.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="818"/>
+        <location filename="../ui/configpanel.py" line="830"/>
         <source>Intermediate image format</source>
         <translation>Format d&apos;image intermédiaire</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="824"/>
+        <location filename="../ui/configpanel.py" line="836"/>
         <source>Quality for lossy intermediate working images. Higher values preserve detail for later steps, but use more disk space and can slow writes.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="826"/>
+        <location filename="../ui/configpanel.py" line="838"/>
         <source>Intermediate quality</source>
         <translation>Qualité intermédiaire</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="833"/>
+        <location filename="../ui/configpanel.py" line="845"/>
         <source>&lt;a href=&quot;https://github.com/dmMaze/BallonsTranslator/tree/master/doc/saladict.md&quot;&gt;Installation guide&lt;/a&gt;</source>
         <translation>&lt;a href=&quot;https://github.com/dmMaze/BallonsTranslator/tree/master/doc/saladict.md&quot;&gt;Guide d&apos;installation&lt;/a&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="838"/>
+        <location filename="../ui/configpanel.py" line="850"/>
         <source>Show mini menu when selecting text</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="847"/>
+        <location filename="../ui/configpanel.py" line="859"/>
         <source>Shortcut</source>
         <translation>Raccourci</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="850"/>
+        <location filename="../ui/configpanel.py" line="862"/>
         <source>Search Engines</source>
         <translation>Moteurs de recherche</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="886"/>
-        <location filename="../ui/configpanel.py" line="895"/>
-        <location filename="../ui/configpanel.py" line="904"/>
-        <location filename="../ui/configpanel.py" line="906"/>
-        <location filename="../ui/configpanel.py" line="915"/>
-        <location filename="../ui/configpanel.py" line="917"/>
-        <location filename="../ui/configpanel.py" line="930"/>
-        <location filename="../ui/configpanel.py" line="932"/>
-        <location filename="../ui/configpanel.py" line="934"/>
+        <location filename="../ui/configpanel.py" line="432"/>
         <location filename="../ui/configpanel.py" line="943"/>
-        <location filename="../ui/configpanel.py" line="945"/>
-        <location filename="../ui/configpanel.py" line="954"/>
+        <location filename="../ui/configpanel.py" line="952"/>
+        <location filename="../ui/configpanel.py" line="961"/>
+        <location filename="../ui/configpanel.py" line="963"/>
+        <location filename="../ui/configpanel.py" line="972"/>
+        <location filename="../ui/configpanel.py" line="974"/>
+        <location filename="../ui/configpanel.py" line="987"/>
+        <location filename="../ui/configpanel.py" line="989"/>
+        <location filename="../ui/configpanel.py" line="991"/>
+        <location filename="../ui/configpanel.py" line="1000"/>
+        <location filename="../ui/configpanel.py" line="1002"/>
+        <location filename="../ui/configpanel.py" line="1011"/>
         <source>Settings</source>
         <translation>Paramètres</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="886"/>
+        <location filename="../ui/configpanel.py" line="451"/>
+        <source>Page filtering</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/configpanel.py" line="452"/>
+        <source>Pipeline</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/configpanel.py" line="943"/>
         <source>Settings loaded from </source>
         <translation>Paramètres chargés depuis</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="895"/>
+        <location filename="../ui/configpanel.py" line="952"/>
         <source>Failed to apply settings preset: </source>
         <translation>Échec de l&apos;application des paramètres prédéfinis&#xa0;:</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="898"/>
+        <location filename="../ui/configpanel.py" line="955"/>
         <source>Save settings preset</source>
         <translation>Enregistrer les paramètres prédéfinis</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="898"/>
+        <location filename="../ui/configpanel.py" line="955"/>
         <source>Preset name:</source>
         <translation>Nom du préréglage&#xa0;:</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="904"/>
+        <location filename="../ui/configpanel.py" line="961"/>
         <source>Settings preset saved.</source>
         <translation>Paramètres prédéfinis enregistrés.</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="906"/>
+        <location filename="../ui/configpanel.py" line="963"/>
         <source>Failed to save settings preset: </source>
         <translation>Échec de l&apos;enregistrement des paramètres prédéfinis&#xa0;:</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="909"/>
+        <location filename="../ui/configpanel.py" line="966"/>
         <source>Import settings preset</source>
         <translation>Paramètres d&apos;importation prédéfinis</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="909"/>
-        <location filename="../ui/configpanel.py" line="923"/>
-        <location filename="../ui/configpanel.py" line="937"/>
-        <location filename="../ui/configpanel.py" line="948"/>
+        <location filename="../ui/configpanel.py" line="966"/>
+        <location filename="../ui/configpanel.py" line="980"/>
+        <location filename="../ui/configpanel.py" line="994"/>
+        <location filename="../ui/configpanel.py" line="1005"/>
         <source>JSON files (*.json)</source>
         <translation>Fichiers JSON (*.json)</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="915"/>
+        <location filename="../ui/configpanel.py" line="972"/>
         <source>Settings preset imported.</source>
         <translation>Paramètres prédéfinis importés.</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="917"/>
+        <location filename="../ui/configpanel.py" line="974"/>
         <source>Failed to import settings preset: </source>
         <translation>Échec de l&apos;importation des paramètres prédéfinis&#xa0;:</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="923"/>
+        <location filename="../ui/configpanel.py" line="980"/>
         <source>Export settings preset</source>
         <translation>Paramètres d&apos;exportation prédéfinis</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="930"/>
+        <location filename="../ui/configpanel.py" line="987"/>
         <source>Settings preset exported.</source>
         <translation>Paramètres prédéfinis exportés.</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="932"/>
+        <location filename="../ui/configpanel.py" line="989"/>
         <source>Failed to export settings preset.</source>
         <translation>Échec de l&apos;exportation des paramètres prédéfinis.</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="934"/>
+        <location filename="../ui/configpanel.py" line="991"/>
         <source>Failed to export settings preset: </source>
         <translation>Échec de l&apos;exportation des paramètres prédéfinis&#xa0;:</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="943"/>
+        <location filename="../ui/configpanel.py" line="1000"/>
         <source>Current settings exported.</source>
         <translation>Paramètres actuels exportés.</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="945"/>
+        <location filename="../ui/configpanel.py" line="1002"/>
         <source>Failed to export current settings.</source>
         <translation>Échec de l&apos;exportation des paramètres actuels.</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="954"/>
+        <location filename="../ui/configpanel.py" line="1011"/>
         <source>Failed to import settings file: </source>
         <translation>Échec de l&apos;importation du fichier de paramètres&#xa0;:</translation>
     </message>
@@ -1143,47 +1199,47 @@
         <translation type="vanished">Chargez les paramètres prédéfinis sélectionnés dans la session en cours.</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="632"/>
+        <location filename="../ui/configpanel.py" line="643"/>
         <source>Save the current settings as a named reusable preset.</source>
         <translation>Enregistrez les paramètres actuels en tant que préréglage nommé réutilisable.</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="634"/>
+        <location filename="../ui/configpanel.py" line="645"/>
         <source>Copy a settings preset JSON file into the local preset library.</source>
         <translation>Copiez un fichier JSON de paramètres prédéfinis dans la bibliothèque de paramètres prédéfinis locale.</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="636"/>
+        <location filename="../ui/configpanel.py" line="647"/>
         <source>Export the selected preset to a JSON file.</source>
         <translation>Exportez le préréglage sélectionné vers un fichier JSON.</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="638"/>
+        <location filename="../ui/configpanel.py" line="649"/>
         <source>Export the current settings directly to a JSON file.</source>
         <translation>Exportez les paramètres actuels directement vers un fichier JSON.</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="640"/>
+        <location filename="../ui/configpanel.py" line="651"/>
         <source>Load a settings JSON file immediately without first saving it as a preset.</source>
         <translation>Chargez immédiatement un fichier JSON de paramètres sans l’enregistrer au préalable en tant que préréglage.</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="672"/>
+        <location filename="../ui/configpanel.py" line="684"/>
         <source>Open the most recently used project automatically when the application starts.</source>
         <translation>Ouvrez automatiquement le projet le plus récemment utilisé au démarrage de l&apos;application.</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="676"/>
+        <location filename="../ui/configpanel.py" line="688"/>
         <source>Ignore mouse wheel changes on combo boxes and spin boxes so scrolling settings does not accidentally change values.</source>
         <translation>Ignorez les modifications de la molette de la souris sur les zones de liste déroulante et les zones de sélection numérique afin que les paramètres de défilement ne modifient pas accidentellement les valeurs.</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="695"/>
+        <location filename="../ui/configpanel.py" line="707"/>
         <source>Choose whether translated text keeps the original detected size from the image or always uses the fixed global font size defined in the text style presets.</source>
         <translation>Choisissez si le texte traduit conserve la taille originale détectée de l&apos;image ou utilise toujours la taille de police globale fixe définie dans les préréglages de style de texte.</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="706"/>
+        <location filename="../ui/configpanel.py" line="718"/>
         <source>Choose whether stroke width is detected dynamically per region based on the original text or taken from the fixed global text style preset.</source>
         <translation>Choisissez si la largeur du trait est détectée dynamiquement par région en fonction du texte d&apos;origine ou à partir du préréglage de style de texte global fixe.</translation>
     </message>
@@ -1228,7 +1284,7 @@
         <translation type="vanished">Exécute une revue LLM supplémentaire pour les pronoms, références locuteur/destinataire, formulations genrées et niveau de formalité. Ajoute des requêtes LLM.</translation>
     </message>
     <message>
-        <location filename="../ui/configpanel.py" line="784"/>
+        <location filename="../ui/configpanel.py" line="796"/>
         <source>Auto layout without stored line breaks</source>
         <translation>Mise en page auto sans retours a la ligne enregistres</translation>
     </message>
@@ -1296,52 +1352,72 @@
         <translation>Changer la couleur de la police</translation>
     </message>
     <message>
+        <location filename="../ui/text_panel.py" line="299"/>
+        <source>Normal</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../ui/text_panel.py" line="300"/>
+        <source>UPPERCASE</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/text_panel.py" line="301"/>
+        <source>lowercase</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/text_panel.py" line="302"/>
+        <source>Force rendered text case for this font format.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/text_panel.py" line="307"/>
         <source>Change stroke width</source>
         <translation>Modifier la largeur du contour</translation>
     </message>
     <message>
-        <location filename="../ui/text_panel.py" line="303"/>
+        <location filename="../ui/text_panel.py" line="310"/>
         <source>Stroke</source>
         <translation>Contour</translation>
     </message>
     <message>
-        <location filename="../ui/text_panel.py" line="312"/>
+        <location filename="../ui/text_panel.py" line="319"/>
         <source>Change stroke color</source>
         <translation>Changer la couleur du contour</translation>
     </message>
     <message>
-        <location filename="../ui/text_panel.py" line="325"/>
+        <location filename="../ui/text_panel.py" line="332"/>
         <source>Change letter spacing</source>
         <translation>Modifier l&apos;espacement des lettres</translation>
     </message>
     <message>
-        <location filename="../ui/text_panel.py" line="339"/>
+        <location filename="../ui/text_panel.py" line="346"/>
         <source>Global Font Format</source>
         <translation>Format de police global</translation>
     </message>
     <message>
-        <location filename="../ui/text_panel.py" line="349"/>
+        <location filename="../ui/text_panel.py" line="356"/>
         <source>Advanced Text Format</source>
         <translation>Format de texte avancé</translation>
     </message>
     <message>
-        <location filename="../ui/text_panel.py" line="369"/>
+        <location filename="../ui/text_panel.py" line="376"/>
         <source>Unfold</source>
         <translation>Déplier</translation>
     </message>
     <message>
-        <location filename="../ui/text_panel.py" line="369"/>
+        <location filename="../ui/text_panel.py" line="376"/>
         <source>Fold</source>
         <translation>Plier</translation>
     </message>
     <message>
-        <location filename="../ui/text_panel.py" line="370"/>
+        <location filename="../ui/text_panel.py" line="377"/>
         <source>Source</source>
         <translation>Source</translation>
     </message>
     <message>
-        <location filename="../ui/text_panel.py" line="371"/>
+        <location filename="../ui/text_panel.py" line="378"/>
         <source>Translation</source>
         <translation>Traduction</translation>
     </message>
@@ -1514,219 +1590,244 @@
 <context>
     <name>GlossaryWindow</name>
     <message>
-        <location filename="../ui/glossary_widget.py" line="31"/>
+        <location filename="../ui/glossary_widget.py" line="32"/>
         <source>Project Glossary</source>
         <translation>Glossaire du projet</translation>
     </message>
     <message>
-        <location filename="../ui/glossary_widget.py" line="43"/>
+        <location filename="../ui/glossary_widget.py" line="45"/>
         <source>Glossary entries saved in the current project&apos;s glossary.json.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/glossary_widget.py" line="47"/>
+        <location filename="../ui/glossary_widget.py" line="49"/>
         <source>These entries are passed to LLM translators for consistent names, places, titles, and recurring terms.</source>
         <translation>Ces entrées sont transmises aux traducteurs LLM pour des noms, lieux, titres et termes récurrents cohérents.</translation>
     </message>
     <message>
-        <location filename="../ui/glossary_widget.py" line="58"/>
-        <source>Project glossary entries. Format when saved: source =&gt; target [category] # note.</source>
-        <translation>Entrées du glossaire du projet. Format une fois enregistré&#xa0;: source =&gt; cible [catégorie] # note.</translation>
+        <location filename="../ui/glossary_widget.py" line="53"/>
+        <source>Preferred target terms (before translation)</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/glossary_widget.py" line="62"/>
-        <source>Glossary prompt</source>
-        <translation>Invite de glossaire</translation>
+        <location filename="../ui/glossary_widget.py" line="56"/>
+        <source>Enter names, places, titles, and other required spellings in the target language only. LLM translation and review use these terms as consistency guidance.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/glossary_widget.py" line="64"/>
-        <source>Custom instructions inserted before the project glossary in LLM translation prompts.</source>
-        <translation>Instructions personnalisées insérées avant le glossaire du projet dans les invites de traduction LLM.</translation>
+        <location filename="../ui/glossary_widget.py" line="70"/>
+        <source>Target-language-only preferred terms. Example: NEMONA [character]. Changing a saved target term updates matching translated text when the glossary is saved.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/glossary_widget.py" line="69"/>
-        <source>Tell the translator how to apply glossary entries. Keep category and note metadata out of translated text.</source>
-        <translation>Dites au traducteur comment appliquer les entrées du glossaire. Conservez les métadonnées de catégorie et de note hors du texte traduit.</translation>
-    </message>
-    <message>
-        <location filename="../ui/glossary_widget.py" line="73"/>
-        <source>Reference glossary</source>
+        <location filename="../ui/glossary_widget.py" line="74"/>
+        <source>New Target Term</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/glossary_widget.py" line="76"/>
-        <source>Optional imported glossary from another chapter or an official translation template. It is used as context and does not replace project entries.</source>
+        <source>Delete Target Term</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/glossary_widget.py" line="82"/>
-        <source>Reference entries use the same source =&gt; target [category] # note format. Project entries win when terms conflict.</source>
-        <translation type="unfinished"></translation>
+        <location filename="../ui/glossary_widget.py" line="86"/>
+        <source>Project glossary entries. Format when saved: source =&gt; target [category] # note.</source>
+        <translation>Entrées du glossaire du projet. Format une fois enregistré&#xa0;: source =&gt; cible [catégorie] # note.</translation>
     </message>
     <message>
-        <location filename="../ui/glossary_widget.py" line="85"/>
-        <source>Reference prompt</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/glossary_widget.py" line="89"/>
-        <source>Optional instructions for using the reference glossary.</source>
-        <translation type="unfinished"></translation>
+        <location filename="../ui/glossary_widget.py" line="90"/>
+        <source>Glossary prompt</source>
+        <translation>Invite de glossaire</translation>
     </message>
     <message>
         <location filename="../ui/glossary_widget.py" line="92"/>
-        <source>New</source>
-        <translation>Nouveau</translation>
+        <source>Custom instructions inserted before the project glossary in LLM translation prompts.</source>
+        <translation>Instructions personnalisées insérées avant le glossaire du projet dans les invites de traduction LLM.</translation>
     </message>
     <message>
-        <location filename="../ui/glossary_widget.py" line="93"/>
-        <source>Add an empty glossary entry.</source>
-        <translation>Ajoutez une entrée de glossaire vide.</translation>
-    </message>
-    <message>
-        <location filename="../ui/glossary_widget.py" line="95"/>
-        <source>Delete</source>
-        <translation>Supprimer</translation>
-    </message>
-    <message>
-        <location filename="../ui/glossary_widget.py" line="96"/>
-        <source>Delete selected glossary entries.</source>
-        <translation>Supprimez les entrées de glossaire sélectionnées.</translation>
-    </message>
-    <message>
-        <location filename="../ui/glossary_widget.py" line="98"/>
-        <location filename="../ui/glossary_widget.py" line="202"/>
-        <source>Import Glossary</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/glossary_widget.py" line="99"/>
-        <source>Import glossary entries from a glossary.json file into the project table.</source>
-        <translation type="unfinished"></translation>
+        <location filename="../ui/glossary_widget.py" line="97"/>
+        <source>Tell the translator how to apply glossary entries. Keep category and note metadata out of translated text.</source>
+        <translation>Dites au traducteur comment appliquer les entrées du glossaire. Conservez les métadonnées de catégorie et de note hors du texte traduit.</translation>
     </message>
     <message>
         <location filename="../ui/glossary_widget.py" line="101"/>
-        <source>Import Reference</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/glossary_widget.py" line="102"/>
-        <source>Import another chapter&apos;s glossary.json as reference context.</source>
+        <source>Reference glossary</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/glossary_widget.py" line="104"/>
-        <location filename="../ui/glossary_widget.py" line="245"/>
-        <source>Export Glossary</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/glossary_widget.py" line="105"/>
-        <source>Export this glossary as a JSON file.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/glossary_widget.py" line="107"/>
-        <source>Build From Translated Folder</source>
+        <source>Optional imported glossary from another chapter or an official translation template. It is used as context and does not replace project entries.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/glossary_widget.py" line="110"/>
+        <source>Reference entries use the same source =&gt; target [category] # note format. Project entries win when terms conflict.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/glossary_widget.py" line="113"/>
+        <source>Reference prompt</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/glossary_widget.py" line="117"/>
+        <source>Optional instructions for using the reference glossary.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/glossary_widget.py" line="120"/>
+        <source>New</source>
+        <translation>Nouveau</translation>
+    </message>
+    <message>
+        <location filename="../ui/glossary_widget.py" line="121"/>
+        <source>Add an empty glossary entry.</source>
+        <translation>Ajoutez une entrée de glossaire vide.</translation>
+    </message>
+    <message>
+        <location filename="../ui/glossary_widget.py" line="123"/>
+        <source>Delete</source>
+        <translation>Supprimer</translation>
+    </message>
+    <message>
+        <location filename="../ui/glossary_widget.py" line="124"/>
+        <source>Delete selected glossary entries.</source>
+        <translation>Supprimez les entrées de glossaire sélectionnées.</translation>
+    </message>
+    <message>
+        <location filename="../ui/glossary_widget.py" line="126"/>
+        <location filename="../ui/glossary_widget.py" line="273"/>
+        <source>Import Glossary</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/glossary_widget.py" line="127"/>
+        <source>Import glossary entries from a glossary.json file into the project table.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/glossary_widget.py" line="129"/>
+        <source>Import Reference</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/glossary_widget.py" line="130"/>
+        <source>Import another chapter&apos;s glossary.json as reference context.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/glossary_widget.py" line="132"/>
+        <location filename="../ui/glossary_widget.py" line="318"/>
+        <source>Export Glossary</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/glossary_widget.py" line="133"/>
+        <source>Export this glossary as a JSON file.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/glossary_widget.py" line="135"/>
+        <source>Build From Translated Folder</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/glossary_widget.py" line="138"/>
         <source>Choose a folder with an already translated manga/project and extract likely names, places, organizations, and titles.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/glossary_widget.py" line="114"/>
+        <location filename="../ui/glossary_widget.py" line="142"/>
         <source>Include subfolders</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/glossary_widget.py" line="115"/>
+        <location filename="../ui/glossary_widget.py" line="143"/>
         <source>Scan nested chapter folders when building a glossary template.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/glossary_widget.py" line="116"/>
+        <location filename="../ui/glossary_widget.py" line="144"/>
         <source>Save Glossary</source>
         <translation>Enregistrer le glossaire</translation>
     </message>
     <message>
-        <location filename="../ui/glossary_widget.py" line="117"/>
+        <location filename="../ui/glossary_widget.py" line="145"/>
         <source>Save the glossary into the current project&apos;s glossary.json.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/glossary_widget.py" line="204"/>
-        <location filename="../ui/glossary_widget.py" line="223"/>
-        <location filename="../ui/glossary_widget.py" line="247"/>
+        <location filename="../ui/glossary_widget.py" line="275"/>
+        <location filename="../ui/glossary_widget.py" line="296"/>
+        <location filename="../ui/glossary_widget.py" line="320"/>
         <source>Glossary JSON (*.json);;All Files (*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/glossary_widget.py" line="214"/>
-        <location filename="../ui/glossary_widget.py" line="216"/>
-        <location filename="../ui/glossary_widget.py" line="238"/>
-        <location filename="../ui/glossary_widget.py" line="240"/>
-        <location filename="../ui/glossary_widget.py" line="254"/>
-        <location filename="../ui/glossary_widget.py" line="256"/>
-        <location filename="../ui/glossary_widget.py" line="275"/>
-        <location filename="../ui/glossary_widget.py" line="282"/>
-        <location filename="../ui/glossary_widget.py" line="286"/>
+        <location filename="../ui/glossary_widget.py" line="287"/>
+        <location filename="../ui/glossary_widget.py" line="289"/>
+        <location filename="../ui/glossary_widget.py" line="311"/>
+        <location filename="../ui/glossary_widget.py" line="313"/>
+        <location filename="../ui/glossary_widget.py" line="327"/>
+        <location filename="../ui/glossary_widget.py" line="329"/>
+        <location filename="../ui/glossary_widget.py" line="348"/>
+        <location filename="../ui/glossary_widget.py" line="355"/>
+        <location filename="../ui/glossary_widget.py" line="359"/>
         <source>Glossary</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/glossary_widget.py" line="214"/>
+        <location filename="../ui/glossary_widget.py" line="287"/>
         <source>Glossary imported.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/glossary_widget.py" line="216"/>
+        <location filename="../ui/glossary_widget.py" line="289"/>
         <source>Failed to import glossary: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/glossary_widget.py" line="221"/>
+        <location filename="../ui/glossary_widget.py" line="294"/>
         <source>Import Reference Glossary</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/glossary_widget.py" line="238"/>
+        <location filename="../ui/glossary_widget.py" line="311"/>
         <source>Reference glossary imported.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/glossary_widget.py" line="240"/>
+        <location filename="../ui/glossary_widget.py" line="313"/>
         <source>Failed to import reference glossary: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/glossary_widget.py" line="254"/>
+        <location filename="../ui/glossary_widget.py" line="327"/>
         <source>Glossary exported.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/glossary_widget.py" line="256"/>
+        <location filename="../ui/glossary_widget.py" line="329"/>
         <source>Failed to export glossary: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/glossary_widget.py" line="261"/>
+        <location filename="../ui/glossary_widget.py" line="334"/>
         <source>Choose Translated Manga Folder</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/glossary_widget.py" line="276"/>
+        <location filename="../ui/glossary_widget.py" line="349"/>
         <source>No glossary candidates found in the selected folder.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/glossary_widget.py" line="283"/>
+        <location filename="../ui/glossary_widget.py" line="356"/>
         <source>Reference glossary template created from translated folder.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/glossary_widget.py" line="286"/>
+        <location filename="../ui/glossary_widget.py" line="359"/>
         <source>Failed to build glossary template: </source>
         <translation type="unfinished"></translation>
     </message>
@@ -1740,116 +1841,35 @@
     </message>
 </context>
 <context>
-    <name>ImgtransProgressMessageBox</name>
-    <message>
-        <location filename="../ui/custom_widget/message.py" line="174"/>
-        <source>Projects: </source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/custom_widget/message.py" line="176"/>
-        <source>Detecting: </source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/custom_widget/message.py" line="177"/>
-        <source>OCR: </source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/custom_widget/message.py" line="178"/>
-        <source>Inpainting: </source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/custom_widget/message.py" line="179"/>
-        <source>Decensoring: </source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/custom_widget/message.py" line="180"/>
-        <source>Translating: </source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/custom_widget/message.py" line="191"/>
-        <location filename="../ui/custom_widget/message.py" line="263"/>
-        <source>Stop</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/custom_widget/message.py" line="192"/>
-        <source>Request a graceful stop after the current pipeline step.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/custom_widget/message.py" line="194"/>
-        <location filename="../ui/custom_widget/message.py" line="265"/>
-        <source>Force Stop</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/custom_widget/message.py" line="195"/>
-        <source>Forcefully terminate the running pipeline and translation threads if normal Stop is stuck.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/custom_widget/message.py" line="197"/>
-        <location filename="../ui/custom_widget/message.py" line="267"/>
-        <source>Stop All</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/custom_widget/message.py" line="198"/>
-        <source>Stop the current pipeline and cancel all remaining batch projects.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/custom_widget/message.py" line="215"/>
-        <source>trying to stop...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/custom_widget/message.py" line="221"/>
-        <source>force stopping...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/custom_widget/message.py" line="228"/>
-        <source>stopping all...</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>ImgtransThread</name>
     <message>
-        <location filename="../ui/module_manager.py" line="572"/>
-        <location filename="../ui/module_manager.py" line="835"/>
+        <location filename="../ui/module_manager.py" line="608"/>
+        <location filename="../ui/module_manager.py" line="876"/>
         <source>OCR Failed.</source>
         <translation>Échec de la ROC&#xa0;!</translation>
     </message>
     <message>
-        <location filename="../ui/module_manager.py" line="684"/>
+        <location filename="../ui/module_manager.py" line="720"/>
         <source>Decensoring Failed.</source>
         <translation>Échec de la décensure.</translation>
     </message>
     <message>
-        <location filename="../ui/module_manager.py" line="706"/>
+        <location filename="../ui/module_manager.py" line="742"/>
         <source>Inpaint Optimization Detection Failed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/module_manager.py" line="732"/>
+        <location filename="../ui/module_manager.py" line="768"/>
         <source>Inpaint Optimization Failed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/module_manager.py" line="810"/>
+        <location filename="../ui/module_manager.py" line="851"/>
         <source>Text Detection Failed.</source>
         <translation>Échec de la détection</translation>
     </message>
     <message>
-        <location filename="../ui/module_manager.py" line="901"/>
+        <location filename="../ui/module_manager.py" line="942"/>
         <source>Inpainting Failed.</source>
         <translation>Échec de la retouche.</translation>
     </message>
@@ -1870,12 +1890,12 @@
 <context>
     <name>InpaintConfigPanel</name>
     <message>
-        <location filename="../ui/module_parse_widgets.py" line="475"/>
+        <location filename="../ui/module_parse_widgets.py" line="828"/>
         <source>Let the program decide whether it is necessary to use the selected inpaint method.</source>
         <translation>Laissez le programme décider s&apos;il est nécessaire d&apos;utiliser la méthode de retouche sélectionnée.</translation>
     </message>
     <message>
-        <location filename="../ui/module_parse_widgets.py" line="476"/>
+        <location filename="../ui/module_parse_widgets.py" line="829"/>
         <source>When enabled, the app decides per region whether inpainting is needed before rendering translated text.</source>
         <translation>Lorsqu&apos;elle est activée, l&apos;application décide par région si l&apos;inpainting est nécessaire avant de restituer le texte traduit.</translation>
     </message>
@@ -2076,86 +2096,91 @@
         <translation>Traduire uniquement&#xa0;: exécutez la traduction sur des zones de texte existantes sans détection de texte, OCR ou inpainting.</translation>
     </message>
     <message>
+        <location filename="../ui/mainwindowbars.py" line="196"/>
+        <source>Hist</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindowbars.py" line="197"/>
+        <source>Pipeline History</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindowbars.py" line="198"/>
+        <source>Pipeline History: show completed pipeline and process runs for this project.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Gloss</source>
         <translation type="vanished">Brillant</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="197"/>
+        <location filename="../ui/mainwindowbars.py" line="208"/>
         <source>Glossary: open the current project glossary.</source>
         <translation>Glossaire&#xa0;: ouvrez le glossaire du projet en cours.</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="205"/>
+        <location filename="../ui/mainwindowbars.py" line="216"/>
         <source>Merge nearby text boxes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="206"/>
+        <location filename="../ui/mainwindowbars.py" line="217"/>
         <source>Merge nearby text boxes on the current page using the configured Post-merge settings.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="217"/>
-        <source>Censor Restoration</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/mainwindowbars.py" line="229"/>
+        <location filename="../ui/mainwindowbars.py" line="228"/>
         <source>Re-run Inpainting</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="374"/>
+        <location filename="../ui/mainwindowbars.py" line="373"/>
         <source>Open Comic Archive/PDF</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="397"/>
+        <location filename="../ui/mainwindowbars.py" line="396"/>
         <source>Import Folder</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="218"/>
-        <source>Censor Restoration: detect censored regions on the current page and repair them with inpainting.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/mainwindowbars.py" line="196"/>
+        <location filename="../ui/mainwindowbars.py" line="207"/>
         <source>Glossary</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="230"/>
+        <location filename="../ui/mainwindowbars.py" line="229"/>
         <source>Re-run Inpainting: apply all existing inpaint masks again on the current page.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="241"/>
+        <location filename="../ui/mainwindowbars.py" line="240"/>
         <source>Optimize Inpainting</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="242"/>
+        <location filename="../ui/mainwindowbars.py" line="241"/>
         <source>Optimize Inpainting: detect leftover text on the current inpainted page and repair it again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="253"/>
+        <location filename="../ui/mainwindowbars.py" line="252"/>
         <source>Upscale 2x</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="254"/>
+        <location filename="../ui/mainwindowbars.py" line="253"/>
         <source>Upscale 2x: replace project pages with 2x images using the configured Upscaling quality and size limits.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="359"/>
+        <location filename="../ui/mainwindowbars.py" line="358"/>
         <source>Select Directory</source>
         <translation>Sélectionner un annuaire</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="366"/>
+        <location filename="../ui/mainwindowbars.py" line="365"/>
         <source>Import *.docx</source>
         <translation>Importer *.docx</translation>
     </message>
@@ -2184,214 +2209,240 @@
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../ui/mainwindow.py" line="293"/>
+        <location filename="../ui/mainwindow.py" line="306"/>
         <source>Keyword substitution for source text</source>
         <translation>Substitution de mots-clés pour le texte source</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="297"/>
+        <location filename="../ui/mainwindow.py" line="310"/>
         <source>Keyword substitution for machine translation source text</source>
         <translation>Substitution de mots-clés pour le texte source de la traduction auto</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="301"/>
+        <location filename="../ui/mainwindow.py" line="314"/>
         <source>Keyword substitution for machine translation</source>
         <translation>Substitution de mots-clés pour la traduction auto</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="840"/>
+        <location filename="../ui/mainwindow.py" line="911"/>
         <source>Failed to load project </source>
         <translation>Impossible d&amp;apos;ouvrir le gestionnaire &amp; #160;: %1</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="895"/>
+        <location filename="../ui/mainwindow.py" line="966"/>
         <source>Failed to load project from</source>
         <translation>Échec du chargement du projet à partir de</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="971"/>
+        <location filename="../ui/mainwindow.py" line="1042"/>
         <source>Ignored in pipeline runs: text detection, OCR, translation, and inpainting are skipped for this page.</source>
         <translation>Ignoré dans les exécutions du pipeline&#xa0;: la détection de texte, l&apos;OCR, la traduction et l&apos;inpainting sont ignorés pour cette page.</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="959"/>
+        <location filename="../ui/mainwindow.py" line="1032"/>
         <source>Page preview</source>
         <translation>Aperçu de la page</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="604"/>
+        <location filename="../ui/mainwindow.py" line="618"/>
         <source>Failed to import selected sources</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="611"/>
+        <location filename="../ui/mainwindow.py" line="625"/>
         <source>Failed to import archive </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="617"/>
+        <location filename="../ui/mainwindow.py" line="631"/>
         <source>Failed to import image </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="624"/>
+        <location filename="../ui/mainwindow.py" line="638"/>
         <source>Failed to import folder </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="636"/>
-        <location filename="../ui/mainwindow.py" line="1132"/>
-        <location filename="../ui/mainwindow.py" line="2526"/>
+        <location filename="../ui/mainwindow.py" line="650"/>
+        <location filename="../ui/mainwindow.py" line="1246"/>
+        <location filename="../ui/mainwindow.py" line="2676"/>
         <source>Another pipeline is already running. Please wait until it finishes.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="646"/>
+        <location filename="../ui/mainwindow.py" line="660"/>
         <source>No project folders with images found. Generated folders are ignored.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="773"/>
+        <location filename="../ui/mainwindow.py" line="790"/>
         <source>Failed to finish batch project </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="794"/>
+        <location filename="../ui/mainwindow.py" line="807"/>
+        <location filename="../ui/mainwindow.py" line="817"/>
+        <source>Batch Re-Inpaint: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.py" line="827"/>
+        <source>batch re-inpaint</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.py" line="853"/>
         <source>Batch processing finished.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="794"/>
+        <location filename="../ui/mainwindow.py" line="853"/>
         <source>Batch processing stopped.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="961"/>
+        <location filename="../ui/mainwindow.py" line="864"/>
+        <source>Failed to run batch completion action.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.py" line="1034"/>
         <source>source</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="962"/>
+        <location filename="../ui/mainwindow.py" line="1035"/>
         <source>Imported from {source_type}: {group}
 Page: {page}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="1067"/>
+        <location filename="../ui/mainwindow.py" line="1045"/>
+        <source>Automatically skipped as cover/title page: text detection, OCR, translation, and inpainting are skipped for this page.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.py" line="1143"/>
         <source>Open a project before editing the glossary.</source>
         <translation>Ouvrez un projet avant de modifier le glossaire.</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="1082"/>
+        <location filename="../ui/mainwindow.py" line="1153"/>
+        <source>Open a project before viewing pipeline history.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.py" line="1178"/>
         <source>saving project glossary</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="1095"/>
+        <location filename="../ui/mainwindow.py" line="1201"/>
         <source>saving search/replace glossary</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="1129"/>
+        <location filename="../ui/mainwindow.py" line="1239"/>
+        <source>saving detected cover/title page state</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.py" line="1243"/>
         <source>Open a project before running Gloss Scan.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="1137"/>
-        <source>No non-ignored pages are available for Gloss Scan.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/mainwindow.py" line="1179"/>
+        <location filename="../ui/mainwindow.py" line="1294"/>
         <source>Gloss Scan finished, but no glossary terms were found in the OCR text or by the selected LLM glossary scan.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="1184"/>
+        <location filename="../ui/mainwindow.py" line="1299"/>
         <source>saving Gloss Scan glossary</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="1191"/>
+        <location filename="../ui/mainwindow.py" line="1306"/>
         <source>Gloss Scan finished. {count} glossary candidates were added to the project glossary.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="1278"/>
+        <location filename="../ui/mainwindow.py" line="1397"/>
         <source>Restart to apply changes? 
 </source>
         <translation>Redémarrer pour appliquer les modifications&#xa0;?</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="1335"/>
+        <location filename="../ui/mainwindow.py" line="1454"/>
         <source>
 A temporary project file was kept at:
 {path}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="1337"/>
+        <location filename="../ui/mainwindow.py" line="1456"/>
         <source>Project changes could not be saved right now. The project is still marked as unsaved; please try saving again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="1341"/>
-        <location filename="../ui/mainwindow.py" line="1352"/>
+        <location filename="../ui/mainwindow.py" line="1460"/>
+        <location filename="../ui/mainwindow.py" line="1471"/>
         <source>Project Save Failed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="1353"/>
+        <location filename="../ui/mainwindow.py" line="1472"/>
         <source>Project changes could not be saved. The project remains unsaved.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="1644"/>
-        <location filename="../ui/mainwindow.py" line="1655"/>
-        <location filename="../ui/mainwindow.py" line="1659"/>
-        <location filename="../ui/mainwindow.py" line="1720"/>
-        <location filename="../ui/mainwindow.py" line="1725"/>
+        <location filename="../ui/mainwindow.py" line="1757"/>
+        <location filename="../ui/mainwindow.py" line="1768"/>
+        <location filename="../ui/mainwindow.py" line="1772"/>
+        <location filename="../ui/mainwindow.py" line="1833"/>
+        <location filename="../ui/mainwindow.py" line="1838"/>
         <source>Warning</source>
         <translation>Avertissement</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="1644"/>
+        <location filename="../ui/mainwindow.py" line="1757"/>
         <source>Please open a project first.</source>
         <translation>Veuillez d&apos;abord ouvrir un projet.</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="1655"/>
+        <location filename="../ui/mainwindow.py" line="1768"/>
         <source>No current file.</source>
         <translation>Aucun dossier actuel.</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="1659"/>
+        <location filename="../ui/mainwindow.py" line="1772"/>
         <source>Current page data does not exist.</source>
         <translation>Les données de la page actuelle n&apos;existent pas.</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="1664"/>
-        <location filename="../ui/mainwindow.py" line="1716"/>
+        <location filename="../ui/mainwindow.py" line="1777"/>
+        <location filename="../ui/mainwindow.py" line="1829"/>
         <source>Notice</source>
         <translation>Avis</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="1664"/>
+        <location filename="../ui/mainwindow.py" line="1777"/>
         <source>The current page has no text boxes.</source>
         <translation>La page actuelle ne comporte aucune zone de texte.</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="1697"/>
+        <location filename="../ui/mainwindow.py" line="1810"/>
         <source>Success</source>
         <translation>Succès</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="1698"/>
+        <location filename="../ui/mainwindow.py" line="1811"/>
         <source>Merge complete: box count {initial} -&gt; {final} ({reduced} fewer)</source>
         <translation>Fusion terminée&#xa0;: nombre de boîtes {initial} -&gt; {final} ({réduit} en moins)</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="1707"/>
+        <location filename="../ui/mainwindow.py" line="1820"/>
         <source>No merge was performed.
 There are {count} text boxes.
 Label types: {labels}
@@ -2412,27 +2463,27 @@ Suggestions&#xa0;:
 4. Vérifiez si les étiquettes sont sur liste noire.</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="1715"/>
+        <location filename="../ui/mainwindow.py" line="1828"/>
         <source>none</source>
         <translation>aucun</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="1720"/>
+        <location filename="../ui/mainwindow.py" line="1833"/>
         <source>The project has no images.</source>
         <translation>Le projet n&apos;a pas d&apos;images.</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="1725"/>
+        <location filename="../ui/mainwindow.py" line="1838"/>
         <source>Project JSON file not found: {path}</source>
         <translation>Fichier JSON du projet introuvable&#xa0;: {path}</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="1769"/>
+        <location filename="../ui/mainwindow.py" line="1882"/>
         <source>Complete</source>
         <translation>Complet</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="1770"/>
+        <location filename="../ui/mainwindow.py" line="1883"/>
         <source>Region merge complete
 Succeeded: {success}/{total}
 Failed: {failed}/{total}</source>
@@ -2441,439 +2492,468 @@ Réussi&#xa0;:&#xa0;{succès}/{total}
 Échec&#xa0;:&#xa0;{échec}/{total}</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="1895"/>
+        <location filename="../ui/mainwindow.py" line="2008"/>
         <source>saving current page</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2053"/>
+        <location filename="../ui/mainwindow.py" line="2166"/>
         <source>Open a project page before running a translation benchmark.</source>
         <translation>Ouvrez une page de projet avant d&apos;exécuter un test de traduction.</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2058"/>
+        <location filename="../ui/mainwindow.py" line="2171"/>
         <source>The current page has no source text to benchmark.</source>
         <translation>La page actuelle ne contient aucun texte source à comparer.</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2241"/>
+        <location filename="../ui/mainwindow.py" line="2356"/>
         <source>page translation finish</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2252"/>
+        <location filename="../ui/mainwindow.py" line="2367"/>
         <source>page decensor finish</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2261"/>
+        <location filename="../ui/mainwindow.py" line="2376"/>
         <source>No censor mask was detected. You can draw/select a repair mask manually and run Censor Restoration again. No censor mask found. Try debug masks or adjust gray/banded censor detection settings. The text inpaint mask will not be used automatically.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2266"/>
+        <location filename="../ui/mainwindow.py" line="2381"/>
         <source>Censor Restoration finished for the current page.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2271"/>
+        <location filename="../ui/mainwindow.py" line="2386"/>
         <source>unsaved</source>
         <translation>Non enregistré</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2271"/>
+        <location filename="../ui/mainwindow.py" line="2386"/>
         <source>saved</source>
         <translation>Sauvegardé</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2280"/>
-        <source>Select ChatGPT, LLM_API_Translator, or Two-Step Translator before reviewing selected translations.</source>
+        <location filename="../ui/mainwindow.py" line="3002"/>
+        <source>All pages are ignored or detected as cover/title pages for pipeline runs.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2308"/>
+        <location filename="../ui/mainwindow.py" line="2432"/>
         <source>Saving image...</source>
         <translation>Enregistrement de l&apos;image...</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2324"/>
+        <location filename="../ui/mainwindow.py" line="2448"/>
         <source>Confirmation</source>
         <translation>Confirmation</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2325"/>
+        <location filename="../ui/mainwindow.py" line="2449"/>
         <source>&quot;Run&quot; will clear previous results, &quot;Continue&quot; will try to run from previous progress</source>
         <translation>&quot;Exécuter&quot; effacera les résultats précédents, &quot;Continuer&quot; tentera de reprendre la progression précédente</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2328"/>
+        <location filename="../ui/mainwindow.py" line="2452"/>
         <source>Run</source>
         <translation>Courir</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2329"/>
+        <location filename="../ui/mainwindow.py" line="2453"/>
         <source>Continue</source>
         <translation>Continuer</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2330"/>
+        <location filename="../ui/mainwindow.py" line="2454"/>
         <source>Cancel</source>
         <translation>Annuler</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2386"/>
-        <source>Select ChatGPT, LLM_API_Translator, or Two-Step Translator before running translation review.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/mainwindow.py" line="2399"/>
+        <location filename="../ui/mainwindow.py" line="2549"/>
         <source>Open a project page before running translation review.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2408"/>
-        <source>No non-ignored pages are available for translation review.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/mainwindow.py" line="2414"/>
+        <location filename="../ui/mainwindow.py" line="2564"/>
         <source>Open a project page before running Censor Restoration.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2419"/>
-        <location filename="../ui/mainwindow.py" line="2477"/>
+        <location filename="../ui/mainwindow.py" line="2569"/>
+        <location filename="../ui/mainwindow.py" line="2627"/>
         <source>The current page is not available in the project.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2423"/>
+        <location filename="../ui/mainwindow.py" line="2573"/>
         <source>Select an inpainter before running Censor Restoration.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2472"/>
+        <location filename="../ui/mainwindow.py" line="2622"/>
         <source>Open a project page before re-running inpainting.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2481"/>
+        <location filename="../ui/mainwindow.py" line="2631"/>
         <source>Inpainting is already running. Please wait until it finishes.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2489"/>
+        <location filename="../ui/mainwindow.py" line="2639"/>
         <source>Loading fallback inpainter. Run Re-Inpaint again after it is ready.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2491"/>
+        <location filename="../ui/mainwindow.py" line="2641"/>
         <source>Select an inpainter before re-running inpainting.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2496"/>
-        <location filename="../ui/mainwindow.py" line="2501"/>
-        <location filename="../ui/mainwindow.py" line="2793"/>
-        <location filename="../ui/mainwindow.py" line="2796"/>
+        <location filename="../ui/mainwindow.py" line="2646"/>
+        <location filename="../ui/mainwindow.py" line="2651"/>
+        <location filename="../ui/mainwindow.py" line="2944"/>
+        <location filename="../ui/mainwindow.py" line="2947"/>
         <source>No inpaint masks found for the current page.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2518"/>
+        <location filename="../ui/mainwindow.py" line="2668"/>
         <source>Re-running inpainting on current page...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2523"/>
+        <location filename="../ui/mainwindow.py" line="2673"/>
         <source>Open a project before optimizing inpainting.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2529"/>
+        <location filename="../ui/mainwindow.py" line="2679"/>
         <source>Select a text detector before optimizing inpainting.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2532"/>
+        <location filename="../ui/mainwindow.py" line="2682"/>
         <source>Select an inpainter before optimizing inpainting.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2543"/>
+        <location filename="../ui/mainwindow.py" line="2694"/>
         <source>Open a project page before optimizing inpainting.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2552"/>
-        <source>No non-ignored pages are available for inpaint optimization.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/mainwindow.py" line="2567"/>
+        <location filename="../ui/mainwindow.py" line="2718"/>
         <source>Open a project before upscaling project images.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2570"/>
+        <location filename="../ui/mainwindow.py" line="2721"/>
         <source>Another pipeline or upscaling task is already running. Please wait until it finishes.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2579"/>
+        <location filename="../ui/mainwindow.py" line="2730"/>
         <source>{count} project page(s) already contain &quot;upscaled&quot; in the filename.
 
 Choose Yes to upscale them again, No to skip them, or Cancel to stop.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2584"/>
-        <location filename="../ui/mainwindow.py" line="2685"/>
+        <location filename="../ui/mainwindow.py" line="2735"/>
+        <location filename="../ui/mainwindow.py" line="2836"/>
         <source>Already Upscaled Images Found</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2593"/>
+        <location filename="../ui/mainwindow.py" line="2744"/>
         <source>No project pages remain to upscale.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2610"/>
+        <location filename="../ui/mainwindow.py" line="2761"/>
         <source>Upscaling project images ({factor}x): </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2626"/>
+        <location filename="../ui/mainwindow.py" line="2777"/>
         <source>Project image upscaling was stopped. No source images were replaced.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2632"/>
+        <location filename="../ui/mainwindow.py" line="2783"/>
         <source>Project image upscaling failed. No source images were replaced.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2638"/>
+        <location filename="../ui/mainwindow.py" line="2789"/>
         <source>No project pages met the configured upscaling size limits.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2644"/>
+        <location filename="../ui/mainwindow.py" line="2795"/>
         <source>Upscaled and replaced {count} project page(s).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2646"/>
+        <location filename="../ui/mainwindow.py" line="2797"/>
         <source>
 Skipped {count} page(s) because of configured size limits.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2649"/>
+        <location filename="../ui/mainwindow.py" line="2800"/>
         <source>Failed to activate upscaled project images.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2656"/>
+        <location filename="../ui/mainwindow.py" line="2807"/>
         <source>Another pipeline or batch upscaling task is already running. Please wait until it finishes.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2659"/>
+        <location filename="../ui/mainwindow.py" line="2810"/>
         <source>Project image upscaling is already running. Please wait until it finishes.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2665"/>
+        <location filename="../ui/mainwindow.py" line="2816"/>
         <source>Select Parent Folder for Batch Upscaling</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2673"/>
+        <location filename="../ui/mainwindow.py" line="2824"/>
         <source>No source-image subfolders found. Generated output folders are ignored.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2687"/>
+        <location filename="../ui/mainwindow.py" line="2838"/>
         <source>{count} image(s) in the selected source folders already contain &quot;upscaled&quot; in the filename.
 
 Choose Yes to upscale them again, No to skip them, or Cancel to stop.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2701"/>
+        <location filename="../ui/mainwindow.py" line="2852"/>
         <source>No source images remain to upscale.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="724"/>
-        <location filename="../ui/mainwindow.py" line="2723"/>
+        <location filename="../ui/mainwindow.py" line="738"/>
+        <location filename="../ui/mainwindow.py" line="2874"/>
         <source>Batch Upscaling: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2738"/>
+        <location filename="../ui/mainwindow.py" line="1252"/>
+        <source>No processable pages are available for Gloss Scan.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.py" line="2395"/>
+        <source>Select ChatGPT, LLM_API_Translator, LLM_API_Translator_2, or Two-Step Translator before reviewing selected translations.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.py" line="2398"/>
+        <source>Select LLM_API_Translator, LLM_API_Translator_2, or Two-Step Translator before reviewing address and pronouns.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.py" line="2401"/>
+        <source>Select LLM_API_Translator, LLM_API_Translator_2, or Two-Step Translator before running uncensored translation review.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.py" line="2404"/>
+        <source>Select LLM_API_Translator, LLM_API_Translator_2, or Two-Step Translator before rewriting and shortening selected translations.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.py" line="2535"/>
+        <source>Select ChatGPT, LLM_API_Translator, LLM_API_Translator_2, or Two-Step Translator before running translation review.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.py" line="2558"/>
+        <source>No processable pages are available for translation review.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.py" line="2703"/>
+        <source>No processable pages are available for inpaint optimization.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.py" line="2889"/>
         <source>Detecting: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2757"/>
+        <location filename="../ui/mainwindow.py" line="2908"/>
         <source>Batch upscaling failed before translation. Batch processing was stopped.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2769"/>
+        <location filename="../ui/mainwindow.py" line="2920"/>
         <source>Batch upscaling stopped. Replaced {replaced} image(s) before stopping.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2779"/>
+        <location filename="../ui/mainwindow.py" line="2930"/>
         <source>Batch upscaling completed with errors after replacing {replaced} image(s).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2783"/>
+        <location filename="../ui/mainwindow.py" line="2934"/>
         <source>Batch upscaling replaced {count} image(s).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2785"/>
+        <location filename="../ui/mainwindow.py" line="2936"/>
         <source>
 Skipped {count} image(s) because of configured size limits.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2790"/>
+        <location filename="../ui/mainwindow.py" line="2941"/>
         <source>Open a project page before removing masks.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2800"/>
+        <location filename="../ui/mainwindow.py" line="2951"/>
         <source>remove current page masks</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2802"/>
+        <location filename="../ui/mainwindow.py" line="2953"/>
         <source>All masks and related inpainting were removed from the current page.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2821"/>
+        <location filename="../ui/mainwindow.py" line="2972"/>
         <source>current page re-inpaint</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2823"/>
+        <location filename="../ui/mainwindow.py" line="2974"/>
         <source>Inpainting re-run completed for current page.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2835"/>
+        <location filename="../ui/mainwindow.py" line="2986"/>
         <source>Re-running inpainting failed for the current page. Check the log for details.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2849"/>
         <source>All pages are ignored for pipeline runs.</source>
-        <translation>Toutes les pages sont ignorées pour les exécutions de pipeline.</translation>
+        <translation type="vanished">Toutes les pages sont ignorées pour les exécutions de pipeline.</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2906"/>
+        <location filename="../ui/mainwindow.py" line="3059"/>
         <source>Import Text Styles</source>
         <translation>Importer des styles de texte</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2920"/>
+        <location filename="../ui/mainwindow.py" line="3073"/>
         <source>Save Text Styles</source>
         <translation>Styles du texte</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2965"/>
+        <location filename="../ui/mainwindow.py" line="3120"/>
         <source>Open a project before exporting a comic archive.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2976"/>
+        <location filename="../ui/mainwindow.py" line="3131"/>
         <source>Export Comic Archive/PDF</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2986"/>
+        <location filename="../ui/mainwindow.py" line="3141"/>
         <source>Comic export written to </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2988"/>
+        <location filename="../ui/mainwindow.py" line="3143"/>
         <source>Failed to export comic archive/PDF</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2996"/>
+        <location filename="../ui/mainwindow.py" line="3152"/>
+        <source>text export</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.py" line="3154"/>
         <source>Text file exported to </source>
         <translation>Fichier texte exporté vers</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2998"/>
+        <location filename="../ui/mainwindow.py" line="3156"/>
         <source>Failed to export as TEXT file</source>
         <translation>Échec de l&apos;exportation en tant que fichier TEXTE</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="3004"/>
+        <location filename="../ui/mainwindow.py" line="3162"/>
         <source>Import *.md/*.txt</source>
         <translation>Importer *.md/*.txt</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="3016"/>
+        <location filename="../ui/mainwindow.py" line="3174"/>
         <source>Translation imported and matched successfully.</source>
         <translation>Traduction importée et mise en correspondance réussie.</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="3018"/>
+        <location filename="../ui/mainwindow.py" line="3176"/>
         <source>Imported txt file not fully matched with current project, please make sure source txt file structured like results from &quot;export TXT/markdown&quot;</source>
         <translation>Le fichier txt importé ne correspond pas entièrement au projet en cours, veuillez vous assurer que le fichier txt source est structuré comme les résultats de «&#xa0;export TXT/Markdown&#xa0;»</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="3020"/>
+        <location filename="../ui/mainwindow.py" line="3178"/>
         <source>Missing pages: </source>
         <translation>Pages manquantes :</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="3023"/>
+        <location filename="../ui/mainwindow.py" line="3181"/>
         <source>Unexpected pages: </source>
         <translation>Pages inattendues&#xa0;:</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="3026"/>
+        <location filename="../ui/mainwindow.py" line="3184"/>
         <source>Unmatched pages: </source>
         <translation>Pages non appariées&#xa0;:</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="3037"/>
+        <location filename="../ui/mainwindow.py" line="3195"/>
         <source>Failed to import translation from </source>
         <translation>Échec de l&apos;importation de la traduction à partir de</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="3044"/>
+        <location filename="../ui/mainwindow.py" line="3202"/>
         <source>saving ignored page state</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="3051"/>
+        <location filename="../ui/mainwindow.py" line="3209"/>
         <source>Delete Page Data</source>
         <translation>Supprimer les données de la page</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="3052"/>
+        <location filename="../ui/mainwindow.py" line="3210"/>
         <source>Are you sure you want to delete textboxes, masks, and inpainting for this page?</source>
         <translation>Êtes-vous sûr de vouloir supprimer les zones de texte, les masques et l&apos;inpainting pour cette page&#xa0;?</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="3076"/>
+        <location filename="../ui/mainwindow.py" line="3234"/>
         <source>saving deleted page data state</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="3106"/>
+        <location filename="../ui/mainwindow.py" line="3264"/>
         <source>Export to </source>
         <translation>Exporter vers</translation>
     </message>
@@ -2900,12 +2980,12 @@ All existing translation results will be cleared!</source>
 Tous les résultats de traduction existants seront effacés&#xa0;!</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2916"/>
+        <location filename="../ui/mainwindow.py" line="3069"/>
         <source>Failed to load from {p}</source>
         <translation>Échec du chargement à partir de {p}</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="2937"/>
+        <location filename="../ui/mainwindow.py" line="3090"/>
         <source>Failed save to {savep}</source>
         <translation>Échec de l&apos;enregistrement vers {savep}</translation>
     </message>
@@ -3333,7 +3413,7 @@ qipao,qipao2</translation>
 <context>
     <name>ModuleConfigParseWidget</name>
     <message>
-        <location filename="../ui/module_parse_widgets.py" line="327"/>
+        <location filename="../ui/module_parse_widgets.py" line="665"/>
         <source>Select which module implementation is used for this step. Different modules can be much faster or slower depending on CPU/GPU support, model size, and network/API latency.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3345,7 +3425,7 @@ qipao,qipao2</translation>
 <context>
     <name>ModuleManager</name>
     <message>
-        <location filename="../ui/module_manager.py" line="1680"/>
+        <location filename="../ui/module_manager.py" line="1885"/>
         <source>Set Inpainter...</source>
         <translation>Définir le Retoucheur...</translation>
     </message>
@@ -3353,55 +3433,121 @@ qipao,qipao2</translation>
 <context>
     <name>OCRConfigPanel</name>
     <message>
-        <location filename="../ui/module_parse_widgets.py" line="503"/>
+        <location filename="../ui/module_parse_widgets.py" line="856"/>
         <source>Delete and restore region where OCR return empty string.</source>
         <translation>Supprimez et restaurez la région où l&apos;OCR renvoie la chaîne vide.</translation>
     </message>
     <message>
-        <location filename="../ui/module_parse_widgets.py" line="504"/>
+        <location filename="../ui/module_parse_widgets.py" line="857"/>
         <source>Remove OCR regions that return empty text and restore the underlying image area.</source>
         <translation>Supprimez les régions OCR qui renvoient du texte vide et restaurez la zone d&apos;image sous-jacente.</translation>
     </message>
     <message>
-        <location filename="../ui/module_parse_widgets.py" line="508"/>
+        <location filename="../ui/module_parse_widgets.py" line="861"/>
         <source>Font Detection</source>
         <translation>Détection de polices</translation>
     </message>
     <message>
-        <location filename="../ui/module_parse_widgets.py" line="509"/>
+        <location filename="../ui/module_parse_widgets.py" line="862"/>
         <source>Try to detect font properties from the source image for each OCR region.</source>
         <translation>Essayez de détecter les propriétés de police de l&apos;image source pour chaque région OCR.</translation>
     </message>
 </context>
 <context>
+    <name>OllamaModelManager</name>
+    <message>
+        <location filename="../ui/module_parse_widgets.py" line="181"/>
+        <location filename="../ui/module_parse_widgets.py" line="207"/>
+        <source>Installed Ollama models</source>
+        <translation>Modèles Ollama installés</translation>
+    </message>
+    <message>
+        <location filename="../ui/module_parse_widgets.py" line="183"/>
+        <source>Queries the configured Ollama server. Favorites and ratings are saved separately for this translator profile.</source>
+        <translation>Interroge le serveur Ollama configuré. Les favoris et les évaluations sont enregistrés séparément pour ce profil de traduction.</translation>
+    </message>
+    <message>
+        <location filename="../ui/module_parse_widgets.py" line="189"/>
+        <source>Refresh models</source>
+        <translation>Actualiser les modèles</translation>
+    </message>
+    <message>
+        <location filename="../ui/module_parse_widgets.py" line="190"/>
+        <source>Use selected model</source>
+        <translation>Utiliser le modèle sélectionné</translation>
+    </message>
+    <message>
+        <location filename="../ui/module_parse_widgets.py" line="200"/>
+        <location filename="../ui/module_parse_widgets.py" line="314"/>
+        <source>Favorite</source>
+        <translation>Favori</translation>
+    </message>
+    <message>
+        <location filename="../ui/module_parse_widgets.py" line="200"/>
+        <source>Model</source>
+        <translation>Modèle</translation>
+    </message>
+    <message>
+        <location filename="../ui/module_parse_widgets.py" line="200"/>
+        <location filename="../ui/module_parse_widgets.py" line="333"/>
+        <source>Rating</source>
+        <translation>Évaluation</translation>
+    </message>
+    <message>
+        <location filename="../ui/module_parse_widgets.py" line="256"/>
+        <source>Select Ollama as provider.</source>
+        <translation>Sélectionnez Ollama comme fournisseur.</translation>
+    </message>
+    <message>
+        <location filename="../ui/module_parse_widgets.py" line="258"/>
+        <source>Refresh to query installed models.</source>
+        <translation>Actualisez pour interroger les modèles installés.</translation>
+    </message>
+    <message>
+        <location filename="../ui/module_parse_widgets.py" line="263"/>
+        <source>Querying Ollama...</source>
+        <translation>Interrogation d’Ollama...</translation>
+    </message>
+    <message>
+        <location filename="../ui/module_parse_widgets.py" line="288"/>
+        <source>%d installed model(s).</source>
+        <translation>%d modèle(s) installé(s).</translation>
+    </message>
+    <message>
+        <location filename="../ui/module_parse_widgets.py" line="293"/>
+        <source>Ollama query failed: </source>
+        <translation>Échec de la requête Ollama : </translation>
+    </message>
+</context>
+<context>
     <name>PageListView</name>
     <message>
-        <location filename="../ui/mainwindow.py" line="106"/>
+        <location filename="../ui/mainwindow.py" line="112"/>
         <source>Reveal in File Explorer</source>
         <translation>Révéler dans l&apos;Explorateur de fichiers</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="108"/>
+        <location filename="../ui/mainwindow.py" line="114"/>
         <source>Include Page in Pipeline</source>
         <translation>Inclure la page dans le pipeline</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="108"/>
+        <location filename="../ui/mainwindow.py" line="114"/>
         <source>Ignore Page in Pipeline</source>
         <translation>Ignorer la page dans le pipeline</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="110"/>
+        <location filename="../ui/mainwindow.py" line="116"/>
         <source>Skip this page during text detection, OCR, translation, and inpainting pipeline runs.</source>
         <translation>Ignorez cette page lors des exécutions de pipeline de détection de texte, d&apos;OCR, de traduction et d&apos;inpainting.</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="112"/>
+        <location filename="../ui/mainwindow.py" line="118"/>
         <source>Delete Page Data</source>
         <translation>Supprimer les données de la page</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.py" line="113"/>
+        <location filename="../ui/mainwindow.py" line="119"/>
         <source>Delete textboxes, masks, and inpainting for this page.</source>
         <translation>Supprimez les zones de texte, les masques et l&apos;inpainting pour cette page.</translation>
     </message>
@@ -3481,15 +3627,15 @@ qipao,qipao2</translation>
     </message>
 </context>
 <context>
-    <name>ParamComboBox</name>
+    <name>ParamWidget</name>
     <message>
-        <location filename="../ui/custom_widget/combobox.py" line="94"/>
-        <source>Flush</source>
+        <location filename="../ui/module_parse_widgets.py" line="474"/>
+        <source>Reset</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/custom_widget/combobox.py" line="97"/>
-        <source>Select Path</source>
+        <location filename="../ui/module_parse_widgets.py" line="475"/>
+        <source>Reset this prompt to config.sample default.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -3524,6 +3670,24 @@ qipao,qipao2</translation>
         <location filename="../ui/drawingpanel.py" line="154"/>
         <source>Rectangle</source>
         <translation>Rectangle</translation>
+    </message>
+</context>
+<context>
+    <name>PipelineHistoryWindow</name>
+    <message>
+        <location filename="../ui/pipeline_history_widget.py" line="33"/>
+        <source>Pipeline History</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/pipeline_history_widget.py" line="39"/>
+        <source>Refresh</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/pipeline_history_widget.py" line="72"/>
+        <source>No project is open.</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -3631,17 +3795,17 @@ qipao,qipao2</translation>
 <context>
     <name>SelectionWithConfigWidget</name>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="829"/>
+        <location filename="../ui/mainwindowbars.py" line="830"/>
         <source>Open settings for </source>
         <translation>Ouvrir les paramètres pour</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="833"/>
+        <location filename="../ui/mainwindowbars.py" line="834"/>
         <source>Select </source>
         <translation>Sélectionner</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="838"/>
+        <location filename="../ui/mainwindowbars.py" line="839"/>
         <source>Configure </source>
         <translation>Configurer</translation>
     </message>
@@ -3682,12 +3846,12 @@ qipao,qipao2</translation>
 <context>
     <name>TextDetectConfigPanel</name>
     <message>
-        <location filename="../ui/module_parse_widgets.py" line="493"/>
+        <location filename="../ui/module_parse_widgets.py" line="846"/>
         <source>Keep Existing Lines</source>
         <translation>Lignes existantes</translation>
     </message>
     <message>
-        <location filename="../ui/module_parse_widgets.py" line="494"/>
+        <location filename="../ui/module_parse_widgets.py" line="847"/>
         <source>Keep manually edited or existing text lines instead of replacing them during detection.</source>
         <translation>Conservez les lignes de texte modifiées manuellement ou existantes au lieu de les remplacer lors de la détection.</translation>
     </message>
@@ -3838,363 +4002,363 @@ qipao,qipao2</translation>
 <context>
     <name>TitleBar</name>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="447"/>
+        <location filename="../ui/mainwindowbars.py" line="448"/>
         <source>Edit</source>
         <translation>Éditer</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="448"/>
+        <location filename="../ui/mainwindowbars.py" line="449"/>
         <source>Edit menu: undo, redo, search, and keyword substitution.</source>
         <translation>Menu Édition&#xa0;: annuler, rétablir, rechercher et substitution de mots clés.</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="450"/>
+        <location filename="../ui/mainwindowbars.py" line="451"/>
         <source>Undo</source>
         <translation>Annuler</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="453"/>
+        <location filename="../ui/mainwindowbars.py" line="454"/>
         <source>Redo</source>
         <translation>Rétablir</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="456"/>
+        <location filename="../ui/mainwindowbars.py" line="457"/>
         <source>Search</source>
         <translation>Rechercher</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="459"/>
+        <location filename="../ui/mainwindowbars.py" line="460"/>
         <source>Global Search</source>
         <translation>Recherche globale</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="463"/>
+        <location filename="../ui/mainwindowbars.py" line="464"/>
         <source>Keyword substitution for machine translation source text</source>
         <translation>Substitution de mots-clés pour le texte source de la traduction auto</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="465"/>
+        <location filename="../ui/mainwindowbars.py" line="466"/>
         <source>Keyword substitution for machine translation</source>
         <translation>Substitution de mots-clés pour la traduction auto</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="467"/>
+        <location filename="../ui/mainwindowbars.py" line="468"/>
         <source>Keyword substitution for source text</source>
         <translation>Substitution de mots-clés pour le texte source</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="478"/>
+        <location filename="../ui/mainwindowbars.py" line="479"/>
         <source>View</source>
         <translation>Vue</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="479"/>
+        <location filename="../ui/mainwindowbars.py" line="480"/>
         <source>View menu: display language, panels, text styles, and theme.</source>
         <translation>Menu Affichage&#xa0;: langue d&apos;affichage, panneaux, styles de texte et thème.</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="481"/>
+        <location filename="../ui/mainwindowbars.py" line="482"/>
         <source>Display Language</source>
         <translation>Langue d’affichage</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="495"/>
+        <location filename="../ui/mainwindowbars.py" line="496"/>
         <source>Drawing Board</source>
         <translation>Planche à dessin</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="497"/>
+        <location filename="../ui/mainwindowbars.py" line="498"/>
         <source>Text Editor</source>
         <translation>Éditeur de texte</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="499"/>
+        <location filename="../ui/mainwindowbars.py" line="500"/>
         <source>Import Text Styles</source>
         <translation>Importer des styles de texte</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="500"/>
+        <location filename="../ui/mainwindowbars.py" line="501"/>
         <source>Export Text Styles</source>
         <translation>Exporter les styles de texte</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="501"/>
+        <location filename="../ui/mainwindowbars.py" line="502"/>
         <source>Dark Mode</source>
         <translation>Mode Sombre</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="521"/>
+        <location filename="../ui/mainwindowbars.py" line="522"/>
         <source>Go</source>
         <translation>Aller</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="522"/>
+        <location filename="../ui/mainwindowbars.py" line="523"/>
         <source>Go menu: move between project pages.</source>
         <translation>Menu Aller&#xa0;: se déplacer entre les pages du projet.</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="523"/>
+        <location filename="../ui/mainwindowbars.py" line="524"/>
         <source>Previous Page</source>
         <translation>Page précédente</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="525"/>
+        <location filename="../ui/mainwindowbars.py" line="526"/>
         <source>Next Page</source>
         <translation>Page suivante</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="535"/>
+        <location filename="../ui/mainwindowbars.py" line="536"/>
         <source>Tools</source>
         <translation>Outils</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="536"/>
+        <location filename="../ui/mainwindowbars.py" line="537"/>
         <source>Tools menu: utilities for project editing.</source>
         <translation>Menu Outils&#xa0;: utilitaires d&apos;édition de projet.</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="538"/>
+        <location filename="../ui/mainwindowbars.py" line="539"/>
         <source>Region Merge Tool</source>
         <translation>Outil de fusion de régions</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="542"/>
+        <location filename="../ui/mainwindowbars.py" line="543"/>
         <source>Re-run Inpainting Current Page</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="544"/>
+        <location filename="../ui/mainwindowbars.py" line="545"/>
         <source>Re-run Inpainting: apply all existing inpaint masks again on the current page.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="547"/>
+        <location filename="../ui/mainwindowbars.py" line="548"/>
         <source>Optimize Inpainting Current Page</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="549"/>
+        <location filename="../ui/mainwindowbars.py" line="550"/>
         <source>Detect leftover text on the current inpainted page and repair it with a second inpainting pass.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="552"/>
+        <location filename="../ui/mainwindowbars.py" line="553"/>
         <source>Optimize Inpainting All Pages</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="553"/>
+        <location filename="../ui/mainwindowbars.py" line="554"/>
         <source>Detect leftover text on all non-ignored inpainted pages and repair it with a second inpainting pass.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="556"/>
+        <location filename="../ui/mainwindowbars.py" line="557"/>
         <source>Upscale Project Images 2x</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="557"/>
+        <location filename="../ui/mainwindowbars.py" line="558"/>
         <source>Replace all project pages with 2x upscaled files, using the Upscaling quality and size-limit settings.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="560"/>
+        <location filename="../ui/mainwindowbars.py" line="561"/>
         <source>Upscale Project Images Using Settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="561"/>
+        <location filename="../ui/mainwindowbars.py" line="562"/>
         <source>Replace all project pages using the configured Upscaling factor, quality, and size limits.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="564"/>
+        <location filename="../ui/mainwindowbars.py" line="565"/>
         <source>Batch Upscale Folders Using Settings...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="565"/>
+        <location filename="../ui/mainwindowbars.py" line="566"/>
         <source>Choose a parent folder and replace pages in each source-image subfolder using the configured Upscaling settings.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="568"/>
+        <location filename="../ui/mainwindowbars.py" line="569"/>
         <source>Remove All Masks Current Page</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="570"/>
+        <location filename="../ui/mainwindowbars.py" line="571"/>
         <source>Remove every mask on the current page and restore the inpainted pixels from the original image.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="573"/>
+        <location filename="../ui/mainwindowbars.py" line="574"/>
         <source>Model Downloads</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="574"/>
+        <location filename="../ui/mainwindowbars.py" line="575"/>
         <source>Download optional or missing local OCR, detection, inpainting, and translator model files.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="592"/>
-        <location filename="../ui/mainwindowbars.py" line="628"/>
+        <location filename="../ui/mainwindowbars.py" line="593"/>
+        <location filename="../ui/mainwindowbars.py" line="629"/>
         <source>Run</source>
         <translation>Exécuter</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="593"/>
+        <location filename="../ui/mainwindowbars.py" line="594"/>
         <source>Run menu: choose enabled stages, presets, and translation commands.</source>
         <translation>Menu Exécuter&#xa0;: choisissez les étapes activées, les préréglages et les commandes de traduction.</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="596"/>
+        <location filename="../ui/mainwindowbars.py" line="597"/>
         <source>Enable Text Detection</source>
         <translation>Activer la détection de texte</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="597"/>
+        <location filename="../ui/mainwindowbars.py" line="598"/>
         <source>Enable OCR</source>
         <translation>Activer OCR</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="598"/>
+        <location filename="../ui/mainwindowbars.py" line="599"/>
         <source>Enable Translation</source>
         <translation>Activer la traduction</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="599"/>
+        <location filename="../ui/mainwindowbars.py" line="600"/>
         <source>Enable Inpainting</source>
         <translation>Activer la retouche</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="600"/>
+        <location filename="../ui/mainwindowbars.py" line="601"/>
         <source>Enable Inpaint Optimization</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="607"/>
+        <location filename="../ui/mainwindowbars.py" line="608"/>
         <source>Preset: Full Run</source>
         <translation>Préréglage&#xa0;:&#xa0;exécution complète</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="608"/>
+        <location filename="../ui/mainwindowbars.py" line="609"/>
         <source>Preset: Text Detection</source>
         <translation>Préréglage&#xa0;: Détection de texte</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="609"/>
+        <location filename="../ui/mainwindowbars.py" line="610"/>
         <source>Preset: OCR</source>
         <translation>Préréglage&#xa0;: ROC</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="610"/>
+        <location filename="../ui/mainwindowbars.py" line="611"/>
         <source>Preset: Translation</source>
         <translation>Préréglage&#xa0;: Traduction</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="611"/>
+        <location filename="../ui/mainwindowbars.py" line="612"/>
         <source>Preset: Inpainting</source>
         <translation>Préréglage&#xa0;:&#xa0;Inpainting</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="619"/>
+        <location filename="../ui/mainwindowbars.py" line="620"/>
         <source>Enable text detection, OCR, translation, and inpainting.</source>
         <translation>Activez la détection de texte, l&apos;OCR, la traduction et l&apos;inpainting.</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="620"/>
+        <location filename="../ui/mainwindowbars.py" line="621"/>
         <source>Enable only text detection. OCR, translation, and inpainting are disabled.</source>
         <translation>Activez uniquement la détection de texte. L&apos;OCR, la traduction et l&apos;inpainting sont désactivés.</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="621"/>
+        <location filename="../ui/mainwindowbars.py" line="622"/>
         <source>Enable only OCR for existing text regions.</source>
         <translation>Activez uniquement l&apos;OCR pour les zones de texte existantes.</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="622"/>
+        <location filename="../ui/mainwindowbars.py" line="623"/>
         <source>Enable only translation for existing source text.</source>
         <translation>Activer uniquement la traduction pour le texte source existant.</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="623"/>
+        <location filename="../ui/mainwindowbars.py" line="624"/>
         <source>Enable only inpainting for existing regions.</source>
         <translation>Activez uniquement l&apos;inpainting pour les régions existantes.</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="624"/>
+        <location filename="../ui/mainwindowbars.py" line="625"/>
         <source>After normal inpainting, detect leftover text on the inpainted page and run a second repair pass.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="629"/>
+        <location filename="../ui/mainwindowbars.py" line="630"/>
         <source>Run without updating text style</source>
         <translation>Exécuter sans mettre à jour le style du texte</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="630"/>
+        <location filename="../ui/mainwindowbars.py" line="631"/>
         <source>Translate Page</source>
         <translation>Page de traduction</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="631"/>
+        <location filename="../ui/mainwindowbars.py" line="632"/>
         <source>Gloss Scan Current Manga</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="632"/>
+        <location filename="../ui/mainwindowbars.py" line="633"/>
         <source>Review Current Page</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="633"/>
+        <location filename="../ui/mainwindowbars.py" line="634"/>
         <source>Review All Pages</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="634"/>
+        <location filename="../ui/mainwindowbars.py" line="635"/>
         <source>Translation Benchmark</source>
         <translation>Référence de traduction</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="635"/>
+        <location filename="../ui/mainwindowbars.py" line="636"/>
         <source>Detect text and run OCR on the current manga, then build a reusable glossary without translation or inpainting.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="636"/>
+        <location filename="../ui/mainwindowbars.py" line="637"/>
         <source>Review and correct existing translations on the current page with the active LLM translator settings.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="637"/>
+        <location filename="../ui/mainwindowbars.py" line="638"/>
         <source>Review and correct existing translations on all non-ignored pages with the active LLM translator settings.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="638"/>
+        <location filename="../ui/mainwindowbars.py" line="639"/>
         <source>Compare the current page translation with multiple translators or LLM configurations in a side-by-side table.</source>
         <translation>Comparez la traduction de la page actuelle avec plusieurs traducteurs ou configurations LLM dans un tableau côte à côte.</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="685"/>
+        <location filename="../ui/mainwindowbars.py" line="686"/>
         <source>Minimize window</source>
         <translation>Réduire la fenêtre</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="689"/>
+        <location filename="../ui/mainwindowbars.py" line="690"/>
         <source>Maximize or restore window</source>
         <translation>Agrandir ou restaurer la fenêtre</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="694"/>
+        <location filename="../ui/mainwindowbars.py" line="695"/>
         <source>Close window</source>
         <translation>Fermer la fenêtre</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="805"/>
+        <location filename="../ui/mainwindowbars.py" line="806"/>
         <source>{current}/{total} pages</source>
         <translation>{current}/{total} pages</translation>
     </message>
@@ -4324,13 +4488,13 @@ qipao,qipao2</translation>
     </message>
     <message>
         <location filename="../ui/translation_benchmark.py" line="176"/>
-        <location filename="../ui/translation_benchmark.py" line="323"/>
+        <location filename="../ui/translation_benchmark.py" line="324"/>
         <source>#</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/translation_benchmark.py" line="176"/>
-        <location filename="../ui/translation_benchmark.py" line="323"/>
+        <location filename="../ui/translation_benchmark.py" line="324"/>
         <source>Source</source>
         <translation>Source</translation>
     </message>
@@ -4420,42 +4584,42 @@ qipao,qipao2</translation>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/translation_benchmark.py" line="319"/>
+        <location filename="../ui/translation_benchmark.py" line="320"/>
         <source>Select at least one translator.</source>
         <translation>Sélectionnez au moins un traducteur.</translation>
     </message>
     <message>
-        <location filename="../ui/translation_benchmark.py" line="327"/>
+        <location filename="../ui/translation_benchmark.py" line="328"/>
         <source>Running ...</source>
         <translation>En cours d&apos;exécution ...</translation>
     </message>
     <message>
-        <location filename="../ui/translation_benchmark.py" line="353"/>
+        <location filename="../ui/translation_benchmark.py" line="354"/>
         <source>Enter at least one model for the model matrix.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/translation_benchmark.py" line="362"/>
+        <location filename="../ui/translation_benchmark.py" line="363"/>
         <source>Select LLM, Two-Step, or both.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/translation_benchmark.py" line="409"/>
+        <location filename="../ui/translation_benchmark.py" line="410"/>
         <source>Model matrix benchmark saved: {summary_path}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/translation_benchmark.py" line="416"/>
+        <location filename="../ui/translation_benchmark.py" line="417"/>
         <source>Model matrix benchmark failed: {message}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/translation_benchmark.py" line="420"/>
+        <location filename="../ui/translation_benchmark.py" line="421"/>
         <source>Benchmark is still running. Wait for it to finish before closing.</source>
         <translation>Le benchmark est toujours en cours d&apos;exécution. Attendez qu&apos;il soit terminé avant de fermer.</translation>
     </message>
     <message>
-        <location filename="../ui/translation_benchmark.py" line="424"/>
+        <location filename="../ui/translation_benchmark.py" line="425"/>
         <source>Model matrix benchmark is still running. Wait for it to finish before closing.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4463,52 +4627,52 @@ qipao,qipao2</translation>
 <context>
     <name>TranslatorConfigPanel</name>
     <message>
-        <location filename="../ui/module_parse_widgets.py" line="417"/>
+        <location filename="../ui/module_parse_widgets.py" line="770"/>
         <source>Language expected in the detected source text.</source>
         <translation>Langue attendue dans le texte source détecté.</translation>
     </message>
     <message>
-        <location filename="../ui/module_parse_widgets.py" line="418"/>
+        <location filename="../ui/module_parse_widgets.py" line="771"/>
         <source>Language used for translated output.</source>
         <translation>Langue utilisée pour la sortie traduite.</translation>
     </message>
     <message>
-        <location filename="../ui/module_parse_widgets.py" line="419"/>
+        <location filename="../ui/module_parse_widgets.py" line="772"/>
         <source>Keyword substitution for machine translation source text</source>
         <translation>Substitution de mots-clés pour le texte source de la traduction auto</translation>
     </message>
     <message>
-        <location filename="../ui/module_parse_widgets.py" line="420"/>
+        <location filename="../ui/module_parse_widgets.py" line="773"/>
         <source>Configure replacements that run before machine translation reads the source text.</source>
         <translation>Configurez les remplacements qui s&apos;exécutent avant que la traduction automatique ne lise le texte source.</translation>
     </message>
     <message>
-        <location filename="../ui/module_parse_widgets.py" line="423"/>
+        <location filename="../ui/module_parse_widgets.py" line="776"/>
         <source>Keyword substitution for machine translation</source>
         <translation>Substitution de mots-clés pour la traduction auto</translation>
     </message>
     <message>
-        <location filename="../ui/module_parse_widgets.py" line="424"/>
+        <location filename="../ui/module_parse_widgets.py" line="777"/>
         <source>Configure replacements that run on machine translation output.</source>
         <translation>Configurez les remplacements qui s&apos;exécutent sur la sortie de traduction automatique.</translation>
     </message>
     <message>
-        <location filename="../ui/module_parse_widgets.py" line="427"/>
+        <location filename="../ui/module_parse_widgets.py" line="780"/>
         <source>Keyword substitution for source text</source>
         <translation>Substitution de mots-clés pour le texte source</translation>
     </message>
     <message>
-        <location filename="../ui/module_parse_widgets.py" line="428"/>
+        <location filename="../ui/module_parse_widgets.py" line="781"/>
         <source>Configure replacements that run on OCR/source text before translation.</source>
         <translation>Configurez les remplacements qui s&apos;exécutent sur l&apos;OCR/le texte source avant la traduction.</translation>
     </message>
     <message>
-        <location filename="../ui/module_parse_widgets.py" line="431"/>
+        <location filename="../ui/module_parse_widgets.py" line="784"/>
         <source>Translate each text block individually</source>
         <translation>Traduire chaque bloc de texte individuellement</translation>
     </message>
     <message>
-        <location filename="../ui/module_parse_widgets.py" line="432"/>
+        <location filename="../ui/module_parse_widgets.py" line="785"/>
         <source>Translate every detected text block as a separate request instead of batching them together. This can improve isolation for providers that struggle with batches, but it usually slows translation because it creates many more requests.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4517,12 +4681,12 @@ qipao,qipao2</translation>
         <translation type="vanished">Traduisez chaque bloc de texte détecté sous forme de requête distincte au lieu de les regrouper.</translation>
     </message>
     <message>
-        <location filename="../ui/module_parse_widgets.py" line="438"/>
+        <location filename="../ui/module_parse_widgets.py" line="791"/>
         <source>Source</source>
         <translation>Source</translation>
     </message>
     <message>
-        <location filename="../ui/module_parse_widgets.py" line="440"/>
+        <location filename="../ui/module_parse_widgets.py" line="793"/>
         <source>Target</source>
         <translation>Cible</translation>
     </message>
@@ -4530,52 +4694,52 @@ qipao,qipao2</translation>
 <context>
     <name>TranslatorSelectionWidget</name>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="880"/>
+        <location filename="../ui/mainwindowbars.py" line="881"/>
         <source>Translate</source>
         <translation>Traduire</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="881"/>
+        <location filename="../ui/mainwindowbars.py" line="882"/>
         <source>Open translator settings.</source>
         <translation>Ouvrez les paramètres du traducteur.</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="883"/>
+        <location filename="../ui/mainwindowbars.py" line="884"/>
         <source>Source</source>
         <translation>Source</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="884"/>
+        <location filename="../ui/mainwindowbars.py" line="885"/>
         <source>Open source language settings.</source>
         <translation>Paramètres de langue open source.</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="886"/>
+        <location filename="../ui/mainwindowbars.py" line="887"/>
         <source>Target</source>
         <translation>Cible</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="887"/>
+        <location filename="../ui/mainwindowbars.py" line="888"/>
         <source>Open target language settings.</source>
         <translation>Ouvrez les paramètres de langue cible.</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="891"/>
+        <location filename="../ui/mainwindowbars.py" line="892"/>
         <source>Select translator module.</source>
         <translation>Sélectionnez le module de traduction.</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="893"/>
+        <location filename="../ui/mainwindowbars.py" line="894"/>
         <source>Source language.</source>
         <translation>Langue source.</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="895"/>
+        <location filename="../ui/mainwindowbars.py" line="896"/>
         <source>Target language.</source>
         <translation>Langue cible.</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindowbars.py" line="897"/>
+        <location filename="../ui/mainwindowbars.py" line="898"/>
         <source>Configure translator module.</source>
         <translation>Configurez le module de traduction.</translation>
     </message>

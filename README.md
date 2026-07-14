@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README_EN.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.93`
+Fork release: `1.4.0-vibe.94`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -310,7 +310,7 @@ The `Two-Step Translator` first creates Google, DeepL Free, or DeepL draft trans
 
 When `Ollama` is selected, translation, refinement, reflection, and glossary calls use Ollama's native `/api/chat` endpoint. The default endpoint is `http://127.0.0.1:11434/v1`; URLs ending in `/v1` or `/api/chat` are normalized automatically. This Ollama default is ignored when another provider is selected, so OpenAI, Gemini, Google, Grok, and OpenRouter retain their provider defaults. Set `num ctx` in translator settings to pass an explicit `options.num_ctx` context window; leave it at `0` to retain the Ollama server default.
 
-The `Installed Ollama models` panel is available in `LLM_API_Translator`, `LLM_API_Translator_2`, and `Two-Step Translator`. `Refresh models` queries the configured server's `/api/tags` endpoint asynchronously. Each returned model can be marked as a favorite and rated from 1 to 5; these values are stored under `ollama model preferences` in that translator profile inside `config.json`. Favorites and higher-rated models appear first after refreshing. Select a row and use `Use selected model`, or double-click it, to set the Ollama override model for the profile.
+The `Installed Ollama models` panel is available in `LLM_API_Translator`, `LLM_API_Translator_2`, and `Two-Step Translator`. `Refresh models` queries the configured server's `/api/tags` endpoint asynchronously. Each returned model can be marked as a favorite and rated from 1 to 5; these values are stored under `ollama model preferences` in that translator profile inside `config.json`. Favorites and higher-rated models appear first after refreshing. Select a row and use `Use selected model`, or double-click it, to set the Ollama override model for the profile. Selected rows use a high-contrast foreground/background pair across the model, favorite, and rating cells, and those controls expose model-specific accessible names to assistive technology.
 
 `request timeout` controls how long one LLM API call may run before it is treated as failed. Local reasoning models can exceed the old fixed 120-second limit when `reasoning`, `reflection`, automatic glossary extraction, high `max tokens`, or large `num ctx` values are enabled. For a remote Ollama server, keep the model endpoint in Settings, for example `http://10.10.13.1:11434/v1/`; the app normalizes it to the native Ollama API internally. If a reasoning model such as Qwen3.5/Gemma times out, raise `request timeout` to 300-600 seconds, reduce `max tokens` to 2048-4096 for translation, disable unnecessary review/glossary passes, or use `review speed mode` to combine or skip extra review requests.
 
