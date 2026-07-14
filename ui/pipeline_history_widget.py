@@ -4,6 +4,7 @@ from qtpy.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QAbstractItemView,
+    QMenu,
     QPushButton,
     QTableWidget,
     QTableWidgetItem,
@@ -39,8 +40,22 @@ class PipelineHistoryWindow(QDialog):
         self.refresh_button = QPushButton(self.tr('Refresh'))
         self.refresh_button.clicked.connect(self.refresh)
 
+        self.columns_button = QPushButton(self.tr('Columns'))
+        self.columns_menu = QMenu(self.columns_button)
+        self.column_actions = []
+        for column, header in enumerate(self.HEADERS):
+            action = self.columns_menu.addAction(self.tr(header))
+            action.setCheckable(True)
+            action.setChecked(True)
+            action.toggled.connect(
+                lambda visible, index=column: self.table.setColumnHidden(index, not visible)
+            )
+            self.column_actions.append(action)
+        self.columns_button.setMenu(self.columns_menu)
+
         top_layout = QHBoxLayout()
         top_layout.addWidget(self.path_label, 1)
+        top_layout.addWidget(self.columns_button)
         top_layout.addWidget(self.refresh_button)
 
         self.table = QTableWidget(0, len(self.HEADERS))

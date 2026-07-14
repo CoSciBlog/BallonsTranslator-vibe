@@ -4,6 +4,8 @@
 
 ### Added
 
+- Per-step runtime measurements for Text Detection, OCR, Translate, and Inpaint in new pipeline-history entries.
+- A Columns menu in Pipeline History for showing or hiding individual table columns.
 - Clickable Model, Reasoning, and Rating headers in installed Ollama model tables, with ascending/descending sorting and a visible direction arrow.
 - Combined installed-Ollama-model filters for parameter size (for example 12B or 27B), reasoning capability, and minimum personal rating alongside the existing name search.
 - Optional, separately configured fallback OCR settings for retrying empty regions and handling primary OCR failures or source-language incompatibility.
@@ -107,6 +109,8 @@
 
 ### Changed
 
+- Updated `pipeline_history.json` to schema version 3 while retaining read compatibility with existing history files.
+- Bumped the fork runtime version string to `1.4.0-vibe.104`.
 - Bumped the fork runtime version string to `1.4.0-vibe.103`.
 - Bumped the fork runtime version string to `1.4.0-vibe.102`.
 - Fallback OCR now retries only empty text regions after a successful primary pass instead of requiring the entire page to be empty.

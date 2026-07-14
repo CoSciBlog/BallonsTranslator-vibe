@@ -214,6 +214,7 @@ class TranslateThread(ModuleThread):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__('translator', TRANSLATORS, *args, **kwargs)
         self.translator: BaseTranslator = self.module
+        self.pipeline_duration_seconds = 0.0
 
     def _set_translator(self, translator: str):
         
@@ -288,11 +289,13 @@ class TranslateThread(ModuleThread):
 
     def runTranslatePipeline(self, imgtrans_proj: ProjImgTrans):
         self.initImgtransPipeline(imgtrans_proj)
+        self.pipeline_duration_seconds = 0.0
         self.job = self._run_translate_pipeline
         self.start()
 
     def runPretranslatePipeline(self, imgtrans_proj: ProjImgTrans):
         self.initImgtransPipeline(imgtrans_proj)
+        self.pipeline_duration_seconds = 0.0
         self.job = self._run_pretranslate_pipeline
         self.start()
 
@@ -311,10 +314,13 @@ class TranslateThread(ModuleThread):
                 continue
 
             page_key = self.pipeline_pagekey_queue.pop(0)
+            started = time.perf_counter()
             try:
                 self.translator.pretranslate_textblk_lst(self.imgtrans_proj.pages[page_key])
             except Exception as e:
                 LOGGER.warning(f'Background first-step translation failed for {page_key}: {e}')
+            finally:
+                self.pipeline_duration_seconds += time.perf_counter() - started
             self.finished_counter += 1
 
 
@@ -334,6 +340,7 @@ class TranslateThread(ModuleThread):
             page_key = self.pipeline_pagekey_queue.pop(0)
             self.blockSignals(True)
             trans_success = True
+            started = time.perf_counter()
             try:
                 self._translate_page(self.imgtrans_proj.pages, page_key, emit_finished=False)
             except Exception as e:
@@ -349,6 +356,8 @@ class TranslateThread(ModuleThread):
                 # self.finished_counter = 0
                 # self.pipeline_pagekey_queue = []
                 # return
+            finally:
+                self.pipeline_duration_seconds += time.perf_counter() - started
             self.blockSignals(False)
             self.finished_counter += 1
             if trans_success:
@@ -404,6 +413,30 @@ class ImgtransThread(QThread):
         self.decensor_only = False
         self.inpaint_optimization_only = False
         self.blktrans_page_key = None
+        self.stage_duration_seconds = self._empty_stage_durations()
+
+    @staticmethod
+    def _empty_stage_durations() -> Dict[str, float]:
+        return {
+            'text_detection': 0.0,
+            'ocr': 0.0,
+            'translate': 0.0,
+            'inpaint': 0.0,
+        }
+
+    def _reset_stage_durations(self):
+        self.stage_duration_seconds = self._empty_stage_durations()
+        self.translate_thread.pipeline_duration_seconds = 0.0
+
+    def _add_stage_duration(self, stage: str, started: float):
+        self.stage_duration_seconds[stage] += max(0.0, time.perf_counter() - started)
+
+    def _timed_stage_call(self, stage: str, operation: Callable, *args, **kwargs):
+        started = time.perf_counter()
+        try:
+            return operation(*args, **kwargs)
+        finally:
+            self._add_stage_duration(stage, started)
 
     def on_module_thread_stopped(self):
         while True:
@@ -551,6 +584,7 @@ class ImgtransThread(QThread):
             self._clear_translator_page_context()
 
     def runImgtransPipeline(self, imgtrans_proj: ProjImgTrans, pages_to_process=None):
+        self._reset_stage_durations()
         self.imgtrans_proj = imgtrans_proj
         self.pages_to_process = pages_to_process  # 保存需要处理的页面列表
         self.num_pages = len(self.imgtrans_proj.pages)
@@ -565,6 +599,7 @@ class ImgtransThread(QThread):
         self.start()
 
     def runTranslateOnlyPipeline(self, imgtrans_proj: ProjImgTrans, pages_to_process=None):
+        self._reset_stage_durations()
         self.imgtrans_proj = imgtrans_proj
         self.pages_to_process = pages_to_process
         self.num_pages = len(self.imgtrans_proj.pages)
@@ -578,6 +613,7 @@ class ImgtransThread(QThread):
         self.start()
 
     def runReviewPipeline(self, imgtrans_proj: ProjImgTrans, pages_to_process=None):
+        self._reset_stage_durations()
         self.imgtrans_proj = imgtrans_proj
         self.pages_to_process = pages_to_process
         self.num_pages = len(self.imgtrans_proj.pages)
@@ -591,6 +627,7 @@ class ImgtransThread(QThread):
         self.start()
 
     def runDecensorPipeline(self, imgtrans_proj: ProjImgTrans, pages_to_process=None):
+        self._reset_stage_durations()
         self.imgtrans_proj = imgtrans_proj
         self.pages_to_process = pages_to_process
         self.num_pages = len(self.imgtrans_proj.pages)
@@ -604,6 +641,7 @@ class ImgtransThread(QThread):
         self.start()
 
     def runInpaintOptimizationPipeline(self, imgtrans_proj: ProjImgTrans, pages_to_process=None):
+        self._reset_stage_durations()
         self.imgtrans_proj = imgtrans_proj
         self.pages_to_process = pages_to_process
         self.num_pages = len(self.imgtrans_proj.pages)
@@ -827,7 +865,7 @@ class ImgtransThread(QThread):
             if self.stop_requested:
                 LOGGER.info('Inpaint optimization stopped by user')
                 break
-            self._optimize_inpaint_page(imgname)
+            self._timed_stage_call('inpaint', self._optimize_inpaint_page, imgname)
             self.inpaint_counter += 1
             self.imgtrans_proj.update_page_progress(imgname, RunStatus.FIN_INPAINT)
             self.update_inpaint_progress.emit(self.inpaint_counter)
@@ -890,6 +928,7 @@ class ImgtransThread(QThread):
             need_save_mask = False
             blk_removed: List[TextBlock] = []
             if cfg_module.enable_detect:
+                started = time.perf_counter()
                 try:
                     mask, blk_list = self.textdetector.detect(img, self.imgtrans_proj)
                     need_save_mask = True
@@ -910,12 +949,14 @@ class ImgtransThread(QThread):
                     need_save_mask = False
                     
                 self.imgtrans_proj.update_page_progress(imgname, RunStatus.FIN_DET)
+                self._add_stage_duration('text_detection', started)
                 self.update_detect_progress.emit(self.detect_counter)
 
             if blk_list is None:
                 blk_list = self.imgtrans_proj.pages[imgname] if imgname in self.imgtrans_proj.pages else []
 
             if cfg_module.enable_ocr:
+                started = time.perf_counter()
                 try:
                     self._run_ocr_with_fallback(img, blk_list)
                 except Exception as e:
@@ -958,6 +999,7 @@ class ImgtransThread(QThread):
                                 need_save_mask = False
 
                 self.imgtrans_proj.update_page_progress(imgname, RunStatus.FIN_OCR)
+                self._add_stage_duration('ocr', started)
                 self.update_ocr_progress.emit(self.ocr_counter)
 
             if need_save_mask and mask is not None:
@@ -970,11 +1012,14 @@ class ImgtransThread(QThread):
                 elif self.parallel_trans:
                     self.translate_thread.push_pagekey_queue(imgname)
                 elif not low_vram_trans and not translate_after_image_processing:
-                    self._translate_textblocks(imgname, blk_list)
+                    self._timed_stage_call(
+                        'translate', self._translate_textblocks, imgname, blk_list
+                    )
                     self.translate_counter += 1
                     self.update_translate_progress.emit(self.translate_counter)
                         
             if cfg_module.enable_inpaint:
+                started = time.perf_counter()
                 if mask is None:
                     mask = self.imgtrans_proj.load_mask_by_imgname(imgname)
                     
@@ -989,6 +1034,7 @@ class ImgtransThread(QThread):
                     
                 self.inpaint_counter += 1
                 self.imgtrans_proj.update_page_progress(imgname, RunStatus.FIN_INPAINT)
+                self._add_stage_duration('inpaint', started)
                 self.update_inpaint_progress.emit(self.inpaint_counter)
             else:
                 if len(blk_removed) > 0:
@@ -1016,7 +1062,9 @@ class ImgtransThread(QThread):
                     break
                     
                 blk_list = self.imgtrans_proj.pages[imgname]
-                self._translate_textblocks(imgname, blk_list)
+                self._timed_stage_call(
+                    'translate', self._translate_textblocks, imgname, blk_list
+                )
                 self.translate_counter += 1
                 self.imgtrans_proj.update_page_progress(imgname, RunStatus.FIN_TRANSLATE)
                 self.update_translate_progress.emit(self.translate_counter)
@@ -1048,7 +1096,9 @@ class ImgtransThread(QThread):
 
             blk_list = self.imgtrans_proj.pages.get(imgname, [])
             if len(blk_list) > 0:
-                self._translate_textblocks(imgname, blk_list)
+                self._timed_stage_call(
+                    'translate', self._translate_textblocks, imgname, blk_list
+                )
             self.translate_counter += 1
             self.imgtrans_proj.update_page_progress(imgname, RunStatus.FIN_TRANSLATE)
             self.update_translate_progress.emit(self.translate_counter)
@@ -1080,7 +1130,9 @@ class ImgtransThread(QThread):
 
             blk_list = self.imgtrans_proj.pages.get(imgname, [])
             if len(blk_list) > 0:
-                self._review_textblocks(imgname, blk_list)
+                self._timed_stage_call(
+                    'translate', self._review_textblocks, imgname, blk_list
+                )
             self.translate_counter += 1
             self.imgtrans_proj.update_page_progress(imgname, RunStatus.FIN_TRANSLATE)
             self.update_translate_progress.emit(self.translate_counter)
@@ -1406,6 +1458,17 @@ class ModuleManager(QObject):
             for step, label, stage_key, module_key in definitions
         ]
 
+    def _pipeline_history_stage_durations(self) -> Dict[str, float]:
+        durations = dict(getattr(self.imgtrans_thread, 'stage_duration_seconds', {}) or {})
+        durations['translate'] = (
+            float(durations.get('translate', 0.0) or 0.0)
+            + float(getattr(self.translate_thread, 'pipeline_duration_seconds', 0.0) or 0.0)
+        )
+        return {
+            step: round(max(0.0, float(durations.get(step, 0.0) or 0.0)), 3)
+            for step in ('text_detection', 'ocr', 'translate', 'inpaint')
+        }
+
     def _start_pipeline_history(self, pipeline_name: str, pages_to_process, process_pages: List[str]):
         self.active_pipeline_started_at = time.time()
         stages = self._pipeline_history_stages(pipeline_name)
@@ -1438,9 +1501,11 @@ class ModuleManager(QObject):
                 stages = entry.get('stages', stages)
                 break
         steps = self._pipeline_history_steps(stages, modules)
+        durations = self._pipeline_history_stage_durations()
         for step in steps:
             if step['enabled']:
                 step['status'] = status
+                step['duration_seconds'] = durations[step['step']]
         updates = {
             'status': status,
             'finished_at': ProjImgTrans.utc_now_iso(),
