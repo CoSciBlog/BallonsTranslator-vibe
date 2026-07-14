@@ -2,7 +2,10 @@ import unittest
 
 from utils.ollama import (
     OLLAMA_DEFAULT_ENDPOINT,
+    ollama_model_matches_filters,
     ollama_model_matches_query,
+    ollama_model_parameter_size,
+    ollama_parameter_size_sort_key,
     ollama_show_endpoint,
     ollama_tags_endpoint,
     ollama_thinking_capability,
@@ -15,6 +18,32 @@ class OllamaModelPreferencesTest(unittest.TestCase):
         self.assertTrue(ollama_model_matches_query('Gemma3:12B-Latest', 'gemma 12b'))
         self.assertTrue(ollama_model_matches_query('qwen3.5:27b', 'QWEN3.5'))
         self.assertFalse(ollama_model_matches_query('gemma3:12b', 'gemma 27b'))
+
+    def test_parameter_size_is_read_from_name_or_declared_metadata(self):
+        self.assertEqual(ollama_model_parameter_size('gemma4:12b'), '12B')
+        self.assertEqual(ollama_model_parameter_size('qwen3:30b-a3b'), '30B')
+        self.assertEqual(ollama_model_parameter_size('embedding:335m'), '335M')
+        self.assertEqual(ollama_model_parameter_size('custom:latest', '27.0B'), '27B')
+        self.assertEqual(
+            sorted(['27B', '335M', '1.5B', '12B'], key=ollama_parameter_size_sort_key),
+            ['335M', '1.5B', '12B', '27B'],
+        )
+
+    def test_model_filters_can_be_combined(self):
+        values = dict(
+            model_name='gemma4:12b-thinking',
+            query='gemma',
+            model_parameter_size='12B',
+            parameter_size_filter='12b',
+            reasoning_status='yes',
+            reasoning_filter='yes',
+            rating=4,
+            minimum_rating=4,
+        )
+        self.assertTrue(ollama_model_matches_filters(**values))
+        self.assertFalse(ollama_model_matches_filters(**{**values, 'parameter_size_filter': '27B'}))
+        self.assertFalse(ollama_model_matches_filters(**{**values, 'reasoning_filter': 'no'}))
+        self.assertFalse(ollama_model_matches_filters(**{**values, 'minimum_rating': 5}))
 
     def test_default_tags_endpoint(self):
         self.assertEqual(

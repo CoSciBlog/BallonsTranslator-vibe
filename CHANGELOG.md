@@ -4,6 +4,7 @@
 
 ### Added
 
+- Combined installed-Ollama-model filters for parameter size (for example 12B or 27B), reasoning capability, and minimum personal rating alongside the existing name search.
 - Optional, separately configured fallback OCR settings for retrying empty regions and handling primary OCR failures or source-language incompatibility.
 - Thinking/reasoning capability status in installed Ollama model lists, populated from each model's native `/api/show` metadata.
 - An opt-in pipeline completion alert that plays a short system sound and shows a Windows notification after successful pipeline or full GUI batch completion.
@@ -105,6 +106,7 @@
 
 ### Changed
 
+- Bumped the fork runtime version string to `1.4.0-vibe.102`.
 - Fallback OCR now retries only empty text regions after a successful primary pass instead of requiring the entire page to be empty.
 - Bumped the fork runtime version string to `1.4.0-vibe.101`.
 - Improved Ollama model-list hover and selected-row colors so model names, reasoning status, favorites, and ratings remain readable.

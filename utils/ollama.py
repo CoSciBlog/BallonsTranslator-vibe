@@ -1,3 +1,6 @@
+import re
+
+
 OLLAMA_DEFAULT_ENDPOINT = 'http://127.0.0.1:11434/v1'
 
 
@@ -5,6 +8,57 @@ def ollama_model_matches_query(model_name: str, query: str = '') -> bool:
     name = str(model_name or '').casefold()
     terms = str(query or '').casefold().split()
     return all(term in name for term in terms)
+
+
+def ollama_model_parameter_size(model_name: str = '', declared_size: str = '') -> str:
+    """Return a normalized parameter-size label such as 12B, 1.5B, or 335M."""
+    pattern = re.compile(r'(?<![\d.])(\d+(?:\.\d+)?)\s*([mMbB])(?![A-Za-z])')
+    for value in (model_name, declared_size):
+        match = pattern.search(str(value or ''))
+        if match:
+            number = float(match.group(1))
+            display = str(int(number)) if number.is_integer() else f'{number:g}'
+            return f'{display}{match.group(2).upper()}'
+    return ''
+
+
+def ollama_parameter_size_sort_key(size: str):
+    normalized = ollama_model_parameter_size(declared_size=size)
+    if not normalized:
+        return (1, float('inf'), str(size).casefold())
+    value = float(normalized[:-1])
+    if normalized.endswith('M'):
+        value /= 1000
+    return (0, value, normalized.casefold())
+
+
+def ollama_model_matches_filters(
+    model_name: str,
+    query: str = '',
+    model_parameter_size: str = '',
+    parameter_size_filter: str = '',
+    reasoning_status: str = 'unknown',
+    reasoning_filter: str = '',
+    rating: int = 3,
+    minimum_rating: int = 0,
+) -> bool:
+    if not ollama_model_matches_query(model_name, query):
+        return False
+    if parameter_size_filter:
+        actual_size = ollama_model_parameter_size(
+            model_name=model_parameter_size or model_name
+        )
+        expected_size = ollama_model_parameter_size(declared_size=parameter_size_filter)
+        if actual_size != expected_size:
+            return False
+    if reasoning_filter and str(reasoning_status).casefold() != str(reasoning_filter).casefold():
+        return False
+    try:
+        if int(rating) < int(minimum_rating):
+            return False
+    except (TypeError, ValueError):
+        return False
+    return True
 
 
 def ollama_base_url(endpoint: str = '') -> str:

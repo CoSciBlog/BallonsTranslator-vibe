@@ -11,7 +11,9 @@ from utils.shared import CONFIG_COMBOBOX_LONG, size2width, CONFIG_COMBOBOX_SHORT
 from utils.config import pcfg, sample_module_param_value
 from utils.ollama import (
     OLLAMA_DEFAULT_ENDPOINT,
-    ollama_model_matches_query,
+    ollama_model_matches_filters,
+    ollama_model_parameter_size,
+    ollama_parameter_size_sort_key,
     ollama_show_endpoint,
     ollama_tags_endpoint,
     ollama_thinking_capability,
@@ -209,10 +211,45 @@ class OllamaModelManager(QWidget):
         self.search_edit.setPlaceholderText(self.tr('Filter by model name...'))
         self.search_edit.setClearButtonEnabled(True)
         self.search_edit.setAccessibleName(self.tr('Search installed Ollama models'))
-        self.search_edit.setFixedWidth(CONFIG_FIELD_WIDE)
+        self.search_edit.setMinimumWidth(260)
         search_label.setBuddy(self.search_edit)
-        layout.addWidget(search_label)
-        layout.addWidget(self.search_edit)
+
+        size_label = QLabel(self.tr('Parameter size'))
+        self.size_filter = QComboBox()
+        self.size_filter.addItem(self.tr('All sizes'), '')
+        self.size_filter.setAccessibleName(self.tr('Filter models by parameter size'))
+        size_label.setBuddy(self.size_filter)
+
+        reasoning_label = QLabel(self.tr('Reasoning'))
+        self.reasoning_filter = QComboBox()
+        self.reasoning_filter.addItem(self.tr('All'), '')
+        self.reasoning_filter.addItem(self.tr('Yes'), 'yes')
+        self.reasoning_filter.addItem(self.tr('No'), 'no')
+        self.reasoning_filter.addItem(self.tr('Unknown'), 'unknown')
+        self.reasoning_filter.setAccessibleName(self.tr('Filter models by reasoning capability'))
+        reasoning_label.setBuddy(self.reasoning_filter)
+
+        rating_label = QLabel(self.tr('Minimum rating'))
+        self.rating_filter = QComboBox()
+        self.rating_filter.addItem(self.tr('All ratings'), 0)
+        for rating_value in range(1, 6):
+            self.rating_filter.addItem(f'{rating_value}+', rating_value)
+        self.rating_filter.setAccessibleName(self.tr('Filter models by minimum rating'))
+        rating_label.setBuddy(self.rating_filter)
+
+        filters = QGridLayout()
+        filters.setHorizontalSpacing(12)
+        filters.setVerticalSpacing(4)
+        filters.addWidget(search_label, 0, 0)
+        filters.addWidget(size_label, 0, 1)
+        filters.addWidget(reasoning_label, 0, 2)
+        filters.addWidget(rating_label, 0, 3)
+        filters.addWidget(self.search_edit, 1, 0)
+        filters.addWidget(self.size_filter, 1, 1)
+        filters.addWidget(self.reasoning_filter, 1, 2)
+        filters.addWidget(self.rating_filter, 1, 3)
+        filters.setColumnStretch(0, 1)
+        layout.addLayout(filters)
         layout.addWidget(self.status_label)
 
         self.table = QTableWidget(0, 4)
@@ -265,6 +302,9 @@ class OllamaModelManager(QWidget):
         self.table.doubleClicked.connect(lambda _index: self.use_selected_model())
         self.table.itemSelectionChanged.connect(self._sync_selected_row_styles)
         self.search_edit.textChanged.connect(self._filter_models)
+        self.size_filter.currentIndexChanged.connect(self._filter_models)
+        self.reasoning_filter.currentIndexChanged.connect(self._filter_models)
+        self.rating_filter.currentIndexChanged.connect(self._filter_models)
         self._update_availability()
 
     @staticmethod
@@ -301,6 +341,9 @@ class OllamaModelManager(QWidget):
             enabled and self._reply is None and self._capability_reply is None
         )
         self.search_edit.setEnabled(enabled)
+        self.size_filter.setEnabled(enabled)
+        self.reasoning_filter.setEnabled(enabled)
+        self.rating_filter.setEnabled(enabled)
         self.use_button.setEnabled(enabled and self._visible_model_count() > 0)
         if not enabled:
             self.status_label.setText(self.tr('Select Ollama as provider.'))
@@ -343,7 +386,15 @@ class OllamaModelManager(QWidget):
                 name: ollama_thinking_capability(model.get('capabilities'))
                 for name, model in model_map.items()
             }
-            self._set_models(names, declared)
+            parameter_sizes = {}
+            for name in names:
+                details = model_map[name].get('details')
+                declared_size = (
+                    details.get('parameter_size', '')
+                    if isinstance(details, dict) else ''
+                )
+                parameter_sizes[name] = ollama_model_parameter_size(name, declared_size)
+            self._set_models(names, declared, parameter_sizes)
             self._start_capability_queries(
                 [name for name in names if declared.get(name) is None]
             )
@@ -356,8 +407,9 @@ class OllamaModelManager(QWidget):
             reply.deleteLater()
             self._update_availability()
 
-    def _set_models(self, names, reasoning_statuses=None):
+    def _set_models(self, names, reasoning_statuses=None, parameter_sizes=None):
         reasoning_statuses = reasoning_statuses or {}
+        parameter_sizes = parameter_sizes or {}
         for name in names:
             self.preferences.setdefault(name, {'favorite': False, 'rating': 3})
         ordered = sorted(
@@ -387,6 +439,10 @@ class OllamaModelManager(QWidget):
             model_item = QTableWidgetItem(name)
             model_item.setToolTip(name)
             model_item.setData(Qt.ItemDataRole.AccessibleTextRole, name)
+            model_item.setData(
+                Qt.ItemDataRole.UserRole,
+                parameter_sizes.get(name) or ollama_model_parameter_size(name),
+            )
             self.table.setItem(row, 1, model_item)
 
             reasoning_item = QTableWidgetItem()
@@ -403,6 +459,10 @@ class OllamaModelManager(QWidget):
             )
             self.table.setCellWidget(row, 3, rating)
         self._updating = False
+        self._set_parameter_size_options(
+            parameter_sizes.get(name) or ollama_model_parameter_size(name)
+            for name in ordered
+        )
         if ordered:
             self.table.selectRow(0)
         self._filter_models()
@@ -429,7 +489,28 @@ class OllamaModelManager(QWidget):
             item.setText(text)
             item.setToolTip(tooltip)
             item.setData(Qt.ItemDataRole.AccessibleTextRole, text)
+            item.setData(
+                Qt.ItemDataRole.UserRole,
+                'yes' if supported is True else 'no' if supported is False else 'unknown',
+            )
+            if not self._updating:
+                self._filter_models()
             return
+
+    def _set_parameter_size_options(self, sizes):
+        selected = self.size_filter.currentData()
+        normalized_sizes = sorted(
+            {size for size in sizes if size},
+            key=ollama_parameter_size_sort_key,
+        )
+        self.size_filter.blockSignals(True)
+        self.size_filter.clear()
+        self.size_filter.addItem(self.tr('All sizes'), '')
+        for size in normalized_sizes:
+            self.size_filter.addItem(size, size)
+        selected_index = self.size_filter.findData(selected)
+        self.size_filter.setCurrentIndex(max(0, selected_index))
+        self.size_filter.blockSignals(False)
 
     def _start_capability_queries(self, model_names):
         self._capability_queue = list(model_names)
@@ -493,12 +574,29 @@ class OllamaModelManager(QWidget):
 
     def _filter_models(self, _text=None):
         query = self.search_edit.text().strip()
+        parameter_size = str(self.size_filter.currentData() or '')
+        reasoning = str(self.reasoning_filter.currentData() or '')
+        minimum_rating = int(self.rating_filter.currentData() or 0)
+        filters_active = bool(query or parameter_size or reasoning or minimum_rating)
         first_visible = -1
         current_visible = False
         current_row = self.table.currentRow()
         for row in range(self.table.rowCount()):
             item = self.table.item(row, 1)
-            visible = item is not None and ollama_model_matches_query(item.text(), query)
+            reasoning_item = self.table.item(row, 2)
+            visible = item is not None and ollama_model_matches_filters(
+                item.text(),
+                query=query,
+                model_parameter_size=item.data(Qt.ItemDataRole.UserRole) or '',
+                parameter_size_filter=parameter_size,
+                reasoning_status=(
+                    reasoning_item.data(Qt.ItemDataRole.UserRole)
+                    if reasoning_item is not None else 'unknown'
+                ),
+                reasoning_filter=reasoning,
+                rating=self.preferences.get(item.text(), {}).get('rating', 3),
+                minimum_rating=minimum_rating,
+            )
             self.table.setRowHidden(row, not visible)
             if visible:
                 if first_visible < 0:
@@ -515,7 +613,7 @@ class OllamaModelManager(QWidget):
         enabled = str(self.provider_getter()).casefold() == 'ollama'
         self.use_button.setEnabled(enabled and visible_count > 0)
         if enabled and self._reply is None:
-            if query and total_count:
+            if filters_active and total_count:
                 self.status_label.setText(
                     self.tr('%d of %d installed model(s) shown.')
                     % (visible_count, total_count)
@@ -524,8 +622,8 @@ class OllamaModelManager(QWidget):
                 self.status_label.setText(
                     self.tr('%d installed model(s).') % total_count
                 )
-            elif query:
-                self.status_label.setText(self.tr('No installed models match the search.'))
+            elif filters_active:
+                self.status_label.setText(self.tr('No installed models match the active filters.'))
         self._sync_selected_row_styles()
 
     def _sync_selected_row_styles(self):
@@ -556,6 +654,7 @@ class OllamaModelManager(QWidget):
             return
         self.preferences[model]['rating'] = max(1, min(5, int(rating)))
         self.paramwidget_edited.emit(self.param_key, dict(self.preferences))
+        self._filter_models()
 
     def use_selected_model(self):
         row = self.table.currentRow()
