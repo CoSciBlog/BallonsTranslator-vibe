@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README_EN.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.106`
+Fork release: `1.4.0-vibe.107`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -24,6 +24,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Replaced the mixed-language root `README.md` with the English documentation and refreshed the English README for this fork.
 - Documented that translated output and some documentation assets are machine-translated and should be disclosed as such when redistributed.
 - Fixed `manga_ocr` startup with current Transformers releases by using the image processor API required by the local `manga-ocr-base` vision model.
+- Made `manga_ocr` output length rely only on its `max output characters` setting, avoiding conflicting Transformers `max_length` and `max_new_tokens` warnings.
 - Added an optional, separately configured fallback OCR in the OCR settings. It can retry individual empty regions or take over when the primary OCR fails or is incompatible with the selected source language.
 - Added a project glossary window, project-level glossary persistence in each project's `glossary.json`, and a custom glossary prompt for LLM translation guidance.
 - Added project-level pipeline history in `pipeline_history.json`, with a left-sidebar history window that lists the pipeline summary, Text Detection, OCR, Translate, and Inpaint in one compact Step column. Each step keeps its module/model values and measured duration, Ollama translation entries show whether reasoning was enabled, and a Columns menu controls which table fields are visible.

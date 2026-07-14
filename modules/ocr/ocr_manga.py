@@ -14,6 +14,9 @@ class MangaOcr:
         self.image_processor = AutoImageProcessor.from_pretrained(pretrained_model_name_or_path)
         self.tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path)
         self.model = VisionEncoderDecoderModel.from_pretrained(pretrained_model_name_or_path)
+        # The legacy model config supplies max_length=300, while this wrapper
+        # controls output length exclusively through max_new_tokens.
+        self.model.generation_config.max_length = None
         self.to(device)
         
     def to(self, device):
