@@ -63,6 +63,8 @@ class MessageBox(QMessageBox):
     
 
 class TaskProgressBar(Widget):
+    eta_changed = Signal(str)
+
     def __init__(self, description: str = '', verbose=False, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
@@ -106,8 +108,10 @@ class TaskProgressBar(Widget):
             if progress == 0:
                 self.verbose_label.setText('')
                 self.start_time = time.time()
+                self.eta_changed.emit('')
             elif progress == 100:
                 self.verbose_label.setText('')
+                self.eta_changed.emit('')
             else:
                 cur_time = time.time()
                 left_progress = 100 - progress
@@ -115,6 +119,7 @@ class TaskProgressBar(Widget):
                 eta = datetime.timedelta(seconds=int(round(eta)))
                 added_str = f'{progress}% ETA {eta}'
                 self.verbose_label.setText(added_str)
+                self.eta_changed.emit(f'ETA {eta}')
 
 
 class FrameLessMessageBox(QMessageBox):
@@ -167,6 +172,7 @@ class ImgtransProgressMessageBox(ProgressMessageBox):
     stop_clicked = Signal()
     force_stop_clicked = Signal()
     stop_all_clicked = Signal()
+    eta_changed = Signal(str)
     
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(None, *args, **kwargs)
@@ -178,6 +184,18 @@ class ImgtransProgressMessageBox(ProgressMessageBox):
         self.inpaint_bar = TaskProgressBar(self.tr('Inpainting: '), True, self)
         self.decensor_bar = TaskProgressBar(self.tr('Decensoring: '), True, self)
         self.translate_bar = TaskProgressBar(self.tr('Translating: '), True, self)
+        self._stage_etas = {}
+        for stage, bar in (
+            (self.tr('Projects'), self.batch_bar),
+            (self.tr('Detecting'), self.detect_bar),
+            (self.tr('OCR'), self.ocr_bar),
+            (self.tr('Inpainting'), self.inpaint_bar),
+            (self.tr('Decensoring'), self.decensor_bar),
+            (self.tr('Translating'), self.translate_bar),
+        ):
+            bar.eta_changed.connect(
+                lambda eta, stage_name=stage: self._on_stage_eta_changed(stage_name, eta)
+            )
 
         layout = self.layout()
         layout.addWidget(self.batch_bar)
@@ -207,6 +225,18 @@ class ImgtransProgressMessageBox(ProgressMessageBox):
         layout.addLayout(button_layout)
 
         self.setFixedWidth(self.sizeHint().width())
+
+    def _on_stage_eta_changed(self, stage: str, eta: str):
+        if eta:
+            self._stage_etas[stage] = eta
+            self.eta_changed.emit(f'{stage} {eta}')
+            return
+        self._stage_etas.pop(stage, None)
+        if self._stage_etas:
+            latest_stage = next(reversed(self._stage_etas))
+            self.eta_changed.emit(f'{latest_stage} {self._stage_etas[latest_stage]}')
+        else:
+            self.eta_changed.emit('')
     
     def on_stop_clicked(self):
         self.stop_clicked.emit()

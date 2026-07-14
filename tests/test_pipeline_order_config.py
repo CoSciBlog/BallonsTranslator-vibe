@@ -16,6 +16,15 @@ class PipelineOrderConfigTest(unittest.TestCase):
 
         self.assertTrue(saved['translate_after_image_processing'])
 
+    def test_pipeline_completion_notification_defaults_off_and_is_serialized(self):
+        self.assertFalse(ModuleConfig().pipeline_completion_notification)
+
+        saved = ModuleConfig(
+            pipeline_completion_notification=True
+        ).get_saving_params()
+
+        self.assertTrue(saved['pipeline_completion_notification'])
+
 
 if __name__ == '__main__':
     unittest.main()

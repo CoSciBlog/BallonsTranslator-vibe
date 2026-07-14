@@ -574,6 +574,16 @@ class ConfigPanel(QDialog):
         self.translate_after_image_processing_checker.stateChanged.connect(
             self.on_translate_after_image_processing_changed
         )
+        self.pipeline_completion_notification_checker, _ = generalConfigPanel.addCheckBox(
+            self.tr('Notify when pipeline finishes'),
+            discription=self.tr(
+                'Plays a short system sound and shows a Windows notification after a '
+                'pipeline or complete batch run finishes successfully.'
+            ),
+        )
+        self.pipeline_completion_notification_checker.stateChanged.connect(
+            self.on_pipeline_completion_notification_changed
+        )
 
         generalConfigPanel.addTextLabel(label_post_merge)
         self.post_merge_checker, _ = generalConfigPanel.addCheckBox(
@@ -1165,6 +1175,11 @@ class ConfigPanel(QDialog):
             self.translate_after_image_processing_checker.isChecked()
         )
 
+    def on_pipeline_completion_notification_changed(self):
+        pcfg.module.pipeline_completion_notification = (
+            self.pipeline_completion_notification_checker.isChecked()
+        )
+
     def on_pronoun_review_changed(self):
         pcfg.module.pronoun_review_after_translation = self.pronoun_review_checker.isChecked()
 
@@ -1309,6 +1324,9 @@ class ConfigPanel(QDialog):
         self.skip_cover_title_pages_checker.setChecked(pcfg.module.skip_cover_title_pages)
         self.translate_after_image_processing_checker.setChecked(
             pcfg.module.translate_after_image_processing
+        )
+        self.pipeline_completion_notification_checker.setChecked(
+            pcfg.module.pipeline_completion_notification
         )
         self.post_merge_checker.setChecked(pcfg.module.post_merge_textboxes)
         self.pronoun_review_checker.setChecked(pcfg.module.pronoun_review_after_translation)

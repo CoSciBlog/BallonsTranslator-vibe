@@ -1158,6 +1158,7 @@ class ModuleManager(QObject):
         self.post_pipeline_merge_done = False
         self.active_pipeline_history_id = None
         self.active_pipeline_started_at = None
+        self.last_pipeline_status = None
 
     def setupThread(self, config_panel: ConfigPanel, imgtrans_progress_msgbox: ImgtransProgressMessageBox, ocr_postprocess: Callable = None, translate_preprocess: Callable = None, translate_postprocess: Callable = None):
         self.textdetect_thread = TextDetectThread()
@@ -1409,6 +1410,7 @@ class ModuleManager(QObject):
         self.inpaint_th_finished.emit()
 
     def runImgtransPipeline(self, pages_to_process=None):
+        self.last_pipeline_status = 'running'
         if self.imgtrans_proj.is_empty:
             LOGGER.info('proj file is empty, nothing to do')
             self.progress_msgbox.hide()
@@ -1420,6 +1422,7 @@ class ModuleManager(QObject):
             LOGGER.info('No pages to process after applying ignored page filters')
             self.progress_msgbox.hide()
             self._finish_pipeline_history('completed')
+            self.last_pipeline_status = 'completed'
             self.imgtrans_pipeline_finished.emit()
             return
         self._start_pipeline_history('image_translation_pipeline', pages_to_process, process_pages)
@@ -1432,6 +1435,7 @@ class ModuleManager(QObject):
             for page_name in process_pages:
                 self.page_trans_finished.emit(self.imgtrans_proj.pagename2idx(page_name))
             self._finish_pipeline_history('completed')
+            self.last_pipeline_status = 'completed'
             self.imgtrans_pipeline_finished.emit()
             return
         
@@ -1445,6 +1449,7 @@ class ModuleManager(QObject):
         self.imgtrans_thread.runImgtransPipeline(self.imgtrans_proj, pages_to_process)
 
     def runTranslateOnlyPipeline(self, pages_to_process=None):
+        self.last_pipeline_status = 'running'
         if self.imgtrans_proj.is_empty:
             LOGGER.info('proj file is empty, nothing to translate')
             self.progress_msgbox.hide()
@@ -1454,6 +1459,7 @@ class ModuleManager(QObject):
         if len(self.imgtrans_proj.pipeline_pages(pages_to_process, skip_ignored=True)) == 0:
             LOGGER.info('No pages to translate after applying ignored page filters')
             self.progress_msgbox.hide()
+            self.last_pipeline_status = 'completed'
             self.imgtrans_pipeline_finished.emit()
             return
         process_pages = self.imgtrans_proj.pipeline_pages(pages_to_process, skip_ignored=True)
@@ -1473,6 +1479,7 @@ class ModuleManager(QObject):
         self.imgtrans_thread.runTranslateOnlyPipeline(self.imgtrans_proj, pages_to_process)
 
     def runReviewPipeline(self, pages_to_process=None):
+        self.last_pipeline_status = 'running'
         if self.imgtrans_proj.is_empty:
             LOGGER.info('proj file is empty, nothing to review')
             self.progress_msgbox.hide()
@@ -1491,6 +1498,7 @@ class ModuleManager(QObject):
         if len(self.imgtrans_proj.pipeline_pages(pages_to_process, skip_ignored=True)) == 0:
             LOGGER.info('No pages to review after applying ignored page filters')
             self.progress_msgbox.hide()
+            self.last_pipeline_status = 'completed'
             self.imgtrans_pipeline_finished.emit()
             return
         process_pages = self.imgtrans_proj.pipeline_pages(pages_to_process, skip_ignored=True)
@@ -1510,6 +1518,7 @@ class ModuleManager(QObject):
         self.imgtrans_thread.runReviewPipeline(self.imgtrans_proj, pages_to_process)
 
     def runDecensorPipeline(self, pages_to_process=None):
+        self.last_pipeline_status = 'running'
         if self.imgtrans_proj.is_empty:
             LOGGER.info('proj file is empty, nothing to decensor')
             self.progress_msgbox.hide()
@@ -1534,6 +1543,7 @@ class ModuleManager(QObject):
         self.imgtrans_thread.runDecensorPipeline(self.imgtrans_proj, pages_to_process)
 
     def runInpaintOptimizationPipeline(self, pages_to_process=None):
+        self.last_pipeline_status = 'running'
         if self.imgtrans_proj.is_empty:
             LOGGER.info('proj file is empty, nothing to optimize')
             self.progress_msgbox.hide()
@@ -1628,6 +1638,7 @@ class ModuleManager(QObject):
         self.block_set_inpainter = False
         self.progress_msgbox.hide()
         self._finish_pipeline_history('force_stopped')
+        self.last_pipeline_status = 'force_stopped'
         if was_canvas_inpaint:
             self.inpaint_thread.inpaint_failed.emit()
         if emit_finished:
@@ -1845,6 +1856,7 @@ class ModuleManager(QObject):
                 self.apply_post_pipeline_textbox_merge()
             self.progress_msgbox.hide()
             self._finish_pipeline_history('completed')
+            self.last_pipeline_status = 'completed'
             self.imgtrans_pipeline_finished.emit()
             self.imgtrans_thread.translation_only = False
             self.imgtrans_thread.review_only = False
@@ -1856,6 +1868,7 @@ class ModuleManager(QObject):
         # 线程完成了，直接关闭窗口
         self.progress_msgbox.hide()
         self._finish_pipeline_history('stopped')
+        self.last_pipeline_status = 'stopped'
         self.imgtrans_pipeline_finished.emit()
         self.imgtrans_thread.translation_only = False
         self.imgtrans_thread.review_only = False
@@ -1865,6 +1878,7 @@ class ModuleManager(QObject):
     def on_imgtrans_thread_finished(self):
         if self.active_pipeline_history_id:
             self._finish_pipeline_history('failed')
+            self.last_pipeline_status = 'failed'
 
     def setTranslator(self, translator: str = None):
         if translator is None:

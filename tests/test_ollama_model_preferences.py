@@ -1,6 +1,12 @@
 import unittest
 
-from utils.ollama import OLLAMA_DEFAULT_ENDPOINT, ollama_model_matches_query, ollama_tags_endpoint
+from utils.ollama import (
+    OLLAMA_DEFAULT_ENDPOINT,
+    ollama_model_matches_query,
+    ollama_show_endpoint,
+    ollama_tags_endpoint,
+    ollama_thinking_capability,
+)
 from utils.config import ModuleConfig, migrate_ollama_translator_config
 
 
@@ -21,6 +27,15 @@ class OllamaModelPreferencesTest(unittest.TestCase):
             ollama_tags_endpoint('http://server:11434/api/tags'),
             'http://server:11434/api/tags',
         )
+
+    def test_show_endpoint_and_thinking_capability(self):
+        self.assertEqual(
+            ollama_show_endpoint('http://server:11434/api/tags'),
+            'http://server:11434/api/show',
+        )
+        self.assertTrue(ollama_thinking_capability(['completion', 'thinking']))
+        self.assertFalse(ollama_thinking_capability(['completion', 'vision']))
+        self.assertIsNone(ollama_thinking_capability(None))
 
     def test_preferences_are_serialized_in_translator_config(self):
         preferences = {

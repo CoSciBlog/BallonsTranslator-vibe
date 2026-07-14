@@ -9,10 +9,16 @@ from .custom_widget import ConfigComboBox, ParamComboBox, NoBorderPushBtn, Param
 from .tooltip_utils import wrap_tooltip
 from utils.shared import CONFIG_COMBOBOX_LONG, size2width, CONFIG_COMBOBOX_SHORT, CONFIG_COMBOBOX_HEIGHT
 from utils.config import pcfg, sample_module_param_value
-from utils.ollama import OLLAMA_DEFAULT_ENDPOINT, ollama_model_matches_query, ollama_tags_endpoint
+from utils.ollama import (
+    OLLAMA_DEFAULT_ENDPOINT,
+    ollama_model_matches_query,
+    ollama_show_endpoint,
+    ollama_tags_endpoint,
+    ollama_thinking_capability,
+)
 
 from qtpy.QtWidgets import QPlainTextEdit, QHBoxLayout, QVBoxLayout, QWidget, QLabel, QCheckBox, QLineEdit, QGridLayout, QPushButton, QSizePolicy, QTableWidget, QTableWidgetItem, QComboBox, QAbstractItemView, QHeaderView
-from qtpy.QtCore import Qt, Signal, QUrl, QTimer
+from qtpy.QtCore import QByteArray, Qt, Signal, QUrl, QTimer
 from qtpy.QtGui import QDoubleValidator
 from qtpy.QtNetwork import QNetworkAccessManager, QNetworkRequest
 
@@ -173,6 +179,10 @@ class OllamaModelManager(QWidget):
         self.provider_getter = lambda: ''
         self._updating = False
         self._reply = None
+        self._capability_reply = None
+        self._capability_queue = []
+        self._capability_total = 0
+        self._capability_checked = 0
         self.network_manager = QNetworkAccessManager(self)
 
         layout = QVBoxLayout(self)
@@ -205,9 +215,10 @@ class OllamaModelManager(QWidget):
         layout.addWidget(self.search_edit)
         layout.addWidget(self.status_label)
 
-        self.table = QTableWidget(0, 3)
+        self.table = QTableWidget(0, 4)
+        self.table.setObjectName('OllamaModelTable')
         self.table.setHorizontalHeaderLabels([
-            self.tr('Favorite'), self.tr('Model'), self.tr('Rating')
+            self.tr('Favorite'), self.tr('Model'), self.tr('Reasoning'), self.tr('Rating')
         ])
         self.table.setAlternatingRowColors(True)
         self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
@@ -220,9 +231,34 @@ class OllamaModelManager(QWidget):
         header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
         header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
         header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
         self.table.setMinimumHeight(190)
         self.table.setFixedWidth(CONFIG_FIELD_WIDE)
         layout.addWidget(self.table)
+
+        self.setStyleSheet('''
+            QTableWidget#OllamaModelTable::item:hover {
+                background-color: #d9ecff;
+                color: #102030;
+            }
+            QTableWidget#OllamaModelTable::item:selected,
+            QTableWidget#OllamaModelTable::item:selected:hover {
+                background-color: #0b5ea8;
+                color: #ffffff;
+            }
+            QComboBox:hover {
+                background-color: #d9ecff;
+                color: #102030;
+            }
+            QComboBox[ollamaRowSelected="true"] {
+                background-color: #0b5ea8;
+                color: #ffffff;
+            }
+            QWidget[ollamaRowSelected="true"] {
+                background-color: #0b5ea8;
+                color: #ffffff;
+            }
+        ''')
 
         self.refresh_button.clicked.connect(self.refresh_models)
         self.use_button.clicked.connect(self.use_selected_model)
@@ -261,7 +297,9 @@ class OllamaModelManager(QWidget):
 
     def _update_availability(self):
         enabled = str(self.provider_getter()).casefold() == 'ollama'
-        self.refresh_button.setEnabled(enabled and self._reply is None)
+        self.refresh_button.setEnabled(
+            enabled and self._reply is None and self._capability_reply is None
+        )
         self.search_edit.setEnabled(enabled)
         self.use_button.setEnabled(enabled and self._visible_model_count() > 0)
         if not enabled:
@@ -270,7 +308,11 @@ class OllamaModelManager(QWidget):
             self.status_label.setText(self.tr('Refresh to query installed models.'))
 
     def refresh_models(self):
-        if str(self.provider_getter()).casefold() != 'ollama' or self._reply is not None:
+        if (
+            str(self.provider_getter()).casefold() != 'ollama'
+            or self._reply is not None
+            or self._capability_reply is not None
+        ):
             return
         self.status_label.setText(self.tr('Querying Ollama...'))
         self.refresh_button.setEnabled(False)
@@ -291,12 +333,20 @@ class OllamaModelManager(QWidget):
             if not isinstance(payload, dict) or not isinstance(payload.get('models'), list):
                 raise ValueError('Invalid Ollama /api/tags response')
             models = payload['models']
-            names = sorted({
-                str(model.get('name') or model.get('model')).strip()
+            model_map = {
+                str(model.get('name') or model.get('model')).strip(): model
                 for model in models
                 if isinstance(model, dict) and (model.get('name') or model.get('model'))
-            })
-            self._set_models(names)
+            }
+            names = sorted(model_map)
+            declared = {
+                name: ollama_thinking_capability(model.get('capabilities'))
+                for name, model in model_map.items()
+            }
+            self._set_models(names, declared)
+            self._start_capability_queries(
+                [name for name in names if declared.get(name) is None]
+            )
         except Exception as error:
             detail = reply.errorString()
             if not detail or detail == 'Unknown error':
@@ -306,7 +356,8 @@ class OllamaModelManager(QWidget):
             reply.deleteLater()
             self._update_availability()
 
-    def _set_models(self, names):
+    def _set_models(self, names, reasoning_statuses=None):
+        reasoning_statuses = reasoning_statuses or {}
         for name in names:
             self.preferences.setdefault(name, {'favorite': False, 'rating': 3})
         ordered = sorted(
@@ -338,6 +389,11 @@ class OllamaModelManager(QWidget):
             model_item.setData(Qt.ItemDataRole.AccessibleTextRole, name)
             self.table.setItem(row, 1, model_item)
 
+            reasoning_item = QTableWidgetItem()
+            reasoning_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.table.setItem(row, 2, reasoning_item)
+            self._set_reasoning_status(name, reasoning_statuses.get(name))
+
             rating = QComboBox()
             rating.addItems(['1', '2', '3', '4', '5'])
             rating.setCurrentText(str(self.preferences[name]['rating']))
@@ -345,13 +401,89 @@ class OllamaModelManager(QWidget):
             rating.currentTextChanged.connect(
                 lambda value, model=name: self._set_rating(model, value)
             )
-            self.table.setCellWidget(row, 2, rating)
+            self.table.setCellWidget(row, 3, rating)
         self._updating = False
         if ordered:
             self.table.selectRow(0)
         self._filter_models()
         self._sync_selected_row_styles()
         self.paramwidget_edited.emit(self.param_key, dict(self.preferences))
+
+    def _set_reasoning_status(self, model_name: str, supported):
+        for row in range(self.table.rowCount()):
+            model_item = self.table.item(row, 1)
+            if model_item is None or model_item.text() != model_name:
+                continue
+            item = self.table.item(row, 2)
+            if item is None:
+                return
+            if supported is True:
+                text = self.tr('Yes')
+                tooltip = self.tr('Ollama reports that this model supports thinking/reasoning output.')
+            elif supported is False:
+                text = self.tr('No')
+                tooltip = self.tr('Ollama does not report a thinking capability for this model.')
+            else:
+                text = self.tr('Unknown')
+                tooltip = self.tr('The Ollama server did not provide capability information for this model.')
+            item.setText(text)
+            item.setToolTip(tooltip)
+            item.setData(Qt.ItemDataRole.AccessibleTextRole, text)
+            return
+
+    def _start_capability_queries(self, model_names):
+        self._capability_queue = list(model_names)
+        self._capability_total = len(self._capability_queue)
+        self._capability_checked = 0
+        if not self._capability_queue:
+            self._update_availability()
+            return
+        self.status_label.setText(
+            self.tr('Checking reasoning capabilities: %d/%d')
+            % (0, self._capability_total)
+        )
+        self._query_next_capability()
+
+    def _query_next_capability(self):
+        if not self._capability_queue:
+            self._capability_reply = None
+            self._filter_models()
+            self._update_availability()
+            return
+        model_name = self._capability_queue.pop(0)
+        request = QNetworkRequest(QUrl(ollama_show_endpoint(self.endpoint_getter())))
+        request.setRawHeader(b'Content-Type', b'application/json')
+        body = QByteArray(json.dumps({'model': model_name, 'verbose': False}).encode('utf-8'))
+        reply = self.network_manager.post(request, body)
+        reply.setProperty('ollamaModelName', model_name)
+        self._capability_reply = reply
+        timer = QTimer(reply)
+        timer.setSingleShot(True)
+        timer.timeout.connect(reply.abort)
+        timer.start(5000)
+        reply.finished.connect(self._on_capability_finished)
+
+    def _on_capability_finished(self):
+        reply = self._capability_reply
+        if reply is None:
+            return
+        self._capability_reply = None
+        model_name = str(reply.property('ollamaModelName') or '')
+        supported = None
+        try:
+            payload = json.loads(bytes(reply.readAll()).decode('utf-8'))
+            supported = ollama_thinking_capability(payload.get('capabilities'))
+        except Exception:
+            supported = None
+        self._set_reasoning_status(model_name, supported)
+        self._capability_checked += 1
+        reply.deleteLater()
+        if self._capability_queue:
+            self.status_label.setText(
+                self.tr('Checking reasoning capabilities: %d/%d')
+                % (self._capability_checked, self._capability_total)
+            )
+        QTimer.singleShot(0, self._query_next_capability)
 
     def _visible_model_count(self):
         return sum(
@@ -401,7 +533,7 @@ class OllamaModelManager(QWidget):
         for row in range(self.table.rowCount()):
             selected = row in selected_rows
             container = self.table.cellWidget(row, 0)
-            rating = self.table.cellWidget(row, 2)
+            rating = self.table.cellWidget(row, 3)
             widgets = [container, rating]
             if container is not None:
                 widgets.extend(container.findChildren(QCheckBox))

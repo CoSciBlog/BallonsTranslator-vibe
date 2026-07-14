@@ -11,7 +11,7 @@ import time
 import cv2
 
 from tqdm import tqdm
-from qtpy.QtWidgets import QAction, QFileDialog, QMenu, QHBoxLayout, QVBoxLayout, QApplication, QStackedWidget, QSplitter, QListWidget, QShortcut, QListWidgetItem, QMessageBox, QTextEdit, QPlainTextEdit, QDialog
+from qtpy.QtWidgets import QAction, QFileDialog, QMenu, QHBoxLayout, QVBoxLayout, QApplication, QStackedWidget, QSplitter, QListWidget, QShortcut, QListWidgetItem, QMessageBox, QTextEdit, QPlainTextEdit, QDialog, QSystemTrayIcon
 from qtpy.QtCore import Qt, QPoint, QSize, QEvent, Signal, QThread, QTimer, QUrl
 from qtpy.QtGui import QContextMenuEvent, QTextCursor, QGuiApplication, QIcon, QCloseEvent, QKeySequence, QKeyEvent, QPainter, QClipboard, QImage, QColor, QBrush
 
@@ -156,6 +156,7 @@ class MainWindow(mainwindow_cls):
         self.app.installEventFilter(self.input_wheel_guard)
         self.backup_blkstyles = []
         self._run_imgtrans_wo_textstyle_update = False
+        self._pipeline_notification_tray = None
 
         self.setupThread()
         self.setupUi()
@@ -373,6 +374,7 @@ class MainWindow(mainwindow_cls):
         self.comicTransSplitter.setStretchFactor(1, 10)
         self.comicTransSplitter.setStretchFactor(2, 1)
         self.imgtrans_progress_msgbox = ImgtransProgressMessageBox()
+        self.imgtrans_progress_msgbox.eta_changed.connect(self.on_pipeline_eta_changed)
         self.resetStyleSheet()
 
     def on_finish_setdetector(self):
@@ -840,6 +842,9 @@ class MainWindow(mainwindow_cls):
         self._gui_batch_upscale_pending = False
         self.module_manager.setOCRFallback('')
         self.imgtrans_progress_msgbox.set_batch_mode(False)
+
+        if options and not stopped:
+            self._notify_pipeline_completion(batch=True)
 
         completion_action_started = False
         if options and not stopped:
@@ -2220,6 +2225,7 @@ class MainWindow(mainwindow_cls):
             self.st_manager.updateTranslation()
 
     def on_imgtrans_pipeline_finished(self):
+        self.on_pipeline_eta_changed('')
         self.backup_blkstyles.clear()
         self._run_imgtrans_wo_textstyle_update = False
         self.postprocess_mt_toggle = True
@@ -2242,8 +2248,37 @@ class MainWindow(mainwindow_cls):
             self._update_gui_batch_progress()
             self.run_next_gui_batch_project()
             return
+        if self.module_manager.last_pipeline_status == 'completed':
+            self._notify_pipeline_completion()
         if shared.HEADLESS or shared.HEADLESS_CONTINUOUS:
             self.run_next_dir()
+
+    def _notify_pipeline_completion(self, batch: bool = False):
+        if (
+            not pcfg.module.pipeline_completion_notification
+            or shared.HEADLESS
+            or shared.HEADLESS_CONTINUOUS
+        ):
+            return
+        QApplication.beep()
+        if sys.platform != 'win32' or not QSystemTrayIcon.isSystemTrayAvailable():
+            return
+        if self._pipeline_notification_tray is None:
+            self._pipeline_notification_tray = QSystemTrayIcon(self.windowIcon(), self)
+        tray = self._pipeline_notification_tray
+        tray.setIcon(self.windowIcon())
+        tray.show()
+        title = self.tr('Batch processing finished') if batch else self.tr('Pipeline finished')
+        project_name = osp.basename(getattr(self.imgtrans_proj, 'directory', '') or '')
+        message = (
+            self.tr('All selected projects were processed successfully.')
+            if batch
+            else self.tr('The pipeline completed successfully.')
+        )
+        if project_name and not batch:
+            message += ' ' + project_name
+        tray.showMessage(title, message, QSystemTrayIcon.MessageIcon.Information, 6000)
+        QTimer.singleShot(8000, tray.hide)
 
     def postprocess_translations(self, blk_list: List[TextBlock]) -> None:
         src_is_cjk = is_cjk(pcfg.module.translate_source)
@@ -2424,6 +2459,13 @@ class MainWindow(mainwindow_cls):
         p = self.mapToGlobal(QPoint(size.width() - msg_size.width(),
                                     size.height() - msg_size.height()))
         self.module_manager.progress_msgbox.move(p)
+
+    def on_pipeline_eta_changed(self, eta_text: str):
+        self.titleBar.setStatusText(eta_text)
+        window_title = 'BallonsTranslator'
+        if eta_text:
+            window_title += ' - ' + eta_text
+        self.setWindowTitle(window_title)
 
     def on_closebtn_clicked(self):
         if self.imsave_thread.isRunning():

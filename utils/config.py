@@ -61,6 +61,7 @@ class ModuleConfig(Config):
     enable_inpaint_optimization: bool = False
     skip_cover_title_pages: bool = False
     translate_after_image_processing: bool = False
+    pipeline_completion_notification: bool = False
     # 是否在 OCR 后进行字体检测（默认不启用）
     ocr_font_detect: bool = False
     textdetector_params: Dict = field(default_factory=lambda: dict())

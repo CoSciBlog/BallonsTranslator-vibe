@@ -4,6 +4,9 @@
 
 ### Added
 
+- Thinking/reasoning capability status in installed Ollama model lists, populated from each model's native `/api/show` metadata.
+- An opt-in pipeline completion alert that plays a short system sound and shows a Windows notification after successful pipeline or full GUI batch completion.
+- The active pipeline stage and ETA in the custom application title and native window title.
 - Live, case-insensitive multi-term search for installed Ollama models in the `LLM_API_Translator`, `LLM_API_Translator_2`, and `Two-Step Translator` settings.
 - Installed Ollama model lists for `LLM_API_Translator`, `LLM_API_Translator_2`, and `Two-Step Translator`, queried asynchronously from `/api/tags`.
 - Per-profile Ollama model favorites and 1-5 ratings persisted in `config.json`, plus direct selection of a listed model as the active override.
@@ -101,6 +104,8 @@
 
 ### Changed
 
+- Improved Ollama model-list hover and selected-row colors so model names, reasoning status, favorites, and ratings remain readable.
+- Bumped the fork runtime version string to `1.4.0-vibe.100`.
 - Bumped the fork runtime version string to `1.4.0-vibe.99`.
 - Bumped the fork runtime version string to `1.4.0-vibe.98`.
 - Bumped the fork runtime version string to `1.4.0-vibe.97`.
