@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.95`
+Fork release: `1.4.0-vibe.96`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -273,7 +273,7 @@ The left sidebar Region Merge icon applies these persisted Post-merge mode, gap,
 
 ## Settings pages and pipeline order
 
-The Settings navigation opens each category or section on its own scrollable page. Text Detection, OCR, Inpaint, Translator, Upscaling, Page filtering, Pipeline, Post-merge, presets, Startup, Typesetting, Save, and SalaDict no longer share one continuous scroll surface. Translator settings use a compact single-column form so labels, fields, prompts, and the Ollama model browser remain aligned without horizontal overflow. Other wide multi-value controls and preset actions use compact multi-row grids for smaller windows and high display scaling.
+The Settings navigation opens each category or section on its own scrollable page. Text Detection, OCR, Inpaint, Translator, Upscaling, Page filtering, Pipeline, Post-merge, presets, Startup, Typesetting, Save, and SalaDict no longer share one continuous scroll surface. Translator settings use a mixed responsive form: Source and Target share a two-column row, selectors and checkboxes sit inline with their labels, and text fields, lists, prompts, and the Ollama model browser use wider block rows. Prompt reset actions stay beside their headings instead of consuming space beside the editor. Other wide multi-value controls and preset actions use compact multi-row grids for smaller windows and high display scaling.
 
 Enable `Settings -> General -> Pipeline -> Translate after image processing` when translation must begin only after detection, OCR, and inpainting have completed for all selected pages. This disables translation/image-processing overlap, including the Two-Step background first pass. It can reduce simultaneous RAM, VRAM, and API usage, but normally increases total pipeline time. Leave it disabled to retain the faster page-by-page or parallel behavior supported by the selected translator.
 

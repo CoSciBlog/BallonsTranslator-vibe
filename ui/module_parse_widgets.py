@@ -211,7 +211,7 @@ class OllamaModelManager(QWidget):
         header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
         header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
         self.table.setMinimumHeight(190)
-        self.table.setFixedWidth(CONFIG_COMBOBOX_LONG)
+        self.table.setFixedWidth(CONFIG_FIELD_WIDE)
         layout.addWidget(self.table)
 
         self.refresh_button.clicked.connect(self.refresh_models)
@@ -420,14 +420,17 @@ class ParamWidget(QWidget):
             is_digital = isinstance(params[param_key], float) or isinstance(params[param_key], int)
             param_widget = None
             reset_btn = None
+            param_type = None
 
             if isinstance(params[param_key], bool):
+                param_type = 'checkbox'
                 param_widget = ParamCheckBox(param_key)
                 val = params[param_key]
                 param_widget.setChecked(val)
                 param_widget.paramwidget_edited.connect(self.on_paramwidget_edited)
 
             elif is_str or is_digital:
+                param_type = 'line_editor'
                 param_widget = ParamLineEditor(param_key, force_digital=is_digital)
                 val = params[param_key]
                 if is_digital:
@@ -503,46 +506,87 @@ class ParamWidget(QWidget):
 
             if self.single_column:
                 if isinstance(param_widget, ParamLineEditor):
-                    param_widget.setFixedWidth(CONFIG_COMBOBOX_LONG)
+                    param_widget.setFixedWidth(CONFIG_FIELD_WIDE)
                 elif isinstance(param_widget, ParamEditor):
+                    param_widget.setFixedWidth(CONFIG_FIELD_WIDE)
+                elif isinstance(param_widget, ParamComboBox) and param_key == 'model':
                     param_widget.setFixedWidth(CONFIG_COMBOBOX_LONG)
 
             tooltip = wrap_tooltip(description)
             if tooltip and param_widget is not None:
                 param_widget.setToolTip(tooltip)
-            widget_idx = 0
-            widget_row = layout_row
+
+            if param_widget is None:
+                v = params[param_key]
+                raise ValueError(f"Failed to initialize widget for key-value pair: {param_key}-{v}")
+
+            self.param_widget_map[param_key] = param_widget
+            control_layout = None
+            if hasattr(param_widget, 'flush_btn') or hasattr(param_widget, 'path_select_btn'):
+                control_layout = QHBoxLayout()
+                control_layout.setContentsMargins(0, 0, 0, 0)
+                control_layout.addWidget(param_widget)
+            if hasattr(param_widget, 'flush_btn'):
+                control_layout.addWidget(param_widget.flush_btn)
+                param_widget.flushbtn_clicked.connect(self.on_flushbtn_clicked)
+            if hasattr(param_widget, 'path_select_btn'):
+                control_layout.addWidget(param_widget.path_select_btn)
+                param_widget.pathbtn_clicked.connect(self.on_pathbtn_clicked)
+
+            param_label = None
             if require_label:
                 param_label = ParamNameLabel(display_param_name)
                 if tooltip:
                     param_label.setToolTip(tooltip)
-                param_layout.addWidget(param_label, widget_row, 0)
-                if self.single_column:
-                    widget_row += 1
+
+            if self.single_column:
+                inline_control = param_type in {'selector', 'checkbox'}
+                if require_label and inline_control:
+                    row_layout = QHBoxLayout()
+                    row_layout.setContentsMargins(0, 0, 0, 0)
+                    row_layout.setSpacing(10)
+                    row_layout.addWidget(param_label)
+                    if control_layout is None:
+                        row_layout.addWidget(param_widget)
+                    else:
+                        row_layout.addLayout(control_layout)
+                    row_layout.addStretch(1)
+                    param_layout.addLayout(row_layout, layout_row, 0)
+                    layout_row += 1
                 else:
-                    widget_idx = 1
-            if param_widget is not None:
-                self.param_widget_map[param_key] = param_widget
-                pw_lo = None
-                if hasattr(param_widget, 'flush_btn') or hasattr(param_widget, 'path_select_btn') or reset_btn is not None:
-                    pw_lo = QHBoxLayout()
-                    pw_lo.addWidget(param_widget)
-                if hasattr(param_widget, 'flush_btn'):
-                    pw_lo.addWidget(param_widget.flush_btn)
-                    param_widget.flushbtn_clicked.connect(self.on_flushbtn_clicked)
-                if hasattr(param_widget, 'path_select_btn'):
-                    pw_lo.addWidget(param_widget.path_select_btn)
-                    param_widget.pathbtn_clicked.connect(self.on_pathbtn_clicked)
-                if reset_btn is not None:
-                    pw_lo.addWidget(reset_btn)
-                if pw_lo is None:
-                    param_layout.addWidget(param_widget, widget_row, widget_idx)
-                else:
-                    param_layout.addLayout(pw_lo, widget_row, widget_idx)
+                    if require_label:
+                        if reset_btn is None:
+                            param_layout.addWidget(param_label, layout_row, 0)
+                        else:
+                            label_layout = QHBoxLayout()
+                            label_layout.setContentsMargins(0, 0, 0, 0)
+                            label_layout.setSpacing(10)
+                            label_layout.addWidget(param_label)
+                            label_layout.addWidget(reset_btn)
+                            label_layout.addStretch(1)
+                            param_layout.addLayout(label_layout, layout_row, 0)
+                        layout_row += 1
+                    if control_layout is None:
+                        param_layout.addWidget(param_widget, layout_row, 0)
+                    else:
+                        control_layout.addStretch(1)
+                        param_layout.addLayout(control_layout, layout_row, 0)
+                    layout_row += 1
             else:
-                v = params[param_key]
-                raise ValueError(f"Failed to initialize widget for key-value pair: {param_key}-{v}")
-            layout_row = widget_row + 1
+                widget_idx = 0
+                if require_label:
+                    param_layout.addWidget(param_label, layout_row, 0)
+                    widget_idx = 1
+                if reset_btn is not None:
+                    if control_layout is None:
+                        control_layout = QHBoxLayout()
+                        control_layout.addWidget(param_widget)
+                    control_layout.addWidget(reset_btn)
+                if control_layout is None:
+                    param_layout.addWidget(param_widget, layout_row, widget_idx)
+                else:
+                    param_layout.addLayout(control_layout, layout_row, widget_idx)
+                layout_row += 1
 
         if self.ollama_model_manager is not None:
             provider_widget = self.param_widget_map.get('provider')
@@ -659,7 +703,7 @@ class ModuleConfigParseWidget(QWidget):
         self.params_layout = QHBoxLayout()
         self.params_layout.setContentsMargins(0, 0, 0, 0)
 
-        p_layout = QVBoxLayout() if single_column else QHBoxLayout()
+        p_layout = QHBoxLayout()
         p_layout.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
         self.module_label = ParamNameLabel(module_name)
         module_tooltip = self.tr('Select which module implementation is used for this step. Different modules can be much faster or slower depending on CPU/GPU support, model size, and network/API latency.')
@@ -667,8 +711,7 @@ class ModuleConfigParseWidget(QWidget):
         self.module_combobox.setToolTip(module_tooltip)
         p_layout.addWidget(self.module_label)
         p_layout.addWidget(self.module_combobox)
-        if not single_column:
-            p_layout.addStretch(-1)
+        p_layout.addStretch(-1)
         self.p_layout = p_layout
 
         layout = QVBoxLayout(self)
@@ -764,6 +807,7 @@ class TranslatorConfigPanel(ModuleConfigParseWidget):
             **kwargs,
         )
         self.translator_changed = self.module_changed
+        self.vlayout.setSpacing(18)
     
         self.source_combobox = ConfigComboBox(scrollWidget=scrollWidget)
         self.target_combobox = ConfigComboBox(scrollWidget=scrollWidget)
@@ -785,13 +829,14 @@ class TranslatorConfigPanel(ModuleConfigParseWidget):
         self.translateByTextblockBox.setToolTip(self.tr('Translate every detected text block as a separate request instead of batching them together. This can improve isolation for providers that struggle with batches, but it usually slows translation because it creates many more requests.'))
         self.translateByTextblockBox.name_label.setToolTip(self.translateByTextblockBox.toolTip())
 
-        st_layout = QVBoxLayout()
-        st_layout.setSpacing(6)
+        st_layout = QGridLayout()
+        st_layout.setHorizontalSpacing(16)
+        st_layout.setVerticalSpacing(4)
         st_layout.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
-        st_layout.addWidget(ParamNameLabel(self.tr('Source')))
-        st_layout.addWidget(self.source_combobox)
-        st_layout.addWidget(ParamNameLabel(self.tr('Target')))
-        st_layout.addWidget(self.target_combobox)
+        st_layout.addWidget(ParamNameLabel(self.tr('Source')), 0, 0)
+        st_layout.addWidget(ParamNameLabel(self.tr('Target')), 0, 1)
+        st_layout.addWidget(self.source_combobox, 1, 0)
+        st_layout.addWidget(self.target_combobox, 1, 1)
         
         self.vlayout.insertLayout(1, st_layout) 
         self.vlayout.addWidget(self.translateByTextblockBox)
