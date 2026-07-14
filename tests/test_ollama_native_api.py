@@ -47,6 +47,19 @@ class FakeHttpClient:
         return FakeResponse()
 
 
+class RejectedSchemaResponse:
+    status_code = 400
+    text = "json schema format is not supported"
+
+
+class SchemaFallbackHttpClient(FakeHttpClient):
+    def post(self, url, json, timeout):
+        self.requests.append((url, json, timeout))
+        if len(self.requests) == 1:
+            return RejectedSchemaResponse()
+        return FakeResponse()
+
+
 class FakeLogger:
     def __init__(self):
         self.infos = []
@@ -195,6 +208,71 @@ class NativeOllamaTransportTest(unittest.TestCase):
         self.assertIn('"Hello"', completion.choices[0].message.content)
         self.assertIn("prompt=7 tokens at 70.00 tkn/s", translator.logger.infos[0])
         self.assertIn("output=5 tokens at 20.00 tkn/s", translator.logger.infos[0])
+
+    def test_ollama_chat_request_passes_native_json_schema(self):
+        translator = NativeOllamaTranslator()
+        schema = {
+            "type": "object",
+            "properties": {"translations": {"type": "array"}},
+            "required": ["translations"],
+        }
+
+        translator._create_completion(
+            {
+                "model": "gemma4:12b",
+                "messages": [{"role": "user", "content": "Translate."}],
+                "response_format": {
+                    "type": "json_schema",
+                    "json_schema": {"schema": schema},
+                },
+            }
+        )
+
+        _, payload, _ = translator.client.requests[0]
+        self.assertEqual(payload["format"], schema)
+
+    def test_ollama_schema_rejection_falls_back_to_json_mode(self):
+        translator = NativeOllamaTranslator()
+        translator.client = SchemaFallbackHttpClient()
+
+        translator._create_completion(
+            {
+                "model": "gemma4:12b",
+                "messages": [{"role": "user", "content": "Translate."}],
+                "response_format": {
+                    "type": "json_schema",
+                    "json_schema": {"schema": {"type": "object"}},
+                },
+            }
+        )
+
+        self.assertEqual(len(translator.client.requests), 2)
+        self.assertEqual(translator.client.requests[0][1]["format"], {"type": "object"})
+        self.assertEqual(translator.client.requests[1][1]["format"], "json")
+        self.assertIn("Retrying with generic JSON mode", translator.logger.warnings[-1])
+
+    def test_translation_request_schema_bounds_count_and_ids(self):
+        translator = StructuredFallbackTranslator(
+            [
+                '{"translations":['
+                '{"id":1,"translation":"One"},'
+                '{"id":2,"translation":"Two"}]}'
+            ]
+        )
+
+        translator._request_translation(
+            "Translate two items.",
+            purpose="translation",
+            expected_count=2,
+            expected_ids=[1, 2],
+        )
+
+        schema = translator.request_args[0]["response_format"]["json_schema"]["schema"]
+        translations_schema = schema["properties"]["translations"]
+        id_schema = schema["$defs"]["TranslationElement"]["properties"]["id"]
+        self.assertEqual(translations_schema["minItems"], 2)
+        self.assertEqual(translations_schema["maxItems"], 2)
+        self.assertEqual(id_schema["enum"], [1, 2])
 
     def test_ollama_chat_request_uses_configured_request_timeout(self):
         translator = NativeOllamaTranslator()

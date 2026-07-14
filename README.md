@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README_EN.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.107`
+Fork release: `1.4.0-vibe.108`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -25,6 +25,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Documented that translated output and some documentation assets are machine-translated and should be disclosed as such when redistributed.
 - Fixed `manga_ocr` startup with current Transformers releases by using the image processor API required by the local `manga-ocr-base` vision model.
 - Made `manga_ocr` output length rely only on its `max output characters` setting, avoiding conflicting Transformers `max_length` and `max_new_tokens` warnings.
+- Improved Ollama structured translation reliability with native JSON schemas, bounded translation batches, strict ID validation, and recovery for fragmented ID/translation pairs returned by local models.
 - Added an optional, separately configured fallback OCR in the OCR settings. It can retry individual empty regions or take over when the primary OCR fails or is incompatible with the selected source language.
 - Added a project glossary window, project-level glossary persistence in each project's `glossary.json`, and a custom glossary prompt for LLM translation guidance.
 - Added project-level pipeline history in `pipeline_history.json`, with a left-sidebar history window that lists the pipeline summary, Text Detection, OCR, Translate, and Inpaint in one compact Step column. Each step keeps its module/model values and measured duration, Ollama translation entries show whether reasoning was enabled, and a Columns menu controls which table fields are visible.
@@ -204,6 +205,8 @@ The left sidebar also includes an `x2` button for the current project. It perfor
 LLM translation and review prompts now explicitly check names, pronouns, gendered wording, first-person singular/plural, speaker/addressee roles, and formal/informal address. They also direct the reviewer not to carry every source-side name into fluent dialogue: when context makes the participant clear, it may use natural pronouns or direct address while retaining names needed for calling someone, emphasis, or clarity. Enable `Settings -> DL Module -> Translator -> Review and optimize translation with LLM` to run an additional LLM review pass after translation for each page, using ChatGPT, `LLM_API_Translator`, or `Two-Step Translator`.
 
 For `LLM_API_Translator` and `Two-Step Translator`, `max review items per request` limits the size of manual or post-translation review batches. The default of `8` improves local-model attention to dialogue references and structured JSON reliability; increasing it reduces the number of review requests when a larger-context model can handle the page reliably.
+
+For `LLM_API_Translator` and `LLM_API_Translator_2`, `max translation items per request` similarly limits normal translation batches and defaults to `8`. Native Ollama requests send the TranslationResponse JSON schema with the expected item count and IDs; if an older Ollama server rejects schema mode, the request is retried automatically with generic JSON mode. Smaller batches can further improve reliability for local models that emit incomplete or malformed arrays.
 
 Use `Tools -> Model Downloads` to download optional or missing local models after setup. The first setup still downloads the common text detection, `manga_ocr`, `mit48px`, and LaMa inpainting assets, while optional backends such as `flux2-klein`, `aot`, and PaddleOCR-VL Manga are downloaded only from that window or when a backend with declared downloadable files is first loaded. Native PaddleOCR downloads its own runtime assets on first use, OneOCR still requires the local `oneocr.dll` and `oneocr.onemodel` files to be supplied manually, and Stariver OCR is API-based without a local model download.
 

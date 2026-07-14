@@ -64,6 +64,7 @@ class TwoStepTranslator(LLM_API_Translator):
         },
         **deepcopy(LLM_API_Translator.params),
     }
+    params.pop("max translation items per request", None)
     params["provider"]["value"] = "Ollama"
     params["model"]["value"] = "OLLAMA: qwen3"
     params["endpoint"]["value"] = OLLAMA_DEFAULT_ENDPOINT

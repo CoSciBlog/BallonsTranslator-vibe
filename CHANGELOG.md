@@ -109,6 +109,9 @@
 
 ### Changed
 
+- Bumped the fork runtime version string to `1.4.0-vibe.108`.
+- Native Ollama translation and glossary requests now send their Pydantic JSON schemas through `/api/chat`, with expected translation counts and IDs included for regular and review requests.
+- Regular `LLM_API_Translator` translation requests now use the configurable `max translation items per request` batch limit, defaulting to 8 for more reliable local-model JSON output.
 - Bumped the fork runtime version string to `1.4.0-vibe.107`.
 - Bumped the fork runtime version string to `1.4.0-vibe.106`.
 - Removed the redundant Pipeline column from Pipeline History; the Step column now carries the pipeline summary and individual stage labels.
@@ -203,6 +206,7 @@
 
 ### Fixed
 
+- Prevented repeated translation structure-mismatch failures by validating exact ID sets, recovering split numeric-ID/translation string pairs, and falling back to generic JSON mode when an older Ollama server rejects native schema mode.
 - Prevented repeated Transformers generation warnings in `manga_ocr` by clearing the legacy model `max_length=300` setting and using the configurable `max_new_tokens` limit exclusively.
 - Allowed the NVIDIA Blackwell/cu128 Runtime Manager profile to install on Python 3.14 now that matching Windows PyTorch, TorchVision, and TorchAudio cu128 wheels are available; Python versions older than 3.10 remain unsupported.
 - Ollama reasoning models such as Gemma no longer abort translation when `think=true` produces thought-process JSON instead of the required structured response; invalid translation and glossary responses are retried once with thinking disabled.

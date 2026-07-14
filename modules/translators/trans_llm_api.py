@@ -331,6 +331,10 @@ class LLM_API_Translator(BaseTranslator):
             "value": 2,
             "description": "Number of retries if the count of translations mismatches the source count.",
         },
+        "max translation items per request": {
+            "value": 8,
+            "description": "Maximum source text blocks sent in each translation request. Smaller batches improve structured JSON reliability for local models; larger batches use fewer requests but are more likely to produce incomplete or malformed responses.",
+        },
         "max requests per minute": {
             "value": 20,
             "description": "Maximum requests per minute for EACH API key.",
@@ -711,6 +715,10 @@ class LLM_API_Translator(BaseTranslator):
         return max(self._param_int("max review items per request", default=8), 1)
 
     @property
+    def max_translation_items_per_request(self) -> int:
+        return max(self._param_int("max translation items per request", default=8), 1)
+
+    @property
     def reflection_prompt(self) -> str:
         return self.get_param_value("reflection prompt")
 
@@ -1009,29 +1017,30 @@ class LLM_API_Translator(BaseTranslator):
 
     def _assemble_prompts(self, queries: List[str], to_lang: str):
         from_lang = self.lang_map.get(self.lang_source, self.lang_source)
-
-        input_elements = [
-            {"id": i + 1, "source": query} for i, query in enumerate(queries)
-        ]
-        input_json_str = json.dumps(input_elements, ensure_ascii=False, indent=2)
         glossary_section = self._glossary_prompt_section()
         context_section = self._translation_context_prompt_section()
         shortening_section = self._bubble_text_shortening_rules()
 
-        prompt = (
-            f"Translate the following manga/comic text snippets from {from_lang} to {to_lang}. "
-            "The input is a JSON array. Respond with one JSON object in the required schema.\n"
-            "Preserve each id, item count, order, line intent, names, honorifics, pronouns, speaker/addressee roles, singular/plural first person, and formal/informal address. "
-            "Do not turn a male character into a feminine pronoun/address, a female/girl character into a masculine pronoun/address, or I/me into we/us unless the source/context clearly says so. "
-            "If gender or addressee form is unknown, keep the target wording neutral or as ambiguous as the language allows.\n\n"
-            f"{self._dialogue_naturalness_rules()}"
-            f"{shortening_section}"
-            f"{context_section}"
-            f"{glossary_section}"
-            f"INPUT:\n{input_json_str}"
-        )
-
-        yield prompt, len(queries)
+        chunk_size = self.max_translation_items_per_request
+        for start in range(0, len(queries), chunk_size):
+            chunk = queries[start : start + chunk_size]
+            input_elements = [
+                {"id": i + 1, "source": query} for i, query in enumerate(chunk)
+            ]
+            input_json_str = json.dumps(input_elements, ensure_ascii=False, indent=2)
+            prompt = (
+                f"Translate the following manga/comic text snippets from {from_lang} to {to_lang}. "
+                "The input is a JSON array. Respond with one JSON object in the required schema.\n"
+                "Preserve each id, item count, order, line intent, names, honorifics, pronouns, speaker/addressee roles, singular/plural first person, and formal/informal address. "
+                "Do not turn a male character into a feminine pronoun/address, a female/girl character into a masculine pronoun/address, or I/me into we/us unless the source/context clearly says so. "
+                "If gender or addressee form is unknown, keep the target wording neutral or as ambiguous as the language allows.\n\n"
+                f"{self._dialogue_naturalness_rules()}"
+                f"{shortening_section}"
+                f"{context_section}"
+                f"{glossary_section}"
+                f"INPUT:\n{input_json_str}"
+            )
+            yield prompt, len(chunk)
 
     def _glossary_prompt_section(self) -> str:
         if not self.use_glossary_enabled:
@@ -1249,15 +1258,71 @@ class LLM_API_Translator(BaseTranslator):
     def _normalize_translation_entries(cls, entries: List[Any], logger=None) -> List[Dict]:
         normalized_entries = []
         dropped = 0
+        recovered_fragments = 0
+        pending_fragment_id = None
         for idx, item in enumerate(entries):
             normalized = cls._normalize_translation_entry(item, idx + 1)
-            if normalized is None:
-                dropped += 1
+            if normalized is not None:
+                pending_fragment_id = None
+                normalized_entries.append(normalized)
                 continue
-            normalized_entries.append(normalized)
+
+            if isinstance(item, str):
+                stripped = item.strip()
+                if stripped.isdigit():
+                    candidate_id = int(stripped)
+                    pending_fragment_id = (
+                        candidate_id if 1 <= candidate_id <= len(entries) else None
+                    )
+                    dropped += 1
+                    continue
+                if pending_fragment_id is not None:
+                    match = re.match(
+                        r'^\s*"?translation"?\s*[:=]\s*(.+?)\s*$',
+                        stripped,
+                        flags=re.DOTALL | re.IGNORECASE,
+                    )
+                    if match:
+                        raw_translation = match.group(1).strip()
+                        try:
+                            translation = json.loads(raw_translation)
+                        except (json.JSONDecodeError, TypeError):
+                            translation = raw_translation.strip('"')
+                        normalized_entries.append(
+                            {
+                                "id": pending_fragment_id,
+                                "translation": cls._coerce_translation_text(translation),
+                            }
+                        )
+                        pending_fragment_id = None
+                        recovered_fragments += 1
+                        continue
+
+            dropped += 1
         if dropped and logger is not None:
             logger.warning(f"Dropped {dropped} translation entries without usable id or translation.")
+        if recovered_fragments and logger is not None:
+            label = "entry" if recovered_fragments == 1 else "entries"
+            logger.warning(
+                f"Recovered {recovered_fragments} fragmented translation {label}."
+            )
         return normalized_entries
+
+    @staticmethod
+    def _translation_response_json_schema(
+        expected_count: Optional[int] = None,
+        expected_ids: Optional[List[int]] = None,
+    ) -> Dict[str, Any]:
+        schema = deepcopy(TranslationResponse.model_json_schema())
+        translations_schema = schema.get("properties", {}).get("translations", {})
+        if expected_count is not None:
+            translations_schema["minItems"] = int(expected_count)
+            translations_schema["maxItems"] = int(expected_count)
+        if expected_ids:
+            element_schema = schema.get("$defs", {}).get("TranslationElement", {})
+            id_schema = element_schema.get("properties", {}).get("id", {})
+            id_schema["enum"] = [int(item_id) for item_id in expected_ids]
+        return schema
 
     @classmethod
     def _normalize_translation_response_data(cls, data: Any, logger=None) -> Any:
@@ -2272,12 +2337,12 @@ class LLM_API_Translator(BaseTranslator):
             "max_tokens": self.max_tokens,
         }
 
-        if self.json_mode_enabled and self.provider == "LLM Studio":
+        if self.json_mode_enabled and self.provider in {"LLM Studio", "Ollama"}:
             api_args["response_format"] = {
                 "type": "json_schema",
                 "json_schema": {"schema": response_model.model_json_schema()},
             }
-        elif self.json_mode_enabled and self.provider in ["OpenAI", "Gemini", "Grok", "Google", "OpenRouter", "Ollama"]:
+        elif self.json_mode_enabled and self.provider in ["OpenAI", "Gemini", "Grok", "Google", "OpenRouter"]:
             api_args["response_format"] = {"type": "json_object"}
 
         if self.provider == "OpenAI":
@@ -2407,9 +2472,18 @@ class LLM_API_Translator(BaseTranslator):
         return ollama_chat_endpoint(self.endpoint or OLLAMA_DEFAULT_ENDPOINT)
 
     def _create_ollama_completion(self, api_args: Dict):
-        return self._create_ollama_completion_with_retry(api_args, allow_reasoning_retry=True)
+        return self._create_ollama_completion_with_retry(
+            api_args,
+            allow_reasoning_retry=True,
+            allow_schema_retry=True,
+        )
 
-    def _create_ollama_completion_with_retry(self, api_args: Dict, allow_reasoning_retry: bool):
+    def _create_ollama_completion_with_retry(
+        self,
+        api_args: Dict,
+        allow_reasoning_retry: bool,
+        allow_schema_retry: bool,
+    ):
         options = {
             "temperature": api_args.get("temperature", self.temperature),
             "top_p": api_args.get("top_p", self.top_p),
@@ -2426,8 +2500,10 @@ class LLM_API_Translator(BaseTranslator):
             "options": options,
             "think": bool(extra_body.get("think", False)),
         }
-        if api_args.get("response_format"):
-            payload["format"] = "json"
+        response_format = api_args.get("response_format") or {}
+        if response_format:
+            schema = response_format.get("json_schema", {}).get("schema")
+            payload["format"] = schema if isinstance(schema, dict) else "json"
 
         response = self.client.post(
             self._ollama_chat_endpoint(),
@@ -2447,7 +2523,25 @@ class LLM_API_Translator(BaseTranslator):
             else:
                 retry_args.pop("extra_body", None)
             return self._create_ollama_completion_with_retry(
-                retry_args, allow_reasoning_retry=False
+                retry_args,
+                allow_reasoning_retry=False,
+                allow_schema_retry=allow_schema_retry,
+            )
+        if (
+            response.status_code == 400
+            and allow_schema_retry
+            and isinstance(payload.get("format"), dict)
+        ):
+            self.logger.warning(
+                "Ollama rejected native JSON schema mode: %s. Retrying with generic JSON mode."
+                % response.text
+            )
+            retry_args = dict(api_args)
+            retry_args["response_format"] = {"type": "json_object"}
+            return self._create_ollama_completion_with_retry(
+                retry_args,
+                allow_reasoning_retry=allow_reasoning_retry,
+                allow_schema_retry=False,
             )
         if response.status_code >= 400:
             self.logger.error("Ollama API request failed: %s" % response.text)
@@ -2615,13 +2709,18 @@ class LLM_API_Translator(BaseTranslator):
             "max_tokens": response_max_tokens,
         }
 
-        if self.json_mode_enabled and self.provider == "LLM Studio":
-            self.logger.debug("Using 'json_schema' mode for LLM Studio.")
+        if self.json_mode_enabled and self.provider in {"LLM Studio", "Ollama"}:
+            self.logger.debug(f"Using native JSON schema mode for {self.provider}.")
             api_args["response_format"] = {
                 "type": "json_schema",
-                "json_schema": {"schema": TranslationResponse.model_json_schema()},
+                "json_schema": {
+                    "schema": self._translation_response_json_schema(
+                        expected_count,
+                        expected_ids,
+                    )
+                },
             }
-        elif self.json_mode_enabled and self.provider in ["OpenAI", "Gemini", "Grok", "Google", "OpenRouter", "Ollama"]:
+        elif self.json_mode_enabled and self.provider in ["OpenAI", "Gemini", "Grok", "Google", "OpenRouter"]:
             self.logger.debug(f"Using 'json_object' mode for {self.provider}.")
             api_args["response_format"] = {"type": "json_object"}
 
@@ -2811,16 +2910,28 @@ class LLM_API_Translator(BaseTranslator):
 
             while True:
                 try:
-                    parsed_response = self._clean_translation_response(self._request_translation(prompt))
+                    expected_ids = list(range(1, num_src + 1))
+                    parsed_response = self._clean_translation_response(
+                        self._request_translation(
+                            prompt,
+                            purpose="translation",
+                            expected_count=num_src,
+                            expected_ids=expected_ids,
+                        )
+                    )
 
                     if not parsed_response or not parsed_response.translations:
                         raise ValueError(
                             "Received empty or invalid parsed response from API."
                         )
 
-                    if len(parsed_response.translations) != num_src:
+                    actual_ids = [item.id for item in parsed_response.translations]
+                    if (
+                        len(parsed_response.translations) != num_src
+                        or sorted(set(actual_ids)) != expected_ids
+                    ):
                         raise InvalidNumTranslations(
-                            f"Expected {num_src}, got {len(parsed_response.translations)}"
+                            f"Expected ids {expected_ids}, got {actual_ids}"
                         )
 
                     translations_dict = {

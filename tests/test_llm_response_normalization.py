@@ -1,4 +1,5 @@
 import logging
+import json
 import os.path as osp
 import sys
 import unittest
@@ -7,6 +8,24 @@ APP_ROOT = osp.dirname(osp.dirname(osp.abspath(__file__)))
 sys.path.append(APP_ROOT)
 
 from modules.translators.trans_llm_api import LLM_API_Translator, TranslationResponse
+
+
+class PromptChunkTranslator(LLM_API_Translator):
+    @property
+    def max_translation_items_per_request(self):
+        return 2
+
+    def _glossary_prompt_section(self):
+        return ""
+
+    def _translation_context_prompt_section(self):
+        return ""
+
+    def _bubble_text_shortening_rules(self):
+        return ""
+
+    def _dialogue_naturalness_rules(self):
+        return ""
 
 
 class LLMResponseNormalizationTest(unittest.TestCase):
@@ -158,6 +177,60 @@ class LLMResponseNormalizationTest(unittest.TestCase):
         response = TranslationResponse.model_validate(self.normalize(data))
 
         self.assertEqual([item.translation for item in response.translations], ["One", "Two"])
+
+    def test_fragmented_id_and_translation_strings_are_recovered(self):
+        raw_json = (
+            '{"translations":[{"id":1,"translation":"First"},'
+            '"1234567890","2","translation\\\":\\\"Second\\\"",'
+            '"3","translation\\\":\\\"Third\\\""]}'
+        )
+        logger = logging.getLogger("test_fragmented_translation_entries")
+
+        with self.assertLogs(logger, level="WARNING") as captured:
+            data = LLM_API_Translator._loads_json_with_list_recovery(
+                raw_json,
+                "translations",
+                logger,
+            )
+            normalized = LLM_API_Translator._normalize_translation_response_data(
+                data,
+                logger,
+            )
+        response = TranslationResponse.model_validate(normalized)
+
+        self.assertEqual(
+            [(item.id, item.translation) for item in response.translations],
+            [(1, "First"), (2, "Second"), (3, "Third")],
+        )
+        self.assertIn(
+            "Recovered 2 fragmented translation entries.",
+            "\n".join(captured.output),
+        )
+
+    def test_translation_prompts_are_chunked_with_local_ids(self):
+        translator = PromptChunkTranslator.__new__(PromptChunkTranslator)
+        translator.lang_source = "Japanese"
+        translator.lang_map = {"Japanese": "Japanese"}
+
+        prompts = list(
+            translator._assemble_prompts(
+                ["One", "Two", "Three", "Four", "Five"],
+                to_lang="English",
+            )
+        )
+
+        self.assertEqual([count for _, count in prompts], [2, 2, 1])
+        input_batches = [
+            json.loads(prompt.split("INPUT:\n", 1)[1]) for prompt, _ in prompts
+        ]
+        self.assertEqual(
+            [[item["id"] for item in batch] for batch in input_batches],
+            [[1, 2], [1, 2], [1]],
+        )
+        self.assertEqual(
+            [[item["source"] for item in batch] for batch in input_batches],
+            [["One", "Two"], ["Three", "Four"], ["Five"]],
+        )
 
 
 if __name__ == "__main__":
