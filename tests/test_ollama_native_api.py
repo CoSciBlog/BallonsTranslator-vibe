@@ -1,12 +1,17 @@
 import os.path as osp
 import sys
 import unittest
+from types import SimpleNamespace
 
 
 APP_ROOT = osp.dirname(osp.dirname(osp.abspath(__file__)))
 sys.path.append(APP_ROOT)
 
-from modules.translators.trans_llm_api import LLM_API_Translator, LLM_API_Translator_2
+from modules.translators.trans_llm_api import (
+    GlossaryResponse,
+    LLM_API_Translator,
+    LLM_API_Translator_2,
+)
 from modules.translators.trans_two_step import TwoStepTranslator
 from utils.ollama import (
     OLLAMA_DEFAULT_ENDPOINT,
@@ -45,9 +50,19 @@ class FakeHttpClient:
 class FakeLogger:
     def __init__(self):
         self.infos = []
+        self.warnings = []
 
     def info(self, message):
         self.infos.append(message)
+
+    def warning(self, message):
+        self.warnings.append(message)
+
+    def debug(self, _message):
+        return None
+
+    def error(self, _message):
+        return None
 
 
 class NativeOllamaTranslator(LLM_API_Translator):
@@ -70,7 +85,87 @@ class NativeOllamaTranslator(LLM_API_Translator):
         return self._params.get(param_key)
 
 
+class StructuredFallbackTranslator(NativeOllamaTranslator):
+    def __init__(self, responses):
+        super().__init__()
+        self.responses = list(responses)
+        self.request_args = []
+        self.token_count = 0
+        self.token_count_last = 0
+        self.lang_source = "Japanese"
+        self.lang_target = "English"
+        self.lang_map = {"Japanese": "Japanese", "English": "English"}
+        self._params.update(
+            {
+                "model": "gemma4:12b",
+                "override model": "",
+                "system_prompt": "Return only the requested JSON object.",
+                "request prompt": "",
+                "json mode": True,
+                "reasoning": True,
+                "reflection": False,
+                "num ctx": 24576,
+            }
+        )
+
+    def _select_api_key(self):
+        return "dummy-key"
+
+    def _initialize_client(self, _api_key):
+        return True
+
+    def _respect_delay(self):
+        return None
+
+    def _create_completion(self, api_args):
+        self.request_args.append(api_args)
+        return SimpleNamespace(
+            choices=[
+                SimpleNamespace(
+                    message=SimpleNamespace(content=self.responses.pop(0))
+                )
+            ],
+            usage=SimpleNamespace(total_tokens=10),
+        )
+
+
 class NativeOllamaTransportTest(unittest.TestCase):
+    def test_thought_json_retries_translation_once_without_thinking(self):
+        translator = StructuredFallbackTranslator(
+            [
+                '{"thought_process":"Translate the supplied text."}',
+                '{"translations":[{"id":1,"translation":"Hello"}]}',
+            ]
+        )
+
+        response = translator._request_translation("Translate item 1.")
+
+        self.assertEqual(response.translations[0].translation, "Hello")
+        self.assertTrue(translator.request_args[0]["extra_body"]["think"])
+        self.assertFalse(translator.request_args[1]["extra_body"]["think"])
+        self.assertEqual(len(translator.request_args), 2)
+        self.assertIn("retrying this request once", translator.logger.warnings[-1])
+
+    def test_thought_json_retries_glossary_once_without_thinking(self):
+        translator = StructuredFallbackTranslator(
+            [
+                '{"thought_process_not_included":"none"}',
+                '{"entries":[]}',
+            ]
+        )
+
+        response = translator._request_model_object(
+            "Extract glossary entries.",
+            GlossaryResponse,
+            "Return GlossaryResponse JSON.",
+            purpose="glossary",
+        )
+
+        self.assertEqual(response.entries, [])
+        self.assertTrue(translator.request_args[0]["extra_body"]["think"])
+        self.assertFalse(translator.request_args[1]["extra_body"]["think"])
+        self.assertEqual(len(translator.request_args), 2)
+
     def test_ollama_chat_request_uses_native_payload_and_context_option(self):
         translator = NativeOllamaTranslator()
 

@@ -2240,6 +2240,7 @@ class LLM_API_Translator(BaseTranslator):
         purpose: str = "translation",
         expected_count: Optional[int] = None,
         expected_ids: Optional[List[int]] = None,
+        _disable_ollama_thinking: bool = False,
     ) -> Optional[BaseModel]:
         current_api_key = self._select_api_key()
 
@@ -2286,6 +2287,8 @@ class LLM_API_Translator(BaseTranslator):
                 api_args["reasoning_effort"] = self.reasoning_level
 
         extra_body = self._build_reasoning_extra_body()
+        if self.provider == "Ollama" and _disable_ollama_thinking:
+            extra_body["think"] = False
         if extra_body:
             api_args["extra_body"] = extra_body
 
@@ -2331,12 +2334,33 @@ class LLM_API_Translator(BaseTranslator):
                 json_to_parse = json_to_parse[start : end + 1]
 
         list_key = "entries" if response_model is GlossaryResponse else "translations"
-        raw_data = self._loads_json_with_list_recovery(json_to_parse, list_key, self.logger)
-        self.logger.debug(f"Raw JSON content from API: {raw_content}")
-        if response_model is GlossaryResponse:
-            raw_data = self._normalize_glossary_response_data(raw_data, self.logger)
-            self.logger.debug(f"Normalized glossary JSON content from API: {raw_data}")
-        return response_model.model_validate(raw_data)
+        try:
+            raw_data = self._loads_json_with_list_recovery(json_to_parse, list_key, self.logger)
+            self.logger.debug(f"Raw JSON content from API: {raw_content}")
+            if response_model is GlossaryResponse:
+                raw_data = self._normalize_glossary_response_data(raw_data, self.logger)
+                self.logger.debug(f"Normalized glossary JSON content from API: {raw_data}")
+            if not isinstance(raw_data, dict) or list_key not in raw_data:
+                raise ValueError(
+                    f"Structured response is missing the required '{list_key}' field."
+                )
+            return response_model.model_validate(raw_data)
+        except (ValidationError, json.JSONDecodeError, ValueError):
+            if self.provider == "Ollama" and extra_body.get("think"):
+                self.logger.warning(
+                    "Ollama thinking returned invalid structured JSON for %s; "
+                    "retrying this request once with think disabled." % purpose
+                )
+                return self._request_model_object(
+                    prompt,
+                    response_model,
+                    system_prompt,
+                    purpose=purpose,
+                    expected_count=expected_count,
+                    expected_ids=expected_ids,
+                    _disable_ollama_thinking=True,
+                )
+            raise
 
     def _create_completion(self, api_args: Dict):
         if self.provider == "Ollama":
@@ -2543,6 +2567,7 @@ class LLM_API_Translator(BaseTranslator):
         expected_count: Optional[int] = None,
         expected_ids: Optional[List[int]] = None,
         max_tokens_override: Optional[int] = None,
+        _disable_ollama_thinking: bool = False,
     ) -> Optional[TranslationResponse]:
         current_api_key = self._select_api_key()
 
@@ -2607,6 +2632,8 @@ class LLM_API_Translator(BaseTranslator):
                 api_args["reasoning_effort"] = self.reasoning_level
 
         extra_body = self._build_reasoning_extra_body()
+        if self.provider == "Ollama" and _disable_ollama_thinking:
+            extra_body["think"] = False
         if extra_body:
             api_args["extra_body"] = extra_body
 
@@ -2713,10 +2740,26 @@ class LLM_API_Translator(BaseTranslator):
                     else:
                         raise e
                 except (ValidationError, json.JSONDecodeError, Exception) as final_e:
+                    self.logger.debug(f"Raw JSON content from API: {raw_content}")
+                    if self.provider == "Ollama" and extra_body.get("think"):
+                        self.logger.warning(
+                            "Ollama thinking returned invalid TranslationResponse JSON for %s; "
+                            "retrying this request once with think disabled."
+                            % request_purpose
+                        )
+                        self._record_usage(completion)
+                        return self._request_translation(
+                            prompt,
+                            is_reflection=is_reflection,
+                            purpose=purpose,
+                            expected_count=expected_count,
+                            expected_ids=expected_ids,
+                            max_tokens_override=max_tokens_override,
+                            _disable_ollama_thinking=True,
+                        )
                     self.logger.error(
                         f"Pydantic validation or JSON parsing failed even after attempting fix: {final_e}"
                     )
-                    self.logger.debug(f"Raw JSON content from API: {raw_content}")
                     raise
         else:
             self.logger.warning("No valid message content in API response.")
