@@ -208,9 +208,11 @@ def get_base_det_models(model_path, device='cpu', half=False, act='leaky'):
     text_seg.load_state_dict(textdetector_dict['text_seg'])
     text_det = DBHead(64, act=act)
     text_det.load_state_dict(textdetector_dict['text_det'])
+    models = [blk_det, text_seg, text_det]
+    models = [model.eval().to(device) for model in models]
     if half:
-        return blk_det.eval().half(), text_seg.eval().half(), text_det.eval().half()
-    return blk_det.eval().to(device), text_seg.eval().to(device), text_det.eval().to(device)
+        models = [model.half() for model in models]
+    return tuple(models)
 
 class TextDetBase(nn.Module):
     def __init__(self, model_path, device='cpu', half=False, fuse=False, act='leaky'):

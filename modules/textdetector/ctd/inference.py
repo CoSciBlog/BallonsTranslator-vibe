@@ -300,6 +300,7 @@ class TextDetector:
         model_path = CTD_MODEL_PATH+'.onnx' if device == 'cpu' else CTD_MODEL_PATH
         if not osp.exists(model_path):
             raise FileNotFoundError(f'CTD model not found: {model_path}')
+        self.device = device
         self.load_model(model_path)
 
     def det_batch_forward_ctd(self, batch: np.ndarray, device: str) -> Tuple[np.ndarray, np.ndarray]:
@@ -307,6 +308,8 @@ class TextDetector:
         if isinstance(self.net, TextDetBase):
             batch = einops.rearrange(batch.astype(np.float32) / 255., 'n h w c -> n c h w')
             batch = torch.from_numpy(batch).to(device)
+            if self.half:
+                batch = batch.half()
             _, mask, lines = self.net(batch)
             mask = mask.cpu().numpy()
             lines = lines.cpu().numpy()

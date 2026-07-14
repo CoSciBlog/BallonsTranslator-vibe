@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README_EN.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.96`
+Fork release: `1.4.0-vibe.97`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -225,6 +225,10 @@ For NVIDIA Blackwell/RTX 50xx systems, the auto profile uses the PyTorch cu128 w
 ## OCR notes
 
 `manga_ocr` uses the local model in `data/models/manga-ocr-base`. Current Transformers versions load this vision model through `AutoImageProcessor`; older `AutoFeatureExtractor` loading can fail with `Unrecognized feature extractor` even when `preprocessor_config.json` is present.
+
+## ComicTextDetector GPU notes
+
+ComicTextDetector keeps its input tensors and all model weights on the selected device. Half Precision now also works in the rearranged-batch path; it moves the model to the GPU before converting both weights and inputs to FP16. If a GPU backend does not reliably support FP16, disable `Text Detector -> ComicTextDetector -> Half Precision`.
 
 ## Project glossary
 

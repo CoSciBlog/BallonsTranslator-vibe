@@ -100,6 +100,7 @@
 
 ### Changed
 
+- Bumped the fork runtime version string to `1.4.0-vibe.97`.
 - Reworked Translator settings into a denser mixed layout with two-column Source/Target controls, inline selectors and checkboxes, wider text/list/editor rows, a wider Ollama model table, and compact prompt reset actions.
 - Bumped the fork runtime version string to `1.4.0-vibe.96`.
 - Added `unload vision models before llm` to both LLM API translator profiles and made the pipeline defer their LLM requests until detector, OCR, and inpainting models have been unloaded.
@@ -179,6 +180,7 @@
 
 ### Fixed
 
+- Fixed ComicTextDetector Half Precision inference by moving all model weights to the selected GPU before converting them to FP16, matching rearranged-batch inputs to the same precision, and retaining device changes during model reloads.
 - Full pipeline completion no longer treats translation as already finished merely because OCR is disabled; existing text boxes can still be translated, including in deferred mode.
 - Post-translation LLM review now keeps the existing draft translations for a chunk when an API timeout or retryable provider error occurs, preventing optional review failures from aborting an otherwise completed translation pipeline.
 - Reloaded a `lama_large_512px` model if it is unloaded between preprocessing and inference instead of attempting to call `None`.
