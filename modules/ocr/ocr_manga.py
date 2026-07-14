@@ -47,6 +47,7 @@ def post_process(text):
 
 @register_OCR('manga_ocr')
 class MangaOCR(OCRBase):
+    supported_ocr_languages = {'Japanese'}
     params = {
         'device': DEVICE_SELECTOR(),
         'beam size': {

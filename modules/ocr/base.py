@@ -1,4 +1,5 @@
 from typing import Tuple, List, Dict, Union, Callable
+import re
 import numpy as np
 import cv2
 from collections import OrderedDict
@@ -9,12 +10,14 @@ OCR = Registry('OCR')
 register_OCR = OCR.register_module
 
 from ..base import BaseModule, DEFAULT_DEVICE, DEVICE_SELECTOR, LOGGER
+from utils.ocr_language import ocr_languages_compatible
 
 class OCRBase(BaseModule):
 
     _postprocess_hooks = OrderedDict()
     _preprocess_hooks = OrderedDict()
     _line_only: bool = False
+    supported_ocr_languages = None
 
     def __init__(self, **params) -> None:
         super().__init__(**params)
@@ -47,6 +50,31 @@ class OCRBase(BaseModule):
             callback(textblocks=blk_list, img=img, ocr_module=self)
 
         return blk_list
+
+    def supports_language(self, source_language: str) -> bool:
+        if self.supported_ocr_languages:
+            return any(
+                ocr_languages_compatible(source_language, language)
+                for language in self.supported_ocr_languages
+            )
+
+        configured_languages = []
+        for key in ('language', 'target_language', 'language_hints'):
+            if not self.params or key not in self.params:
+                continue
+            value = self.get_param_value(key)
+            if isinstance(value, (list, tuple, set)):
+                configured_languages.extend(value)
+            elif isinstance(value, str):
+                configured_languages.extend(
+                    part.strip() for part in re.split(r'[,;|]', value) if part.strip()
+                )
+        if not configured_languages:
+            return True
+        return any(
+            ocr_languages_compatible(source_language, language)
+            for language in configured_languages
+        )
 
     def _ocr_blk_list(self, img: np.ndarray, blk_list: List[TextBlock], *args, **kwargs) -> None:
         raise NotImplementedError

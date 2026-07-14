@@ -1085,6 +1085,9 @@ class TextDetectConfigPanel(ModuleConfigParseWidget):
         
 
 class OCRConfigPanel(ModuleConfigParseWidget):
+    fallback_configuration_changed = Signal()
+    fallback_paramwidget_edited = Signal(str, dict)
+
     def __init__(self, module_name: str, scrollWidget: QWidget = None, *args, **kwargs) -> None:
         super().__init__(module_name, GET_VALID_OCR, scrollWidget = scrollWidget, module_config_key='ocr_params', *args, **kwargs)
         self.ocr_changed = self.module_changed
@@ -1099,6 +1102,65 @@ class OCRConfigPanel(ModuleConfigParseWidget):
         self.fontDetectChecker.setChecked(pcfg.module.ocr_font_detect)
         self.fontDetectChecker.clicked.connect(self.on_fontdetect_changed)
         self.vlayout.addWidget(self.fontDetectChecker)
+
+        self.fallbackEnabledChecker = QCheckBox(self.tr('Enable fallback OCR'), self)
+        self.fallbackEnabledChecker.setToolTip(self.tr('Use a separately configured OCR module when the primary OCR cannot provide usable text.'))
+        self.fallbackOnEmptyChecker = QCheckBox(self.tr('Use fallback for regions where primary OCR returns no text'), self)
+        self.fallbackOnFailureChecker = QCheckBox(self.tr('Use fallback when primary OCR fails or is incompatible with the source language'), self)
+        self.fallbackPanel = ModuleConfigParseWidget(
+            self.tr('Fallback OCR'), GET_VALID_OCR, scrollWidget=scrollWidget,
+            module_config_key='ocr_params', single_column=True,
+        )
+        self.vlayout.addWidget(self.fallbackEnabledChecker)
+        self.vlayout.addWidget(self.fallbackOnEmptyChecker)
+        self.vlayout.addWidget(self.fallbackOnFailureChecker)
+        self.vlayout.addWidget(self.fallbackPanel)
+        self.fallbackEnabledChecker.toggled.connect(self.on_fallback_configuration_changed)
+        self.fallbackOnEmptyChecker.toggled.connect(self.on_fallback_configuration_changed)
+        self.fallbackOnFailureChecker.toggled.connect(self.on_fallback_configuration_changed)
+        self.fallbackPanel.module_changed.connect(self.on_fallback_configuration_changed)
+        self.fallbackPanel.paramwidget_edited.connect(self.fallback_paramwidget_edited)
+        self.module_changed.connect(self.on_fallback_configuration_changed)
+
+    def addModulesParamWidgets(self, module_dict: dict):
+        saved_fallback = pcfg.module.ocr_fallback
+        self._initializing_fallback = True
+        super().addModulesParamWidgets(module_dict)
+        self.fallbackPanel.addModulesParamWidgets(module_dict)
+        self.fallbackEnabledChecker.setChecked(pcfg.module.ocr_fallback_enabled)
+        self.fallbackOnEmptyChecker.setChecked(pcfg.module.ocr_fallback_on_empty)
+        self.fallbackOnFailureChecker.setChecked(pcfg.module.ocr_fallback_on_failure)
+        fallback = saved_fallback
+        valid = self.get_valid_module_keys()
+        primary = self.module_combobox.currentText()
+        if fallback not in valid or fallback == primary:
+            fallback = next((name for name in valid if name != primary), '')
+        self.fallbackPanel.setModule(fallback)
+        pcfg.module.ocr_fallback = fallback
+        self._initializing_fallback = False
+        self._update_fallback_controls()
+
+    def _update_fallback_controls(self):
+        enabled = self.fallbackEnabledChecker.isChecked()
+        has_distinct_module = bool(self.fallbackPanel.module_combobox.currentText())
+        self.fallbackOnEmptyChecker.setEnabled(enabled and has_distinct_module)
+        self.fallbackOnFailureChecker.setEnabled(enabled and has_distinct_module)
+        self.fallbackPanel.setEnabled(enabled and has_distinct_module)
+
+    def on_fallback_configuration_changed(self, *args):
+        if getattr(self, '_initializing_fallback', False):
+            return
+        primary = self.module_combobox.currentText()
+        fallback = self.fallbackPanel.module_combobox.currentText()
+        if fallback == primary:
+            fallback = next((name for name in self.get_valid_module_keys() if name != primary), '')
+            self.fallbackPanel.setModule(fallback)
+        pcfg.module.ocr_fallback_enabled = self.fallbackEnabledChecker.isChecked() and bool(fallback)
+        pcfg.module.ocr_fallback = fallback
+        pcfg.module.ocr_fallback_on_empty = self.fallbackOnEmptyChecker.isChecked()
+        pcfg.module.ocr_fallback_on_failure = self.fallbackOnFailureChecker.isChecked()
+        self._update_fallback_controls()
+        self.fallback_configuration_changed.emit()
 
     def on_restore_empty_ocr(self):
         pcfg.restore_ocr_empty = self.restoreEmptyOCRChecker.isChecked()

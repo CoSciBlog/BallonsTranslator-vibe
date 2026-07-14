@@ -64,6 +64,10 @@ class ModuleConfig(Config):
     pipeline_completion_notification: bool = False
     # 是否在 OCR 后进行字体检测（默认不启用）
     ocr_font_detect: bool = False
+    ocr_fallback_enabled: bool = False
+    ocr_fallback: str = 'manga_ocr'
+    ocr_fallback_on_empty: bool = True
+    ocr_fallback_on_failure: bool = True
     textdetector_params: Dict = field(default_factory=lambda: dict())
     ocr_params: Dict = field(default_factory=lambda: dict())
     translator_params: Dict = field(default_factory=lambda: dict())

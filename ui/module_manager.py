@@ -16,6 +16,7 @@ from utils.io_utils import imread, text_is_empty
 from utils.textblock_mask import canny_flood, connected_canny_flood, existing_mask
 from utils.decensor import build_decensor_mask, select_decensor_input_image, write_decensor_debug_outputs
 from modules.translators import MissingTranslatorParams
+from modules.translators.base import LANGUAGE_ENGLISH_NAMES
 from modules.base import BaseModule, soft_empty_cache
 from modules import INPAINTERS, TRANSLATORS, TEXTDETECTORS, OCR, \
     GET_VALID_TRANSLATORS, GET_VALID_TEXTDETECTORS, GET_VALID_INPAINTERS, GET_VALID_OCR, \
@@ -395,6 +396,8 @@ class ImgtransThread(QThread):
         self.pages_to_process = None  # 需要处理的页面列表（用于继续运行模式）
         self.ocr_fallback_name = ''
         self.ocr_fallback = None
+        self.ocr_fallback_on_empty = True
+        self.ocr_fallback_on_failure = False
 
         self.translation_only = False
         self.review_only = False
@@ -436,27 +439,69 @@ class ImgtransThread(QThread):
         if self.translator is not None and hasattr(self.translator, 'clear_page_context'):
             self.translator.clear_page_context()
 
-    def configure_ocr_fallback(self, module_name: str = ''):
+    def configure_ocr_fallback(self, module_name: str = '', on_empty: bool = True, on_failure: bool = False):
+        old_fallback = self.ocr_fallback
         self.ocr_fallback_name = module_name or ''
         self.ocr_fallback = None
+        self.ocr_fallback_on_empty = on_empty
+        self.ocr_fallback_on_failure = on_failure
+        if old_fallback is not None:
+            old_fallback.unload_model()
 
-    def _run_ocr_with_fallback(self, img: np.ndarray, blk_list: List[TextBlock]):
-        self.ocr.run_ocr(img, blk_list)
+    def _get_ocr_fallback(self):
         if (
             not self.ocr_fallback_name
             or self.ocr_fallback_name == getattr(self.ocr, 'name', '')
-            or not blk_list
-            or any(not text_is_empty(blk.get_text()) for blk in blk_list)
+            or self.ocr_fallback_name not in OCR.module_dict
         ):
-            return
+            return None
         if self.ocr_fallback is None:
             fallback_class = OCR.module_dict[self.ocr_fallback_name]
             params = cfg_module.get_params('ocr').get(self.ocr_fallback_name)
             self.ocr_fallback = fallback_class(**params) if params is not None else fallback_class()
             if not pcfg.module.load_model_on_demand:
                 self.ocr_fallback.load_model()
-        LOGGER.info(f'OCR returned no text; retrying with fallback {self.ocr_fallback_name}.')
-        self.ocr_fallback.run_ocr(img, blk_list)
+        return self.ocr_fallback
+
+    def _has_ocr_fallback(self):
+        return bool(
+            self.ocr_fallback_name
+            and self.ocr_fallback_name != getattr(self.ocr, 'name', '')
+            and self.ocr_fallback_name in OCR.module_dict
+        )
+
+    def _run_ocr_with_fallback(self, img: np.ndarray, blk_list: List[TextBlock]):
+        has_fallback = self._has_ocr_fallback()
+        source_language = LANGUAGE_ENGLISH_NAMES.get(
+            cfg_module.translate_source, cfg_module.translate_source
+        )
+        if has_fallback and self.ocr_fallback_on_failure and not self.ocr.supports_language(source_language):
+            LOGGER.info(
+                f'Primary OCR {self.ocr.name} is incompatible with {source_language}; '
+                f'using fallback {self.ocr_fallback_name}.'
+            )
+            self._get_ocr_fallback().run_ocr(img, blk_list)
+            return
+        try:
+            self.ocr.run_ocr(img, blk_list)
+        except Exception as exc:
+            if not has_fallback or not self.ocr_fallback_on_failure:
+                raise
+            LOGGER.warning(
+                f'Primary OCR {self.ocr.name} failed ({type(exc).__name__}: {exc}); '
+                f'using fallback {self.ocr_fallback_name}.'
+            )
+            self._get_ocr_fallback().run_ocr(img, blk_list)
+            return
+        if not has_fallback or not self.ocr_fallback_on_empty:
+            return
+        empty_blocks = [blk for blk in blk_list if text_is_empty(blk.get_text())]
+        if empty_blocks:
+            LOGGER.info(
+                f'OCR returned no text for {len(empty_blocks)}/{len(blk_list)} region(s); '
+                f'retrying them with fallback {self.ocr_fallback_name}.'
+            )
+            self._get_ocr_fallback().run_ocr(img, empty_blocks)
 
     def _translate_textblocks(self, imgname: str, blk_list: List[TextBlock]):
         try:
@@ -963,7 +1008,7 @@ class ImgtransThread(QThread):
                     time.sleep(0.05)
 
             if low_vram_trans or unload_before_llm_refinement:
-                unload_modules(self, ['textdetector', 'inpainter', 'ocr'])
+                unload_modules(self, ['textdetector', 'inpainter', 'ocr', 'ocr_fallback'])
             for imgname in pages_to_iterate:
                 # 检查是否请求停止
                 if self.stop_requested:
@@ -1125,7 +1170,9 @@ class ImgtransThread(QThread):
 def unload_modules(self, module_names):
     model_deleted = False
     for module in module_names:
-        module: BaseModule = getattr(self, module)
+        module: BaseModule = getattr(self, module, None)
+        if module is None:
+            continue
         model_deleted = model_deleted or module.unload_model()
     if model_deleted:
         soft_empty_cache()
@@ -1218,13 +1265,16 @@ class ModuleManager(QObject):
         ocr_panel.addModulesParamWidgets(ocr_params)
         ocr_panel.paramwidget_edited.connect(self.on_ocrparam_edited)
         ocr_panel.ocr_changed.connect(self.setOCR)
+        ocr_panel.fallback_configuration_changed.connect(self.setOCRFallbackFromConfig)
+        ocr_panel.fallback_paramwidget_edited.connect(self.on_ocr_fallback_param_edited)
+        self.setOCRFallbackFromConfig()
         OCRBase.register_postprocess_hooks(ocr_postprocess)
 
         config_panel.unload_models.connect(self.unload_all_models)
 
 
     def unload_all_models(self):
-        unload_modules(self, {'textdetector', 'inpainter', 'ocr', 'translator'})
+        unload_modules(self, {'textdetector', 'inpainter', 'ocr', 'ocr_fallback', 'translator'})
 
     @property
     def translator(self) -> BaseTranslator:
@@ -1241,6 +1291,10 @@ class ModuleManager(QObject):
     @property
     def ocr(self) -> OCRBase:
         return self.ocr_thread.ocr
+
+    @property
+    def ocr_fallback(self) -> OCRBase:
+        return self.imgtrans_thread.ocr_fallback
 
     def translatePage(self, run_target: bool, page_key: str):
         if not run_target:
@@ -1920,8 +1974,15 @@ class ModuleManager(QObject):
             self.ocr_thread.terminate()
         self.ocr_thread.setOCR(ocr)
 
-    def setOCRFallback(self, ocr: str = ''):
-        self.imgtrans_thread.configure_ocr_fallback(ocr)
+    def setOCRFallback(self, ocr: str = '', on_empty: bool = True, on_failure: bool = False):
+        self.imgtrans_thread.configure_ocr_fallback(ocr, on_empty, on_failure)
+
+    def setOCRFallbackFromConfig(self):
+        self.setOCRFallback(
+            cfg_module.ocr_fallback if cfg_module.ocr_fallback_enabled else '',
+            cfg_module.ocr_fallback_on_empty,
+            cfg_module.ocr_fallback_on_failure,
+        )
 
     def on_finish_translate_page(self, page_key: str):
         self.finish_translate_page.emit(page_key)
@@ -1980,6 +2041,20 @@ class ModuleManager(QObject):
         if self.ocr is not None:
             self.updateModuleSetupParam(self.ocr, param_key, param_content)
             cfg_module.ocr_params[self.ocr.name] = self.ocr.params
+
+    def on_ocr_fallback_param_edited(self, param_key: str, param_content: dict):
+        selected = self.ocr_panel.fallbackPanel.module_combobox.currentText()
+        fallback = self.imgtrans_thread.ocr_fallback
+        if fallback is not None and fallback.name == selected:
+            self.updateModuleSetupParam(fallback, param_key, param_content)
+            cfg_module.ocr_params[selected] = fallback.params
+            return
+        if selected not in OCR.module_dict:
+            return
+        params = cfg_module.ocr_params.get(selected)
+        module = OCR.module_dict[selected](**params) if params is not None else OCR.module_dict[selected]()
+        self.updateModuleSetupParam(module, param_key, param_content)
+        cfg_module.ocr_params[selected] = module.params
 
     def updateModuleSetupParam(self, 
                                module: Union[InpainterBase, BaseTranslator],

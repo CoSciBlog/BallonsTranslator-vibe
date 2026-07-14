@@ -696,7 +696,9 @@ class MainWindow(mainwindow_cls):
         self.module_manager.setTextDetector(options.textdetector)
         self.module_manager.setOCR(options.ocr)
         self.module_manager.setOCRFallback(
-            options.ocr_fallback if options.ocr_fallback_enabled and options.ocr_fallback != options.ocr else ''
+            options.ocr_fallback if options.ocr_fallback_enabled and options.ocr_fallback != options.ocr else '',
+            on_empty=True,
+            on_failure=False,
         )
         self.module_manager.setInpainter(options.inpainter)
         self.module_manager.setTranslator(options.translator)
@@ -840,7 +842,7 @@ class MainWindow(mainwindow_cls):
         self._gui_batch_completed = 0
         self._gui_batch_cancel_requested = False
         self._gui_batch_upscale_pending = False
-        self.module_manager.setOCRFallback('')
+        self.module_manager.setOCRFallbackFromConfig()
         self.imgtrans_progress_msgbox.set_batch_mode(False)
 
         if options and not stopped:
