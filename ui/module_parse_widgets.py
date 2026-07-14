@@ -9,7 +9,7 @@ from .custom_widget import ConfigComboBox, ParamComboBox, NoBorderPushBtn, Param
 from .tooltip_utils import wrap_tooltip
 from utils.shared import CONFIG_COMBOBOX_LONG, size2width, CONFIG_COMBOBOX_SHORT, CONFIG_COMBOBOX_HEIGHT
 from utils.config import pcfg, sample_module_param_value
-from utils.ollama import OLLAMA_DEFAULT_ENDPOINT, ollama_tags_endpoint
+from utils.ollama import OLLAMA_DEFAULT_ENDPOINT, ollama_model_matches_query, ollama_tags_endpoint
 
 from qtpy.QtWidgets import QPlainTextEdit, QHBoxLayout, QVBoxLayout, QWidget, QLabel, QCheckBox, QLineEdit, QGridLayout, QPushButton, QSizePolicy, QTableWidget, QTableWidgetItem, QComboBox, QAbstractItemView, QHeaderView
 from qtpy.QtCore import Qt, Signal, QUrl, QTimer
@@ -193,6 +193,16 @@ class OllamaModelManager(QWidget):
         actions.addWidget(self.use_button)
         actions.addStretch(1)
         layout.addLayout(actions)
+
+        search_label = QLabel(self.tr('Search models'))
+        self.search_edit = QLineEdit()
+        self.search_edit.setPlaceholderText(self.tr('Filter by model name...'))
+        self.search_edit.setClearButtonEnabled(True)
+        self.search_edit.setAccessibleName(self.tr('Search installed Ollama models'))
+        self.search_edit.setFixedWidth(CONFIG_FIELD_WIDE)
+        search_label.setBuddy(self.search_edit)
+        layout.addWidget(search_label)
+        layout.addWidget(self.search_edit)
         layout.addWidget(self.status_label)
 
         self.table = QTableWidget(0, 3)
@@ -218,6 +228,7 @@ class OllamaModelManager(QWidget):
         self.use_button.clicked.connect(self.use_selected_model)
         self.table.doubleClicked.connect(lambda _index: self.use_selected_model())
         self.table.itemSelectionChanged.connect(self._sync_selected_row_styles)
+        self.search_edit.textChanged.connect(self._filter_models)
         self._update_availability()
 
     @staticmethod
@@ -251,7 +262,8 @@ class OllamaModelManager(QWidget):
     def _update_availability(self):
         enabled = str(self.provider_getter()).casefold() == 'ollama'
         self.refresh_button.setEnabled(enabled and self._reply is None)
-        self.use_button.setEnabled(enabled and self.table.rowCount() > 0)
+        self.search_edit.setEnabled(enabled)
+        self.use_button.setEnabled(enabled and self._visible_model_count() > 0)
         if not enabled:
             self.status_label.setText(self.tr('Select Ollama as provider.'))
         elif self.table.rowCount() == 0 and self._reply is None:
@@ -285,7 +297,6 @@ class OllamaModelManager(QWidget):
                 if isinstance(model, dict) and (model.get('name') or model.get('model'))
             })
             self._set_models(names)
-            self.status_label.setText(self.tr('%d installed model(s).') % len(names))
         except Exception as error:
             detail = reply.errorString()
             if not detail or detail == 'Unknown error':
@@ -338,8 +349,52 @@ class OllamaModelManager(QWidget):
         self._updating = False
         if ordered:
             self.table.selectRow(0)
+        self._filter_models()
         self._sync_selected_row_styles()
         self.paramwidget_edited.emit(self.param_key, dict(self.preferences))
+
+    def _visible_model_count(self):
+        return sum(
+            not self.table.isRowHidden(row)
+            for row in range(self.table.rowCount())
+        )
+
+    def _filter_models(self, _text=None):
+        query = self.search_edit.text().strip()
+        first_visible = -1
+        current_visible = False
+        current_row = self.table.currentRow()
+        for row in range(self.table.rowCount()):
+            item = self.table.item(row, 1)
+            visible = item is not None and ollama_model_matches_query(item.text(), query)
+            self.table.setRowHidden(row, not visible)
+            if visible:
+                if first_visible < 0:
+                    first_visible = row
+                current_visible = current_visible or row == current_row
+
+        if not current_visible:
+            self.table.clearSelection()
+            if first_visible >= 0:
+                self.table.selectRow(first_visible)
+
+        visible_count = self._visible_model_count()
+        total_count = self.table.rowCount()
+        enabled = str(self.provider_getter()).casefold() == 'ollama'
+        self.use_button.setEnabled(enabled and visible_count > 0)
+        if enabled and self._reply is None:
+            if query and total_count:
+                self.status_label.setText(
+                    self.tr('%d of %d installed model(s) shown.')
+                    % (visible_count, total_count)
+                )
+            elif total_count:
+                self.status_label.setText(
+                    self.tr('%d installed model(s).') % total_count
+                )
+            elif query:
+                self.status_label.setText(self.tr('No installed models match the search.'))
+        self._sync_selected_row_styles()
 
     def _sync_selected_row_styles(self):
         selected_rows = {index.row() for index in self.table.selectionModel().selectedRows()}
@@ -372,7 +427,11 @@ class OllamaModelManager(QWidget):
 
     def use_selected_model(self):
         row = self.table.currentRow()
-        item = self.table.item(row, 1) if row >= 0 else None
+        item = (
+            self.table.item(row, 1)
+            if row >= 0 and not self.table.isRowHidden(row)
+            else None
+        )
         if item is not None:
             self.model_selected.emit(item.text())
 

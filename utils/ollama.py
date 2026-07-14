@@ -1,6 +1,12 @@
 OLLAMA_DEFAULT_ENDPOINT = 'http://127.0.0.1:11434/v1'
 
 
+def ollama_model_matches_query(model_name: str, query: str = '') -> bool:
+    name = str(model_name or '').casefold()
+    terms = str(query or '').casefold().split()
+    return all(term in name for term in terms)
+
+
 def ollama_base_url(endpoint: str = '') -> str:
     base_url = str(endpoint or OLLAMA_DEFAULT_ENDPOINT).strip().rstrip('/')
     for suffix in ('/api/chat', '/api/tags', '/v1'):

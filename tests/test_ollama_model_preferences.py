@@ -1,10 +1,15 @@
 import unittest
 
-from utils.ollama import OLLAMA_DEFAULT_ENDPOINT, ollama_tags_endpoint
+from utils.ollama import OLLAMA_DEFAULT_ENDPOINT, ollama_model_matches_query, ollama_tags_endpoint
 from utils.config import ModuleConfig, migrate_ollama_translator_config
 
 
 class OllamaModelPreferencesTest(unittest.TestCase):
+    def test_model_search_matches_case_insensitive_multiple_terms(self):
+        self.assertTrue(ollama_model_matches_query('Gemma3:12B-Latest', 'gemma 12b'))
+        self.assertTrue(ollama_model_matches_query('qwen3.5:27b', 'QWEN3.5'))
+        self.assertFalse(ollama_model_matches_query('gemma3:12b', 'gemma 27b'))
+
     def test_default_tags_endpoint(self):
         self.assertEqual(
             ollama_tags_endpoint(OLLAMA_DEFAULT_ENDPOINT),

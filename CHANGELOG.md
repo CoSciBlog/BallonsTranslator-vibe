@@ -4,6 +4,7 @@
 
 ### Added
 
+- Live, case-insensitive multi-term search for installed Ollama models in the `LLM_API_Translator`, `LLM_API_Translator_2`, and `Two-Step Translator` settings.
 - Installed Ollama model lists for `LLM_API_Translator`, `LLM_API_Translator_2`, and `Two-Step Translator`, queried asynchronously from `/api/tags`.
 - Per-profile Ollama model favorites and 1-5 ratings persisted in `config.json`, plus direct selection of a listed model as the active override.
 - A global `Translate after image processing` pipeline option that runs translation only after detection, OCR, and inpainting finish for all selected pages.
@@ -100,6 +101,7 @@
 
 ### Changed
 
+- Bumped the fork runtime version string to `1.4.0-vibe.98`.
 - Bumped the fork runtime version string to `1.4.0-vibe.97`.
 - Reworked Translator settings into a denser mixed layout with two-column Source/Target controls, inline selectors and checkboxes, wider text/list/editor rows, a wider Ollama model table, and compact prompt reset actions.
 - Bumped the fork runtime version string to `1.4.0-vibe.96`.
