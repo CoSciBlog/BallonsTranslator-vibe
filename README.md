@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README_EN.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.91`
+Fork release: `1.4.0-vibe.92`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -28,7 +28,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Added project-level pipeline history in `pipeline_history.json`, with a left-sidebar history window that lists Text Detection, OCR, Translate, and Inpaint as separate step entries. Each step keeps its module/model values, and Ollama translation entries show whether reasoning was enabled.
 - Reworked Settings into separate navigation pages for every category and section instead of one long shared page, with denser responsive grids for multi-value controls and preset actions.
 - Added `General -> Pipeline -> Translate after image processing` to defer translation until text detection, OCR, and inpainting have finished for every page.
-- Added an installed-model browser to all LLM API translator profiles for querying Ollama, selecting a model, marking favorites, and storing personal 1-5 ratings.
+- Added an installed-model browser to all LLM API translator profiles. Ollama profiles query installed models when opened, support selecting a model, and persist favorites plus personal 1-5 ratings in the profile configuration.
 - Changed Settings to open in a separate non-modal window, following the upstream 1.5.x layout behavior while keeping the Vibe-specific settings intact.
 - Added an optional settings safety switch that prevents mouse wheel changes on combo boxes and spin boxes, plus wider input fields for long API keys, URLs, and prompts.
 - Added optional pre-detection page upscaling with factor, quality, maximum size, and skip-threshold settings.

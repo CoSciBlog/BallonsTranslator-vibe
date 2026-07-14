@@ -100,6 +100,8 @@
 
 ### Changed
 
+- Existing LLM translator configurations now migrate Ollama profiles to `http://127.0.0.1:11434/v1`, add the model-preferences store, and query installed models when their settings are opened or switched to Ollama.
+- Bumped the fork runtime version string to `1.4.0-vibe.92`.
 - Set the LLM translator Ollama endpoint default to `http://127.0.0.1:11434/v1` and centralized normalization for `/v1`, `/api/chat`, and `/api/tags` URLs.
 - Bumped the fork runtime version string to `1.4.0-vibe.91`.
 - Replaced the single long Settings scroll page with separate pages for every navigation category and section.

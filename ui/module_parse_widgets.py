@@ -238,6 +238,11 @@ class OllamaModelManager(QWidget):
         self.endpoint_getter = endpoint_getter
         self.provider_getter = provider_getter
         self._update_availability()
+        if (
+            str(self.provider_getter()).casefold() == 'ollama'
+            and self.table.rowCount() == 0
+        ):
+            QTimer.singleShot(0, self.refresh_models)
 
     def _update_availability(self):
         enabled = str(self.provider_getter()).casefold() == 'ollama'
@@ -544,6 +549,11 @@ class ParamWidget(QWidget):
         ):
             endpoint_widget.setText(OLLAMA_DEFAULT_ENDPOINT)
         self.ollama_model_manager._update_availability()
+        if (
+            provider.casefold() == 'ollama'
+            and self.ollama_model_manager.table.rowCount() == 0
+        ):
+            QTimer.singleShot(0, self.ollama_model_manager.refresh_models)
             
     def on_flushbtn_clicked(self):
         paramw: ParamComboBox = self.sender()

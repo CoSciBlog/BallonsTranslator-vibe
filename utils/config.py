@@ -9,6 +9,35 @@ from .fontformat import FontFormat
 from .structures import List, Dict, Config, field, nested_dataclass
 from .logger import logger as LOGGER
 from .io_utils import json_dump_nested_obj, np, serialize_np
+from .ollama import OLLAMA_DEFAULT_ENDPOINT
+
+
+OLLAMA_LLM_TRANSLATOR_PROFILES = (
+    'LLM_API_Translator',
+    'LLM_API_Translator_2',
+    'Two-Step Translator',
+)
+
+
+def migrate_ollama_translator_config(translator_params: dict) -> None:
+    """Add Ollama metadata to existing LLM profiles without replacing user values."""
+    if not isinstance(translator_params, dict):
+        return
+    legacy_endpoints = {
+        '',
+        'http://localhost:11434',
+        'http://localhost:11434/v1',
+    }
+    for profile_name in OLLAMA_LLM_TRANSLATOR_PROFILES:
+        params = translator_params.get(profile_name)
+        if not isinstance(params, dict):
+            continue
+        params.setdefault('ollama model preferences', {})
+        if str(params.get('provider', '')).casefold() != 'ollama':
+            continue
+        endpoint = str(params.get('endpoint', '')).strip().rstrip('/')
+        if endpoint in legacy_endpoints:
+            params['endpoint'] = OLLAMA_DEFAULT_ENDPOINT
 
 class RunStatus:
     FIN_DET = 1
@@ -234,6 +263,7 @@ class ProgramConfig(Config):
                     trans_params[i] = trans_params.pop(k)
             if module_cfg['translator'] in repl_pairs:
                 module_cfg['translator'] = repl_pairs[module_cfg['translator']]
+            migrate_ollama_translator_config(trans_params)
 
         if 'let_text_case' not in config_dict:
             config_dict['let_text_case'] = 'upper' if config_dict.get('let_uppercase_flag', True) else 'normal'
