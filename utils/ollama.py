@@ -61,6 +61,27 @@ def ollama_model_matches_filters(
     return True
 
 
+def ollama_model_sort_value(
+    column: str,
+    model_name: str = '',
+    reasoning_status: str = 'unknown',
+    rating: int = 0,
+):
+    column = str(column or '').casefold()
+    if column == 'model':
+        return str(model_name or '').casefold()
+    if column == 'reasoning':
+        return {'no': 0, 'unknown': 1, 'yes': 2}.get(
+            str(reasoning_status or '').casefold(), 1
+        )
+    if column == 'rating':
+        try:
+            return max(1, min(5, int(rating)))
+        except (TypeError, ValueError):
+            return 0
+    return ''
+
+
 def ollama_base_url(endpoint: str = '') -> str:
     base_url = str(endpoint or OLLAMA_DEFAULT_ENDPOINT).strip().rstrip('/')
     for suffix in ('/api/chat', '/api/tags', '/api/show', '/v1'):

@@ -13,6 +13,7 @@ from utils.ollama import (
     OLLAMA_DEFAULT_ENDPOINT,
     ollama_model_matches_filters,
     ollama_model_parameter_size,
+    ollama_model_sort_value,
     ollama_parameter_size_sort_key,
     ollama_show_endpoint,
     ollama_tags_endpoint,
@@ -31,6 +32,7 @@ WIDE_PARAM_KEYWORDS = (
 )
 EDITOR_PARAM_KEYWORDS = ('prompt', 'template', 'glossary', 'sample')
 CONFIG_FIELD_WIDE = int(CONFIG_COMBOBOX_LONG * 1.45)
+OLLAMA_SORT_ROLE = int(Qt.ItemDataRole.UserRole) + 1
 
 
 def param_key_uses_wide_field(param_key: str) -> bool:
@@ -169,6 +171,15 @@ class ParamPushButton(QPushButton):
         self.paramwidget_edited.emit(self.param_key, '')
 
 
+class OllamaSortableTableItem(QTableWidgetItem):
+    def __lt__(self, other):
+        left = self.data(OLLAMA_SORT_ROLE)
+        right = other.data(OLLAMA_SORT_ROLE)
+        if left is not None and right is not None:
+            return left < right
+        return super().__lt__(other)
+
+
 class OllamaModelManager(QWidget):
     paramwidget_edited = Signal(str, dict)
     model_selected = Signal(str)
@@ -185,6 +196,8 @@ class OllamaModelManager(QWidget):
         self._capability_queue = []
         self._capability_total = 0
         self._capability_checked = 0
+        self._sort_column = -1
+        self._sort_order = Qt.SortOrder.AscendingOrder
         self.network_manager = QNetworkAccessManager(self)
 
         layout = QVBoxLayout(self)
@@ -269,6 +282,11 @@ class OllamaModelManager(QWidget):
         header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
         header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
         header.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionsClickable(True)
+        header.setSortIndicatorShown(False)
+        for column in (1, 2, 3):
+            header_item = self.table.horizontalHeaderItem(column)
+            header_item.setToolTip(self.tr('Click to sort ascending or descending.'))
         self.table.setMinimumHeight(190)
         self.table.setFixedWidth(CONFIG_FIELD_WIDE)
         layout.addWidget(self.table)
@@ -301,6 +319,7 @@ class OllamaModelManager(QWidget):
         self.use_button.clicked.connect(self.use_selected_model)
         self.table.doubleClicked.connect(lambda _index: self.use_selected_model())
         self.table.itemSelectionChanged.connect(self._sync_selected_row_styles)
+        header.sectionClicked.connect(self._on_sort_header_clicked)
         self.search_edit.textChanged.connect(self._filter_models)
         self.size_filter.currentIndexChanged.connect(self._filter_models)
         self.reasoning_filter.currentIndexChanged.connect(self._filter_models)
@@ -436,16 +455,20 @@ class OllamaModelManager(QWidget):
             container_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
             container_layout.addWidget(favorite)
             self.table.setCellWidget(row, 0, container)
-            model_item = QTableWidgetItem(name)
+            model_item = OllamaSortableTableItem(name)
             model_item.setToolTip(name)
             model_item.setData(Qt.ItemDataRole.AccessibleTextRole, name)
             model_item.setData(
                 Qt.ItemDataRole.UserRole,
                 parameter_sizes.get(name) or ollama_model_parameter_size(name),
             )
+            model_item.setData(
+                OLLAMA_SORT_ROLE,
+                ollama_model_sort_value('model', model_name=name),
+            )
             self.table.setItem(row, 1, model_item)
 
-            reasoning_item = QTableWidgetItem()
+            reasoning_item = OllamaSortableTableItem()
             reasoning_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
             self.table.setItem(row, 2, reasoning_item)
             self._set_reasoning_status(name, reasoning_statuses.get(name))
@@ -457,14 +480,23 @@ class OllamaModelManager(QWidget):
             rating.currentTextChanged.connect(
                 lambda value, model=name: self._set_rating(model, value)
             )
+            rating_item = OllamaSortableTableItem(str(self.preferences[name]['rating']))
+            rating_item.setData(
+                OLLAMA_SORT_ROLE,
+                ollama_model_sort_value('rating', rating=self.preferences[name]['rating']),
+            )
+            rating_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.table.setItem(row, 3, rating_item)
             self.table.setCellWidget(row, 3, rating)
         self._updating = False
         self._set_parameter_size_options(
             parameter_sizes.get(name) or ollama_model_parameter_size(name)
             for name in ordered
         )
+        self._apply_sort()
         if ordered:
-            self.table.selectRow(0)
+            if self.table.currentRow() < 0:
+                self.table.selectRow(0)
         self._filter_models()
         self._sync_selected_row_styles()
         self.paramwidget_edited.emit(self.param_key, dict(self.preferences))
@@ -493,9 +525,54 @@ class OllamaModelManager(QWidget):
                 Qt.ItemDataRole.UserRole,
                 'yes' if supported is True else 'no' if supported is False else 'unknown',
             )
+            item.setData(
+                OLLAMA_SORT_ROLE,
+                ollama_model_sort_value(
+                    'reasoning',
+                    reasoning_status=item.data(Qt.ItemDataRole.UserRole),
+                ),
+            )
             if not self._updating:
-                self._filter_models()
+                if self._sort_column == 2:
+                    self._apply_sort()
+                else:
+                    self._filter_models()
             return
+
+    def _selected_model_name(self):
+        row = self.table.currentRow()
+        item = self.table.item(row, 1) if row >= 0 else None
+        return item.text() if item is not None else ''
+
+    def _on_sort_header_clicked(self, column: int):
+        if column not in (1, 2, 3):
+            return
+        if column == self._sort_column:
+            self._sort_order = (
+                Qt.SortOrder.DescendingOrder
+                if self._sort_order == Qt.SortOrder.AscendingOrder
+                else Qt.SortOrder.AscendingOrder
+            )
+        else:
+            self._sort_column = column
+            self._sort_order = Qt.SortOrder.AscendingOrder
+        header = self.table.horizontalHeader()
+        header.setSortIndicator(self._sort_column, self._sort_order)
+        header.setSortIndicatorShown(True)
+        self._apply_sort()
+
+    def _apply_sort(self):
+        if self._sort_column not in (1, 2, 3):
+            return
+        selected_model = self._selected_model_name()
+        self.table.sortItems(self._sort_column, self._sort_order)
+        if selected_model:
+            for row in range(self.table.rowCount()):
+                item = self.table.item(row, 1)
+                if item is not None and item.text() == selected_model:
+                    self.table.selectRow(row)
+                    break
+        self._filter_models()
 
     def _set_parameter_size_options(self, sizes):
         selected = self.size_filter.currentData()
@@ -654,7 +731,22 @@ class OllamaModelManager(QWidget):
             return
         self.preferences[model]['rating'] = max(1, min(5, int(rating)))
         self.paramwidget_edited.emit(self.param_key, dict(self.preferences))
-        self._filter_models()
+        for row in range(self.table.rowCount()):
+            model_item = self.table.item(row, 1)
+            if model_item is None or model_item.text() != model:
+                continue
+            rating_item = self.table.item(row, 3)
+            if rating_item is not None:
+                rating_item.setText(str(self.preferences[model]['rating']))
+                rating_item.setData(
+                    OLLAMA_SORT_ROLE,
+                    ollama_model_sort_value('rating', rating=self.preferences[model]['rating']),
+                )
+            break
+        if self._sort_column == 3:
+            self._apply_sort()
+        else:
+            self._filter_models()
 
     def use_selected_model(self):
         row = self.table.currentRow()

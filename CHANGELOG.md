@@ -4,6 +4,7 @@
 
 ### Added
 
+- Clickable Model, Reasoning, and Rating headers in installed Ollama model tables, with ascending/descending sorting and a visible direction arrow.
 - Combined installed-Ollama-model filters for parameter size (for example 12B or 27B), reasoning capability, and minimum personal rating alongside the existing name search.
 - Optional, separately configured fallback OCR settings for retrying empty regions and handling primary OCR failures or source-language incompatibility.
 - Thinking/reasoning capability status in installed Ollama model lists, populated from each model's native `/api/show` metadata.
@@ -106,6 +107,7 @@
 
 ### Changed
 
+- Bumped the fork runtime version string to `1.4.0-vibe.103`.
 - Bumped the fork runtime version string to `1.4.0-vibe.102`.
 - Fallback OCR now retries only empty text regions after a successful primary pass instead of requiring the entire page to be empty.
 - Bumped the fork runtime version string to `1.4.0-vibe.101`.

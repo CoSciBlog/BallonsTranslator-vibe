@@ -5,6 +5,7 @@ from utils.ollama import (
     ollama_model_matches_filters,
     ollama_model_matches_query,
     ollama_model_parameter_size,
+    ollama_model_sort_value,
     ollama_parameter_size_sort_key,
     ollama_show_endpoint,
     ollama_tags_endpoint,
@@ -44,6 +45,22 @@ class OllamaModelPreferencesTest(unittest.TestCase):
         self.assertFalse(ollama_model_matches_filters(**{**values, 'parameter_size_filter': '27B'}))
         self.assertFalse(ollama_model_matches_filters(**{**values, 'reasoning_filter': 'no'}))
         self.assertFalse(ollama_model_matches_filters(**{**values, 'minimum_rating': 5}))
+
+    def test_sort_values_support_model_reasoning_and_rating_columns(self):
+        self.assertLess(
+            ollama_model_sort_value('model', model_name='Gemma:12b'),
+            ollama_model_sort_value('model', model_name='qwen:12b'),
+        )
+        self.assertEqual(
+            sorted(['yes', 'unknown', 'no'], key=lambda value: ollama_model_sort_value(
+                'reasoning', reasoning_status=value
+            )),
+            ['no', 'unknown', 'yes'],
+        )
+        self.assertLess(
+            ollama_model_sort_value('rating', rating=2),
+            ollama_model_sort_value('rating', rating=5),
+        )
 
     def test_default_tags_endpoint(self):
         self.assertEqual(

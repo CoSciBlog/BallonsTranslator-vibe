@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.102`
+Fork release: `1.4.0-vibe.103`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -32,6 +32,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Added an installed-model browser to all LLM API translator profiles. Ollama profiles query installed models when opened, support selecting a model, and persist favorites plus personal 1-5 ratings in the profile configuration.
 - The installed Ollama model browser now queries each model's declared capabilities and shows whether thinking/reasoning is supported, with clearer high-contrast hover and selected-row colors.
 - The installed Ollama model browser can combine name, parameter-size, reasoning-capability, and minimum-rating filters.
+- Model, Reasoning, and Rating table headers sort their columns in ascending or descending order and display the active direction arrow.
 - Added an optional successful-pipeline completion alert with a short system sound and Windows notification, including one final alert after a complete GUI batch run.
 - Added the active pipeline stage and ETA to both the custom application title bar and native window title while work is running.
 - Changed Settings to open in a separate non-modal window, following the upstream 1.5.x layout behavior while keeping the Vibe-specific settings intact.
