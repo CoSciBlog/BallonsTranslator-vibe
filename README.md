@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README_EN.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.105`
+Fork release: `1.4.0-vibe.106`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -227,7 +227,7 @@ reset.js
 
 The launcher update flow tracks `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` on the `dev` branch. `update.js` now prints each Git and dependency-refresh step, streams Git/pip/uv output, and emits timed `still working` progress messages while longer update commands are running. The Windows batch launchers also create and reuse the same `env` virtual environment instead of the old bundled `ballontrans_pylibs_win` runtime. On first start, the launchers print the active setup step, stream pip/download output, and emit periodic `still working` progress messages while silent commands such as virtual-environment creation are running. Runtime Manager package installs inherit the terminal so pip download bars and wheel-install output stay visible. After `.runtime_profile.json` has been created, normal starts skip dependency and Runtime Manager checks; checks run again on `--update`, explicit `--repair-runtime`, or when `BALLOONTRANS_FORCE_RUNTIME_CHECK=1` is set. Runtime setup uses `requirements.txt`.
 
-For NVIDIA Blackwell/RTX 50xx systems, the auto profile uses the PyTorch cu128 wheel index. If the base requirements previously installed a CPU Torch wheel, run `python launch.py --runtime-profile nvidia_blackwell_cu128 --repair-runtime`; the repair path force-reinstalls `torch`, `torchvision`, and `torchaudio` from the CUDA index before the health check.
+For NVIDIA Blackwell/RTX 50xx systems, the auto profile uses the PyTorch cu128 wheel index. Current cu128 Windows wheels support Python 3.14, so an existing Python 3.14 virtual environment no longer needs to be replaced. If the base requirements previously installed a CPU Torch wheel, or startup stopped with the former `expected Python >=3.10 and <3.14` error, update the repository and run `launch_win.bat --repair-runtime` (or `python launch.py --runtime-profile nvidia_blackwell_cu128 --repair-runtime` from the active environment). The repair path force-reinstalls `torch`, `torchvision`, and `torchaudio` from the CUDA index before the health check.
 
 ## OCR notes
 
@@ -409,7 +409,7 @@ The provided packages do not run on Windows 7. Windows 7 users need to install [
 
 ### Run from source
 
-Install [Python](https://www.python.org/downloads/release/python-31011) `<= 3.12` and [Git](https://git-scm.com/downloads).
+Install [Python](https://www.python.org/downloads/) `>= 3.10` and [Git](https://git-scm.com/downloads). Python 3.14 is supported by the NVIDIA Blackwell/cu128 runtime profile.
 
 ```bash
 # Clone this fork

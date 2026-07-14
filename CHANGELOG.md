@@ -109,6 +109,7 @@
 
 ### Changed
 
+- Bumped the fork runtime version string to `1.4.0-vibe.106`.
 - Removed the redundant Pipeline column from Pipeline History; the Step column now carries the pipeline summary and individual stage labels.
 - Bumped the fork runtime version string to `1.4.0-vibe.105`.
 - Updated `pipeline_history.json` to schema version 3 while retaining read compatibility with existing history files.
@@ -201,6 +202,7 @@
 
 ### Fixed
 
+- Allowed the NVIDIA Blackwell/cu128 Runtime Manager profile to install on Python 3.14 now that matching Windows PyTorch, TorchVision, and TorchAudio cu128 wheels are available; Python versions older than 3.10 remain unsupported.
 - Ollama reasoning models such as Gemma no longer abort translation when `think=true` produces thought-process JSON instead of the required structured response; invalid translation and glossary responses are retried once with thinking disabled.
 - Fixed ComicTextDetector Half Precision inference by moving all model weights to the selected GPU before converting them to FP16, matching rearranged-batch inputs to the same precision, and retaining device changes during model reloads.
 - Full pipeline completion no longer treats translation as already finished merely because OCR is disabled; existing text boxes can still be translated, including in deferred mode.

@@ -293,10 +293,10 @@ def install_profile(profile):
 
     if profile == "nvidia_blackwell_cu128":
         py_version = parse_version_tuple(platform.python_version())
-        if py_version < (3, 10) or py_version >= (3, 14):
+        if py_version < (3, 10):
             raise RuntimeError(
                 "nvidia_blackwell_cu128 requires a Python version supported by current PyTorch cu128 wheels "
-                "(expected Python >=3.10 and <3.14). Current Python: " + platform.python_version()
+                "(expected Python >=3.10). Current Python: " + platform.python_version()
             )
 
     uninstall_runtime_packages()
