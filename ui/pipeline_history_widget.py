@@ -17,7 +17,6 @@ from utils.proj_imgtrans import ProjImgTrans
 class PipelineHistoryWindow(QDialog):
     HEADERS = [
         'Started',
-        'Pipeline',
         'Step',
         'Status',
         'Duration',
@@ -107,10 +106,7 @@ class PipelineHistoryWindow(QDialog):
     def _entry_rows(cls, entry):
         if not isinstance(entry, dict):
             return []
-        common = [
-            entry.get('started_at', ''),
-            entry.get('pipeline', entry.get('process', '')),
-        ]
+        common = [entry.get('started_at', '')]
         summary = common + [
             'Pipeline',
             entry.get('status', ''),

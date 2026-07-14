@@ -109,6 +109,8 @@
 
 ### Changed
 
+- Removed the redundant Pipeline column from Pipeline History; the Step column now carries the pipeline summary and individual stage labels.
+- Bumped the fork runtime version string to `1.4.0-vibe.105`.
 - Updated `pipeline_history.json` to schema version 3 while retaining read compatibility with existing history files.
 - Bumped the fork runtime version string to `1.4.0-vibe.104`.
 - Bumped the fork runtime version string to `1.4.0-vibe.103`.

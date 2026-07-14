@@ -45,10 +45,10 @@ class PipelineHistoryRowsTest(unittest.TestCase):
 
         rows = PipelineHistoryWindow._entry_rows(entry)
 
-        self.assertEqual([row[2] for row in rows], [
+        self.assertEqual([row[1] for row in rows], [
             'Pipeline', 'Text Detection', 'OCR', 'Translate'
         ])
-        self.assertEqual(rows[-1][6:], [
+        self.assertEqual(rows[-1][5:], [
             'LLM_API_Translator', 'qwen3.5:9b', 'Ollama', 'No'
         ])
 
@@ -74,9 +74,9 @@ class PipelineHistoryRowsTest(unittest.TestCase):
         rows = PipelineHistoryWindow._entry_rows(entry)
 
         self.assertEqual(len(rows), 2)
-        self.assertEqual(rows[1][2], 'Translate')
-        self.assertEqual(rows[1][4], '12.3s')
-        self.assertEqual(rows[1][7:], ['gemma-4-12b', 'Ollama', 'Yes'])
+        self.assertEqual(rows[1][1], 'Translate')
+        self.assertEqual(rows[1][3], '12.3s')
+        self.assertEqual(rows[1][6:], ['gemma-4-12b', 'Ollama', 'Yes'])
 
     def test_legacy_step_without_duration_keeps_duration_cell_blank(self):
         entry = {
@@ -87,8 +87,8 @@ class PipelineHistoryRowsTest(unittest.TestCase):
 
         rows = PipelineHistoryWindow._entry_rows(entry)
 
-        self.assertEqual(rows[0][4], '20.0s')
-        self.assertEqual(rows[1][4], '')
+        self.assertEqual(rows[0][3], '20.0s')
+        self.assertEqual(rows[1][3], '')
 
     def test_reasoning_is_blank_for_non_ollama_provider(self):
         entry = {
