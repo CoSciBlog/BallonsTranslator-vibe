@@ -6,6 +6,37 @@ from utils.proj_imgtrans import ProjImgTrans
 
 
 class PipelineHistoryRowsTest(unittest.TestCase):
+    def test_responsive_columns_fill_available_width_with_weighted_sizes(self):
+        widths = PipelineHistoryWindow.responsive_column_widths(1180)
+
+        self.assertEqual(sum(widths.values()), 1180)
+        self.assertGreater(widths[6], widths[0])
+        self.assertGreater(widths[5], widths[4])
+
+    def test_hidden_columns_release_space_to_visible_columns(self):
+        visible_columns = [0, 1, 5, 6]
+        widths = PipelineHistoryWindow.responsive_column_widths(
+            900, visible_columns
+        )
+
+        self.assertEqual(set(widths), set(visible_columns))
+        self.assertEqual(sum(widths.values()), 900)
+        self.assertGreater(widths[6], widths[1])
+
+    def test_narrow_history_window_preserves_minimum_column_widths(self):
+        visible_columns = [0, 3, 4]
+        widths = PipelineHistoryWindow.responsive_column_widths(
+            100, visible_columns
+        )
+
+        self.assertEqual(
+            widths,
+            {
+                column: PipelineHistoryWindow.COLUMN_MIN_WIDTHS[column]
+                for column in visible_columns
+            },
+        )
+
     def test_new_history_file_uses_schema_three(self):
         with TemporaryDirectory() as directory:
             project = ProjImgTrans()

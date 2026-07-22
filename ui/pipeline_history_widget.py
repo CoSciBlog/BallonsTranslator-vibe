@@ -1,9 +1,10 @@
-from qtpy.QtCore import Qt
+from qtpy.QtCore import QEvent, Qt
 from qtpy.QtWidgets import (
     QDialog,
     QHBoxLayout,
     QLabel,
     QAbstractItemView,
+    QSizePolicy,
     QMenu,
     QPushButton,
     QTableWidget,
@@ -26,15 +27,19 @@ class PipelineHistoryWindow(QDialog):
         'Provider',
         'Reasoning',
     ]
+    COLUMN_WEIGHTS = (18, 11, 10, 10, 7, 15, 24, 11, 10)
+    COLUMN_MIN_WIDTHS = (110, 70, 65, 70, 50, 85, 125, 70, 70)
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self.imgtrans_proj: ProjImgTrans = None
         self.setWindowTitle(self.tr('Pipeline History'))
         self.resize(1180, 560)
+        self._history_path = ''
 
         self.path_label = QLabel()
         self.path_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+        self.path_label.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
 
         self.refresh_button = QPushButton(self.tr('Refresh'))
         self.refresh_button.clicked.connect(self.refresh)
@@ -47,7 +52,7 @@ class PipelineHistoryWindow(QDialog):
             action.setCheckable(True)
             action.setChecked(True)
             action.toggled.connect(
-                lambda visible, index=column: self.table.setColumnHidden(index, not visible)
+                lambda visible, index=column: self._set_column_visible(index, visible)
             )
             self.column_actions.append(action)
         self.columns_button.setMenu(self.columns_menu)
@@ -72,10 +77,100 @@ class PipelineHistoryWindow(QDialog):
         self.table.setSelectionBehavior(selection_behavior)
         self.table.setEditTriggers(edit_trigger)
         self.table.verticalHeader().setVisible(False)
+        self.table.viewport().installEventFilter(self)
 
         layout = QVBoxLayout(self)
         layout.addLayout(top_layout)
         layout.addWidget(self.table)
+
+    @classmethod
+    def responsive_column_widths(cls, available_width: int, visible_columns=None):
+        if visible_columns is None:
+            visible_columns = list(range(len(cls.HEADERS)))
+        visible_columns = list(visible_columns)
+        if not visible_columns:
+            return {}
+
+        minimum_total = sum(cls.COLUMN_MIN_WIDTHS[column] for column in visible_columns)
+        available_width = max(0, int(available_width))
+        if available_width <= minimum_total:
+            return {
+                column: cls.COLUMN_MIN_WIDTHS[column]
+                for column in visible_columns
+            }
+
+        widths = {}
+        remaining_columns = list(visible_columns)
+        remaining_width = available_width
+        while remaining_columns:
+            weight_total = sum(cls.COLUMN_WEIGHTS[column] for column in remaining_columns)
+            constrained = [
+                column
+                for column in remaining_columns
+                if remaining_width * cls.COLUMN_WEIGHTS[column] / weight_total
+                < cls.COLUMN_MIN_WIDTHS[column]
+            ]
+            if not constrained:
+                assigned = 0
+                for column in remaining_columns[:-1]:
+                    width = int(
+                        remaining_width * cls.COLUMN_WEIGHTS[column] / weight_total
+                    )
+                    widths[column] = width
+                    assigned += width
+                widths[remaining_columns[-1]] = remaining_width - assigned
+                break
+            for column in constrained:
+                width = cls.COLUMN_MIN_WIDTHS[column]
+                widths[column] = width
+                remaining_width -= width
+                remaining_columns.remove(column)
+        return widths
+
+    def _resize_columns_to_viewport(self):
+        visible_columns = [
+            column
+            for column in range(len(self.HEADERS))
+            if not self.table.isColumnHidden(column)
+        ]
+        widths = self.responsive_column_widths(
+            self.table.viewport().width(), visible_columns
+        )
+        header = self.table.horizontalHeader()
+        for column, width in widths.items():
+            header.resizeSection(column, width)
+
+    def _update_path_label(self):
+        if not self._history_path:
+            return
+        width = max(40, self.path_label.width())
+        text = self.path_label.fontMetrics().elidedText(
+            self._history_path,
+            Qt.TextElideMode.ElideMiddle,
+            width,
+        )
+        self.path_label.setText(text)
+        self.path_label.setToolTip(self._history_path)
+
+    def _set_column_visible(self, column: int, visible: bool):
+        self.table.setColumnHidden(column, not visible)
+        self._resize_columns_to_viewport()
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        if hasattr(self, 'path_label'):
+            self._update_path_label()
+        if hasattr(self, 'table'):
+            self._resize_columns_to_viewport()
+
+    def eventFilter(self, watched, event):
+        if (
+            hasattr(self, 'table')
+            and watched is self.table.viewport()
+            and event.type() == QEvent.Type.Resize
+        ):
+            self._resize_columns_to_viewport()
+        return super().eventFilter(watched, event)
 
     def set_project(self, imgtrans_proj: ProjImgTrans):
         self.imgtrans_proj = imgtrans_proj
@@ -83,11 +178,13 @@ class PipelineHistoryWindow(QDialog):
 
     def refresh(self):
         if self.imgtrans_proj is None or self.imgtrans_proj.is_empty:
-            self.path_label.setText(self.tr('No project is open.'))
+            self._history_path = self.tr('No project is open.')
+            self._update_path_label()
             self.table.setRowCount(0)
             return
 
-        self.path_label.setText(self.imgtrans_proj.pipeline_history_path())
+        self._history_path = self.imgtrans_proj.pipeline_history_path()
+        self._update_path_label()
         entries = self.imgtrans_proj.load_pipeline_history().get('entries', [])
         rows = []
         for entry in reversed(entries):
@@ -100,7 +197,7 @@ class PipelineHistoryWindow(QDialog):
                 item.setToolTip(str(value))
                 self.table.setItem(row, column, item)
         self.table.setSortingEnabled(True)
-        self.table.resizeColumnsToContents()
+        self._resize_columns_to_viewport()
 
     @classmethod
     def _entry_rows(cls, entry):

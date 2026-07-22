@@ -111,6 +111,8 @@
 
 ### Changed
 
+- Bumped the fork runtime version string to `1.4.0-vibe.113`.
+- Pipeline History now distributes visible table columns responsively across the current window width, reallocates space after columns are hidden, and elides long project-history paths on narrower windows.
 - Bumped the fork runtime version string to `1.4.0-vibe.112`.
 - Bumped the fork runtime version string to `1.4.0-vibe.111`.
 - Bumped the fork runtime version string to `1.4.0-vibe.110`.
