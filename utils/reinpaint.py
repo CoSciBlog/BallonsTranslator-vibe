@@ -53,13 +53,22 @@ def mask_bounding_rect(mask: np.ndarray) -> Optional[Tuple[int, int, int, int]]:
     return x, y, x + w, y + h
 
 
-def reinpaint_project_page(project, inpainter, page_name: str, dilate: int = 0, logger=None) -> bool:
+def reinpaint_project_page(
+    project,
+    inpainter,
+    page_name: str,
+    dilate: int = 0,
+    logger=None,
+    use_original_source: bool = False,
+) -> bool:
     if inpainter is None:
         if logger is not None:
             logger.info('Batch Re-Inpaint skipped because no inpainter is loaded.')
         return False
 
-    source_img = project.load_inpainted_by_imgname(page_name)
+    source_img = None
+    if not use_original_source:
+        source_img = project.load_inpainted_by_imgname(page_name)
     if source_img is None:
         source_img = project.ensure_upscaled_img(page_name)
     if source_img is None:

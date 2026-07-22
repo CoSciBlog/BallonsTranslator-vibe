@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.111`
+Fork release: `1.4.0-vibe.112`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -52,6 +52,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Expanded intermediate image saving to `PNG`, `JPG`, `WEBP`, and `JXL` with a separate quality setting.
 - Temporarily removed Censor Restoration / Decensor Inpaint controls from General settings and the left sidebar while that workflow is being repaired.
 - Added a `Ri` sidebar action, Drawboard Re-Inpaint settings tab, Tools-menu action, and `Ctrl+Shift+I` shortcut to re-run inpainting for the current page with existing masks.
+- Added `Tools -> Re-run Inpainting All Pages` to reapply saved text and censor-repair masks across every project page in a stoppable pipeline progress dialog.
 - Added readable English names to source-language selectors, for example `日本語 (Japanese)`, `Deutsch (German)`, and `Polski (Polish)`, while keeping the original internal language values.
 - Added `English` to the Batch Processing source- and target-language selectors and made the dialog restore saved language choices by internal language key.
 - Added an optional Batch Processing Re-Inpaint step that reapplies saved inpaint and censor masks to finished pages before export.

@@ -542,6 +542,10 @@ class TitleBar(Widget):
         reinpaintAction.setToolTip(self.tr('Re-run Inpainting: apply all existing inpaint masks again on the current page.'))
         self.reinpaint_current_page_trigger = reinpaintAction.triggered
 
+        reinpaintAllAction = QAction(self.tr('Re-run Inpainting All Pages'), self)
+        reinpaintAllAction.setToolTip(self.tr('Apply all existing inpaint masks again on every page in the current project.'))
+        self.reinpaint_all_pages_trigger = reinpaintAllAction.triggered
+
         optimizeInpaintCurrentAction = QAction(self.tr('Optimize Inpainting Current Page'), self)
         optimizeInpaintCurrentAction.setShortcut(QKeySequence('Ctrl+Alt+I'))
         optimizeInpaintCurrentAction.setToolTip(self.tr('Detect leftover text on the current inpainted page and repair it with a second inpainting pass.'))
@@ -575,6 +579,7 @@ class TitleBar(Widget):
         toolsMenu = QMenu(self.toolsToolBtn)
         toolsMenu.addAction(mergeToolAction)
         toolsMenu.addAction(reinpaintAction)
+        toolsMenu.addAction(reinpaintAllAction)
         toolsMenu.addAction(optimizeInpaintCurrentAction)
         toolsMenu.addAction(optimizeInpaintAllAction)
         toolsMenu.addAction(upscaleProject2xAction)

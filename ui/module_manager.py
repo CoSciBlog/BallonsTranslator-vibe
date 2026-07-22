@@ -29,6 +29,7 @@ from utils.message import create_error_dialog, create_info_dialog
 from .custom_widget import ImgtransProgressMessageBox, ParamComboBox
 from .configpanel import ConfigPanel
 from utils.proj_imgtrans import ProjImgTrans
+from utils.reinpaint import reinpaint_project_page
 from utils.config import pcfg, RunStatus
 cfg_module = pcfg.module
 
@@ -412,6 +413,7 @@ class ImgtransThread(QThread):
         self.review_only = False
         self.decensor_only = False
         self.inpaint_optimization_only = False
+        self.reinpaint_only = False
         self.blktrans_page_key = None
         self.stage_duration_seconds = self._empty_stage_durations()
 
@@ -584,6 +586,7 @@ class ImgtransThread(QThread):
             self._clear_translator_page_context()
 
     def runImgtransPipeline(self, imgtrans_proj: ProjImgTrans, pages_to_process=None):
+        self.reinpaint_only = False
         self._reset_stage_durations()
         self.imgtrans_proj = imgtrans_proj
         self.pages_to_process = pages_to_process  # 保存需要处理的页面列表
@@ -599,6 +602,7 @@ class ImgtransThread(QThread):
         self.start()
 
     def runTranslateOnlyPipeline(self, imgtrans_proj: ProjImgTrans, pages_to_process=None):
+        self.reinpaint_only = False
         self._reset_stage_durations()
         self.imgtrans_proj = imgtrans_proj
         self.pages_to_process = pages_to_process
@@ -613,6 +617,7 @@ class ImgtransThread(QThread):
         self.start()
 
     def runReviewPipeline(self, imgtrans_proj: ProjImgTrans, pages_to_process=None):
+        self.reinpaint_only = False
         self._reset_stage_durations()
         self.imgtrans_proj = imgtrans_proj
         self.pages_to_process = pages_to_process
@@ -627,6 +632,7 @@ class ImgtransThread(QThread):
         self.start()
 
     def runDecensorPipeline(self, imgtrans_proj: ProjImgTrans, pages_to_process=None):
+        self.reinpaint_only = False
         self._reset_stage_durations()
         self.imgtrans_proj = imgtrans_proj
         self.pages_to_process = pages_to_process
@@ -641,6 +647,7 @@ class ImgtransThread(QThread):
         self.start()
 
     def runInpaintOptimizationPipeline(self, imgtrans_proj: ProjImgTrans, pages_to_process=None):
+        self.reinpaint_only = False
         self._reset_stage_durations()
         self.imgtrans_proj = imgtrans_proj
         self.pages_to_process = pages_to_process
@@ -652,6 +659,21 @@ class ImgtransThread(QThread):
         self.inpaint_optimization_only = True
         self.process_idx_to_page_idx = {}
         self.job = self._inpaint_optimization_pipeline
+        self.start()
+
+    def runReinpaintPipeline(self, imgtrans_proj: ProjImgTrans, pages_to_process=None):
+        self._reset_stage_durations()
+        self.imgtrans_proj = imgtrans_proj
+        self.pages_to_process = pages_to_process
+        self.num_pages = len(self.imgtrans_proj.pages)
+        self.stop_requested = False
+        self.translation_only = False
+        self.review_only = False
+        self.decensor_only = False
+        self.inpaint_optimization_only = False
+        self.reinpaint_only = True
+        self.process_idx_to_page_idx = {}
+        self.job = self._reinpaint_pipeline
         self.start()
     
     def requestStop(self):
@@ -870,6 +892,45 @@ class ImgtransThread(QThread):
             self.imgtrans_proj.update_page_progress(imgname, RunStatus.FIN_INPAINT)
             self.update_inpaint_progress.emit(self.inpaint_counter)
 
+        if self.stop_requested:
+            self.pipeline_stopped.emit()
+
+    def _reinpaint_pipeline(self):
+        self.detect_counter = 0
+        self.ocr_counter = 0
+        self.translate_counter = 0
+        self.inpaint_counter = 0
+        self.decensor_counter = 0
+        pages_to_iterate = self._iter_pipeline_pages(skip_ignored=False)
+        self.inpaint_thread.num_process_pages = self.num_pages
+        repaired_count = 0
+        LOGGER.info(f'Re-running inpainting for all {len(pages_to_iterate)} project pages')
+
+        for imgname in pages_to_iterate:
+            if self.stop_requested:
+                LOGGER.info('All-pages Re-Inpaint stopped by user')
+                break
+            try:
+                repaired = self._timed_stage_call(
+                    'inpaint',
+                    reinpaint_project_page,
+                    self.imgtrans_proj,
+                    self.inpainter,
+                    imgname,
+                    dilate=pcfg.drawpanel.reinpaint_dilate_ksize,
+                    logger=LOGGER,
+                    use_original_source=True,
+                )
+                repaired_count += int(bool(repaired))
+            except Exception:
+                LOGGER.error(f'All-pages Re-Inpaint failed for {imgname}.', exc_info=True)
+            self.inpaint_counter += 1
+            self.update_inpaint_progress.emit(self.inpaint_counter)
+
+        LOGGER.info(
+            f'All-pages Re-Inpaint reapplied masks on '
+            f'{repaired_count}/{len(pages_to_iterate)} project page(s).'
+        )
         if self.stop_requested:
             self.pipeline_stopped.emit()
 
@@ -1177,7 +1238,7 @@ class ImgtransThread(QThread):
         return self.translate_counter == self.num_pages or not cfg_module.enable_translate
 
     def inpaint_finished(self) -> bool:
-        if self.inpaint_optimization_only:
+        if self.inpaint_optimization_only or self.reinpaint_only:
             return self.inpaint_counter == self.num_pages
         if self.imgtrans_proj is None or not cfg_module.enable_inpaint:
             return True
@@ -1196,7 +1257,7 @@ class ImgtransThread(QThread):
         self.job = None
 
     def recent_finished_index(self, ref_counter: int) -> int:
-        if self.translation_only or self.decensor_only or self.inpaint_optimization_only:
+        if self.translation_only or self.decensor_only or self.inpaint_optimization_only or self.reinpaint_only:
             process_idx = ref_counter - 1
             if hasattr(self, 'process_idx_to_page_idx') and process_idx in self.process_idx_to_page_idx:
                 return self.process_idx_to_page_idx[process_idx]
@@ -1241,6 +1302,7 @@ class ModuleManager(QObject):
     blktrans_pipeline_finished = Signal(int, list)
     page_trans_finished = Signal(int)
     page_decensor_finished = Signal(int)
+    page_reinpaint_finished = Signal(int)
 
     run_canvas_inpaint = False
     is_waiting_th = False
@@ -1423,13 +1485,13 @@ class ModuleManager(QObject):
                 'inpaint': False,
                 'inpaint_optimization': False,
             }
-        if pipeline_name == 'inpaint_optimization_pipeline':
+        if pipeline_name in {'inpaint_optimization_pipeline', 'reinpaint_pipeline'}:
             return {
                 'detect': False,
                 'ocr': False,
                 'translate': False,
                 'inpaint': True,
-                'inpaint_optimization': True,
+                'inpaint_optimization': pipeline_name == 'inpaint_optimization_pipeline',
             }
         return {
             'detect': bool(cfg_module.enable_detect),
@@ -1697,6 +1759,42 @@ class ModuleManager(QObject):
         self.progress_msgbox.zero_progress()
         self.progress_msgbox.show()
         self.imgtrans_thread.runInpaintOptimizationPipeline(self.imgtrans_proj, pages_to_process)
+
+    def runReinpaintPipeline(self, pages_to_process=None):
+        self.last_pipeline_status = 'running'
+        if self.imgtrans_proj.is_empty:
+            LOGGER.info('Project is empty, nothing to re-inpaint')
+            self.progress_msgbox.hide()
+            return
+        if self.inpainter is None:
+            LOGGER.info('All-pages Re-Inpaint requires a loaded inpainter')
+            self.progress_msgbox.hide()
+            self.imgtrans_pipeline_finished.emit()
+            return
+        process_pages = self.imgtrans_proj.pipeline_pages(pages_to_process, skip_ignored=False)
+        if len(process_pages) == 0:
+            LOGGER.info('No project pages are available for Re-Inpaint')
+            self.progress_msgbox.hide()
+            self.imgtrans_pipeline_finished.emit()
+            return
+        if self.anyPipelineThreadRunning():
+            LOGGER.warning('Stopping existing pipeline before starting all-pages Re-Inpaint.')
+            self.forceStopImgtransPipeline(emit_finished=False)
+        self._start_pipeline_history('reinpaint_pipeline', pages_to_process, process_pages)
+        self.last_finished_index = -1
+        self.pipeline_pages_to_process = pages_to_process
+        self.post_pipeline_merge_done = False
+        self.terminateRunningThread()
+
+        self.progress_msgbox.detect_bar.setVisible(False)
+        self.progress_msgbox.ocr_bar.setVisible(False)
+        self.progress_msgbox.translate_bar.setVisible(False)
+        self.progress_msgbox.inpaint_bar.setVisible(True)
+        self.progress_msgbox.decensor_bar.setVisible(False)
+        self.progress_msgbox.zero_progress()
+        self.progress_msgbox.updateInpaintProgress(0, self.tr('Re-running Inpainting: '))
+        self.progress_msgbox.show()
+        self.imgtrans_thread.runReinpaintPipeline(self.imgtrans_proj, pages_to_process)
     
     def stopImgtransPipeline(self):
         """停止图像翻译流程"""
@@ -1750,6 +1848,8 @@ class ModuleManager(QObject):
         self.imgtrans_thread.translation_only = False
         self.imgtrans_thread.review_only = False
         self.imgtrans_thread.decensor_only = False
+        self.imgtrans_thread.inpaint_optimization_only = False
+        self.imgtrans_thread.reinpaint_only = False
         self.imgtrans_thread.pipeline_pagekey_queue.clear()
         self.translate_thread.pipeline_pagekey_queue.clear()
         self.run_canvas_inpaint = False
@@ -1835,7 +1935,9 @@ class ModuleManager(QObject):
         self.progress_msgbox.updateInpaintProgress(progress)
         if ri != self.last_finished_index:
             self.last_finished_index = ri
-            if self.imgtrans_thread.inpaint_optimization_only:
+            if self.imgtrans_thread.reinpaint_only:
+                self.page_reinpaint_finished.emit(ri)
+            elif self.imgtrans_thread.inpaint_optimization_only:
                 self.page_decensor_finished.emit(ri)
             else:
                 self.page_trans_finished.emit(ri)
@@ -1870,7 +1972,7 @@ class ModuleManager(QObject):
     def proj_finished(self):
         if self.imgtrans_thread.decensor_only:
             return self.imgtrans_thread.decensor_finished()
-        if self.imgtrans_thread.inpaint_optimization_only:
+        if self.imgtrans_thread.inpaint_optimization_only or self.imgtrans_thread.reinpaint_only:
             return self.imgtrans_thread.inpaint_finished()
         if self.imgtrans_thread.translation_only or self.imgtrans_thread.review_only:
             return self.imgtrans_thread.translate_finished()
@@ -1971,7 +2073,11 @@ class ModuleManager(QObject):
 
     def finishImgtransPipeline(self):
         if self.proj_finished():
-            if not self.imgtrans_thread.translation_only and not self.imgtrans_thread.review_only:
+            if (
+                not self.imgtrans_thread.translation_only
+                and not self.imgtrans_thread.review_only
+                and not self.imgtrans_thread.reinpaint_only
+            ):
                 self.apply_post_pipeline_textbox_merge()
             self.progress_msgbox.hide()
             self._finish_pipeline_history('completed')
@@ -1981,6 +2087,7 @@ class ModuleManager(QObject):
             self.imgtrans_thread.review_only = False
             self.imgtrans_thread.decensor_only = False
             self.imgtrans_thread.inpaint_optimization_only = False
+            self.imgtrans_thread.reinpaint_only = False
     
     def on_imgtrans_thread_stopped(self):
         """线程完成时确保关闭进度对话框"""
@@ -1993,6 +2100,7 @@ class ModuleManager(QObject):
         self.imgtrans_thread.review_only = False
         self.imgtrans_thread.decensor_only = False
         self.imgtrans_thread.inpaint_optimization_only = False
+        self.imgtrans_thread.reinpaint_only = False
 
     def on_imgtrans_thread_finished(self):
         if self.active_pipeline_history_id:

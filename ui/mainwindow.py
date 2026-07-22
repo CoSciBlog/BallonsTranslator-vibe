@@ -333,6 +333,7 @@ class MainWindow(mainwindow_cls):
         self._gui_batch_upscale_pending = False
         self._decensor_current_page_request = None
         self._reinpaint_current_page_request = None
+        self._reinpaint_all_pages_pending = False
 
         SW.st_manager = self.st_manager = SceneTextManager(self.app, self, self.canvas, self.textPanel)
         self.st_manager.new_textblk.connect(self.canvas.search_widget.on_new_textblk)
@@ -482,6 +483,7 @@ class MainWindow(mainwindow_cls):
         module_manager.imgtrans_pipeline_finished.connect(self.on_imgtrans_pipeline_finished)
         module_manager.page_trans_finished.connect(self.on_pagtrans_finished)
         module_manager.page_decensor_finished.connect(self.on_page_decensor_finished)
+        module_manager.page_reinpaint_finished.connect(self.on_page_reinpaint_finished)
         module_manager.canvas_inpaint_finished.connect(self.on_reinpaint_current_page_finished)
         module_manager.setupThread(self.configPanel, self.imgtrans_progress_msgbox, self.ocr_postprocess, self.translate_preprocess, self.translate_postprocess)
         module_manager.progress_msgbox.showed.connect(self.on_imgtrans_progressbox_showed)
@@ -1527,6 +1529,7 @@ class MainWindow(mainwindow_cls):
         self.titleBar.darkmode_trigger.connect(self.on_darkmode_triggered)
         self.titleBar.merge_tool_trigger.connect(self.on_open_merge_tool)
         self.titleBar.reinpaint_current_page_trigger.connect(self.run_reinpaint_current_page)
+        self.titleBar.reinpaint_all_pages_trigger.connect(self.run_reinpaint_all_pages)
         self.titleBar.optimize_inpaint_current_page_trigger.connect(self.run_inpaint_optimize_current_page)
         self.titleBar.optimize_inpaint_all_pages_trigger.connect(self.run_inpaint_optimize_all_pages)
         self.titleBar.upscale_project_2x_trigger.connect(self.run_project_upscale_2x)
@@ -2258,6 +2261,14 @@ class MainWindow(mainwindow_cls):
 
     def on_imgtrans_pipeline_finished(self):
         self.on_pipeline_eta_changed('')
+        if self._reinpaint_all_pages_pending:
+            self._reinpaint_all_pages_pending = False
+            current_page = self.imgtrans_proj.current_img
+            if current_page and current_page in self.imgtrans_proj.pages:
+                self.imgtrans_proj.set_current_img(current_page)
+                self.canvas.updateCanvas()
+            if self.module_manager.last_pipeline_status == 'completed':
+                self.save_project_safely(self.tr('all pages re-inpaint'), notify_user=False)
         self.backup_blkstyles.clear()
         self._run_imgtrans_wo_textstyle_update = False
         self.postprocess_mt_toggle = True
@@ -2448,6 +2459,13 @@ class MainWindow(mainwindow_cls):
                     create_info_dialog(self.tr('Censor Restoration finished for the current page.'))
             except Exception as e:
                 LOGGER.warning(f'Could not inspect Censor Restoration mask for {page_name}: {e}')
+
+    def on_page_reinpaint_finished(self, page_index: int):
+        if page_index < 0 or page_index >= self.imgtrans_proj.num_pages:
+            return
+        if page_index == self.pageList.currentIndex().row():
+            self.imgtrans_proj.set_current_img_byidx(page_index)
+            self.canvas.updateCanvas()
 
     def on_savestate_changed(self, unsaved: bool):
         save_state = self.tr('unsaved') if unsaved else self.tr('saved')
@@ -2741,6 +2759,33 @@ class MainWindow(mainwindow_cls):
         )
         self._show_reinpaint_progress(self.tr('Re-running inpainting on current page...'))
         self.module_manager.canvas_inpaint(inpaint_dict)
+
+    def run_reinpaint_all_pages(self):
+        if self.imgtrans_proj.is_empty:
+            create_info_dialog(self.tr('Open a project before re-running inpainting.'))
+            return
+        if self.module_manager.anyPipelineThreadRunning():
+            create_info_dialog(self.tr('Another pipeline is already running. Please wait until it finishes.'))
+            return
+        if self.module_manager.inpainter is None:
+            fallback = 'lama_large_512px'
+            if fallback in GET_VALID_INPAINTERS():
+                LOGGER.info(f'No active inpainter; loading fallback {fallback} for all-pages Re-Inpaint.')
+                self.module_manager.setInpainter(fallback)
+                create_info_dialog(self.tr('Loading fallback inpainter. Run Re-Inpaint again after it is ready.'))
+            else:
+                create_info_dialog(self.tr('Select an inpainter before re-running inpainting.'))
+            return
+        if self.bottomBar.textblockChecker.isChecked():
+            self.bottomBar.textblockChecker.click()
+        self.saveCurrentPage(update_scene_text=True, save_proj=True, restore_interface=True)
+        self._wait_for_image_saves()
+        page_names = list(self.imgtrans_proj.pages.keys())
+        if not page_names:
+            create_info_dialog(self.tr('No project pages are available for Re-Inpaint.'))
+            return
+        self._reinpaint_all_pages_pending = True
+        self.module_manager.runReinpaintPipeline(page_names)
 
     def _can_run_inpaint_optimization(self) -> bool:
         if self.imgtrans_proj.is_empty:
