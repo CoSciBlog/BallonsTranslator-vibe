@@ -4,6 +4,7 @@
 
 ### Added
 
+- A bottom-bar `Reasoning` checkbox for `LLM_API_Translator` and `LLM_API_Translator_2`, synchronized with the persisted Translator Settings option and hidden for other translators.
 - Per-step runtime measurements for Text Detection, OCR, Translate, and Inpaint in new pipeline-history entries.
 - A Columns menu in Pipeline History for showing or hiding individual table columns.
 - Clickable Model, Reasoning, and Rating headers in installed Ollama model tables, with ascending/descending sorting and a visible direction arrow.
@@ -109,6 +110,7 @@
 
 ### Changed
 
+- Bumped the fork runtime version string to `1.4.0-vibe.111`.
 - Bumped the fork runtime version string to `1.4.0-vibe.110`.
 - Moved GUI Batch Processing out of the left Open menu into a dedicated `Batch Processing` title-bar menu, alongside batch folder upscaling.
 - Bumped the fork runtime version string to `1.4.0-vibe.109`.

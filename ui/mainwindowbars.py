@@ -896,6 +896,9 @@ class SelectionWithConfigWidget(Widget):
 class TranslatorSelectionWidget(Widget):
 
     cfg_clicked = Signal()
+    reasoning_changed = Signal(bool)
+
+    LLM_API_TRANSLATORS = {'LLM_API_Translator', 'LLM_API_Translator_2'}
 
     def __init__(self) -> None:
         super().__init__()
@@ -911,6 +914,12 @@ class TranslatorSelectionWidget(Widget):
         
         self.selector = SmallComboBox()
         self.selector.setToolTip(self.tr('Select translator module.'))
+        self.reasoning_checker = QCheckBox(self.tr('Reasoning'))
+        self.reasoning_checker.setToolTip(
+            self.tr('Enable reasoning for the selected LLM API translator. This can improve difficult translations, but usually takes longer and uses more tokens.')
+        )
+        self.reasoning_checker.setVisible(False)
+        self.reasoning_checker.toggled.connect(self.reasoning_changed.emit)
         self.src_selector = SmallComboBox()
         self.src_selector.setToolTip(self.tr('Source language.'))
         self.tgt_selector = SmallComboBox()
@@ -923,6 +932,7 @@ class TranslatorSelectionWidget(Widget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(label)
         layout.addWidget(self.selector)
+        layout.addWidget(self.reasoning_checker)
         layout.addWidget(label_src)
         layout.addWidget(self.src_selector)
         layout.addWidget(label_tgt)
@@ -944,7 +954,13 @@ class TranslatorSelectionWidget(Widget):
         self.src_selector.blockSignals(block)
         self.tgt_selector.blockSignals(block)
         self.selector.blockSignals(block)
+        self.reasoning_checker.blockSignals(block)
         super().blockSignals(block)
+
+    def setReasoningChecked(self, checked: bool):
+        self.reasoning_checker.blockSignals(True)
+        self.reasoning_checker.setChecked(bool(checked))
+        self.reasoning_checker.blockSignals(False)
     
     def finishSetTranslator(self, translator: BaseTranslator):
         self.blockSignals(True)
@@ -961,6 +977,15 @@ class TranslatorSelectionWidget(Widget):
         self.selector.setCurrentText(translator.name)
         self.src_selector.setCurrentText(lang_display_label(translator.lang_source))
         self.tgt_selector.setCurrentText(lang_display_label(translator.lang_target))
+        supports_reasoning = (
+            translator.name in self.LLM_API_TRANSLATORS
+            and translator.params is not None
+            and 'reasoning' in translator.params
+        )
+        self.reasoning_checker.setVisible(supports_reasoning)
+        self.reasoning_checker.setChecked(
+            translator.get_param_value('reasoning') if supports_reasoning else False
+        )
         self.blockSignals(False)
 
 

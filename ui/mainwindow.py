@@ -443,8 +443,10 @@ class MainWindow(mainwindow_cls):
         self.bottomBar.inpaint_selector.selector.currentTextChanged.connect(self.on_inpaint_changed)
         self.bottomBar.trans_selector.cfg_clicked.connect(self.to_trans_config)
         self.bottomBar.trans_selector.selector.currentTextChanged.connect(self.on_trans_changed)
+        self.bottomBar.trans_selector.reasoning_changed.connect(self.on_trans_reasoning_changed)
         self.bottomBar.trans_selector.tgt_selector.currentTextChanged.connect(self.on_trans_tgt_changed)
         self.bottomBar.trans_selector.src_selector.currentTextChanged.connect(self.on_trans_src_changed)
+        self.configPanel.trans_config_panel.paramwidget_edited.connect(self.on_translator_param_changed)
         self.bottomBar.textdet_selector.cfg_clicked.connect(self.to_detect_config)
         self.bottomBar.inpaint_selector.cfg_clicked.connect(self.to_inpaint_config)
         self.bottomBar.ocr_selector.cfg_clicked.connect(self.to_ocr_config)
@@ -2092,6 +2094,36 @@ class MainWindow(mainwindow_cls):
         tgt_selector = self.configPanel.trans_config_panel.module_combobox
         if tgt_selector.currentText() != module and module in GET_VALID_TRANSLATORS():
             tgt_selector.setCurrentText(module)
+
+    def on_trans_reasoning_changed(self, checked: bool):
+        translator = self.module_manager.translator
+        if (
+            translator is None
+            or translator.name not in self.bottomBar.trans_selector.LLM_API_TRANSLATORS
+            or translator.params is None
+            or 'reasoning' not in translator.params
+        ):
+            return
+
+        translator.updateParam('reasoning', checked)
+        pcfg.module.translator_params[translator.name] = translator.params
+
+        param_panel = self.configPanel.trans_config_panel.param_widget_map.get(translator.name)
+        if param_panel is not None:
+            reasoning_widget = param_panel.param_widget_map.get('reasoning')
+            if reasoning_widget is not None:
+                reasoning_widget.blockSignals(True)
+                reasoning_widget.setChecked(checked)
+                reasoning_widget.blockSignals(False)
+        save_config()
+
+    def on_translator_param_changed(self, param_key: str, param_content: dict):
+        if param_key != 'reasoning':
+            return
+        checked = param_content.get('content', False)
+        if isinstance(checked, str):
+            checked = checked.strip().lower() == 'true'
+        self.bottomBar.trans_selector.setReasoningChecked(bool(checked))
 
     def on_trans_src_changed(self):
         sender = self.sender()

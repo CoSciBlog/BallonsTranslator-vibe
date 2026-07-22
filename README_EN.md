@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.110`
+Fork release: `1.4.0-vibe.111`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -32,6 +32,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Reworked Settings into separate navigation pages for every category and section instead of one long shared page, with denser responsive grids for multi-value controls and preset actions.
 - Added `General -> Pipeline -> Translate after image processing` to defer translation until text detection, OCR, and inpainting have finished for every page.
 - Added an installed-model browser to all LLM API translator profiles. Ollama profiles query installed models when opened, support selecting a model, and persist favorites plus personal 1-5 ratings in the profile configuration.
+- Added a bottom-bar `Reasoning` checkbox for `LLM_API_Translator` and `LLM_API_Translator_2`. It updates the same persisted option as Translator Settings and stays hidden for other translators.
 - The installed Ollama model browser now queries each model's declared capabilities and shows whether thinking/reasoning is supported, with clearer high-contrast hover and selected-row colors.
 - The installed Ollama model browser can combine name, parameter-size, reasoning-capability, and minimum-rating filters.
 - Model, Reasoning, and Rating table headers sort their columns in ascending or descending order and display the active direction arrow.
