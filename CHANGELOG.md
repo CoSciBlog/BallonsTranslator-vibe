@@ -88,10 +88,10 @@
 - `Ctrl+Shift+P` shortcut for showing or hiding the page list.
 - Full language hover text and wider popups for compact language selectors.
 - Language placeholders for LLM `system_prompt` and `reflection prompt`: `{source_language}`, `{target_language}`, `{input_language}`, `{output_language}`, `{from_lang}`, and `{to_lang}`.
-- GUI batch processing from the Open menu that selects a parent folder, treats each immediate image subfolder as a separate project with its own glossary, ignores generated output folders, runs projects sequentially through the normal pipeline, and can optionally export each project as `.cbz` or `.pdf`.
+- GUI batch processing from the dedicated Batch Processing title-bar menu that selects project folders or parent folders, treats each image subfolder as a separate project with its own glossary, ignores generated output folders, runs projects sequentially through the normal pipeline, and can optionally export each project as `.cbz` or `.pdf`.
 - Persisted `translation_llm_review` output and sidebar provenance labels for original source, Google/DeepL machine draft, LLM review, and editable translation output.
 - Tools-menu project image upscaling actions for a fixed `2x` run or the configured Upscaling factor, with progress reporting, settings-based size/quality limits, and confirmation before re-upscaling files already marked `upscaled`.
-- Tools-menu batch upscaling for choosing a parent folder and replacing pages across its source-image subfolders with the configured Upscaling settings, using the modal run-pipeline progress view with ETA and Stop.
+- Batch Processing-menu upscaling for choosing a parent folder and replacing pages across its source-image subfolders with the configured Upscaling settings, using the modal run-pipeline progress view with ETA and Stop.
 - Left-sidebar `x2` action for running the existing 2x project-image replacement workflow with Settings-page quality and size limits.
 - Native Ollama `/api/chat` transport for `LLM_API_Translator` and `Two-Step Translator`, including the configurable `num ctx` runtime option for local model context length.
 - Per-request Ollama terminal metrics showing model load time, prompt-evaluation speed, and output-generation speed in tokens per second.
@@ -109,6 +109,8 @@
 
 ### Changed
 
+- Bumped the fork runtime version string to `1.4.0-vibe.110`.
+- Moved GUI Batch Processing out of the left Open menu into a dedicated `Batch Processing` title-bar menu, alongside batch folder upscaling.
 - Bumped the fork runtime version string to `1.4.0-vibe.109`.
 - Project source-image upscaling now uses the same modal multi-stage progress dialog as the run pipeline, including ETA and Stop/Force Stop handling; successful project and batch upscaling closes without an additional OK dialog.
 - Repeated source-image upscaling continues to rename every generated page by appending the matching `_upscaled_<factor>x` marker for that run.

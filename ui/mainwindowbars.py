@@ -75,7 +75,6 @@ class LeftBar(Widget):
     run_translate_clicked = Signal()
     pipeline_history_clicked = Signal()
     export_comic_clicked = Signal()
-    batch_processing_clicked = Signal()
     def __init__(self, mainwindow, *args, **kwargs) -> None:
         super().__init__(mainwindow, *args, **kwargs)
         self.mainwindow: QMainWindow = mainwindow
@@ -108,9 +107,6 @@ class LeftBar(Widget):
         actionOpenArchive.triggered.connect(self.onOpenArchive)
         actionImportFolder = QAction(self.tr("Import Folder ... archives, PDFs, and images"), self)
         actionImportFolder.triggered.connect(self.onImportFolder)
-        actionBatchProcessing = QAction(self.tr("Batch Processing ..."), self)
-        actionBatchProcessing.setToolTip(self.tr('Process each image subfolder as a separate project with its own glossary.'))
-        self.batch_processing_clicked = actionBatchProcessing.triggered
 
         actionOpenProj = QAction(self.tr("Open Project ... *.json"), self)
         actionOpenProj.triggered.connect(self.onOpenProj)
@@ -142,7 +138,7 @@ class LeftBar(Widget):
         self.recentMenu = QMenu(self.tr("Open Recent"), self)
         
         openMenu = QMenu(self)
-        openMenu.addActions([actionOpenFolder, actionOpenArchive, actionImportFolder, actionBatchProcessing, actionOpenProj])
+        openMenu.addActions([actionOpenFolder, actionOpenArchive, actionImportFolder, actionOpenProj])
         openMenu.addMenu(self.recentMenu)
         openMenu.addSeparator()
         openMenu.addActions([
@@ -583,7 +579,6 @@ class TitleBar(Widget):
         toolsMenu.addAction(optimizeInpaintAllAction)
         toolsMenu.addAction(upscaleProject2xAction)
         toolsMenu.addAction(upscaleProjectSettingsAction)
-        toolsMenu.addAction(batchUpscaleFoldersAction)
         toolsMenu.addAction(removeMasksAction)
         toolsMenu.addSeparator()
         toolsMenu.addAction(modelDownloadsAction)
@@ -658,6 +653,21 @@ class TitleBar(Widget):
         self.review_all_pages_trigger = reviewAllPagesAction.triggered
         self.translation_benchmark_trigger = translationBenchmarkAction.triggered
 
+        self.batchToolBtn = TitleBarToolBtn(self)
+        self.batchToolBtn.setText(self.tr('Batch Processing'))
+        self.batchToolBtn.setToolTip(self.tr('Batch Processing menu: process or upscale multiple project folders.'))
+
+        batchProcessingAction = QAction(self.tr('Batch Processing ...'), self)
+        batchProcessingAction.setToolTip(self.tr('Process each image subfolder as a separate project with its own glossary.'))
+        self.batch_processing_trigger = batchProcessingAction.triggered
+
+        batchMenu = QMenu(self.batchToolBtn)
+        batchMenu.addAction(batchProcessingAction)
+        batchMenu.addSeparator()
+        batchMenu.addAction(batchUpscaleFoldersAction)
+        self.batchToolBtn.setMenu(batchMenu)
+        self.batchToolBtn.setPopupMode(QToolButton.InstantPopup)
+
         self.iconLabel = QLabel(self)
         if not C.ON_MACOS:
             self.iconLabel.setFixedWidth(LEFTBAR_WIDTH - 12)
@@ -675,6 +685,7 @@ class TitleBar(Widget):
         hlayout.addWidget(self.viewToolBtn)
         hlayout.addWidget(self.goToolBtn)
         hlayout.addWidget(self.runToolBtn)
+        hlayout.addWidget(self.batchToolBtn)
         hlayout.addWidget(self.toolsToolBtn)
         hlayout.addStretch()
         hlayout.addWidget(self.titleLabel)

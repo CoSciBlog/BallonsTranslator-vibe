@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README_EN.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.109`
+Fork release: `1.4.0-vibe.110`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -89,9 +89,9 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Made the Model Downloads window explicitly non-modal so selected or all downloads continue in the background while the app remains usable.
 - Added direct comic archive, PDF, and source-folder import for `.cbz`, `.cbr`, `.zip`, `.pdf`, and nested image folders by extracting, rendering, or copying pages into a normal project folder.
 - Added comic export for `.cbz`, `.zip`, `.pdf`, and `.cbr` when a local RAR writer is installed.
-- Added GUI batch processing from the Open menu for processing each image subfolder as a separate project with its own `glossary.json`, selectable pipeline modules, optional `.cbz`/`.pdf` export, and an optional quit-on-finish mode.
+- Added a dedicated `Batch Processing` title-bar menu for processing each image subfolder as a separate project with its own `glossary.json`, selectable pipeline modules, optional `.cbz`/`.pdf` export, and an optional quit-on-finish mode.
 - Added `Tools -> Upscale Project Images 2x` and `Tools -> Upscale Project Images Using Settings` to replace all eligible source pages with staged `_upscaled_<factor>x` outputs and reload the project with visible progress.
-- Added `Tools -> Batch Upscale Folders Using Settings...` to choose a parent directory and upscale every immediate source-image subfolder through the configured settings with the same modal progress, ETA, and Stop controls as the run pipeline.
+- Added `Batch Processing -> Batch Upscale Folders Using Settings...` to choose a parent directory and upscale every immediate source-image subfolder through the configured settings with the same modal progress, ETA, and Stop controls as the run pipeline.
 - Added a sidebar `x2` shortcut for the fixed-factor project upscaling action, using the same quality/limit settings and already-upscaled confirmation as `Tools -> Upscale Project Images 2x`.
 - Replaced abbreviated sidebar utility actions with local SVG icons and added a current-page Region Merge shortcut that uses the configured Post-merge thresholds.
 - Updated Ollama-backed LLM and Two-Step translation to use native `/api/chat` requests, with `num ctx` controlling the Ollama context window per request.
@@ -152,7 +152,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
   - support for long-strip and webtoon-style pages
 - Censor Restoration / Decensor Inpaint workflow is temporarily hidden from Settings and the left sidebar while it is being repaired.
 - Headless automation for batch processing from the command line
-- GUI batch processing from `Open -> Batch Processing` for selecting a parent folder and running each immediate image subfolder as its own project
+- GUI batch processing from `Batch Processing -> Batch Processing ...` for selecting project folders or parent folders and running each image subfolder as its own project
 - Multiple OCR, translator, and inpainting backends already wired into the desktop app
 
 ### Two-Step Translation Provenance
@@ -181,7 +181,7 @@ The importer only writes into the derived project folder. If that folder already
 
 Use `Open -> Export as Comic Archive/PDF` after saving or running the project to export rendered result pages. `.cbz` and `.zip` are written directly with Python's standard ZIP support. `.pdf` writes one image per PDF page and uses each rendered image's own dimensions, so portrait, landscape, and mixed-size pages keep independent page boxes. `.cbr` export requires a local `rar` or WinRAR command line writer; if none is available, use `.cbz`, `.zip`, or `.pdf`.
 
-Use `Open -> Batch Processing` to enter or select one or more chapter/project folders or parent folders, separated by semicolons or new lines. The dialog lets you choose pipeline modules and source/target languages, including `English` for both source and target, retry empty OCR output with a fallback OCR backend, skip already processed pages/projects, permanently upscale and replace originals with the chosen factor/quality/size limits before processing, optionally re-run inpainting with saved text/censor masks after each project, optionally export each finished project as `.cbz` or `.pdf`, optionally quit when complete, and optionally run a completion action after a successful batch. Completion actions include doing nothing, shutting down, restarting, hibernating, sleeping, or running a custom command/program. Generated output folders are ignored. A project-count progress bar remains visible above the per-stage progress bars; `Stop All` cancels the active pipeline and all queued projects.
+Use `Batch Processing -> Batch Processing ...` to enter or select one or more chapter/project folders or parent folders, separated by semicolons or new lines. The dialog lets you choose pipeline modules and source/target languages, including `English` for both source and target, retry empty OCR output with a fallback OCR backend, skip already processed pages/projects, permanently upscale and replace originals with the chosen factor/quality/size limits before processing, optionally re-run inpainting with saved text/censor masks after each project, optionally export each finished project as `.cbz` or `.pdf`, optionally quit when complete, and optionally run a completion action after a successful batch. Completion actions include doing nothing, shutting down, restarting, hibernating, sleeping, or running a custom command/program. Generated output folders are ignored. A project-count progress bar remains visible above the per-stage progress bars; `Stop All` cancels the active pipeline and all queued projects.
 
 ## Re-Inpaint current page
 
@@ -280,7 +280,7 @@ The General settings page starts with an `Upscaling` section. When `Upscale page
 
 For permanent source-page replacement, use `Tools -> Upscale Project Images 2x` or `Tools -> Upscale Project Images Using Settings`. The first action forces only the factor to `2.0`; both actions use the configured maximum long edge, skip threshold, and quality preset. The second action also uses the configured factor. Generated page files are staged first and then written beside the original pages with names such as `001_upscaled_2x.png` or `001_upscaled_2_5x.png`; originals are removed only after successful generation, and the project reloads the new page files. If any current page filename already contains `upscaled`, the app asks whether those pages should be processed again or skipped. Existing text-box coordinates are scaled to the replacement image, while stale image-processing progress and generated page outputs are reset for a fresh pipeline run.
 
-Use `Tools -> Batch Upscale Folders Using Settings...` to select a parent folder containing multiple chapter/source-image folders. Each immediate subfolder containing image pages is processed with the configured factor, quality and size limits; generated folders named `mask`, `inpainted`, `result`, `upscaled`, `decensor_mask`, and `decensored` are excluded. The batch run uses the same modal progress placement and ETA/Stop controls as the normal run pipeline. Already marked `_upscaled_` images can be included again or skipped before processing begins.
+Use `Batch Processing -> Batch Upscale Folders Using Settings...` to select a parent folder containing multiple chapter/source-image folders. Each immediate subfolder containing image pages is processed with the configured factor, quality and size limits; generated folders named `mask`, `inpainted`, `result`, `upscaled`, `decensor_mask`, and `decensored` are excluded. The batch run uses the same modal progress placement and ETA/Stop controls as the normal run pipeline. Already marked `_upscaled_` images can be included again or skipped before processing begins.
 
 ## Post-merge settings
 
