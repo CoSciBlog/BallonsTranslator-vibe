@@ -56,7 +56,7 @@ from utils.archive_export import archive_export_filter, default_export_path, exp
 from utils.io_utils import IMG_EXT, find_all_imgs
 from utils.batch_processing import collect_batch_project_dirs
 from utils.batch_completion import run_completion_action
-from utils.upscale import filename_has_upscale_marker
+from utils.upscale import filename_has_upscale_marker, filter_upscale_pages
 from .canvas import Canvas
 from .configpanel import ConfigPanel
 from .module_manager import ModuleManager
@@ -724,6 +724,14 @@ class MainWindow(mainwindow_cls):
         jobs = []
         for directory in options.project_dirs:
             pages = find_all_imgs(directory, abs_path=False, sort=True)
+            if options.skip_upscaled_pages:
+                pending_pages = filter_upscale_pages(pages, skip_marked=True)
+                marked_count = len(pages) - len(pending_pages)
+                if marked_count:
+                    LOGGER.info(
+                        f'Skipping {marked_count} already upscaled page(s) in batch project {directory}.'
+                    )
+                pages = pending_pages
             if pages:
                 jobs.append((directory, pages))
         if not jobs:

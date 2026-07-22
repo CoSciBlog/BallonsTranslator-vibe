@@ -49,6 +49,7 @@ class BatchProcessingOptions:
     skip_translated_pages: bool
     skip_finished_projects: bool
     upscale_enabled: bool
+    skip_upscaled_pages: bool
     upscale_factor: float
     upscale_max_long_edge: int
     upscale_skip_if_long_edge_above: int
@@ -122,6 +123,12 @@ class BatchProcessingDialog(QDialog):
         self.inpaint_check.toggled.connect(lambda enabled: self.reinpaint_check.setChecked(False) if not enabled else None)
 
         self.upscale_check = QCheckBox(self.tr('Upscale and replace original pages before processing'))
+        self.skip_upscaled_pages_check = QCheckBox(self.tr('Skip pages already marked as upscaled'))
+        self.skip_upscaled_pages_check.setToolTip(self.tr(
+            'When batch upscaling is enabled, skip source pages whose filename already contains an '
+            '_upscaled_<factor>x marker, for example 012_upscaled_2x.jpg.'
+        ))
+        self.skip_upscaled_pages_check.setChecked(False)
         self.upscale_factor = QDoubleSpinBox()
         self.upscale_factor.setRange(1.0, 8.0)
         self.upscale_factor.setSingleStep(0.5)
@@ -137,6 +144,7 @@ class BatchProcessingDialog(QDialog):
         self.upscale_skip_edge.setRange(0, 100000)
         self.upscale_skip_edge.setValue(int(pcfg.upscale_skip_if_long_edge_above))
         upscale_widgets = [
+            self.skip_upscaled_pages_check,
             self.upscale_factor,
             self.upscale_quality,
             self.upscale_artifact_reduction,
@@ -183,6 +191,7 @@ class BatchProcessingDialog(QDialog):
         form.addRow('', self.skip_projects_check)
         form.addRow('', self.reinpaint_check)
         form.addRow('', self.upscale_check)
+        form.addRow('', self.skip_upscaled_pages_check)
         form.addRow(self.tr('Upscale factor'), self.upscale_factor)
         form.addRow(self.tr('Upscale quality'), self.upscale_quality)
         form.addRow(self.tr('Compression artifact cleanup'), self.upscale_artifact_reduction)
@@ -281,6 +290,7 @@ class BatchProcessingDialog(QDialog):
             skip_translated_pages=self.skip_pages_check.isChecked(),
             skip_finished_projects=self.skip_projects_check.isChecked(),
             upscale_enabled=self.upscale_check.isChecked(),
+            skip_upscaled_pages=self.skip_upscaled_pages_check.isChecked(),
             upscale_factor=self.upscale_factor.value(),
             upscale_max_long_edge=self.upscale_max_edge.value(),
             upscale_skip_if_long_edge_above=self.upscale_skip_edge.value(),

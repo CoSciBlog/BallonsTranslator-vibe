@@ -74,6 +74,16 @@
         <translation>Originalseiten vor der Verarbeitung hochskalieren und ersetzen</translation>
     </message>
     <message>
+        <location filename="../ui/batch_processing_dialog.py" line="126"/>
+        <source>Skip pages already marked as upscaled</source>
+        <translation>Bereits als hochskaliert markierte Seiten überspringen</translation>
+    </message>
+    <message>
+        <location filename="../ui/batch_processing_dialog.py" line="127"/>
+        <source>When batch upscaling is enabled, skip source pages whose filename already contains an _upscaled_&lt;factor&gt;x marker, for example 012_upscaled_2x.jpg.</source>
+        <translation>Wenn die Batch-Hochskalierung aktiviert ist, werden Quellseiten übersprungen, deren Dateiname bereits einen _upscaled_&lt;Faktor&gt;x-Marker enthält, zum Beispiel 012_upscaled_2x.jpg.</translation>
+    </message>
+    <message>
         <location filename="../ui/batch_processing_dialog.py" line="150"/>
         <source>Export each finished project</source>
         <translation type="unfinished"></translation>

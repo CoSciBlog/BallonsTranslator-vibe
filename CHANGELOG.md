@@ -4,6 +4,7 @@
 
 ### Added
 
+- An opt-in Batch Processing checkbox that skips source pages already carrying a structured `_upscaled_<factor>x` filename marker before permanent pre-processing upscaling.
 - A `Tools -> Re-run Inpainting All Pages` process that reapplies saved inpaint and censor-repair masks to every project page with pipeline progress, ETA, Stop, and Force Stop controls.
 - A bottom-bar `Reasoning` checkbox for `LLM_API_Translator` and `LLM_API_Translator_2`, synchronized with the persisted Translator Settings option and hidden for other translators.
 - Per-step runtime measurements for Text Detection, OCR, Translate, and Inpaint in new pipeline-history entries.
@@ -111,6 +112,7 @@
 
 ### Changed
 
+- Bumped the fork runtime version string to `1.4.0-vibe.114`.
 - Bumped the fork runtime version string to `1.4.0-vibe.113`.
 - Pipeline History now distributes visible table columns responsively across the current window width, reallocates space after columns are hidden, and elides long project-history paths on narrower windows.
 - Bumped the fork runtime version string to `1.4.0-vibe.112`.

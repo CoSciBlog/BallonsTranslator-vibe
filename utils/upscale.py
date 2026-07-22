@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 from typing import Tuple
 
@@ -45,7 +46,14 @@ def project_upscale_filename(imgname: str, factor: float) -> str:
 
 
 def filename_has_upscale_marker(imgname: str) -> bool:
-    return "upscaled" in Path(imgname).stem.lower()
+    return re.search(r"_upscaled_\d+(?:_\d+)?x(?:_|$)", Path(imgname).stem, re.IGNORECASE) is not None
+
+
+def filter_upscale_pages(page_names, skip_marked: bool = False):
+    pages = list(page_names)
+    if not skip_marked:
+        return pages
+    return [page for page in pages if not filename_has_upscale_marker(page)]
 
 
 def effective_upscale_factor(
