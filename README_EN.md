@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.108`
+Fork release: `1.4.0-vibe.109`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -40,6 +40,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Changed Settings to open in a separate non-modal window, following the upstream 1.5.x layout behavior while keeping the Vibe-specific settings intact.
 - Added an optional settings safety switch that prevents mouse wheel changes on combo boxes and spin boxes, plus wider input fields for long API keys, URLs, and prompts.
 - Added optional pre-detection page upscaling with factor, quality, maximum size, and skip-threshold settings.
+- Project and batch source-image upscaling now use the normal run-pipeline progress dialog with ETA and Stop/Force Stop controls, close without a completion OK dialog, and keep appending the matching `_upscaled_<factor>x` marker on every completed upscale.
 - Refined the General settings layout, added a glossary icon, and added a sidebar translation-only run button.
 - Moved Upscaling and Post-merge settings to the top of General settings, with visible field labels and detailed hover tooltips.
 - Added page-list previews, a page context-menu toggle for ignoring pages in pipeline runs, and project JSON persistence for ignored pages.

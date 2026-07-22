@@ -187,7 +187,6 @@ class MainWindow(mainwindow_cls):
         self.imgtrans_progress_msgbox.setStyleSheet(styleSheet)
         self.export_doc_thread.progress_bar.setStyleSheet(styleSheet)
         self.import_doc_thread.progress_bar.setStyleSheet(styleSheet)
-        self.project_upscale_thread.progress_bar.setStyleSheet(styleSheet)
         return super().setStyleSheet(styleSheet)
 
     def setupThread(self):
@@ -199,7 +198,6 @@ class MainWindow(mainwindow_cls):
         self.project_upscale_thread = ProjectUpscaleThread(self)
         self.project_upscale_thread.progress_changed.connect(self.on_project_upscale_progress)
         self.project_upscale_thread.upscale_finished.connect(self.on_project_upscale_finished)
-        self.project_upscale_thread.progress_bar.stop_clicked.connect(self.on_project_upscale_stop)
         self.batch_project_upscale_thread = BatchProjectUpscaleThread(self)
         self.batch_project_upscale_thread.progress_changed.connect(self.on_batch_project_upscale_progress)
         self.batch_project_upscale_thread.upscale_finished.connect(self.on_batch_project_upscale_finished)
@@ -2801,24 +2799,30 @@ class MainWindow(mainwindow_cls):
             pcfg.upscale_artifact_reduction,
         )
         if started:
-            self.project_upscale_thread.progress_bar.setTaskName(
-                self.tr('Upscaling project images ({factor}x): ').format(factor=f'{factor:g}')
-            )
-            self.project_upscale_thread.progress_bar.zero_progress()
-            self.project_upscale_thread.progress_bar.show()
+            progress_box = self.imgtrans_progress_msgbox
+            progress_box.set_batch_mode(False)
+            progress_box.hide_all_bars()
+            progress_box.detect_bar.description = self.tr(
+                'Upscaling project images ({factor}x): '
+            ).format(factor=f'{factor:g}')
+            progress_box.detect_bar.show()
+            progress_box.zero_progress()
+            progress_box.show()
 
     def on_project_upscale_progress(self, current: int, total: int):
         progress = int(current / max(total, 1) * 100)
-        self.project_upscale_thread.progress_bar.updateTaskProgress(progress, f' {current}/{total}')
+        self.imgtrans_progress_msgbox.updateDetectProgress(progress, f' {current}/{total}')
 
     def on_project_upscale_stop(self):
-        self.project_upscale_thread.requestStop()
-        self.project_upscale_thread.progress_bar.hide()
+        if self.project_upscale_thread.isRunning():
+            self.project_upscale_thread.requestStop()
+        if self.batch_project_upscale_thread.isRunning():
+            self.batch_project_upscale_thread.requestStop()
 
     def on_project_upscale_finished(self, replacements, skipped, failures, stopped, staging_dir):
-        self.project_upscale_thread.progress_bar.hide()
+        self._restore_project_upscale_progress()
         if stopped:
-            create_info_dialog(self.tr('Project image upscaling was stopped. No source images were replaced.'))
+            LOGGER.info('Project image upscaling was stopped; no source images were replaced.')
             return
         if failures:
             details = '\n'.join(f'- {name}: {reason}' for name, reason in failures[:8])
@@ -2830,16 +2834,17 @@ class MainWindow(mainwindow_cls):
         if not replacements:
             if staging_dir:
                 shutil.rmtree(staging_dir, ignore_errors=True)
-            create_info_dialog(self.tr('No project pages met the configured upscaling size limits.'))
+            LOGGER.info('No project pages met the configured upscaling size limits.')
             return
         try:
             project_path = self.imgtrans_proj.proj_path
             self.imgtrans_proj.replace_pages_with_upscaled_files(replacements)
             self.openJsonProj(project_path)
-            msg = self.tr('Upscaled and replaced {count} project page(s).').format(count=len(replacements))
-            if skipped:
-                msg += self.tr('\nSkipped {count} page(s) because of configured size limits.').format(count=len(skipped))
-            create_info_dialog(msg)
+            LOGGER.info(
+                'Upscaled and replaced %d project page(s); skipped %d page(s).',
+                len(replacements),
+                len(skipped),
+            )
         except Exception as e:
             create_error_dialog(e, self.tr('Failed to activate upscaled project images.'))
         finally:
@@ -2925,13 +2930,16 @@ class MainWindow(mainwindow_cls):
         self.imgtrans_progress_msgbox.updateDetectProgress(progress, f' {current}/{total} - {folder_name}')
 
     def on_batch_project_upscale_stop(self):
-        if self.batch_project_upscale_thread.isRunning():
-            self.batch_project_upscale_thread.requestStop()
+        self.on_project_upscale_stop()
 
-    def _restore_batch_project_upscale_progress(self):
+    def _restore_project_upscale_progress(self):
         self.imgtrans_progress_msgbox.hide()
         self.imgtrans_progress_msgbox.detect_bar.description = self.tr('Detecting: ')
+        self.imgtrans_progress_msgbox.show_all_bars()
         self.imgtrans_progress_msgbox.zero_progress()
+
+    def _restore_batch_project_upscale_progress(self):
+        self._restore_project_upscale_progress()
 
     def on_batch_project_upscale_finished(self, replaced_count, skipped_count, failures, stopped):
         self._restore_batch_project_upscale_progress()
@@ -2960,10 +2968,9 @@ class MainWindow(mainwindow_cls):
             return
 
         if stopped:
-            create_info_dialog(
-                self.tr('Batch upscaling stopped. Replaced {replaced} image(s) before stopping.').format(
-                    replaced=replaced_count,
-                )
+            LOGGER.info(
+                'Batch upscaling stopped after replacing %d image(s).',
+                replaced_count,
             )
             return
         if failures:
@@ -2975,10 +2982,11 @@ class MainWindow(mainwindow_cls):
                 ).format(replaced=replaced_count),
             )
             return
-        msg = self.tr('Batch upscaling replaced {count} image(s).').format(count=replaced_count)
-        if skipped_count:
-            msg += self.tr('\nSkipped {count} image(s) because of configured size limits.').format(count=skipped_count)
-        create_info_dialog(msg)
+        LOGGER.info(
+            'Batch upscaling replaced %d image(s); skipped %d image(s).',
+            replaced_count,
+            skipped_count,
+        )
 
     def remove_current_page_masks(self):
         if self.imgtrans_proj.is_empty or not self.imgtrans_proj.current_img:

@@ -257,7 +257,6 @@ class ProjectUpscaleThread(ThreadBase):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.progress_bar = ProgressMessageBox(self.tr('Upscaling project images: '))
         self.stop_requested = False
         self.directory = ''
         self.img_list = []

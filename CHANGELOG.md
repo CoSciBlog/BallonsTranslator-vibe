@@ -109,6 +109,9 @@
 
 ### Changed
 
+- Bumped the fork runtime version string to `1.4.0-vibe.109`.
+- Project source-image upscaling now uses the same modal multi-stage progress dialog as the run pipeline, including ETA and Stop/Force Stop handling; successful project and batch upscaling closes without an additional OK dialog.
+- Repeated source-image upscaling continues to rename every generated page by appending the matching `_upscaled_<factor>x` marker for that run.
 - Bumped the fork runtime version string to `1.4.0-vibe.108`.
 - Native Ollama translation and glossary requests now send their Pydantic JSON schemas through `/api/chat`, with expected translation counts and IDs included for regular and review requests.
 - Regular `LLM_API_Translator` translation requests now use the configurable `max translation items per request` batch limit, defaulting to 8 for more reliable local-model JSON output.
