@@ -3108,7 +3108,6 @@ class MainWindow(mainwindow_cls):
         self.pageList.viewport().update()
         self.save_project_safely(self.tr('current page re-inpaint'), notify_user=False)
         self.saveCurrentPage(update_scene_text=False, save_proj=True)
-        create_info_dialog(self.tr('Inpainting re-run completed for current page.'))
 
     def on_reinpaint_current_page_failed(self):
         if self._reinpaint_current_page_request is None:

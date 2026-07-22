@@ -112,6 +112,7 @@
 
 ### Changed
 
+- Bumped the fork runtime version string to `1.4.0-vibe.115`.
 - Bumped the fork runtime version string to `1.4.0-vibe.114`.
 - Bumped the fork runtime version string to `1.4.0-vibe.113`.
 - Pipeline History now distributes visible table columns responsively across the current window width, reallocates space after columns are hidden, and elides long project-history paths on narrower windows.
@@ -219,6 +220,7 @@
 
 ### Fixed
 
+- Current-page Re-Inpaint now closes its progress UI and returns directly to the editor after success without showing a blocking completion confirmation; warning and failure dialogs are unchanged.
 - Prevented repeated translation structure-mismatch failures by validating exact ID sets, recovering split numeric-ID/translation string pairs, and falling back to generic JSON mode when an older Ollama server rejects native schema mode.
 - Prevented repeated Transformers generation warnings in `manga_ocr` by clearing the legacy model `max_length=300` setting and using the configurable `max_new_tokens` limit exclusively.
 - Allowed the NVIDIA Blackwell/cu128 Runtime Manager profile to install on Python 3.14 now that matching Windows PyTorch, TorchVision, and TorchAudio cu128 wheels are available; Python versions older than 3.10 remain unsupported.

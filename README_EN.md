@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.114`
+Fork release: `1.4.0-vibe.115`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -187,7 +187,7 @@ ZIP and CBZ files use Python's built-in ZIP support. CBR files require a local `
 
 The left sidebar includes a `Ri` button below the project utility actions. It re-runs inpainting for the currently opened page only, using the page's existing text/manual inpaint mask plus any explicit repair mask saved for that same page. Masks from other pages, debug masks, thumbnails, and exported result images are not used.
 
-The same action is available from `Tools -> Re-run Inpainting Current Page` and the `Ctrl+Shift+I` shortcut. The Drawboard has a Re-Inpaint settings tab with the current inpainter selector and a dedicated `Dilate` slider, matching the rectangle repair tool's dilation behavior. Re-Inpaint now keeps the page metadata attached to the inpaint result, so the progress dialog can close when the current-page result finishes. This is useful after changing the inpainting model or editing masks manually. Batch Processing can also run a project-wide Re-Inpaint pass after the normal pipeline and before export; it prefers each page's existing `inpainted` image as the source and combines saved text masks with censor-restoration masks.
+The same action is available from `Tools -> Re-run Inpainting Current Page` and the `Ctrl+Shift+I` shortcut. The Drawboard has a Re-Inpaint settings tab with the current inpainter selector and a dedicated `Dilate` slider, matching the rectangle repair tool's dilation behavior. Re-Inpaint keeps the page metadata attached to the inpaint result, closes the progress dialog when the current-page result finishes, and returns directly to the editor without an additional completion confirmation. Warning and failure dialogs remain visible. This is useful after changing the inpainting model or editing masks manually. Batch Processing can also run a project-wide Re-Inpaint pass after the normal pipeline and before export; it prefers each page's existing `inpainted` image as the source and combines saved text masks with censor-restoration masks.
 
 The Drawboard sidebar also includes a `Show translated text` checkbox. Enable it while drawing masks if you need to see the translated text boxes together with the mask layer.
 
