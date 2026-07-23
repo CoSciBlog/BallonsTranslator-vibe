@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README_EN.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.115`
+Fork release: `1.4.0-vibe.116`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -56,6 +56,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Added `Tools -> Re-run Inpainting All Pages` to reapply saved text and censor-repair masks across every project page in a stoppable pipeline progress dialog.
 - Added readable English names to source-language selectors, for example `日本語 (Japanese)`, `Deutsch (German)`, and `Polski (Polish)`, while keeping the original internal language values.
 - Added `English` to the Batch Processing source- and target-language selectors and made the dialog restore saved language choices by internal language key.
+- Added a default-enabled Batch Processing option that carries one cumulative glossary through related comic/manga folders while preserving project-local entries on conflicts.
 - Added an optional Batch Processing Re-Inpaint step that reapplies saved inpaint and censor masks to finished pages before export.
 - Added Batch Processing completion actions for shutting down, restarting, hibernating, sleeping, or running a custom command/program after a successful batch run.
 - Recovered complete LLM translation and glossary items from malformed or truncated JSON responses so Batch Processing, review passes, and glossary updates can continue when a local model emits a broken trailing item.
@@ -92,7 +93,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Made the Model Downloads window explicitly non-modal so selected or all downloads continue in the background while the app remains usable.
 - Added direct comic archive, PDF, and source-folder import for `.cbz`, `.cbr`, `.zip`, `.pdf`, and nested image folders by extracting, rendering, or copying pages into a normal project folder.
 - Added comic export for `.cbz`, `.zip`, `.pdf`, and `.cbr` when a local RAR writer is installed.
-- Added a dedicated `Batch Processing` title-bar menu for processing each image subfolder as a separate project with its own `glossary.json`, selectable pipeline modules, optional `.cbz`/`.pdf` export, and an optional quit-on-finish mode.
+- Added a dedicated `Batch Processing` title-bar menu for processing each image subfolder as a separate project, optionally sharing a cumulative glossary, with selectable pipeline modules, optional `.cbz`/`.pdf` export, and an optional quit-on-finish mode.
 - Added `Tools -> Upscale Project Images 2x` and `Tools -> Upscale Project Images Using Settings` to replace all eligible source pages with staged `_upscaled_<factor>x` outputs and reload the project with visible progress.
 - Added `Batch Processing -> Batch Upscale Folders Using Settings...` to choose a parent directory and upscale every immediate source-image subfolder through the configured settings with the same modal progress, ETA, and Stop controls as the run pipeline.
 - Added a sidebar `x2` shortcut for the fixed-factor project upscaling action, using the same quality/limit settings and already-upscaled confirmation as `Tools -> Upscale Project Images 2x`.
@@ -155,7 +156,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
   - support for long-strip and webtoon-style pages
 - Censor Restoration / Decensor Inpaint workflow is temporarily hidden from Settings and the left sidebar while it is being repaired.
 - Headless automation for batch processing from the command line
-- GUI batch processing from `Batch Processing -> Batch Processing ...` for selecting project folders or parent folders and running each image subfolder as its own project
+- GUI batch processing from `Batch Processing -> Batch Processing ...` for selecting project folders or parent folders, running each image subfolder as its own project, and sharing terminology across related folders
 - Multiple OCR, translator, and inpainting backends already wired into the desktop app
 
 ### Two-Step Translation Provenance
@@ -184,7 +185,7 @@ The importer only writes into the derived project folder. If that folder already
 
 Use `Open -> Export as Comic Archive/PDF` after saving or running the project to export rendered result pages. `.cbz` and `.zip` are written directly with Python's standard ZIP support. `.pdf` writes one image per PDF page and uses each rendered image's own dimensions, so portrait, landscape, and mixed-size pages keep independent page boxes. `.cbr` export requires a local `rar` or WinRAR command line writer; if none is available, use `.cbz`, `.zip`, or `.pdf`.
 
-Use `Batch Processing -> Batch Processing ...` to enter or select one or more chapter/project folders or parent folders, separated by semicolons or new lines. The dialog lets you choose pipeline modules and source/target languages, including `English` for both source and target, retry empty OCR output with a fallback OCR backend, skip already processed pages/projects, permanently upscale and replace originals with the chosen factor/quality/size limits before processing, and optionally skip pages whose filename already contains the structured `_upscaled_<factor>x` marker. The marker check is filename-based; if every page in a project is already marked, its upscale pass is skipped and normal pipeline processing continues. The dialog can also re-run inpainting with saved text/censor masks after each project, export each finished project as `.cbz` or `.pdf`, quit when complete, or run a completion action after a successful batch. Completion actions include doing nothing, shutting down, restarting, hibernating, sleeping, or running a custom command/program. Generated output folders are ignored. A project-count progress bar remains visible above the per-stage progress bars; `Stop All` cancels the active pipeline and all queued projects.
+Use `Batch Processing -> Batch Processing ...` to enter or select one or more chapter/project folders or parent folders, separated by semicolons or new lines. `Share glossary across all projects` is enabled by default for related comics, manga volumes, or chapters: the first project's glossary becomes the cumulative batch glossary, each following project's existing entries take priority on conflicts, and newly extracted terms are saved and passed to every later project. Disable the option when processing unrelated works that should retain isolated terminology. The dialog also lets you choose pipeline modules and source/target languages, including `English` for both source and target, retry empty OCR output with a fallback OCR backend, skip already processed pages/projects, permanently upscale and replace originals with the chosen factor/quality/size limits before processing, and optionally skip pages whose filename already contains the structured `_upscaled_<factor>x` marker. The marker check is filename-based; if every page in a project is already marked, its upscale pass is skipped and normal pipeline processing continues. The dialog can also re-run inpainting with saved text/censor masks after each project, export each finished project as `.cbz` or `.pdf`, quit when complete, or run a completion action after a successful batch. Completion actions include doing nothing, shutting down, restarting, hibernating, sleeping, or running a custom command/program. Generated output folders are ignored. A project-count progress bar remains visible above the per-stage progress bars; `Stop All` cancels the active pipeline and all queued projects.
 
 ## Re-Inpaint current page
 
@@ -248,6 +249,8 @@ ComicTextDetector keeps its input tensors and all model weights on the selected 
 ## Project glossary
 
 The left sidebar includes a book-icon Glossary button that opens the current project's glossary window. Entries, preferred target terms, the glossary prompt, optional reference entries, and the optional reference prompt are saved in a separate `glossary.json` file inside the project's image folder, next to the project's `imgtrans_*.json` file, so each manga/comic project keeps its own terminology. Before translating, use **Preferred target terms** to enter required target-language-only spellings for names, places, titles, or recurring designations, for example `NEMONA [character]`; no source-language form is required. LLM translation, review, refinement, and glossary extraction use those entries as consistency guidance. If a preferred target term or a normal glossary target is renamed and the glossary is saved, matching existing translations are updated by search/replace and matching terms are synchronized in both glossary tables. The old Settings-page glossary text boxes are no longer used; edit glossary entries and prompts from the Glossary window. Category labels and notes such as `[CHARACTER]` or `[PLACE]` are treated as metadata and are not included in translation output. Automatic glossary extraction defaults to character/name entries and places only; optional translator checkboxes can enable organizations, titles, domain terms, honorifics, or catchphrases when needed. Automatically extracted names are merged without replacing existing manual glossary entries.
+
+For a connected series, enable `Share glossary across all projects` in Batch Processing. The batch keeps the cumulative glossary in memory, merges it into each next folder's `glossary.json`, and gives that folder's existing entries priority when the same source term and category conflict.
 
 Use `Import Glossary` to merge entries from another `glossary.json` into the current editable table. Use `Import Reference` to load another chapter's glossary into the separate reference field; reference entries are included in translation and review prompts as supporting context, while explicit project entries take priority when terms conflict. `Export Glossary` writes the full glossary data, including reference entries, to a JSON file.
 

@@ -54,7 +54,7 @@ from utils.archive_import import (
 )
 from utils.archive_export import archive_export_filter, default_export_path, export_project
 from utils.io_utils import IMG_EXT, find_all_imgs
-from utils.batch_processing import collect_batch_project_dirs
+from utils.batch_processing import collect_batch_project_dirs, merge_batch_glossaries
 from utils.batch_completion import run_completion_action
 from utils.upscale import filename_has_upscale_marker, filter_upscale_pages
 from .canvas import Canvas
@@ -331,6 +331,7 @@ class MainWindow(mainwindow_cls):
         self._gui_batch_completed = 0
         self._gui_batch_cancel_requested = False
         self._gui_batch_upscale_pending = False
+        self._gui_batch_shared_glossary = None
         self._decensor_current_page_request = None
         self._reinpaint_current_page_request = None
         self._reinpaint_all_pages_pending = False
@@ -675,6 +676,7 @@ class MainWindow(mainwindow_cls):
         self._gui_batch_completed = 0
         self._gui_batch_cancel_requested = False
         self._gui_batch_upscale_pending = False
+        self._gui_batch_shared_glossary = None
         self._apply_gui_batch_options(options)
         self.imgtrans_progress_msgbox.set_batch_mode(True)
         self._update_gui_batch_progress()
@@ -769,6 +771,7 @@ class MainWindow(mainwindow_cls):
         self._gui_batch_active_project = project_dir
         LOGGER.info(f'Batch processing project {project_dir}')
         self.OpenProj(project_dir)
+        self._prepare_gui_batch_project_glossary()
         if self.imgtrans_proj.is_empty:
             LOGGER.warning(f'Batch project has no pages: {project_dir}')
             self._gui_batch_completed += 1
@@ -784,14 +787,44 @@ class MainWindow(mainwindow_cls):
             self._update_gui_batch_progress()
             self.run_next_gui_batch_project()
 
+    def _prepare_gui_batch_project_glossary(self):
+        options = self._gui_batch_options
+        if not options or not options.share_glossary:
+            return
+
+        project_glossary = self.imgtrans_proj.normalize_glossary(self.imgtrans_proj.glossary)
+        if self._gui_batch_shared_glossary is None:
+            merged_glossary = project_glossary
+        else:
+            merged_glossary = merge_batch_glossaries(
+                self._gui_batch_shared_glossary,
+                project_glossary,
+                self.imgtrans_proj.default_glossary(),
+            )
+
+        self.imgtrans_proj.glossary = self.imgtrans_proj.normalize_glossary(merged_glossary)
+        self._gui_batch_shared_glossary = deepcopy(self.imgtrans_proj.glossary)
+        self.imgtrans_proj.save_glossary()
+        self.sync_project_glossary_to_ui()
+        self.sync_project_glossary_to_translator()
+        LOGGER.info(
+            f'Applied cumulative batch glossary to {self.imgtrans_proj.directory}.'
+        )
+
     def finish_current_gui_batch_project(self):
         options = self._gui_batch_options
         if not options:
             return
         try:
+            if options.share_glossary:
+                self.sync_translator_glossary_to_project(update_ui=False)
             if self.canvas.text_change_unsaved():
                 self.st_manager.updateTextBlkList()
             self.saveCurrentPage(update_scene_text=False, save_proj=True, restore_interface=True)
+            if options.share_glossary:
+                self._gui_batch_shared_glossary = deepcopy(
+                    self.imgtrans_proj.normalize_glossary(self.imgtrans_proj.glossary)
+                )
             self._wait_for_image_saves()
             if options.reinpaint_enabled:
                 self._run_gui_batch_reinpaint_step()
@@ -852,6 +885,7 @@ class MainWindow(mainwindow_cls):
         self._gui_batch_completed = 0
         self._gui_batch_cancel_requested = False
         self._gui_batch_upscale_pending = False
+        self._gui_batch_shared_glossary = None
         self.module_manager.setOCRFallbackFromConfig()
         self.imgtrans_progress_msgbox.set_batch_mode(False)
 

@@ -4,6 +4,7 @@
 
 ### Added
 
+- A default-enabled Batch Processing option for carrying one cumulative glossary across related project folders; project-local terms win conflicts and newly extracted terms are available to each following project.
 - An opt-in Batch Processing checkbox that skips source pages already carrying a structured `_upscaled_<factor>x` filename marker before permanent pre-processing upscaling.
 - A `Tools -> Re-run Inpainting All Pages` process that reapplies saved inpaint and censor-repair masks to every project page with pipeline progress, ETA, Stop, and Force Stop controls.
 - A bottom-bar `Reasoning` checkbox for `LLM_API_Translator` and `LLM_API_Translator_2`, synchronized with the persisted Translator Settings option and hidden for other translators.
@@ -112,6 +113,7 @@
 
 ### Changed
 
+- Bumped the fork runtime version string to `1.4.0-vibe.116`.
 - Bumped the fork runtime version string to `1.4.0-vibe.115`.
 - Bumped the fork runtime version string to `1.4.0-vibe.114`.
 - Bumped the fork runtime version string to `1.4.0-vibe.113`.

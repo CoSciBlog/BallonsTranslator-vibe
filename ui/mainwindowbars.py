@@ -663,7 +663,9 @@ class TitleBar(Widget):
         self.batchToolBtn.setToolTip(self.tr('Batch Processing menu: process or upscale multiple project folders.'))
 
         batchProcessingAction = QAction(self.tr('Batch Processing ...'), self)
-        batchProcessingAction.setToolTip(self.tr('Process each image subfolder as a separate project with its own glossary.'))
+        batchProcessingAction.setToolTip(self.tr(
+            'Process each image subfolder as a separate project, optionally sharing one cumulative glossary.'
+        ))
         self.batch_processing_trigger = batchProcessingAction.triggered
 
         batchMenu = QMenu(self.batchToolBtn)

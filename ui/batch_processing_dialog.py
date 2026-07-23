@@ -48,6 +48,7 @@ class BatchProcessingOptions:
     quit_when_finished: bool
     skip_translated_pages: bool
     skip_finished_projects: bool
+    share_glossary: bool
     upscale_enabled: bool
     skip_upscaled_pages: bool
     upscale_factor: float
@@ -110,8 +111,20 @@ class BatchProcessingDialog(QDialog):
         self._set_language_combo(self.source_combo, pcfg.module.translate_source)
         self._set_language_combo(self.target_combo, pcfg.module.translate_target)
 
-        self.skip_pages_check = QCheckBox(self.tr('Skip pages already processed by the pipeline'))
-        self.skip_projects_check = QCheckBox(self.tr('Skip projects whose pages are already processed'))
+        self.skip_pages_check = QCheckBox(self.tr('Skip already processed pages'))
+        self.skip_pages_check.setToolTip(self.tr(
+            'Continue each project with only pages that still have pending pipeline stages.'
+        ))
+        self.skip_projects_check = QCheckBox(self.tr('Skip finished projects'))
+        self.skip_projects_check.setToolTip(self.tr(
+            'Skip a project when all of its pages already have the selected pipeline stages completed.'
+        ))
+        self.share_glossary_check = QCheckBox(self.tr('Share glossary across all projects'))
+        self.share_glossary_check.setToolTip(self.tr(
+            'Keep one cumulative glossary for the selected folders. Existing entries in each project '
+            'take priority, and newly extracted terms are available to every following project.'
+        ))
+        self.share_glossary_check.setChecked(True)
         self.reinpaint_check = QCheckBox(self.tr('Re-run inpainting after each project'))
         self.reinpaint_check.setToolTip(self.tr(
             'After a project finishes, apply saved inpaint and censor masks again to the current inpainted pages. '
@@ -187,8 +200,11 @@ class BatchProcessingDialog(QDialog):
         form.addRow(self.translate_check, self.translator_combo)
         form.addRow(self.tr('Source language'), self.source_combo)
         form.addRow(self.tr('Target language'), self.target_combo)
-        form.addRow('', self.skip_pages_check)
-        form.addRow('', self.skip_projects_check)
+        skip_layout = QHBoxLayout()
+        skip_layout.addWidget(self.skip_pages_check)
+        skip_layout.addWidget(self.skip_projects_check)
+        form.addRow('', skip_layout)
+        form.addRow('', self.share_glossary_check)
         form.addRow('', self.reinpaint_check)
         form.addRow('', self.upscale_check)
         form.addRow('', self.skip_upscaled_pages_check)
@@ -289,6 +305,7 @@ class BatchProcessingDialog(QDialog):
             quit_when_finished=self.quit_check.isChecked(),
             skip_translated_pages=self.skip_pages_check.isChecked(),
             skip_finished_projects=self.skip_projects_check.isChecked(),
+            share_glossary=self.share_glossary_check.isChecked(),
             upscale_enabled=self.upscale_check.isChecked(),
             skip_upscaled_pages=self.skip_upscaled_pages_check.isChecked(),
             upscale_factor=self.upscale_factor.value(),
