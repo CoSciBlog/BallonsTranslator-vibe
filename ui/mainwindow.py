@@ -113,7 +113,10 @@ class PageListView(QListWidget):
         
         ignore_label = self.tr('Include Page in Pipeline') if ignored else self.tr('Ignore Page in Pipeline')
         ignore_act = menu.addAction(ignore_label)
-        ignore_act.setToolTip(self.tr('Skip this page during text detection, OCR, translation, and inpainting pipeline runs.'))
+        ignore_act.setToolTip(self.tr(
+            'Skip this page during text detection, OCR, translation, and inpainting pipeline runs. '
+            'Saving, export, and upscaling still include the page.'
+        ))
         
         delete_data_act = menu.addAction(self.tr('Delete Page Data'))
         delete_data_act.setToolTip(self.tr('Delete textboxes, masks, and inpainting for this page.'))
@@ -846,7 +849,7 @@ class MainWindow(mainwindow_cls):
         )
 
     def _run_gui_batch_reinpaint_step(self) -> int:
-        pages = self.imgtrans_proj.pipeline_pages(skip_ignored=True)
+        pages = self.imgtrans_proj.pipeline_pages()
         if not pages:
             return 0
         progress_box = self.imgtrans_progress_msgbox
@@ -1298,7 +1301,7 @@ class MainWindow(mainwindow_cls):
             return
 
         self.update_detected_cover_title_pages()
-        page_names = self.imgtrans_proj.pipeline_pages(skip_ignored=True)
+        page_names = self.imgtrans_proj.pipeline_pages()
         if len(page_names) == 0:
             create_info_dialog(self.tr('No processable pages are available for Gloss Scan.'))
             return
@@ -2614,7 +2617,7 @@ class MainWindow(mainwindow_cls):
         self.st_manager.updateTextBlkList()
 
         self.update_detected_cover_title_pages()
-        page_names = self.imgtrans_proj.pipeline_pages(skip_ignored=True)
+        page_names = self.imgtrans_proj.pipeline_pages()
         if len(page_names) == 0:
             return
         self.backup_blkstyles = [[] for _ in range(self.imgtrans_proj.num_pages)]
@@ -2687,7 +2690,7 @@ class MainWindow(mainwindow_cls):
     def run_review_all_pages(self):
         if not self._prepare_review_run():
             return
-        page_names = self.imgtrans_proj.pipeline_pages(skip_ignored=True)
+        page_names = self.imgtrans_proj.pipeline_pages()
         if len(page_names) == 0:
             create_info_dialog(self.tr('No processable pages are available for translation review.'))
             return
@@ -2859,7 +2862,7 @@ class MainWindow(mainwindow_cls):
     def run_inpaint_optimize_all_pages(self):
         if not self._can_run_inpaint_optimization():
             return
-        page_names = self.imgtrans_proj.pipeline_pages(skip_ignored=True)
+        page_names = self.imgtrans_proj.pipeline_pages()
         if len(page_names) == 0:
             create_info_dialog(self.tr('No processable pages are available for inpaint optimization.'))
             return
@@ -2884,7 +2887,7 @@ class MainWindow(mainwindow_cls):
         if self.canvas.text_change_unsaved():
             self.saveCurrentPage(update_scene_text=True, save_proj=True, restore_interface=True)
 
-        page_names = list(self.imgtrans_proj.pages.keys())
+        page_names = self.imgtrans_proj.project_pages()
         marked_pages = [page for page in page_names if filename_has_upscale_marker(page)]
         if marked_pages:
             msg = self.tr(
@@ -3167,7 +3170,7 @@ class MainWindow(mainwindow_cls):
         self.update_detected_cover_title_pages()
         
         pages_to_process = []
-        processable_pages = self.imgtrans_proj.pipeline_pages(skip_ignored=True)
+        processable_pages = self.imgtrans_proj.pipeline_pages()
         if len(processable_pages) == 0:
             create_info_dialog(self.tr('All pages are ignored or detected as cover/title pages for pipeline runs.'))
             return False

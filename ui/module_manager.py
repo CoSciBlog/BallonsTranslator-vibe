@@ -742,9 +742,9 @@ class ImgtransThread(QThread):
                     self.finish_blktrans_stage.emit('inpaint', int((ii+1) * progress_prod))
         self.finish_blktrans.emit(mode, blk_ids)
 
-    def _iter_pipeline_pages(self, skip_ignored: bool = True):
+    def _iter_pipeline_pages(self):
         all_pages = list(self.imgtrans_proj.pages.keys())
-        pages_to_iterate = self.imgtrans_proj.pipeline_pages(self.pages_to_process, skip_ignored=skip_ignored)
+        pages_to_iterate = self.imgtrans_proj.pipeline_pages(self.pages_to_process)
         if self.pages_to_process is not None and len(self.pages_to_process) > 0:
             LOGGER.info(f'Processing specific pages: {len(pages_to_iterate)} pages')
         else:
@@ -879,7 +879,7 @@ class ImgtransThread(QThread):
         self.translate_counter = 0
         self.inpaint_counter = 0
         self.decensor_counter = 0
-        pages_to_iterate = self._iter_pipeline_pages(skip_ignored=True)
+        pages_to_iterate = self._iter_pipeline_pages()
         self.inpaint_thread.num_process_pages = self.num_pages
         LOGGER.info(f'Running inpaint optimization for {len(pages_to_iterate)} pages')
 
@@ -901,7 +901,7 @@ class ImgtransThread(QThread):
         self.translate_counter = 0
         self.inpaint_counter = 0
         self.decensor_counter = 0
-        pages_to_iterate = self._iter_pipeline_pages(skip_ignored=False)
+        pages_to_iterate = self._iter_pipeline_pages()
         self.inpaint_thread.num_process_pages = self.num_pages
         repaired_count = 0
         LOGGER.info(f'Re-running inpainting for all {len(pages_to_iterate)} project pages')
@@ -1141,7 +1141,7 @@ class ImgtransThread(QThread):
         self.decensor_counter = 0
 
         all_pages = list(self.imgtrans_proj.pages.keys())
-        pages_to_iterate = self.imgtrans_proj.pipeline_pages(self.pages_to_process, skip_ignored=True)
+        pages_to_iterate = self.imgtrans_proj.pipeline_pages(self.pages_to_process)
 
         self.num_pages = max(1, len(pages_to_iterate))
         for process_idx, page_name in enumerate(pages_to_iterate):
@@ -1175,7 +1175,7 @@ class ImgtransThread(QThread):
         self.decensor_counter = 0
 
         all_pages = list(self.imgtrans_proj.pages.keys())
-        pages_to_iterate = self.imgtrans_proj.pipeline_pages(self.pages_to_process, skip_ignored=True)
+        pages_to_iterate = self.imgtrans_proj.pipeline_pages(self.pages_to_process)
 
         self.num_pages = max(1, len(pages_to_iterate))
         for process_idx, page_name in enumerate(pages_to_iterate):
@@ -1207,7 +1207,7 @@ class ImgtransThread(QThread):
         self.translate_counter = 0
         self.inpaint_counter = 0
         self.decensor_counter = 0
-        pages_to_iterate = self._iter_pipeline_pages(skip_ignored=False)
+        pages_to_iterate = self._iter_pipeline_pages()
         self.inpaint_thread.num_process_pages = self.num_pages
         LOGGER.info(f'Running decensor for {len(pages_to_iterate)} pages')
         self._run_decensor_pages(pages_to_iterate)
@@ -1598,7 +1598,7 @@ class ModuleManager(QObject):
             return
         if cfg_module.skip_cover_title_pages:
             self.imgtrans_proj.update_cover_title_pages()
-        process_pages = self.imgtrans_proj.pipeline_pages(pages_to_process, skip_ignored=True)
+        process_pages = self.imgtrans_proj.pipeline_pages(pages_to_process)
         if len(process_pages) == 0:
             LOGGER.info('No pages to process after applying ignored page filters')
             self.progress_msgbox.hide()
@@ -1637,13 +1637,13 @@ class ModuleManager(QObject):
             return
         if cfg_module.skip_cover_title_pages:
             self.imgtrans_proj.update_cover_title_pages()
-        if len(self.imgtrans_proj.pipeline_pages(pages_to_process, skip_ignored=True)) == 0:
+        if len(self.imgtrans_proj.pipeline_pages(pages_to_process)) == 0:
             LOGGER.info('No pages to translate after applying ignored page filters')
             self.progress_msgbox.hide()
             self.last_pipeline_status = 'completed'
             self.imgtrans_pipeline_finished.emit()
             return
-        process_pages = self.imgtrans_proj.pipeline_pages(pages_to_process, skip_ignored=True)
+        process_pages = self.imgtrans_proj.pipeline_pages(pages_to_process)
         self._start_pipeline_history('translation_only_pipeline', pages_to_process, process_pages)
         self.last_finished_index = -1
         self.pipeline_pages_to_process = pages_to_process
@@ -1676,13 +1676,13 @@ class ModuleManager(QObject):
             return
         if cfg_module.skip_cover_title_pages:
             self.imgtrans_proj.update_cover_title_pages()
-        if len(self.imgtrans_proj.pipeline_pages(pages_to_process, skip_ignored=True)) == 0:
+        if len(self.imgtrans_proj.pipeline_pages(pages_to_process)) == 0:
             LOGGER.info('No pages to review after applying ignored page filters')
             self.progress_msgbox.hide()
             self.last_pipeline_status = 'completed'
             self.imgtrans_pipeline_finished.emit()
             return
-        process_pages = self.imgtrans_proj.pipeline_pages(pages_to_process, skip_ignored=True)
+        process_pages = self.imgtrans_proj.pipeline_pages(pages_to_process)
         self._start_pipeline_history('llm_review_pipeline', pages_to_process, process_pages)
         self.last_finished_index = -1
         self.pipeline_pages_to_process = pages_to_process
@@ -1707,7 +1707,7 @@ class ModuleManager(QObject):
         if self.anyPipelineThreadRunning():
             LOGGER.warning('Stopping existing pipeline before starting decensor.')
             self.forceStopImgtransPipeline(emit_finished=False)
-        process_pages = self.imgtrans_proj.pipeline_pages(pages_to_process, skip_ignored=False)
+        process_pages = self.imgtrans_proj.pipeline_pages(pages_to_process)
         self._start_pipeline_history('decensor_pipeline', pages_to_process, process_pages)
         self.last_finished_index = -1
         self.pipeline_pages_to_process = pages_to_process
@@ -1736,7 +1736,7 @@ class ModuleManager(QObject):
             return
         if cfg_module.skip_cover_title_pages:
             self.imgtrans_proj.update_cover_title_pages()
-        if len(self.imgtrans_proj.pipeline_pages(pages_to_process, skip_ignored=True)) == 0:
+        if len(self.imgtrans_proj.pipeline_pages(pages_to_process)) == 0:
             LOGGER.info('No pages to optimize after applying ignored page filters')
             self.progress_msgbox.hide()
             self.imgtrans_pipeline_finished.emit()
@@ -1744,7 +1744,7 @@ class ModuleManager(QObject):
         if self.anyPipelineThreadRunning():
             LOGGER.warning('Stopping existing pipeline before starting inpaint optimization.')
             self.forceStopImgtransPipeline(emit_finished=False)
-        process_pages = self.imgtrans_proj.pipeline_pages(pages_to_process, skip_ignored=True)
+        process_pages = self.imgtrans_proj.pipeline_pages(pages_to_process)
         self._start_pipeline_history('inpaint_optimization_pipeline', pages_to_process, process_pages)
         self.last_finished_index = -1
         self.pipeline_pages_to_process = pages_to_process
@@ -1771,7 +1771,7 @@ class ModuleManager(QObject):
             self.progress_msgbox.hide()
             self.imgtrans_pipeline_finished.emit()
             return
-        process_pages = self.imgtrans_proj.pipeline_pages(pages_to_process, skip_ignored=False)
+        process_pages = self.imgtrans_proj.pipeline_pages(pages_to_process)
         if len(process_pages) == 0:
             LOGGER.info('No project pages are available for Re-Inpaint')
             self.progress_msgbox.hide()
@@ -2039,9 +2039,9 @@ class ModuleManager(QObject):
         self.post_pipeline_merge_done = True
         all_pages = list(self.imgtrans_proj.pages.keys())
         if self.pipeline_pages_to_process:
-            page_names = self.imgtrans_proj.pipeline_pages(self.pipeline_pages_to_process, skip_ignored=True)
+            page_names = self.imgtrans_proj.pipeline_pages(self.pipeline_pages_to_process)
         else:
-            page_names = self.imgtrans_proj.pipeline_pages(skip_ignored=True)
+            page_names = self.imgtrans_proj.pipeline_pages()
 
         if not page_names:
             return

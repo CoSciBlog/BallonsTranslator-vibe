@@ -75,7 +75,7 @@ def _find_result_image_for_page(project, page_name: str) -> str:
 def _materialize_ignored_result_images(project) -> List[str]:
     ignored_pages = getattr(project, 'ignored_pages', set()) or set()
     created = []
-    for page_name in project.pages.keys():
+    for page_name in project.project_pages():
         if page_name not in ignored_pages:
             continue
         if _find_result_image_for_page(project, page_name):
@@ -107,7 +107,7 @@ def result_images_for_project(project) -> List[Tuple[str, str]]:
 
     missing = []
     images = []
-    for page_name in project.pages.keys():
+    for page_name in project.project_pages():
         image_path = _find_result_image_for_page(project, page_name)
         if not image_path:
             missing.append(page_name)

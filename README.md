@@ -7,7 +7,7 @@
 # BallonsTranslator Vibe Fork
 English | [README mirror](/README_EN.md) | [pt-BR](doc/README_PT-BR.md) | [Russian](doc/README_RU.md) | [Japanese](doc/README_JA.md) | [Indonesian](doc/README_ID.md) | [Vietnamese](doc/README_VI.md) | [Korean](doc/README_KO.md) | [Spanish](doc/README_ES.md) | [French](doc/README_FR.md)
 
-Fork release: `1.4.0-vibe.116`
+Fork release: `1.4.0-vibe.117`
 Upstream base: `BallonsTranslator 1.4.0`
 Update source: `https://github.com/CoSciBlog/BallonsTranslator-vibe.git` (`dev`)
 
@@ -47,6 +47,7 @@ This repository is a Codex-expanded fork. It keeps the original desktop workflow
 - Moved Upscaling and Post-merge settings to the top of General settings, with visible field labels and detailed hover tooltips.
 - Added page-list previews, a page context-menu toggle for ignoring pages in pipeline runs, and project JSON persistence for ignored pages.
 - Added a zero-padded current/total page counter beside the active page title in the window header.
+- Limited `Ignore Page in Pipeline` strictly to text detection, OCR, translation, and inpainting; ignored pages remain part of saves, exports, and upscaling.
 - Added LLM project-context settings for previous pages, optional next-page context, capped document context, and narrower automatic glossary category extraction.
 - Added a `Force Stop` control to the run progress dialog for terminating stuck pipeline or translation threads.
 - Added the missing `accelerate>=0.26.0` dependency required by `flux2-klein` GGUF loading.
@@ -306,7 +307,7 @@ The General settings page lets you choose the intermediate image format for proj
 
 ## Page pipeline ignore
 
-The Pages sidebar now shows page previews for the project list. The centered window title shows the selected position and project size next to the active page name, for example `001/217 pages`. Right-click a page and choose `Ignore Page in Pipeline` to skip that page during text detection, OCR, translation, and inpainting runs. Ignored pages are lightly highlighted in the list and saved in the project's `imgtrans_*.json` file under `ignored_pages`. Use the same context menu entry again to include the page in pipeline runs.
+The Pages sidebar now shows page previews for the project list. The centered window title shows the selected position and project size next to the active page name, for example `001/217 pages`. Right-click a page and choose `Ignore Page in Pipeline` to skip that page only during text detection, OCR, translation, and inpainting runs, including the matching Re-Inpaint and restoration pipelines. Ignored pages are still saved with the project, included in Word/text/comic/PDF exports, and included in project or batch upscaling. If an ignored page has no rendered result when exporting a comic archive or PDF, its unchanged source image is exported in the correct page order. Ignored pages are lightly highlighted in the list and saved in the project's `imgtrans_*.json` file under `ignored_pages`. Use the same context menu entry again to include the page in pipeline runs.
 
 Enable `Settings -> General -> Page filtering -> Skip detected cover and title pages in pipeline` to omit probable covers and title pages from automatic detection, OCR, translation, review, glossary scan, and inpainting/optimization runs. Detection is intentionally conservative: it recognizes explicit cover/title filenames and strongly colored first or second pages. Detected entries are stored in project JSON under `cover_title_pages` and become processable again when the setting is disabled.
 

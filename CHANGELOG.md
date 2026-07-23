@@ -4,6 +4,7 @@
 
 ### Added
 
+- A strict project-page versus pipeline-page selection boundary: ignored pages are excluded only from text detection, OCR, translation, and inpainting pipelines, while saving, document/comic export, and project or batch upscaling continue to include them.
 - A default-enabled Batch Processing option for carrying one cumulative glossary across related project folders; project-local terms win conflicts and newly extracted terms are available to each following project.
 - An opt-in Batch Processing checkbox that skips source pages already carrying a structured `_upscaled_<factor>x` filename marker before permanent pre-processing upscaling.
 - A `Tools -> Re-run Inpainting All Pages` process that reapplies saved inpaint and censor-repair masks to every project page with pipeline progress, ETA, Stop, and Force Stop controls.
@@ -113,6 +114,7 @@
 
 ### Changed
 
+- Bumped the fork runtime version string to `1.4.0-vibe.117`.
 - Bumped the fork runtime version string to `1.4.0-vibe.116`.
 - Bumped the fork runtime version string to `1.4.0-vibe.115`.
 - Bumped the fork runtime version string to `1.4.0-vibe.114`.

@@ -432,15 +432,21 @@ class ProjImgTrans:
         self.cover_title_pages = detected
         return changed
 
-    def pipeline_pages(self, pages_to_process=None, skip_ignored: bool = True) -> List[str]:
+    def project_pages(self, pages_to_process=None) -> List[str]:
+        """Return selected project pages without applying pipeline-only filters."""
         if pages_to_process is not None and len(pages_to_process) > 0:
-            page_names = [page for page in pages_to_process if page in self.pages]
-        else:
-            page_names = list(self.pages.keys())
-        if skip_ignored:
-            page_names = [page for page in page_names if page not in self.ignored_pages]
-            if pcfg.module.skip_cover_title_pages:
-                page_names = [page for page in page_names if page not in self.cover_title_pages]
+            return [page for page in pages_to_process if page in self.pages]
+        return list(self.pages.keys())
+
+    def pipeline_pages(self, pages_to_process=None) -> List[str]:
+        """Return pages eligible for text detection, OCR, translation, and inpainting."""
+        page_names = [
+            page
+            for page in self.project_pages(pages_to_process)
+            if page not in self.ignored_pages
+        ]
+        if pcfg.module.skip_cover_title_pages:
+            page_names = [page for page in page_names if page not in self.cover_title_pages]
         return page_names
 
     def set_page_progress(self, pagename, code):
