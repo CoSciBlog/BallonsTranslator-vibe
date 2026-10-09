@@ -2,84 +2,65 @@
 setlocal EnableExtensions
 cd /d "%~dp0"
 
-set "RUNTIME_DIR=%~dp0ballontrans_pylibs_win"
-set "PYTHON=%RUNTIME_DIR%\python.exe"
+set "PROJECT_ROOT=%~dp0"
+set "VENV_DIR=%PROJECT_ROOT%.venv"
+set "PYTHON=%VENV_DIR%\Scripts\python.exe"
+set "UV_ROOT=%PROJECT_ROOT%.runtime\uv"
+set "UV_EXE=%UV_ROOT%\uv.exe"
+set "UV_PYTHON_INSTALL_DIR=%PROJECT_ROOT%.runtime\python"
+set "UV_CACHE_DIR=%PROJECT_ROOT%.runtime\cache"
+set "UV_MANAGED_PYTHON=1"
+set "UV_PYTHON_DOWNLOADS=automatic"
 set "ERROR_REPORTING=FALSE"
 
-if exist "%~dp0python\" (
-    if not exist "%RUNTIME_DIR%\" ren "%~dp0python" "ballontrans_pylibs_win"
-)
+if not exist "%PYTHON%" goto :bootstrap_runtime
+if not exist "%UV_EXE%" goto :bootstrap_runtime
+goto :validate_runtime
 
-if exist "%PYTHON%" goto :validate_runtime
-if exist "%RUNTIME_DIR%\" goto :incomplete_runtime
-
-echo No local BallonsTranslator Python runtime was found.
-echo Installing the supported project-local Python 3.12 runtime...
+:bootstrap_runtime
+echo Preparing the project-local uv, Python, and .venv runtime...
 echo.
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\install.ps1"
-set "INSTALL_EXIT=%ERRORLEVEL%"
-if not "%INSTALL_EXIT%"=="0" (
+powershell -NoProfile -ExecutionPolicy Bypass -File "%PROJECT_ROOT%scripts\bootstrap_windows.ps1" -ProjectRoot "%PROJECT_ROOT%"
+set "BOOTSTRAP_EXIT=%ERRORLEVEL%"
+if not "%BOOTSTRAP_EXIT%"=="0" (
     echo.
-    echo Runtime installation failed with exit code %INSTALL_EXIT%.
+    echo Runtime setup failed with exit code %BOOTSTRAP_EXIT%.
     pause
-    exit /b %INSTALL_EXIT%
+    exit /b %BOOTSTRAP_EXIT%
 )
 
-rem install.ps1 launches BallonsTranslator after a successful first-time setup.
-exit /b 0
+if not exist "%PYTHON%" (
+    echo Runtime setup completed without creating "%PYTHON%".
+    pause
+    exit /b 1
+)
 
 :validate_runtime
-"%PYTHON%" -c "import sys; raise SystemExit(sys.version_info[:2] not in ((3, 8), (3, 9), (3, 10), (3, 11), (3, 12)))" >NUL 2>&1
+"%PYTHON%" -c "import sys; raise SystemExit(sys.version_info[:3] != (3, 12, 10))" >NUL 2>&1
 if errorlevel 1 goto :unsupported_runtime
 
-set "PATH=%RUNTIME_DIR%;%RUNTIME_DIR%\Scripts;%PATH%"
+if not exist "%UV_EXE%" goto :missing_uv
 
-mkdir tmp 2>NUL
-type NUL >"tmp\stdout.txt"
-type NUL >"tmp\stderr.txt"
+set "VIRTUAL_ENV=%VENV_DIR%"
+set "PATH=%VENV_DIR%\Scripts;%UV_ROOT%;%PATH%"
 
-"%PYTHON%" -m pip --help >"tmp\stdout.txt" 2>"tmp\stderr.txt"
-if not errorlevel 1 goto :launch
-if not defined PIP_INSTALLER_LOCATION goto :pip_failed
-
-"%PYTHON%" "%PIP_INSTALLER_LOCATION%" >"tmp\stdout.txt" 2>"tmp\stderr.txt"
-if errorlevel 1 goto :pip_failed
-
-:launch
 "%PYTHON%" -m ballontranslator %*
 set "APP_EXIT=%ERRORLEVEL%"
 if not "%APP_EXIT%"=="0" echo BallonsTranslator exited with code %APP_EXIT%.
 pause
 exit /b %APP_EXIT%
 
-:incomplete_runtime
-echo The local runtime directory exists but does not contain python.exe:
-echo   "%RUNTIME_DIR%"
-echo Rename or repair that directory, then run scripts\install.bat.
-pause
-exit /b 1
-
 :unsupported_runtime
-echo The local runtime at "%PYTHON%" is not usable or has an unsupported Python version.
-echo BallonsTranslator 1.5 requires Python 3.8 through 3.12.
-echo Repair the local runtime with scripts\install.bat.
+echo The project virtual environment does not use the pinned Python 3.12.10 runtime:
+echo   "%PYTHON%"
+echo Existing environments are never deleted automatically.
+echo Rename or repair .venv, then run launch_win.bat again.
 pause
 exit /b 1
 
-:pip_failed
-set "PIP_EXIT=%ERRORLEVEL%"
-echo Couldn't launch or install pip in the local runtime.
-echo.
-if exist "tmp\stdout.txt" for %%I in ("tmp\stdout.txt") do if %%~zI GTR 0 (
-    echo stdout:
-    type "tmp\stdout.txt"
-    echo.
-)
-if exist "tmp\stderr.txt" for %%I in ("tmp\stderr.txt") do if %%~zI GTR 0 (
-    echo stderr:
-    type "tmp\stderr.txt"
-    echo.
-)
-echo Launch unsuccessful. Exiting.
+:missing_uv
+echo The project virtual environment exists, but project-local uv is missing:
+echo   "%UV_EXE%"
+echo Run scripts\install.bat to repair the project runtime.
 pause
-exit /b %PIP_EXIT%
+exit /b 1

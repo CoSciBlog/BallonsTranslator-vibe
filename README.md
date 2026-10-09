@@ -115,17 +115,17 @@
 **方式 A（一键自动配置本地环境，需要系统支持 PowerShell）**：
 该脚本会在执行目录安装 `BallonsTranslator`：
 ```powershell
-irm https://raw.githubusercontent.com/dmMaze/BallonsTranslator/dev/scripts/install.ps1 | iex
+irm https://raw.githubusercontent.com/CoSciBlog/BallonsTranslator-vibe/1.5-vibe/scripts/install.ps1 | iex
 ```
 或者在系统的命令提示符 (`cmd.exe`) 中运行：
 ```cmd
-powershell -NoProfile -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/dmMaze/BallonsTranslator/dev/scripts/install.ps1 | iex"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/CoSciBlog/BallonsTranslator-vibe/1.5-vibe/scripts/install.ps1 | iex"
 ```
 
 **方式 B（下载免配置压缩包）**：
 从 [GitHub Releases](https://github.com/dmMaze/BallonsTranslator/releases) 下载 `Ballonstranslator_win_minium.zip`，解压并双击运行 `launch_win.bat` 启动程序。  
 
-从源码目录运行 `launch_win.bat` 时，启动器只会使用项目内的 `ballontrans_pylibs_win` 运行环境。如果该环境不存在，启动器会调用 `scripts/install.ps1`，在项目目录内安装受支持的 Python 3.12；不会再向系统全局 Python 安装依赖。如果已经存在不完整或版本不受支持的本地环境，启动器会保留它并显示修复说明。
+从源码目录运行 `launch_win.bat` 时，启动器会将 uv 安装到 `.runtime/uv`，由 uv 按照 `.python-version` 将固定版本的 Python 安装到 `.runtime/python`，并创建隔离的 `.venv`。uv 缓存也保存在 `.runtime` 内，不使用系统全局 Python 或全局 uv。启动器不会自动删除已有虚拟环境；如果 `.venv` 不完整或 Python 版本不匹配，会保留它并显示修复说明。
   
 以上方式不支持 Windows 7，Windows 7 用户需要自行安装 [Python 3.8](https://www.python.org/downloads/release/python-3810/) 运行源码。 
 
@@ -136,7 +136,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command "irm https://raw.githubus
 
 该脚本会在执行目录安装 `BallonsTranslator`：
 ```bash
-curl -fLO https://raw.githubusercontent.com/dmMaze/BallonsTranslator/dev/scripts/install.sh && chmod +x install.sh && ./install.sh
+curl -fLO https://raw.githubusercontent.com/CoSciBlog/BallonsTranslator-vibe/1.5-vibe/scripts/install.sh && chmod +x install.sh && ./install.sh
 ```
 
 如果系统没有 `curl`，也可以用 `wget -O ...` 下载脚本。安装完成后会自动启动程序；之后可运行 `cd BallonsTranslator && ./launch.sh` 再次启动。  
@@ -262,6 +262,7 @@ Sugoi 翻译器作者: [mingshiba](https://www.patreon.com/mingshiba)
 ## 杂
 * 电脑带 Nvidia 显卡或 Apple silicon 默认启用 GPU 加速
 * 感谢 [bropines](https://github.com/bropines) 提供俄语翻译
+* 项目本地 Python 和虚拟环境的引导安装使用 [uv](https://github.com/astral-sh/uv)，其许可证为 Apache-2.0 或 MIT。
 * 第三方输入法可能会造成右侧编辑框显示 bug，见[#76](https://github.com/dmMaze/BallonsTranslator/issues/76)，暂时不打算修
 <details>
   <summary><i>启用 AMD ROCm 显卡加速方法</i></summary>
@@ -302,7 +303,7 @@ Sugoi 翻译器作者: [mingshiba](https://www.patreon.com/mingshiba)
 
   nvrtc.dll → nvrtc64_112_0.dll
 ```
-  将已经重命名的文件替换掉 `BallonsTranslator\ballontrans_pylibs_win\Lib\site-packages\torch\lib\` 目录中的同名文件
+  将已经重命名的文件替换掉 `BallonsTranslator-vibe\.venv\Lib\site-packages\torch\lib\` 目录中的同名文件
 
 5. 启动程序并设置 OCR 和文本检测 为 Cuda **(图像修复请继续使用 CPU)**
 6. 运行 OCR 并等待 ZLUDA 编译 PTX 文件 **(首次编译大概需要 5-10 分钟，取决于 CPU 性能)**,**下次运行无需编译**

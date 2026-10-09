@@ -103,18 +103,18 @@
 **Method A (One-Click Local Environment Setup, requires PowerShell)**:
 The script installs `BallonsTranslator` in the directory where you run it:
 ```powershell
-irm https://raw.githubusercontent.com/dmMaze/BallonsTranslator/dev/scripts/install.ps1 | iex
+irm https://raw.githubusercontent.com/CoSciBlog/BallonsTranslator-vibe/1.5-vibe/scripts/install.ps1 | iex
 ```
 Or run the following command in the Command Prompt (`cmd.exe`):
 ```cmd
-powershell -NoProfile -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/dmMaze/BallonsTranslator/dev/scripts/install.ps1 | iex"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/CoSciBlog/BallonsTranslator-vibe/1.5-vibe/scripts/install.ps1 | iex"
 ```
 
 
 **Method B (Download Pre-configured Package)**:
 Download `Ballonstranslator_win_minium.zip` from [GitHub Releases](https://github.com/dmMaze/BallonsTranslator/releases), extract it, and double-click `launch_win.bat` to launch the application.
 
-When `launch_win.bat` is run from a source checkout, it uses only the project-local `ballontrans_pylibs_win` runtime. If that runtime is missing, the launcher starts `scripts/install.ps1` to install the supported Python 3.12 runtime inside the project. It does not install packages into a global Python installation. An existing incomplete or unsupported local runtime is left untouched and reported with repair instructions.
+When `launch_win.bat` is run from a source checkout, it bootstraps uv into `.runtime/uv`, lets uv install the pinned Python version from `.python-version` into `.runtime/python`, and creates an isolated `.venv`. The uv cache also stays under `.runtime`. Neither a global Python nor a global uv installation is used. Existing virtual environments are never deleted automatically; an incomplete or mismatched `.venv` is preserved and reported with repair instructions.
 
 These methods do not support Windows 7; Windows 7 users must install [Python 3.8](https://www.python.org/downloads/release/python-3810/) manually and run from source.
 
@@ -124,7 +124,7 @@ If you see errors involving `msvcp140.dll`, `c10.dll`, or `[WinError 1114]`, ins
 
 The script installs `BallonsTranslator` in the directory where you run it:
 ```bash
-curl -fLO https://raw.githubusercontent.com/dmMaze/BallonsTranslator/dev/scripts/install.sh && chmod +x install.sh && ./install.sh
+curl -fLO https://raw.githubusercontent.com/CoSciBlog/BallonsTranslator-vibe/1.5-vibe/scripts/install.sh && chmod +x install.sh && ./install.sh
 ```
 
 If `curl` is not available, download the script with `wget -O ...` instead. The app launches automatically after installation; later, use `cd BallonsTranslator && ./launch.sh` to start it again.
@@ -247,3 +247,4 @@ This project is heavily dependent upon [manga-image-translator](https://github.c
 * Fonts are from your system's fonts.
 * Thanks to [bropines](https://github.com/bropines) for the Russian localization.
 * Added Export to photoshop JSX script by [bropines](https://github.com/bropines). </br> To read the instructions, improve the code and just poke around to see how it works, you can go to `scripts/export to photoshop` -> `install_manual.md`.
+* The project-local Python and virtual-environment bootstrap uses [uv](https://github.com/astral-sh/uv), distributed under the Apache-2.0 or MIT license.

@@ -1,7 +1,8 @@
 # Changelogs
 
-### 2026-10-09
-- Fixed the Windows source launcher so it never installs dependencies into a global Python environment. A missing project-local runtime now triggers the supported Python 3.12 installer, while incomplete or unsupported local runtimes stop with repair guidance.
+### 2026-10-09 — 1.5.19+vibe.1
+- Migrated source checkouts to a uv-managed project runtime: pinned Python, uv, cache, and dependencies now stay under `.runtime` and `.venv` instead of using a global Python installation.
+- Existing virtual environments are preserved; incomplete or version-mismatched environments stop with repair guidance instead of being removed automatically.
 - Added an early startup error for unsupported Python versions instead of attempting dependency repair on Python 3.13 or newer.
 
 ### 2023-04-15

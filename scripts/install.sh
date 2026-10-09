@@ -2,9 +2,8 @@
 
 set -eu
 
-SOURCE_URL="https://github.com/dmMaze/BallonsTranslator/archive/refs/heads/dev.zip"
-APP_NAME="BallonsTranslator"
-ARCHIVE_DIR="BallonsTranslator-dev"
+SOURCE_URL="https://github.com/CoSciBlog/BallonsTranslator-vibe/archive/refs/heads/1.5-vibe.zip"
+APP_NAME="BallonsTranslator-vibe"
 VENV_NAME=".venv"
 
 info() {
@@ -112,8 +111,8 @@ mkdir "$extract_dir"
 info "Extracting source..."
 extract_archive "$archive_path" "$extract_dir"
 
-extracted_app="${extract_dir}/${ARCHIVE_DIR}"
-[ -d "$extracted_app" ] || fail "Expected ${ARCHIVE_DIR} in downloaded archive"
+extracted_app=$(find "$extract_dir" -mindepth 1 -maxdepth 1 -type d -print -quit)
+[ -n "$extracted_app" ] && [ -d "$extracted_app" ] || fail "Downloaded archive did not contain a project directory"
 
 backup_existing_app "$APP_DIR"
 mv "$extracted_app" "$APP_DIR"
@@ -123,8 +122,16 @@ cd "$APP_DIR"
 [ -f "launch.sh" ] || fail "Downloaded source does not include launch.sh"
 chmod +x "launch.sh"
 
-info "Creating ${VENV_NAME} with Python 3.12..."
-uv venv --python 3.12 "$VENV_NAME"
+python_version=$(tr -d '[:space:]' < .python-version)
+[ -n "$python_version" ] || fail "Missing Python version in .python-version"
+
+UV_PYTHON_INSTALL_DIR="${APP_DIR}/.runtime/python"
+UV_CACHE_DIR="${APP_DIR}/.runtime/cache"
+UV_MANAGED_PYTHON=1
+export UV_PYTHON_INSTALL_DIR UV_CACHE_DIR UV_MANAGED_PYTHON
+
+info "Creating ${VENV_NAME} with project-local Python ${python_version}..."
+uv venv --python "$python_version" --managed-python --seed "$VENV_NAME"
 
 venv_python="${APP_DIR}/${VENV_NAME}/bin/python"
 [ -x "$venv_python" ] || fail "Virtual environment Python was not created at ${venv_python}"

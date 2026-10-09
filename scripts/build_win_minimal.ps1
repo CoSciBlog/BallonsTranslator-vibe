@@ -10,7 +10,6 @@ $ErrorActionPreference = "Stop"
 $BuildDir = Join-Path $PSScriptRoot "..\build_temp"
 $DestName = "Ballonstranslator_win_minium"
 $DestDir = Join-Path $BuildDir $DestName
-$PyLibsDir = Join-Path $DestDir "ballontrans_pylibs_win"
 $ZipFile = Join-Path $PSScriptRoot "..\$DestName.zip"
 
 Write-Host "=== Starting BallonsTranslator Minimal Build ==="
@@ -29,7 +28,7 @@ if (Test-Path $ZipFile) {
 }
 
 # Create build directory structure
-New-Item -ItemType Directory -Force -Path $PyLibsDir | Out-Null
+New-Item -ItemType Directory -Force -Path $DestDir | Out-Null
 
 # Step 1: Get Source Code
 if ($UseLocalSource) {
@@ -37,10 +36,13 @@ if ($UseLocalSource) {
     $RepoRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
     
     # Copy project files excluding git, github, temp, and current build dirs
-    $ExcludePatterns = @(".git", ".github", "build_temp", "*.zip", ".idea", ".vscode", "__pycache__")
+    $ExcludePatterns = @(
+        ".git", ".github", ".runtime", ".venv", "build_temp", "*.zip",
+        ".idea", ".vscode", "__pycache__"
+    )
     
     # Simple copy filter
-    Get-ChildItem -Path $RepoRoot | Where-Object {
+    Get-ChildItem -Path $RepoRoot -Force | Where-Object {
         $name = $_.Name
         $match = $false
         foreach ($pattern in $ExcludePatterns) {
@@ -50,9 +52,9 @@ if ($UseLocalSource) {
     } | Copy-Item -Destination $DestDir -Recurse -Force
 } else {
     # Determine download URL
-    $SourceUrl = "https://github.com/dmMaze/BallonsTranslator/archive/refs/heads/dev.zip"
+    $SourceUrl = "https://github.com/CoSciBlog/BallonsTranslator-vibe/archive/refs/heads/1.5-vibe.zip"
     if ($Tag) {
-        $SourceUrl = "https://github.com/dmMaze/BallonsTranslator/archive/refs/tags/$Tag.zip"
+        $SourceUrl = "https://github.com/CoSciBlog/BallonsTranslator-vibe/archive/refs/tags/$Tag.zip"
     }
     
     Write-Host "Downloading source code from $SourceUrl ..."
@@ -70,80 +72,32 @@ if ($UseLocalSource) {
     }
     
     Write-Host "Moving source files to target destination..."
-    Move-Item -Path $ExtractedFolder.FullName -Destination $DestDir
+    Get-ChildItem -LiteralPath $ExtractedFolder.FullName -Force |
+        Move-Item -Destination $DestDir -Force
     Remove-Item -Recurse -Force $ExtractTemp
     Remove-Item $SourceZip
 }
 
-# Step 2: Download and Extract Python Embeddable
-$PythonZipName = "python-$PythonVersion-embed-amd64.zip"
-$PythonUrl = "https://www.python.org/ftp/python/$PythonVersion/$PythonZipName"
-$PythonZipPath = Join-Path $BuildDir $PythonZipName
-
-Write-Host "Downloading Python $PythonVersion embeddable..."
-Invoke-WebRequest -Uri $PythonUrl -OutFile $PythonZipPath
-
-Write-Host "Extracting Python..."
-Expand-Archive -Path $PythonZipPath -DestinationPath $PyLibsDir
-Remove-Item $PythonZipPath
-
-# Step 3: Modify python._pth to uncomment "import site"
-$VersionParts = $PythonVersion.Split('.')
-$MajorMinor = $VersionParts[0] + $VersionParts[1]
-$PthFile = Join-Path $PyLibsDir "python$MajorMinor._pth"
-
-if (-not (Test-Path $PthFile)) {
-    throw "Could not find path file: $PthFile"
+# Step 2: Build a relocatable uv-managed Python virtual environment.
+$VersionFile = Join-Path $DestDir ".python-version"
+Set-Content -LiteralPath $VersionFile -Value $PythonVersion -Encoding ascii
+$BootstrapScript = Join-Path $DestDir "scripts\bootstrap_windows.ps1"
+if (-not (Test-Path $BootstrapScript -PathType Leaf)) {
+    throw "Could not find runtime bootstrap in build source: $BootstrapScript"
 }
 
-Write-Host "Modifying $PthFile to enable site-packages and project root path..."
-$PthContent = Get-Content -Path $PthFile
-$UpdatedContent = @()
-foreach ($line in $PthContent) {
-    if ($line.Trim() -eq "#import site") {
-        $UpdatedContent += "import site"
-    } elseif ($line.Trim() -eq ".") {
-        $UpdatedContent += "."
-        $UpdatedContent += ".."
-    } else {
-        $UpdatedContent += $line
-    }
+Write-Host "Creating relocatable uv runtime with Python $PythonVersion..."
+& $BootstrapScript -ProjectRoot $DestDir -Relocatable
+if ($LASTEXITCODE -ne 0) {
+    throw "Runtime bootstrap failed with exit code $LASTEXITCODE"
 }
-$UpdatedContent | Set-Content -Path $PthFile
 
-# Step 4: Install pip inside the embeddable Python
-Write-Host "Downloading get-pip.py..."
-$GetPipUrl = "https://bootstrap.pypa.io/get-pip.py"
-$GetPipPath = Join-Path $BuildDir "get-pip.py"
-Invoke-WebRequest -Uri $GetPipUrl -OutFile $GetPipPath
-
-Write-Host "Installing pip..."
-$PythonExe = Join-Path $PyLibsDir "python.exe"
-# Run python.exe get-pip.py to install pip
-Start-Process -FilePath $PythonExe -ArgumentList "$GetPipPath --no-warn-script-location" -Wait -NoNewWindow
-Remove-Item $GetPipPath
-
-# Step 5: Download and extract uv
-$UvUrl = "https://github.com/astral-sh/uv/releases/latest/download/uv-x86_64-pc-windows-msvc.zip"
-$UvZipPath = Join-Path $BuildDir "uv.zip"
-
-Write-Host "Downloading uv..."
-Invoke-WebRequest -Uri $UvUrl -OutFile $UvZipPath
-
-Write-Host "Extracting uv..."
-$UvTempDir = Join-Path $BuildDir "uv_temp"
-Expand-Archive -Path $UvZipPath -DestinationPath $UvTempDir
-Remove-Item $UvZipPath
-
-# Copy uv.exe to ballontrans_pylibs_win
-$UvExe = Get-ChildItem -Path $UvTempDir -Filter "uv.exe" -Recurse | Select-Object -First 1
-if (-not $UvExe) {
-    throw "Could not find uv.exe in the downloaded archive"
+$RuntimeCache = Join-Path $DestDir ".runtime\cache"
+if (Test-Path $RuntimeCache) {
+    Remove-Item -LiteralPath $RuntimeCache -Recurse -Force
 }
-Copy-Item -Path $UvExe.FullName -Destination $PyLibsDir -Force
-Remove-Item -Recurse -Force $UvTempDir
 
-# Step 6: Create Final Zip Archive
+# Step 3: Create Final Zip Archive
 Write-Host "Creating final zip package: $ZipFile ..."
 # Compress-Archive stores Windows separators, so write portable entry names explicitly.
 Add-Type -AssemblyName System.IO.Compression.FileSystem

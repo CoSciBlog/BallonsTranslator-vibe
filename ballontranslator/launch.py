@@ -36,8 +36,8 @@ def unsupported_python_message(version_info=None, executable: str = '') -> str:
     executable = executable or sys.executable
     return (
         f'Python {version[0]}.{version[1]} is not supported by BallonsTranslator 1.5. '
-        'Use Python 3.8 through 3.12. On Windows, run launch_win.bat to set up '
-        f'the project-local Python 3.12 runtime. Current executable: {executable}'
+        'Use Python 3.8 through 3.12. On Windows, run launch_win.bat to let uv '
+        f'set up the project-local Python 3.12 virtual environment. Current executable: {executable}'
     )
 
 def disable_bundled_windows_user_site() -> list:

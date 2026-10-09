@@ -31,6 +31,7 @@ class UpdaterTests(unittest.TestCase):
         self.assertIn('config/llm_profile_builtin', updater.SOURCE_UPDATE_DIRS)
         self.assertIn('scripts', updater.SOURCE_UPDATE_DIRS)
         self.assertNotIn('custom_modules', updater.SOURCE_UPDATE_DIRS)
+        self.assertIn('.python-version', updater.SOURCE_UPDATE_FILES)
         self.assertIn('launch_win.bat', updater.SOURCE_UPDATE_FILES)
         self.assertIn('launch.sh', updater.SOURCE_UPDATE_FILES)
 
@@ -44,6 +45,10 @@ class UpdaterTests(unittest.TestCase):
     def test_release_version_comparison_strips_tag_prefix(self):
         self.assertTrue(updater.is_remote_newer('1.4.0', 'v1.4.1'))
         self.assertFalse(updater.is_remote_newer('1.4.1', 'v1.4.1'))
+
+    def test_vibe_local_version_tracks_the_upstream_release_line(self):
+        self.assertFalse(updater.is_remote_newer('1.5.19+vibe.1', 'v1.5.19'))
+        self.assertTrue(updater.is_remote_newer('1.5.19+vibe.1', 'v1.5.20'))
 
     def test_release_payload_requires_source_zip(self):
         info = updater.release_info_from_api_payload({
