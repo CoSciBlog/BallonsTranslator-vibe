@@ -15,6 +15,30 @@ stored_commit_hash = None
 FONT_EXTS = {'.ttf','.otf','.ttc','.pfb'}
 
 IS_WIN7 = "Windows-7" in platform()
+SUPPORTED_PYTHON_MIN = (3, 8)
+SUPPORTED_PYTHON_MAX_EXCLUSIVE = (3, 13)
+
+
+def unsupported_python_message(version_info=None, executable: str = '') -> str:
+    """Return startup guidance when the active Python is unsupported.
+
+    >>> unsupported_python_message((3, 12, 0))
+    ''
+    >>> 'Python 3.14' in unsupported_python_message((3, 14, 1), r'C:\\Python314\\python.exe')
+    True
+    """
+
+    version_info = version_info or sys.version_info
+    version = (int(version_info[0]), int(version_info[1]))
+    if SUPPORTED_PYTHON_MIN <= version < SUPPORTED_PYTHON_MAX_EXCLUSIVE:
+        return ''
+
+    executable = executable or sys.executable
+    return (
+        f'Python {version[0]}.{version[1]} is not supported by BallonsTranslator 1.5. '
+        'Use Python 3.8 through 3.12. On Windows, run launch_win.bat to set up '
+        f'the project-local Python 3.12 runtime. Current executable: {executable}'
+    )
 
 def disable_bundled_windows_user_site() -> list:
     """Remove per-user packages from the bundled Windows Python runtime.
@@ -210,6 +234,10 @@ def core_requirements_env(config_path: str) -> dict:
 
 
 def main():
+
+    runtime_error = unsupported_python_message()
+    if runtime_error:
+        raise SystemExit(runtime_error)
 
     if args.debug:
         os.environ['BALLOONTRANS_DEBUG'] = '1'

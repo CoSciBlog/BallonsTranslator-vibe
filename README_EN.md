@@ -114,6 +114,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command "irm https://raw.githubus
 **Method B (Download Pre-configured Package)**:
 Download `Ballonstranslator_win_minium.zip` from [GitHub Releases](https://github.com/dmMaze/BallonsTranslator/releases), extract it, and double-click `launch_win.bat` to launch the application.
 
+When `launch_win.bat` is run from a source checkout, it uses only the project-local `ballontrans_pylibs_win` runtime. If that runtime is missing, the launcher starts `scripts/install.ps1` to install the supported Python 3.12 runtime inside the project. It does not install packages into a global Python installation. An existing incomplete or unsupported local runtime is left untouched and reported with repair instructions.
+
 These methods do not support Windows 7; Windows 7 users must install [Python 3.8](https://www.python.org/downloads/release/python-3810/) manually and run from source.
 
 If you see errors involving `msvcp140.dll`, `c10.dll`, or `[WinError 1114]`, install or update the [Microsoft Visual C++ Redistributable x64](https://aka.ms/vc14/vc_redist.x64.exe) (Visual Studio 2015-2022; [official download notes](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist)).

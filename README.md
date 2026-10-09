@@ -124,6 +124,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command "irm https://raw.githubus
 
 **方式 B（下载免配置压缩包）**：
 从 [GitHub Releases](https://github.com/dmMaze/BallonsTranslator/releases) 下载 `Ballonstranslator_win_minium.zip`，解压并双击运行 `launch_win.bat` 启动程序。  
+
+从源码目录运行 `launch_win.bat` 时，启动器只会使用项目内的 `ballontrans_pylibs_win` 运行环境。如果该环境不存在，启动器会调用 `scripts/install.ps1`，在项目目录内安装受支持的 Python 3.12；不会再向系统全局 Python 安装依赖。如果已经存在不完整或版本不受支持的本地环境，启动器会保留它并显示修复说明。
   
 以上方式不支持 Windows 7，Windows 7 用户需要自行安装 [Python 3.8](https://www.python.org/downloads/release/python-3810/) 运行源码。 
 

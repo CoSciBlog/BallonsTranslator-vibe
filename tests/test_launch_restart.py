@@ -11,6 +11,21 @@ from ballontranslator import launch
 
 class LaunchRestartTests(unittest.TestCase):
 
+    def test_supported_python_versions_have_no_startup_error(self):
+        self.assertEqual(launch.unsupported_python_message((3, 8, 0)), '')
+        self.assertEqual(launch.unsupported_python_message((3, 12, 10)), '')
+
+    def test_unsupported_python_message_points_windows_users_to_local_runtime(self):
+        message = launch.unsupported_python_message(
+            (3, 14, 8),
+            r'C:\Python314\python.exe',
+        )
+
+        self.assertIn('Python 3.14 is not supported', message)
+        self.assertIn('Python 3.8 through 3.12', message)
+        self.assertIn('launch_win.bat', message)
+        self.assertIn(r'C:\Python314\python.exe', message)
+
     def test_numba_cache_uses_persistent_app_directory(self):
         self.assertEqual(
             os.environ['NUMBA_CACHE_DIR'],

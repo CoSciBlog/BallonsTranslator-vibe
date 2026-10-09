@@ -1,5 +1,9 @@
 # Changelogs
 
+### 2026-10-09
+- Fixed the Windows source launcher so it never installs dependencies into a global Python environment. A missing project-local runtime now triggers the supported Python 3.12 installer, while incomplete or unsupported local runtimes stop with repair guidance.
+- Added an early startup error for unsupported Python versions instead of attempting dependency repair on Python 3.13 or newer.
+
 ### 2023-04-15
 Src download implementation based on gallery-dl (#131) thanks to [ROKOLYT](https://github.com/ROKOLYT)
 
