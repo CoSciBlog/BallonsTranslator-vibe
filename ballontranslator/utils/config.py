@@ -467,6 +467,7 @@ class ProgramConfig(Config):
     imgsave_quality: int = 100
     imgsave_ext: str = '.png'
     intermediate_imgsave_ext: str = '.png'
+    intermediate_imgsave_quality: int = 100
     show_text_style_preset: bool = True
     expand_tstyle_panel: bool = True
     show_text_effect_panel: bool = True
@@ -477,6 +478,28 @@ class ProgramConfig(Config):
     expand_ttransform_panel: bool = True
     excluded_fonts: List[str] = field(default_factory=list)
     custom_colors: List[str] = field(default_factory=list)
+
+    def __post_init__(self) -> None:
+        if (
+            type(self.intermediate_imgsave_ext) is not str
+            or self.intermediate_imgsave_ext not in {
+                '.png', '.jpg', '.jpeg', '.webp', '.jxl'
+            }
+        ):
+            LOGGER.warning(
+                'Discard invalid intermediate_imgsave_ext config %r.',
+                self.intermediate_imgsave_ext,
+            )
+            self.intermediate_imgsave_ext = '.png'
+        if (
+            type(self.intermediate_imgsave_quality) is not int
+            or not 0 <= self.intermediate_imgsave_quality <= 101
+        ):
+            LOGGER.warning(
+                'Discard invalid intermediate_imgsave_quality config %r.',
+                self.intermediate_imgsave_quality,
+            )
+            self.intermediate_imgsave_quality = 100
 
     @staticmethod
     def load(cfg_path: str):

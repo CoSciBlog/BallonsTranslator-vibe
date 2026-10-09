@@ -58,6 +58,24 @@ class CodexConfigPanelTest(unittest.TestCase):
         self.assertEqual(self.panel.llm_profiles_panel.rows['openai'].model_combo.currentText(), 'gpt-4o')
         self.assertEqual(profile.model, 'example-model')
 
+    def test_intermediate_image_format_and_quality_controls_update_config(self) -> None:
+        formats = [
+            self.panel.intermediate_imgformat_combobox.itemText(index)
+            for index in range(self.panel.intermediate_imgformat_combobox.count())
+        ]
+        self.assertEqual(formats, ['PNG', 'JPG', 'WEBP', 'JXL'])
+
+        with (
+            patch.object(pcfg, 'intermediate_imgsave_ext', '.png'),
+            patch.object(pcfg, 'intermediate_imgsave_quality', 100),
+        ):
+            self.panel.intermediate_imgformat_combobox.setCurrentText('WEBP')
+            self.panel.on_intermediate_imgformat_changed()
+            self.panel.on_intermediate_imgquality_changed('83')
+
+            self.assertEqual(pcfg.intermediate_imgsave_ext, '.webp')
+            self.assertEqual(pcfg.intermediate_imgsave_quality, 83)
+
 
 if __name__ == '__main__':
     unittest.main()

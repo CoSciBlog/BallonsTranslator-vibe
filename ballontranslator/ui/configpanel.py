@@ -1352,8 +1352,20 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
         sublock.layout().insertStretch(-1)
         imsave_sublock.layout().addWidget(sublock)
 
-        self.intermediate_imgformat_combobox, intermediate_imsave_sublock = applicationConfigPanel.addCombobox(['PNG', 'JXL'], self.tr('Intermediate image format'))
+        self.intermediate_imgformat_combobox, intermediate_imsave_sublock = applicationConfigPanel.addCombobox(['PNG', 'JPG', 'WEBP', 'JXL'], self.tr('Intermediate image format'))
         self.intermediate_imgformat_combobox.activated.connect(self.on_intermediate_imgformat_changed)
+        self.intermediate_imgquality_edit = PercentageLineEdit('100')
+        self.intermediate_imgquality_edit.setFixedWidth(CONFIG_COMBOBOX_SHORT)
+        self.intermediate_imgquality_edit.finish_edited.connect(self.on_intermediate_imgquality_changed)
+
+        intermediate_quality_sublock = ConfigSubBlock(
+            self.intermediate_imgquality_edit,
+            self.tr('Quality'),
+            vertical_layout=False,
+        )
+        intermediate_quality_sublock.layout().setAlignment(Qt.AlignmentFlag.AlignLeft)
+        intermediate_quality_sublock.layout().insertStretch(-1)
+        intermediate_imsave_sublock.layout().addWidget(intermediate_quality_sublock)
 
         splitter = QSplitter(Qt.Orientation.Horizontal)
         splitter.addWidget(self.configTable)
@@ -1678,6 +1690,9 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
     def on_intermediate_imgformat_changed(self):
         pcfg.intermediate_imgsave_ext = '.' + self.intermediate_imgformat_combobox.currentText().lower()
 
+    def on_intermediate_imgquality_changed(self, value: str) -> None:
+        pcfg.intermediate_imgsave_quality = int(value)
+
     def on_edit_quality_changed(self, value: str):
         pcfg.imgsave_quality = int(value)
 
@@ -1883,6 +1898,7 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
         self.rst_imgformat_combobox.setCurrentText(pcfg.imgsave_ext.replace('.', '').upper())
         self.intermediate_imgformat_combobox.setCurrentText(pcfg.intermediate_imgsave_ext.replace('.', '').upper())
         self.rst_imgquality_edit.setText(str(pcfg.imgsave_quality))
+        self.intermediate_imgquality_edit.setText(str(pcfg.intermediate_imgsave_quality))
         self.empty_runcache_checker.setChecked(pcfg.module.empty_runcache)
         self.package_auto_install_checker.setChecked(pcfg.package_manager.auto_install_missing_packages)
         self.let_show_only_custom_fonts.setChecked(pcfg.let_show_only_custom_fonts_flag)

@@ -52,6 +52,7 @@ RASTER_ASSET_DECODE_CACHE_ITEMS = 16
 RASTER_ASSET_DECODE_CACHE_MAX_BYTES = RASTER_ASSET_MAX_DECODED_BYTES * 2
 LLM_VISUAL_SUMMARY_VERSION = 1
 LLM_COMPACT_MEMORY_VERSION = 1
+INTERMEDIATE_IMAGE_EXTENSIONS = ('.jxl', '.png', '.jpg', '.jpeg', '.webp')
 _RASTER_ASSET_RGBA8_MODES = {
     '1', 'L', 'LA', 'P', 'RGB', 'RGBA', 'CMYK', 'YCbCr', 'HSV'
 }
@@ -1041,11 +1042,21 @@ class ProjImgTrans:
         self._image_info[imgname].update({'width': w, 'height': h})
         return img
 
-    def save_mask(self, img_name, mask: np.ndarray):
-        imwrite(self.get_mask_path(img_name), mask, ext=pcfg.intermediate_imgsave_ext)
+    def save_mask(self, img_name: str, mask: np.ndarray) -> None:
+        imwrite(
+            self.get_mask_path(img_name),
+            mask,
+            ext=pcfg.intermediate_imgsave_ext,
+            quality=pcfg.intermediate_imgsave_quality,
+        )
 
-    def save_inpainted(self, img_name, inpainted: np.ndarray):
-        imwrite(self.get_inpainted_path(img_name), inpainted, ext=pcfg.intermediate_imgsave_ext)
+    def save_inpainted(self, img_name: str, inpainted: np.ndarray) -> None:
+        imwrite(
+            self.get_inpainted_path(img_name),
+            inpainted,
+            ext=pcfg.intermediate_imgsave_ext,
+            quality=pcfg.intermediate_imgsave_quality,
+        )
 
     def current_img_path(self) -> str:
         if self.current_img is None:
@@ -1058,7 +1069,11 @@ class ProjImgTrans:
 
         fileprefix = osp.join(self.mask_dir(), osp.splitext(imgname)[0])
         if get_last_modified:
-            p = get_last_modified_file(fileprefix, ['.jxl', '.png'], ext_fallback=pcfg.intermediate_imgsave_ext)
+            p = get_last_modified_file(
+                fileprefix,
+                INTERMEDIATE_IMAGE_EXTENSIONS,
+                ext_fallback=pcfg.intermediate_imgsave_ext,
+            )
         else:
             p = fileprefix+pcfg.intermediate_imgsave_ext
 
@@ -1077,7 +1092,11 @@ class ProjImgTrans:
 
         fileprefix = osp.join(self.inpainted_dir(), osp.splitext(imgname)[0])
         if get_last_modified:
-            p = get_last_modified_file(fileprefix, ['.jxl', '.png'], ext_fallback=pcfg.intermediate_imgsave_ext)
+            p = get_last_modified_file(
+                fileprefix,
+                INTERMEDIATE_IMAGE_EXTENSIONS,
+                ext_fallback=pcfg.intermediate_imgsave_ext,
+            )
         else:
             p = fileprefix+pcfg.intermediate_imgsave_ext
 

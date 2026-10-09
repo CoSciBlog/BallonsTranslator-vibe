@@ -1,5 +1,10 @@
 # Changelogs
 
+### 2026-10-09 — 1.5.19+vibe.3
+- Added JPEG and WebP options for intermediate project images.
+- Added an independent intermediate-image quality setting and applied it consistently to masks and inpainted images.
+- Existing intermediate images are now discovered across PNG, JPEG, WebP, and JPEG XL after changing formats.
+
 ### 2026-10-09 — 1.5.19+vibe.2
 - Added complete English and German UI catalogs with a selectable German language pack.
 - Display translator source and target languages with localized names while preserving stable language identifiers in saved configuration.
