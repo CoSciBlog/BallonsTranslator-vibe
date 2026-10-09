@@ -1,5 +1,11 @@
 # Changelogs
 
+### 2026-10-09 — 1.5.19+vibe.2
+- Added complete English and German UI catalogs with a selectable German language pack.
+- Display translator source and target languages with localized names while preserving stable language identifiers in saved configuration.
+- Replaced hard-coded Chinese Region Merge UI text and module parameter labels with translatable English source text.
+- Fixed translation extraction in uv virtual environments and added completeness, placeholder, and runtime language-pack tests.
+
 ### 2026-10-09 — 1.5.19+vibe.1
 - Migrated source checkouts to a uv-managed project runtime: pinned Python, uv, cache, and dependencies now stay under `.runtime` and `.venv` instead of using a global Python installation.
 - Existing virtual environments are preserved; incomplete or version-mismatched environments stop with repair guidance instead of being removed automatically.

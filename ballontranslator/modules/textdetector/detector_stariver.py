@@ -73,10 +73,10 @@ class StariverDetector(TextDetectorBase):
         'update_token_btn': {
             'type': 'pushbtn',
             'value': '',
-            'description': '删除旧 Token 并重新申请',
-            'display_name': '更新 Token'
+            'description': 'Delete the old token and request a new one',
+            'display_name': 'Refresh Token'
         },
-        'description': '星河云(团子翻译器) OCR 文字检测器'
+        'description': 'Xinghe Cloud (Tuanzi Translator) OCR text detector'
     }
 
     @property

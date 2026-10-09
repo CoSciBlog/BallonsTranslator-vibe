@@ -39,6 +39,10 @@
   - Supports a rich set of [text effects](https://github.com/dmMaze/BallonsTranslator/pull/1296) and [text transforms](https://github.com/dmMaze/BallonsTranslator/pull/1238)
   - Supports find and replace across all text, source text, or translations, and Word document import/export
 
+* User interface localization
+  - Complete English and German UI catalogs; choose **Deutsch** from **View → Display Language**.
+  - Translator source and target languages use localized display names without changing the identifiers stored in projects and configuration.
+
 * <details>
   <summary><i>Context-aware LLM translation & Glossary</i></summary>
 
@@ -246,5 +250,6 @@ This project is heavily dependent upon [manga-image-translator](https://github.c
 * Accelarate performance if you have a [NVIDIA's CUDA](https://pytorch.org/docs/stable/notes/cuda.html) or [AMD's ROCm](https://pytorch.org/docs/stable/notes/hip.html) device as most modules uses [PyTorch](https://pytorch.org/get-started/locally/).
 * Fonts are from your system's fonts.
 * Thanks to [bropines](https://github.com/bropines) for the Russian localization.
+* The initial German UI catalog for this fork was generated locally with [TranslateGemma](https://ai.google.dev/gemma/docs/translation) and validated for Qt placeholders and catalog completeness.
 * Added Export to photoshop JSX script by [bropines](https://github.com/bropines). </br> To read the instructions, improve the code and just poke around to see how it works, you can go to `scripts/export to photoshop` -> `install_manual.md`.
 * The project-local Python and virtual-environment bootstrap uses [uv](https://github.com/astral-sh/uv), distributed under the Apache-2.0 or MIT license.

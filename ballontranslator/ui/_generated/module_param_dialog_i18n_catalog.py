@@ -245,7 +245,7 @@ MODULE_PARAM_CATALOG = {
         "source": 'device', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'device'),
     },
     ('ocr', 'paddle_vl', '', 'description'): {
-        "source": '本地部署的 Paddle OCR-VL 服务 (POST /layout-parsing)', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', '本地部署的 Paddle OCR-VL 服务 (POST /layout-parsing)'),
+        "source": 'Locally deployed Paddle OCR-VL service (POST /layout-parsing)', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Locally deployed Paddle OCR-VL service (POST /layout-parsing)'),
     },
     ('ocr', 'paddle_vl', 'max retry times', 'display_name'): {
         "source": 'max retry times', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'max retry times'),
@@ -275,7 +275,7 @@ MODULE_PARAM_CATALOG = {
         "source": 'Recognition Batch Size', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Recognition Batch Size'),
     },
     ('ocr', 'stariver_ocr', '', 'description'): {
-        "source": '星河云(团子翻译器) OCR API', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', '星河云(团子翻译器) OCR API'),
+        "source": 'Xinghe Cloud (Tuanzi Translator) OCR API', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Xinghe Cloud (Tuanzi Translator) OCR API'),
     },
     ('ocr', 'stariver_ocr', 'Password', 'display_name'): {
         "source": 'Password', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Password'),
@@ -293,7 +293,7 @@ MODULE_PARAM_CATALOG = {
         "source": 'Filtrate', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Filtrate'),
     },
     ('ocr', 'stariver_ocr', 'force_expand', 'description'): {
-        "source": '是否强制扩展图片像素，会导致识别速度下降', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', '是否强制扩展图片像素，会导致识别速度下降'),
+        "source": 'Force image pixel expansion (slower recognition)', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Force image pixel expansion (slower recognition)'),
     },
     ('ocr', 'stariver_ocr', 'force_expand', 'display_name'): {
         "source": 'Force Expand', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Force Expand'),
@@ -308,10 +308,10 @@ MODULE_PARAM_CATALOG = {
         "source": 'Refine', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Refine'),
     },
     ('ocr', 'stariver_ocr', 'update_token_btn', 'description'): {
-        "source": '删除旧 Token 并重新申请', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', '删除旧 Token 并重新申请'),
+        "source": 'Delete the old token and request a new one', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Delete the old token and request a new one'),
     },
     ('ocr', 'stariver_ocr', 'update_token_btn', 'display_name'): {
-        "source": '更新 Token', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', '更新 Token'),
+        "source": 'Refresh Token', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Refresh Token'),
     },
     ('textdetector', 'ctbd', '', 'description'): {
         "source": 'RT-DETR-V2 (ogkalu/comic-text-and-bubble-detector) for text/bubble detection.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'RT-DETR-V2 (ogkalu/comic-text-and-bubble-detector) for text/bubble detection.'),
@@ -452,7 +452,7 @@ MODULE_PARAM_CATALOG = {
         "source": 'mask dilate size', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'mask dilate size'),
     },
     ('textdetector', 'stariver_ocr', '', 'description'): {
-        "source": '星河云(团子翻译器) OCR 文字检测器', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', '星河云(团子翻译器) OCR 文字检测器'),
+        "source": 'Xinghe Cloud (Tuanzi Translator) OCR text detector', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Xinghe Cloud (Tuanzi Translator) OCR text detector'),
     },
     ('textdetector', 'stariver_ocr', 'Password', 'display_name'): {
         "source": 'Password', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Password'),
@@ -497,46 +497,46 @@ MODULE_PARAM_CATALOG = {
         "source": 'Refine', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Refine'),
     },
     ('textdetector', 'stariver_ocr', 'update_token_btn', 'description'): {
-        "source": '删除旧 Token 并重新申请', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', '删除旧 Token 并重新申请'),
+        "source": 'Delete the old token and request a new one', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Delete the old token and request a new one'),
     },
     ('textdetector', 'stariver_ocr', 'update_token_btn', 'display_name'): {
-        "source": '更新 Token', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', '更新 Token'),
+        "source": 'Refresh Token', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Refresh Token'),
     },
     ('textdetector', 'ysgyolo', 'IoU threshold', 'display_name'): {
-        "source": 'IoU阈值', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'IoU阈值'),
+        "source": 'IoU Threshold', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'IoU Threshold'),
     },
     ('textdetector', 'ysgyolo', 'confidence threshold', 'display_name'): {
-        "source": '置信度阈值', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', '置信度阈值'),
+        "source": 'Confidence Threshold', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Confidence Threshold'),
     },
     ('textdetector', 'ysgyolo', 'detect size', 'display_name'): {
-        "source": '检测尺寸', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', '检测尺寸'),
+        "source": 'Detection Size', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Detection Size'),
     },
     ('textdetector', 'ysgyolo', 'device', 'display_name'): {
-        "source": '设备', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', '设备'),
+        "source": 'Device', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Device'),
     },
     ('textdetector', 'ysgyolo', 'font size max', 'display_name'): {
-        "source": '最大字号', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', '最大字号'),
+        "source": 'Maximum Font Size', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Maximum Font Size'),
     },
     ('textdetector', 'ysgyolo', 'font size min', 'display_name'): {
-        "source": '最小字号', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', '最小字号'),
+        "source": 'Minimum Font Size', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Minimum Font Size'),
     },
     ('textdetector', 'ysgyolo', 'font size multiplier', 'display_name'): {
-        "source": '字号乘数', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', '字号乘数'),
+        "source": 'Font Size Multiplier', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Font Size Multiplier'),
     },
     ('textdetector', 'ysgyolo', 'label', 'display_name'): {
-        "source": '标签', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', '标签'),
+        "source": 'Label', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Label'),
     },
     ('textdetector', 'ysgyolo', 'mask dilate size', 'display_name'): {
-        "source": '掩码扩张尺寸', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', '掩码扩张尺寸'),
+        "source": 'Mask Dilation Size', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Mask Dilation Size'),
     },
     ('textdetector', 'ysgyolo', 'merge text lines', 'display_name'): {
-        "source": '合并文本行', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', '合并文本行'),
+        "source": 'Merge Text Lines', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Merge Text Lines'),
     },
     ('textdetector', 'ysgyolo', 'model path', 'display_name'): {
-        "source": '模型路径', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', '模型路径'),
+        "source": 'Model Path', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Model Path'),
     },
     ('textdetector', 'ysgyolo', 'source text is vertical', 'display_name'): {
-        "source": '竖排文本', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', '竖排文本'),
+        "source": 'Vertical Text', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Vertical Text'),
     },
     ('translator', 'Baidu', 'appId', 'display_name'): {
         "source": 'appId', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'appId'),

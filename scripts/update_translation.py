@@ -3,6 +3,7 @@ import os
 import shutil
 import subprocess
 import sys
+import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Dict, Iterable, Tuple
 
@@ -145,13 +146,16 @@ def _ui_python_files(program_dir: Path):
 
 
 def run_lupdate(program_dir: Path, translate_path: Path) -> None:
-    environment_bin = Path(sys.executable).resolve().parent
+    # Keep the virtual-environment launcher directory intact.  Resolving the
+    # executable follows it into uv's managed Python installation and would
+    # make us miss the Qt tools installed in ``.venv/Scripts``.
+    environment_bin = Path(sys.executable).parent
     candidates = ('pyside6-lupdate', 'pylupdate6', 'pylupdate5')
     lupdate = next(
         (
-            str(environment_bin / name)
+            shutil.which(name, path=str(environment_bin))
             for name in candidates
-            if (environment_bin / name).is_file()
+            if shutil.which(name, path=str(environment_bin))
         ),
         None,
     )
@@ -162,8 +166,29 @@ def run_lupdate(program_dir: Path, translate_path: Path) -> None:
         )
     if lupdate is None:
         raise SystemExit('No Python-capable Qt lupdate executable was found.')
-    command = [lupdate, '-verbose', *_ui_python_files(program_dir), '-ts', str(translate_path)]
+    command = [
+        lupdate,
+        '--no-obsolete',
+        *_ui_python_files(program_dir),
+        '-ts',
+        str(translate_path),
+    ]
     subprocess.run(command, check=True)
+
+
+def complete_source_language_catalog(translate_path: Path) -> None:
+    """Mark an English source catalog complete without changing its wording."""
+
+    tree = ET.parse(translate_path)
+    for message in tree.getroot().findall('.//message'):
+        source = message.findtext('source') or ''
+        translation = message.find('translation')
+        if translation is None:
+            translation = ET.SubElement(message, 'translation')
+        translation.attrib.pop('type', None)
+        translation.text = source
+    ET.indent(tree, space='    ')
+    tree.write(translate_path, encoding='utf-8', xml_declaration=True)
 
 
 if __name__ == '__main__':
@@ -177,4 +202,6 @@ if __name__ == '__main__':
     print(f'Generated module parameter catalog: {catalog_path}', flush=True)
     print('target language: ', language_code, flush=True)
     run_lupdate(program_dir, translate_path)
+    if language_code == 'en_US':
+        complete_source_language_catalog(translate_path)
     print(f'Saved to {translate_path}')

@@ -47,6 +47,10 @@
   - 支持丰富的文本[特效](https://github.com/dmMaze/BallonsTranslator/pull/1296)和[变形](https://github.com/dmMaze/BallonsTranslator/pull/1238)
   - 支持全文/原文/译文查找替换、导入导出 word 文档
 
+* 界面本地化
+  - 提供完整的英语和德语界面，可在 **视图 → 显示语言** 中选择 **Deutsch**。
+  - 翻译器的源语言和目标语言显示本地化名称，但不会改变项目和配置中保存的内部语言标识符。
+
 * <details>
   <summary><i>支持上下文和术语表的 LLM 翻译</i></summary>
 
@@ -262,6 +266,7 @@ Sugoi 翻译器作者: [mingshiba](https://www.patreon.com/mingshiba)
 ## 杂
 * 电脑带 Nvidia 显卡或 Apple silicon 默认启用 GPU 加速
 * 感谢 [bropines](https://github.com/bropines) 提供俄语翻译
+* 本分支的初始德语界面翻译使用 [TranslateGemma](https://ai.google.dev/gemma/docs/translation) 在本地生成，并通过 Qt 占位符和目录完整性检查。
 * 项目本地 Python 和虚拟环境的引导安装使用 [uv](https://github.com/astral-sh/uv)，其许可证为 Apache-2.0 或 MIT。
 * 第三方输入法可能会造成右侧编辑框显示 bug，见[#76](https://github.com/dmMaze/BallonsTranslator/issues/76)，暂时不打算修
 <details>

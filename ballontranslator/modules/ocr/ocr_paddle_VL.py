@@ -25,7 +25,7 @@ class OCRPaddleVL(OCRBase):
         'visualize': {'type': 'checkbox', 'value': False},
         'max retry times': 3,
         'retry interval': 1.0,
-        'description': '本地部署的 Paddle OCR-VL 服务 (POST /layout-parsing)'
+        'description': 'Locally deployed Paddle OCR-VL service (POST /layout-parsing)'
     }
 
     @property

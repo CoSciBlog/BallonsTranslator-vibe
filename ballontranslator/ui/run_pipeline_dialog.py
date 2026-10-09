@@ -49,6 +49,7 @@ from .llm_modality import (
     modality_badge_qcolor,
 )
 from .page_range_progress import PageRangeProgressWidget, PageRangeSpinBox
+from .translator_language_names import translator_language_name
 from .custom_widget import ExpandingToolButton
 from .custom_widget.combobox import BottomBorderComboBox
 from ballontranslator.utils.config import (
@@ -918,6 +919,17 @@ class RunPipelineDialog(QDialog):
             options.append(current)
         return options
 
+    @staticmethod
+    def _populate_language_combobox(combobox, options, current: str) -> None:
+        blocker = QSignalBlocker(combobox)
+        combobox.clear()
+        for identifier in options:
+            combobox.addItem(translator_language_name(identifier), identifier)
+        current_index = combobox.findData(current)
+        if current_index >= 0:
+            combobox.setCurrentIndex(current_index)
+        del blocker
+
     def _build_translation_settings(
         self,
         section: QWidget,
@@ -945,11 +957,14 @@ class RunPipelineDialog(QDialog):
         source_layout.addStretch()
         self.source_combobox = BottomBorderComboBox(source_row)
         self.source_combobox.setObjectName('RunPipelineSourceComboBox')
-        self.source_combobox.addItems(self._translation_options(
-            'supported_src_list',
+        self._populate_language_combobox(
+            self.source_combobox,
+            self._translation_options(
+                'supported_src_list',
+                pcfg.module.translate_source,
+            ),
             pcfg.module.translate_source,
-        ))
-        self.source_combobox.setCurrentText(pcfg.module.translate_source)
+        )
         self.source_combobox.setFixedWidth(RUN_PIPELINE_SETTING_CONTROL_WIDTH)
         source_layout.addWidget(self.source_combobox)
 
@@ -964,11 +979,14 @@ class RunPipelineDialog(QDialog):
         target_layout.addStretch()
         self.target_combobox = BottomBorderComboBox(target_row)
         self.target_combobox.setObjectName('RunPipelineTargetComboBox')
-        self.target_combobox.addItems(self._translation_options(
-            'supported_tgt_list',
+        self._populate_language_combobox(
+            self.target_combobox,
+            self._translation_options(
+                'supported_tgt_list',
+                pcfg.module.translate_target,
+            ),
             pcfg.module.translate_target,
-        ))
-        self.target_combobox.setCurrentText(pcfg.module.translate_target)
+        )
         self.target_combobox.setFixedWidth(RUN_PIPELINE_SETTING_CONTROL_WIDTH)
         target_layout.addWidget(self.target_combobox)
         translation_grid.addWidget(source_row, 0, 0)
@@ -1216,10 +1234,10 @@ class RunPipelineDialog(QDialog):
 
         self.context_row.setVisible(not self._llm_settings_visible)
 
-        self.source_combobox.currentTextChanged.connect(
+        self.source_combobox.currentIndexChanged.connect(
             self._on_translate_source_changed
         )
-        self.target_combobox.currentTextChanged.connect(
+        self.target_combobox.currentIndexChanged.connect(
             self._on_translate_target_changed
         )
         self.context_combobox.currentIndexChanged.connect(
@@ -1263,11 +1281,11 @@ class RunPipelineDialog(QDialog):
             (self.source_combobox, 'supported_src_list', source),
             (self.target_combobox, 'supported_tgt_list', target),
         ):
-            blocker = QSignalBlocker(combobox)
-            combobox.clear()
-            combobox.addItems(self._translation_options(key, current))
-            combobox.setCurrentText(current)
-            del blocker
+            self._populate_language_combobox(
+                combobox,
+                self._translation_options(key, current),
+                current,
+            )
 
         self._llm_settings_visible = (
             self.translator_metadata.get('name') == LLM_TRANSLATOR_KEY
@@ -1283,11 +1301,13 @@ class RunPipelineDialog(QDialog):
         self._sync_llm_overwrite_summary_visibility()
         self._fit_to_current_workflow()
 
-    def _on_translate_source_changed(self, source: str):
+    def _on_translate_source_changed(self, _index: int):
+        source = self.source_combobox.currentData()
         pcfg.module.translate_source = source
         self.translate_source_changed.emit(source)
 
-    def _on_translate_target_changed(self, target: str):
+    def _on_translate_target_changed(self, _index: int):
+        target = self.target_combobox.currentData()
         pcfg.module.translate_target = target
         self.translate_target_changed.emit(target)
 

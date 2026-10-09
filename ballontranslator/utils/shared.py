@@ -110,7 +110,8 @@ DISPLAY_LANGUAGE_MAP = {
     "한국어": "ko_KR",
     "Español": "es_MX",
     "Hungarian": "hu_HU",
-    "Français": "fr_FR"
+    "Français": "fr_FR",
+    "Deutsch": "de_DE",
 }
 VALID_LANG_SET = set(list(DISPLAY_LANGUAGE_MAP.values()))
 

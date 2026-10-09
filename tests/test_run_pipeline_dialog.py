@@ -705,6 +705,24 @@ class RunPipelineDialogTests(unittest.TestCase):
         self.assertFalse(hasattr(dialog, 'show_MT_keyword_window'))
         dialog.close()
 
+    def test_pipeline_language_names_are_displayed_without_changing_identifiers(self):
+        dialog = RunPipelineDialog(translator_metadata={
+            'supported_src_list': ['日本語', '简体中文'],
+            'supported_tgt_list': ['English', '繁體中文'],
+            'lang_source': '日本語',
+            'lang_target': 'English',
+        })
+        self.assertEqual(dialog.source_combobox.currentText(), 'Japanese')
+        self.assertEqual(dialog.source_combobox.currentData(), '日本語')
+        chinese_index = dialog.source_combobox.findData('简体中文')
+        self.assertEqual(
+            dialog.source_combobox.itemText(chinese_index),
+            'Chinese (Simplified)',
+        )
+        dialog.source_combobox.setCurrentIndex(chinese_index)
+        self.assertEqual(pcfg.module.translate_source, '简体中文')
+        dialog.close()
+
     def test_llm_ocr_run_settings_are_conditional_and_persistent(self):
         pcfg.module.ocr = 'LLMOCR'
         pcfg.module.ocr_llm_page_level = False
@@ -1197,7 +1215,7 @@ class RunPipelineDialogTests(unittest.TestCase):
                 for action in title_bar.toolsToolBtn.menu().actions()
                 if not action.isSeparator()
             }.issuperset({
-                '区域合并工具',
+                'Region Merge Tool',
                 'Photoshop Bridge',
                 'Path Reorder',
                 'Font Exclusion',

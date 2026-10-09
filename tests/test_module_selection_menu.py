@@ -25,6 +25,7 @@ from ballontranslator.ui.configpanel import ConfigPanel
 from ballontranslator.ui.mainwindow import MainWindow
 from ballontranslator.ui.module_manager import ModuleManager
 from ballontranslator.ui.module_tool_button import ModuleSelectionWidget
+from ballontranslator.ui.translator_language_names import translator_language_name
 from ballontranslator.ui.run_pipeline_dialog import RunPipelineDialog
 from ballontranslator.utils.config import pcfg
 from ballontranslator.utils.llm_profiles import default_codex_profile, LLMProfile, default_profile, sync_codex_profile
@@ -170,13 +171,46 @@ class ModuleSelectionMenuTest(unittest.TestCase):
                 expected = []
             self.assertEqual(titles, expected)
         bottom = self.window.bottomBar.trans_selector
-        bottom.src_selector.addItem('Japanese')
+        bottom.src_selector.addItem('日本語')
         bottom.tgt_selector.addItem('English')
         bottom.menu.aboutToShow.emit()
         titles = [action.menu().title() for action in bottom.menu.actions() if action.menu() is not None]
         self.assertIn('Source - Japanese', titles)
         self.assertIn('Target - English', titles)
+        source_menu = next(
+            action.menu() for action in bottom.menu.actions()
+            if action.menu() is not None
+            and action.menu().title() == 'Source - Japanese'
+            and any(item.data() == '日本語' for item in action.menu().actions())
+        )
+        japanese_action = next(
+            action for action in source_menu.actions()
+            if action.data() == '日本語'
+        )
+        self.assertEqual(japanese_action.text().split('\t', 1)[0], 'Japanese')
+        self.assertEqual(japanese_action.data(), '日本語')
         dialog.deleteLater()
+
+    def test_requested_translator_languages_have_english_display_names(self) -> None:
+        expected = {
+            '简体中文': 'Chinese (Simplified)',
+            '繁體中文': 'Chinese (Traditional)',
+            '한국어': 'Korean',
+            'Tiếng Việt': 'Vietnamese',
+            'čeština': 'Czech',
+            'magyar nyelv': 'Hungarian',
+            'Português': 'Portuguese',
+            'русский язык': 'Russian',
+            'Español': 'Spanish',
+            'Türk dili': 'Turkish',
+            'украї́нська мо́ва': 'Ukrainian',
+            'limba română': 'Romanian',
+            '日本語': 'Japanese',
+        }
+        self.assertEqual(
+            {identifier: translator_language_name(identifier) for identifier in expected},
+            expected,
+        )
 
     def test_local_setting_value_drives_text_and_checkmarks_without_profile_edits(self) -> None:
         profile = pcfg.module.llm_profiles[0]

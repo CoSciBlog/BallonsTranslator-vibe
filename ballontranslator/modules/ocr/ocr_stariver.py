@@ -40,7 +40,7 @@ class OCRStariver(OCRBase):
         "force_expand":{
             'type': 'checkbox',
             'value': False,
-            'description': '是否强制扩展图片像素，会导致识别速度下降',
+            'description': 'Force image pixel expansion (slower recognition)',
             'display_name': 'Force Expand'
         },
         "low_accuracy_mode":{
@@ -51,10 +51,10 @@ class OCRStariver(OCRBase):
         'update_token_btn': {
             'type': 'pushbtn',
             'value': '',
-            'description': '删除旧 Token 并重新申请',
-            'display_name': '更新 Token'
+            'description': 'Delete the old token and request a new one',
+            'display_name': 'Refresh Token'
         },
-        'description': '星河云(团子翻译器) OCR API'
+        'description': 'Xinghe Cloud (Tuanzi Translator) OCR API'
     }
 
     @property

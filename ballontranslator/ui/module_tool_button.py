@@ -27,6 +27,7 @@ from .llm_modality import (
     LLM_MODALITY_VISION_COLOR,
 )
 from .misc import themed_icon_path
+from .translator_language_names import translator_language_name
 from ballontranslator.utils import shared
 from ballontranslator.utils.config import pcfg
 from ballontranslator.utils.llm_profiles import (
@@ -542,8 +543,11 @@ class ModuleSelectionWidget(Widget):
 
     def _addLanguageMenus(self):
         _add_bottom_menu_section(self.menu, self.tr('Language'))
+        current_source = self.src_selector.currentText()
         source_menu = _bottom_submenu(
-            self.tr('Source - {language}').format(language=self.src_selector.currentText()),
+            self.tr('Source - {language}').format(
+                language=translator_language_name(current_source),
+            ),
             self.menu,
         )
         self.menu.addMenu(source_menu)
@@ -551,14 +555,17 @@ class ModuleSelectionWidget(Widget):
             lang = self.src_selector.itemText(i)
             _add_bottom_menu_action(
                 source_menu,
-                lang,
-                lang == self.src_selector.currentText(),
+                translator_language_name(lang),
+                lang == current_source,
                 lang,
                 self._select_source_language_action,
             )
 
+        current_target = self.tgt_selector.currentText()
         target_menu = _bottom_submenu(
-            self.tr('Target - {language}').format(language=self.tgt_selector.currentText()),
+            self.tr('Target - {language}').format(
+                language=translator_language_name(current_target),
+            ),
             self.menu,
         )
         self.menu.addMenu(target_menu)
@@ -566,8 +573,8 @@ class ModuleSelectionWidget(Widget):
             lang = self.tgt_selector.itemText(i)
             _add_bottom_menu_action(
                 target_menu,
-                lang,
-                lang == self.tgt_selector.currentText(),
+                translator_language_name(lang),
+                lang == current_target,
                 lang,
                 self._select_target_language_action,
             )
