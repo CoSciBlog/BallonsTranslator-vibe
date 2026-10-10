@@ -1,5 +1,9 @@
 # Changelogs
 
+### 2026-10-11 — 1.5.19+vibe.17
+- Replaced the repository's primary Chinese README with the complete English documentation so the default GitHub and package landing page is now English.
+- Updated the language navigation in both English README files to avoid presenting the English main README as a Chinese translation.
+
 ### 2026-10-11 — 1.5.19+vibe.16
 - Added a persisted translation-failure policy with **Retry once**, **Skip page**, and **Abort pipeline** choices in the Run dialog; the existing skip behavior remains the default.
 - Fixed the inpainting CPU fallback to raise `NotImplementedError` correctly, made split `.001`/`.002` download archives extractable with explicit progress, and routed the legacy MIT48px beam entry point through the tensorized decoder cache.

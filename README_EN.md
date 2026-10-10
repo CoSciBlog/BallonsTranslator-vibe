@@ -11,7 +11,7 @@
 <p align="center">Yet another computer-aided comic/manga translation tool powered by deep learning.</p>
 
 <p align="center">
-  <a href="/README.md">简体中文</a> | English | <a href="/doc/README_RU.md">Русский</a> | <a href="/doc/README_JA.md">日本語</a> | <a href="/doc/README_ES.md">Español</a> | <a href="/doc/README_FR.md">Français</a> | <a href="/doc/README_PT-BR.md">pt-BR</a> | <a href="/doc/README_KO.md">한국어</a> | <a href="/doc/README_ID.md">Indonesia</a> | <a href="/doc/README_VI.md">Tiếng Việt</a>
+  English | <a href="/doc/README_RU.md">Русский</a> | <a href="/doc/README_JA.md">日本語</a> | <a href="/doc/README_ES.md">Español</a> | <a href="/doc/README_FR.md">Français</a> | <a href="/doc/README_PT-BR.md">pt-BR</a> | <a href="/doc/README_KO.md">한국어</a> | <a href="/doc/README_ID.md">Indonesia</a> | <a href="/doc/README_VI.md">Tiếng Việt</a>
 </p>
 
 <p align="center">
@@ -24,17 +24,17 @@
 > [!IMPORTANT]
 > **If you're sharing the translated result publicly and no experienced human translator participated in a throughout translating or proofreading, please mark it as machine translation somewhere clear to see.**
 
-* Fully automated translation  
+* Fully automated translation
   - Support automatic text-detection, recognition, removal, and translation. Overall performance is dependent upon these modules.
   - Typesetting is based on the formatting estimation of the original text.
   - Works decently with manga and comics.
   - Improved manga->English, English->Chinese typesetting (based on the extraction of balloon regions.).
   
-* Image editing  
-  - Support mask editing & inpainting (something like spot healing brush tool in PS) 
+* Image editing
+  - Support mask editing & inpainting (something like spot healing brush tool in PS)
   - Adapted to images with extreme aspect ratio such as webtoons
   
-* Text editing  
+* Text editing
   - Supports WYSIWYG rich-text editing and [text style presets](https://github.com/dmMaze/BallonsTranslator/pull/311)
   - Supports a rich set of [text effects](https://github.com/dmMaze/BallonsTranslator/pull/1296) and [text transforms](https://github.com/dmMaze/BallonsTranslator/pull/1238)
   - Supports find and replace across all text, source text, or translations, and Word document import/export
@@ -197,8 +197,8 @@ Image Editing Mode, Inpainting Tool
 Rect Tool
 </p>
 
-To 'erase' unwanted inpainted results, use the inpainting tool or rect tool with your **right button** pressed.  
-The result depends on how accurately the algorithm ("method 1" and "method 2" in the gif) extracts the text mask. It could perform worse on complex text & background.  
+To 'erase' unwanted inpainted results, use the inpainting tool or rect tool with your **right button** pressed.
+The result depends on how accurately the algorithm ("method 1" and "method 2" in the gif) extracts the text mask. It could perform worse on complex text & background.
 
 ## Text editing
 <img src="https://github.com/user-attachments/assets/0f688abe-41f7-416a-85c8-e0dd6968fd00">
@@ -221,32 +221,32 @@ OCR & Translate Selected Area
 * ```Ctrl+Z```, ```Ctrl+Shift+Z``` to undo/redo most operations. (note the undo stack will be cleared after you turn the page)
 * ```T``` to text-editting mode (or the "T" button on the bottom toolbar).
 * ```W``` to activate text block creating mode, then drag the mouse on the canvas with the right button clicked to add a new text block. (see the text editing gif)
-* ```P``` to image-editting mode.  
+* ```P``` to image-editting mode.
 * In the image editing mode, use the slider on the right bottom to control the original image transparency.
-* Disable or enable any automatic modules via titlebar->run, run with all modules disabled will re-letter and re-render all text according to corresponding settings.  
-* Set parameters of automatic modules in the config panel.  
+* Disable or enable any automatic modules via titlebar->run, run with all modules disabled will re-letter and re-render all text according to corresponding settings.
+* Set parameters of automatic modules in the config panel.
 * ```Ctrl++```/```Ctrl+-``` (Also ```Ctrl+Shift+=```) to resize image.
 * ```Ctrl+G```/```Ctrl+F``` to search globally/in current page.
 * ```0-9``` to adjust opacity of text layer
-* For text editing: bold - ```Ctrl+B```, underline - ```Ctrl+U```, Italics - ```Ctrl+I``` 
-* Set text shadow and transparency in the text style panel -> Effect.  
+* For text editing: bold - ```Ctrl+B```, underline - ```Ctrl+U```, Italics - ```Ctrl+I```
+* Set text shadow and transparency in the text style panel -> Effect.
 * ```Alt+Arrow Keys``` or ```Alt+WASD``` (```pageDown``` or ```pageUp``` while in text editing mode) to switch between text blocks.
-  
+
 <img src="https://github.com/user-attachments/assets/084a250d-6a31-4344-94c0-2a5f4ba64b96">
 
 ## Headless mode (Run without GUI)
 ``` python
 python -m ballontranslator --headless --exec_dirs "[DIR_1],[DIR_2]..."
 ```
-Note the configuration (source language, target language, inpaint model, etc) will load from config/config.json.  
+Note the configuration (source language, target language, inpaint model, etc) will load from config/config.json.
 If the rendered font size is not right, specify logical DPI manually via ```--ldpi ```, typical values are 96 and 72.
 
 
 # Automation modules
-This project is heavily dependent upon [manga-image-translator](https://github.com/zyddnys/manga-image-translator), online service and model training is not cheap, please consider to donate the project:  
+This project is heavily dependent upon [manga-image-translator](https://github.com/zyddnys/manga-image-translator), online service and model training is not cheap, please consider to donate the project:
 - Ko-fi: <https://ko-fi.com/voilelabs>
 - Patreon: <https://www.patreon.com/voilelabs>
-- 爱发电: <https://afdian.net/@voilelabs>  
+- Afdian: <https://afdian.net/@voilelabs>
 
 [Sugoi translator](https://sugoitranslator.com/) is created by [mingshiba](https://www.patreon.com/mingshiba).
   
@@ -254,9 +254,9 @@ This project is heavily dependent upon [manga-image-translator](https://github.c
  * Support English and Japanese text detection, training code and more details can be found at [comic-text-detector](https://github.com/dmMaze/comic-text-detector)
  * Support using text detection from [Starriver Cloud (Tuanzi Manga OCR)](https://cloud.stariver.org.cn/). Username and password need to be filled in, and automatic login will be performed each time the program is launched.
 
-   * For detailed instructions, see **Tuanzi OCR Instructions**: ([Chinese](doc/团子OCR说明.md) & [Brazilian Portuguese](doc/Manual_TuanziOCR_pt-BR.md) only)
- 
- * `YSGDetector` models are trained by [lhj5426](https://github.com/lhj5426), these models would filter out onomatopoeia in CGs/Manga, download checkpoints from [YSGYoloDetector](https://huggingface.co/YSGforMTL/YSGYoloDetector) and put into `data/models`. 
+   * Detailed Tuanzi OCR instructions are currently available in [Chinese](doc/团子OCR说明.md).
+
+ * `YSGDetector` models are trained by [lhj5426](https://github.com/lhj5426), these models would filter out onomatopoeia in CGs/Manga, download checkpoints from [YSGYoloDetector](https://huggingface.co/YSGforMTL/YSGYoloDetector) and put into `data/models`.
 
 
 ## OCR
@@ -266,7 +266,7 @@ This project is heavily dependent upon [manga-image-translator](https://github.c
  * Support using OCR from [Starriver Cloud (Tuanzi Manga OCR)](https://cloud.stariver.org.cn/). Username and password need to be filled in, and automatic login will be performed each time the program is launched.
    * The current implementation uses OCR on each textblock individually, resulting in slower speed and no significant improvement in accuracy. It is not recommended. If needed, please use the Tuanzi Detector instead.
    * When using the Tuanzi Detector for text detection, it is recommended to set OCR to none_ocr to directly read the text, saving time and reducing the number of requests.
-   * For detailed instructions, see **Tuanzi OCR Instructions**: ([Chinese](doc/团子OCR说明.md) & [Brazilian Portuguese](doc/Manual_TuanziOCR_pt-BR.md) only)
+   * Detailed Tuanzi OCR instructions are currently available in [Chinese](doc/团子OCR说明.md).
 * Added as an "optional" PaddleOCR module. In Debug mode you will see a message stating that it is not there. You can simply install it by following the instructions described there. If you don’t want to install the package yourself, just uncomment (remove the `#`) the lines with paddlepaddle(gpu) and paddleocr. Bet everything at your own peril andrisk. For me (bropines) and two testers, everything was installed fine, you may have an error. Write about it in issue and tag me.
 * Added [OneOCR](https://github.com/b1tg/win11-oneocr). Local WINDOWS model taken from SnippingTOOL or Win.PHOTOS applications. To use it, you need to place the model and DLL files in the 'data/models/one-ocr' folder. Before running, it is better to throw the files at once. Read how to find and get DLL and model files here: https://github.com/dmMaze/BallonsTranslator/discussions/859#discussioncomment-12876757 . Thanks AuroraWright for the project [OneOCR](https://github.com/AuroraWright/oneocr)
  * OCR setting: Font recognition. Download the [Font Recognition Model (YuzuMarker.FontDetection)](https://github.com/JeffersonQin/YuzuMarker.FontDetection) and place it in the data\models\YuzuMarker.FontDetection directory.
@@ -276,13 +276,13 @@ This project is heavily dependent upon [manga-image-translator](https://github.c
 ## Inpainting
   * AOT is from [manga-image-translator](https://github.com/zyddnys/manga-image-translator).
   * All lama* are finetuned using [LaMa](https://github.com/advimman/lama)
-  * PatchMatch is an algorithm from [PyPatchMatch](https://github.com/vacancy/PyPatchMatch), this program uses a [modified version](https://github.com/dmMaze/PyPatchMatchInpaint) by me. 
-  
+  * PatchMatch is an algorithm from [PyPatchMatch](https://github.com/vacancy/PyPatchMatch), this program uses a [modified version](https://github.com/dmMaze/PyPatchMatchInpaint) by me.
+
 ## Translators
-* **You can find information about Translators modules [here.](doc/modules/translators.md)**
+* See [How to add a new translator](doc/how_to_add_new_translator.md) for the translator module extension guide.
 
 ## FAQ & Misc
-* If your computer has an Nvidia GPU or Apple silicon, the program will enable hardware acceleration. 
+* If your computer has an Nvidia GPU or Apple silicon, the program will enable hardware acceleration.
 * Accelarate performance if you have a [NVIDIA's CUDA](https://pytorch.org/docs/stable/notes/cuda.html) or [AMD's ROCm](https://pytorch.org/docs/stable/notes/hip.html) device as most modules uses [PyTorch](https://pytorch.org/get-started/locally/).
 * Fonts are from your system's fonts.
 * Thanks to [bropines](https://github.com/bropines) for the Russian localization.

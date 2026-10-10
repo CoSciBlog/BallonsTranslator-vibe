@@ -9,3 +9,5 @@ The application builds on open-source projects and model providers credited in t
 - Project-local Python environments are bootstrapped with [uv](https://github.com/astral-sh/uv), which is available under the Apache-2.0 and MIT licenses.
 
 Copyright and license notices shipped with third-party dependencies remain the responsibility of their respective authors. New fork code must not remove or replace those notices.
+
+The primary project documentation is maintained in English. Community-maintained translated guides retain their original language and attribution where provided.
