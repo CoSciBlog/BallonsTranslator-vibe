@@ -11,3 +11,5 @@ The application builds on open-source projects and model providers credited in t
 Copyright and license notices shipped with third-party dependencies remain the responsibility of their respective authors. New fork code must not remove or replace those notices.
 
 The primary project documentation is maintained in English. Community-maintained translated guides retain their original language and attribution where provided.
+
+The optional translation line-break normalization and text-box wrapping integration are maintained as original code in this fork and introduce no additional dependency or bundled third-party code.

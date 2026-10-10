@@ -1294,6 +1294,19 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
         )
         self.let_autolayout_checker.stateChanged.connect(self.on_autolayout_changed)
 
+        (
+            self.remove_translation_line_breaks_checker,
+            _,
+        ) = typesettingConfigPanel.addCheckBox(
+            self.tr('Remove translation line breaks'),
+            discription=self.tr(
+                'Replace line breaks in new translations and let the text box wrap the text automatically.'
+            ),
+        )
+        self.remove_translation_line_breaks_checker.toggled.connect(
+            self.on_remove_translation_line_breaks_changed
+        )
+
         self.let_textstyle_indep_checker, _ = typesettingConfigPanel.addCheckBox(self.tr('Independent text styles for each projects'))
         self.let_textstyle_indep_checker.stateChanged.connect(self.on_textstyle_indep_changed)
 
@@ -1980,6 +1993,9 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
     def on_autolayout_changed(self):
         pcfg.let_autolayout_flag = self.let_autolayout_checker.isChecked()
 
+    def on_remove_translation_line_breaks_changed(self, enabled: bool) -> None:
+        pcfg.remove_translation_line_breaks = enabled
+
     def on_quick_insert_characters_changed(self, text: str) -> None:
         pcfg.quick_insert_characters = text
 
@@ -2217,6 +2233,9 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
         self.let_family_combox.setCurrentIndex(pcfg.let_family_flag)
         self.let_writing_mode_combox.setCurrentIndex(pcfg.let_writing_mode_flag)
         self.let_autolayout_checker.setChecked(pcfg.let_autolayout_flag)
+        self.remove_translation_line_breaks_checker.setChecked(
+            pcfg.remove_translation_line_breaks
+        )
         self.quick_insert_characters_edit.setText(pcfg.quick_insert_characters)
         self.let_letter_case_buttons[pcfg.let_letter_case].setChecked(True)
         self.compact_vertical_punctuation_checker.setChecked(

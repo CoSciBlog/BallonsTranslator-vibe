@@ -1,5 +1,10 @@
 # Changelogs
 
+### 2026-10-11 — 1.5.19+vibe.18
+- Added an opt-in **Remove translation line breaks** setting under **Settings → Typesetting**. New translations can now discard model-authored hard line breaks and rely on the existing text-box layout for automatic wrapping.
+- Line-break removal runs after translation conversion, keyword substitution, and letter-case processing; non-CJK lines are joined with one space while CJK lines are joined without artificial spacing.
+- Existing projects retain the previous behavior by default, and existing or manually edited translations are never rewritten merely by changing the setting.
+
 ### 2026-10-11 — 1.5.19+vibe.17
 - Replaced the repository's primary Chinese README with the complete English documentation so the default GitHub and package landing page is now English.
 - Updated the language navigation in both English README files to avoid presenting the English main README as a Chinese translation.

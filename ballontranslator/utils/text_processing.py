@@ -104,6 +104,30 @@ def apply_letter_case(text: str, mode: str) -> str:
     return text
 
 
+def remove_translation_line_breaks(
+    text: str,
+    target_language: str,
+) -> str:
+    """Replace authored line breaks so the text box can wrap the result.
+
+    Whitespace next to a line break is consumed without otherwise collapsing
+    translator spacing. CJK targets are joined without inserting an unnatural
+    inter-word space.
+
+    >>> remove_translation_line_breaks('How\\r\\n wonderful!\\nYou?', 'English')
+    'How wonderful! You?'
+    >>> remove_translation_line_breaks('第一行\\n第二行', '日本語')
+    '第一行第二行'
+    """
+
+    separator = '' if target_language in LANGSET_CJK else ' '
+    return re.sub(
+        r'[ \t]*(?:\r\n?|[\n\v\f\x1c-\x1e\x85\u2028\u2029])+[ \t]*',
+        separator,
+        text,
+    )
+
+
 def full_len(s: str):
     """
     Convert all ASCII characters to their full-width counterpart.

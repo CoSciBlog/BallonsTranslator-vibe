@@ -536,6 +536,7 @@ class ProgramConfig(Config):
     let_writing_mode_flag: int = 0
     let_family_flag: int = 0
     let_autolayout_flag: bool = True
+    remove_translation_line_breaks: bool = False
     let_letter_case: str = OCRTextPostprocess.NONE
     let_show_only_custom_fonts_flag: bool = False
     let_textstyle_indep_flag: bool = False
@@ -575,6 +576,12 @@ class ProgramConfig(Config):
     custom_colors: List[str] = field(default_factory=list)
 
     def __post_init__(self) -> None:
+        if type(self.remove_translation_line_breaks) is not bool:
+            LOGGER.warning(
+                'Discard invalid remove_translation_line_breaks config %r.',
+                self.remove_translation_line_breaks,
+            )
+            self.remove_translation_line_breaks = False
         if (
             type(self.intermediate_imgsave_ext) is not str
             or self.intermediate_imgsave_ext not in {

@@ -38,6 +38,7 @@
   - Supports WYSIWYG rich-text editing and [text style presets](https://github.com/dmMaze/BallonsTranslator/pull/311)
   - Supports a rich set of [text effects](https://github.com/dmMaze/BallonsTranslator/pull/1296) and [text transforms](https://github.com/dmMaze/BallonsTranslator/pull/1238)
   - Supports find and replace across all text, source text, or translations, and Word document import/export
+  - Enable **Remove translation line breaks** under **Settings → Typesetting** to replace translator-authored line breaks in new translations and let each text box wrap the result automatically. The option is disabled by default and does not alter existing or manually edited text.
 
 * User interface localization
   - Complete English and German UI catalogs; choose **Deutsch** from **View → Display Language**.

@@ -12,6 +12,7 @@ from ballontranslator.utils.logger import logger as LOGGER
 from ballontranslator.utils.config import OCRTextPostprocess, TranslateContext, pcfg
 from ballontranslator.utils.text_processing import (
     finalize_translation_text,
+    remove_translation_line_breaks,
     substitute_keywords,
 )
 from ballontranslator.glossary.extraction import RuleBasedGlossaryExtractor
@@ -91,6 +92,7 @@ def postprocess_translation_text(
     letter_case: str = OCRTextPostprocess.NONE,
     convert_to_traditional: bool = False,
     full_page: bool = False,
+    remove_line_breaks: bool = False,
 ) -> str:
     """Apply the fixed translation finalization order for one result.
 
@@ -116,14 +118,19 @@ def postprocess_translation_text(
         text = _CHS2CHT_CONVERTER.convert(text)
 
     if full_page:
-        return finalize_translation_text(
+        text = finalize_translation_text(
             text,
             source_language,
             target_language,
             substitute=lambda value: substitute_keywords(value, substitutions),
             letter_case=letter_case,
         )
-    return substitute_keywords(text, substitutions)
+    else:
+        text = substitute_keywords(text, substitutions)
+
+    if remove_line_breaks:
+        text = remove_translation_line_breaks(text, target_language)
+    return text
 
 
 def check_language_support(check_type: str = 'source'):
@@ -324,6 +331,7 @@ class BaseTranslator(BaseModule):
                 letter_case=pcfg.let_letter_case,
                 convert_to_traditional=self.cht_require_convert,
                 full_page=full_page,
+                remove_line_breaks=pcfg.remove_translation_line_breaks,
             )
             for translation in translations
         ]

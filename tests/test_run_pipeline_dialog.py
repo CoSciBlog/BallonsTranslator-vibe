@@ -88,7 +88,10 @@ from ballontranslator.utils.text_effects import (
 )
 from ballontranslator.utils.textblock import TextBlock
 from ballontranslator.modules.translators import base as translator_base
-from ballontranslator.modules.translators.base import postprocess_translation_text
+from ballontranslator.modules.translators.base import (
+    TransSource,
+    postprocess_translation_text,
+)
 from ballontranslator.modules.translators.trans_llm import LLMTranslator
 
 
@@ -260,6 +263,21 @@ class RunPipelineDialogTests(unittest.TestCase):
         self.assertEqual(config.let_letter_case, OCRTextPostprocess.NONE)
         self.assertFalse(hasattr(config, 'let_uppercase_flag'))
 
+    def test_remove_translation_line_breaks_config_is_validated(self):
+        with tempfile.TemporaryDirectory(dir=os.getcwd()) as directory:
+            enabled_path = os.path.join(directory, 'enabled.json')
+            invalid_path = os.path.join(directory, 'invalid.json')
+            with open(enabled_path, 'w', encoding='utf8') as config_file:
+                json.dump({'remove_translation_line_breaks': True}, config_file)
+            with open(invalid_path, 'w', encoding='utf8') as config_file:
+                json.dump({'remove_translation_line_breaks': 'yes'}, config_file)
+
+            enabled = ProgramConfig.load(enabled_path)
+            invalid = ProgramConfig.load(invalid_path)
+
+        self.assertTrue(enabled.remove_translation_line_breaks)
+        self.assertFalse(invalid.remove_translation_line_breaks)
+
     def test_typesetting_letter_case_buttons_update_config(self):
         original = pcfg.let_letter_case
         pcfg.let_letter_case = OCRTextPostprocess.CAPITALIZE
@@ -282,6 +300,22 @@ class RunPipelineDialogTests(unittest.TestCase):
         finally:
             panel.close()
             pcfg.let_letter_case = original
+
+    def test_typesetting_remove_translation_line_breaks_updates_config(self):
+        original = pcfg.remove_translation_line_breaks
+        pcfg.remove_translation_line_breaks = False
+        panel = ConfigPanel()
+        try:
+            self.assertFalse(
+                panel.remove_translation_line_breaks_checker.isChecked()
+            )
+
+            panel.remove_translation_line_breaks_checker.click()
+
+            self.assertTrue(pcfg.remove_translation_line_breaks)
+        finally:
+            panel.close()
+            pcfg.remove_translation_line_breaks = original
 
     def test_settings_wheel_scrolls_without_changing_field_values(self):
         panel = ConfigPanel()
@@ -1020,6 +1054,51 @@ class RunPipelineDialogTests(unittest.TestCase):
             full_page=True,
         )
         self.assertEqual(leading_number, '123 Hello. 45 Next!')
+
+    def test_translation_line_break_removal_is_opt_in_and_runs_last(self):
+        substitutions = ({
+            'keyword': 'BREAK',
+            'sub': 'first\n second',
+            'use_reg': False,
+            'case_sens': True,
+        },)
+
+        unchanged = postprocess_translation_text(
+            'BREAK',
+            'English',
+            'English',
+            substitutions,
+            remove_line_breaks=False,
+        )
+        normalized = postprocess_translation_text(
+            'BREAK',
+            'English',
+            'English',
+            substitutions,
+            remove_line_breaks=True,
+        )
+        cjk = postprocess_translation_text(
+            '第一行\r\n 第二行',
+            '日本語',
+            '日本語',
+            (),
+            remove_line_breaks=True,
+        )
+
+        self.assertEqual(unchanged, 'first\n second')
+        self.assertEqual(normalized, 'first second')
+        self.assertEqual(cjk, '第一行第二行')
+
+    def test_translator_applies_configured_line_break_removal_to_blocks(self):
+        original = pcfg.remove_translation_line_breaks
+        pcfg.remove_translation_line_breaks = True
+        block = TextBlock(text=['How\n wonderful!\u2028You?'])
+        translator = TransSource('English', 'English')
+        try:
+            translator.translate_textblk_lst([block])
+            self.assertEqual(block.translation, 'How wonderful! You?')
+        finally:
+            pcfg.remove_translation_line_breaks = original
 
     def test_pipeline_keeps_global_keyword_substitution_actions(self):
         panel = ConfigPanel()
