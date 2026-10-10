@@ -14,10 +14,9 @@ from qtpy.QtWidgets import (
     QToolButton,
     QVBoxLayout,
 )
-from qtpy.QtCore import QEvent, QPoint, QSize, Qt, QUrl, Signal
+from qtpy.QtCore import QEvent, QPoint, QSize, Qt, Signal
 from qtpy.QtGui import (
     QActionGroup,
-    QDesktopServices,
     QIcon,
     QKeySequence,
     QMouseEvent,
@@ -299,6 +298,8 @@ class TitleBar(Widget):
         self.proj_name = ''
         self.page_name = ''
         self.save_state = ''
+        self.current_page = 0
+        self.total_pages = 0
         self.setFixedHeight(TITLEBAR_HEIGHT)
         self.setMouseTracking(True)
 
@@ -424,42 +425,59 @@ class TitleBar(Widget):
 
         fontExclusionAction = QAction(self.tr('Font Exclusion'), self)
         self.font_exclusion_trigger = fontExclusionAction.triggered
+
+        glossaryAction = QAction(self.tr('Glossary Manager'), self)
+        glossaryAction.setShortcut(QKeySequence('Ctrl+Shift+G'))
+        self.glossary_trigger = glossaryAction.triggered
+
+        batchProcessingAction = QAction(self.tr('Batch Processing...'), self)
+        batchProcessingAction.setShortcut(QKeySequence('Ctrl+Shift+B'))
+        self.batch_processing_trigger = batchProcessingAction.triggered
+
+        historyAction = QAction(self.tr('Pipeline History'), self)
+        historyAction.setShortcut(QKeySequence('Ctrl+Shift+H'))
+        self.pipeline_history_trigger = historyAction.triggered
+
+        reinpaintCurrentAction = QAction(
+            self.tr('Re-run Inpainting Current Page'),
+            self,
+        )
+        reinpaintCurrentAction.setShortcut(QKeySequence('Ctrl+Shift+I'))
+        self.reinpaint_current_page_trigger = reinpaintCurrentAction.triggered
+        reinpaintAllAction = QAction(
+            self.tr('Re-run Inpainting All Pages'),
+            self,
+        )
+        self.reinpaint_all_pages_trigger = reinpaintAllAction.triggered
+
+        upscaleCurrentPageAction = QAction(
+            self.tr('Upscale Current Page 2x...'),
+            self,
+        )
+        self.upscale_current_page_trigger = upscaleCurrentPageAction.triggered
+        upscaleProjectAction = QAction(
+            self.tr('Upscale Entire Project 2x...'),
+            self,
+        )
+        self.upscale_project_trigger = upscaleProjectAction.triggered
+        upscaleMenu = QMenu(self.tr('Upscaling'), self.toolsToolBtn)
+        upscaleMenu.addAction(upscaleCurrentPageAction)
+        upscaleMenu.addAction(upscaleProjectAction)
         
         toolsMenu = QMenu(self.toolsToolBtn)
         toolsMenu.addAction(mergeToolAction)
         toolsMenu.addAction(psBridgeAction)
         toolsMenu.addAction(self.path_reorder_action)
         toolsMenu.addSeparator()
+        toolsMenu.addAction(reinpaintCurrentAction)
+        toolsMenu.addAction(reinpaintAllAction)
+        toolsMenu.addMenu(upscaleMenu)
+        toolsMenu.addAction(batchProcessingAction)
+        toolsMenu.addAction(historyAction)
+        toolsMenu.addAction(glossaryAction)
         toolsMenu.addAction(fontExclusionAction)
         self.toolsToolBtn.setMenu(toolsMenu)
         self.toolsToolBtn.setPopupMode(QToolButton.InstantPopup)
-
-        self.sponsorToolBtn = TitleBarToolBtn(self)
-        self.sponsorToolBtn.setText(self.tr('Sponsor'))
-        self.sponsorToolBtn.setIcon(QIcon(themed_icon_path('heart.svg')))
-        self.sponsorToolBtn.setIconSize(QSize(16, 16))
-        self.sponsorToolBtn.setToolButtonStyle(
-            Qt.ToolButtonStyle.ToolButtonTextBesideIcon
-        )
-        sponsor_menu = QMenu(self.sponsorToolBtn)
-        self.patreonSponsorAction = QAction('Patreon', self)
-        self.patreonSponsorAction.triggered.connect(
-            lambda _checked=False: QDesktopServices.openUrl(
-                QUrl('https://patreon.com/dreMaze')
-            )
-        )
-        self.afdianSponsorAction = QAction(self.tr('Afdian'), self)
-        self.afdianSponsorAction.triggered.connect(
-            lambda _checked=False: QDesktopServices.openUrl(
-                QUrl('https://afdian.com/a/dmMaze')
-            )
-        )
-        sponsor_menu.addActions([
-            self.patreonSponsorAction,
-            self.afdianSponsorAction,
-        ])
-        self.sponsorToolBtn.setMenu(sponsor_menu)
-        self.sponsorToolBtn.setPopupMode(QToolButton.InstantPopup)
 
         self.iconLabel = QLabel(self)
         if not shared.ON_MACOS:
@@ -478,7 +496,6 @@ class TitleBar(Widget):
         hlayout.addWidget(self.viewToolBtn)
         hlayout.addWidget(self.goToolBtn)
         hlayout.addWidget(self.toolsToolBtn)
-        hlayout.addWidget(self.sponsorToolBtn)
         hlayout.addStretch()
         hlayout.addWidget(self.titleLabel)
         hlayout.addStretch()
@@ -565,7 +582,30 @@ class TitleBar(Widget):
         self.mPos = None
         return super().leaveEvent(e)
 
-    def setTitleContent(self, proj_name: str = None, page_name: str = None, save_state: str = None):
+    @staticmethod
+    def pageCounterText(current_page: int, total_pages: int) -> str:
+        """Format a stable, naturally sortable page counter.
+
+        >>> TitleBar.pageCounterText(29, 53)
+        '029/053'
+        >>> TitleBar.pageCounterText(7, 1200)
+        '0007/1200'
+        """
+
+        if current_page <= 0 or total_pages <= 0:
+            return ''
+        width = max(3, len(str(total_pages)))
+        current_page = min(current_page, total_pages)
+        return f'{current_page:0{width}d}/{total_pages:0{width}d}'
+
+    def setTitleContent(
+        self,
+        proj_name: str = None,
+        page_name: str = None,
+        save_state: str = None,
+        current_page: int = None,
+        total_pages: int = None,
+    ) -> None:
         max_proj_len = 50
         max_page_len = 50
         if proj_name is not None:
@@ -578,7 +618,20 @@ class TitleBar(Widget):
             self.page_name = page_name
         if save_state is not None:
             self.save_state = save_state
+        if current_page is not None:
+            self.current_page = current_page
+        if total_pages is not None:
+            self.total_pages = total_pages
         title = self.proj_name + ' - ' + self.page_name
+        page_counter = self.pageCounterText(
+            self.current_page,
+            self.total_pages,
+        )
+        if page_counter:
+            title += ' ' + self.tr('{current}/{total} pages').format(
+                current=page_counter.split('/', 1)[0],
+                total=page_counter.split('/', 1)[1],
+            )
         if self.save_state != '':
             title += ' - '  + self.save_state
         self.titleLabel.setText(title)

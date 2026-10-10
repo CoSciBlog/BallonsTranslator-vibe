@@ -1038,6 +1038,23 @@ QFrame#RunPipelineSurface {
     border-radius: 12px;
 }
 
+QWidget#PipelineHistoryWindow[opaqueFrame="false"] {
+    background-color: transparent;
+}
+
+QFrame#PipelineHistorySurface {
+    color: @qwidgetForegroundColor;
+    background-color: @widgetBackgroundColor;
+    border: 1px solid @borderColor;
+    border-radius: 12px;
+}
+
+QWidget#PipelineHistoryWindow[opaqueFrame="true"]
+QFrame#PipelineHistorySurface {
+    border: none;
+    border-radius: 0px;
+}
+
 QLabel#RunPipelineTitle {
     font-size: 18px;
     font-weight: 600;
@@ -1411,6 +1428,7 @@ QToolButton#LLMProfileModelRemoveButton:hover {
     background-color: #FF605C;
 }
 
+QToolButton#LLMProfileDuplicateButton,
 QToolButton#LLMProfileDeleteButton {
     width: 12px;
     height: 12px;
@@ -1418,6 +1436,10 @@ QToolButton#LLMProfileDeleteButton {
     border: none;
     border-radius: 4px;
     background-color: @widgetBackgroundColor;
+}
+
+QToolButton#LLMProfileDuplicateButton:hover {
+    background-color: rgb(30, 147, 229);
 }
 
 QToolButton#LLMProfileDeleteButton:hover {

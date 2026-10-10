@@ -19,7 +19,13 @@ from qtpy.QtCore import (
     QPointF,
     Qt,
 )
-from qtpy.QtGui import QColor, QTextCursor, QTextDocument, QWheelEvent
+from qtpy.QtGui import (
+    QColor,
+    QContextMenuEvent,
+    QTextCursor,
+    QTextDocument,
+    QWheelEvent,
+)
 from qtpy.QtTest import QSignalSpy, QTest
 from qtpy.QtWidgets import (
     QApplication,
@@ -29,7 +35,9 @@ from qtpy.QtWidgets import (
     QFrame,
     QLabel,
     QMainWindow,
+    QMenu,
     QRadioButton,
+    QListWidgetItem,
     QSpinBox,
     QStackedWidget,
     QToolButton,
@@ -43,7 +51,7 @@ from ballontranslator.ui.run_pipeline_dialog import (
 )
 from ballontranslator.ui.configpanel import ConfigPanel
 from ballontranslator.ui.module_parse_widgets import ModuleParamDialog
-from ballontranslator.ui.mainwindow import MainWindow
+from ballontranslator.ui.mainwindow import MainWindow, PageListView
 from ballontranslator.ui.mainwindowbars import TitleBar
 from ballontranslator.ui.module_manager import ModuleManager
 from ballontranslator.ui.text_engine.annotations import (
@@ -59,6 +67,7 @@ from ballontranslator.ui.text_engine.pipeline_formatting import (
 from ballontranslator.utils.config import (
     AutoTateChuYokoConfig,
     LLMTranslateContext,
+    ModuleConfig,
     OCRTextPostprocess,
     ProgramConfig,
     RunStatus,
@@ -790,6 +799,31 @@ class RunPipelineDialogTests(unittest.TestCase):
         self.assertEqual(pcfg.module.translate_source, '简体中文')
         dialog.close()
 
+    def test_auto_detect_is_the_default_source_and_not_a_target(self):
+        default_config = ModuleConfig()
+        self.assertEqual(default_config.translate_source, 'Auto')
+
+        translator = LLMTranslator('Auto', 'English')
+        self.assertEqual(translator.lang_source, 'Auto')
+        self.assertEqual(
+            translator._translated_lang('Auto'),
+            'the automatically detected source language',
+        )
+        self.assertEqual(translator.supported_src_list[0], 'Auto')
+        self.assertNotIn('Auto', translator.supported_tgt_list)
+
+        dialog = RunPipelineDialog(translator_metadata={
+            'name': 'LLMTranslator',
+            'supported_src_list': translator.supported_src_list,
+            'supported_tgt_list': translator.supported_tgt_list,
+            'lang_source': 'Auto',
+            'lang_target': 'English',
+        })
+        self.assertEqual(dialog.source_combobox.currentData(), 'Auto')
+        self.assertEqual(dialog.source_combobox.currentText(), 'Auto-detect')
+        self.assertEqual(dialog.target_combobox.findData('Auto'), -1)
+        dialog.close()
+
     def test_llm_ocr_run_settings_are_conditional_and_persistent(self):
         pcfg.module.ocr = 'LLMOCR'
         pcfg.module.ocr_llm_page_level = False
@@ -1270,12 +1304,7 @@ class RunPipelineDialogTests(unittest.TestCase):
         )
         self.assertFalse(any(action.isSeparator() for action in view_actions[:2]))
         self.assertFalse(hasattr(title_bar, 'runToolBtn'))
-        self.assertEqual(title_bar.sponsorToolBtn.text(), 'Sponsor')
-        self.assertFalse(title_bar.sponsorToolBtn.icon().isNull())
-        self.assertEqual(
-            [action.text() for action in title_bar.sponsorToolBtn.menu().actions()],
-            ['Patreon', 'Afdian'],
-        )
+        self.assertFalse(hasattr(title_bar, 'sponsorToolBtn'))
         self.assertTrue(
             {
                 action.text()
@@ -1289,16 +1318,16 @@ class RunPipelineDialogTests(unittest.TestCase):
             })
         )
         self.assertTrue(hasattr(title_bar, 'font_exclusion_trigger'))
-        with patch(
-            'ballontranslator.ui.mainwindowbars.QDesktopServices.openUrl'
-        ) as open_url:
-            title_bar.patreonSponsorAction.trigger()
-            title_bar.afdianSponsorAction.trigger()
+        upscale_menu = next(
+            action.menu()
+            for action in title_bar.toolsToolBtn.menu().actions()
+            if action.menu() is not None and action.text() == 'Upscaling'
+        )
         self.assertEqual(
-            [call.args[0].toString() for call in open_url.call_args_list],
+            [action.text() for action in upscale_menu.actions()],
             [
-                'https://patreon.com/dreMaze',
-                'https://afdian.com/a/dmMaze',
+                'Upscale Current Page 2x...',
+                'Upscale Entire Project 2x...',
             ],
         )
 
@@ -1435,6 +1464,155 @@ class RunPipelineDialogTests(unittest.TestCase):
                 )
             ],
         )
+
+    def test_ignored_pages_are_not_reset_or_dispatched(self):
+        project = ProjImgTrans()
+        project.pages = {
+            '001.png': [TextBlock(text=['first'])],
+            '002.png': [TextBlock(text=['ignored'])],
+            '003.png': [TextBlock(text=['third'])],
+        }
+        project._image_info = {
+            '001.png': {'finish_code': RunStatus.FIN_ALL},
+            '002.png': {
+                'finish_code': RunStatus.FIN_ALL,
+                'pipeline_ignore': True,
+            },
+            '003.png': {'finish_code': RunStatus.FIN_ALL},
+        }
+        calls = []
+        owner = SimpleNamespace(
+            backup_blkstyles=[],
+            _run_imgtrans_wo_textstyle_update=False,
+            _render_only=False,
+            _render_global_format=None,
+            textPanel=SimpleNamespace(
+                formatpanel=SimpleNamespace(global_format=FontFormat())
+            ),
+            bottomBar=SimpleNamespace(
+                textblockChecker=SimpleNamespace(isChecked=lambda: False)
+            ),
+            imgtrans_proj=project,
+            st_manager=SimpleNamespace(updateTextBlkList=lambda: None),
+            module_manager=SimpleNamespace(
+                runImgtransPipeline=lambda *args, **kwargs: calls.append(
+                    (args, kwargs)
+                )
+            ),
+        )
+
+        MainWindow.on_run_imgtrans(owner)
+
+        self.assertEqual(project.pages['002.png'][0].get_text(), 'ignored')
+        self.assertEqual(
+            project._image_info['002.png']['finish_code'],
+            RunStatus.FIN_ALL,
+        )
+        self.assertEqual(
+            calls,
+            [((['001.png', '003.png'],), {'render_only': False})],
+        )
+
+    def test_page_ignore_state_round_trips_and_empty_selection_stays_empty(self):
+        project = ProjImgTrans()
+        project.pages = {'001.png': [], '002.png': []}
+        project._image_info = {
+            '001.png': {'finish_code': 0},
+            '002.png': {'finish_code': 0},
+        }
+
+        project.set_page_ignored('002.png', True)
+
+        self.assertEqual(project.pipeline_pages(), ['001.png'])
+        self.assertEqual(project.pipeline_pages([]), [])
+        self.assertTrue(
+            project.to_dict()['image_info']['002.png']['pipeline_ignore']
+        )
+        project.set_page_ignored('002.png', False)
+        self.assertNotIn(
+            'pipeline_ignore',
+            project.to_dict()['image_info']['002.png'],
+        )
+
+    def test_invalid_page_ignore_state_is_discarded_on_load(self):
+        project = ProjImgTrans()
+        project.directory = 'test-project'
+        payload = {
+            'pages': {'001.png': []},
+            'current_img': None,
+            'image_info': {
+                '001.png': {
+                    'finish_code': 0,
+                    'pipeline_ignore': 'yes',
+                },
+            },
+        }
+
+        with patch(
+            'ballontranslator.utils.proj_imgtrans.find_all_imgs',
+            return_value=['001.png'],
+        ):
+            project.load_from_dict(payload)
+
+        self.assertFalse(project.is_page_ignored('001.png'))
+        self.assertNotIn(
+            'pipeline_ignore',
+            project.to_dict()['image_info']['001.png'],
+        )
+
+    def test_page_context_menu_emits_ignore_request_and_marks_item(self):
+        page_list = PageListView()
+        item = QListWidgetItem('001.png')
+        page_list.addItem(item)
+        page_list.resize(240, 120)
+        page_list.show()
+        self.app.processEvents()
+        requests = []
+        page_list.ignore_page_changed.connect(
+            lambda page, ignored: requests.append((page, ignored))
+        )
+
+        def choose_ignore(menu, _position):
+            return next(
+                action
+                for action in menu.actions()
+                if action.text() == 'Ignore page'
+            )
+
+        position = page_list.visualItemRect(item).center()
+        event = QContextMenuEvent(
+            QContextMenuEvent.Reason.Mouse,
+            position,
+            page_list.mapToGlobal(position),
+        )
+        with patch.object(QMenu, 'exec_', autospec=True) as execute:
+            execute.side_effect = choose_ignore
+            page_list.contextMenuEvent(event)
+
+        self.assertEqual(requests, [('001.png', True)])
+        page_list.setItemIgnored(item, True)
+        self.assertTrue(item.font().strikeOut())
+        self.assertIn('ignored', item.toolTip())
+        page_list.close()
+
+    def test_page_ignore_request_is_saved_and_updates_sidebar(self):
+        project = ProjImgTrans()
+        project.pages = {'001.png': []}
+        project._image_info = {'001.png': {'finish_code': 0}}
+        project.save = Mock()
+        page_list = PageListView()
+        item = QListWidgetItem('001.png')
+        page_list.addItem(item)
+        owner = SimpleNamespace(
+            imgtrans_proj=project,
+            pageList=page_list,
+        )
+
+        MainWindow.on_page_ignore_changed(owner, '001.png', True)
+
+        self.assertTrue(project.is_page_ignored('001.png'))
+        project.save.assert_called_once_with()
+        self.assertTrue(item.font().strikeOut())
 
     def test_continue_dispatches_all_unfinished_pages_ignoring_selected_range(self):
         pcfg.module.set_stage_enabled(0, False)
@@ -2168,6 +2346,34 @@ class RunPipelineDialogTests(unittest.TestCase):
         ModuleManager.runImgtransPipeline(owner, render_only=True)
 
         self.assertEqual(pages, [0, 1, 2])
+        self.assertEqual(finished, [True])
+
+    def test_render_only_skips_ignored_pages(self):
+        pages = []
+        finished = []
+        project = ProjImgTrans()
+        project.pages = {'001.png': [], '002.png': [], '003.png': []}
+        project._image_info = {
+            '001.png': {},
+            '002.png': {'pipeline_ignore': True},
+            '003.png': {},
+        }
+        owner = SimpleNamespace(
+            imgtrans_proj=project,
+            progress_msgbox=SimpleNamespace(hide=lambda: None),
+            terminateRunningThread=lambda: None,
+            page_trans_finished=SimpleNamespace(emit=pages.append),
+            imgtrans_pipeline_finished=SimpleNamespace(
+                emit=lambda: finished.append(True)
+            ),
+            _prepare_modules_then=lambda *args, **kwargs: self.fail(
+                'Rendering must not prepare pipeline modules'
+            ),
+        )
+
+        ModuleManager.runImgtransPipeline(owner, render_only=True)
+
+        self.assertEqual(pages, [0, 2])
         self.assertEqual(finished, [True])
 
 

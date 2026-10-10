@@ -34,6 +34,29 @@ class DemoTranslator:
         self.assertEqual(specs[0].supported_tgt_list, ['日本語', 'English'])
         self.assertEqual(validate_lazy_module_specs(specs), [])
 
+    def test_auto_detect_is_available_only_as_source_language(self):
+        specs = self.scan_source(
+            '''
+@register_translator("demo")
+class DemoTranslator:
+    def _setup_translator(self):
+        self.lang_map.update({"Auto": "auto", "日本語": "ja", "English": "en"})
+''',
+            'translator',
+        )
+
+        self.assertEqual(specs[0].supported_src_list, ['Auto', '日本語', 'English'])
+        self.assertEqual(specs[0].supported_tgt_list, ['日本語', 'English'])
+        self.assertEqual(validate_lazy_module_specs(specs), [])
+
+        llm_specs = _scan_file(
+            'ballontranslator/modules/translators/trans_llm.py',
+            'translator',
+        )
+        llm_spec = next(spec for spec in llm_specs if spec.key == 'LLMTranslator')
+        self.assertEqual(llm_spec.supported_src_list[0], 'Auto')
+        self.assertNotIn('Auto', llm_spec.supported_tgt_list)
+
     def test_dynamic_translator_lang_map_is_reported(self):
         specs = self.scan_source(
             '''

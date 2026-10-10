@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/CoSciBlog/BallonsTranslator-vibe/blob/1.5-vibe/docs/glossary.schema.json",
+  "title": "BallonsTranslator glossary",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "glossary_id", "entries"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "glossary_id": {"type": "string", "minLength": 1},
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "sources": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "series": {"type": "string"},
+            "references": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "entries": {"type": "array", "items": {"$ref": "#/$defs/entry"}}
+  },
+  "$defs": {
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "id", "original", "translation", "source_language", "target_language", "category", "aliases", "description", "origin", "status", "protected", "created_at", "updated_at", "confidence"],
+      "properties": {
+        "schema_version": {"const": 1},
+        "id": {"type": "string", "minLength": 1},
+        "original": {"type": "string", "minLength": 1},
+        "translation": {"type": "string"},
+        "source_language": {"type": "string"},
+        "target_language": {"type": "string"},
+        "category": {"enum": ["Character", "Place", "Organization", "Title", "Honorific", "Item", "Ability", "Terminology", "Catchphrase", "Other"]},
+        "aliases": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+        "description": {"type": "string"},
+        "origin": {"enum": ["Manual", "OCR", "LLM", "Import"]},
+        "status": {"enum": ["Suggestion", "Confirmed", "Rejected"]},
+        "protected": {"type": "boolean"},
+        "created_at": {"type": "string", "format": "date-time"},
+        "updated_at": {"type": "string", "format": "date-time"},
+        "confidence": {"type": ["number", "null"], "minimum": 0, "maximum": 1}
+      }
+    }
+  }
+}

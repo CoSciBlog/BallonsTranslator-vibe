@@ -670,6 +670,11 @@ def _collect_translator_langs(class_node: ast.ClassDef, env: Dict[str, Any]) -> 
         src = langs or None
     if tgt is None:
         tgt = langs or None
+    if tgt is not None:
+        # Auto-detection is a source-language capability, never a valid
+        # translation target. Mirror BaseTranslator's runtime contract in the
+        # metadata used before a translator module is imported.
+        tgt = [lang for lang in tgt if lang != 'Auto']
     if not langs and src is None and tgt is None:
         warnings.append(f'{class_node.name} has no lazy translator language metadata')
     return src, tgt, warnings

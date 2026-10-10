@@ -70,6 +70,7 @@ PROFILE_COMMON_PARAM_DEFS = [
     ('frequency_penalty', 'line_editor'),
     ('presence_penalty', 'line_editor'),
     ('low_vram_mode', 'checkbox'),
+    ('use_glossary', 'checkbox'),
     ('json_schema_response_format', 'checkbox'),
 ]
 PROFILE_MODALITY_PARAM_DEFS = {
@@ -405,6 +406,7 @@ class ProfileCardWidget(QGroupBox):
             'vision_prompt': self.tr('Prompt'),
             'image_prompt': self.tr('Prompt'),
             'low_vram_mode': self.tr('Low VRAM Mode'),
+            'use_glossary': self.tr('Use Glossary for Translation'),
         }
         self.profile_param_descriptions = {
             'base_url': self.tr('OpenAI-compatible API base URL.'),
@@ -427,6 +429,9 @@ class ProfileCardWidget(QGroupBox):
             'presence_penalty': self.tr('Sent only when greater than 0. Some OpenAI-compatible providers may ignore or reject it.'),
             'json_schema_response_format': self.tr('Request responses with the translation JSON schema. Useful for LM Studio; disable it if a provider rejects json_schema response_format.'),
             'low_vram_mode': self.tr('Preserved compatibility flag for local profiles.'),
+            'use_glossary': self.tr(
+                'Include matching project, series, reference, and selected file glossary entries in translation requests.'
+            ),
         }
         layout = QVBoxLayout(self)
         layout.setContentsMargins(16, 18, 16, 14)
@@ -467,6 +472,13 @@ class ProfileCardWidget(QGroupBox):
         self.more_btn.clicked.connect(self.toggleExpanded)
         self.more_btn.installEventFilter(self)
         self.more_btn.setFixedSize(22, 22)
+
+        self.duplicate_btn = QToolButton(self)
+        self.duplicate_btn.setObjectName('LLMProfileDuplicateButton')
+        self.duplicate_btn.setIcon(QIcon(themed_icon_path('files.svg')))
+        self.duplicate_btn.setToolTip(self.tr('Duplicate profile'))
+        self.duplicate_btn.clicked.connect(self.requestCopy)
+        self.duplicate_btn.setFixedSize(18, 18)
 
         self.delete_btn = QToolButton(self)
         self.delete_btn.setObjectName('LLMProfileDeleteButton')
@@ -742,6 +754,11 @@ class ProfileCardWidget(QGroupBox):
                 editor.blockSignals(True)
                 editor.setPlainText(str(getattr(self.profile, key) or ''))
                 editor.blockSignals(False)
+        glossary_checkbox = self.details.param_widgets.get('use_glossary')
+        if glossary_checkbox is not None and hasattr(glossary_checkbox, 'setChecked'):
+            glossary_checkbox.blockSignals(True)
+            glossary_checkbox.setChecked(bool(self.profile.use_glossary))
+            glossary_checkbox.blockSignals(False)
         self.refreshTextBadge()
         self.refreshVisionBadge()
         self.refreshImageBadge()
@@ -813,7 +830,12 @@ class ProfileCardWidget(QGroupBox):
             self.fontMetrics().boundingRect(self.title() or '').width() + 14,
             self.name_edit.sizeHint().width(),
         )
-        title_width += self.more_btn.width() + self.delete_btn.width() + 42
+        title_width += (
+            self.more_btn.width()
+            + self.duplicate_btn.width()
+            + self.delete_btn.width()
+            + 48
+        )
         self.setMinimumWidth(max(details_width, summary_width, title_width) + margins.left() + margins.right())
 
     def _summary_grid_widgets(self):
@@ -1043,6 +1065,7 @@ class ProfileCardWidget(QGroupBox):
     def setActionButtonsVisible(self, visible: bool) -> None:
         self._action_buttons_visible = visible
         self.more_btn.setVisible(visible)
+        self.duplicate_btn.setVisible(visible)
         self.delete_btn.setVisible(visible)
         self.add_model_btn.setVisible(visible and bool(self.profile.support_text))
         self.remove_model_btn.setVisible(visible and bool(self.profile.support_text))
@@ -1068,12 +1091,15 @@ class ProfileCardWidget(QGroupBox):
         button_y = 14
         spacing = 6
         delete_x = max(18, self.width() - 18 - self.delete_btn.width())
-        more_x = max(18, delete_x - spacing - self.more_btn.width())
+        duplicate_x = max(18, delete_x - spacing - self.duplicate_btn.width())
+        more_x = max(18, duplicate_x - spacing - self.more_btn.width())
         self.more_btn.move(more_x, button_y)
+        self.duplicate_btn.move(duplicate_x, button_y + 2)
         self.delete_btn.move(delete_x, button_y + 2)
         if self.name_edit.isVisible():
             self.name_edit.raise_()
         self.more_btn.raise_()
+        self.duplicate_btn.raise_()
         self.delete_btn.raise_()
 
     def resizeEvent(self, event):
@@ -1094,11 +1120,14 @@ class ProfileCardWidget(QGroupBox):
     def requestDelete(self) -> None:
         self.delete_requested.emit(self.profile.id)
 
+    def requestCopy(self) -> None:
+        self.copy_requested.emit(self.profile.id)
+
     def contextMenuEvent(self, event):
         menu = QMenu(self)
         edit_action = QAction(self.tr('Edit name'), menu)
         delete_action = QAction(self.tr('Delete'), menu)
-        copy_action = QAction(self.tr('Copy'), menu)
+        copy_action = QAction(self.tr('Duplicate profile'), menu)
         copy_json_action = QAction(self.tr('Copy Profile as JSON'), menu)
         more_action = QAction(self.tr('Edit'), menu)
         set_translator_action = QAction(self.tr('Set for Translator'), menu)
@@ -1123,7 +1152,7 @@ class ProfileCardWidget(QGroupBox):
         elif action == delete_action:
             self.requestDelete()
         elif action == copy_action:
-            self.copy_requested.emit(self.profile.id)
+            self.requestCopy()
         elif action == copy_json_action:
             self.copy_json_requested.emit(self.profile.id)
         elif action == set_translator_action:

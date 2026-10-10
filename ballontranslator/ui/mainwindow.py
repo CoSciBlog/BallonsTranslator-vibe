@@ -1,5 +1,5 @@
 import os.path as osp
-import os, re, traceback, sys
+import os, re, shutil, traceback, sys
 from typing import List, Optional, Tuple, Union
 from pathlib import Path
 import subprocess
@@ -36,6 +36,18 @@ from ballontranslator.utils.config import (
     text_styles,
 )
 from ballontranslator.utils.proj_imgtrans import ProjImgTrans
+from ballontranslator.utils.pipeline_history import PipelineHistoryStore
+from ballontranslator.utils.llm_profiles import LLM_TRANSLATOR_KEY, profile_by_id
+from ballontranslator.utils.batch_processing import (
+    BatchOptions,
+    BatchTask,
+    COMPLETION_CLOSE,
+    GLOSSARY_GLOBAL,
+    ORDER_STAGED,
+    build_batch_tasks,
+    windows_completion_command,
+)
+from ballontranslator.glossary import GlossaryWorkspace
 from .canvas import Canvas
 from .configpanel import ConfigPanel
 from .module_manager import ModuleManager
@@ -49,12 +61,20 @@ from .text_engine.editing.manager import (
 )
 from .mainwindowbars import TitleBar, LeftBar, BottomBar
 from .menu_style import install_app_style_filters
-from .io_thread import ImgSaveThread, ImportDocThread, ExportDocThread
+from .io_thread import (
+    ExportDocThread,
+    ImgSaveThread,
+    ImportDocThread,
+    ProjectUpscaleThread,
+)
 from .update_thread import UpdateCheckThread
 from .font_change_detection import FontChangeDetector
 from .font_refresh import FontRefreshController
 from .update_dialog import UpdateReleaseDialog
 from .run_pipeline_dialog import RunPipelineDialog
+from .batch_processing_dialog import BatchProcessingDialog
+from .glossary_window import GlossaryWindow
+from .pipeline_history_window import PipelineHistoryWindow
 from .custom_widget import ScrollBar, Widget, ViewWidget
 from .global_search_widget import GlobalSearchWidget
 from .llm_context_editor import LLMContextEditor
@@ -92,6 +112,8 @@ def _current_custom_colors() -> List[str]:
 class PageListView(QListWidget):
 
     reveal_file = Signal()
+    ignore_page_changed = Signal(str, bool)
+    _IGNORED_ROLE = int(Qt.ItemDataRole.UserRole) + 1
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -108,15 +130,43 @@ class PageListView(QListWidget):
             Qt.Orientation.Vertical, self, fadeout=True
         )
 
-    def contextMenuEvent(self, e: QContextMenuEvent):
-        menu = QMenu()
+    def setItemIgnored(
+        self,
+        item: QListWidgetItem,
+        ignored: bool,
+    ) -> None:
+        item.setData(self._IGNORED_ROLE, ignored)
+        font = item.font()
+        font.setItalic(ignored)
+        font.setStrikeOut(ignored)
+        item.setFont(font)
+        item.setToolTip(
+            self.tr('This page is ignored by the pipeline.')
+            if ignored
+            else ''
+        )
+
+    def contextMenuEvent(self, e: QContextMenuEvent) -> None:
+        item = self.itemAt(e.pos())
+        menu = QMenu(self)
+        ignore_act = None
+        if item is not None:
+            ignored = bool(item.data(self._IGNORED_ROLE))
+            ignore_act = menu.addAction(
+                self.tr('Include page in pipeline')
+                if ignored
+                else self.tr('Ignore page')
+            )
+            menu.addSeparator()
         reveal_act = menu.addAction(self.tr('Reveal in File Explorer'))
         rst = menu.exec_(e.globalPos())
 
-        if rst == reveal_act:
+        if ignore_act is not None and rst == ignore_act:
+            ignored = not bool(item.data(self._IGNORED_ROLE))
+            self.ignore_page_changed.emit(item.text(), ignored)
+        elif rst == reveal_act:
             self.reveal_file.emit()
-
-        return super().contextMenuEvent(e)
+        e.accept()
 
 mainwindow_cls = Widget if shared.HEADLESS else FramelessWindow
 
@@ -164,6 +214,27 @@ class MainWindow(mainwindow_cls):
         self._render_only = False
         self._render_global_format = None
         self._llm_context_dirty = False
+        self.glossary_window: Optional[GlossaryWindow] = None
+        self.pipeline_history_window: Optional[PipelineHistoryWindow] = None
+        self._active_history = None
+        self._batch_history = None
+        self._batch_task_history = None
+        self._batch_id = ''
+        self._batch_options: Optional[BatchOptions] = None
+        self._batch_tasks: List[BatchTask] = []
+        self._batch_task: Optional[BatchTask] = None
+        self._batch_project_count = 0
+        self._batch_finished_projects = set()
+        self._batch_config_snapshot = None
+        self._batch_cancel_requested = False
+        self._batch_failed = False
+        self._batch_upscale_active = False
+        self._batch_running_reinpaint = False
+        self._batch_task_reinpaint_done = False
+        self._scheduled_batch_reinpaint_pages: List[str] = []
+        self._pending_reinpaint_request = None
+        self._reinpaint_active_pages: List[str] = []
+        self._manual_reinpaint_active = False
 
         self.setupThread()
         self.setupUi()
@@ -212,10 +283,35 @@ class MainWindow(mainwindow_cls):
 
     def setupThread(self):
         self.imsave_thread = ImgSaveThread()
+        self._pending_project_upscale = None
+        self.imsave_thread.finished.connect(
+            self._start_pending_project_upscale
+        )
+        self.imsave_thread.finished.connect(
+            self._start_pending_reinpaint
+        )
         self.export_doc_thread = ExportDocThread()
         self.export_doc_thread.fin_io.connect(self.on_fin_export_doc)
         self.import_doc_thread = ImportDocThread(self)
         self.import_doc_thread.fin_io.connect(self.on_fin_import_doc)
+        self.project_upscale_thread = ProjectUpscaleThread(self)
+        self.project_upscale_thread.progress_changed.connect(
+            self.on_project_upscale_progress
+        )
+        self.project_upscale_thread.upscale_finished.connect(
+            self.on_project_upscale_finished
+        )
+        self.project_upscale_progress = ProgressMessageBox(
+            self.tr('Upscaling project images 2x: '),
+            True,
+            self,
+        )
+        self.project_upscale_progress.stop_clicked.connect(
+            self.project_upscale_thread.request_stop
+        )
+        self.project_upscale_progress.showed.connect(
+            self.on_imgtrans_progressbox_showed
+        )
         self.update_thread = UpdateCheckThread()
         self.update_thread.progress_changed.connect(self.on_update_progress_changed)
         self.update_thread.update_finished.connect(self.on_update_finished)
@@ -279,6 +375,9 @@ class MainWindow(mainwindow_cls):
         self.pageList = PageListView()
         self.pageList.setObjectName('PageListArea')
         self.pageList.reveal_file.connect(self.on_reveal_file)
+        self.pageList.ignore_page_changed.connect(
+            self.on_page_ignore_changed
+        )
         self.pageList.currentItemChanged.connect(self.pageListCurrentItemChanged)
 
         self.leftStackWidget = QStackedWidget(self)
@@ -450,8 +549,31 @@ class MainWindow(mainwindow_cls):
         elif module_key == 'inpainter':
             self.bottomBar.inpaint_selector.setSelectedValue(module_name)
             profile_id = pcfg.module.inpaint_llm_id
+        if module_key in {'textdetector', 'ocr', 'inpainter'}:
+            self.configPanel.setModuleSettings(
+                module_key,
+                module_name,
+                self.module_manager.moduleParams(module_key, module_name),
+                self.module_manager.moduleRuntimeActionsEnabled(
+                    module_key, module_name
+                ),
+            )
         if profile_id:
             self.configPanel.llm_profiles_panel.refreshSelectionBorders(profile_id)
+
+    def on_settings_module_selected(
+        self,
+        module_key: str,
+        module_name: str,
+    ) -> None:
+        selectors = {
+            'textdetector': self.module_manager.selectTextDetector,
+            'ocr': self.module_manager.selectOCR,
+            'inpainter': self.module_manager.selectInpainter,
+        }
+        selector = selectors.get(module_key)
+        if selector is not None:
+            selector(module_name)
 
     def validateModuleSelections(self) -> None:
         def valid_or_first(value, valid_values):
@@ -490,7 +612,16 @@ class MainWindow(mainwindow_cls):
             parent_widget=self,
         )
         module_manager.module_selection_changed.connect(self.on_module_selection_changed)
+        self.configPanel.module_selected.connect(
+            self.on_settings_module_selected
+        )
+        self.configPanel.module_param_edited.connect(
+            module_manager.onModuleParamEdited
+        )
         module_manager.progress_msgbox.showed.connect(self.on_imgtrans_progressbox_showed)
+        module_manager.progress_msgbox.stop_clicked.connect(
+            self.stop_batch_processing
+        )
         module_manager.progress_msgbox.showed.connect(
             self.llmContextEditor.close_bulk_summary_editor
         )
@@ -500,6 +631,19 @@ class MainWindow(mainwindow_cls):
         module_manager.imgtrans_thread.post_process_mask = self.drawingPanel.rectPanel.post_process_mask
         module_manager.translate_thread.finish_set_module.connect(self.on_finish_settranslator)
         self.setTranslatorSelectionFromMetadata(pcfg.module.translator)
+        for module_key, module_name in (
+            ('textdetector', pcfg.module.textdetector),
+            ('ocr', pcfg.module.ocr),
+            ('inpainter', pcfg.module.inpainter),
+        ):
+            self.configPanel.setModuleSettings(
+                module_key,
+                module_name,
+                module_manager.moduleParams(module_key, module_name),
+                module_manager.moduleRuntimeActionsEnabled(
+                    module_key, module_name
+                ),
+            )
 
         self.bottomBar.textdet_selector.selector.currentTextChanged.connect(self.on_textdet_changed)
         self.bottomBar.inpaint_selector.selector.currentTextChanged.connect(self.on_inpaint_changed)
@@ -800,9 +944,17 @@ class MainWindow(mainwindow_cls):
                 SceneTextReplacementReason.PROJECT_RELOAD
             )
             self.canvas.clear_undostack(update_saved_step=True)
-            self.titleBar.setTitleContent(osp.basename(directory))
             self.updatePageList()
+            self._update_project_title(osp.basename(directory))
             self._llm_context_dirty = False
+            if self.glossary_window is not None:
+                self.glossary_window.set_workspace(
+                    self.imgtrans_proj.glossary_workspace
+                )
+            if self.pipeline_history_window is not None:
+                self.pipeline_history_window.set_directory(
+                    self.imgtrans_proj.directory
+                )
             self.opening_dir = False
         except Exception as e:
             self.opening_dir = False
@@ -847,8 +999,18 @@ class MainWindow(mainwindow_cls):
             self.canvas.clear_undostack(update_saved_step=True)
             self.leftBar.updateRecentProjList(self.imgtrans_proj.proj_path)
             self.updatePageList()
-            self.titleBar.setTitleContent(osp.basename(self.imgtrans_proj.proj_path))
+            self._update_project_title(
+                osp.basename(self.imgtrans_proj.proj_path)
+            )
             self._llm_context_dirty = False
+            if self.glossary_window is not None:
+                self.glossary_window.set_workspace(
+                    self.imgtrans_proj.glossary_workspace
+                )
+            if self.pipeline_history_window is not None:
+                self.pipeline_history_window.set_directory(
+                    self.imgtrans_proj.directory
+                )
             self.opening_dir = False
         except Exception as e:
             self.opening_dir = False
@@ -864,10 +1026,25 @@ class MainWindow(mainwindow_cls):
                 QListWidgetItem(QIcon(osp.join(self.imgtrans_proj.directory, imgname)), imgname)
         for imgname in self.imgtrans_proj.pages:
             lstitem =  item_func(imgname)
+            self.pageList.setItemIgnored(
+                lstitem,
+                self.imgtrans_proj.is_page_ignored(imgname),
+            )
             self.pageList.addItem(lstitem)
             if imgname == self.imgtrans_proj.current_img:
                 self.pageList.setCurrentItem(lstitem)
         self.llmContextEditor.set_project(self.imgtrans_proj)
+
+    def _update_project_title(self, project_name: str = None) -> None:
+        pages = list(self.imgtrans_proj.pages)
+        page_name = self.imgtrans_proj.current_img or ''
+        current_page = pages.index(page_name) + 1 if page_name in pages else 0
+        self.titleBar.setTitleContent(
+            proj_name=project_name,
+            page_name=page_name,
+            current_page=current_page,
+            total_pages=len(pages),
+        )
 
     def _set_left_panel_content(
         self,
@@ -897,6 +1074,10 @@ class MainWindow(mainwindow_cls):
         save_config()
 
     def closeEvent(self, event: QCloseEvent) -> None:
+        if self.project_upscale_thread.isRunning():
+            self.project_upscale_thread.request_stop()
+            self.project_upscale_thread.wait()
+        self._pending_project_upscale = None
         if self.font_change_detector is not None:
             self.font_change_detector.stop()
         self.font_refresh.shutdown()
@@ -913,6 +1094,7 @@ class MainWindow(mainwindow_cls):
             if not self.imsave_thread.isRunning():
                 break
             time.sleep(0.1)
+        self.imgtrans_proj.close_project_glossary()
         self.st_manager.hovering_transwidget = None
         self.st_manager.blockSignals(True)
         self.canvas.prepareClose()
@@ -934,7 +1116,7 @@ class MainWindow(mainwindow_cls):
         # according to https://stackoverflow.com/questions/27635068/how-to-retranslate-dynamically-created-widgets
         # we got to do it manually ... I'd rather restart the program
         msg = QMessageBox()
-        msg.setText(self.tr('Restart to apply changes? \n'))
+        msg.setText(self.tr('Restart to apply changes?\n'))
         msg.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         ret = msg.exec_()
         if ret == QMessageBox.StandardButton.Yes:
@@ -991,9 +1173,10 @@ class MainWindow(mainwindow_cls):
             self.imgtrans_proj.set_current_img(item.text())
             self.llmContextEditor.set_page(item.text())
             self.canvas.clear_undostack(update_saved_step=True)
+            self.canvas.reset_auto_fit_zoom()
             self.canvas.updateCanvas()
             self.st_manager.populateSceneTextitems()
-            self.titleBar.setTitleContent(page_name=self.imgtrans_proj.current_img)
+            self._update_project_title()
             self.module_manager.handle_page_changed()
             self.drawingPanel.handle_page_changed()
             
@@ -1018,6 +1201,25 @@ class MainWindow(mainwindow_cls):
         self.titleBar.merge_tool_trigger.connect(self.on_open_merge_tool)
         self.titleBar.ps_bridge_trigger.connect(self.on_open_photoshop_bridge)
         self.titleBar.path_reorder_trigger.connect(self.on_path_reorder)
+        self.titleBar.glossary_trigger.connect(self.on_open_glossary_manager)
+        self.titleBar.batch_processing_trigger.connect(
+            self.on_open_batch_processing
+        )
+        self.titleBar.pipeline_history_trigger.connect(
+            self.on_open_pipeline_history
+        )
+        self.titleBar.reinpaint_current_page_trigger.connect(
+            self.rerun_inpainting_current_page
+        )
+        self.titleBar.reinpaint_all_pages_trigger.connect(
+            self.rerun_inpainting_all_pages
+        )
+        self.titleBar.upscale_current_page_trigger.connect(
+            self.run_current_page_upscale
+        )
+        self.titleBar.upscale_project_trigger.connect(
+            self.run_project_upscale
+        )
         self.canvas.path_reorder_mode_changed.connect(
             self.titleBar.path_reorder_action.setChecked
         )
@@ -1246,6 +1448,737 @@ class MainWindow(mainwindow_cls):
             self.merge_dialog.activateWindow()
         else:
             self.merge_dialog.show()
+
+    def on_open_glossary_manager(self) -> None:
+        """Show the cached manager for the currently loaded project."""
+
+        if (
+            self.imgtrans_proj.glossary_workspace is None
+            and self.imgtrans_proj.directory
+        ):
+            # Opening the manager is an explicit request to create the optional
+            # project glossary even when passive auto-creation is disabled.
+            self.imgtrans_proj.glossary_workspace = GlossaryWorkspace.for_project(
+                self.imgtrans_proj.directory
+            )
+            self.imgtrans_proj.glossary_service = (
+                self.imgtrans_proj.glossary_workspace.project
+            )
+        if self.glossary_window is None:
+            self.glossary_window = GlossaryWindow(self)
+        self.glossary_window.set_workspace(
+            self.imgtrans_proj.glossary_workspace
+        )
+        self.glossary_window.show()
+        self.glossary_window.raise_()
+        self.glossary_window.activateWindow()
+
+    def on_open_pipeline_history(self) -> None:
+        if not self.imgtrans_proj.directory:
+            create_info_dialog(self.tr('Open a project to view its pipeline history.'))
+            return
+        if self.pipeline_history_window is None:
+            self.pipeline_history_window = PipelineHistoryWindow(self)
+        self.pipeline_history_window.set_directory(self.imgtrans_proj.directory)
+        self.pipeline_history_window.show()
+        self.pipeline_history_window.raise_()
+        self.pipeline_history_window.activateWindow()
+
+    def _history_details(self, pages: List[str]) -> dict:
+        module = pcfg.module
+        stages = [
+            name for name, enabled in (
+                ('detect', module.enable_detect),
+                ('ocr', module.enable_ocr),
+                ('inpaint', module.enable_inpaint),
+                ('translate', module.enable_translate),
+            ) if enabled
+        ]
+        details = {
+            'project_directory': getattr(self.imgtrans_proj, 'directory', None),
+            'pages': list(pages),
+            'page_count': len(pages),
+            'pipeline': {
+                'stages': stages,
+                'modules': {
+                    'textdetector': module.textdetector,
+                    'ocr': module.ocr,
+                    'inpainter': module.inpainter,
+                    'translator': module.translator,
+                },
+            },
+        }
+        if module.enable_translate and module.translator == LLM_TRANSLATOR_KEY:
+            profile = profile_by_id(
+                module.llm_profiles,
+                module.translator_llm_id,
+            )
+            if profile is not None:
+                details['translation_llm'] = {
+                    'profile_id': profile.id,
+                    'profile_name': profile.name,
+                    'backend': profile.backend,
+                    'model': profile.model,
+                }
+        batch_id = getattr(self, '_batch_id', '')
+        batch_task = getattr(self, '_batch_task', None)
+        if batch_id and batch_task is not None:
+            details['batch'] = {
+                'id': batch_id,
+                'phase': batch_task.phase,
+                'root_directory': self._batch_options.root_directory,
+            }
+        return details
+
+    def _begin_pipeline_history(self, kind: str, pages: List[str]) -> None:
+        directory = getattr(self.imgtrans_proj, 'directory', None)
+        if not directory:
+            return
+        try:
+            store = PipelineHistoryStore(directory)
+            entry_id = store.start(
+                kind,
+                MainWindow._history_details(self, pages),
+            )
+            self._active_history = (store, entry_id)
+        except Exception as error:
+            LOGGER.warning('Could not start pipeline history entry: %s', error)
+            self._active_history = None
+
+    def _finish_pipeline_history(self, status: str) -> None:
+        active = getattr(self, '_active_history', None)
+        self._active_history = None
+        if active is None:
+            return
+        store, entry_id = active
+        try:
+            store.finish(entry_id, status)
+            window = getattr(self, 'pipeline_history_window', None)
+            if window is not None and window.isVisible():
+                window.refresh()
+        except Exception as error:
+            LOGGER.warning('Could not finish pipeline history entry: %s', error)
+
+    def on_open_batch_processing(self) -> None:
+        if self._batch_options is not None or self.module_manager.pipelineBusy():
+            create_info_dialog(self.tr('A pipeline operation is already running.'))
+            return
+        dialog = BatchProcessingDialog(self)
+        try:
+            accepted = getattr(getattr(QDialog, 'DialogCode', QDialog), 'Accepted')
+            if dialog.exec_() != accepted:
+                return
+            self.start_batch_processing(
+                dialog.options(),
+                dialog.project_directories,
+            )
+        finally:
+            dialog.deleteLater()
+
+    def start_batch_processing(
+        self,
+        options: BatchOptions,
+        project_directories: List[str],
+    ) -> None:
+        """Start a sequential GUI batch using the normal project pipeline."""
+
+        tasks = build_batch_tasks(project_directories, options)
+        if not tasks:
+            create_info_dialog(self.tr('No batch tasks were created.'))
+            return
+        self.conditional_save(keep_exist_as_backup=True)
+        module = pcfg.module
+        self._batch_config_snapshot = {
+            key: getattr(module, key)
+            for key in (
+                'textdetector', 'ocr', 'inpainter', 'translator',
+                'enable_detect', 'enable_ocr', 'enable_inpaint',
+                'enable_translate', 'empty_runcache',
+                'project_glossary_enabled',
+                'project_glossary_series_enabled',
+                'project_glossary_series_path',
+            )
+        }
+        self._batch_options = options
+        self._batch_tasks = tasks
+        self._batch_task = None
+        self._batch_project_count = len(project_directories)
+        self._batch_finished_projects = set()
+        self._batch_cancel_requested = False
+        self._batch_failed = False
+        module.empty_runcache = False
+        module.project_glossary_enabled = True
+        if options.glossary_mode == GLOSSARY_GLOBAL:
+            module.project_glossary_series_enabled = True
+            module.project_glossary_series_path = osp.join(
+                options.root_directory,
+                'series_glossary.json',
+            )
+        else:
+            module.project_glossary_series_enabled = False
+            module.project_glossary_series_path = ''
+        self.module_manager.selectTextDetector(options.textdetector)
+        self.module_manager.selectOCR(options.ocr)
+        self.module_manager.selectInpainter(options.inpainter)
+        self.module_manager.selectTranslator(options.translator)
+        self.module_manager.configure_ocr_fallback(options.fallback_ocr)
+        try:
+            batch_store = PipelineHistoryStore(options.root_directory)
+            details = {
+                'root_directory': options.root_directory,
+                'project_directories': list(project_directories),
+                'project_count': len(project_directories),
+                'order': options.order,
+                'glossary_mode': options.glossary_mode,
+                'upscale_first': options.upscale_first,
+                'rerun_inpaint': options.rerun_inpaint,
+                'completion_action': options.completion_action,
+                'pipeline': {
+                    'stages': [
+                        name for name, enabled in (
+                            ('detect', options.enable_detect),
+                            ('ocr', options.enable_ocr),
+                            ('inpaint', options.enable_inpaint),
+                            ('translate', options.enable_translate),
+                        ) if enabled
+                    ],
+                    'modules': {
+                        'textdetector': options.textdetector,
+                        'ocr': options.ocr,
+                        'fallback_ocr': options.fallback_ocr,
+                        'inpainter': options.inpainter,
+                        'translator': options.translator,
+                    },
+                },
+            }
+            if options.translator == LLM_TRANSLATOR_KEY:
+                profile = profile_by_id(
+                    module.llm_profiles,
+                    module.translator_llm_id,
+                )
+                if profile is not None:
+                    details['translation_llm'] = {
+                        'profile_id': profile.id,
+                        'profile_name': profile.name,
+                        'backend': profile.backend,
+                        'model': profile.model,
+                    }
+            batch_id = batch_store.start('batch', details)
+            self._batch_id = batch_id
+            self._batch_history = (batch_store, batch_id)
+        except Exception as error:
+            LOGGER.warning('Could not start batch history entry: %s', error)
+            self._batch_id = ''
+            self._batch_history = None
+        QTimer.singleShot(0, self._run_next_batch_task)
+
+    def _run_next_batch_task(self) -> None:
+        if self._batch_options is None:
+            return
+        if self._batch_cancel_requested or self._batch_failed:
+            self._finish_batch_processing(False)
+            return
+        if not self._batch_tasks:
+            self._finish_batch_processing(True)
+            return
+
+        previous_phase = self._batch_task.phase if self._batch_task else ''
+        task = self._batch_tasks.pop(0)
+        if (
+            self._batch_options.order == ORDER_STAGED
+            and previous_phase == 'local'
+            and task.phase == 'translation'
+        ):
+            LOGGER.info(
+                'Batch local stages completed; unloading models before translation.'
+            )
+            self.module_manager.unload_all_models()
+            self.module_manager.configure_ocr_fallback(
+                self._batch_options.fallback_ocr
+            )
+        self._batch_task = task
+        self._batch_running_reinpaint = False
+        self._batch_task_reinpaint_done = False
+
+        if osp.normcase(osp.abspath(self.imgtrans_proj.directory or '')) != osp.normcase(
+            osp.abspath(task.project_directory)
+        ):
+            self.conditional_save(keep_exist_as_backup=True)
+            self.OpenProj(task.project_directory)
+        if osp.normcase(osp.abspath(self.imgtrans_proj.directory or '')) != osp.normcase(
+            osp.abspath(task.project_directory)
+        ):
+            LOGGER.error('Unable to open batch project %s.', task.project_directory)
+            self._batch_failed = True
+            self._finish_batch_processing(False)
+            return
+
+        workspace = self.imgtrans_proj.glossary_workspace
+        if (
+            workspace is not None
+            and self._batch_options.glossary_mode == GLOSSARY_GLOBAL
+        ):
+            try:
+                workspace.assign_series(
+                    pcfg.module.project_glossary_series_path,
+                    create=True,
+                )
+            except Exception as error:
+                create_error_dialog(
+                    error,
+                    self.tr('Failed to assign the global batch glossary.'),
+                )
+                self._batch_failed = True
+                self._finish_batch_processing(False)
+                return
+
+        module = pcfg.module
+        module.enable_detect = task.enable_detect
+        module.enable_ocr = task.enable_ocr
+        module.enable_inpaint = task.enable_inpaint
+        module.enable_translate = task.enable_translate
+        module.update_finish_code()
+        LOGGER.info(
+            'Batch phase %s: %s', task.phase, task.project_directory
+        )
+        try:
+            task_store = PipelineHistoryStore(task.project_directory)
+            task_details = self._history_details(
+                self.imgtrans_proj.pipeline_pages(list(self.imgtrans_proj.pages))
+            )
+            task_details.update({
+                'phase': task.phase,
+                'upscale_first': task.upscale_first,
+                'rerun_inpaint': task.rerun_inpaint,
+            })
+            task_id = task_store.start('batch_task', task_details)
+            self._batch_task_history = (task_store, task_id)
+        except Exception as error:
+            LOGGER.warning('Could not start batch task history entry: %s', error)
+            self._batch_task_history = None
+
+        if task.upscale_first:
+            eligible_pages = self.imgtrans_proj.pipeline_pages(
+                list(self.imgtrans_proj.pages)
+            )
+            if not eligible_pages:
+                QTimer.singleShot(0, self._complete_batch_task)
+                return
+            self._batch_upscale_active = True
+            self._start_project_upscale(eligible_pages)
+            if not self.project_upscale_thread.isRunning():
+                self._batch_upscale_active = False
+                self._batch_failed = True
+                self._finish_batch_processing(False)
+            return
+        self._run_current_batch_pipeline()
+
+    def _run_current_batch_pipeline(self) -> None:
+        pages = self.imgtrans_proj.pipeline_pages(
+            list(self.imgtrans_proj.pages)
+        )
+        if not pages:
+            LOGGER.info('Batch project has no pipeline-eligible pages; skipping.')
+            QTimer.singleShot(0, self._complete_batch_task)
+            return
+        task = self._batch_task
+        if (
+            task is not None
+            and task.rerun_inpaint
+            and not any((
+                task.enable_detect,
+                task.enable_ocr,
+                task.enable_inpaint,
+                task.enable_translate,
+            ))
+        ):
+            self._batch_running_reinpaint = True
+            self._start_reinpaint(pages, manual=False)
+            return
+        self.on_run_imgtrans(pages_to_process=pages)
+
+    def _complete_batch_task(self) -> None:
+        if self._batch_options is None or self._batch_task is None:
+            return
+        try:
+            workspace = self.imgtrans_proj.glossary_workspace
+            if workspace is not None:
+                if self._batch_options.glossary_mode == GLOSSARY_GLOBAL:
+                    workspace.promote_confirmed_to_series()
+                workspace.complete_project()
+            self.imgtrans_proj.save(keep_exist_as_backup=True)
+        except Exception as error:
+            create_error_dialog(
+                error,
+                self.tr('Failed to save the current batch project.'),
+            )
+            self._batch_failed = True
+
+        self._finish_batch_task_history(
+            'failed' if self._batch_failed else 'completed'
+        )
+
+        directory = self._batch_task.project_directory
+        if not any(task.project_directory == directory for task in self._batch_tasks):
+            self._batch_finished_projects.add(directory)
+        QTimer.singleShot(0, self._run_next_batch_task)
+
+    def _finish_batch_task_history(self, status: str) -> None:
+        active = self._batch_task_history
+        self._batch_task_history = None
+        if active is None:
+            return
+        store, entry_id = active
+        try:
+            store.finish(entry_id, status)
+            window = getattr(self, 'pipeline_history_window', None)
+            if window is not None and window.isVisible():
+                window.refresh()
+        except Exception as error:
+            LOGGER.warning('Could not finish batch task history entry: %s', error)
+
+    def stop_batch_processing(self) -> None:
+        if self._batch_options is None:
+            return
+        self._batch_cancel_requested = True
+        self._batch_tasks.clear()
+        if self._batch_upscale_active:
+            self.project_upscale_thread.request_stop()
+        if self.module_manager.pipelineBusy():
+            self.module_manager.stopImgtransPipeline()
+        else:
+            QTimer.singleShot(0, self._run_next_batch_task)
+
+    def _restore_batch_config(self) -> None:
+        snapshot = self._batch_config_snapshot
+        if snapshot is None:
+            return
+        module = pcfg.module
+        for key, value in snapshot.items():
+            setattr(module, key, value)
+        module.update_finish_code()
+        self.module_manager.selectTextDetector(module.textdetector)
+        self.module_manager.selectOCR(module.ocr)
+        self.module_manager.selectInpainter(module.inpainter)
+        self.module_manager.selectTranslator(module.translator)
+        self.module_manager.configure_ocr_fallback('')
+
+    def _finish_batch_processing(self, successful: bool) -> None:
+        options = self._batch_options
+        if options is None:
+            return
+        cancelled = self._batch_cancel_requested
+        finished = len(self._batch_finished_projects)
+        status = 'completed' if successful else ('cancelled' if cancelled else 'failed')
+        if self._batch_task_history is not None:
+            self._finish_batch_task_history(status)
+        if self._batch_history is not None:
+            store, entry_id = self._batch_history
+            try:
+                store.finish(entry_id, status)
+            except Exception as error:
+                LOGGER.warning('Could not finish batch history entry: %s', error)
+        self._restore_batch_config()
+        self._batch_options = None
+        self._batch_tasks = []
+        self._batch_task = None
+        self._batch_config_snapshot = None
+        self._batch_upscale_active = False
+        self._batch_running_reinpaint = False
+        self._batch_task_reinpaint_done = False
+        self._scheduled_batch_reinpaint_pages = []
+        self._batch_history = None
+        self._batch_task_history = None
+        self._batch_id = ''
+
+        if not successful:
+            message = (
+                self.tr('Batch processing was cancelled after {count} project(s).')
+                if cancelled
+                else self.tr('Batch processing stopped after an error ({count} project(s) completed).')
+            )
+            create_info_dialog(message.format(count=finished))
+            return
+
+        create_info_dialog(
+            self.tr('Batch processing completed: {count} project(s).').format(
+                count=finished
+            )
+        )
+        if options.completion_action == COMPLETION_CLOSE:
+            QTimer.singleShot(0, self.close)
+            return
+        command = windows_completion_command(options.completion_action)
+        if command:
+            if shared.ON_WINDOWS:
+                try:
+                    subprocess.Popen(command, shell=False)
+                except OSError as error:
+                    create_error_dialog(
+                        error,
+                        self.tr('Failed to run the selected completion action.'),
+                    )
+            else:
+                create_info_dialog(
+                    self.tr('The selected system action is only available on Windows.')
+                )
+
+    def rerun_inpainting_current_page(self) -> None:
+        page_name = self.imgtrans_proj.current_img
+        self._request_reinpaint([page_name] if page_name else [])
+
+    def rerun_inpainting_all_pages(self) -> None:
+        self._request_reinpaint(list(self.imgtrans_proj.pages))
+
+    def _request_reinpaint(self, page_names: List[str]) -> None:
+        """Save pending edits, then re-inpaint eligible requested pages."""
+
+        if self.imgtrans_proj.is_empty or not page_names:
+            create_info_dialog(
+                self.tr('Open a project before re-running inpainting.')
+            )
+            return
+        if (
+            self.module_manager.pipelineBusy()
+            or self.project_upscale_thread.isRunning()
+            or self._pending_reinpaint_request is not None
+        ):
+            create_info_dialog(
+                self.tr('Another pipeline or upscaling task is already running.')
+            )
+            return
+        pages = self.imgtrans_proj.pipeline_pages(page_names)
+        if not pages:
+            create_info_dialog(self.tr('No pipeline-eligible pages selected.'))
+            return
+
+        if self.canvas.projstate_unsaved or self.canvas.text_change_unsaved():
+            self.saveCurrentPage(
+                update_scene_text=True,
+                save_proj=True,
+                restore_interface=True,
+            )
+        if self.imsave_thread.isRunning():
+            self._pending_reinpaint_request = (
+                self.imgtrans_proj.directory,
+                self.imgtrans_proj.load_identity,
+                pages,
+            )
+            return
+        self._start_reinpaint(pages, manual=True)
+
+    def _start_pending_reinpaint(self) -> None:
+        pending = self._pending_reinpaint_request
+        self._pending_reinpaint_request = None
+        if pending is None:
+            return
+        directory, load_identity, pages = pending
+        if (
+            directory != self.imgtrans_proj.directory
+            or load_identity is not self.imgtrans_proj.load_identity
+        ):
+            LOGGER.warning(
+                'Cancelled pending re-inpainting because the active project changed.'
+            )
+            return
+        self._start_reinpaint(pages, manual=True)
+
+    def _start_reinpaint(
+        self,
+        page_names: List[str],
+        *,
+        manual: bool,
+    ) -> None:
+        self._reinpaint_active_pages = list(page_names)
+        self._manual_reinpaint_active = manual
+        self._begin_pipeline_history('reinpaint', page_names)
+        self.module_manager.runReinpaintPipeline(page_names)
+
+    def _schedule_batch_reinpaint(self, page_names: List[str]) -> None:
+        self._scheduled_batch_reinpaint_pages = list(page_names)
+        QTimer.singleShot(0, self._start_scheduled_batch_reinpaint)
+
+    def _start_scheduled_batch_reinpaint(self) -> None:
+        if not self._scheduled_batch_reinpaint_pages:
+            return
+        if self.module_manager.imgtrans_thread.isRunning():
+            QTimer.singleShot(10, self._start_scheduled_batch_reinpaint)
+            return
+        pages = self._scheduled_batch_reinpaint_pages
+        self._scheduled_batch_reinpaint_pages = []
+        self._start_reinpaint(pages, manual=False)
+
+    def run_current_page_upscale(self) -> None:
+        page_name = self.imgtrans_proj.current_img
+        self._run_page_upscale([page_name] if page_name else [])
+
+    def run_project_upscale(self) -> None:
+        self._run_page_upscale(list(self.imgtrans_proj.pages))
+
+    def _run_page_upscale(self, page_names: List[str]) -> None:
+        if self.imgtrans_proj.is_empty or not page_names:
+            create_info_dialog(
+                self.tr('Open a project before upscaling project images.')
+            )
+            return
+        if (
+            self.module_manager.pipelineBusy()
+            or self.project_upscale_thread.isRunning()
+            or self._pending_project_upscale is not None
+        ):
+            create_info_dialog(
+                self.tr(
+                    'Another pipeline or upscaling task is already running.'
+                )
+            )
+            return
+        page_names = [
+            page_name
+            for page_name in page_names
+            if page_name in self.imgtrans_proj.pages
+        ]
+        message = self.tr(
+            'Upscale {count} page(s) to 2x and permanently replace the original image files?'
+        ).format(count=len(page_names))
+        answer = QMessageBox.question(
+            self,
+            self.tr('Replace Original Images'),
+            message,
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
+        if answer != QMessageBox.StandardButton.Yes:
+            return
+
+        if self.canvas.projstate_unsaved or self.canvas.text_change_unsaved():
+            self.saveCurrentPage(
+                update_scene_text=True,
+                save_proj=True,
+                restore_interface=True,
+            )
+        if self.imsave_thread.isRunning():
+            self._pending_project_upscale = (
+                self.imgtrans_proj.directory,
+                self.imgtrans_proj.load_identity,
+                page_names,
+            )
+            return
+        self._start_project_upscale(page_names)
+
+    def _start_pending_project_upscale(self) -> None:
+        pending = self._pending_project_upscale
+        self._pending_project_upscale = None
+        if pending is None:
+            return
+        directory, load_identity, page_names = pending
+        if (
+            directory != self.imgtrans_proj.directory
+            or load_identity is not self.imgtrans_proj.load_identity
+        ):
+            LOGGER.warning(
+                'Cancelled pending upscaling because the active project changed.'
+            )
+            return
+        self._start_project_upscale(page_names)
+
+    def _start_project_upscale(self, page_names: List[str]) -> None:
+        if self.project_upscale_thread.run_upscale(
+            self.imgtrans_proj.directory,
+            page_names,
+        ):
+            self.project_upscale_progress.zero_progress()
+            self.project_upscale_progress.show_fitted()
+
+    def on_project_upscale_progress(
+        self,
+        current: int,
+        total: int,
+    ) -> None:
+        progress = int(current / max(total, 1) * 100)
+        self.project_upscale_progress.updateTaskProgress(
+            progress,
+            f' {current}/{total}',
+        )
+
+    def on_project_upscale_finished(
+        self,
+        replacements,
+        failures,
+        stopped: bool,
+        staging_dir: str,
+    ) -> None:
+        self.project_upscale_progress.hide()
+        if self._batch_upscale_active:
+            self._batch_upscale_active = False
+            try:
+                if stopped:
+                    self._batch_cancel_requested = True
+                elif failures:
+                    details = '\n'.join(
+                        f'- {page_name}: {reason}'
+                        for page_name, reason in failures[:8]
+                    )
+                    create_error_dialog(
+                        RuntimeError(details),
+                        self.tr(
+                            'Batch image upscaling failed. Original images were not changed.'
+                        ),
+                    )
+                    self._batch_failed = True
+                elif replacements:
+                    self.imgtrans_proj.replace_pages_with_upscaled_files(
+                        replacements
+                    )
+            except Exception as error:
+                create_error_dialog(
+                    error,
+                    self.tr('Failed to activate upscaled batch images.'),
+                )
+                self._batch_failed = True
+            finally:
+                if staging_dir:
+                    shutil.rmtree(staging_dir, ignore_errors=True)
+            if self._batch_cancel_requested or self._batch_failed:
+                QTimer.singleShot(0, self._run_next_batch_task)
+            else:
+                QTimer.singleShot(0, self._run_current_batch_pipeline)
+            return
+        try:
+            if stopped:
+                LOGGER.info(
+                    'Project image upscaling stopped; original images were not changed.'
+                )
+                return
+            if failures:
+                details = '\n'.join(
+                    f'- {page_name}: {reason}'
+                    for page_name, reason in failures[:8]
+                )
+                create_error_dialog(
+                    RuntimeError(details),
+                    self.tr(
+                        'Project image upscaling failed. Original images were not changed.'
+                    ),
+                )
+                return
+            if not replacements:
+                return
+            project_path = self.imgtrans_proj.proj_path
+            self.imgtrans_proj.replace_pages_with_upscaled_files(replacements)
+            self.openJsonProj(project_path)
+            create_info_dialog(
+                self.tr('Upscaled and replaced {count} page(s).').format(
+                    count=len(replacements)
+                )
+            )
+        except Exception as error:
+            create_error_dialog(
+                error,
+                self.tr('Failed to activate upscaled project images.'),
+            )
+        finally:
+            if staging_dir:
+                shutil.rmtree(staging_dir, ignore_errors=True)
 
     def on_open_photoshop_bridge(self):
         """Open Photoshop Bridge & Tools dialog"""
@@ -1974,6 +2907,66 @@ class MainWindow(mainwindow_cls):
         self._run_imgtrans_wo_textstyle_update = False
         self._render_only = False
         self._render_global_format = None
+        preparation_failed = bool(
+            getattr(self.module_manager, 'pipeline_preparation_failed', False)
+        )
+        stopped = self.module_manager.imgtrans_thread.isStopRequested()
+        MainWindow._finish_pipeline_history(
+            self,
+            'failed' if preparation_failed else ('cancelled' if stopped else 'completed')
+        )
+        reinpaint_pages = getattr(self, '_reinpaint_active_pages', [])
+        manual_reinpaint = getattr(self, '_manual_reinpaint_active', False)
+        if reinpaint_pages:
+            self._reinpaint_active_pages = []
+            self._manual_reinpaint_active = False
+            if self.imgtrans_proj.current_img in reinpaint_pages:
+                self.canvas.updateCanvas()
+            self.pageList.viewport().update()
+
+            reinpaint_failed = preparation_failed or stopped
+            if manual_reinpaint and not reinpaint_failed:
+                try:
+                    self.imgtrans_proj.save(keep_exist_as_backup=True)
+                except Exception as error:
+                    create_error_dialog(
+                        error,
+                        self.tr('Failed to save the re-inpainted project.'),
+                    )
+                    reinpaint_failed = True
+                if not reinpaint_failed:
+                    create_info_dialog(
+                        self.tr('Re-inpainting completed for {count} page(s).').format(
+                            count=len(reinpaint_pages)
+                        )
+                    )
+        if getattr(self, '_batch_options', None) is not None and not shared.HEADLESS:
+            if (
+                preparation_failed or stopped
+            ):
+                if not self._batch_cancel_requested:
+                    self._batch_failed = True
+                QTimer.singleShot(0, self._run_next_batch_task)
+            elif self._batch_running_reinpaint:
+                self._batch_running_reinpaint = False
+                self._batch_task_reinpaint_done = True
+                QTimer.singleShot(0, self._complete_batch_task)
+            elif (
+                self._batch_task is not None
+                and self._batch_task.rerun_inpaint
+                and not self._batch_task_reinpaint_done
+            ):
+                pages = self.imgtrans_proj.pipeline_pages(
+                    list(self.imgtrans_proj.pages)
+                )
+                if pages:
+                    self._batch_running_reinpaint = True
+                    self._schedule_batch_reinpaint(pages)
+                else:
+                    QTimer.singleShot(0, self._complete_batch_task)
+            else:
+                QTimer.singleShot(0, self._complete_batch_task)
+            return
         if pcfg.module.empty_runcache and not shared.HEADLESS:
             self.module_manager.unload_all_models()
         if shared.args.export_translation_txt:
@@ -2297,10 +3290,21 @@ class MainWindow(mainwindow_cls):
                 if page in self.imgtrans_proj.pages
             ]
         )
-        if has_explicit_range and not requested_pages and not render_only:
-            return
+        select_pipeline_pages = getattr(
+            self.imgtrans_proj,
+            'pipeline_pages',
+            None,
+        )
+        if callable(select_pipeline_pages):
+            requested_pages = select_pipeline_pages(requested_pages)
+            if not requested_pages:
+                return
 
-        pipeline_pages = None
+        pipeline_pages = (
+            requested_pages
+            if callable(select_pipeline_pages)
+            else (requested_pages if has_explicit_range else None)
+        )
         if continue_mode:
             pipeline_pages = [
                 page_name
@@ -2321,8 +3325,6 @@ class MainWindow(mainwindow_cls):
                     page_name,
                     progress_mask,
                 )
-            if has_explicit_range:
-                pipeline_pages = requested_pages
 
         if enable_detect:
             for page in requested_pages:
@@ -2343,6 +3345,16 @@ class MainWindow(mainwindow_cls):
                         textblk.rich_text = ''
                     textblk.vertical = textblk.src_is_vertical
 
+        history_kind = (
+            'render'
+            if render_only
+            else ('pipeline_continue' if continue_mode else 'pipeline')
+        )
+        MainWindow._begin_pipeline_history(
+            self,
+            history_kind,
+            requested_pages,
+        )
         self.module_manager.runImgtransPipeline(
             pipeline_pages,
             render_only=render_only,
@@ -2470,6 +3482,37 @@ class MainWindow(mainwindow_cls):
         elif sys.platform == 'darwin':
             p = "\""+current_img_path+"\""
             subprocess.Popen("open -R "+p, shell=True)
+
+    def on_page_ignore_changed(
+        self,
+        page_name: str,
+        ignored: bool,
+    ) -> None:
+        if page_name not in self.imgtrans_proj.pages:
+            return
+        previous = self.imgtrans_proj.is_page_ignored(page_name)
+        if previous == ignored:
+            return
+        try:
+            if self.imgtrans_proj.img_valid:
+                self.st_manager.formatpanel.resolve_text_transform_edits_for_save()
+                self.st_manager.updateTextBlkList()
+            self.imgtrans_proj.set_page_ignored(page_name, ignored)
+            self.imgtrans_proj.save()
+        except Exception as error:
+            self.imgtrans_proj.set_page_ignored(page_name, previous)
+            create_error_dialog(
+                error,
+                self.tr('Failed to update ignored page'),
+            )
+            return
+
+        matching_items = self.pageList.findItems(
+            page_name,
+            Qt.MatchFlag.MatchExactly,
+        )
+        if matching_items:
+            self.pageList.setItemIgnored(matching_items[0], ignored)
 
     def on_set_gsearch_widget(self) -> None:
         setup = self.leftBar.globalSearchChecker.isChecked()

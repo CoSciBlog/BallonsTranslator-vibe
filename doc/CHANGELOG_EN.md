@@ -1,5 +1,26 @@
 # Changelogs
 
+### 2026-10-10 — 1.5.19+vibe.12
+- Added **Tools → Pipeline History** (`Ctrl+Shift+H`) with start time, duration, status, stages, modules, and the LLM profile/model used for translation.
+- Normal runs, continue/render operations, re-inpainting, complete batches, and individual batch phases are now recorded in a separate versioned, atomically written `pipeline_history.json`.
+- Overall batch records live in the batch root while project phases are also recorded in their project directories; malformed history files are never silently overwritten.
+
+### 2026-10-10 — 1.5.19+vibe.11
+- Added **Tools → Re-run Inpainting Current Page/All Pages**, which reruns the selected inpainter from original pages using saved detection masks and text regions instead of compounding old inpainting results.
+- Added an optional re-inpainting step to batch processing; it runs after the normal pipeline in per-project mode and remains in the local-model phase in staged mode.
+- Re-inpainting respects ignored pages and reuses background cancellation, lazy module loading, project progress persistence, and English/German localization.
+
+### 2026-10-10 — 1.5.19+vibe.10
+- Added **Tools → Batch Processing** for processing every image-bearing direct child folder with selectable detector, OCR, fallback OCR, inpainter, translator, glossary scope, and optional 2× source-image upscaling.
+- Added complete-project and staged execution plans. Staged mode runs local detector/OCR/inpaint work first, unloads those models, then keeps the translation model available while translating all projects.
+- Added safe cancellation, project/glossary persistence, shared batch `series_glossary.json`, Windows completion actions, English/German UI text, and planning/regression tests.
+
+### 2026-10-10 — 1.5.19+vibe.9
+- Added dedicated **Text Detector**, **OCR**, and **Inpaint** pages under Settings → Modules. They share the pipeline's selected modules and persisted parameter mappings without loading models when Settings opens.
+- Moved glossary behavior controls into a dedicated Modules settings page while keeping entry/source/conflict management in the Glossary Manager.
+- Added complete LLM-profile duplication, default automatic source-language selection, persistent per-page pipeline exclusion, and confirmed 2× current-page/project upscaling with source replacement.
+- Removed the Sponsor menu entry and added English/German strings plus offscreen and regression coverage for the new settings workflow.
+
 ### 2026-10-10 — 1.5.19+vibe.8
 - Mouse-wheel input over Settings combo boxes and numeric fields now scrolls the containing settings page instead of changing values accidentally.
 - Fixed `ConfigComboBox` scroll-target wiring and applied the same wheel pass-through behavior even when a field has keyboard focus.
@@ -9,6 +30,21 @@
 - Added an opt-in **Unload local models before LLM requests** Pipeline setting that frees BallonsTranslator detector, OCR, translator, and inpainter models before chat, Ollama-compatible, Codex, or image LLM requests.
 - LLM pipeline stages now use the existing serial low-VRAM path while the option is enabled, preventing a concurrently used local translation model from being unloaded; released modules still reload lazily when needed.
 - Added validated persistence, English/German UI text, request-boundary and memory-release tests, and documentation of the external Ollama-server limitation.
+
+### 2026-10-10 — 1.5.19+vibe.6
+- Added the Phase 3 Glossary Manager with searchable CRUD, review/protection controls, JSON exchange, source management, and visible conflict resolution.
+- Added reusable series and read-only reference glossaries with deterministic priorities, source tracing, safe persistence, and combined Phase 2 prompt selection.
+- Added Qt-free project-context/completion APIs for future batch queues, validated glossary settings, English/German UI strings, schema and documentation, and offscreen/service tests.
+
+### 2026-10-10 — 1.5.19+vibe.5
+- Added Phase 2 automatic glossary candidate extraction with atomic deduplication, conflict reporting, review states, and cancellation-safe pipeline integration.
+- Added Unicode- and alias-aware selection of confirmed project terms for LLM prompts with configurable entry/token budgets and an optional non-destructive consistency check.
+- Preserved external glossary files and every non-glossary translation path; no additional LLM request or dependency is introduced.
+
+### 2026-10-09 — 1.5.19+vibe.4
+- Added the Phase 1 project-glossary backend with a versioned Unicode data model and UI-independent CRUD/search service.
+- Added standalone atomic `glossary.json` persistence, autosave, external-change protection, import/export, and migration from 1.4-vibe glossaries.
+- Integrated glossary creation/loading/closing with the v1.5 project lifecycle without changing project JSON.
 
 ### 2026-10-09 — 1.5.19+vibe.3
 - Added JPEG and WebP options for intermediate project images.

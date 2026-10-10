@@ -203,10 +203,14 @@ class LLMProfile(Config):
     top_p: float = 1.0
     frequency_penalty: float = 0.0
     presence_penalty: float = 0.0
+    use_glossary: bool = True
     json_schema_response_format: bool = False
     low_vram_mode: bool = False
 
     def __post_init__(self) -> None:
+        if not isinstance(self.use_glossary, bool):
+            LOGGER.warning('Discard invalid LLM profile use_glossary for %s.', self.id or self.name)
+            self.use_glossary = True
         if self.backend not in ('openai', 'codex', 'unavailable'):
             LOGGER.warning('Discard invalid LLM profile backend for %s.', self.id or self.name)
             # An unknown backend must never fall through to a paid API request.

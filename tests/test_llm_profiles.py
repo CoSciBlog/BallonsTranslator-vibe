@@ -32,6 +32,14 @@ from ballontranslator.utils.secret_store import SecretStore, is_portable_secret
 
 
 class CodexProfileConfigTest(unittest.TestCase):
+    def test_glossary_setting_defaults_on_and_roundtrips(self) -> None:
+        profile = LLMProfile(id='glossary-profile')
+        self.assertTrue(profile.use_glossary)
+        profile.use_glossary = False
+        restored = LLMProfile(**profile_to_dict(profile))
+        self.assertFalse(restored.use_glossary)
+        self.assertTrue(LLMProfile(use_glossary='invalid').use_glossary)
+
     def test_image_combinations_are_derived_for_gpt_models_and_remain_out_of_saved_options(self) -> None:
         for backend in ('openai', 'codex'):
             with self.subTest(backend=backend):

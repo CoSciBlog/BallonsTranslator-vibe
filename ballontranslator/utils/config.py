@@ -110,13 +110,31 @@ class ModuleConfig(Config):
     ocr_llm_id: str = ''
     inpaint_llm_id: str = ''
     inpainter_params: Dict = field(default_factory=lambda: dict())
-    translate_source: str = '日本語'
+    translate_source: str = 'Auto'
     translate_target: str = '简体中文'
     translate_context: str = TranslateContext.Page
     llm_translate_context: str = LLMTranslateContext.PAGE
     llm_prior_context_token_budget: int = 10000
     llm_glossary_path: str = ''
     llm_glossary_mode: str = LLMGlossaryMode.Matching
+    project_glossary_enabled: bool = True
+    project_glossary_auto_create: bool = True
+    project_glossary_auto_extract: bool = False
+    project_glossary_postcheck: bool = False
+    project_glossary_max_prompt_entries: int = 32
+    project_glossary_prompt_token_budget: int = 1200
+    project_glossary_detection_categories: List[str] = field(
+        default_factory=lambda: [
+            'Character', 'Place', 'Organization', 'Title', 'Honorific',
+            'Item', 'Ability', 'Terminology', 'Catchphrase', 'Other',
+        ]
+    )
+    project_glossary_review_enabled: bool = False
+    project_glossary_reference_paths: List[str] = field(default_factory=list)
+    project_glossary_series_enabled: bool = False
+    project_glossary_series_path: str = ''
+    project_glossary_conflict_warnings: bool = True
+    project_glossary_confirmation_mode: str = 'manual'
     llm_translate_vision: bool = False
     llm_translate_summary_memory: bool = False
     llm_translate_overwrite_summary: bool = False
@@ -209,12 +227,52 @@ class ModuleConfig(Config):
             ('llm_translate_summary_memory', False),
             ('llm_translate_overwrite_summary', False),
             ('unload_models_before_llm', False),
+            ('project_glossary_enabled', True),
+            ('project_glossary_auto_create', True),
+            ('project_glossary_auto_extract', False),
+            ('project_glossary_postcheck', False),
+            ('project_glossary_review_enabled', False),
+            ('project_glossary_series_enabled', False),
+            ('project_glossary_conflict_warnings', True),
         ):
             if type(getattr(self, setting_name)) is not bool:
                 LOGGER.warning(
                     f'Discard invalid module.{setting_name} config: expected a boolean.'
                 )
                 setattr(self, setting_name, default)
+        valid_categories = {
+            'Character', 'Place', 'Organization', 'Title', 'Honorific',
+            'Item', 'Ability', 'Terminology', 'Catchphrase', 'Other',
+        }
+        if not isinstance(self.project_glossary_detection_categories, list):
+            LOGGER.warning(
+                'Discard invalid module.project_glossary_detection_categories '
+                'config: expected a list.'
+            )
+            self.project_glossary_detection_categories = sorted(valid_categories)
+        else:
+            self.project_glossary_detection_categories = [
+                value for value in self.project_glossary_detection_categories
+                if isinstance(value, str) and value in valid_categories
+            ]
+        if not isinstance(self.project_glossary_reference_paths, list):
+            LOGGER.warning(
+                'Discard invalid module.project_glossary_reference_paths '
+                'config: expected a list.'
+            )
+            self.project_glossary_reference_paths = []
+        else:
+            self.project_glossary_reference_paths = [
+                value for value in self.project_glossary_reference_paths
+                if isinstance(value, str) and value
+            ]
+        if not isinstance(self.project_glossary_series_path, str):
+            self.project_glossary_series_path = ''
+        if self.project_glossary_confirmation_mode not in {'manual', 'automatic'}:
+            LOGGER.warning(
+                'Discard invalid module.project_glossary_confirmation_mode config.'
+            )
+            self.project_glossary_confirmation_mode = 'manual'
         if self.ocr_text_postprocess not in OCRTextPostprocess.Valid:
             self.ocr_text_postprocess = OCRTextPostprocess.NONE
         if self.translate_context not in TranslateContext.Valid:
@@ -225,6 +283,20 @@ class ModuleConfig(Config):
             self.llm_glossary_path = ''
         if self.llm_glossary_mode not in LLMGlossaryMode.Valid:
             self.llm_glossary_mode = LLMGlossaryMode.Matching
+        for setting_name, default in (
+            ('project_glossary_max_prompt_entries', 32),
+            ('project_glossary_prompt_token_budget', 1200),
+        ):
+            value = getattr(self, setting_name)
+            if (
+                not isinstance(value, int)
+                or isinstance(value, bool)
+                or value <= 0
+            ):
+                LOGGER.warning(
+                    f'Discard invalid module.{setting_name} config: expected a positive integer.'
+                )
+                setattr(self, setting_name, default)
         if (
             not isinstance(self.llm_prior_context_token_budget, int)
             or isinstance(self.llm_prior_context_token_budget, bool)

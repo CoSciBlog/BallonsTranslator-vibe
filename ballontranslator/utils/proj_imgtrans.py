@@ -9,7 +9,7 @@ from docx import Document
 import piexif.helper
 import numpy as np
 import os.path as osp
-from typing import BinaryIO, Optional, Tuple, Union, List, Dict
+from typing import BinaryIO, Iterable, Optional, Tuple, Union, List, Dict
 from PIL import Image
 
 from .logger import logger as LOGGER
@@ -29,6 +29,7 @@ from .raster_assets import (
 from .rgba import premultiply_rgba_in_place
 from .text_alpha_mask import AlphaBrushStroke, TextAlphaMask
 from .config import pcfg, RunStatus
+from ..glossary import GlossaryPersistenceError, GlossaryService, GlossaryWorkspace
 from . import shared
 
 class ProjectDirNotExistException(Exception):
@@ -158,6 +159,9 @@ class ProjImgTrans:
         self.not_found_pages: Dict[str, List[TextBlock]] = {}
         self.new_pages: List[str] = []
         self.proj_path: str = None
+        self.glossary_service: Optional[GlossaryService] = None
+        self.glossary_workspace: Optional[GlossaryWorkspace] = None
+        self.glossary_load_error: Optional[str] = None
 
         self.current_img: str = None
         self.img_array: np.ndarray = None
@@ -187,7 +191,72 @@ class ProjImgTrans:
     def proj_name(self) -> str:
         return self.type+'_'+osp.basename(self.directory)
 
+    def glossary_path(self) -> str:
+        """Return the project-owned glossary path without touching project JSON."""
+
+        return osp.join(self.directory, 'glossary.json')
+
+    def load_project_glossary(self) -> Optional[GlossaryService]:
+        """Open or create the standalone glossary without blocking project load."""
+
+        self.close_project_glossary()
+        self.glossary_load_error = None
+        if (
+            not pcfg.module.project_glossary_auto_create
+            and not osp.isfile(self.glossary_path())
+        ):
+            return None
+        try:
+            self.glossary_workspace = GlossaryWorkspace.for_project(
+                self.directory,
+                create=pcfg.module.project_glossary_auto_create,
+            )
+            self.glossary_service = self.glossary_workspace.project
+            if pcfg.module.project_glossary_series_enabled:
+                series_path = pcfg.module.project_glossary_series_path
+                if series_path and self.glossary_workspace.series is None:
+                    self.glossary_workspace.assign_series(series_path)
+            assigned_references = {
+                osp.normcase(osp.abspath(source.path))
+                for source in self.glossary_workspace.references
+            }
+            for reference_path in pcfg.module.project_glossary_reference_paths:
+                resolved = (
+                    reference_path if osp.isabs(reference_path)
+                    else osp.join(self.directory, reference_path)
+                )
+                if osp.normcase(osp.abspath(resolved)) not in assigned_references:
+                    self.glossary_workspace.add_reference(reference_path)
+        except (GlossaryPersistenceError, OSError, ValueError) as error:
+            workspace = self.glossary_workspace
+            if workspace is not None:
+                workspace.close()
+            self.glossary_workspace = None
+            self.glossary_service = None
+            self.glossary_load_error = str(error)
+            LOGGER.warning(
+                'Project opened without glossary because %s could not be loaded: %s',
+                self.glossary_path(),
+                error,
+            )
+        return self.glossary_service
+
+    def close_project_glossary(self) -> None:
+        """Flush deferred glossary changes and release the active source."""
+
+        workspace = self.glossary_workspace
+        service = self.glossary_service
+        if workspace is None and service is None:
+            return
+        if workspace is not None:
+            workspace.close()
+        elif service is not None:
+            service.close()
+        self.glossary_workspace = None
+        self.glossary_service = None
+
     def load(self, directory: str, json_path: str = None) -> bool:
+        self.close_project_glossary()
         self._raster_asset_cache.clear()
         self.directory = directory
         if json_path is None:
@@ -211,6 +280,7 @@ class ProjImgTrans:
             os.makedirs(self.inpainted_dir())
         if not osp.exists(self.mask_dir()):
             os.makedirs(self.mask_dir())
+        self.load_project_glossary()
 
         return new_proj
 
@@ -668,6 +738,16 @@ class ProjImgTrans:
             if p not in self._image_info:
                 self._image_info[p] = {}
             img_info = self._image_info[p]
+            pipeline_ignore = img_info.get('pipeline_ignore')
+            if pipeline_ignore is not None and not isinstance(
+                pipeline_ignore,
+                bool,
+            ):
+                LOGGER.warning(
+                    'Invalid pipeline_ignore value for page %s; ignoring it.',
+                    p,
+                )
+                img_info.pop('pipeline_ignore', None)
             summary_record = img_info.get('llm_visual_summary')
             if (
                 summary_record is not None
@@ -727,6 +807,215 @@ class ProjImgTrans:
 
     def update_page_progress(self, pagename, code):
         self._image_info[pagename]['finish_code'] |= code
+
+    def is_page_ignored(self, pagename: str) -> bool:
+        """Return whether a page is excluded from pipeline processing."""
+        return self._image_info.get(pagename, {}).get(
+            'pipeline_ignore',
+            False,
+        ) is True
+
+    def set_page_ignored(self, pagename: str, ignored: bool) -> None:
+        """Set a page's persistent pipeline exclusion state.
+
+        ``False`` removes the optional field so older and untouched projects
+        keep their existing compact representation.
+        """
+        if pagename not in self.pages:
+            raise ImgnameNotInProjectException(pagename)
+        img_info = self._image_info.setdefault(pagename, {})
+        if ignored:
+            img_info['pipeline_ignore'] = True
+        else:
+            img_info.pop('pipeline_ignore', None)
+
+    def pipeline_pages(
+        self,
+        page_names: Optional[Iterable[str]] = None,
+    ) -> List[str]:
+        """Return existing, non-ignored pages in the requested order.
+
+        ``None`` selects the whole project in project order while an empty
+        iterable selects no pages. Unknown names are ignored.
+
+        >>> project = ProjImgTrans()
+        >>> project.pages = {'001.png': [], '002.png': []}
+        >>> project._image_info = {'001.png': {}, '002.png': {'pipeline_ignore': True}}
+        >>> project.pipeline_pages()
+        ['001.png']
+        """
+        candidates = self.pages if page_names is None else page_names
+        return [
+            page_name
+            for page_name in candidates
+            if page_name in self.pages
+            and not self.is_page_ignored(page_name)
+        ]
+
+    @staticmethod
+    def _scale_textblock_for_source_replacement(
+        block: TextBlock,
+        factor: float,
+    ) -> None:
+        if factor <= 1:
+            return
+        block.xyxy = [int(round(value * factor)) for value in block.xyxy]
+        if block.lines:
+            block.lines = np.rint(
+                np.asarray(block.lines, dtype=np.float64) * factor
+            ).astype(np.int32).tolist()
+        if block._bounding_rect is not None:
+            block._bounding_rect = [
+                int(round(value * factor))
+                for value in block._bounding_rect
+            ]
+        if block.distance is not None:
+            block.distance = np.asarray(block.distance) * factor
+        if block.vec is not None:
+            block.vec = np.asarray(block.vec) * factor
+        if block.norm > 0:
+            block.norm *= factor
+        if block.font_size > 0:
+            block.font_size *= factor
+        if block._detected_font_size > 0:
+            block._detected_font_size *= factor
+        block.region_mask = None
+        block.region_inpaint_dict = None
+
+    @staticmethod
+    def _textblock_upscale_state(block: TextBlock) -> Dict:
+        return {
+            'xyxy': copy.deepcopy(block.xyxy),
+            'lines': copy.deepcopy(block.lines),
+            '_bounding_rect': copy.deepcopy(block._bounding_rect),
+            'distance': copy.deepcopy(block.distance),
+            'vec': copy.deepcopy(block.vec),
+            'norm': block.norm,
+            'font_size': block.font_size,
+            '_detected_font_size': block._detected_font_size,
+            'region_mask': block.region_mask,
+            'region_inpaint_dict': block.region_inpaint_dict,
+        }
+
+    @staticmethod
+    def _restore_textblock_upscale_state(
+        block: TextBlock,
+        state: Dict,
+    ) -> None:
+        block.xyxy = state['xyxy']
+        block.lines = state['lines']
+        block._bounding_rect = state['_bounding_rect']
+        block.distance = state['distance']
+        block.vec = state['vec']
+        block.norm = state['norm']
+        block.font_size = state['font_size']
+        block._detected_font_size = state['_detected_font_size']
+        block.region_mask = state['region_mask']
+        block.region_inpaint_dict = state['region_inpaint_dict']
+
+    def _remove_generated_page_outputs(self, page_name: str) -> None:
+        page_stem = osp.splitext(page_name)[0]
+        for directory in (
+            self.mask_dir(),
+            self.inpainted_dir(),
+            self.result_dir(),
+        ):
+            if not osp.isdir(directory):
+                continue
+            for filename in os.listdir(directory):
+                if osp.splitext(filename)[0] == page_stem:
+                    try:
+                        os.remove(osp.join(directory, filename))
+                    except OSError as error:
+                        LOGGER.warning(
+                            'Unable to remove stale generated page output %s: %s',
+                            filename,
+                            error,
+                        )
+
+    def replace_pages_with_upscaled_files(
+        self,
+        replacements: List[Dict],
+    ) -> None:
+        """Atomically activate staged images and scale retained page geometry."""
+        if not replacements:
+            return
+        replacement_names = [item['source_name'] for item in replacements]
+        if len(set(replacement_names)) != len(replacement_names):
+            raise ValueError('Duplicate page replacement requested.')
+        if any(page_name not in self.pages for page_name in replacement_names):
+            raise ImgnameNotInProjectException
+
+        backup_dir = tempfile.mkdtemp(
+            prefix='.upscale_backup_',
+            dir=self.directory,
+        )
+        activated = []
+        block_states = []
+        image_info_states = {
+            page_name: copy.deepcopy(self._image_info.get(page_name, {}))
+            for page_name in replacement_names
+        }
+
+        def rollback_files() -> None:
+            for source_path, backup_path in reversed(activated):
+                try:
+                    if osp.exists(source_path):
+                        os.remove(source_path)
+                    if osp.exists(backup_path):
+                        os.replace(backup_path, source_path)
+                except OSError as error:
+                    LOGGER.error(
+                        'Unable to restore original page %s: %s',
+                        source_path,
+                        error,
+                    )
+
+        try:
+            for item in replacements:
+                page_name = item['source_name']
+                source_path = osp.join(self.directory, page_name)
+                backup_path = osp.join(backup_dir, page_name)
+                os.makedirs(osp.dirname(backup_path), exist_ok=True)
+                os.replace(source_path, backup_path)
+                activated.append((source_path, backup_path))
+                os.replace(item['staged_path'], source_path)
+
+            for item in replacements:
+                page_name = item['source_name']
+                factor = float(item['factor'])
+                for block in self.pages[page_name]:
+                    block_states.append(
+                        (block, self._textblock_upscale_state(block))
+                    )
+                    self._scale_textblock_for_source_replacement(block, factor)
+                image_info = self._image_info.setdefault(page_name, {})
+                image_info.update({
+                    'width': int(item['width']),
+                    'height': int(item['height']),
+                    'original_width': int(item['original_width']),
+                    'original_height': int(item['original_height']),
+                    'upscaled': True,
+                    'upscale_factor': factor,
+                    'finish_code': 0,
+                })
+                image_info.pop('translation_target', None)
+            self.save(keep_exist_as_backup=True)
+        except Exception:
+            for block, state in reversed(block_states):
+                self._restore_textblock_upscale_state(block, state)
+            for page_name, state in image_info_states.items():
+                self._image_info[page_name] = state
+            rollback_files()
+            project_backup = self.proj_path + '.backup'
+            if not osp.exists(self.proj_path) and osp.exists(project_backup):
+                os.replace(project_backup, self.proj_path)
+            raise
+        finally:
+            shutil.rmtree(backup_dir, ignore_errors=True)
+
+        for page_name in replacement_names:
+            self._remove_generated_page_outputs(page_name)
 
     def invalidate_translation(self, page_key):
         self.clear_page_progress(page_key, RunStatus.FIN_TRANSLATE)

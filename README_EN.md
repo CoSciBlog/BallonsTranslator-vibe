@@ -53,6 +53,28 @@
 * Safer settings scrolling
   - Scrolling the mouse wheel over combo boxes or numeric fields in **Settings** now scrolls the surrounding page without changing the selected value. Values remain editable by clicking, typing, or using the keyboard.
 
+* Integrated module settings and page workflow
+  - **Settings → Modules** now includes dedicated **Text Detector**, **OCR**, **Inpaint**, and **Glossary** pages. Detector/OCR/inpainter pages edit the same selected-module parameters used by the pipeline, without loading models merely by opening Settings.
+  - LLM profiles can be duplicated with all settings, and **Auto** is the default source-language choice for compatible translators.
+  - Pages can be excluded from every pipeline stage through **Ignore page** in the thumbnail context menu. Use **Tools → Upscaling → Upscale Current Page / Entire Project 2x** to replace confirmed source images with 2× upscaled copies.
+
+* Batch processing
+  - Open **Tools → Batch Processing** (`Ctrl+Shift+B`) and select a parent folder to process its image-bearing direct child folders sequentially. Detector, primary/fallback OCR, inpainter, translator, glossary scope, and optional pre-upscaling are selectable per run.
+  - Choose complete-project order or run detector/OCR/inpaint for every project first, unload local models, and then translate every project while keeping the LLM available. On successful completion the app can do nothing, close, hibernate, shut down, or restart Windows.
+  - An optional re-inpainting step runs the selected inpainter again from the original pages using saved detection masks and text regions. The same operation is available for the current page or all pages under **Tools** (`Ctrl+Shift+I` for the current page).
+
+* Pipeline history
+  - **Tools → Pipeline History** (`Ctrl+Shift+H`) shows start time, duration, status, stages, modules, and the LLM profile/model used for translation.
+  - Normal runs, continue/render operations, re-inpainting, complete batches, and individual batch phases are atomically stored in a separate `pipeline_history.json`.
+
+* Project glossary backend
+  - Each project owns a versioned, Unicode-safe `glossary.json` with atomic autosave, migration from 1.4-vibe, duplicate detection, import/export, and a UI-independent service API.
+  - Confirmed project entries are selected by Unicode-aware source matching and supplied to LLM translation under configurable entry and token budgets. Aliases are matched without rewriting source text.
+  - Optional rule-based extraction records conservative OCR/translation candidates as reviewable suggestions. It never overwrites confirmed, protected, or rejected entries. The feature is controlled by `project_glossary_enabled`, `project_glossary_auto_extract`, and `project_glossary_postcheck` in module configuration.
+  - Open **Tools → Glossary Manager** (`Ctrl+Shift+G`) for searchable entry editing, aliases/categories, review and protection, JSON import/export, sources, and conflict resolution. Glossary behavior is configured under **Settings → Modules → Glossary**.
+  - Projects can combine their glossary with a shared writable `series_glossary.json` and read-only reference glossaries. Confirmed project decisions have highest priority and confirmed entries can be copied into the series for later chapters.
+  - See [Glossary system](docs/GLOSSARY.md) for the JSON schema, 1.4-vibe migration, source priority, service API, and future batch integration.
+
 * <details>
   <summary><i>Context-aware LLM translation & Glossary</i></summary>
 
@@ -94,6 +116,7 @@
 
   - Matching is case-insensitive and literal. Conflicting entries, malformed files, unsupported formats, and missing files stop the translation before an LLM request is sent.
   - Prior-page context and glossary injection affect only `LLMTranslator`; other translators ignore these settings.
+  - The standalone **Glossary File** remains supported. Confirmed entries from the current project's `glossary.json` take priority when both sources contain the same term.
 
   </details>
 

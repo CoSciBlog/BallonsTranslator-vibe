@@ -957,13 +957,16 @@ class RunPipelineDialog(QDialog):
         source_layout.addStretch()
         self.source_combobox = BottomBorderComboBox(source_row)
         self.source_combobox.setObjectName('RunPipelineSourceComboBox')
+        source_language = self.translator_metadata.get(
+            'lang_source', pcfg.module.translate_source,
+        )
         self._populate_language_combobox(
             self.source_combobox,
             self._translation_options(
                 'supported_src_list',
-                pcfg.module.translate_source,
+                source_language,
             ),
-            pcfg.module.translate_source,
+            source_language,
         )
         self.source_combobox.setFixedWidth(RUN_PIPELINE_SETTING_CONTROL_WIDTH)
         source_layout.addWidget(self.source_combobox)
@@ -979,13 +982,16 @@ class RunPipelineDialog(QDialog):
         target_layout.addStretch()
         self.target_combobox = BottomBorderComboBox(target_row)
         self.target_combobox.setObjectName('RunPipelineTargetComboBox')
+        target_language = self.translator_metadata.get(
+            'lang_target', pcfg.module.translate_target,
+        )
         self._populate_language_combobox(
             self.target_combobox,
             self._translation_options(
                 'supported_tgt_list',
-                pcfg.module.translate_target,
+                target_language,
             ),
-            pcfg.module.translate_target,
+            target_language,
         )
         self.target_combobox.setFixedWidth(RUN_PIPELINE_SETTING_CONTROL_WIDTH)
         target_layout.addWidget(self.target_combobox)

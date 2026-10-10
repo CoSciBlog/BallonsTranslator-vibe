@@ -9,7 +9,7 @@ from qtpy.QtWidgets import (
     QDialog, QAbstractItemView, QButtonGroup, QRadioButton,
     QFrame,
 )
-from qtpy.QtCore import Qt, Signal, QSize, QItemSelection, QTimer
+from qtpy.QtCore import QCoreApplication, Qt, Signal, QSize, QItemSelection, QTimer
 from qtpy.QtGui import QStandardItem, QStandardItemModel, QMouseEvent, QFont, QIntValidator, QValidator, QFocusEvent
 
 from .custom_widget import ConfigComboBox, NoBorderPushBtn, ScrollBar, Widget
@@ -40,8 +40,15 @@ from ballontranslator.utils.shared import (
 )
 from ballontranslator.utils.logger import logger as LOGGER
 from ballontranslator.modules.lazy_registry import probe_torch_package
+from ballontranslator.modules import (
+    GET_VALID_INPAINTERS,
+    GET_VALID_OCR,
+    GET_VALID_TEXTDETECTORS,
+)
+from ballontranslator.glossary import GlossaryCategory
 from .llm_profile_widgets import LLMProfilesWidget
 from .codex_settings import CodexSettingsPanel
+from .module_parse_widgets import ParamWidget, has_configurable_params
 from .framelesswindow import (
     DialogCloseButton,
     FramelessWindow,
@@ -544,6 +551,122 @@ class ConfigBlock(Widget):
         return checkbox, sublock
 
 
+class ModuleSettingsWidget(QWidget):
+    """Edit stored parameters for one selectable pipeline module type.
+
+    The widget only renders already-merged config metadata. Selecting or editing
+    a module is delegated to ``ModuleManager`` by the owning main window, so
+    opening Settings never imports or loads a model.
+
+    >>> ModuleSettingsWidget.module_selected is not None
+    True
+    """
+
+    module_selected = Signal(str, str)
+    paramwidget_edited = Signal(str, str, str, dict)
+
+    def __init__(
+        self,
+        module_type: str,
+        module_names: List[str],
+        selected_module: str,
+        scroll_widget: QWidget,
+        parent: QWidget = None,
+    ) -> None:
+        super().__init__(parent)
+        self.module_type = module_type
+        self.module_name = selected_module
+        self._params: Optional[dict] = None
+        self.param_widget: Optional[ParamWidget] = None
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(CONFIG_CONTENT_MARGIN)
+
+        self.module_selector = ConfigComboBox(
+            fix_size=False,
+            scrollWidget=scroll_widget,
+        )
+        self.module_selector.addItems(module_names)
+        self.module_selector.setCurrentText(selected_module)
+        selector_row = ConfigSubBlock(
+            self.module_selector,
+            self.tr('Module'),
+            vertical_layout=False,
+        )
+        selector_row.layout().addStretch()
+        layout.addWidget(selector_row)
+
+        self.editor_container = QWidget(self)
+        self.editor_layout = QVBoxLayout(self.editor_container)
+        self.editor_layout.setContentsMargins(0, 0, 0, 0)
+        self.editor_layout.setSpacing(0)
+        layout.addWidget(self.editor_container)
+
+        self.empty_label = QLabel(self.tr('No configurable settings.'), self)
+        self.empty_label.setObjectName('ModuleSettingsEmptyLabel')
+        self.editor_layout.addWidget(self.empty_label)
+        self.module_selector.currentTextChanged.connect(
+            self._onModuleSelectionChanged
+        )
+
+    def _onModuleSelectionChanged(self, module_name: str) -> None:
+        if module_name:
+            self.module_selected.emit(self.module_type, module_name)
+
+    def _onParamEdited(self, param_key: str, content: dict) -> None:
+        self.paramwidget_edited.emit(
+            self.module_type,
+            self.module_name,
+            param_key,
+            content,
+        )
+
+    def setModule(
+        self,
+        module_name: str,
+        params: Optional[dict],
+        runtime_actions_enabled: bool = False,
+    ) -> None:
+        """Synchronize selection and rebuild only the changed parameter editor."""
+        same_editor = module_name == self.module_name and params is self._params
+        if same_editor:
+            if self.param_widget is not None:
+                self.param_widget.setRuntimeActionsEnabled(
+                    runtime_actions_enabled
+                )
+            return
+
+        self.module_name = module_name
+        self._params = params
+        if self.module_selector.currentText() != module_name:
+            self.module_selector.blockSignals(True)
+            self.module_selector.setCurrentText(module_name)
+            self.module_selector.blockSignals(False)
+
+        if self.param_widget is not None:
+            self.editor_layout.removeWidget(self.param_widget)
+            self.param_widget.deleteLater()
+            self.param_widget = None
+
+        configurable = has_configurable_params(params)
+        self.empty_label.setVisible(not configurable)
+        if not configurable:
+            return
+
+        self.param_widget = ParamWidget(
+            params,
+            scrollWidget=self.window(),
+            module_type=self.module_type,
+            module_key=module_name,
+            spaced_fields=True,
+            parent=self.editor_container,
+        )
+        self.param_widget.setRuntimeActionsEnabled(runtime_actions_enabled)
+        self.param_widget.paramwidget_edited.connect(self._onParamEdited)
+        self.editor_layout.addWidget(self.param_widget)
+
+
 class ConfigContent(QStackedWidget):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -707,6 +830,8 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
     show_pre_MT_keyword_window = Signal()
     show_MT_keyword_window = Signal()
     show_OCR_keyword_window = Signal()
+    module_selected = Signal(str, str)
+    module_param_edited = Signal(str, str, str, dict)
 
     dictionary_urls = DICTIONARY_URLS
 
@@ -738,12 +863,24 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
         generalTableItem = self.configTable.addHeader(self.tr('General'))
         
         label_pipeline = self.tr('Pipeline')
+        label_text_detector = self.tr('Text Detector')
+        label_ocr = self.tr('OCR')
+        label_inpaint = self.tr('Inpaint')
+        label_glossary = self.tr('Glossary')
         label_llm_profile = self.tr('LLM Profile')
         label_application = self.tr('Application')
         label_typesetting = self.tr('Typesetting')
         label_spellcheck = self.tr('Spell Checker')
 
         pipelineConfigPanel = self.addConfigBlock(label_pipeline, moduleTableItem, 'pipeline')
+        textDetectorConfigPanel = self.addConfigBlock(
+            label_text_detector, moduleTableItem, 'textdetector'
+        )
+        ocrConfigPanel = self.addConfigBlock(label_ocr, moduleTableItem, 'ocr')
+        inpaintConfigPanel = self.addConfigBlock(
+            label_inpaint, moduleTableItem, 'inpainter'
+        )
+        glossaryConfigPanel = self.addConfigBlock(label_glossary, moduleTableItem, 'glossary')
         llmProfileConfigPanel = self.addConfigBlock(label_llm_profile, moduleTableItem, 'llm_profile')
         codexConfigPanel = self.addConfigBlock(self.tr('Codex'), moduleTableItem, 'codex')
         applicationConfigPanel = self.addConfigBlock(label_application, generalTableItem, 'application')
@@ -857,6 +994,35 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
         self.replaceMTkeywordBtn.clicked.connect(self.show_MT_keyword_window)
         pipeline_options_layout.addWidget(self.replaceMTkeywordBtn)
         pipelineConfigPanel.vlayout.addWidget(pipeline_options)
+        self.module_settings_widgets = {
+            'textdetector': ModuleSettingsWidget(
+                'textdetector',
+                GET_VALID_TEXTDETECTORS(),
+                pcfg.module.textdetector,
+                self,
+                self,
+            ),
+            'ocr': ModuleSettingsWidget(
+                'ocr', GET_VALID_OCR(), pcfg.module.ocr, self, self
+            ),
+            'inpainter': ModuleSettingsWidget(
+                'inpainter',
+                GET_VALID_INPAINTERS(),
+                pcfg.module.inpainter,
+                self,
+                self,
+            ),
+        }
+        module_panels = {
+            'textdetector': textDetectorConfigPanel,
+            'ocr': ocrConfigPanel,
+            'inpainter': inpaintConfigPanel,
+        }
+        for module_type, settings_widget in self.module_settings_widgets.items():
+            module_panels[module_type].addBlockWidget(settings_widget)
+            settings_widget.module_selected.connect(self.module_selected)
+            settings_widget.paramwidget_edited.connect(self.module_param_edited)
+        self._buildGlossarySettings(glossaryConfigPanel)
         self.llm_profiles_panel = LLMProfilesWidget(scrollWidget=self)
         llmProfileConfigPanel.addBlockWidget(self.llm_profiles_panel)
         self.codex_panel = CodexSettingsPanel(scrollWidget=self)
@@ -1448,6 +1614,132 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
     def on_package_auto_install_changed(self):
         pcfg.package_manager.auto_install_missing_packages = self.package_auto_install_checker.isChecked()
 
+    def _buildGlossarySettings(self, panel: ConfigBlock) -> None:
+        checkbox_specs = (
+            ('glossary_enabled_checker', self.tr('Enable project glossaries')),
+            ('glossary_create_checker', self.tr('Automatically create project glossaries')),
+            ('glossary_auto_checker', self.tr('Automatically detect glossary candidates')),
+            ('glossary_review_checker', self.tr('Use glossary in translation review')),
+            ('glossary_series_checker', self.tr('Use series glossary')),
+            ('glossary_warning_checker', self.tr('Show conflict warnings')),
+        )
+        for attribute, label in checkbox_specs:
+            checkbox, _ = panel.addCheckBox(label)
+            checkbox.setObjectName('GlossarySettingsCheckBox')
+            setattr(self, attribute, checkbox)
+
+        self.glossary_confirmation_combobox, _ = panel.addCombobox(
+            [self.tr('Manual confirmation'), self.tr('Automatic confirmation')],
+            self.tr('Candidate confirmation'),
+        )
+        self.glossary_confirmation_combobox.setObjectName(
+            'GlossaryConfirmationComboBox'
+        )
+
+        self.glossary_max_terms_spinbox = ConfigSpinBox(self)
+        self.glossary_max_terms_spinbox.setObjectName('GlossaryMaximumTermsSpinBox')
+        self.glossary_max_terms_spinbox.setRange(1, 500)
+        self.glossary_max_terms_spinbox.setFixedWidth(CONFIG_COMBOBOX_SHORT)
+        max_terms_row = ConfigSubBlock(
+            self.glossary_max_terms_spinbox,
+            self.tr('Maximum prompt terms'),
+            vertical_layout=False,
+        )
+        max_terms_row.layout().insertStretch(-1)
+        panel.addSublock(max_terms_row)
+
+        self.glossary_categories_list = QListWidget(self)
+        self.glossary_categories_list.setObjectName('GlossaryDetectionCategories')
+        self.glossary_categories_list.setMaximumHeight(230)
+        for category in GlossaryCategory:
+            item = QListWidgetItem(
+                QCoreApplication.translate('GlossaryWindow', category.value),
+                self.glossary_categories_list,
+            )
+            item.setData(Qt.ItemDataRole.UserRole, category.value)
+            item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
+            item.setCheckState(Qt.CheckState.Unchecked)
+        panel.addBlockWidget(
+            self.glossary_categories_list,
+            self.tr('Automatic detection categories'),
+            vertical_layout=True,
+        )
+
+        self._syncGlossarySettings()
+        for attribute, _label in checkbox_specs:
+            getattr(self, attribute).stateChanged.connect(
+                self._onGlossarySettingsChanged
+            )
+        self.glossary_confirmation_combobox.currentIndexChanged.connect(
+            self._onGlossarySettingsChanged
+        )
+        self.glossary_max_terms_spinbox.valueChanged.connect(
+            self._onGlossarySettingsChanged
+        )
+        self.glossary_categories_list.itemChanged.connect(
+            self._onGlossarySettingsChanged
+        )
+
+    def _syncGlossarySettings(self) -> None:
+        module = pcfg.module
+        checkbox_values = (
+            (self.glossary_enabled_checker, module.project_glossary_enabled),
+            (self.glossary_create_checker, module.project_glossary_auto_create),
+            (self.glossary_auto_checker, module.project_glossary_auto_extract),
+            (self.glossary_review_checker, module.project_glossary_review_enabled),
+            (self.glossary_series_checker, module.project_glossary_series_enabled),
+            (self.glossary_warning_checker, module.project_glossary_conflict_warnings),
+        )
+        for checkbox, checked in checkbox_values:
+            checkbox.blockSignals(True)
+            checkbox.setChecked(bool(checked))
+            checkbox.blockSignals(False)
+        self.glossary_confirmation_combobox.blockSignals(True)
+        self.glossary_confirmation_combobox.setCurrentIndex(
+            1 if module.project_glossary_confirmation_mode == 'automatic' else 0
+        )
+        self.glossary_confirmation_combobox.blockSignals(False)
+        self.glossary_max_terms_spinbox.blockSignals(True)
+        self.glossary_max_terms_spinbox.setValue(
+            module.project_glossary_max_prompt_entries
+        )
+        self.glossary_max_terms_spinbox.blockSignals(False)
+        selected = set(module.project_glossary_detection_categories)
+        self.glossary_categories_list.blockSignals(True)
+        for index in range(self.glossary_categories_list.count()):
+            item = self.glossary_categories_list.item(index)
+            item.setCheckState(
+                Qt.CheckState.Checked
+                if item.data(Qt.ItemDataRole.UserRole) in selected
+                else Qt.CheckState.Unchecked
+            )
+        self.glossary_categories_list.blockSignals(False)
+
+    def _onGlossarySettingsChanged(self, *_args) -> None:
+        module = pcfg.module
+        module.project_glossary_enabled = self.glossary_enabled_checker.isChecked()
+        module.project_glossary_auto_create = self.glossary_create_checker.isChecked()
+        module.project_glossary_auto_extract = self.glossary_auto_checker.isChecked()
+        module.project_glossary_review_enabled = self.glossary_review_checker.isChecked()
+        module.project_glossary_series_enabled = self.glossary_series_checker.isChecked()
+        module.project_glossary_conflict_warnings = self.glossary_warning_checker.isChecked()
+        module.project_glossary_confirmation_mode = (
+            'automatic'
+            if self.glossary_confirmation_combobox.currentIndex() == 1
+            else 'manual'
+        )
+        module.project_glossary_max_prompt_entries = (
+            self.glossary_max_terms_spinbox.value()
+        )
+        module.project_glossary_detection_categories = [
+            self.glossary_categories_list.item(index).data(
+                Qt.ItemDataRole.UserRole
+            )
+            for index in range(self.glossary_categories_list.count())
+            if self.glossary_categories_list.item(index).checkState()
+            == Qt.CheckState.Checked
+        ]
+
     def refreshTorchStatus(self) -> None:
         version, device = probe_torch_package()
         if version is not None:
@@ -1486,6 +1778,22 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
         section_key = SECTION_ALIASES.get(section_key, section_key)
         self.configContent.showSection(section_key)
         self.configTable.setCurrentSection(section_key)
+
+    def setModuleSettings(
+        self,
+        module_type: str,
+        module_name: str,
+        params: Optional[dict],
+        runtime_actions_enabled: bool = False,
+    ) -> None:
+        """Update one module page without importing or initializing its model."""
+        settings_widget = self.module_settings_widgets.get(module_type)
+        if settings_widget is not None:
+            settings_widget.setModule(
+                module_name,
+                params,
+                runtime_actions_enabled,
+            )
 
     def on_open_onstartup_changed(self):
         pcfg.open_recent_on_startup = self.open_on_startup_checker.isChecked()
@@ -1934,6 +2242,7 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
             pcfg.module.unload_models_before_llm
         )
         self.package_auto_install_checker.setChecked(pcfg.package_manager.auto_install_missing_packages)
+        self._syncGlossarySettings()
         self.let_show_only_custom_fonts.setChecked(pcfg.let_show_only_custom_fonts_flag)
 
         self.blockSignals(False)

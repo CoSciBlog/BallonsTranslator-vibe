@@ -14,6 +14,12 @@ from ballontranslator.utils.text_processing import (
     finalize_translation_text,
     substitute_keywords,
 )
+from ballontranslator.glossary.extraction import RuleBasedGlossaryExtractor
+from ballontranslator.glossary.integration import (
+    check_translation_consistency,
+    extract_and_store_candidates,
+)
+from ballontranslator.glossary.matching import select_relevant_entries
 
 if TYPE_CHECKING:
     from ballontranslator.utils.proj_imgtrans import ProjImgTrans
@@ -325,6 +331,75 @@ class BaseTranslator(BaseModule):
         for tr, blk in zip(translations, textblk_lst):
             blk.translation = tr
 
+        self._update_project_glossary(
+            project,
+            [block.get_text() for block in textblk_lst],
+            translations,
+        )
+
+    def _update_project_glossary(
+        self,
+        project: Optional['ProjImgTrans'],
+        sources: Sequence[str],
+        translations: Sequence[str],
+    ) -> None:
+        """Record successful results without making translation depend on it."""
+
+        if project is None or not pcfg.module.project_glossary_enabled:
+            return
+        service = getattr(project, 'glossary_service', None)
+        if service is None:
+            return
+        stop_event = getattr(self, 'stop_event', None)
+        if stop_event is not None and stop_event.is_set():
+            return
+        try:
+            if pcfg.module.project_glossary_auto_extract:
+                extract_and_store_candidates(
+                    service,
+                    sources,
+                    translations,
+                    extractor=RuleBasedGlossaryExtractor(),
+                    source_language=str(self.lang_source),
+                    target_language=str(self.lang_target),
+                    categories=pcfg.module.project_glossary_detection_categories,
+                    confirm_new=(
+                        pcfg.module.project_glossary_confirmation_mode == 'automatic'
+                    ),
+                )
+            if (
+                pcfg.module.project_glossary_postcheck
+                or pcfg.module.project_glossary_review_enabled
+            ):
+                workspace = getattr(project, 'glossary_workspace', None)
+                glossary_entries = (
+                    tuple(item.entry for item in workspace.effective_entries())
+                    if workspace is not None else service.entries
+                )
+                selected = select_relevant_entries(
+                    glossary_entries,
+                    sources,
+                    source_language=str(self.lang_source),
+                    target_language=str(self.lang_target),
+                    max_entries=pcfg.module.project_glossary_max_prompt_entries,
+                    token_budget=pcfg.module.project_glossary_prompt_token_budget,
+                )
+                issues = check_translation_consistency(
+                    selected,
+                    sources,
+                    translations,
+                )
+                if issues:
+                    LOGGER.warning(
+                        'Project glossary post-check found %d possible mismatch(es): %s',
+                        len(issues),
+                        ', '.join(issue.source for issue in issues),
+                    )
+        except Exception as error:
+            # Glossary extraction is optional. A persistence conflict or malformed
+            # externally edited file must not invalidate completed translations.
+            LOGGER.warning('Project glossary update skipped: %s', error)
+
     def on_page_translation_finished(
         self,
         project: 'ProjImgTrans',
@@ -361,7 +436,10 @@ class BaseTranslator(BaseModule):
 
     @property
     def supported_tgt_list(self) -> List[str]:
-        return self.valid_lang_list
+        # Automatic detection is meaningful only for source text. Keeping it
+        # out of target selectors also prevents providers from receiving an
+        # invalid automatic target-language code.
+        return [lang for lang in self.valid_lang_list if lang != 'Auto']
 
     @property
     def supported_src_list(self) -> List[str]:

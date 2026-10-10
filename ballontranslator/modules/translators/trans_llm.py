@@ -13,8 +13,13 @@ from ..context.errors import (
     is_context_length_error,
 )
 from ..context.glossary import (
+    GlossaryEntry as ContextGlossaryEntry,
     load_glossary,
     select_glossary,
+)
+from ballontranslator.glossary.integration import (
+    merge_prompt_entries,
+    project_prompt_entries,
 )
 from ..context.history import (
     ContextAction,
@@ -147,6 +152,7 @@ class LLMTranslator(LLMChatRequester, BaseTranslator):
     }
 
     def _setup_translator(self):
+        self.lang_map['Auto'] = 'the automatically detected source language'
         self.lang_map['简体中文'] = 'Simplified Chinese'
         self.lang_map['繁體中文'] = 'Traditional Chinese'
         self.lang_map['日本語'] = 'Japanese'
@@ -355,6 +361,36 @@ class LLMTranslator(LLMChatRequester, BaseTranslator):
         queries = tuple(text) if is_list else (text,)
         source_language = str(self.lang_source)
         target_language = str(self.lang_target)
+        profile = self.profile
+        project_glossary = ()
+        if (
+            profile.use_glossary
+            and pcfg.module.project_glossary_enabled
+            and project is not None
+        ):
+            glossary_source = (
+                getattr(project, 'glossary_workspace', None)
+                or getattr(project, 'glossary_service', None)
+            )
+            if glossary_source is not None:
+                try:
+                    if hasattr(glossary_source, 'reload_external_changes'):
+                        glossary_source.reload_external_changes()
+                    else:
+                        glossary_source.reload_if_changed()
+                    project_glossary = project_prompt_entries(
+                        glossary_source,
+                        queries,
+                        source_language=source_language,
+                        target_language=target_language,
+                        max_entries=pcfg.module.project_glossary_max_prompt_entries,
+                        token_budget=pcfg.module.project_glossary_prompt_token_budget,
+                    )
+                except Exception as error:
+                    self.logger.warning(
+                        'Project glossary prompt integration skipped: %s',
+                        error,
+                    )
         history_enabled = (
             pcfg.module.llm_translate_context == LLMTranslateContext.HISTORY
         )
@@ -362,7 +398,11 @@ class LLMTranslator(LLMChatRequester, BaseTranslator):
             0,
             int(pcfg.module.llm_prior_context_token_budget),
         )
-        glossary_path = str(pcfg.module.llm_glossary_path or '')
+        glossary_path = (
+            str(pcfg.module.llm_glossary_path or '')
+            if profile.use_glossary
+            else ''
+        )
         glossary_mode = pcfg.module.llm_glossary_mode
         overwrite_existing_summary = summary_memory_enabled and bool(
             pcfg.module.llm_translate_overwrite_summary
@@ -384,7 +424,6 @@ class LLMTranslator(LLMChatRequester, BaseTranslator):
             account.require_sign_in(self.stop_event)
         if not self.all_model_loaded():
             self.load_model()
-        profile = self.profile
         model = self._text_model(profile)
         array_response = profile.backend == 'codex' or gpt_model_version(model) is not None
         target_language_name = self._translated_lang(target_language)
@@ -424,6 +463,7 @@ class LLMTranslator(LLMChatRequester, BaseTranslator):
             history_budget=history_budget,
             glossary_path=glossary_path,
             glossary_mode=glossary_mode,
+            project_glossary=project_glossary,
             memory_enabled=summary_memory_enabled,
             ignore_current_summary=(
                 overwrite_existing_summary and existing_summary is not None
@@ -591,6 +631,7 @@ class LLMTranslator(LLMChatRequester, BaseTranslator):
         memory_enabled: bool,
         ignore_current_summary: bool = False,
         model: str,
+        project_glossary: Tuple[ContextGlossaryEntry, ...] = (),
         allow_compaction: bool = True,
     ) -> Optional[RequestContext]:
         """Freeze user-owned context and eligible page history for one request.
@@ -639,6 +680,7 @@ class LLMTranslator(LLMChatRequester, BaseTranslator):
         if (
             not use_history
             and not glossary_path
+            and not project_glossary
             and memory is None
             and not saved_summaries
         ):
@@ -654,7 +696,10 @@ class LLMTranslator(LLMChatRequester, BaseTranslator):
             self.logger.debug(str(disabled_diagnostic))
             return None
 
-        glossary = load_glossary(glossary_path)
+        glossary = merge_prompt_entries(
+            project_glossary,
+            load_glossary(glossary_path),
+        )
         if not use_history:
             # A glossary can operate alone, but must not retain a stale history window.
             self._history_window = None
@@ -921,6 +966,7 @@ class LLMTranslator(LLMChatRequester, BaseTranslator):
                         history_budget=history_budget,
                         glossary_path=glossary_path,
                         glossary_mode=glossary_mode,
+                        project_glossary=project_glossary,
                         memory_enabled=memory_enabled,
                         ignore_current_summary=ignore_current_summary,
                         model=model,
@@ -1107,7 +1153,12 @@ class LLMTranslator(LLMChatRequester, BaseTranslator):
         )
 
     def build_copy_prompt(self, src_list: List[str]) -> str:
-        glossary_path = str(pcfg.module.llm_glossary_path or '')
+        profile = self.profile
+        glossary_path = (
+            str(pcfg.module.llm_glossary_path or '')
+            if profile.use_glossary
+            else ''
+        )
         glossary_mode = pcfg.module.llm_glossary_mode
         glossary = load_glossary(glossary_path)
         selected_glossary = select_glossary(

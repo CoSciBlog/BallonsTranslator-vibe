@@ -1,5 +1,6 @@
 import threading
 import time
+from copy import deepcopy
 from typing import Callable, List, Optional, Union
 import os.path as osp
 
@@ -45,6 +46,7 @@ from ballontranslator.utils.py_package_manager import (
 from .custom_widget import ImgtransProgressMessageBox, ParamComboBox, ProgressMessageBox
 from .configpanel import ConfigPanel
 from ballontranslator.utils.proj_imgtrans import ProjImgTrans
+from ballontranslator.utils.reinpaint import reinpaint_project_page
 from ballontranslator.utils.config import pcfg, RunStatus, save_config
 from ballontranslator.utils.llm_profiles import (
     LLM_INPAINT_KEY, LLM_OCR_KEY, LLM_TRANSLATOR_KEY, LLMProfile,
@@ -774,6 +776,9 @@ class ImgtransThread(QThread):
         self.stop_event = threading.Event()
         self._pipeline_stop_emitted = False
         self.pages_to_process = None
+        self.reinpaint_only = False
+        self.ocr_fallback_name = ''
+        self._ocr_fallback = None
         register_global_callback('user_request_stop', self.isStopRequested)
 
     def on_module_thread_stopped(self):
@@ -818,17 +823,125 @@ class ImgtransThread(QThread):
         pages_to_process=None,
     ):
         self.imgtrans_proj = imgtrans_proj
-        self.pages_to_process = pages_to_process  # 保存需要处理的页面列表
-        self.num_pages = len(self.imgtrans_proj.pages)
+        self.reinpaint_only = False
+        self.pages_to_process = self.imgtrans_proj.pipeline_pages(
+            pages_to_process
+        )
+        self.num_pages = len(self.pages_to_process)
         self.clearStopRequest()
         # 创建处理索引到实际页面索引的映射
         self.process_idx_to_page_idx = {}
         self.job = self._imgtrans_pipeline
         self.start()
+
+    def runReinpaintPipeline(
+        self,
+        imgtrans_proj: ProjImgTrans,
+        pages_to_process,
+    ) -> None:
+        """Re-run only inpainting for existing project masks."""
+
+        self.imgtrans_proj = imgtrans_proj
+        self.pages_to_process = self.imgtrans_proj.pipeline_pages(
+            pages_to_process
+        )
+        self.num_pages = len(self.pages_to_process)
+        self.clearStopRequest()
+        self.process_idx_to_page_idx = {}
+        all_pages = list(self.imgtrans_proj.pages)
+        for process_index, page_name in enumerate(self.pages_to_process):
+            if page_name in self.imgtrans_proj.pages:
+                self.process_idx_to_page_idx[process_index] = all_pages.index(
+                    page_name
+                )
+        self.reinpaint_only = True
+        self.job = self._reinpaint_pipeline
+        self.start()
     
     def requestStop(self):
         """请求停止当前任务"""
         self.stop_event.set()
+
+    def configure_ocr_fallback(self, module_name: str = '') -> None:
+        """Select a lazy fallback OCR for batch runs.
+
+        The fallback is constructed only inside the pipeline worker after the
+        primary OCR either fails or returns empty blocks.
+        """
+
+        module_name = module_name if module_name in GET_VALID_OCR() else ''
+        if module_name == self.ocr_fallback_name:
+            return
+        self.unload_ocr_fallback()
+        self.ocr_fallback_name = module_name
+
+    def unload_ocr_fallback(self) -> None:
+        fallback = self._ocr_fallback
+        self._ocr_fallback = None
+        if fallback is not None:
+            try:
+                fallback.unload_model(empty_cache=False)
+            except Exception as error:
+                LOGGER.warning('Failed to unload fallback OCR: %s', error)
+
+    def _fallback_ocr(self) -> Optional[OCRBase]:
+        if not self.ocr_fallback_name:
+            return None
+        if self._ocr_fallback is None:
+            try:
+                module_class = OCR.resolve_module(self.ocr_fallback_name)
+                if module_class is None:
+                    raise RuntimeError('module is unavailable')
+                params = cfg_module.get_params('ocr').get(
+                    self.ocr_fallback_name,
+                    {},
+                )
+                self._ocr_fallback = module_class(**deepcopy(params or {}))
+            except Exception as error:
+                raise ModuleRunError(
+                    'ocr', self.ocr_fallback_name, str(error)
+                ) from error
+        if hasattr(self._ocr_fallback, 'set_stop_event'):
+            self._ocr_fallback.set_stop_event(self.stop_event)
+        return self._ocr_fallback
+
+    def _run_ocr_with_fallback(
+        self,
+        img: np.ndarray,
+        blk_list: List[TextBlock],
+    ) -> List[TextBlock]:
+        """Run primary OCR and retry failed or empty blocks with the fallback."""
+
+        try:
+            if getattr(self.ocr, 'name', '') == LLM_OCR_KEY:
+                result = self.ocr.run_ocr(img, blk_list, full_page=True)
+            else:
+                result = self.ocr.run_ocr(img, blk_list)
+            if isinstance(result, list):
+                blk_list = result
+        except ModuleRunError:
+            fallback = self._fallback_ocr()
+            if fallback is None:
+                raise
+            LOGGER.warning(
+                'Primary OCR failed; retrying page with fallback OCR %s.',
+                self.ocr_fallback_name,
+            )
+            result = fallback.run_ocr(img, blk_list)
+            return result if isinstance(result, list) else blk_list
+
+        empty_blocks = [
+            block for block in blk_list if text_is_empty(block.get_text())
+        ]
+        fallback = self._fallback_ocr() if empty_blocks else None
+        if fallback is not None:
+            LOGGER.info(
+                'Retrying %d empty OCR block(s) with %s.',
+                len(empty_blocks),
+                self.ocr_fallback_name,
+            )
+            fallback.run_ocr(img, empty_blocks)
+        return blk_list
 
     def _stop_on_stage_failure(
         self,
@@ -855,6 +968,7 @@ class ImgtransThread(QThread):
         page_key: str = None,
     ):
         self.clearStopRequest()
+        self.reinpaint_only = False
         self.job = lambda : self._blktrans_pipeline(
             blk_list,
             mode,
@@ -1061,7 +1175,7 @@ class ImgtransThread(QThread):
         
         # 如果指定了pages_to_process，只处理这些页面
         all_pages = list(self.imgtrans_proj.pages.keys())
-        if self.pages_to_process is not None and len(self.pages_to_process) > 0:
+        if self.pages_to_process is not None:
             pages_to_iterate = self.pages_to_process
             self.num_pages = num_pages = len(self.pages_to_process)
             # 建立处理索引到实际页面索引的映射
@@ -1173,18 +1287,7 @@ class ImgtransThread(QThread):
                 if hasattr(self.ocr, 'set_stop_event'):
                     self.ocr.set_stop_event(self.stop_event)
                 try:
-                    # full_page is an LLMOCR-only extension; preserve the
-                    # historical two-argument contract for custom OCR modules.
-                    if getattr(self.ocr, 'name', '') == LLM_OCR_KEY:
-                        ocr_result = self.ocr.run_ocr(
-                            img,
-                            blk_list,
-                            full_page=True,
-                        )
-                    else:
-                        ocr_result = self.ocr.run_ocr(img, blk_list)
-                    if isinstance(ocr_result, list):
-                        blk_list = ocr_result
+                    blk_list = self._run_ocr_with_fallback(img, blk_list)
                     self.imgtrans_proj.pages[imgname] = blk_list
                     self.ocr_counter += 1
 
@@ -1331,17 +1434,82 @@ class ImgtransThread(QThread):
 
         self._emit_pipeline_stopped_if_ready(imgtrans_running=False)
 
+    def _reinpaint_pipeline(self) -> None:
+        """Regenerate inpainted files without repeating detection or OCR."""
+
+        self.detect_counter = 0
+        self.ocr_counter = 0
+        self.translate_counter = 0
+        self.inpaint_counter = 0
+        if hasattr(self.inpainter, 'set_stop_event'):
+            self.inpainter.set_stop_event(self.stop_event)
+
+        for page_name in self.pages_to_process:
+            if self.isStopRequested():
+                break
+            try:
+                changed = reinpaint_project_page(
+                    self.imgtrans_proj,
+                    self.inpainter,
+                    page_name,
+                    allow_maskless=(cfg_module.inpainter == LLM_INPAINT_KEY),
+                )
+                if not changed:
+                    LOGGER.info(
+                        'Re-inpainting skipped %s: no saved mask or text region.',
+                        page_name,
+                    )
+            except LLMUserActionRequiredError as error:
+                _show_llm_user_action_required_dialog(
+                    error,
+                    self.tr('Inpainting Failed.'),
+                    'InpaintFailed',
+                    page_name,
+                    self.tr('Page'),
+                )
+                self.requestStop()
+                break
+            except LLMRequestStopped:
+                LOGGER.info('Re-inpainting stopped by user.')
+                self.requestStop()
+                break
+            except Exception as error:
+                _create_page_error_dialog(
+                    error,
+                    self.tr('Inpainting Failed.'),
+                    'InpaintFailed',
+                    page_name,
+                    self.tr('Page'),
+                )
+                self.requestStop()
+                break
+
+            self.inpaint_counter += 1
+            self.imgtrans_proj.update_page_progress(
+                page_name,
+                RunStatus.FIN_INPAINT,
+            )
+            self.update_inpaint_progress.emit(self.inpaint_counter)
+
+        self._emit_pipeline_stopped_if_ready(imgtrans_running=False)
+
     def detect_finished(self) -> bool:
+        if self.reinpaint_only:
+            return True
         if self.imgtrans_proj is None:
             return True
         return self.detect_counter == self.num_pages or not cfg_module.enable_detect
 
     def ocr_finished(self) -> bool:
+        if self.reinpaint_only:
+            return True
         if self.imgtrans_proj is None:
             return True
         return self.ocr_counter == self.num_pages or not cfg_module.enable_ocr
 
     def translate_finished(self) -> bool:
+        if self.reinpaint_only:
+            return True
         if self.imgtrans_proj is None \
             or not cfg_module.enable_ocr \
             or not cfg_module.enable_translate:
@@ -1352,6 +1520,8 @@ class ImgtransThread(QThread):
         return self.translate_counter == self.num_pages or not cfg_module.enable_translate
 
     def inpaint_finished(self) -> bool:
+        if self.reinpaint_only:
+            return self.inpaint_counter == self.num_pages
         if self.imgtrans_proj is None or not cfg_module.enable_inpaint:
             return True
         return self.inpaint_counter == self.num_pages or not cfg_module.enable_inpaint
@@ -1377,6 +1547,9 @@ class ImgtransThread(QThread):
             self.job = None
 
     def recent_finished_index(self, ref_counter: int) -> int:
+        if self.reinpaint_only:
+            process_idx = ref_counter - 1
+            return self.process_idx_to_page_idx.get(process_idx, process_idx)
         if cfg_module.enable_detect:
             ref_counter = min(ref_counter, self.detect_counter)
         if cfg_module.enable_ocr:
@@ -1443,6 +1616,8 @@ class ModuleManager(QObject):
         self.package_install_thread: PackageInstallThread = None
         self.config_panel: ConfigPanel = None
         self.parent_widget = None
+        self.pipeline_preparation_failed = False
+        self._pending_reinpaint_pages = None
 
     def setupThread(
         self,
@@ -2024,7 +2199,11 @@ class ModuleManager(QObject):
         create_error_dialog(thread.last_error, msg, f'FailedSetModule:{thread.module_key}:{thread.last_set_module_name}')
 
     def unload_all_models(self):
+        self.imgtrans_thread.unload_ocr_fallback()
         unload_modules(self, ('textdetector', 'inpainter', 'ocr', 'translator'))
+
+    def configure_ocr_fallback(self, module_name: str = '') -> None:
+        self.imgtrans_thread.configure_ocr_fallback(module_name)
 
     @property
     def translator(self) -> BaseTranslator:
@@ -2044,6 +2223,12 @@ class ModuleManager(QObject):
 
     def inpainterBusy(self):
         return self.inpaint_thread.isRunning()
+
+    def pipelineBusy(self) -> bool:
+        return (
+            self.imgtrans_thread.isRunning()
+            or self._module_preparation_running()
+        )
 
     def inpaint(self, img: np.ndarray, mask: np.ndarray, img_key: str = None, inpaint_rect = None, *, profile: Optional[LLMProfile] = None, use_mask: bool = True, **kwargs: object) -> None:
         if self.inpaint_thread.isRunning():
@@ -2098,10 +2283,23 @@ class ModuleManager(QObject):
         render_only=False,
     ):
         _reset_llm_key_required_dialogs()
+        self.pipeline_preparation_failed = False
         if self.imgtrans_proj.is_empty:
             LOGGER.info('proj file is empty, nothing to do')
             self.progress_msgbox.hide()
             return
+        select_pipeline_pages = getattr(
+            self.imgtrans_proj,
+            'pipeline_pages',
+            None,
+        )
+        if callable(select_pipeline_pages):
+            pages_to_process = select_pipeline_pages(pages_to_process)
+            if not pages_to_process:
+                LOGGER.info('No pipeline-eligible pages selected.')
+                self.progress_msgbox.hide()
+                self.imgtrans_pipeline_finished.emit()
+                return
         self.last_finished_index = -1
         self.terminateRunningThread()
         
@@ -2110,7 +2308,7 @@ class ModuleManager(QObject):
             # Rendering reuses the normal page-finished path without preparing
             # or running any pipeline module.
             page_indexes = range(self.imgtrans_proj.num_pages)
-            if not render_only and pages_to_process is not None:
+            if pages_to_process is not None:
                 page_index_by_name = {
                     page_name: index
                     for index, page_name in enumerate(self.imgtrans_proj.pages)
@@ -2139,8 +2337,51 @@ class ModuleManager(QObject):
             lambda: self._startImgtransPipeline(
                 pages_to_process,
             ),
-            on_failure=lambda: self.imgtrans_pipeline_finished.emit() if shared.HEADLESS else None,
+            # Callers such as the GUI batch controller also need a terminal
+            # signal when preparation is cancelled or fails before the worker
+            # starts. Normal GUI runs only reset their transient run state.
+            on_failure=self._on_pipeline_preparation_failed,
         )
+
+    def runReinpaintPipeline(self, pages_to_process=None) -> None:
+        """Prepare the selected inpainter and rebuild existing page regions."""
+
+        _reset_llm_key_required_dialogs()
+        self.pipeline_preparation_failed = False
+        if self.imgtrans_proj is None or self.imgtrans_proj.is_empty:
+            create_info_dialog(self.tr('Open a project before re-running inpainting.'))
+            return
+        pages = self.imgtrans_proj.pipeline_pages(pages_to_process)
+        if not pages:
+            create_info_dialog(self.tr('No pipeline-eligible pages selected.'))
+            return
+        self.last_finished_index = -1
+        self.terminateRunningThread()
+        self._pending_reinpaint_pages = pages
+        self._prepare_modules_then(
+            [('inpainter', cfg_module.inpainter)],
+            self._startPendingReinpaintPipeline,
+            on_failure=self._on_pipeline_preparation_failed,
+        )
+
+    def _startPendingReinpaintPipeline(self) -> None:
+        pages_to_process = self._pending_reinpaint_pages
+        self._pending_reinpaint_pages = None
+        if self.prepare_msgbox is not None and self.prepare_msgbox.isVisible():
+            self.prepare_msgbox.done(0)
+        self.progress_msgbox.hide_all_bars()
+        self.progress_msgbox.inpaint_bar.show()
+        self.progress_msgbox.zero_progress()
+        self.progress_msgbox.show_fitted()
+        self.imgtrans_thread.runReinpaintPipeline(
+            self.imgtrans_proj,
+            pages_to_process,
+        )
+
+    def _on_pipeline_preparation_failed(self) -> None:
+        self.pipeline_preparation_failed = True
+        self._pending_reinpaint_pages = None
+        self.imgtrans_pipeline_finished.emit()
 
     def _startImgtransPipeline(
         self,
@@ -2237,7 +2478,7 @@ class ModuleManager(QObject):
             shared.pbar[stage].update(1)
         progress = int(progress / self.imgtrans_thread.num_pages * 100)
         update_progress(progress)
-        if ri != self.last_finished_index:
+        if not self.imgtrans_thread.reinpaint_only and ri != self.last_finished_index:
             self.last_finished_index = ri
             self.page_trans_finished.emit(ri)
         if progress == 100:

@@ -59,6 +59,20 @@ class LLMProfileModelSelectorTest(unittest.TestCase):
         card.finishVisionModelEdit()
         self.assertEqual(profile.model_options.count('shared-model'), 1)
 
+    def test_glossary_checkbox_updates_and_resyncs_profile_setting(self) -> None:
+        profile = LLMProfile(id='test', name='Test', use_glossary=True)
+        card = ProfileCardWidget(profile)
+        self.addCleanup(card.deleteLater)
+        checkbox = card.details.param_widgets['use_glossary']
+
+        self.assertTrue(checkbox.isChecked())
+        checkbox.click()
+        self.assertFalse(profile.use_glossary)
+
+        profile.use_glossary = True
+        card.syncFromProfile()
+        self.assertTrue(checkbox.isChecked())
+
     def image_card(self) -> ProfileCardWidget:
         card = ProfileCardWidget(LLMProfile(
             id='image-test', name='Image test', support_image=True, support_vision=True,
@@ -325,6 +339,31 @@ class APIProfilesPanelTest(unittest.TestCase):
             self.assertNotIn('copy-only-model', source.model_options)
             self.assertNotIn('copy-only-model', second.model_options)
             self.assertEqual(profile_to_dict(source), original)
+
+    def test_duplicate_button_copies_complete_profile(self) -> None:
+        source = default_profile('OpenRouter')
+        source.api_key = 'saved-test-key'
+        source.model = 'custom-text-model'
+        source.vision_prompt = 'Keep names consistent.'
+        original = profile_to_dict(source)
+        with patch.object(pcfg.module, 'llm_profiles', [source]):
+            panel = LLMProfilesWidget()
+            self.addCleanup(panel.deleteLater)
+            row = panel.rows[source.id]
+            row.show()
+            row.setActionButtonsVisible(True)
+            QTest.mouseClick(row.duplicate_btn, Qt.MouseButton.LeftButton)
+            self.app.processEvents()
+
+            copied = pcfg.module.llm_profiles[-1]
+            self.assertEqual(profile_to_dict(copied), {
+                **original,
+                'id': copied.id,
+                'name': source.name + ' Copy',
+                'built_in': False,
+            })
+            self.assertIsNot(copied, source)
+            self.assertIn(copied.id, panel.rows)
 
     def test_codex_is_excluded_from_profile_editing_copy_and_delete(self) -> None:
         codex = default_codex_profile()

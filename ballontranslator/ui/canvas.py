@@ -251,6 +251,8 @@ class Canvas(QGraphicsScene):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.scale_factor = 1.
+        self.auto_fit_page_zoom = False
+        self.user_zoom_override = False
         self.textblock_mode = False
         self.order_badges_visible = True
         self.creating_textblock = False
@@ -574,6 +576,56 @@ class Canvas(QGraphicsScene):
         if refresh_control:
             self.refresh_text_shape_control()
 
+    def reset_auto_fit_zoom(self) -> None:
+        """Re-enable automatic fitting for the next loaded page."""
+
+        self.auto_fit_page_zoom = True
+        self.user_zoom_override = False
+
+    def _apply_canvas_scale(
+        self,
+        scale: float,
+        *,
+        emit_changed: bool = True,
+    ) -> None:
+        scale = float(np.clip(scale, CANVAS_SCALE_MIN, CANVAS_SCALE_MAX))
+        scale_changed = self.scale_factor != scale
+        if scale_changed:
+            # Scene-space gestures retain the scale from their starting frame.
+            self.text_move_session.cancel()
+            self.cancel_path_reorder()
+        self._set_scene_scale(scale)
+        if scale_changed and emit_changed:
+            self.scalefactor_changed.emit()
+
+    def fitCurrentPageToView(self) -> None:
+        """Scale the complete page into the current viewport.
+
+        Both dimensions constrain the proportional scale, so portrait and
+        landscape pages remain fully visible without distortion.
+        """
+
+        if (
+            not self.gv.isVisible()
+            or self.imgtrans_proj is None
+            or not self.imgtrans_proj.img_valid
+            or self.base_pixmap is None
+        ):
+            return
+        page_size = self.img_window_size()
+        if page_size.width() <= 0 or page_size.height() <= 0:
+            return
+        viewport_size = self.gv.viewport().size()
+        padding = 12
+        available_width = max(1, viewport_size.width() - padding * 2)
+        available_height = max(1, viewport_size.height() - padding * 2)
+        scale = min(
+            available_width / page_size.width(),
+            available_height / page_size.height(),
+        )
+        self._apply_canvas_scale(scale)
+        self.gv.centerOn(self.baseLayer)
+
     def render_result_img(self) -> QImage:
         self.text_move_session.cancel()
         self.inpaintLayer.hide()
@@ -713,7 +765,7 @@ class Canvas(QGraphicsScene):
     def adjustScrollBar(self, scrollBar: QScrollBar, factor: float):
         scrollBar.setValue(int(factor * scrollBar.value() + ((factor - 1) * scrollBar.pageStep() / 2)))
 
-    def scaleImage(self, factor: float) -> None:
+    def scaleImage(self, factor: float, user_initiated: bool = True) -> None:
         if not self.gv.isVisible() or not self.imgtrans_proj.img_valid:
             return
         s_f = np.clip(
@@ -727,6 +779,8 @@ class Canvas(QGraphicsScene):
             # Scene-space gestures retain the scale from their starting frame.
             self.text_move_session.cancel()
             self.cancel_path_reorder()
+            if user_initiated:
+                self.user_zoom_override = True
         self.scale_factor = s_f
         self.baseLayer.setScale(self.scale_factor)
 
@@ -755,6 +809,10 @@ class Canvas(QGraphicsScene):
         pos = self.search_widget.pos()
         pos.setX(x-30)
         self.search_widget.move(pos)
+        if self.auto_fit_page_zoom and not self.user_zoom_override:
+            # The viewport obtains its final size only after Qt finishes the
+            # current layout pass (for example when a side panel changes).
+            QTimer.singleShot(0, self.fitCurrentPageToView)
         self.refresh_text_shape_control()
         self.gv.viewport().update()
         
@@ -1626,7 +1684,13 @@ class Canvas(QGraphicsScene):
             self.baseLayer.setRect(QRectF(im_rect))
             if im_rect != self.sceneRect():
                 self.setSceneRect(0, 0, im_rect.width(), im_rect.height())
-            self.scaleImage(1)
+            if self.auto_fit_page_zoom and not self.user_zoom_override:
+                QTimer.singleShot(0, self.fitCurrentPageToView)
+            else:
+                self._apply_canvas_scale(
+                    self.scale_factor,
+                    emit_changed=False,
+                )
 
         self.setDrawingLayer()
 

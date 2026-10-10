@@ -10,6 +10,7 @@ from ballontranslator.utils.logger import logger as LOGGER
 from ballontranslator.utils.io_utils import imread, imwrite
 from ballontranslator.utils.message import create_error_dialog
 from ballontranslator.utils.proj_imgtrans import ProjImgTrans
+from ballontranslator.utils.upscale import stage_upscaled_pages
 from .custom_widget import ProgressMessageBox
 from .misc import pixmap2ndarray
 
@@ -173,7 +174,55 @@ class ImportDocThread(ImgTransProjFileIOThread):
         self.progress_bar.hide()
         self.fin_io.emit()
 
-    
+
+class ProjectUpscaleThread(ThreadBase):
+    """Stage fixed 2x page replacements away from the Qt main thread."""
+
+    progress_changed = Signal(int, int)
+    upscale_finished = Signal(object, object, bool, str)
+
+    def __init__(self, parent=None) -> None:
+        super().__init__(parent)
+        self.directory = ''
+        self.page_names = []
+        self._stop_requested = False
+
+    def run_upscale(self, directory: str, page_names: list[str]) -> bool:
+        if self.isRunning():
+            return False
+        self.directory = directory
+        self.page_names = list(page_names)
+        self._stop_requested = False
+        self.job = self._run_upscale
+        self.start()
+        return True
+
+    def request_stop(self) -> None:
+        self._stop_requested = True
+
+    def _run_upscale(self) -> None:
+        try:
+            replacements, failures, stopped, staging_dir = (
+                stage_upscaled_pages(
+                    self.directory,
+                    self.page_names,
+                    progress_callback=self.progress_changed.emit,
+                    stop_requested=lambda: self._stop_requested,
+                )
+            )
+        except Exception as error:
+            LOGGER.exception('Unable to stage project image upscaling.')
+            replacements = []
+            failures = [('', str(error))]
+            stopped = False
+            staging_dir = ''
+        self.upscale_finished.emit(
+            replacements,
+            failures,
+            stopped,
+            staging_dir,
+        )
+
 
 class MergeThread(ThreadBase):
     """区域合并后台线程"""
