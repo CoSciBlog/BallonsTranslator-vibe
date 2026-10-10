@@ -775,6 +775,23 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
         )
         pipeline_options_layout.addWidget(self.empty_runcache_checker)
         self.empty_runcache_checker.stateChanged.connect(self.on_runcache_changed)
+        self.unload_before_llm_checker = QCheckBox(
+            self.tr('Unload local models before LLM requests')
+        )
+        self.unload_before_llm_checker.setObjectName(
+            'PipelineModuleActionCheckBox'
+        )
+        self.unload_before_llm_checker.setToolTip(
+            self.tr(
+                'Unload detector, OCR, translator, and inpainter models before '
+                'an LLM or Ollama request to free RAM and VRAM. Models are '
+                'loaded again when needed.'
+            )
+        )
+        self.unload_before_llm_checker.stateChanged.connect(
+            self.on_unload_before_llm_changed
+        )
+        pipeline_options_layout.addWidget(self.unload_before_llm_checker)
         self.package_auto_install_checker = QCheckBox(
             self.tr('Auto install missing packages')
         )
@@ -1415,6 +1432,11 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
     def on_runcache_changed(self):
         pcfg.module.empty_runcache = self.empty_runcache_checker.isChecked()
 
+    def on_unload_before_llm_changed(self) -> None:
+        pcfg.module.unload_models_before_llm = (
+            self.unload_before_llm_checker.isChecked()
+        )
+
     def on_package_auto_install_changed(self):
         pcfg.package_manager.auto_install_missing_packages = self.package_auto_install_checker.isChecked()
 
@@ -1900,6 +1922,9 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
         self.rst_imgquality_edit.setText(str(pcfg.imgsave_quality))
         self.intermediate_imgquality_edit.setText(str(pcfg.intermediate_imgsave_quality))
         self.empty_runcache_checker.setChecked(pcfg.module.empty_runcache)
+        self.unload_before_llm_checker.setChecked(
+            pcfg.module.unload_models_before_llm
+        )
         self.package_auto_install_checker.setChecked(pcfg.package_manager.auto_install_missing_packages)
         self.let_show_only_custom_fonts.setChecked(pcfg.let_show_only_custom_fonts_flag)
 

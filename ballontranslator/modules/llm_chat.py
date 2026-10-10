@@ -19,6 +19,7 @@ from .exceptions import (
     LLMRequestStopped,
     LLMUserActionRequiredError,
 )
+from .base import unload_models_before_llm_request
 from ballontranslator.utils.llm_profiles import (
     LLMProfile,
     PROVIDER_DEFAULTS,
@@ -350,6 +351,7 @@ class LLMChatRequester:
         # adopt the replacement run's token for this request's existing inputs.
         stop_event = self.stop_event
         self._check_request_current(stop_event)
+        unload_models_before_llm_request(self)
         if profile.backend == 'codex':
             if self._openai_session is not None:
                 self._openai_session.close()

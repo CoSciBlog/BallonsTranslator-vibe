@@ -123,6 +123,7 @@ class ModuleConfig(Config):
 
     check_need_inpaint: bool = True
     empty_runcache: bool = False
+    unload_models_before_llm: bool = False
     finish_code: int = 15
 
     def get_params(self, module_key: str, for_saving=False) -> dict:
@@ -207,6 +208,7 @@ class ModuleConfig(Config):
             ('llm_translate_vision', False),
             ('llm_translate_summary_memory', False),
             ('llm_translate_overwrite_summary', False),
+            ('unload_models_before_llm', False),
         ):
             if type(getattr(self, setting_name)) is not bool:
                 LOGGER.warning(

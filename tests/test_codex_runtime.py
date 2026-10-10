@@ -206,6 +206,26 @@ class CodexRuntimeTest(unittest.TestCase):
         self.assertEqual(len(stopped), 1)
         thread.translator.translate_textblk_lst.assert_called_once()
 
+    def test_llm_ocr_memory_handoff_disables_parallel_translation(self) -> None:
+        for index in range(4):
+            pcfg.module.set_stage_enabled(index, index in (1, 2))
+        pcfg.module.unload_models_before_llm = True
+        translate = self._translator_thread()
+        translate.translator.name = 'Google'
+        translate.translator.is_computational_intensive.return_value = False
+        thread = self._pipeline(translate)
+        thread.imgtrans_proj.pages = {}
+        thread.ocr_thread.ocr = SimpleNamespace(name='LLMOCR')
+
+        with patch.object(
+            translate,
+            'runTranslatePipeline',
+        ) as start_parallel, patch.object(module_manager, 'unload_modules'):
+            thread._imgtrans_pipeline()
+
+        self.assertFalse(thread.parallel_trans)
+        start_parallel.assert_not_called()
+
     def test_stopped_run_cannot_emit_success_before_workers_exit(self) -> None:
         manager = module_manager.ModuleManager(ProjImgTrans())
         self.addCleanup(manager.deleteLater)

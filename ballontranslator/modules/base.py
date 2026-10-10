@@ -1,5 +1,7 @@
 import gc
 import os
+import threading
+import weakref
 from typing import Callable, Dict, List
 from copy import deepcopy
 import re
@@ -14,6 +16,9 @@ from ballontranslator.utils.lock import aquire_model_loading_lock, release_model
 
 
 GPUINTENSIVE_SET = {'cuda', 'mps', 'xpu', 'privateuseone'}
+_LIVE_MODULES: weakref.WeakValueDictionary = weakref.WeakValueDictionary()
+_LIVE_MODULES_LOCK = threading.RLock()
+_LLM_HANDOFF_LOCK = threading.Lock()
 
 
 def patch_module_params(cfg_param, module_params, module_name: str = ''):
@@ -212,6 +217,8 @@ class BaseModule:
     _load_model_keys: set = None
 
     def __init__(self, **params) -> None:
+        with _LIVE_MODULES_LOCK:
+            _LIVE_MODULES[id(self)] = self
         standardize_module_params(self.params)
         if self.params is not None and '__param_patched' not in params:
             params = patch_module_params(params, self.params, self)
@@ -319,6 +326,51 @@ class BaseModule:
     
     def flush(self, param_key: str):
         return None
+
+
+def unload_models_before_llm_request(requester: object = None) -> int:
+    """Release resident application models before an optional LLM request.
+
+    The LLM requester itself is retained. This matters for future requesters
+    that may own local state, while detector/OCR/translator/inpainter models
+    are still released through their normal module lifecycle.
+
+    >>> unload_models_before_llm_request() >= 0
+    True
+    """
+
+    # Import lazily so the base module remains usable while configuration is
+    # still being constructed during application startup.
+    from ballontranslator.utils.config import pcfg
+
+    if not pcfg.module.unload_models_before_llm:
+        return 0
+
+    with _LLM_HANDOFF_LOCK:
+        with _LIVE_MODULES_LOCK:
+            modules = tuple(_LIVE_MODULES.values())
+        released = 0
+        for module in modules:
+            if module is requester:
+                continue
+            try:
+                if module.unload_model(empty_cache=False):
+                    released += 1
+            except Exception as error:
+                # An optional memory optimization must not prevent the LLM
+                # request when a third-party module has a broken unloader.
+                LOGGER.warning(
+                    'Failed to unload %s before LLM request: %s',
+                    type(module).__name__,
+                    error,
+                )
+        if released:
+            soft_empty_cache()
+            LOGGER.info(
+                'Released %d loaded module(s) before LLM request.',
+                released,
+            )
+        return released
 
 os.environ['PYTORCH_ENABLE_MPS_FALLBACK'] = '1'
 

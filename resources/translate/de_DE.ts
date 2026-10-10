@@ -497,6 +497,16 @@
         </message>
         <message>
             <location filename="..\..\ballontranslator\ui\configpanel.py" line="779" />
+            <source>Unload local models before LLM requests</source>
+            <translation>Lokale Modelle vor LLM-Anfragen entladen</translation>
+        </message>
+        <message>
+            <location filename="..\..\ballontranslator\ui\configpanel.py" line="785" />
+            <source>Unload detector, OCR, translator, and inpainter models before an LLM or Ollama request to free RAM and VRAM. Models are loaded again when needed.</source>
+            <translation>Detector-, OCR-, Übersetzer- und Inpainting-Modelle vor einer LLM- oder Ollama-Anfrage entladen, um RAM und VRAM freizugeben. Die Modelle werden bei Bedarf erneut geladen.</translation>
+        </message>
+        <message>
+            <location filename="..\..\ballontranslator\ui\configpanel.py" line="779" />
             <source>Auto install missing packages</source>
             <translation>Automatische Installation fehlender Pakete</translation>
         </message>

@@ -54,6 +54,10 @@
 * 可配置的中间图像
   - 蒙版和修复后的项目图像可保存为 PNG、JPEG、WebP 或 JPEG XL，并可单独设置质量。
 
+* 低内存 LLM 切换
+  - 在 **设置 → 流程** 中启用 **在 LLM 请求前卸载本地模型**，可在 LLM 或 Ollama 请求前卸载检测、OCR、翻译和修复模型，为 LLM 释放更多 RAM 与 VRAM；需要时会自动重新加载这些模块。
+  - 启用后，LLM 流程阶段会与本地翻译串行执行，避免卸载正在使用的模型。此设置只能释放 BallonsTranslator 自身加载的模型，不能卸载由外部 Ollama 服务管理的模型。
+
 * <details>
   <summary><i>支持上下文和术语表的 LLM 翻译</i></summary>
 

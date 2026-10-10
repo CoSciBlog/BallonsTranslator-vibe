@@ -29,6 +29,7 @@ from ballontranslator.utils.llm_profiles import (
     LLMProfile, image_responses_url, resolve_api_key, split_image_model_selection,
 )
 from ballontranslator.utils.logger import logger as LOGGER
+from .base import unload_models_before_llm_request
 from . import image_generation
 
 
@@ -906,6 +907,7 @@ class LLMImageRequester:
                 'that supports the Responses image tool. Update the endpoint '
                 'or select a direct image model.'
             )
+        unload_models_before_llm_request(self)
         client = None if profile.backend == 'codex' else self._initialize_client(profile)
         original_shape = None if image is None else image.shape[:2]
         request_image = (

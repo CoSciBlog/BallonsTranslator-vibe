@@ -46,6 +46,10 @@
 * Configurable intermediate images
   - Save masks and inpainted project images as PNG, JPEG, WebP, or JPEG XL with an independent quality setting.
 
+* Low-memory LLM handoff
+  - Enable **Unload local models before LLM requests** under **Settings → Pipeline** to release loaded detector, OCR, translator, and inpainter models before an LLM or Ollama request. This makes more RAM and VRAM available to the LLM; released modules load again automatically when needed.
+  - The option serializes LLM pipeline stages with local translation to prevent an in-use model from being unloaded. It releases models owned by BallonsTranslator, but cannot unload a model managed by an external Ollama server.
+
 * <details>
   <summary><i>Context-aware LLM translation & Glossary</i></summary>
 

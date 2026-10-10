@@ -47,7 +47,8 @@ from .configpanel import ConfigPanel
 from ballontranslator.utils.proj_imgtrans import ProjImgTrans
 from ballontranslator.utils.config import pcfg, RunStatus, save_config
 from ballontranslator.utils.llm_profiles import (
-    LLM_INPAINT_KEY, LLM_OCR_KEY, LLMProfile, profile_by_id, profile_from_config,
+    LLM_INPAINT_KEY, LLM_OCR_KEY, LLM_TRANSLATOR_KEY, LLMProfile,
+    profile_by_id, profile_from_config,
 )
 from ballontranslator.utils.global_callbacks import register_global_callback
 cfg_module = pcfg.module
@@ -1094,9 +1095,29 @@ class ImgtransThread(QThread):
         self.inpaint_thread.num_process_pages = self.num_pages
         self.translate_thread.num_process_pages = self.num_pages
 
+        llm_stage_enabled = cfg_module.unload_models_before_llm and (
+            (
+                cfg_module.enable_translate
+                and self.translator is not None
+                and getattr(self.translator, 'name', '') == LLM_TRANSLATOR_KEY
+            )
+            or (
+                cfg_module.enable_ocr
+                and self.ocr is not None
+                and getattr(self.ocr, 'name', '') == LLM_OCR_KEY
+            )
+            or (
+                cfg_module.enable_inpaint
+                and self.inpainter is not None
+                and getattr(self.inpainter, 'name', '') == LLM_INPAINT_KEY
+            )
+        )
         low_vram_trans = False
         if self.translator is not None:
-            low_vram_trans = self.translator.low_vram_mode
+            # A local translator must not run while an LLM stage unloads the
+            # process-wide model set. The existing serial/low-VRAM path keeps
+            # every model transition on this pipeline thread.
+            low_vram_trans = self.translator.low_vram_mode or llm_stage_enabled
             self.parallel_trans = not self.translator.is_computational_intensive() and not low_vram_trans
         else:
             self.parallel_trans = False

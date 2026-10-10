@@ -1,5 +1,10 @@
 # Changelogs
 
+### 2026-10-10 — 1.5.19+vibe.7
+- Added an opt-in **Unload local models before LLM requests** Pipeline setting that frees BallonsTranslator detector, OCR, translator, and inpainter models before chat, Ollama-compatible, Codex, or image LLM requests.
+- LLM pipeline stages now use the existing serial low-VRAM path while the option is enabled, preventing a concurrently used local translation model from being unloaded; released modules still reload lazily when needed.
+- Added validated persistence, English/German UI text, request-boundary and memory-release tests, and documentation of the external Ollama-server limitation.
+
 ### 2026-10-09 — 1.5.19+vibe.3
 - Added JPEG and WebP options for intermediate project images.
 - Added an independent intermediate-image quality setting and applied it consistently to masks and inpainted images.

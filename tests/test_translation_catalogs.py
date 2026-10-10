@@ -84,6 +84,17 @@ class TranslationCatalogTest(unittest.TestCase):
             expected,
         )
 
+    def test_german_qm_contains_llm_memory_setting(self):
+        translator = QTranslator()
+        self.assertTrue(translator.load(str(TRANSLATE_DIR / 'de_DE.qm')))
+        self.assertEqual(
+            translator.translate(
+                'ConfigPanel',
+                'Unload local models before LLM requests',
+            ),
+            'Lokale Modelle vor LLM-Anfragen entladen',
+        )
+
 
 if __name__ == '__main__':
     unittest.main()

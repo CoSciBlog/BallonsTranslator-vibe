@@ -256,6 +256,23 @@ class RunPipelineDialogTests(unittest.TestCase):
             panel.close()
             pcfg.let_letter_case = original
 
+    def test_pipeline_llm_memory_checkbox_updates_config(self):
+        original = pcfg.module.unload_models_before_llm
+        pcfg.module.unload_models_before_llm = False
+        panel = ConfigPanel()
+        try:
+            checkbox = panel.unload_before_llm_checker
+            self.assertFalse(checkbox.isChecked())
+            self.assertIn('RAM', checkbox.toolTip())
+            self.assertIn('VRAM', checkbox.toolTip())
+
+            checkbox.click()
+
+            self.assertTrue(pcfg.module.unload_models_before_llm)
+        finally:
+            panel.close()
+            pcfg.module.unload_models_before_llm = original
+
     def test_quick_insert_characters_config_defaults_and_round_trip(self):
         default_characters = '『』「」♥♡★☆※♩♬'
         self.assertEqual(
