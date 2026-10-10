@@ -937,14 +937,29 @@ class ProjImgTrans:
         self,
         replacements: List[Dict],
     ) -> None:
-        """Atomically activate staged images and scale retained page geometry."""
+        """Activate staged images under factor-suffixed names.
+
+        The filesystem and all project page indexes are restored together when
+        activation or persistence fails.
+        """
         if not replacements:
             return
         replacement_names = [item['source_name'] for item in replacements]
+        target_names = [item['target_name'] for item in replacements]
         if len(set(replacement_names)) != len(replacement_names):
             raise ValueError('Duplicate page replacement requested.')
+        if len(set(target_names)) != len(target_names):
+            raise ValueError('Upscaled page names must be unique.')
         if any(page_name not in self.pages for page_name in replacement_names):
             raise ImgnameNotInProjectException
+        for source_name, target_name in zip(replacement_names, target_names):
+            if target_name != source_name and (
+                target_name in self.pages
+                or osp.exists(osp.join(self.directory, target_name))
+            ):
+                raise FileExistsError(
+                    f'Upscaled page already exists: {target_name}'
+                )
 
         backup_dir = tempfile.mkdtemp(
             prefix='.upscale_backup_',
@@ -952,16 +967,17 @@ class ProjImgTrans:
         )
         activated = []
         block_states = []
-        image_info_states = {
-            page_name: copy.deepcopy(self._image_info.get(page_name, {}))
-            for page_name in replacement_names
-        }
+        pages_state = self.pages.copy()
+        pagename2idx_state = self._pagename2idx.copy()
+        idx2pagename_state = self._idx2pagename.copy()
+        image_info_state = copy.deepcopy(self._image_info)
+        current_img_state = self.current_img
 
         def rollback_files() -> None:
-            for source_path, backup_path in reversed(activated):
+            for source_path, target_path, backup_path in reversed(activated):
                 try:
-                    if osp.exists(source_path):
-                        os.remove(source_path)
+                    if osp.exists(target_path):
+                        os.remove(target_path)
                     if osp.exists(backup_path):
                         os.replace(backup_path, source_path)
                 except OSError as error:
@@ -974,29 +990,57 @@ class ProjImgTrans:
         try:
             for item in replacements:
                 page_name = item['source_name']
+                target_name = item['target_name']
                 source_path = osp.join(self.directory, page_name)
+                target_path = osp.join(self.directory, target_name)
                 backup_path = osp.join(backup_dir, page_name)
                 os.makedirs(osp.dirname(backup_path), exist_ok=True)
                 os.replace(source_path, backup_path)
-                activated.append((source_path, backup_path))
-                os.replace(item['staged_path'], source_path)
+                activated.append((source_path, target_path, backup_path))
+                os.replace(item['staged_path'], target_path)
+
+            renamed = dict(zip(replacement_names, target_names))
+            self.pages = {
+                renamed.get(page_name, page_name): blocks
+                for page_name, blocks in self.pages.items()
+            }
+            self._pagename2idx = {
+                renamed.get(page_name, page_name): index
+                for page_name, index in self._pagename2idx.items()
+            }
+            self._idx2pagename = {
+                index: renamed.get(page_name, page_name)
+                for index, page_name in self._idx2pagename.items()
+            }
+            self._image_info = {
+                renamed.get(page_name, page_name): info
+                for page_name, info in self._image_info.items()
+            }
+            if self.current_img in renamed:
+                self.current_img = renamed[self.current_img]
 
             for item in replacements:
                 page_name = item['source_name']
+                target_name = item['target_name']
                 factor = float(item['factor'])
-                for block in self.pages[page_name]:
+                for block in self.pages[target_name]:
                     block_states.append(
                         (block, self._textblock_upscale_state(block))
                     )
                     self._scale_textblock_for_source_replacement(block, factor)
-                image_info = self._image_info.setdefault(page_name, {})
+                image_info = self._image_info.setdefault(target_name, {})
+                previous_factor = float(image_info.get('upscale_factor', 1.0))
                 image_info.update({
                     'width': int(item['width']),
                     'height': int(item['height']),
-                    'original_width': int(item['original_width']),
-                    'original_height': int(item['original_height']),
+                    'original_width': int(image_info.get(
+                        'original_width', item['original_width']
+                    )),
+                    'original_height': int(image_info.get(
+                        'original_height', item['original_height']
+                    )),
                     'upscaled': True,
-                    'upscale_factor': factor,
+                    'upscale_factor': previous_factor * factor,
                     'finish_code': 0,
                 })
                 image_info.pop('translation_target', None)
@@ -1004,8 +1048,11 @@ class ProjImgTrans:
         except Exception:
             for block, state in reversed(block_states):
                 self._restore_textblock_upscale_state(block, state)
-            for page_name, state in image_info_states.items():
-                self._image_info[page_name] = state
+            self.pages = pages_state
+            self._pagename2idx = pagename2idx_state
+            self._idx2pagename = idx2pagename_state
+            self._image_info = image_info_state
+            self.current_img = current_img_state
             rollback_files()
             project_backup = self.proj_path + '.backup'
             if not osp.exists(self.proj_path) and osp.exists(project_backup):
@@ -1016,6 +1063,9 @@ class ProjImgTrans:
 
         for page_name in replacement_names:
             self._remove_generated_page_outputs(page_name)
+        self._fuzzy_inpainted_list = None
+        if self.current_img is not None:
+            self.set_current_img(self.current_img)
 
     def invalidate_translation(self, page_key):
         self.clear_page_progress(page_key, RunStatus.FIN_TRANSLATE)

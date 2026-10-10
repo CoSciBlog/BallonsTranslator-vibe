@@ -56,7 +56,7 @@
 * Integrated module settings and page workflow
   - **Settings → Modules** now includes dedicated **Text Detector**, **OCR**, **Inpaint**, and **Glossary** pages. Detector/OCR/inpainter pages edit the same selected-module parameters used by the pipeline, without loading models merely by opening Settings.
   - LLM profiles can be duplicated with all settings, and **Auto** is the default source-language choice for compatible translators.
-  - Pages can be excluded from every pipeline stage through **Ignore page** in the thumbnail context menu. Use **Tools → Upscaling → Upscale Current Page / Entire Project 2x** to replace confirmed source images with 2× upscaled copies.
+  - Pages can be excluded from every pipeline stage through **Ignore page** in the thumbnail context menu. Use **Tools → Upscaling → Upscale Current Page / Entire Project 2x** to replace confirmed source images with 2× upscaled copies. Upscaled files carry their effective factor (`001_x2.png`, then `001_x4.png` after another 2× pass), while project page references and metadata are updated with the rename.
 
 * Batch processing
   - Open **Tools → Batch Processing** (`Ctrl+Shift+B`) and select a parent folder to process its image-bearing direct child folders sequentially. Detector, primary/fallback OCR, inpainter, translator, glossary scope, and optional pre-upscaling are selectable per run.

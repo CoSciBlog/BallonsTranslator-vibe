@@ -1,5 +1,10 @@
 # Changelogs
 
+### 2026-10-10 — 1.5.19+vibe.13
+- Upscaled source images are now renamed with their effective factor, for example `001.png` → `001_x2.png`; another 2× pass produces `001_x4.png`.
+- Project page keys, indexes, current-page state, image metadata, and retained text geometry now move atomically with the renamed image, including rollback on activation or save failure.
+- Added compatibility with legacy `_upscaled_2x` names and reusable integer-factor naming/scaling support for future x3, x4, and higher workflows.
+
 ### 2026-10-10 — 1.5.19+vibe.12
 - Added **Tools → Pipeline History** (`Ctrl+Shift+H`) with start time, duration, status, stages, modules, and the LLM profile/model used for translation.
 - Normal runs, continue/render operations, re-inpainting, complete batches, and individual batch phases are now recorded in a separate versioned, atomically written `pipeline_history.json`.
