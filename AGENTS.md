@@ -25,6 +25,15 @@ Use `rg` for repo search.
 - Make surprising behavior opt-in or clearly discoverable through existing config/UI/module parameters. Preserve Qt localization and ensure pipeline features work or safely no-op in headless mode.
 - Keep long-running inference, IO, downloads, and model loading off the Qt main thread; trace signal and worker ordering, especially in `ui/module_manager.py`.
 
+## Git, Licensing, and Release Updates
+
+- Record completed changes in Git with focused commits. Stage only files that belong to the current task, preserve unrelated user-owned changes, and never rewrite published history or force-push.
+- Comply with the repository license and all licenses, attribution requirements, redistribution terms, and notices of incorporated dependencies, models, code, and assets. Do not add material with unclear or incompatible licensing.
+- For every release-worthy or user-facing change, review and update the README, changelog, project version, and credits/attribution information together. Keep English and translated documentation consistent where corresponding files exist.
+- Inspect every change for errors and regressions before completion. Run relevant automated tests after changes, plus the verification required by this file, and report failures or unverified behavior clearly.
+- After successful verification, push the resulting commits and version state to the configured upstream branch. Never force-push; report authentication, network, branch-protection, or remote failures instead of bypassing them.
+- Follow this `AGENTS.md` for all work in this repository. When nested `AGENTS.md` files apply, obey their more specific instructions as well.
+
 ## Performance and Maintainability
 
 - Trace production callers and data flow before changing code. Search for existing methods, helpers, and patterns; reuse or extend the owning implementation before adding another. Prefer standard-library and Qt facilities over custom equivalents.
