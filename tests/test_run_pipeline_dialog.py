@@ -52,7 +52,7 @@ from ballontranslator.ui.run_pipeline_dialog import (
 from ballontranslator.ui.configpanel import ConfigPanel
 from ballontranslator.ui.module_parse_widgets import ModuleParamDialog
 from ballontranslator.ui.mainwindow import MainWindow, PageListView
-from ballontranslator.ui.mainwindowbars import TitleBar
+from ballontranslator.ui.mainwindowbars import LeftBar, TitleBar
 from ballontranslator.ui.module_manager import ModuleManager
 from ballontranslator.ui.text_engine.annotations import (
     apply_text_combine_upright,
@@ -123,6 +123,10 @@ class RunPipelineDialogTests(unittest.TestCase):
         RunPipelineDialog._page_range = (1, None)
         self._stage_states = [pcfg.module.stage_enabled(idx) for idx in range(4)]
         self._pipeline_mode = pcfg.run_pipeline_mode
+        self._pipeline_range = (
+            pcfg.run_pipeline_range_start,
+            pcfg.run_pipeline_range_end,
+        )
         self._render_without_text_style_update = (
             pcfg.render_without_text_style_update
         )
@@ -163,6 +167,8 @@ class RunPipelineDialogTests(unittest.TestCase):
         pcfg.show_translator_tool = True
         pcfg.show_inpainter_tool = True
         pcfg.run_pipeline_mode = 'pipeline'
+        pcfg.run_pipeline_range_start = 1
+        pcfg.run_pipeline_range_end = 0
         pcfg.render_without_text_style_update = False
 
     def tearDown(self):
@@ -179,6 +185,10 @@ class RunPipelineDialogTests(unittest.TestCase):
             pcfg.show_inpainter_tool,
         ) = self._visibility_states
         pcfg.run_pipeline_mode = self._pipeline_mode
+        (
+            pcfg.run_pipeline_range_start,
+            pcfg.run_pipeline_range_end,
+        ) = self._pipeline_range
         pcfg.render_without_text_style_update = (
             self._render_without_text_style_update
         )
@@ -241,7 +251,7 @@ class RunPipelineDialogTests(unittest.TestCase):
         dialog.close()
 
     def test_typesetting_letter_case_defaults_without_uppercase_migration(self):
-        with tempfile.TemporaryDirectory() as directory:
+        with tempfile.TemporaryDirectory(dir=os.getcwd()) as directory:
             path = os.path.join(directory, 'config.json')
             with open(path, 'w', encoding='utf8') as config_file:
                 json.dump({'let_uppercase_flag': True}, config_file)
@@ -343,7 +353,7 @@ class RunPipelineDialogTests(unittest.TestCase):
         restored = ProgramConfig(**json.loads(json_dump_program_config(config)))
         self.assertEqual(restored.quick_insert_characters, '♥☆')
 
-        with tempfile.TemporaryDirectory() as directory:
+        with tempfile.TemporaryDirectory(dir=os.getcwd()) as directory:
             path = os.path.join(directory, 'config.json')
             with open(path, 'w', encoding='utf8') as config_file:
                 json.dump(
@@ -922,7 +932,7 @@ class RunPipelineDialogTests(unittest.TestCase):
             ),
             tr=lambda text: text,
         )
-        with tempfile.TemporaryDirectory() as directory:
+        with tempfile.TemporaryDirectory(dir=os.getcwd()) as directory:
             pcfg.module.llm_glossary_path = os.path.join(
                 directory,
                 'deleted-glossary.json',
@@ -1277,6 +1287,70 @@ class RunPipelineDialogTests(unittest.TestCase):
             self.assertEqual(calls, [])
             self.assertEqual(FakeDialog.deleted_count, 4)
 
+    def test_quick_run_dispatches_last_saved_page_range_without_dialog(self):
+        calls = []
+        owner = SimpleNamespace(
+            imgtrans_proj=SimpleNamespace(
+                pages={
+                    '001.png': [],
+                    '002.png': [],
+                    '003.png': [],
+                    '004.png': [],
+                }
+            ),
+            _run_imgtrans_wo_textstyle_update=True,
+            on_run_imgtrans=lambda **kwargs: calls.append(kwargs),
+        )
+        RunPipelineDialog._page_range = (2, 3)
+
+        MainWindow.quick_run_imgtrans(owner)
+
+        self.assertFalse(owner._run_imgtrans_wo_textstyle_update)
+        self.assertEqual(
+            calls,
+            [{'pages_to_process': ['002.png', '003.png']}],
+        )
+
+    def test_quick_run_range_uses_safe_persisted_defaults_and_clamps(self):
+        project = SimpleNamespace(
+            pages={'001.png': [], '002.png': [], '003.png': []}
+        )
+        RunPipelineDialog._page_range = None
+        pcfg.run_pipeline_range_start = 'invalid'
+        pcfg.run_pipeline_range_end = -5
+
+        with patch(
+            'ballontranslator.ui.run_pipeline_dialog.LOGGER.warning'
+        ) as warning:
+            selected = RunPipelineDialog.pages_from_stored_range(project)
+
+        self.assertEqual(selected, ['001.png', '002.png', '003.png'])
+        self.assertEqual(pcfg.run_pipeline_range_start, 1)
+        self.assertEqual(pcfg.run_pipeline_range_end, 0)
+        self.assertEqual(warning.call_count, 2)
+
+        RunPipelineDialog._page_range = (9, 20)
+        self.assertEqual(
+            RunPipelineDialog.pages_from_stored_range(project),
+            ['003.png'],
+        )
+
+    def test_left_bar_exposes_separate_dialog_and_quick_run_buttons(self):
+        window = QMainWindow()
+        bar = LeftBar(window)
+        dialog_spy = QSignalSpy(bar.run_imgtrans_clicked)
+        quick_spy = QSignalSpy(bar.quick_run_imgtrans_clicked)
+
+        bar.quickRunImgtransBtn.click()
+
+        self.assertEqual(len(dialog_spy), 0)
+        self.assertEqual(len(quick_spy), 1)
+        self.assertEqual(
+            bar.quickRunImgtransBtn.shortcut().toString(),
+            'Ctrl+F5',
+        )
+        self.assertTrue(bar.quickRunImgtransBtn.accessibleName())
+
     def test_view_actions_only_control_bottom_bar_visibility(self):
         window = QMainWindow()
         self.addCleanup(
@@ -1382,10 +1456,14 @@ class RunPipelineDialogTests(unittest.TestCase):
 
         config = ProgramConfig(
             run_pipeline_mode='rendering',
+            run_pipeline_range_start=2,
+            run_pipeline_range_end=5,
             render_without_text_style_update=True,
         )
         restored = ProgramConfig(**json.loads(json_dump_program_config(config)))
         self.assertEqual(restored.run_pipeline_mode, 'rendering')
+        self.assertEqual(restored.run_pipeline_range_start, 2)
+        self.assertEqual(restored.run_pipeline_range_end, 5)
         self.assertTrue(restored.render_without_text_style_update)
 
         pcfg.run_pipeline_mode = 'automation'

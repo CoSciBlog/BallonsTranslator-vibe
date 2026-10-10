@@ -1919,18 +1919,21 @@ QToolButton#RunPipelineModuleSelector::menu-indicator {
     right: 8px;
 }
 
-QToolButton#LeftBarRunButton {
+QToolButton#LeftBarRunButton,
+QToolButton#LeftBarQuickRunButton {
     border: none;
     border-radius: 7px;
     background-color: rgba(0, 0, 0, 0);
 }
 
-QToolButton#LeftBarRunButton:hover {
+QToolButton#LeftBarRunButton:hover,
+QToolButton#LeftBarQuickRunButton:hover {
     border: none;
     background-color: rgba(14, 170, 205, 20%);
 }
 
-QToolButton#LeftBarRunButton:pressed {
+QToolButton#LeftBarRunButton:pressed,
+QToolButton#LeftBarQuickRunButton:pressed {
     border: none;
     background-color: rgba(14, 170, 205, 32%);
 }

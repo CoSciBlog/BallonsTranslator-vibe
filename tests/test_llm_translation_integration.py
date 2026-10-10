@@ -205,7 +205,7 @@ class LLMTranslationIntegrationTest(
         )
 
     def test_build_copy_prompt_includes_glossary_but_not_project_history(self):
-        with tempfile.TemporaryDirectory() as directory:
+        with tempfile.TemporaryDirectory(dir=os.getcwd()) as directory:
             path = os.path.join(directory, 'terms.txt')
             with open(path, 'w', encoding='utf-8') as glossary_file:
                 glossary_file.write('Hero->勇者\nMage->法师\n')

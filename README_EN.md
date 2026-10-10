@@ -49,6 +49,7 @@
 * Low-memory LLM handoff
   - Enable **Unload local models before LLM requests** under **Settings → Pipeline** to release loaded detector, OCR, translator, and inpainter models before an LLM or Ollama request. This makes more RAM and VRAM available to the LLM; released modules load again automatically when needed.
   - The option serializes LLM pipeline stages with local translation to prevent an in-use model from being unloaded. It releases models owned by BallonsTranslator, but cannot unload a model managed by an external Ollama server.
+  - Local Ollama profiles expose **Ollama Context Length**. A value above `0` uses Ollama's native `/api/chat` request with `options.num_ctx`; `0` keeps the server default. The profile also shows a deliberately approximate combined RAM/VRAM range when the parameter count can be inferred from a model tag such as `27b-q4_K_M`. Actual RAM/VRAM allocation depends on the model architecture, quantization, GPU offloading, and parallel requests.
 
 * Safer settings scrolling
   - Scrolling the mouse wheel over combo boxes or numeric fields in **Settings** now scrolls the surrounding page without changing the selected value. Values remain editable by clicking, typing, or using the keyboard.
@@ -56,7 +57,9 @@
 * Integrated module settings and page workflow
   - **Settings → Modules** now includes dedicated **Text Detector**, **OCR**, **Inpaint**, and **Glossary** pages. Detector/OCR/inpainter pages edit the same selected-module parameters used by the pipeline, without loading models merely by opening Settings.
   - LLM profiles can be duplicated with all settings, and **Auto** is the default source-language choice for compatible translators.
+  - Use the regular sidebar Run button (`F5`) to review or change pipeline options. The adjacent lightning-marked quick-run button (`Ctrl+F5`) immediately reuses the saved options and last page range.
   - Pages can be excluded from every pipeline stage through **Ignore page** in the thumbnail context menu. Use **Tools → Upscaling → Upscale Current Page / Entire Project 2x** to replace confirmed source images with 2× upscaled copies. Upscaled files carry their effective factor (`001_x2.png`, then `001_x4.png` after another 2× pass), while project page references and metadata are updated with the rename.
+  - **On translation error** in the Run dialog can retry a failed page once, skip it, or abort the remaining pipeline. Skip remains the compatibility default.
 
 * Batch processing
   - Open **Tools → Batch Processing** (`Ctrl+Shift+B`) and select a parent folder to process its image-bearing direct child folders sequentially. Detector, primary/fallback OCR, inpainter, translator, glossary scope, and optional pre-upscaling are selectable per run.
@@ -286,3 +289,4 @@ This project is heavily dependent upon [manga-image-translator](https://github.c
 * The initial German UI catalog for this fork was generated locally with [TranslateGemma](https://ai.google.dev/gemma/docs/translation) and validated for Qt placeholders and catalog completeness.
 * Added Export to photoshop JSX script by [bropines](https://github.com/bropines). </br> To read the instructions, improve the code and just poke around to see how it works, you can go to `scripts/export to photoshop` -> `install_manual.md`.
 * The project-local Python and virtual-environment bootstrap uses [uv](https://github.com/astral-sh/uv), distributed under the Apache-2.0 or MIT license.
+* Additional fork attribution and license notes are collected in [CREDITS.md](CREDITS.md).

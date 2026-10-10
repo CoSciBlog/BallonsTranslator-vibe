@@ -13,6 +13,7 @@ from qtpy.QtWidgets import (
     QSpacerItem,
     QToolButton,
     QVBoxLayout,
+    QWidget,
 )
 from qtpy.QtCore import QEvent, QPoint, QSize, Qt, Signal
 from qtpy.QtGui import (
@@ -94,6 +95,7 @@ class LeftBar(Widget):
     save_proj = Signal()
     save_config = Signal()
     run_imgtrans_clicked = Signal()
+    quick_run_imgtrans_clicked = Signal()
     def __init__(self, mainwindow, *args, **kwargs) -> None:
         super().__init__(mainwindow, *args, **kwargs)
         self.mainwindow: QMainWindow = mainwindow
@@ -175,6 +177,34 @@ class LeftBar(Widget):
         self.runImgtransBtn.setAccessibleName(self.tr('Run'))
         self.runImgtransBtn.setShortcut(QKeySequence('F5'))
         self.runImgtransBtn.clicked.connect(self.run_imgtrans_clicked.emit)
+
+        self.quickRunImgtransBtn = QToolButton(self)
+        self.quickRunImgtransBtn.setObjectName('LeftBarQuickRunButton')
+        self.quickRunImgtransBtn.setIcon(
+            QIcon(themed_icon_path('run_quick.svg'))
+        )
+        self.quickRunImgtransBtn.setIconSize(
+            QSize(LEFTBTN_WIDTH + 3, LEFTBTN_WIDTH + 3)
+        )
+        self.quickRunImgtransBtn.setFixedSize(
+            LEFTBTN_WIDTH + 4, LEFTBTN_WIDTH + 4
+        )
+        quick_run_text = self.tr('Quick Run with Saved Settings')
+        self.quickRunImgtransBtn.setToolTip(
+            f'{quick_run_text} (Ctrl+F5)'
+        )
+        self.quickRunImgtransBtn.setAccessibleName(quick_run_text)
+        self.quickRunImgtransBtn.setShortcut(QKeySequence('Ctrl+F5'))
+        self.quickRunImgtransBtn.clicked.connect(
+            self.quick_run_imgtrans_clicked.emit
+        )
+
+        run_buttons = QWidget(self)
+        run_buttons_layout = QVBoxLayout(run_buttons)
+        run_buttons_layout.setContentsMargins(0, 0, 0, 0)
+        run_buttons_layout.setSpacing(3)
+        run_buttons_layout.addWidget(self.runImgtransBtn)
+        run_buttons_layout.addWidget(self.quickRunImgtransBtn)
         
         vlayout = QVBoxLayout(self)
         vlayout.addWidget(self.openBtn)
@@ -182,7 +212,7 @@ class LeftBar(Widget):
         vlayout.addWidget(self.globalSearchChecker)
         vlayout.addItem(QSpacerItem(0, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
         vlayout.addWidget(self.configChecker)
-        vlayout.addWidget(self.runImgtransBtn)
+        vlayout.addWidget(run_buttons)
         vlayout.setContentsMargins(padding, LEFTBTN_WIDTH // 2, padding, LEFTBTN_WIDTH // 2)
         vlayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         vlayout.setSpacing(LEFTBTN_WIDTH * 3 // 4)

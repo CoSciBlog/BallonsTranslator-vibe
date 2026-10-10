@@ -47,8 +47,10 @@ from ballontranslator.utils.llm_profiles import (
     LLM_OCR_KEY,
     LLM_TRANSLATOR_KEY,
     LLMProfile,
+    estimate_ollama_memory_gib,
     image_model_choices,
     is_profile_title_url,
+    ollama_native_chat_url,
     parse_profile_title,
     copy_profile,
     profile_by_id,
@@ -65,6 +67,7 @@ PROFILE_COMMON_PARAM_DEFS = [
     ('require_api_key', 'checkbox'),
     ('base_url', 'line_editor'),
     ('max_tokens', 'line_editor'),
+    ('ollama_context_length', 'line_editor'),
     ('temperature', 'line_editor'),
     ('top_p', 'line_editor'),
     ('frequency_penalty', 'line_editor'),
@@ -397,6 +400,7 @@ class ProfileCardWidget(QGroupBox):
             'vision_detail_level': self.tr('Vision Detail Level'),
             'thinking_level': self.tr('Thinking Level'),
             'max_tokens': self.tr('Max Tokens'),
+            'ollama_context_length': self.tr('Ollama Context Length'),
             'temperature': self.tr('Temperature'),
             'top_p': self.tr('Top P'),
             'frequency_penalty': self.tr('Frequency Penalty'),
@@ -423,6 +427,10 @@ class ProfileCardWidget(QGroupBox):
             'vision_prompt': self.tr('Instructions sent to the vision model for OCR.'),
             'image_prompt': self.tr('Instructions sent to the image model for cleanup.'),
             'max_tokens': self.tr('Maximum generated response tokens, not input/context tokens.'),
+            'ollama_context_length': self.tr(
+                'Context tokens requested from a local Ollama server. '
+                'Use 0 to keep the Ollama default.'
+            ),
             'temperature': self.tr('Sampling temperature.'),
             'top_p': self.tr('Top-p sampling.'),
             'frequency_penalty': self.tr('Sent only when greater than 0. Some OpenAI-compatible providers may ignore or reject it.'),
@@ -712,8 +720,19 @@ class ProfileCardWidget(QGroupBox):
         )
         self._install_detail_editor_scrollbars()
         layout.addWidget(self.details)
+        self.ollama_memory_label = QLabel(self)
+        self.ollama_memory_label.setObjectName('LLMProfileMemoryEstimate')
+        self.ollama_memory_label.setWordWrap(True)
+        self.ollama_memory_label.setMaximumWidth(LLM_PROMPT_EDITOR_WIDTH)
+        self.ollama_memory_label.setToolTip(self.tr(
+            'Approximate combined model and context-cache allocation. The '
+            'actual RAM/VRAM split depends on Ollama, GPU offloading, model '
+            'architecture, quantization, and parallel requests.'
+        ))
+        layout.addWidget(self.ollama_memory_label, 0, Qt.AlignmentFlag.AlignLeft)
         self._sync_minimum_width_with_content()
         self.details.setVisible(False)
+        self.ollama_memory_label.hide()
         self.setActionButtonsVisible(False)
 
         self.model_combo.paramwidget_edited.connect(self.on_model_edited)
@@ -759,6 +778,11 @@ class ProfileCardWidget(QGroupBox):
             glossary_checkbox.blockSignals(True)
             glossary_checkbox.setChecked(bool(self.profile.use_glossary))
             glossary_checkbox.blockSignals(False)
+        context_editor = self.details.param_widgets.get('ollama_context_length')
+        if isinstance(context_editor, QLineEdit):
+            context_editor.blockSignals(True)
+            context_editor.setText(str(self.profile.ollama_context_length))
+            context_editor.blockSignals(False)
         self.refreshTextBadge()
         self.refreshVisionBadge()
         self.refreshImageBadge()
@@ -977,6 +1001,7 @@ class ProfileCardWidget(QGroupBox):
 
     def setExpanded(self, expanded: bool):
         self.details.setVisible(expanded)
+        self._refreshOllamaMemoryEstimate()
         self.more_btn.setToolTip(self.tr('Edit'))
         self.more_btn.setIcon(self.edit_icon_active if expanded else self.edit_icon)
 
@@ -1190,6 +1215,7 @@ class ProfileCardWidget(QGroupBox):
         options = self.profile.model_options
         if value and value not in options:
             options.append(value)
+        self._refreshOllamaMemoryEstimate()
         self.profile_changed.emit()
         self.profile_summary_changed.emit()
 
@@ -1273,6 +1299,7 @@ class ProfileCardWidget(QGroupBox):
         self.model_combo.setCurrentText(text)
         self.model_combo.blockSignals(False)
         self.profile.model = text
+        self._refreshOllamaMemoryEstimate()
         if emit_changed:
             self.profile_changed.emit()
             self.profile_summary_changed.emit()
@@ -1452,6 +1479,11 @@ class ProfileCardWidget(QGroupBox):
                 content = int(str(content).strip())
             except (TypeError, ValueError):
                 return
+            if param_key == 'ollama_context_length' and not 0 <= content <= 1_048_576:
+                editor = self.details.param_widgets.get(param_key)
+                if isinstance(editor, QLineEdit):
+                    editor.setText(str(self.profile.ollama_context_length))
+                return
         elif profile_type is float:
             try:
                 content = float(str(content).strip())
@@ -1465,6 +1497,8 @@ class ProfileCardWidget(QGroupBox):
             self.profile_summary_changed.emit()
         elif param_key == 'image_base_url':
             self._syncImageModelCombo()
+        elif param_key in ('base_url', 'ollama_context_length'):
+            self.refreshConditionalVisibility()
         self.profile_changed.emit()
         if param_key == 'thinking_level':
             self.profile_summary_changed.emit()
@@ -1582,12 +1616,45 @@ class ProfileCardWidget(QGroupBox):
         self.image_model_combo.setVisible(support_image)
         self.setActionButtonsVisible(self._action_buttons_visible)
         self.details.setParamVisible('low_vram_mode', not require_key)
+        self.details.setParamVisible(
+            'ollama_context_length', bool(ollama_native_chat_url(self.profile))
+        )
         self.details.setSectionVisible('text', support_text)
         self.details.setSectionVisible('vision', support_vision)
         self.details.setSectionVisible('image', support_image)
         self.refreshKeyStatus()
         self._sync_summary_grid()
+        self._refreshOllamaMemoryEstimate()
         self._sync_minimum_width_with_content()
+
+    def _refreshOllamaMemoryEstimate(self) -> None:
+        is_ollama = bool(ollama_native_chat_url(self.profile))
+        self.ollama_memory_label.setVisible(
+            is_ollama and not self.details.isHidden()
+        )
+        if not is_ollama:
+            return
+        context_length = self.profile.ollama_context_length
+        estimate = estimate_ollama_memory_gib(
+            self.profile.model,
+            context_length,
+        )
+        if context_length <= 0:
+            text = self.tr(
+                'Estimated RAM/VRAM: Ollama default. Set a context length '
+                'to calculate an estimate.'
+            )
+        elif estimate is None:
+            text = self.tr(
+                'Estimated RAM/VRAM: unavailable because the parameter count '
+                'could not be read from the model name.'
+            )
+        else:
+            text = self.tr(
+                'Estimated model + context memory: {minimum:.1f}–{maximum:.1f} '
+                'GiB combined RAM/VRAM.'
+            ).format(minimum=estimate[0], maximum=estimate[1])
+        self.ollama_memory_label.setText(text)
 
     def refreshKeyStatus(self):
         require_key = bool(self.profile.require_api_key)

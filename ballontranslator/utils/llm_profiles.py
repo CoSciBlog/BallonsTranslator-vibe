@@ -138,6 +138,7 @@ PROVIDER_DEFAULTS = {
         "vision_detail_level": "auto",
         "model_options": ["llama3.1", "qwen2.5", "mistral"],
         "vision_model_options": ["llama3.1", "qwen2.5", "mistral"],
+        "ollama_context_length": 0,
     },
 }
 
@@ -199,6 +200,7 @@ class LLMProfile(Config):
     vision_prompt: str = DEFAULT_OCR_PROMPT
     image_prompt: str = DEFAULT_INPAINT_PROMPT
     max_tokens: int = 8192
+    ollama_context_length: int = 0
     temperature: float = 0.1
     top_p: float = 1.0
     frequency_penalty: float = 0.0
@@ -208,6 +210,17 @@ class LLMProfile(Config):
     low_vram_mode: bool = False
 
     def __post_init__(self) -> None:
+        if (
+            not isinstance(self.ollama_context_length, int)
+            or isinstance(self.ollama_context_length, bool)
+            or self.ollama_context_length < 0
+            or self.ollama_context_length > 1_048_576
+        ):
+            LOGGER.warning(
+                'Discard invalid LLM profile ollama_context_length for %s.',
+                self.id or self.name,
+            )
+            self.ollama_context_length = 0
         if not isinstance(self.use_glossary, bool):
             LOGGER.warning('Discard invalid LLM profile use_glossary for %s.', self.id or self.name)
             self.use_glossary = True
@@ -256,6 +269,96 @@ class LLMProfile(Config):
                         'thinking_level_options', 'support_text', 'support_vision', 'support_image'):
                 data.pop(key, None)
         return data
+
+
+def ollama_native_chat_url(profile: LLMProfile) -> str:
+    """Return the native chat endpoint for a recognized Ollama profile.
+
+    ``0`` remains the safe default context value: the normal OpenAI-compatible
+    route is retained until the user explicitly selects a context length.
+
+    >>> ollama_native_chat_url(LLMProfile(base_url='http://127.0.0.1:11434/v1'))
+    'http://127.0.0.1:11434/api/chat'
+    >>> ollama_native_chat_url(LLMProfile(base_url='https://api.example/v1'))
+    ''
+    """
+    try:
+        url = urlsplit(str(profile.base_url or '').strip())
+        host = (url.hostname or '').lower()
+        port = url.port
+    except ValueError:
+        return ''
+    if url.scheme not in ('http', 'https') or not host or host == 'ollama.com':
+        return ''
+    is_ollama = profile.id == 'ollama' or port == 11434
+    if not is_ollama:
+        return ''
+    path = url.path.rstrip('/')
+    if path.endswith('/api/chat'):
+        return url._replace(path=path, query='', fragment='').geturl()
+    if path.endswith('/chat/completions'):
+        path = path[:-len('/chat/completions')]
+    if path.endswith('/v1'):
+        path = path[:-len('/v1')]
+    return url._replace(
+        path=path.rstrip('/') + '/api/chat', query='', fragment=''
+    ).geturl()
+
+
+def estimate_ollama_memory_gib(
+    model: str,
+    context_length: int,
+) -> Optional[Tuple[float, float]]:
+    """Estimate combined model and KV-cache memory from an Ollama model tag.
+
+    The deliberately broad range accounts for architecture-specific grouped
+    query attention and runtime overhead. It predicts combined allocation, not
+    the RAM/VRAM split selected by Ollama.
+
+    >>> estimate_ollama_memory_gib('example:27b-q3_k_s', 32768)
+    (19.8, 33.0)
+    >>> estimate_ollama_memory_gib('model-without-size', 32768) is None
+    True
+    """
+    if not isinstance(context_length, int) or context_length <= 0:
+        return None
+    text = str(model or '')
+    size_matches = list(re.finditer(
+        r'(?<![A-Za-z0-9])(\d+(?:\.\d+)?)\s*[bB](?![A-Za-z])',
+        text,
+    ))
+    if not size_matches:
+        return None
+    parameters_billion = float(size_matches[-1].group(1))
+    if parameters_billion <= 0 or parameters_billion > 1000:
+        return None
+
+    quant_match = re.search(r'(?i)(?:^|[:_-])q([2-8])(?:_[a-z0-9]+)*', text)
+    if quant_match:
+        bits = {
+            2: 2.8,
+            3: 3.5,
+            4: 4.5,
+            5: 5.5,
+            6: 6.5,
+            7: 7.5,
+            8: 8.5,
+        }[int(quant_match.group(1))]
+    elif re.search(r'(?i)(?:^|[:_-])(?:f16|fp16|bf16)(?:$|[:_-])', text):
+        bits = 16.0
+    else:
+        # Most default Ollama library tags are weight-quantized even when the
+        # quantization is omitted from the visible tag.
+        bits = 4.5
+
+    weight_gib = parameters_billion * bits / 8.0
+    context_k = context_length / 1024.0
+    kv_low = parameters_billion * context_k * 0.008
+    kv_high = parameters_billion * context_k * 0.020
+    return (
+        round(weight_gib * 1.05 + kv_low + 0.5, 1),
+        round(weight_gib * 1.20 + kv_high + 1.5, 1),
+    )
 
 
 def split_image_model_selection(value: str) -> Tuple[str, str]:

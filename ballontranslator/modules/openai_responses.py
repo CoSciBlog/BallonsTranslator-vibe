@@ -78,8 +78,16 @@ class OpenAIResponsesSession(ResponsesWebSocket):
     Codex account, subscription cookies, or release identity.
     """
 
-    def __init__(self, url: str, cache_key: str, proxy: str, headers: Dict[str, str]) -> None:
-        super().__init__(url, cache_key, proxy)
+    def __init__(
+        self,
+        url: str,
+        cache_key: str,
+        proxy: str,
+        headers: Dict[str, str],
+        *,
+        websocket: bool = True,
+    ) -> None:
+        super().__init__(url, cache_key, proxy, websocket=websocket)
         self.headers = headers
         self._chat_prefix: List[Dict] = []
 

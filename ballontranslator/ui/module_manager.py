@@ -47,7 +47,12 @@ from .custom_widget import ImgtransProgressMessageBox, ParamComboBox, ProgressMe
 from .configpanel import ConfigPanel
 from ballontranslator.utils.proj_imgtrans import ProjImgTrans
 from ballontranslator.utils.reinpaint import reinpaint_project_page
-from ballontranslator.utils.config import pcfg, RunStatus, save_config
+from ballontranslator.utils.config import (
+    pcfg,
+    RunStatus,
+    save_config,
+    TranslationFailurePolicy,
+)
 from ballontranslator.utils.llm_profiles import (
     LLM_INPAINT_KEY, LLM_OCR_KEY, LLM_TRANSLATOR_KEY, LLMProfile,
     profile_by_id, profile_from_config,
@@ -170,6 +175,32 @@ def _mark_translation_finished(
     """Mark completion, then let the owning translator commit page context."""
     project.mark_translation_finished(page_key, translator.lang_target)
     translator.on_page_translation_finished(project, page_key)
+
+
+def _run_translation_attempts(
+    translate_once: Callable[[], bool],
+    failure_policy: str,
+    stop_event: threading.Event,
+) -> bool:
+    """Run a page translation according to the configured failure policy.
+
+    ``retry`` performs exactly one additional attempt. User cancellation and
+    credential/model errors set ``stop_event`` inside the request boundary and
+    therefore never trigger a retry.
+
+    >>> event = threading.Event()
+    >>> results = iter((False, True))
+    >>> _run_translation_attempts(lambda: next(results), 'retry', event)
+    True
+    """
+    attempts = 2 if failure_policy == TranslationFailurePolicy.RETRY else 1
+    for attempt in range(attempts):
+        success = translate_once()
+        if success or stop_event.is_set():
+            return success
+        if attempt + 1 < attempts:
+            LOGGER.warning('Retrying failed page translation once.')
+    return False
 
 
 class ModuleThread(QThread):
@@ -709,10 +740,14 @@ class TranslateThread(ModuleThread):
             
             page_key = self.pipeline_pagekey_queue.pop(0)
             self.blockSignals(True)
+            success = False
             try:
-                self._translate_page(self.imgtrans_proj, page_key)
+                success = _run_translation_attempts(
+                    lambda: self._translate_page(self.imgtrans_proj, page_key),
+                    cfg_module.translation_failure_policy,
+                    stop_event,
+                )
             except Exception as e:
-                # TODO: allowing retry/skip/terminate
                 msg = '{}\n{}: {}'.format(
                     self.tr('Translation Failed.'),
                     self.tr('Page'),
@@ -724,13 +759,15 @@ class TranslateThread(ModuleThread):
                         translator=self.translator.name,
                     )
                     
-                self.blockSignals(False)
                 create_error_dialog(e, msg, 'TranslationFailed')
-                # self.imgtrans_proj = None
-                # self.finished_counter = 0
-                # self.pipeline_pagekey_queue = []
-                # return
             self.blockSignals(False)
+            if (
+                not success
+                and cfg_module.translation_failure_policy
+                == TranslationFailurePolicy.ABORT
+                and not stop_event.is_set()
+            ):
+                stop_event.set()
             if stop_event.is_set():
                 self.module_thread_stopped.emit()
                 break
@@ -1032,15 +1069,28 @@ class ImgtransThread(QThread):
         page_key: str,
         blk_list: List[TextBlock],
     ) -> bool:
-        project.begin_full_page_translation(page_key)
-        success = self._translate_textblocks(
-            blk_list,
-            project=project,
-            page_key=page_key,
-            full_page=True,
+        def translate_once() -> bool:
+            project.begin_full_page_translation(page_key)
+            return self._translate_textblocks(
+                blk_list,
+                project=project,
+                page_key=page_key,
+                full_page=True,
+            )
+
+        success = _run_translation_attempts(
+            translate_once,
+            cfg_module.translation_failure_policy,
+            self.stop_event,
         )
         if success:
             _mark_translation_finished(project, page_key, self.translator)
+        elif (
+            cfg_module.translation_failure_policy
+            == TranslationFailurePolicy.ABORT
+            and not self.isStopRequested()
+        ):
+            self.requestStop()
         return success
 
     def _blktrans_pipeline(
@@ -2060,6 +2110,7 @@ class ModuleManager(QObject):
             'module_file_group': 10,
             'file_check': 15,
             'file_start': 20,
+            'archive_combine': 70,
             'archive_extract': 75,
             'archive_move': 85,
             'installing_packages': 25,
@@ -2085,11 +2136,13 @@ class ModuleManager(QObject):
                 progress = max(0, min(100, int(downloaded / total * 100)))
         elif event in {'installing_packages', 'package_output'}:
             verbose_message = ''
+        elif event == 'archive_combine':
+            message = self.tr('Combining archive volumes')
         if not message:
             message = path or module_name
 
         if shared.HEADLESS:
-            if event in {'checking_dependencies', 'file_start', 'archive_extract', 'installing_packages', 'package_output', 'importing', 'loading_model'}:
+            if event in {'checking_dependencies', 'file_start', 'archive_combine', 'archive_extract', 'installing_packages', 'package_output', 'importing', 'loading_model'}:
                 LOGGER.info(f'{message}: {event}')
             return
         if self.prepare_msgbox is not None:

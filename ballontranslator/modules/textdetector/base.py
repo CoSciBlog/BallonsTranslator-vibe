@@ -38,7 +38,8 @@ class TextDetectorBase(BaseModule):
             self.load_model()
 
         try:
-            # TODO: allow processing proj entirely in _detect and yield progress
+            # Project iteration and progress belong to ImgtransThread; detector
+            # implementations receive one image plus the shared project context.
             # All text detectors only support 3 channels input
             if img.ndim == 3 and img.shape[2] == 4:
                 img = cv2.cvtColor(img, cv2.COLOR_RGBA2RGB)

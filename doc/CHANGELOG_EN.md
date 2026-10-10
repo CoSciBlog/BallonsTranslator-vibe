@@ -1,5 +1,20 @@
 # Changelogs
 
+### 2026-10-11 — 1.5.19+vibe.16
+- Added a persisted translation-failure policy with **Retry once**, **Skip page**, and **Abort pipeline** choices in the Run dialog; the existing skip behavior remains the default.
+- Fixed the inpainting CPU fallback to raise `NotImplementedError` correctly, made split `.001`/`.002` download archives extractable with explicit progress, and routed the legacy MIT48px beam entry point through the tensorized decoder cache.
+- Made OpenAI Responses transport selectable for deterministic Windows tests, removed sandbox-sensitive temporary-file patterns, and retained the completed Quick Run and Ollama context/RAM controls from the preceding builds.
+
+### 2026-10-10 — 1.5.19+vibe.15
+- Added a per-profile local Ollama context length. Explicit values are sent through native `/api/chat` as `options.num_ctx` for translation and vision OCR; `0` preserves Ollama's default behavior.
+- Ollama profiles now show a clearly labelled combined RAM/VRAM estimate derived from model-tag parameter count, quantization, and context length without loading a model or accessing the network.
+- Standard `:11434/v1`, remote `:11434`, and native `/api/chat` endpoints are supported while retaining JSON Schema, vision input, reasoning control, and token accounting.
+
+### 2026-10-10 — 1.5.19+vibe.14
+- Added a separate sidebar quick-run button (`Ctrl+F5`) that starts the pipeline immediately with the current saved module, language, glossary, and processing settings without opening the Run dialog.
+- The last Run-dialog page range is now persisted and reused by quick run, with safe defaults and clamping when the next project contains fewer pages.
+- The existing `F5` button remains unchanged and continues to open the full Run dialog; the new action has a distinct lightning-marked icon and English/German accessibility text.
+
 ### 2026-10-10 — 1.5.19+vibe.13
 - Upscaled source images are now renamed with their effective factor, for example `001.png` → `001_x2.png`; another 2× pass produces `001_x4.png`.
 - Project page keys, indexes, current-page state, image metadata, and retained text geometry now move atomically with the renamed image, including rollback on activation or save failure.

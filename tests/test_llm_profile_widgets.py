@@ -73,6 +73,31 @@ class LLMProfileModelSelectorTest(unittest.TestCase):
         card.syncFromProfile()
         self.assertTrue(checkbox.isChecked())
 
+    def test_ollama_context_and_memory_estimate_are_profile_scoped(self) -> None:
+        profile = default_profile('Ollama')
+        profile.model = 'qwen:27b-q3_k_s'
+        card = ProfileCardWidget(profile)
+        self.addCleanup(card.deleteLater)
+        context_editor = card.details.param_widgets['ollama_context_length']
+
+        card.setExpanded(True)
+        self.assertTrue(context_editor.isVisibleTo(card))
+        context_editor.setText('32768')
+        context_editor.textEdited.emit('32768')
+        context_editor.editingFinished.emit()
+
+        self.assertEqual(profile.ollama_context_length, 32768)
+        self.assertIn('GiB', card.ollama_memory_label.text())
+        self.assertFalse(card.ollama_memory_label.isHidden())
+
+        remote = ProfileCardWidget(default_profile('OpenAI'))
+        self.addCleanup(remote.deleteLater)
+        remote.setExpanded(True)
+        self.assertFalse(
+            remote.details.param_widgets['ollama_context_length'].isVisibleTo(remote)
+        )
+        self.assertTrue(remote.ollama_memory_label.isHidden())
+
     def image_card(self) -> ProfileCardWidget:
         card = ProfileCardWidget(LLMProfile(
             id='image-test', name='Image test', support_image=True, support_vision=True,

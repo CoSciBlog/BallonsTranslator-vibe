@@ -1,5 +1,6 @@
 import copy
 import json
+import os
 import unittest
 from types import SimpleNamespace
 from unittest import mock
@@ -131,6 +132,7 @@ class LLMTranslatorTest(unittest.TestCase):
                             'llm_translate_summary_memory': False, 'llm_glossary_path': ''}
                 with mock.patch.object(LLMTranslator, 'params', copy.deepcopy(LLMTranslator.params)), \
                         mock.patch.dict(pcfg.module.__dict__, settings), \
+                        mock.patch.dict(os.environ, {'BALLOONTRANS_RESPONSES_WEBSOCKET': '0'}), \
                         mock.patch('websockets.asyncio.client.connect', side_effect=OSError('Offline HTTP contract test')), \
                         httpx.Client(transport=httpx.MockTransport(respond)) as client:
                     translator = LLMTranslator('日本語', 'English')

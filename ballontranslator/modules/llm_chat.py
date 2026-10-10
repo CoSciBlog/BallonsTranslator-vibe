@@ -8,6 +8,7 @@ import threading
 import time
 import uuid
 from dataclasses import dataclass
+from types import SimpleNamespace
 from typing import Any, Dict, Optional, Tuple, TYPE_CHECKING
 
 from .context.errors import provider_error_message
@@ -26,6 +27,7 @@ from ballontranslator.utils.llm_profiles import (
     THINKING_AUTO,
     THINKING_DISABLED,
     normalize_thinking_level,
+    ollama_native_chat_url,
     resolve_api_key,
 )
 
@@ -167,6 +169,91 @@ def openai_json_response_format(
             'schema': schema,
         },
     }
+
+
+def ollama_native_chat_payload(
+    api_args: Dict[str, Any],
+    context_length: int,
+) -> Dict[str, Any]:
+    """Translate the app's chat arguments to Ollama's native request shape.
+
+    Native Ollama is used only for an explicit per-profile context length,
+    because its OpenAI-compatible endpoint does not provide a stable request
+    field for changing ``num_ctx``.
+
+    >>> payload = ollama_native_chat_payload({
+    ...     'model': 'demo:7b', 'messages': [{'role': 'user', 'content': 'Hi'}],
+    ...     'max_tokens': 128, 'temperature': 0.2,
+    ... }, 16384)
+    >>> payload['options']
+    {'num_ctx': 16384, 'num_predict': 128, 'temperature': 0.2}
+    """
+    messages = []
+    for original in api_args.get('messages', ()):  # OpenAI text/vision parts
+        if not isinstance(original, dict):
+            continue
+        content = original.get('content', '')
+        images = []
+        if isinstance(content, list):
+            text_parts = []
+            for part in content:
+                if not isinstance(part, dict):
+                    continue
+                if part.get('type') == 'text':
+                    text_parts.append(str(part.get('text', '')))
+                elif part.get('type') == 'image_url':
+                    image = part.get('image_url', '')
+                    if isinstance(image, dict):
+                        image = image.get('url', '')
+                    image = str(image or '')
+                    if image.startswith('data:') and ',' in image:
+                        image = image.split(',', 1)[1]
+                    if image:
+                        images.append(image)
+            content = '\n'.join(part for part in text_parts if part)
+        message = {
+            'role': str(original.get('role', 'user')),
+            'content': str(content or ''),
+        }
+        if images:
+            message['images'] = images
+        messages.append(message)
+
+    options: Dict[str, Any] = {'num_ctx': int(context_length)}
+    for source, target in (
+        ('max_tokens', 'num_predict'),
+        ('max_completion_tokens', 'num_predict'),
+        ('temperature', 'temperature'),
+        ('top_p', 'top_p'),
+        ('frequency_penalty', 'frequency_penalty'),
+        ('presence_penalty', 'presence_penalty'),
+        ('seed', 'seed'),
+        ('stop', 'stop'),
+    ):
+        if source in api_args:
+            options[target] = api_args[source]
+
+    payload: Dict[str, Any] = {
+        'model': str(api_args.get('model', '')),
+        'messages': messages,
+        'stream': False,
+        'options': options,
+    }
+    response_format = api_args.get('response_format')
+    if isinstance(response_format, dict):
+        format_type = response_format.get('type')
+        if format_type == 'json_schema':
+            schema = response_format.get('json_schema', {}).get('schema')
+            if isinstance(schema, dict):
+                payload['format'] = schema
+        elif format_type == 'json_object':
+            payload['format'] = 'json'
+    reasoning = normalize_thinking_level(api_args.get('reasoning_effort'))
+    if reasoning == THINKING_DISABLED or str(reasoning).lower() == 'none':
+        payload['think'] = False
+    elif reasoning != THINKING_AUTO:
+        payload['think'] = reasoning
+    return payload
 
 
 @dataclass(frozen=True)
@@ -332,8 +419,73 @@ class LLMChatRequester:
         self.last_request_time = time.time()
         self.request_count_minute += 1
 
-    def _codex_websocket_enabled(self) -> bool:
-        return os.environ.get('BALLOONTRANS_CODEX_WEBSOCKET') != '0'
+    def _request_ollama_native(
+        self,
+        profile: LLMProfile,
+        api_args: Dict[str, Any],
+        endpoint: str,
+    ) -> LLMChatResult:
+        """Send one non-streaming request to a local native Ollama API."""
+        self._respect_delay()
+        self._check_request_current(self.stop_event)
+        client = self._http_client(str(self.get_param_value('proxy') or ''))
+        try:
+            payload = ollama_native_chat_payload(
+                api_args,
+                profile.ollama_context_length,
+            )
+            response = client.post(endpoint, json=payload, timeout=None)
+            if response.status_code == 400 and payload.get('think'):
+                self.logger.warning(
+                    'Ollama rejected the requested thinking level; retrying '
+                    'without explicit thinking control.'
+                )
+                payload.pop('think', None)
+                response = client.post(endpoint, json=payload, timeout=None)
+            if response.status_code == 400 and isinstance(payload.get('format'), dict):
+                self.logger.warning(
+                    'Ollama rejected native JSON schema mode; retrying with '
+                    'generic JSON mode.'
+                )
+                payload['format'] = 'json'
+                response = client.post(endpoint, json=payload, timeout=None)
+            response.raise_for_status()
+            data = response.json()
+        finally:
+            client.close()
+        self._check_request_current(self.stop_event)
+        if not isinstance(data, dict):
+            raise RuntimeError('Ollama returned an invalid chat response.')
+        if data.get('error'):
+            raise RuntimeError(str(data['error']))
+        message = data.get('message')
+        content = message.get('content', '') if isinstance(message, dict) else ''
+        prompt_tokens = int(data.get('prompt_eval_count') or 0)
+        completion_tokens = int(data.get('eval_count') or 0)
+        result = LLMChatResult(
+            content=str(content or ''),
+            usage=SimpleNamespace(
+                prompt_tokens=prompt_tokens,
+                completion_tokens=completion_tokens,
+                total_tokens=prompt_tokens + completion_tokens,
+            ),
+            finish_reason=str(data.get('done_reason') or ''),
+        )
+        if result.finish_reason.strip().lower() == 'length':
+            raise LLMOutputLimitError(
+                profile.id,
+                profile.name,
+                profile.max_tokens,
+                str(profile.thinking_level or THINKING_AUTO),
+            )
+        return result
+
+    def _responses_websocket_enabled(self) -> bool:
+        value = os.environ.get(
+            'BALLOONTRANS_RESPONSES_WEBSOCKET',
+            os.environ.get('BALLOONTRANS_CODEX_WEBSOCKET'),
+        )
+        return value != '0'
 
     def _check_request_current(self, stop_event: Optional[threading.Event]) -> None:
         if stop_event is not self.stop_event or (stop_event is not None and stop_event.is_set()):
@@ -361,7 +513,7 @@ class LLMChatRequester:
             self._check_request_current(stop_event)
             identity = (profile.id, str(api_args['model']), account.generation)
             proxy = str(self.get_param_value('proxy') or '')
-            websocket = self._codex_websocket_enabled()
+            websocket = self._responses_websocket_enabled()
             session = self._codex_sessions.get(identity)
             if (session is None or session.closed or session.proxy != proxy
                     or session.websocket != websocket):
@@ -382,6 +534,13 @@ class LLMChatRequester:
             return result
         if profile.backend != 'openai':
             raise LLMUserActionRequiredError('This LLM profile backend is unavailable.')
+        ollama_endpoint = ollama_native_chat_url(profile)
+        if profile.ollama_context_length > 0 and ollama_endpoint:
+            return self._request_ollama_native(
+                profile,
+                api_args,
+                ollama_endpoint,
+            )
         openai = self._openai_module()
         client = self._initialize_client(profile)
         self._respect_delay()
@@ -413,7 +572,9 @@ class LLMChatRequester:
                 headers['Authorization'] = f'Bearer {client.api_key}'
                 self._openai_session = session = OpenAIResponsesSession(
                     base_url + '/responses', cache_key or str(uuid.uuid4()),
-                    str(self.get_param_value('proxy') or ''), headers)
+                    str(self.get_param_value('proxy') or ''), headers,
+                    websocket=self._responses_websocket_enabled(),
+                )
                 self._openai_session_identity = identity
             self._check_request_current(stop_event)
             result = session.request_chat(api_args, profile, stop_event)

@@ -5,7 +5,7 @@ import traceback
 import re
 import shutil
 import os.path as osp
-from typing import List, Union, Optional, Any
+from typing import List, Union, Optional, Any, Tuple
 import hashlib
 from dataclasses import dataclass, field, is_dataclass
 import tempfile
@@ -29,6 +29,95 @@ READ_DATA_CHUNK = 128 * 1024
 
 class DownloadCancelled(Exception):
     pass
+
+
+def prepare_archive_for_extraction(
+    archive_paths: List[str],
+    *,
+    progress_callback=None,
+    cancel_event=None,
+) -> Tuple[str, Optional[str]]:
+    """Return an extractable archive, joining numbered split volumes safely.
+
+    Numbered volumes must use a contiguous ``.001``, ``.002`` ... suffix and
+    share the same base archive name, for example ``model.zip.001``. The
+    second return value is a temporary combined archive the caller must remove.
+
+    >>> prepare_archive_for_extraction(['model.zip'])[0]
+    'model.zip'
+    """
+    if not archive_paths:
+        raise ValueError('At least one archive file is required.')
+    if len(archive_paths) == 1:
+        return archive_paths[0], None
+
+    volumes = []
+    base_path = None
+    for path in archive_paths:
+        match = re.match(r'^(.*)\.(\d{3,})$', path)
+        if match is None:
+            raise ValueError(
+                'Multiple archive files must be numbered split volumes '
+                '(for example model.zip.001, model.zip.002).'
+            )
+        candidate_base, number = match.group(1), int(match.group(2))
+        if base_path is None:
+            base_path = candidate_base
+        elif candidate_base != base_path:
+            raise ValueError('Split archive volumes must share one base filename.')
+        volumes.append((number, path))
+
+    volumes.sort(key=lambda item: item[0])
+    expected = list(range(1, len(volumes) + 1))
+    actual = [number for number, _path in volumes]
+    if actual != expected:
+        raise ValueError(
+            f'Split archive volumes must be contiguous from .001; found {actual}.'
+        )
+
+    supported_extensions = sorted(
+        {
+            extension.lower()
+            for _name, extensions, _description in shutil.get_unpack_formats()
+            for extension in extensions
+        },
+        key=len,
+        reverse=True,
+    )
+    extension = next(
+        (suffix for suffix in supported_extensions if base_path.lower().endswith(suffix)),
+        None,
+    )
+    if extension is None:
+        raise ValueError(
+            'Split archive base filename must retain a supported archive extension.'
+        )
+    root = base_path[:-len(extension)]
+    combined_path = f'{root}.combined-{uuid.uuid4().hex}{base_path[-len(extension):]}'
+    partial_path = _partial_path(combined_path)
+    _notify_progress(
+        progress_callback,
+        event='archive_combine',
+        path=combined_path,
+        volumes=len(volumes),
+        message='Combining archive volumes',
+    )
+    try:
+        with open(partial_path, 'wb') as combined:
+            for _number, volume_path in volumes:
+                _raise_if_cancelled(cancel_event)
+                with open(volume_path, 'rb') as volume:
+                    while True:
+                        chunk = volume.read(READ_DATA_CHUNK)
+                        if not chunk:
+                            break
+                        combined.write(chunk)
+                        _raise_if_cancelled(cancel_event)
+        os.replace(partial_path, combined_path)
+    finally:
+        if osp.exists(partial_path):
+            os.remove(partial_path)
+    return combined_path, combined_path
 
 
 def _cancel_requested(cancel_event=None):
@@ -477,9 +566,13 @@ def download_and_check_files(url: str,
     if not archive_downloaded:
         return False
     
-    # extract archived
+    # Extract a single archive or a contiguous set of numbered split volumes.
     _raise_if_cancelled(cancel_event)
-    archivep = tmp_downloaded_archives[0] # todo: support multi-volume
+    archivep, combined_archive = prepare_archive_for_extraction(
+        tmp_downloaded_archives,
+        progress_callback=progress_callback,
+        cancel_event=cancel_event,
+    )
     extract_dir = osp.join(shared.cache_dir, 'tmp_extract')
     if osp.exists(extract_dir):
         shutil.rmtree(extract_dir)
@@ -487,11 +580,15 @@ def download_and_check_files(url: str,
     LOGGER.info(f'Extracting {archivep} ...')
     _notify_progress(progress_callback, event='archive_extract', path=archivep, total=None, downloaded=None)
     try:
-        shutil.unpack_archive(archivep, extract_dir)
-    except Exception:
-        if osp.exists(extract_dir):
-            shutil.rmtree(extract_dir)
-        raise
+        try:
+            shutil.unpack_archive(archivep, extract_dir)
+        except Exception:
+            if osp.exists(extract_dir):
+                shutil.rmtree(extract_dir)
+            raise
+    finally:
+        if combined_archive and osp.exists(combined_archive):
+            os.remove(combined_archive)
 
     all_valid = True
     try:

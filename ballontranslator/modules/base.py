@@ -298,7 +298,9 @@ class BaseModule:
         return model_deleted
 
     def load_model(self):
-        # TODO: check and download files & inform UIs
+        # ModuleThread/ensure_module_files owns downloads and progress before
+        # this model-loading boundary. Direct callers intentionally perform
+        # only the module-specific in-memory setup here.
         aquire_model_loading_lock()
         try:
             self._load_model()

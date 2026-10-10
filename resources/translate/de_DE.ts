@@ -229,43 +229,43 @@
 <context>
     <name>BottomBar</name>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="655"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="685"/>
         <source>Text Detector</source>
         <translation>Textdetektor</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="659"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="689"/>
         <source>OCR</source>
         <translation>OCR (Texterkennung)</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="660"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="690"/>
         <source>Inpaint</source>
         <translation>Inpainting</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="662"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="692"/>
         <source>Translator</source>
         <translation>Übersetzer</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="670"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="700"/>
         <source>Enable/disable paint mode</source>
         <translation>Malmodus aktivieren/deaktivieren</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="674"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="704"/>
         <source>Enable/disable text edit mode</source>
         <translation>Textbearbeitungsmodus aktivieren/deaktivieren
 ```</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="680"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="710"/>
         <source>Original image opacity</source>
         <translation>Originalbild-Deckkraft</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="684"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="714"/>
         <source>Editing layer opacity</source>
         <translation>Deckkraft der Bearbeitungs-Ebene</translation>
     </message>
@@ -2700,53 +2700,53 @@ Once you provide the prompt, I will generate the image.  Then, when you want me 
 <context>
     <name>ImgtransThread</name>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="958"/>
         <location filename="../../ballontranslator/ui/module_manager.py" line="995"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1014"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1025"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1073"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1088"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1148"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1334"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1392"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1406"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1468"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1482"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1032"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1051"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1062"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1123"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1138"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1198"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1384"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1442"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1456"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1518"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1532"/>
         <source>Page</source>
         <translation>Seite</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="992"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1011"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1022"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1029"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1048"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1059"/>
         <source>Translation Failed.</source>
         <translation>Übersetzung fehlgeschlagen.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1070"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1085"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1331"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1345"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1120"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1135"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1381"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1395"/>
         <source>OCR Failed.</source>
         <translation>Texterkennung fehlgeschlagen.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1145"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1389"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1403"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1465"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1479"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1195"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1439"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1453"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1515"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1529"/>
         <source>Inpainting Failed.</source>
         <translation>Bildrekonstruktion fehlgeschlagen.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1262"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1312"/>
         <source>Text Detection Failed.</source>
         <translation>Texterkennung fehlgeschlagen.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1536"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1545"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1586"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1595"/>
         <source>Image translation failed.</source>
         <translation>Bildübersetzung fehlgeschlagen.</translation>
     </message>
@@ -2870,8 +2870,8 @@ Once you provide the prompt, I will generate the image.  Then, when you want me 
 <context>
     <name>InpaintThread</name>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="468"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="478"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="499"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="509"/>
         <source>Inpainting Failed.</source>
         <translation>Bildrekonstruktion fehlgeschlagen.</translation>
     </message>
@@ -2979,72 +2979,72 @@ Once you provide the prompt, I will generate the image.  Then, when you want me 
 <context>
     <name>LLMProfilesWidget</name>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1640"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1707"/>
         <source>New</source>
         <translation>Neu</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1644"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1711"/>
         <source>New Empty Profile</source>
         <translation>Neues, leeres Profil</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1645"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1712"/>
         <source>Import from Clipboard</source>
         <translation>Aus der Zwischenablage importieren</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1649"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1716"/>
         <source>Restore Built-ins...</source>
         <translation>Voreinstellungen wiederherstellen...</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1656"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1723"/>
         <source>Filter profiles</source>
         <translation>Profile filtern</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1657"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1724"/>
         <source>Filter displayed profiles by name, model, or base URL.</source>
         <translation>Angezeigte Profile nach Name, Modell oder Basis-URL filtern.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1780"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1847"/>
         <source>New Profile</source>
         <translation>Neues Profil</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1802"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1869"/>
         <source>Import Profiles</source>
         <translation>Profile importieren</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1803"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1870"/>
         <source>The clipboard does not contain valid LLM profile JSON.</source>
         <translation>Die Zwischenablage enthält kein gültiges LLM-Profil im JSON-Format.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1858"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1925"/>
         <source>Restore Built-in Profiles</source>
         <translation>Integrierte Profile wiederherstellen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1859"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1926"/>
         <source>Restore built-in LLM profiles to their default values?</source>
         <translation>Möchten Sie die integrierten LLM-Profile auf ihre Standardwerte zurücksetzen?</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1861"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1928"/>
         <source>This may overwrite current built-in profile settings such as base URL, model, and prompts. Filled API keys will be kept.</source>
         <translation>Dies kann aktuelle Einstellungen für integrierte Profile überschreiben, z. B. die Basis-URL, das Modell und die Prompts. Gespeicherte API-Schlüssel bleiben erhalten.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1864"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1931"/>
         <source>Restore</source>
         <translation>Wiederherstellen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1915"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1982"/>
         <source>Image Base URL</source>
         <translation>Basis-URL für Bilder</translation>
     </message>
@@ -3052,84 +3052,89 @@ Once you provide the prompt, I will generate the image.  Then, when you want me 
 <context>
     <name>LeftBar</name>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="106"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="108"/>
         <source>Page List and Context</source>
         <translation>Seitenliste und Kontext
 ```</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="111"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="113"/>
         <source>Global Search (Ctrl+G)</source>
         <translation>Globale Suche (Strg+G)</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="118"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="120"/>
         <source>Open Folder ...</source>
         <translation>Ordner öffnen ...</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="122"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="124"/>
         <source>Open Project ... *.json</source>
         <translation>Projekt öffnen ... *.json</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="125"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="127"/>
         <source>Save Project</source>
         <translation>Projekt speichern</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="129"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="131"/>
         <source>Export as Doc</source>
         <translation>Als Dokument exportieren</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="131"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="133"/>
         <source>Import from Doc</source>
         <translation>Aus Dokument importieren</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="134"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="136"/>
         <source>Export source text as TXT</source>
         <translation>Quelltext als TXT exportieren</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="136"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="138"/>
         <source>Export translation as TXT</source>
         <translation>Übersetzung als TXT exportieren</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="139"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="141"/>
         <source>Export source text as markdown</source>
         <translation>Quelltext als Markdown exportieren</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="141"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="143"/>
         <source>Export translation as markdown</source>
         <translation>Übersetzung als Markdown exportieren</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="144"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="146"/>
         <source>Import translation from TXT/markdown</source>
         <translation>Übersetzung aus TXT/Markdown importieren</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="152"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="154"/>
         <source>Open Recent</source>
         <translation>Letzte Dateien öffnen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="174"/>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="175"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="176"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="177"/>
         <source>Run</source>
         <translation>Ausführen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="267"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="192"/>
+        <source>Quick Run with Saved Settings</source>
+        <translation>Schnellstart mit gespeicherten Einstellungen</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="297"/>
         <source>Select Directory</source>
         <translation>Verzeichnis auswählen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="274"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="304"/>
         <source>Import *.docx</source>
         <translation>Importiere *.docx</translation>
     </message>
@@ -3143,7 +3148,7 @@ Once you provide the prompt, I will generate the image.  Then, when you want me 
     </message>
     <message>
         <location filename="../../ballontranslator/ui/mainwindow.py" line="319"/>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="833"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="836"/>
         <source>Updating: </source>
         <translation>Aktualisierung: </translation>
     </message>
@@ -3163,240 +3168,240 @@ Once you provide the prompt, I will generate the image.  Then, when you want me 
         <translation>Schlüsselwort-Substitution für die maschinelle Übersetzung</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="802"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="805"/>
         <source>Checking...</source>
         <translation>Überprüfung...</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="811"/>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="825"/>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="826"/>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="827"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="814"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="828"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="829"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="830"/>
         <source>Downloading update: </source>
         <translation>Update herunterladen: </translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="824"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="827"/>
         <source>Backing up current version: </source>
         <translation>Aktuelle Version sichern: </translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="828"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="831"/>
         <source>Saving local changes: </source>
         <translation>Lokale Änderungen speichern: </translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="829"/>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="830"/>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="831"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="832"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="833"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="834"/>
         <source>Installing update: </source>
         <translation>Update installieren: </translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="856"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="859"/>
         <source>Already up-to-date.</source>
         <translation>Bereits auf dem neuesten Stand.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="877"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="880"/>
         <source>Failed to check for updates.</source>
         <translation>Fehler beim Überprüfen von Updates.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="961"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="964"/>
         <source>Failed to load project </source>
         <translation>Fehler beim Laden des Projekts </translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="1017"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="1020"/>
         <source>Failed to load project from</source>
         <translation>Fehler beim Laden des Projekts von</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="1119"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="1122"/>
         <source>Restart to apply changes?
 </source>
         <translation>Neustart erforderlich, um Änderungen anzuwenden?
 </translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="1555"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="1567"/>
         <source>A pipeline operation is already running.</source>
         <translation>Es läuft bereits ein Pipeline-Vorgang.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="1578"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="1590"/>
         <source>No batch tasks were created.</source>
         <translation>Es wurden keine Stapelaufgaben erstellt.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="1720"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="1732"/>
         <source>Failed to assign the global batch glossary.</source>
         <translation>Das gemeinsame Stapelglossar konnte nicht zugewiesen werden.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="1804"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="1816"/>
         <source>Failed to save the current batch project.</source>
         <translation>Das aktuelle Stapelprojekt konnte nicht gespeichert werden.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="1884"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="1899"/>
         <source>Batch processing was cancelled after {count} project(s).</source>
         <translation>Die Stapelverarbeitung wurde nach {count} Projekt(en) abgebrochen.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="1886"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="1901"/>
         <source>Batch processing stopped after an error ({count} project(s) completed).</source>
         <translation>Die Stapelverarbeitung wurde nach einem Fehler beendet ({count} Projekt(e) abgeschlossen).</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="1892"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="1907"/>
         <source>Batch processing completed: {count} project(s).</source>
         <translation>Stapelverarbeitung abgeschlossen: {count} Projekt(e).</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="1907"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="1922"/>
         <source>Failed to run the selected completion action.</source>
         <translation>Die gewählte Abschlussaktion konnte nicht ausgeführt werden.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="1911"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="1926"/>
         <source>The selected system action is only available on Windows.</source>
         <translation>Die gewählte Systemaktion ist nur unter Windows verfügbar.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="2009"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="2024"/>
         <source>Open a project before upscaling project images.</source>
         <translation>Öffnen Sie ein Projekt, bevor Sie Projektbilder hochskalieren.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="1935"/>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="2019"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="1950"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="2034"/>
         <source>Another pipeline or upscaling task is already running.</source>
         <translation>Eine andere Pipeline- oder Upscaling-Aufgabe wird bereits ausgeführt.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="1478"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="1481"/>
         <source>Open a project to view its pipeline history.</source>
         <translation>Öffnen Sie ein Projekt, um dessen Pipeline-Verlauf anzuzeigen.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="1926"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="1941"/>
         <source>Open a project before re-running inpainting.</source>
         <translation>Öffnen Sie ein Projekt, bevor Sie das Inpainting erneut ausführen.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="1940"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="1955"/>
         <source>No pipeline-eligible pages selected.</source>
         <translation>Es wurden keine für die Pipeline geeigneten Seiten ausgewählt.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="2029"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="2044"/>
         <source>Upscale {count} page(s) to 2x and permanently replace the original image files?</source>
         <translation>{count} Seite(n) auf 2× hochskalieren und die Originalbilddateien dauerhaft ersetzen?</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="2033"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="2048"/>
         <source>Replace Original Images</source>
         <translation>Originalbilder ersetzen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="2112"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="2127"/>
         <source>Batch image upscaling failed. Original images were not changed.</source>
         <translation>Die Stapel-Hochskalierung ist fehlgeschlagen. Die Originalbilder wurden nicht verändert.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="2123"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="2138"/>
         <source>Failed to activate upscaled batch images.</source>
         <translation>Die hochskalierten Stapelbilder konnten nicht aktiviert werden.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="2148"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="2163"/>
         <source>Project image upscaling failed. Original images were not changed.</source>
         <translation>Das Hochskalieren der Projektbilder ist fehlgeschlagen. Die Originalbilder wurden nicht verändert.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="2158"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="2173"/>
         <source>Upscaled and replaced {count} page(s).</source>
         <translation>{count} Seite(n) wurden hochskaliert und ersetzt.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="2165"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="2180"/>
         <source>Failed to activate upscaled project images.</source>
         <translation>Die hochskalierten Projektbilder konnten nicht aktiviert werden.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="2190"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="2205"/>
         <source>No project is open.</source>
         <translation>Es ist kein Projekt geöffnet.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="2200"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="2215"/>
         <source>The project could not be saved before opening Photoshop.</source>
         <translation>Das Projekt konnte vor dem Öffnen von Photoshop nicht gespeichert werden.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="2217"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="2232"/>
         <source>BallonsTranslator has unsaved changes. Save them, then check for the Photoshop update again.</source>
         <translation>BallonsTranslator hat nicht gespeicherte Änderungen. Speichern Sie diese, bevor Sie erneut nach dem Photoshop-Update suchen.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="2224"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="2239"/>
         <source>The project file changed outside BallonsTranslator. Reload it before applying Photoshop changes.</source>
         <translation>Die Projektdatei wurde außerhalb von BallonsTranslator geändert. Laden Sie sie neu, bevor Sie Photoshop-Änderungen anwenden.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="2269"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="2284"/>
         <source>Failed to save Photoshop changes: {error}</source>
         <translation>Fehler beim Speichern von Photoshop-Änderungen: {error}</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="2304"/>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="2315"/>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="2320"/>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="2393"/>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="2401"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="2319"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="2330"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="2335"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="2408"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="2416"/>
         <source>Warning</source>
         <translation>Warnung</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="2304"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="2319"/>
         <source>Open a project first.</source>
         <translation>Öffnen Sie zuerst ein Projekt.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="2315"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="2330"/>
         <source>There is no current file.</source>
         <translation>Es ist keine aktuelle Datei vorhanden.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="2320"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="2335"/>
         <source>The current page data does not exist.</source>
         <translation>Die aktuellen Seitendaten existieren nicht.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="2325"/>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="2388"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="2340"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="2403"/>
         <source>Notice</source>
         <translation>Hinweis</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="2325"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="2340"/>
         <source>The current page has no text boxes.</source>
         <translation>Die aktuelle Seite enthält keine Textfelder.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="2362"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="2377"/>
         <source>Success</source>
         <translation>Erfolgreich</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="2364"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="2379"/>
         <source>Merge complete: {initial_count} -&gt; {final_count} boxes ({removed_count} removed)</source>
         <translation>Zusammenführung abgeschlossen: {initial_count} -&gt; {final_count} Felder ({removed_count} entfernt)</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="2376"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="2391"/>
         <source>No boxes were merged.
 The page contains {initial_count} text boxes.
 Label types: {labels}
@@ -3417,28 +3422,28 @@ Vorschläge:
 4. Überprüfen Sie, ob die Labels in der Blockliste enthalten sind.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="2386"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="2401"/>
         <source>none</source>
         <translation>keine
 ```</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="2393"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="2408"/>
         <source>The project contains no images.</source>
         <translation>Das Projekt enthält keine Bilder.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="2402"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="2417"/>
         <source>Project JSON file not found: {path}</source>
         <translation>Projekt-JSON-Datei nicht gefunden: {path}</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="2457"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="2472"/>
         <source>Complete</source>
         <translation>Abgeschlossen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="2459"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="2474"/>
         <source>Region merge complete
 Succeeded: {success_count}/{total}
 Failed: {fail_count}/{total}</source>
@@ -3446,82 +3451,82 @@ Failed: {fail_count}/{total}</source>
 Erfolgreich: {success_count}/{total} Regionszusammenführung fehlgeschlagen: {fail_count}/{total}</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="2922"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="2937"/>
         <source>Failed to save the re-inpainted project.</source>
         <translation>Das erneut mit Inpainting bearbeitete Projekt konnte nicht gespeichert werden.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="2927"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="2942"/>
         <source>Re-inpainting completed for {count} page(s).</source>
         <translation>Erneutes Inpainting für {count} Seite(n) abgeschlossen.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="3128"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="3143"/>
         <source>unsaved</source>
         <translation>ung gespeichert</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="3128"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="3143"/>
         <source>saved</source>
         <translation>gespeichert</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="3199"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="3214"/>
         <source>Saving image...</source>
         <translation>Bild wird gespeichert...</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="3357"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="3385"/>
         <source>Import Text Styles</source>
         <translation>Textstile importieren</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="3367"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="3395"/>
         <source>Failed to load from {p}</source>
         <translation>Failed to load from {p}</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="3371"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="3399"/>
         <source>Save Text Styles</source>
         <translation>Textformatvorlagen speichern</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="3388"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="3416"/>
         <source>Failed save to {savep}</source>
         <translation>Failed save to {savep}</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="3414"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="3442"/>
         <source>Text file exported to </source>
         <translation>Textdatei exportiert nach </translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="3416"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="3444"/>
         <source>Failed to export as TEXT file</source>
         <translation>Export als TEXT-Datei fehlgeschlagen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="3422"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="3450"/>
         <source>Import *.md/*.txt</source>
         <translation>Importiere *.md/*.txt</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="3437"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="3465"/>
         <source>Translation imported and matched successfully.</source>
         <translation>Übersetzung importiert und erfolgreich abgeglichen.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="3439"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="3467"/>
         <source>Imported txt file not fully matched with current project, please make sure source txt file structured like results from &quot;export TXT/markdown&quot;</source>
         <translation>Die importierte Textdatei wurde nicht vollständig mit dem aktuellen Projekt abgeglichen. Bitte stellen Sie sicher, dass die Quelldatei im selben Format wie die Ergebnisse von &quot;TXT/Markdown exportieren&quot; strukturiert ist.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="3441"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="3469"/>
         <source>Missing pages: </source>
         <translation>Fehlende Seiten: </translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="3444"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="3472"/>
         <source>Unexpected pages: </source>
         <translation>Unerwartete Seiten: &quot;
     }
@@ -3530,129 +3535,129 @@ Erfolgreich: {success_count}/{total} Regionszusammenführung fehlgeschlagen: {fa
 ``` </translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="3447"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="3475"/>
         <source>Unmatched pages: </source>
         <translation>Nicht übereinstimmende Seiten: </translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="3458"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="3486"/>
         <source>Failed to import translation from </source>
         <translation>Fehler beim Importieren der Übersetzung. </translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="3490"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="3518"/>
         <source>Failed to update ignored page</source>
         <translation>Ignorierte Seite konnte nicht aktualisiert werden</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="3511"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="3539"/>
         <source>Export to </source>
         <translation>Exportieren nach </translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="3545"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="3573"/>
         <source>Failed to copy source text</source>
         <translation>Fehler beim Kopieren des Quelltextes.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="3640"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="3668"/>
         <source>API key required</source>
         <translation>API-Schlüssel erforderlich.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="3641"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="3669"/>
         <source>The selected LLM profile requires an API key.</source>
         <translation>Das ausgewählte LLM-Profil benötigt einen API-Schlüssel.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="3643"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="3671"/>
         <source>Fill the API key before running this LLM task for: {profile_name}</source>
         <translation>Füllen Sie den API-Schlüssel aus, bevor Sie diese LLM-Aufgabe für: {profile_name} ausführen.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="3645"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="3673"/>
         <source>Fill API Key</source>
         <translation>API-Schlüssel ausfüllen.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="3666"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="3694"/>
         <source>Model required</source>
         <translation>Modell erforderlich.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="3667"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="3695"/>
         <source>Vision model required</source>
         <translation>Vision-Modell erforderlich.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="3668"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="3696"/>
         <source>Image model required</source>
         <translation>Bildmodell erforderlich.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="3671"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="3699"/>
         <source>model</source>
         <translation>Modell</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="3672"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="3700"/>
         <source>vision model</source>
         <translation>Vision-Modell</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="3673"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="3701"/>
         <source>image model</source>
         <translation>Bildmodell</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="3677"/>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="3727"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="3705"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="3755"/>
         <source>LLM Profile</source>
         <translation>LLM-Profil</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="3682"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="3710"/>
         <source>The selected LLM profile requires a {field_name}.</source>
         <translation>Das ausgewählte LLM-Profil benötigt einen {field_name}.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="3685"/>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="3735"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="3713"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="3763"/>
         <source>Fill the {field_name} before running this LLM task for: {profile_name}</source>
         <translation>Füllen Sie den {field_name} aus, bevor Sie diese LLM-Aufgabe für: {profile_name} ausführen.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="3690"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="3718"/>
         <source>Fill Model</source>
         <translation>Modell ausfüllen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="3718"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="3746"/>
         <source>Base URL required</source>
         <translation>Basis-URL erforderlich</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="3719"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="3747"/>
         <source>Image base URL required</source>
         <translation>Basis-URL für Bilder erforderlich</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="3722"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="3750"/>
         <source>base URL</source>
         <translation>Basis-URL</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="3723"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="3751"/>
         <source>image base URL</source>
         <translation>Basis-URL für Bilder</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="3732"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="3760"/>
         <source>The selected LLM profile requires this field: {field_name}.</source>
         <translation>Das ausgewählte LLM-Profil erfordert dieses Feld: {field_name}.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindow.py" line="3740"/>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="3768"/>
         <source>Fill URL</source>
         <translation>URL ausfüllen</translation>
     </message>
@@ -3880,117 +3885,122 @@ qipao,qipao2</source>
 <context>
     <name>ModuleManager</name>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1642"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1983"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1692"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="2033"/>
         <source>Preparing module: </source>
         <translation>Modul wird vorbereitet: </translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1867"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="2166"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1917"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="2219"/>
         <source>Missing packages</source>
         <translation>Fehlende Pakete</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1869"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1919"/>
         <source>Selected modules require missing package(s):
 {modules}</source>
         <translation>Die ausgewählten Module erfordern fehlende Pakete:
 {modules}</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1873"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="2173"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1923"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="2226"/>
         <source>Install the missing package(s) now?</source>
         <translation>Möchten Sie die fehlenden Pakete jetzt installieren?</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1875"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="2175"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1925"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="2228"/>
         <source>Install</source>
         <translation>Installieren</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1876"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="2176"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1926"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="2229"/>
         <source>Not Now</source>
         <translation>Nicht jetzt</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1877"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="2177"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1927"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="2230"/>
         <source>Install all missing packages and don&apos;t show again</source>
         <translation>Alle fehlenden Pakete installieren und nicht erneut anzeigen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1939"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1989"/>
         <source>Installing packages: </source>
         <translation>Pakete werden installiert: </translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1943"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1993"/>
         <source>Installing...</source>
         <translation>Wird installiert...</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1970"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="2020"/>
         <source>Failed to install packages</source>
         <translation>Fehler beim Installieren der Pakete</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="2025"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="2075"/>
         <source>Downloading package</source>
         <translation>Paket wird heruntergeladen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="2035"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="2085"/>
         <source>{speed}/s</source>
         <translation>{speed}/s</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="2038"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="2088"/>
         <source>ETA {eta}</source>
         <translation>Geschätzte Zeit bis zum Abschluss: {eta}</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="2168"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="2140"/>
+        <source>Combining archive volumes</source>
+        <translation>Archivteile werden zusammengefügt</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="2221"/>
         <source>Module &quot;{module}&quot; requires missing package(s):
 {packages}</source>
         <translation>Das Modul &quot;{module}&quot; benötigt fehlende Pakete:
 {packages}</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="2198"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="2251"/>
         <source>Failed to set module </source>
         <translation>Fehler beim Setzen des Moduls </translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="2266"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="2319"/>
         <source>Module preparation is already running.</source>
         <translation>Die Modulvorbereitung läuft bereits.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="2270"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="2323"/>
         <source>Selected modules are ready.</source>
         <translation>Die ausgewählten Module sind bereit.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="2352"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="2405"/>
         <source>Open a project before re-running inpainting.</source>
         <translation>Öffnen Sie ein Projekt, bevor Sie das Inpainting erneut ausführen.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="2356"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="2409"/>
         <source>No pipeline-eligible pages selected.</source>
         <translation>Es wurden keine für die Pipeline geeigneten Seiten ausgewählt.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="2642"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="2695"/>
         <source>The drawing LLM profile is unavailable. Select a profile in the drawing panel.</source>
         <translation>Das Zeichen-LLM-Profil ist nicht verfügbar. Wählen Sie ein Profil im Zeichenbereich aus.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="2644"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="2697"/>
         <source>Inpainting Failed.</source>
         <translation>Bildrekonstruktion fehlgeschlagen.</translation>
     </message>
@@ -4989,33 +4999,33 @@ qipao,qipao2</source>
 <context>
     <name>ModuleThread</name>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="223"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="254"/>
         <source>Checking dependencies</source>
         <translation>Abhängigkeiten prüfen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="228"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="259"/>
         <source>Importing module</source>
         <translation>Modul importieren</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="261"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="292"/>
         <source>Creating module</source>
         <translation>Modul erstellen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="268"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="299"/>
         <source>Loading model</source>
         <translation>Modell laden</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="355"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="386"/>
         <source>Installing packages</source>
         <translation>Pakete installieren</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="398"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="406"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="429"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="437"/>
         <source>Module task failed.</source>
         <translation>Modulaufgabe fehlgeschlagen.</translation>
     </message>
@@ -5501,8 +5511,8 @@ Starten Sie dann Photoshop neu. Der Explorer öffnet nun die Quelldatei und den 
 <context>
     <name>PipelineModuleActivator</name>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="210"/>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="211"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="213"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="214"/>
         <source>Config</source>
         <translation>Konfiguration</translation>
     </message>
@@ -5510,82 +5520,87 @@ Starten Sie dann Photoshop neu. Der Explorer öffnet nun die Quelldatei und den 
 <context>
     <name>ProfileCardWidget</name>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="379"/>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1028"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="382"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1053"/>
         <source>Double click the name to edit. Right click for profile actions.</source>
         <translation>Doppelklicken Sie auf den Namen, um ihn zu bearbeiten. Rechtsklick für Profilaktionen.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="392"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="395"/>
         <source>Base URL</source>
         <translation>Basis-URL</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="393"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="396"/>
         <source>Image Base URL</source>
         <translation>Basis-URL für Bilder</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="394"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="397"/>
         <source>Require API Key</source>
         <translation>API-Schlüssel erforderlich</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="395"/>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="583"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="398"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="591"/>
         <source>Vision Model</source>
         <translation>Bilderkennungsmodell</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="396"/>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="635"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="399"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="643"/>
         <source>Image Model</source>
         <translation>Bildmodell</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="397"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="400"/>
         <source>Vision Detail Level</source>
         <translation>Detailgrad der Bilderkennung</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="398"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="401"/>
         <source>Thinking Level</source>
         <translation>Denklevel</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="399"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="402"/>
         <source>Max Tokens</source>
         <translation>Maximale Anzahl von Tokens</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="400"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="403"/>
+        <source>Ollama Context Length</source>
+        <translation>Ollama-Kontextlänge</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="404"/>
         <source>Temperature</source>
         <translation>Temperatur</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="401"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="405"/>
         <source>Top P</source>
         <translation>Top P</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="402"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="406"/>
         <source>Frequency Penalty</source>
         <translation>Frequenzstrafe</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="403"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="407"/>
         <source>Presence Penalty</source>
         <translation>Präsenzstrafe</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="404"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="408"/>
         <source>JSON Schema Response</source>
         <translation>JSON-Schema-Antwort</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="405"/>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="406"/>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="407"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="409"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="410"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="411"/>
         <source>Prompt</source>
         <translation>Aufforderung&quot;
     }
@@ -5594,282 +5609,307 @@ Starten Sie dann Photoshop neu. Der Explorer öffnet nun die Quelldatei und den 
 ```</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="408"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="412"/>
         <source>Low VRAM Mode</source>
         <translation>Niedriger VRAM-Modus</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="409"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="413"/>
         <source>Use Glossary for Translation</source>
         <translation>Glossar für Übersetzungen verwenden</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="412"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="416"/>
         <source>OpenAI-compatible API base URL.</source>
         <translation>OpenAI-kompatible API-Basis-URL.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="413"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="417"/>
         <source>OpenAI-compatible image API base URL used only by LLMInpaint.</source>
         <translation>OpenAI-kompatible Image-API-Basis-URL, die nur von LLMInpaint verwendet wird.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="414"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="418"/>
         <source>Require API key before running this LLM task.</source>
         <translation>Erfordert einen API-Schlüssel, bevor diese LLM-Aufgabe ausgeführt wird.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="415"/>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="587"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="419"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="595"/>
         <source>Model used by LLMOCR for image OCR.</source>
         <translation>Modell, das von LLMOCR für die Bilderkennung verwendet wird.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="416"/>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="639"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="420"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="647"/>
         <source>Model used by LLMInpaint for image cleanup.</source>
         <translation>Modell, das von LLMInpaint für die Bildbereinigung verwendet wird.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="417"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="421"/>
         <source>Image detail level sent to vision-capable providers.</source>
         <translation>Detailgrad des Bildes, der an vision-fähige Anbieter gesendet wird.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="419"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="423"/>
         <source>Auto uses the provider default. Disabled requests no reasoning; explicit levels set the reasoning effort.</source>
         <translation>Standardmäßig wird das vom Anbieter vorgegebene Level verwendet. Deaktivierte Anfragen verwenden keine Logik; explizit gesetzte Level bestimmen den Aufwand für die Logikverarbeitung.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="422"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="426"/>
         <source>Additional translation instructions for style and wording.</source>
         <translation>Zusätzliche Anweisungen für die Übersetzung bezüglich Stil und Formulierung.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="423"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="427"/>
         <source>Instructions sent to the vision model for OCR.</source>
         <translation>Anweisungen, die an das Bilderkennungsmodell für die Texterkennung (OCR) gesendet wurden.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="424"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="428"/>
         <source>Instructions sent to the image model for cleanup.</source>
         <translation>Anweisungen, die an das Bildmodell für die Bildbereinigung gesendet wurden.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="425"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="429"/>
         <source>Maximum generated response tokens, not input/context tokens.</source>
         <translation>Maximale Anzahl generierter Antwort-Token, nicht Eingabe-/Kontext-Token.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="426"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="431"/>
+        <source>Context tokens requested from a local Ollama server. Use 0 to keep the Ollama default.</source>
+        <translation>Beim lokalen Ollama-Server angeforderte Kontext-Tokens. Mit 0 wird der Ollama-Standard beibehalten.</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="434"/>
         <source>Sampling temperature.</source>
         <translation>Sampling-Temperatur.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="427"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="435"/>
         <source>Top-p sampling.</source>
         <translation>Top-p-Sampling.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="428"/>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="429"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="436"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="437"/>
         <source>Sent only when greater than 0. Some OpenAI-compatible providers may ignore or reject it.</source>
         <translation>Wird nur gesendet, wenn es größer als 0 ist. Einige OpenAI-kompatible Anbieter ignorieren oder lehnen es möglicherweise ab.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="430"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="438"/>
         <source>Request responses with the translation JSON schema. Useful for LM Studio; disable it if a provider rejects json_schema response_format.</source>
         <translation>Fordert Antworten mit dem JSON-Schema für Übersetzungen an. Nützlich für LM Studio; deaktivieren Sie es, wenn ein Anbieter das Format `json_schema response_format` ablehnt.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="431"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="439"/>
         <source>Preserved compatibility flag for local profiles.</source>
         <translation>Kompatibilitätsflag, das für lokale Profile beibehalten wird.
 ```</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="433"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="441"/>
         <source>Include matching project, series, reference, and selected file glossary entries in translation requests.</source>
         <translation>Passende Einträge aus Projekt-, Serien-, Referenz- und ausgewählten Datei-Glossaren in Übersetzungsanfragen einbeziehen.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="443"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="451"/>
         <source>Use a plain name or [Name](https://example.com).</source>
         <translation>Verwenden Sie einen einfachen Namen oder [Name](https://example.com).</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="471"/>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="980"/>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1132"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="479"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1005"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1157"/>
         <source>Edit</source>
         <translation>Bearbeiten</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="479"/>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1130"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="487"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1155"/>
         <source>Duplicate profile</source>
         <translation>Profil duplizieren</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="486"/>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1129"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="494"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1154"/>
         <source>Delete</source>
         <translation>Löschen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="505"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="513"/>
         <source>API Key</source>
         <translation>API-Schlüssel</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="539"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="547"/>
         <source>Text Model</source>
         <translation>Textmodell</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="543"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="551"/>
         <source>Text translation model used by LLMTranslator.</source>
         <translation>Textübersetzungsmodell, das von LLMTranslator verwendet wird.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="547"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="555"/>
         <source>Add model</source>
         <translation>Modell hinzufügen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="553"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="561"/>
         <source>Delete current model</source>
         <translation>Aktuelles Modell löschen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="591"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="599"/>
         <source>Add vision model</source>
         <translation>Vision-Modell hinzufügen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="597"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="605"/>
         <source>Delete current vision model</source>
         <translation>Aktuelles Vision-Modell löschen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="643"/>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1396"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="651"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1423"/>
         <source>Add image model</source>
         <translation>Bildmodell hinzufügen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="649"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="657"/>
         <source>Delete current image model and all its reasoning combinations</source>
         <translation>Löschen Sie das aktuelle Bildmodell und alle zugehörigen Kombinationen.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="706"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="714"/>
         <source>Text</source>
         <translation>Text</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="707"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="715"/>
         <source>Vision</source>
         <translation>Vision</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="708"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="716"/>
         <source>Image</source>
         <translation>Bild</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1023"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="728"/>
+        <source>Approximate combined model and context-cache allocation. The actual RAM/VRAM split depends on Ollama, GPU offloading, model architecture, quantization, and parallel requests.</source>
+        <translation>Ungefähre gemeinsame Speicherbelegung von Modell und Kontext-Cache. Die tatsächliche Aufteilung auf RAM und VRAM hängt von Ollama, GPU-Auslagerung, Modellarchitektur, Quantisierung und parallelen Anfragen ab.</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1048"/>
         <source>Right click to edit the name or link.</source>
         <translation>Rechtsklick zum Bearbeiten des Namens oder Links.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1036"/>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1050"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1061"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1075"/>
         <source>LLM Profile</source>
         <translation>LLM-Profil</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1128"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1153"/>
         <source>Edit name</source>
         <translation>Namen bearbeiten</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1131"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1156"/>
         <source>Copy Profile as JSON</source>
         <translation>Profil als JSON kopieren</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1133"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1158"/>
         <source>Set for Translator</source>
         <translation>Für den Übersetzer festlegen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1134"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1159"/>
         <source>Set for OCR</source>
         <translation>Für die Texterkennung (OCR) festlegen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1135"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1160"/>
         <source>Set for Inpainter</source>
         <translation>Für die Bildbearbeitung (Inpainting) festlegen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1224"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1250"/>
         <source>Model name</source>
         <translation>Modellname</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1290"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1317"/>
         <source>Vision model name</source>
         <translation>Name des Vision-Modells</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1368"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1395"/>
         <source>Image model name</source>
         <translation>Name des Bildmodells</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1397"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1424"/>
         <source>Enter an image model ID. Reasoning combinations are added automatically from vision models.</source>
         <translation>Geben Sie eine Modell-ID für Bilder ein. Reasoning-Kombinationen werden automatisch aus Vision-Modellen hinzugefügt.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1535"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1569"/>
         <source>Text translation model used by LLMTranslator. Click to disable text translation for this profile.</source>
         <translation>Textübersetzungsmodell, das von LLMTranslator verwendet wird. Klicken Sie, um die Textübersetzung für dieses Profil zu deaktivieren.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1537"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1571"/>
         <source>Text translation model used by LLMTranslator. Click to enable text translation for this profile.</source>
         <translation>Textübersetzungsmodell, das von LLMTranslator verwendet wird. Klicken Sie, um die Textübersetzung für dieses Profil zu aktivieren.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1549"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1583"/>
         <source>Vision OCR model used by LLMOCR. Click to disable vision OCR for this profile.</source>
         <translation>Vision-OCR-Modell, das von LLMOCR verwendet wird. Klicken Sie, um die Vision-OCR für dieses Profil zu deaktivieren.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1551"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1585"/>
         <source>Vision OCR model used by LLMOCR. Click to enable vision OCR for this profile.</source>
         <translation>Vision-OCR-Modell, das von LLMOCR verwendet wird. Klicken Sie, um die Vision-OCR für dieses Profil zu aktivieren.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1563"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1597"/>
         <source>Image cleanup model used by LLMInpaint. Click to disable image cleanup for this profile.</source>
         <translation>Bildbereinigungsmodell, das von LLMInpaint verwendet wird. Klicken Sie, um die Bildbereinigung für dieses Profil zu deaktivieren.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1565"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1599"/>
         <source>Image cleanup model used by LLMInpaint. Click to enable image cleanup for this profile.</source>
         <translation>Bildbereinigungsmodell, das von LLMInpaint verwendet wird. Klicken Sie, um die Bildbereinigung für dieses Profil zu aktivieren.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1601"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1644"/>
+        <source>Estimated RAM/VRAM: Ollama default. Set a context length to calculate an estimate.</source>
+        <translation>Geschätzter RAM/VRAM-Bedarf: Ollama-Standard. Lege eine Kontextlänge fest, um eine Schätzung zu berechnen.</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1649"/>
+        <source>Estimated RAM/VRAM: unavailable because the parameter count could not be read from the model name.</source>
+        <translation>Geschätzter RAM/VRAM-Bedarf: nicht verfügbar, da die Parameterzahl nicht aus dem Modellnamen gelesen werden konnte.</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1654"/>
+        <source>Estimated model + context memory: {minimum:.1f}–{maximum:.1f} GiB combined RAM/VRAM.</source>
+        <translation>Geschätzter Speicherbedarf für Modell und Kontext: insgesamt {minimum:.1f}–{maximum:.1f} GiB RAM/VRAM.</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1668"/>
         <source>Required API key is configured.</source>
         <translation>Der erforderliche API-Schlüssel ist konfiguriert.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1605"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1672"/>
         <source>Required API key is missing.</source>
         <translation>Der erforderliche API-Schlüssel fehlt.</translation>
     </message>
@@ -6032,263 +6072,283 @@ Starten Sie dann Photoshop neu. Der Explorer öffnet nun die Quelldatei und den 
 <context>
     <name>RunPipelineDialog</name>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="375"/>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="402"/>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="441"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="378"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="405"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="444"/>
         <source>Run</source>
         <translation>Ausführen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="409"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="412"/>
         <source>Pipeline</source>
         <translation>Pipeline</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="409"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="412"/>
         <source>Rendering</source>
         <translation>Darstellung</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="445"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="448"/>
         <source>Continue</source>
         <translation>Fortfahren</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="452"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="455"/>
         <source>Render</source>
         <translation>Rendern</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="588"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="591"/>
         <source>Activate Modules</source>
         <translation>Module aktivieren</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="602"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="605"/>
         <source>Detection</source>
         <translation>Erkennung</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="612"/>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="697"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="615"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="700"/>
         <source>OCR</source>
         <translation>OCR (Texterkennung)</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="622"/>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="698"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="625"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="701"/>
         <source>Inpainting</source>
         <translation>Inpainting (Bildrekonstruktion)</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="632"/>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="699"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="635"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="702"/>
         <source>Translation</source>
         <translation>Übersetzung</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="677"/>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1587"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="680"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1668"/>
         <source>Settings</source>
         <translation>Einstellungen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="696"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="699"/>
         <source>Text Detection</source>
         <translation>Texterkennung</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="764"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="767"/>
         <source>Keep Existing Lines</source>
         <translation>Bestehende Zeilen beibehalten</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="775"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="778"/>
         <source>Remove empty textblocks</source>
         <translation>Leere Textblöcke entfernen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="784"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="787"/>
         <source>Font Detection</source>
         <translation>Schriftartenerkennung</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="799"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="802"/>
         <source>Page-level LLM OCR</source>
         <translation>Seitenübergreifende LLM-OCR</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="808"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="811"/>
         <source>Mask non-text areas</source>
         <translation>Nicht-Text-Bereiche maskieren</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="817"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="820"/>
         <source>Use LLM reading order</source>
         <translation>LLM-Lesereihenfolge verwenden</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="839"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="842"/>
         <source>Letter Case</source>
         <translation>Groß-/Kleinschreibung
 ```</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="842"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="845"/>
         <source>Choose how OCR text letter case is adjusted after keyword substitution.</source>
         <translation>Wählen Sie, wie die Groß- und Kleinschreibung des OCR-Textes nach der Schlüsselwortsubstitution angepasst wird.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="850"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="853"/>
         <source>None</source>
         <translation>Keine</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="852"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="855"/>
         <source>Keep OCR text letter case unchanged.</source>
         <translation>OCR-Text Groß- und Kleinschreibung beibehalten.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="855"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="858"/>
         <source>Capitalize</source>
         <translation>Großschreibung</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="858"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="861"/>
         <source>Lowercase OCR text, then capitalize the first letter of each sentence.</source>
         <translation>OCR-Text in Kleinbuchstaben umwandeln und den ersten Buchstaben jedes Satzes großschreiben.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="862"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="865"/>
         <source>Uppercase</source>
         <translation>Großschreibung (gesamter Text)</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="864"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="867"/>
         <source>Convert OCR text to uppercase.</source>
         <translation>OCR-Text in Großbuchstaben umwandeln.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="901"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="904"/>
         <source>Skip simple cases</source>
         <translation>Einfache Fälle überspringen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="910"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="913"/>
         <source>Filter mask by text boxes</source>
         <translation>Maske anhand von Textfeldern filtern
 ```</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="954"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="957"/>
         <source>Source</source>
         <translation>Quelle</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="979"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="982"/>
         <source>Target</source>
         <translation>Ziel</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1007"/>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1026"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1010"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1029"/>
         <source>Context</source>
         <translation>Kontext</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1013"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1016"/>
         <source>textblock</source>
         <translation>Textblock</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1014"/>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1033"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1017"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1036"/>
         <source>page</source>
         <translation>Seite</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1037"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1040"/>
         <source>+history</source>
         <translation>+Verlauf</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1057"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1060"/>
         <source>Token budget</source>
         <translation>Token-Budget</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1078"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1081"/>
         <source>Token budget shared by prior translation history, saved page summaries, and compact memory. The current translation input, instructions, glossary, image, and generated reply are not included.</source>
         <translation>Das Token-Budget wird von der vorherigen Übersetzungsgeschichte, gespeicherten Seitenzusammenfassungen und dem Kompakt-Speicher geteilt. Die aktuelle Übersetzungseingabe, Anweisungen, Glossar, Bild und die generierte Antwort sind nicht enthalten.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1094"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1097"/>
         <source>Glossary</source>
         <translation>Glossar</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1105"/>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1371"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1108"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1414"/>
         <source>Select Glossary File</source>
         <translation>Glossardatei auswählen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1114"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1117"/>
         <source>Matching</source>
         <translation>Übereinstimmungen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1118"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1121"/>
         <source>All</source>
         <translation>Alles</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1135"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1138"/>
         <source>Mode</source>
         <translation>Modus</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1154"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1157"/>
         <source>LLM Context</source>
         <translation>LLM-Kontext</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1166"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1169"/>
         <source>Vision</source>
         <translation>Vision</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1174"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1177"/>
         <source>Summary</source>
         <translation>Zusammenfassung</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1215"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1218"/>
         <source>Overwrite Existing Summary</source>
         <translation>Bestehende Zusammenfassung überschreiben</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1229"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1232"/>
         <source>Attach the current page image to the translation request.</source>
         <translation>Das aktuelle Seitenbild an die Übersetzungsanfrage anhängen.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1232"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1235"/>
         <source>Generate editable page summaries and compact older summaries into reusable project memory when the context budget fills.</source>
         <translation>Generieren Sie bearbeitbare Seitenzusammenfassungen und komprimieren Sie ältere Zusammenfassungen in einen wiederverwendbaren Projektspeicher, wenn das Kontext-Budget voll ist.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1236"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1239"/>
         <source>Ignore and replace the current page summary when translating it again.</source>
         <translation>Ignorieren und die aktuelle Seitenzusammenfassung durch eine neue ersetzen, wenn sie erneut übersetzt wird.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1373"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1249"/>
+        <source>On translation error</source>
+        <translation>Bei Übersetzungsfehler</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1258"/>
+        <source>Retry once</source>
+        <translation>Einmal wiederholen</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1261"/>
+        <source>Skip page</source>
+        <translation>Seite überspringen</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1264"/>
+        <source>Abort pipeline</source>
+        <translation>Pipeline abbrechen</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1416"/>
         <source>Glossary Files (*.json *.txt *.tsv)</source>
         <translation>Glossardateien (*.json *.txt *.tsv)</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1605"/>
+        <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1686"/>
         <source>Render without update text style</source>
         <translation>Darstellung ohne Aktualisierung des Textstils</translation>
     </message>
@@ -7371,182 +7431,182 @@ Starten Sie dann Photoshop neu. Der Explorer öffnet nun die Quelldatei und den 
 <context>
     <name>TitleBar</name>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="307"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="337"/>
         <source>Edit</source>
         <translation>Bearbeiten</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="309"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="339"/>
         <source>Undo</source>
         <translation>Rückgängig</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="312"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="342"/>
         <source>Redo</source>
         <translation>Wiederherstellen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="315"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="345"/>
         <source>Search</source>
         <translation>Suche</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="318"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="348"/>
         <source>Global Search</source>
         <translation>Globale Suche</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="322"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="352"/>
         <source>Keyword substitution for machine translation source text</source>
         <translation>Schlüsselwort-Substitution für den Quelltext der maschinellen Übersetzung</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="324"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="354"/>
         <source>Keyword substitution for machine translation</source>
         <translation>Schlüsselwort-Substitution für die maschinelle Übersetzung</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="326"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="356"/>
         <source>Keyword substitution for source text</source>
         <translation>Schlüsselwort-Substitution für den Quelltext</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="337"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="367"/>
         <source>View</source>
         <translation>Ansicht</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="341"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="371"/>
         <source>Display Language</source>
         <translation>Anzeigesprache</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="355"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="385"/>
         <source>Drawing Board</source>
         <translation>Zeichenbrett</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="357"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="387"/>
         <source>Text Editor</source>
         <translation>Texteditor</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="359"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="389"/>
         <source>Import Text Styles</source>
         <translation>Textstile importieren</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="360"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="390"/>
         <source>Export Text Styles</source>
         <translation>Textstile exportieren</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="361"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="391"/>
         <source>Dark Mode</source>
         <translation>Dunkelmodus</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="365"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="395"/>
         <source>Show Text Detection</source>
         <translation>Text-Erkennung anzeigen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="366"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="396"/>
         <source>Show OCR</source>
         <translation>OCR anzeigen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="367"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="397"/>
         <source>Show Translation</source>
         <translation>Übersetzung anzeigen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="368"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="398"/>
         <source>Show Inpainting</source>
         <translation>Inpainting anzeigen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="396"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="426"/>
         <source>Go</source>
         <translation>Los</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="397"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="427"/>
         <source>Previous Page</source>
         <translation>Vorherige Seite</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="399"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="429"/>
         <source>Next Page</source>
         <translation>Nächste Seite</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="410"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="440"/>
         <source>Tools</source>
         <translation>Werkzeuge</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="413"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="443"/>
         <source>Region Merge Tool</source>
         <translation>Regionen-Zusammenführungs-Werkzeug</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="418"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="448"/>
         <source>Photoshop Bridge</source>
         <translation>Photoshop Bridge</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="422"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="452"/>
         <source>Path Reorder</source>
         <translation>Pfadreihenfolge ändern</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="426"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="456"/>
         <source>Font Exclusion</source>
         <translation>Schriftart-Ausschluss</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="429"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="459"/>
         <source>Glossary Manager</source>
         <translation>Glossarverwaltung</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="433"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="463"/>
         <source>Batch Processing...</source>
         <translation>Stapelverarbeitung …</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="437"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="467"/>
         <source>Pipeline History</source>
         <translation>Pipeline-Verlauf</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="442"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="472"/>
         <source>Re-run Inpainting Current Page</source>
         <translation>Inpainting der aktuellen Seite erneut ausführen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="448"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="478"/>
         <source>Re-run Inpainting All Pages</source>
         <translation>Inpainting aller Seiten erneut ausführen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="454"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="484"/>
         <source>Upscale Current Page 2x...</source>
         <translation>Aktuelle Seite 2× hochskalieren...</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="459"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="489"/>
         <source>Upscale Entire Project 2x...</source>
         <translation>Gesamtes Projekt 2× hochskalieren...</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="463"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="493"/>
         <source>Upscaling</source>
         <translation>Upscaling</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="631"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="661"/>
         <source>{current}/{total} pages</source>
         <translation>{current}/{total} Seiten</translation>
     </message>
@@ -7629,36 +7689,36 @@ Starten Sie dann Photoshop neu. Der Explorer öffnet nun die Quelldatei und den 
 <context>
     <name>TranslateThread</name>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="547"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="578"/>
         <source>Creating module</source>
         <translation>Modul erstellen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="554"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="585"/>
         <source>Loading model</source>
         <translation>Modell laden</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="624"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="655"/>
         <source>Installing packages</source>
         <translation>Pakete installieren</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="667"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="681"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="717"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="698"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="712"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="752"/>
         <source>Translation Failed.</source>
         <translation>Übersetzung fehlgeschlagen.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="670"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="684"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="718"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="701"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="715"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="753"/>
         <source>Page</source>
         <translation>Seite</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="722"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="757"/>
         <source>{param} is required for {translator}</source>
         <translation>{param} ist erforderlich für {translator}</translation>
     </message>

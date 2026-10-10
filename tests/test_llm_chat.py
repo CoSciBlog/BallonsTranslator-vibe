@@ -13,6 +13,7 @@ from ballontranslator.modules.exceptions import (
 from ballontranslator.modules.llm_chat import (
     LLMChatRequester,
     LLMChatRequestError,
+    ollama_native_chat_payload,
     openai_chat_completion_args,
     openai_json_response_format,
 )
@@ -89,6 +90,63 @@ class LLMChatRequesterTest(unittest.TestCase):
             openai_chat_completion_args(self.profile, 'gpt-5.5'),
             {'max_completion_tokens': 8192},
         )
+
+    def test_native_ollama_context_request_uses_profile_num_ctx(self) -> None:
+        profile = default_profile('Ollama')
+        profile.model = 'qwen:8b-q4_k_m'
+        profile.ollama_context_length = 32768
+        response = mock.Mock()
+        response.status_code = 200
+        response.json.return_value = {
+            'message': {'content': '{"translation":"Hello"}'},
+            'done_reason': 'stop',
+            'prompt_eval_count': 7,
+            'eval_count': 5,
+        }
+        client = mock.Mock()
+        client.post.return_value = response
+
+        with (
+            mock.patch.object(self.requester, '_http_client', return_value=client),
+            mock.patch.object(self.requester, '_respect_delay') as delay,
+            mock.patch.object(self.requester, '_openai_module') as openai_module,
+        ):
+            result = self.requester.request_chat_completion(profile, {
+                'model': profile.model,
+                'messages': [{'role': 'user', 'content': 'Translate.'}],
+                'max_tokens': 2048,
+                'response_format': {'type': 'json_object'},
+            })
+
+        delay.assert_called_once_with()
+        openai_module.assert_not_called()
+        endpoint = client.post.call_args.args[0]
+        payload = client.post.call_args.kwargs['json']
+        self.assertEqual(endpoint, 'http://localhost:11434/api/chat')
+        self.assertEqual(payload['options']['num_ctx'], 32768)
+        self.assertEqual(payload['options']['num_predict'], 2048)
+        self.assertEqual(payload['format'], 'json')
+        self.assertEqual(result.usage.total_tokens, 12)
+        self.assertEqual(result.content, '{"translation":"Hello"}')
+        client.close.assert_called_once_with()
+
+    def test_native_ollama_payload_converts_vision_data_urls(self) -> None:
+        payload = ollama_native_chat_payload({
+            'model': 'vision:8b',
+            'messages': [{
+                'role': 'user',
+                'content': [
+                    {'type': 'text', 'text': 'Read this.'},
+                    {'type': 'image_url', 'image_url': {
+                        'url': 'data:image/png;base64,QUJD',
+                    }},
+                ],
+            }],
+        }, 4096)
+        self.assertEqual(payload['messages'][0], {
+            'role': 'user', 'content': 'Read this.', 'images': ['QUJD'],
+        })
+        self.assertEqual(payload['options']['num_ctx'], 4096)
 
     def test_gpt_sampling_omission_is_endpoint_independent(self) -> None:
         for provider in ('OpenAI', 'OpenRouter', 'LM Studio'):

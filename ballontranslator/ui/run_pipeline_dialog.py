@@ -1,4 +1,5 @@
 import os
+from typing import List, Optional, Tuple
 
 from qtpy.QtCore import (
     QEvent,
@@ -59,8 +60,10 @@ from ballontranslator.utils.config import (
     pcfg,
     save_config,
     TranslateContext,
+    TranslationFailurePolicy,
 )
 from ballontranslator.utils.llm_profiles import LLM_OCR_KEY, LLM_TRANSLATOR_KEY
+from ballontranslator.utils.logger import logger as LOGGER
 from ballontranslator.utils.proj_imgtrans import ProjImgTrans
 from ballontranslator.modules import (
     GET_VALID_INPAINTERS,
@@ -358,7 +361,7 @@ class RunPipelineDialog(QDialog):
     module_config_requested = Signal(str, str)
     RESIZE_BORDER_WIDTH = 5
     _module_settings_expanded = (False, False, False, False)
-    _page_range = (1, None)
+    _page_range = None
 
     def __init__(
         self,
@@ -712,7 +715,7 @@ class RunPipelineDialog(QDialog):
         return page
 
     def _build_general_settings(self, section: QWidget, layout: QVBoxLayout):
-        start, end = type(self)._page_range
+        start, end = type(self)._stored_page_range()
         self.page_range_progress = PageRangeProgressWidget(
             self._project_page_names(),
             start=start,
@@ -1238,6 +1241,38 @@ class RunPipelineDialog(QDialog):
         ))
         translation_grid.addWidget(llm_features_row, 4, 0, 1, 2)
 
+        failure_row = QWidget(section)
+        failure_row.setObjectName('RunPipelineGeneralSettingRow')
+        failure_layout = QHBoxLayout(failure_row)
+        failure_layout.setContentsMargins(0, 0, 0, 0)
+        failure_layout.setSpacing(8)
+        failure_label = QLabel(self.tr('On translation error'), failure_row)
+        failure_label.setObjectName('RunPipelineSettingLabel')
+        failure_layout.addWidget(failure_label)
+        failure_layout.addStretch()
+        self.translation_failure_combobox = BottomBorderComboBox(failure_row)
+        self.translation_failure_combobox.setObjectName(
+            'RunPipelineTranslationFailureComboBox'
+        )
+        self.translation_failure_combobox.addItem(
+            self.tr('Retry once'), TranslationFailurePolicy.RETRY
+        )
+        self.translation_failure_combobox.addItem(
+            self.tr('Skip page'), TranslationFailurePolicy.SKIP
+        )
+        self.translation_failure_combobox.addItem(
+            self.tr('Abort pipeline'), TranslationFailurePolicy.ABORT
+        )
+        failure_index = self.translation_failure_combobox.findData(
+            pcfg.module.translation_failure_policy
+        )
+        self.translation_failure_combobox.setCurrentIndex(max(failure_index, 0))
+        self.translation_failure_combobox.setFixedWidth(
+            RUN_PIPELINE_SETTING_CONTROL_WIDTH
+        )
+        failure_layout.addWidget(self.translation_failure_combobox)
+        translation_grid.addWidget(failure_row, 5, 0, 1, 2)
+
         self.context_row.setVisible(not self._llm_settings_visible)
 
         self.source_combobox.currentIndexChanged.connect(
@@ -1251,6 +1286,9 @@ class RunPipelineDialog(QDialog):
         )
         self.llm_context_combobox.currentIndexChanged.connect(
             self._on_llm_context_changed
+        )
+        self.translation_failure_combobox.currentIndexChanged.connect(
+            self._on_translation_failure_policy_changed
         )
         self.prior_context_token_budget.valueChanged.connect(
             self._on_prior_context_token_budget_changed
@@ -1324,6 +1362,11 @@ class RunPipelineDialog(QDialog):
     def _on_llm_context_changed(self):
         context = self.llm_context_combobox.currentData()
         pcfg.module.llm_translate_context = context
+
+    def _on_translation_failure_policy_changed(self) -> None:
+        pcfg.module.translation_failure_policy = (
+            self.translation_failure_combobox.currentData()
+        )
 
     def _on_llm_vision_toggled(self, checked: bool) -> None:
         pcfg.module.llm_translate_vision = checked
@@ -1442,8 +1485,46 @@ class RunPipelineDialog(QDialog):
             return []
         return pages[self.range_start.value() - 1 : self.range_end.value()]
 
+    @classmethod
+    def _stored_page_range(cls) -> Tuple[int, Optional[int]]:
+        if cls._page_range is not None:
+            return cls._page_range
+        start = pcfg.run_pipeline_range_start
+        end = pcfg.run_pipeline_range_end
+        if type(start) is not int or start < 1:
+            LOGGER.warning(
+                'Invalid run_pipeline_range_start; using the first page.'
+            )
+            start = 1
+            pcfg.run_pipeline_range_start = start
+        if type(end) is not int or end < 0:
+            LOGGER.warning(
+                'Invalid run_pipeline_range_end; using the final page.'
+            )
+            end = 0
+            pcfg.run_pipeline_range_end = end
+        cls._page_range = (start, end or None)
+        return cls._page_range
+
+    @classmethod
+    def pages_from_stored_range(cls, project: ProjImgTrans) -> List[str]:
+        """Select pages from the last saved Run-dialog range.
+
+        >>> RunPipelineDialog.pages_from_stored_range(None)
+        []
+        """
+        pages = list(getattr(project, 'pages', {}) or {})
+        if not pages:
+            return []
+        start, end = cls._stored_page_range()
+        start_index = min(max(start - 1, 0), len(pages) - 1)
+        end_index = len(pages) if end is None else min(max(end, start), len(pages))
+        return pages[start_index:end_index]
+
     def _on_page_range_changed(self, start: int, end: int):
         type(self)._page_range = (start, end)
+        pcfg.run_pipeline_range_start = start
+        pcfg.run_pipeline_range_end = end
 
     @staticmethod
     def _settings_section_has_content(section: QWidget) -> bool:

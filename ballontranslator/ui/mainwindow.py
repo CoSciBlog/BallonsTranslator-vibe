@@ -701,6 +701,9 @@ class MainWindow(mainwindow_cls):
         self.show_source_text(pcfg.show_source_text)
 
         self.leftBar.run_imgtrans_clicked.connect(self.run_imgtrans)
+        self.leftBar.quick_run_imgtrans_clicked.connect(
+            self.quick_run_imgtrans
+        )
 
         self.titleBar.darkModeAction.setChecked(pcfg.darkmode)
 
@@ -3252,6 +3255,15 @@ class MainWindow(mainwindow_cls):
             self.on_run_imgtrans(pages_to_process=dialog.selected_pages())
         finally:
             dialog.deleteLater()
+
+    def quick_run_imgtrans(self) -> None:
+        """Start the pipeline with the last saved Run-dialog settings."""
+        self._run_imgtrans_wo_textstyle_update = False
+        self.on_run_imgtrans(
+            pages_to_process=RunPipelineDialog.pages_from_stored_range(
+                self.imgtrans_proj
+            )
+        )
 
     def on_run_imgtrans(
         self,

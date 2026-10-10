@@ -440,110 +440,6 @@ def generate_square_subsequent_mask(sz):
     mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
     return mask
 
-class Beam:
-    def __init__(self, char_seq = [], logprobs = []):
-        # L
-        if isinstance(char_seq, list):
-            self.chars = torch.tensor(char_seq, dtype=torch.long)
-            self.logprobs = torch.tensor(logprobs, dtype=torch.float32)
-        else:
-            self.chars = char_seq.clone()
-            self.logprobs = logprobs.clone()
-
-    def avg_logprob(self):
-        return self.logprobs.mean().item()
-
-    def sort_key(self):
-        return -self.avg_logprob()
-
-    def seq_end(self, end_tok):
-        return self.chars.view(-1)[-1] == end_tok
-
-    def extend(self, idx, logprob):
-        return Beam(
-            torch.cat([self.chars, idx.unsqueeze(0)], dim = -1),
-            torch.cat([self.logprobs, logprob.unsqueeze(0)], dim = -1),
-        )
-
-DECODE_BLOCK_LENGTH = 8
-
-class Hypothesis:
-    def __init__(self, device, start_tok: int, end_tok: int, padding_tok: int, memory_idx: int, num_layers: int, embd_dim: int):
-        self.device = device
-        self.start_tok = start_tok
-        self.end_tok = end_tok
-        self.padding_tok = padding_tok
-        self.memory_idx = memory_idx
-        self.embd_size = embd_dim
-        self.num_layers = num_layers
-        # 1, L, E
-        self.cached_activations = [torch.zeros(1, 0, self.embd_size).to(self.device)] * (num_layers + 1)
-        self.out_idx = torch.LongTensor([start_tok]).to(self.device)
-        self.out_logprobs = torch.FloatTensor([0]).to(self.device)
-        self.length = 0
-
-    def seq_end(self):
-        return self.out_idx.view(-1)[-1] == self.end_tok
-
-    def logprob(self):
-        return self.out_logprobs.mean().item()
-
-    def sort_key(self):
-        return -self.logprob()
-
-    def prob(self):
-        return self.out_logprobs.mean().exp().item()
-
-    def __len__(self):
-        return self.length
-
-    def extend(self, idx, logprob):
-        ret = Hypothesis(self.device, self.start_tok, self.end_tok, self.padding_tok, self.memory_idx, self.num_layers, self.embd_size)
-        ret.cached_activations = [item.clone() for item in self.cached_activations]
-        ret.length = self.length + 1
-        ret.out_idx = torch.cat([self.out_idx, torch.LongTensor([idx]).to(self.device)], dim = 0)
-        ret.out_logprobs = torch.cat([self.out_logprobs, torch.FloatTensor([logprob]).to(self.device)], dim = 0)
-        return ret
-
-    def output(self):
-        return self.cached_activations[-1]
-
-def next_token_batch(
-    hyps: List[Hypothesis],
-    memory: torch.Tensor, # N, H, W, C
-    memory_mask: torch.BoolTensor,
-    decoders: nn.ModuleList,
-    embd: nn.Embedding
-    ):
-    layer: nn.TransformerDecoderLayer
-    N = len(hyps)
-    offset = len(hyps[0])
-
-    # N
-    last_toks = torch.stack([item.out_idx[-1] for item in hyps])
-    # N, 1, E
-    tgt: torch.FloatTensor = embd(last_toks).unsqueeze_(1)
-    
-    # N, L, E
-    memory = torch.stack([memory[idx, :, :] for idx in [item.memory_idx for item in hyps]], dim = 0)
-    for l, layer in enumerate(decoders):
-        # TODO: keys and values are recomputed everytime
-        # N, L - 1, E
-        combined_activations = torch.cat([item.cached_activations[l] for item in hyps], dim = 0)
-        # N, L, E
-        combined_activations = torch.cat([combined_activations, tgt], dim = 1)
-        for i in range(N):
-            hyps[i].cached_activations[l] = combined_activations[i: i + 1, :, :]
-        # N, 1, E
-        tgt = tgt + layer.self_attn(layer.norm1(tgt), layer.norm1(combined_activations), layer.norm1(combined_activations), q_offset = offset)[0]
-        tgt = tgt + layer.multihead_attn(layer.norm2(tgt), memory, memory, key_padding_mask = memory_mask, q_offset = offset)[0]
-        tgt = tgt + layer._ff_block(layer.norm3(tgt))
-    #print(tgt[0, 0, 0])
-    for i in range(N):
-        hyps[i].cached_activations[len(decoders)] = torch.cat([hyps[i].cached_activations[len(decoders)], tgt[i: i + 1, :, :]], dim = 1)
-    # N, E
-    return tgt.squeeze_(1)
-
 class OCR(nn.Module):
     def __init__(self, dictionary, max_len):
         super(OCR, self).__init__()
@@ -608,82 +504,22 @@ class OCR(nn.Module):
             self.color_pred_bg_ind(color_feats)
 
     def infer_beam_batch(self, img: torch.FloatTensor, img_widths: List[int], beams_k: int = 5, start_tok = 1, end_tok = 2, pad_tok = 0, max_finished_hypos: int = 2, max_seq_length = 384):
-        N, C, H, W = img.shape
-        assert H == 48 and C == 3
-        memory = self.backbone(img)
-        memory = einops.rearrange(memory, 'N C 1 W -> N W C')
-        valid_feats_length = [(x + 3) // 4 + 2 for x in img_widths]
-        input_mask = torch.zeros(N, memory.size(1), dtype = torch.bool).to(img.device)
-        for i, l in enumerate(valid_feats_length):
-            input_mask[i, l:] = True
-        for layer in self.encoders :
-            memory = layer(layer, src = memory, src_key_padding_mask = input_mask)
-        hypos = [Hypothesis(img.device, start_tok, end_tok, pad_tok, i, len(self.decoders), 320) for i in range(N)]
-        # N, E
-        decoded = next_token_batch(hypos, memory, input_mask, self.decoders, self.embd)
-        # N, n_chars
-        pred_char_logprob = self.pred(self.pred1(decoded)).log_softmax(-1)
-        # N, k
-        pred_chars_values, pred_chars_index = torch.topk(pred_char_logprob, beams_k, dim = 1)
-        new_hypos: List[Hypothesis] = []
-        finished_hypos = defaultdict(list)
-        for i in range(N):
-            for k in range(beams_k):
-                new_hypos.append(hypos[i].extend(pred_chars_index[i, k], pred_chars_values[i, k]))
-        hypos = new_hypos
-        for ixx in range(max_seq_length):
-            # N * k, E
-            decoded = next_token_batch(hypos, memory, torch.stack([input_mask[hyp.memory_idx] for hyp in hypos]) , self.decoders, self.embd)
-            # N * k, n_chars
-            pred_char_logprob = self.pred(self.pred1(decoded)).log_softmax(-1)
-            # N * k, k
-            pred_chars_values, pred_chars_index = torch.topk(pred_char_logprob, beams_k, dim = 1)
-            hypos_per_sample = defaultdict(list)
-            h: Hypothesis
-            for i, h in enumerate(hypos):
-                for k in range(beams_k):
-                    hypos_per_sample[h.memory_idx].append(h.extend(pred_chars_index[i, k], pred_chars_values[i, k]))
-            hypos = []
-            # hypos_per_sample now contains N * k^2 hypos
-            for i in hypos_per_sample.keys():
-                cur_hypos: List[Hypothesis] = hypos_per_sample[i]
-                cur_hypos = sorted(cur_hypos, key = lambda a: a.sort_key())[: beams_k + 1]
-                #print(cur_hypos[0].out_idx[-1])
-                to_added_hypos = []
-                sample_done = False
-                for h in cur_hypos:
-                    if h.seq_end():
-                        finished_hypos[i].append(h)
-                        if len(finished_hypos[i]) >= max_finished_hypos:
-                            sample_done = True
-                            break
-                    else:
-                        if len(to_added_hypos) < beams_k:
-                            to_added_hypos.append(h)
-                if not sample_done:
-                    hypos.extend(to_added_hypos)
-            if len(hypos) == 0:
-                break
-        # add remaining hypos to finished
-        for i in range(N):
-            if i not in finished_hypos:
-                cur_hypos: List[Hypothesis] = hypos_per_sample[i]
-                cur_hypo = sorted(cur_hypos, key = lambda a: a.sort_key())[0]
-                finished_hypos[i].append(cur_hypo)
-        assert len(finished_hypos) == N
-        result = []
-        for i in range(N):
-            cur_hypos = finished_hypos[i]
-            cur_hypo = sorted(cur_hypos, key = lambda a: a.sort_key())[0]
-            decoded = cur_hypo.output()
-            color_feats = self.color_pred1(decoded)
-            fg_pred, bg_pred, fg_ind_pred, bg_ind_pred = \
-                self.color_pred_fg(color_feats), \
-                self.color_pred_bg(color_feats), \
-                self.color_pred_fg_ind(color_feats), \
-                self.color_pred_bg_ind(color_feats)
-            result.append((cur_hypo.out_idx[1:], cur_hypo.prob(), fg_pred[0], bg_pred[0], fg_ind_pred[0], bg_ind_pred[0]))
-        return result
+        """Compatibility entry point using the tensorized activation cache.
+
+        Older callers used a Python hypothesis decoder that repeatedly rebuilt
+        every layer's key/value input. Keep the public method while routing it
+        through the same preallocated batched cache as production OCR.
+        """
+        return self.infer_beam_batch_tensor(
+            img,
+            img_widths,
+            beams_k=beams_k,
+            start_tok=start_tok,
+            end_tok=end_tok,
+            pad_tok=pad_tok,
+            max_finished_hypos=max_finished_hypos,
+            max_seq_length=max_seq_length,
+        )
 
     def infer_beam_batch_tensor(self, img: torch.FloatTensor, img_widths: List[int], beams_k: int = 5, start_tok = 1, end_tok = 2, pad_tok = 0, max_finished_hypos: int = 2, max_seq_length = 384):
         N, C, H, W = img.shape

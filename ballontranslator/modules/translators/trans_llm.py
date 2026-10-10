@@ -228,7 +228,7 @@ class LLMTranslator(LLMChatRequester, BaseTranslator):
         )
         cache_mode = 'explicit' if _uses_explicit_cache(profile) else 'implicit'
         transport = (
-            f"transport={'websocket' if self._codex_websocket_enabled() else 'sse'!r}, "
+            f"transport={'websocket' if self._responses_websocket_enabled() else 'sse'!r}, "
             if profile.backend == 'codex' else ''
         )
         return (

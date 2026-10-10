@@ -46,6 +46,19 @@ class TranslateContext:
     Valid = (TextBlock, Page)
 
 
+class TranslationFailurePolicy:
+    """Action taken after a page translation request fails.
+
+    >>> TranslationFailurePolicy.Valid
+    ('retry', 'skip', 'abort')
+    """
+
+    RETRY = 'retry'
+    SKIP = 'skip'
+    ABORT = 'abort'
+    Valid = (RETRY, SKIP, ABORT)
+
+
 class LLMTranslateContext:
     """Canonical LLM translation-context modes stored in module config.
 
@@ -113,6 +126,7 @@ class ModuleConfig(Config):
     translate_source: str = 'Auto'
     translate_target: str = '简体中文'
     translate_context: str = TranslateContext.Page
+    translation_failure_policy: str = TranslationFailurePolicy.SKIP
     llm_translate_context: str = LLMTranslateContext.PAGE
     llm_prior_context_token_budget: int = 10000
     llm_glossary_path: str = ''
@@ -277,6 +291,11 @@ class ModuleConfig(Config):
             self.ocr_text_postprocess = OCRTextPostprocess.NONE
         if self.translate_context not in TranslateContext.Valid:
             self.translate_context = TranslateContext.Page
+        if self.translation_failure_policy not in TranslationFailurePolicy.Valid:
+            LOGGER.warning(
+                'Discard invalid module.translation_failure_policy config.'
+            )
+            self.translation_failure_policy = TranslationFailurePolicy.SKIP
         if self.llm_translate_context not in LLMTranslateContext.Valid:
             self.llm_translate_context = LLMTranslateContext.PAGE
         if not isinstance(self.llm_glossary_path, str):
@@ -504,6 +523,8 @@ class ProgramConfig(Config):
     show_translator_tool: bool = True
     show_inpainter_tool: bool = True
     run_pipeline_mode: str = 'pipeline'
+    run_pipeline_range_start: int = 1
+    run_pipeline_range_end: int = 0
     render_without_text_style_update: bool = False
 
     let_fntsize_flag: int = 0

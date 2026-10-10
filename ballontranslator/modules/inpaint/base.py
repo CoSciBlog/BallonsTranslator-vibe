@@ -208,4 +208,4 @@ class InpainterBase(BaseModule):
         raise NotImplementedError
     
     def moveToDevice(self, device: str, precision: str = None):
-        raise not NotImplementedError
+        raise NotImplementedError
