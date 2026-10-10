@@ -55,6 +55,11 @@ from ballontranslator.utils.fontformat import (
 )
 from ballontranslator.utils.font_registry import FontEntry
 from ballontranslator.utils.font_refresh import runtime_font_refresh_supported
+from ballontranslator.utils.text_effects import (
+    TextEffectStack,
+    effect_paint_fallback_color,
+    primary_stroke,
+)
 from ...custom_widget import (
     AlignmentChecker,
     CheckableLabel,
@@ -923,6 +928,18 @@ class FontFormatPanel(Widget):
         self.colorPicker.colorChanged.connect(self.onColorLabelChanged)
         self.colorPicker.apply_color.connect(self.on_apply_color)
 
+        self.strokeColorPicker = ColorPickerLabel(self)
+        self.strokeColorPicker.setObjectName('FontFormatStrokeColorPicker')
+        self.strokeColorPicker.setAccessibleName(self.tr('Stroke Color'))
+        self.strokeColorPicker.setToolTip(self.tr('Change stroke color'))
+        self.strokeColorPicker.changingColor.connect(self.changingColor)
+        self.strokeColorPicker.colorChanged.connect(
+            self.onStrokeColorLabelChanged
+        )
+        self.strokeColorPicker.apply_color.connect(
+            self.on_apply_stroke_color
+        )
+
         self.alignBtnGroup = AlignmentBtnGroup(self)
         self.alignBtnGroup.param_changed.connect(self.on_param_changed)
 
@@ -1044,6 +1061,7 @@ class FontFormatPanel(Widget):
         hl1 = QHBoxLayout()
         font_selector_layout = QHBoxLayout()
         font_selector_layout.addWidget(self.colorPicker)
+        font_selector_layout.addWidget(self.strokeColorPicker)
         font_selector_layout.addWidget(self.familybox, 1)
         if self.reloadFontsButton is not None:
             font_selector_layout.addWidget(self.reloadFontsButton)
@@ -1358,8 +1376,40 @@ class FontFormatPanel(Widget):
             rgb = sender.rgb()
             self.on_param_changed(sender.param_name, rgb)
 
+    def onStrokeColorLabelChanged(self, is_valid: bool = True) -> None:
+        self.focusOnColorDialog = False
+        if is_valid:
+            self.text_effect_session.commit_primary_stroke_color(
+                self.strokeColorPicker.rgb()
+            )
+
     def on_apply_color(self, param_name, rgb):
         self.on_param_changed(param_name, rgb)
+
+    def on_apply_stroke_color(self, _param_name: str, rgb: tuple) -> None:
+        self.text_effect_session.commit_primary_stroke_color(rgb)
+
+    def sync_stroke_color_picker(
+        self,
+        effects: TextEffectStack,
+        *,
+        preserve_focused_editor: bool = True,
+    ) -> None:
+        """Project the primary Stroke's fallback color into the toolbar."""
+
+        stroke = primary_stroke(effects)
+        color = (
+            (0, 0, 0)
+            if stroke is None
+            else effect_paint_fallback_color(stroke.paint)
+        )
+        if preserve_focused_editor and self.focusOnColorDialog:
+            return
+        if (
+            self.strokeColorPicker.color is None
+            or self.strokeColorPicker.rgb() != color
+        ):
+            self.strokeColorPicker.setPickerColor(color)
 
     def onLineSpacingCtrlChanged(self, delta: int):
         if C.active_format.line_spacing_type == LineSpacingType.Distance:
@@ -1404,6 +1454,10 @@ class FontFormatPanel(Widget):
             )
         ):
             self.colorPicker.setPickerColor(foreground)
+        self.sync_stroke_color_picker(
+            font_format.text_effects,
+            preserve_focused_editor=preserve_focused_editors,
+        )
         if not preserve_focused_editors or not self.lineSpacingBox.hasFocus():
             with QSignalBlocker(self.lineSpacingBox):
                 self.lineSpacingBox.setValue(font_format.line_spacing)

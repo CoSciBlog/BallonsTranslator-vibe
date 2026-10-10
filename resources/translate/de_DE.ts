@@ -1300,87 +1300,87 @@
 <context>
     <name>EmphasisToolButton</name>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="194"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="199"/>
         <source>Emphasis Marks</source>
         <translation>Betonungszeichen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="202"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="207"/>
         <source>Marks</source>
         <translation>Zeichen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="209"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="214"/>
         <source>Filled Dot</source>
         <translation>Gefüllter Punkt</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="210"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="215"/>
         <source>Open Dot</source>
         <translation>Offener Punkt</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="211"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="216"/>
         <source>Filled Circle</source>
         <translation>Gefüllter Kreis</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="212"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="217"/>
         <source>Open Circle</source>
         <translation>Offener Kreis</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="213"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="218"/>
         <source>Filled Double Circle</source>
         <translation>Gefüllter Doppelkreis</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="214"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="219"/>
         <source>Open Double Circle</source>
         <translation>Offener Doppelkreis</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="215"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="220"/>
         <source>Filled Triangle</source>
         <translation>Gefülltes Dreieck</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="216"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="221"/>
         <source>Open Triangle</source>
         <translation>Offenes Dreieck</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="217"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="222"/>
         <source>Filled Sesame</source>
         <translation>Gefülltes Sesamzeichen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="218"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="223"/>
         <source>Open Sesame</source>
         <translation>Sesam, öffne dich!</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="228"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="233"/>
         <source>Position</source>
         <translation>Position</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="235"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="240"/>
         <source>Over / Right</source>
         <translation>Über / Rechts</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="236"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="241"/>
         <source>Under / Right</source>
         <translation>Unter / Rechts</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="237"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="242"/>
         <source>Over / Left</source>
         <translation>Über / Links</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="238"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="243"/>
         <source>Under / Left</source>
         <translation>Unter / Links</translation>
     </message>
@@ -1481,143 +1481,153 @@
 <context>
     <name>FontFormatPanel</name>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="879"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="884"/>
         <source>Font Family</source>
         <translation>Schriftfamilie</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="886"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="891"/>
         <source>Reload fonts</source>
         <translation>Schriftarten neu laden</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="887"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="892"/>
         <source>Reload system fonts and fonts folder</source>
         <translation>System-Schriftarten und Schriftordner neu laden</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="892"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="897"/>
         <source>Font Weight</source>
         <translation>Schriftstärke</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="898"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="903"/>
         <source>Font Size</source>
         <translation>Schriftgröße</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="900"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="905"/>
         <source>Change font size</source>
         <translation>Schriftgröße ändern</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="911"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="916"/>
         <source>Change line spacing</source>
         <translation>Zeilenabstand ändern</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="921"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="926"/>
         <source>Change font color</source>
         <translation>Schriftfarbe ändern</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="937"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="933"/>
+        <source>Stroke Color</source>
+        <translation>Konturfarbe</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="934"/>
+        <source>Change stroke color</source>
+        <translation>Konturfarbe ändern</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="954"/>
         <source>Combine the selected text into one upright vertical cell</source>
         <translation>Den ausgewählten Text in eine einzelne, vertikale Zelle zusammenführen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="950"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="967"/>
         <source>Standard Vertical Roman Alignment</source>
         <translation>Standardmäßige vertikale Ausrichtung (Roman)</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="961"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="978"/>
         <source>Change letter spacing</source>
         <translation>Buchstabenabstand ändern</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="975"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="992"/>
         <source>Global Font Format</source>
         <translation>Globales Schriftformat</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="985"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1002"/>
         <source>Advanced Text Format</source>
         <translation>Erweiterte Textformatierung</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1003"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1020"/>
         <source>Text Effect</source>
         <translation>Texteffekt</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1011"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1028"/>
         <source>Text Transform</source>
         <translation>Texttransformation</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1029"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1046"/>
         <source>Unfold</source>
         <translation>Entfalten</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1029"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1046"/>
         <source>Fold</source>
         <translation>Falten</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1030"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1047"/>
         <source>Source</source>
         <translation>Quelle</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1031"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1048"/>
         <source>Translation</source>
         <translation>Übersetzung</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1219"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1237"/>
         <source>Tate-chu-yoko cannot overlap Ruby.</source>
         <translation>&quot;Tate-chu-yoko&quot; darf nicht mit Ruby überlappen.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1222"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1240"/>
         <source>Unable to apply Tate-chu-yoko to this selection.</source>
         <translation>Es konnte keine &quot;Tate-chu-yoko&quot;-Formatierung auf diese Auswahl angewendet werden.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1255"/>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1263"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1273"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1281"/>
         <source>Select base text to apply Ruby.</source>
         <translation>Wählen Sie den Basistext aus, um Ruby anzuwenden.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1266"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1284"/>
         <source>Ruby text cannot be empty.</source>
         <translation>Der Ruby-Text darf nicht leer sein.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1269"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1287"/>
         <source>Mono Ruby needs one whitespace-separated reading per base grapheme.</source>
         <translation>Mono-Ruby benötigt für jedes Basissymbol genau ein Leerzeichen-getrenntes Leseelement.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1272"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1290"/>
         <source>Ruby cannot partially overlap an existing container.</source>
         <translation>Ruby darf keinen bestehenden Container teilweise überlappen.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1275"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1293"/>
         <source>Ruby cannot overlap Tate-chu-yoko.</source>
         <translation>Ruby darf &quot;Tate-chu-yoko&quot; nicht überlappen.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1278"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1296"/>
         <source>Ruby base text cannot contain paragraph or forced line breaks.</source>
         <translation>Der Ruby-Basistext darf keine Absatz- oder erzwungenen Zeilenumbrüche enthalten.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1284"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1302"/>
         <source>Unable to apply Ruby to this selection.</source>
         <translation>Es konnte keine Ruby-Formatierung auf diese Auswahl angewendet werden.</translation>
     </message>
@@ -1700,12 +1710,12 @@
 <context>
     <name>FontSizeDragLabel</name>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="473"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="478"/>
         <source>Drag to resize text</source>
         <translation>Ziehen Sie, um den Text zu ändern</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="474"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="479"/>
         <source>Resize text</source>
         <translation>Textgröße ändern</translation>
     </message>
@@ -1713,47 +1723,47 @@
 <context>
     <name>FontWeightComboBox</name>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="578"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="583"/>
         <source>Thin</source>
         <translation>Dünn</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="579"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="584"/>
         <source>Extra Light</source>
         <translation>Sehr leicht</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="580"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="585"/>
         <source>Light</source>
         <translation>Hell</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="581"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="586"/>
         <source>Normal</source>
         <translation>Normal</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="582"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="587"/>
         <source>Medium</source>
         <translation>Mittel</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="583"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="588"/>
         <source>Demi Bold</source>
         <translation>Halbfett</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="584"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="589"/>
         <source>Bold</source>
         <translation>Fett</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="585"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="590"/>
         <source>Extra Bold</source>
         <translation>Extra Fett</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="586"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="591"/>
         <source>Black</source>
         <translation>Fetter</translation>
     </message>
@@ -6785,7 +6795,7 @@ Starten Sie dann Photoshop neu. Der Explorer öffnet nun die Quelldatei und den 
 <context>
     <name>TextEffectEditSession</name>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/effects/edit_session.py" line="818"/>
+        <location filename="../../ballontranslator/ui/text_engine/effects/edit_session.py" line="864"/>
         <source>Open a project before generating an Image.</source>
         <translation>Öffnen Sie ein Projekt, bevor Sie ein Bild generieren.</translation>
     </message>

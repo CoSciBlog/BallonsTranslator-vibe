@@ -37,6 +37,7 @@
 * Text editing
   - Supports WYSIWYG rich-text editing and [text style presets](https://github.com/dmMaze/BallonsTranslator/pull/311)
   - Supports a rich set of [text effects](https://github.com/dmMaze/BallonsTranslator/pull/1296) and [text transforms](https://github.com/dmMaze/BallonsTranslator/pull/1238)
+  - The compact font-format toolbar provides separate foreground and Stroke color pickers. Stroke color changes use the typed effect stack, support multi-selection, and remain undoable without replacing other Stroke settings.
   - Supports find and replace across all text, source text, or translations, and Word document import/export
   - Enable **Remove translation line breaks** under **Settings → Typesetting** to replace translator-authored line breaks in new translations and let each text box wrap the result automatically. The option is disabled by default and does not alter existing or manually edited text.
 

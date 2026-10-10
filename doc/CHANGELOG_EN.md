@@ -1,5 +1,10 @@
 # Changelogs
 
+### 2026-10-11 — 1.5.19+vibe.19
+- Added a compact Stroke color picker beside the font-color control in the main text-format toolbar, including English/German tooltips and accessibility text.
+- Stroke color changes now use the existing typed effect stack and preserve width, position, opacity, blending, sibling effects, global styles, and multi-selection behavior in one undoable operation.
+- Choosing a Stroke color for text without a Stroke explicitly adds the standard Stroke effect, while effect-card edits and undo/redo keep the compact picker synchronized.
+
 ### 2026-10-11 — 1.5.19+vibe.18
 - Added an opt-in **Remove translation line breaks** setting under **Settings → Typesetting**. New translations can now discard model-authored hard line breaks and rely on the existing text-box layout for automatic wrapping.
 - Line-break removal runs after translation conversion, keyword substitution, and letter-case processing; non-CJK lines are joined with one space while CJK lines are joined without artificial spacing.
