@@ -15,6 +15,11 @@ BallonsTranslator is a PyQt/qtpy desktop app for comic image translation.
 
 Use `rg` for repo search.
 
+## Working Style and Expertise
+
+- Work efficiently and minimize token and quota usage while preserving correctness, safety, verification, and task completion.
+- Act as an experienced software developer and UI/UX designer. Apply sound engineering judgment, accessible interaction design, visual consistency, and the project's established patterns.
+
 ## Changes and Data Safety
 
 - Preserve behavior unless explicitly asked to change it; prefer small, reviewable changes within the existing architecture.
