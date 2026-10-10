@@ -1,6 +1,7 @@
 from typing import Callable, List, Optional
 
 from qtpy.QtWidgets import (
+    QAbstractScrollArea,
     QComboBox,
     QStyle,
     QStyleOptionComboBox,
@@ -8,12 +9,41 @@ from qtpy.QtWidgets import (
     QWidget,
 )
 from qtpy.QtCore import QSize, Signal, Qt
-from qtpy.QtGui import QDoubleValidator, QPaintEvent, QPainter, QPalette
+from qtpy.QtGui import (
+    QDoubleValidator,
+    QPaintEvent,
+    QPainter,
+    QPalette,
+    QWheelEvent,
+)
 
 from ballontranslator.utils.shared import CONFIG_COMBOBOX_LONG, CONFIG_COMBOBOX_MIDEAN, CONFIG_COMBOBOX_SHORT, CONFIG_COMBOBOX_HEIGHT
 from .push_button import NoBorderPushBtn
 from ..icon_rendering import render_svg_pixmap
 from ..misc import themed_icon_path
+
+
+def forward_wheel_to_scroll_area(
+    widget: QWidget,
+    event: QWheelEvent,
+    scroll_widget: Optional[QWidget] = None,
+) -> None:
+    """Scroll the containing settings area without editing ``widget``."""
+    scroll_area = (
+        scroll_widget
+        if isinstance(scroll_widget, QAbstractScrollArea)
+        else None
+    )
+    ancestor = widget.parentWidget()
+    while scroll_area is None and ancestor is not None:
+        if isinstance(ancestor, QAbstractScrollArea):
+            scroll_area = ancestor
+            break
+        ancestor = ancestor.parentWidget()
+
+    event.ignore()
+    if scroll_area is not None:
+        scroll_area.wheelEvent(event)
 
 
 class ComboBox(QComboBox):
@@ -28,11 +58,11 @@ class ComboBox(QComboBox):
     def setScrollWidget(self, scrollWidget: QWidget):
         self.scrollWidget = scrollWidget
 
-    def wheelEvent(self, *args, **kwargs):
-        if self.scrollWidget is None or self.hasFocus():
-            return super().wheelEvent(*args, **kwargs)
-        else:
-            return self.scrollWidget.wheelEvent(*args, **kwargs)
+    def wheelEvent(self, event: QWheelEvent) -> None:
+        if self.scrollWidget is None:
+            super().wheelEvent(event)
+            return
+        forward_wheel_to_scroll_area(self, event, self.scrollWidget)
         
 
 class SmallComboBox(ComboBox):
@@ -140,7 +170,12 @@ class BottomBorderComboBox(QComboBox):
 class ConfigComboBox(ComboBox):
 
     def __init__(self, fix_size=True, scrollWidget: QWidget = None, *args, **kwargs) -> None:
-        super().__init__(scrollWidget, *args, **kwargs)
+        super().__init__(
+            parent=scrollWidget,
+            scrollWidget=scrollWidget,
+            *args,
+            **kwargs,
+        )
         self.fix_size = fix_size
         self.adjustSize()
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)

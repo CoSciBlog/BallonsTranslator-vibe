@@ -1,5 +1,10 @@
 # Changelogs
 
+### 2026-10-10 — 1.5.19+vibe.8
+- Mouse-wheel input over Settings combo boxes and numeric fields now scrolls the containing settings page instead of changing values accidentally.
+- Fixed `ConfigComboBox` scroll-target wiring and applied the same wheel pass-through behavior even when a field has keyboard focus.
+- Added an offscreen Qt regression covering focused combo boxes, numeric fields, unchanged values, and continued page scrolling.
+
 ### 2026-10-10 — 1.5.19+vibe.7
 - Added an opt-in **Unload local models before LLM requests** Pipeline setting that frees BallonsTranslator detector, OCR, translator, and inpainter models before chat, Ollama-compatible, Codex, or image LLM requests.
 - LLM pipeline stages now use the existing serial low-VRAM path while the option is enabled, preventing a concurrently used local translation model from being unloaded; released modules still reload lazily when needed.

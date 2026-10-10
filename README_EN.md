@@ -50,6 +50,9 @@
   - Enable **Unload local models before LLM requests** under **Settings → Pipeline** to release loaded detector, OCR, translator, and inpainter models before an LLM or Ollama request. This makes more RAM and VRAM available to the LLM; released modules load again automatically when needed.
   - The option serializes LLM pipeline stages with local translation to prevent an in-use model from being unloaded. It releases models owned by BallonsTranslator, but cannot unload a model managed by an external Ollama server.
 
+* Safer settings scrolling
+  - Scrolling the mouse wheel over combo boxes or numeric fields in **Settings** now scrolls the surrounding page without changing the selected value. Values remain editable by clicking, typing, or using the keyboard.
+
 * <details>
   <summary><i>Context-aware LLM translation & Glossary</i></summary>
 

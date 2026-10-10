@@ -13,6 +13,7 @@ from qtpy.QtCore import Qt, Signal, QSize, QItemSelection, QTimer
 from qtpy.QtGui import QStandardItem, QStandardItemModel, QMouseEvent, QFont, QIntValidator, QValidator, QFocusEvent
 
 from .custom_widget import ConfigComboBox, NoBorderPushBtn, ScrollBar, Widget
+from .custom_widget.combobox import forward_wheel_to_scroll_area
 from ballontranslator.utils import shared
 from ballontranslator.utils.config import OCRTextPostprocess, pcfg
 from ballontranslator.utils.version import APP_VERSION
@@ -122,6 +123,13 @@ class PercentageLineEdit(QLineEdit):
             self.finish_edited.emit(text)
 
         return super().focusOutEvent(e)
+
+
+class ConfigSpinBox(QSpinBox):
+    """Numeric settings editor whose wheel scrolls the containing page."""
+
+    def wheelEvent(self, event) -> None:
+        forward_wheel_to_scroll_area(self, event)
 
 
 class ConfigTextLabel(QLabel):
@@ -899,7 +907,7 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
         self.spellcheck_on_source_checker.stateChanged.connect(self.on_spellcheck_on_source_changed)
 
         # Edit Distance Spinbox
-        self.spellcheck_distance_spin = QSpinBox(self)
+        self.spellcheck_distance_spin = ConfigSpinBox(self)
         self.spellcheck_distance_spin.setObjectName('SpellCheckDistanceSpin')
         self.spellcheck_distance_spin.setRange(1, 4)
         self.spellcheck_distance_spin.setFixedWidth(CONFIG_COMBOBOX_SHORT)
@@ -1225,7 +1233,7 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
             'Maximum number of consecutive matching characters to combine.'
         )
         max_length_label.setToolTip(max_length_tooltip)
-        self.auto_tate_chu_yoko_max_length = QSpinBox(max_length_row)
+        self.auto_tate_chu_yoko_max_length = ConfigSpinBox(max_length_row)
         self.auto_tate_chu_yoko_max_length.setObjectName(
             'AutoTateChuYokoMaxLength'
         )

@@ -10,8 +10,16 @@ from unittest.mock import Mock, patch
 
 os.environ.setdefault('QT_QPA_PLATFORM', 'offscreen')
 
-from qtpy.QtCore import QCoreApplication, QObject, QEvent, QLocale, QPoint, Qt
-from qtpy.QtGui import QColor, QTextCursor, QTextDocument
+from qtpy.QtCore import (
+    QCoreApplication,
+    QObject,
+    QEvent,
+    QLocale,
+    QPoint,
+    QPointF,
+    Qt,
+)
+from qtpy.QtGui import QColor, QTextCursor, QTextDocument, QWheelEvent
 from qtpy.QtTest import QSignalSpy, QTest
 from qtpy.QtWidgets import (
     QApplication,
@@ -255,6 +263,48 @@ class RunPipelineDialogTests(unittest.TestCase):
         finally:
             panel.close()
             pcfg.let_letter_case = original
+
+    def test_settings_wheel_scrolls_without_changing_field_values(self):
+        panel = ConfigPanel()
+        try:
+            panel.resize(720, 520)
+            panel.showSection('typesetting')
+            panel.show()
+            self.app.processEvents()
+            scroll_area = panel.configContent.currentWidget()
+            scrollbar = scroll_area.verticalScrollBar()
+            self.assertGreater(scrollbar.maximum(), 0)
+
+            def send_wheel(widget, delta: int = -120) -> None:
+                center = widget.rect().center()
+                event = QWheelEvent(
+                    QPointF(center),
+                    QPointF(widget.mapToGlobal(center)),
+                    QPoint(),
+                    QPoint(0, delta),
+                    Qt.MouseButton.NoButton,
+                    Qt.KeyboardModifier.NoModifier,
+                    Qt.ScrollPhase.ScrollUpdate,
+                    False,
+                )
+                QApplication.sendEvent(widget, event)
+
+            combo = panel.let_fntsize_combox
+            combo.setCurrentIndex(0)
+            combo.setFocus()
+            send_wheel(combo)
+            self.assertEqual(combo.currentIndex(), 0)
+            self.assertGreater(scrollbar.value(), 0)
+
+            scrollbar.setValue(0)
+            spinbox = panel.auto_tate_chu_yoko_max_length
+            original_value = spinbox.value()
+            spinbox.setFocus()
+            send_wheel(spinbox)
+            self.assertEqual(spinbox.value(), original_value)
+            self.assertGreater(scrollbar.value(), 0)
+        finally:
+            panel.close()
 
     def test_pipeline_llm_memory_checkbox_updates_config(self):
         original = pcfg.module.unload_models_before_llm
