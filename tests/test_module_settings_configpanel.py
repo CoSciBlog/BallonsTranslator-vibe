@@ -1,5 +1,6 @@
 import os
 import unittest
+from unittest.mock import patch
 
 os.environ.setdefault('QT_QPA_PLATFORM', 'offscreen')
 
@@ -7,6 +8,7 @@ from qtpy.QtCore import QCoreApplication, QEvent
 from qtpy.QtWidgets import QApplication
 
 from ballontranslator.ui.configpanel import ConfigPanel, ModuleSettingsWidget
+from ballontranslator.utils.config import pcfg
 
 
 class ModuleSettingsConfigPanelTest(unittest.TestCase):
@@ -74,6 +76,33 @@ class ModuleSettingsConfigPanelTest(unittest.TestCase):
 
         self.assertIsNone(editor.param_widget)
         self.assertFalse(editor.empty_label.isHidden())
+
+    def test_typesetting_merge_controls_persist_and_request_current_page(self) -> None:
+        with (
+            patch.object(pcfg.module, 'post_merge_textboxes', False),
+            patch.object(
+                pcfg.module,
+                'post_merge_mode',
+                'VERTICAL_THEN_HORIZONTAL',
+            ),
+        ):
+            panel = ConfigPanel()
+            self.addCleanup(panel.deleteLater)
+            panel.setupConfig()
+            requests = []
+            panel.merge_current_page_requested.connect(
+                lambda: requests.append(True)
+            )
+
+            self.assertFalse(panel.post_merge_mode_combobox.isEnabled())
+            panel.post_merge_checker.click()
+            panel.post_merge_mode_combobox.activated.emit(1)
+            panel.post_merge_current_page_btn.click()
+
+            self.assertTrue(pcfg.module.post_merge_textboxes)
+            self.assertEqual(pcfg.module.post_merge_mode, 'HORIZONTAL')
+            self.assertTrue(panel.post_merge_mode_combobox.isEnabled())
+            self.assertEqual(requests, [True])
 
 
 if __name__ == '__main__':

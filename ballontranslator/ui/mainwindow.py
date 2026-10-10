@@ -725,6 +725,9 @@ class MainWindow(mainwindow_cls):
         self.configPanel.apply_auto_tate_chu_yoko_requested.connect(
             self.apply_auto_tate_chu_yoko_to_project
         )
+        self.configPanel.merge_current_page_requested.connect(
+            self.run_merge_current_page_using_settings
+        )
         self.on_show_only_custom_font(pcfg.let_show_only_custom_fonts_flag)
         self.font_refresh = FontRefreshController(self)
         self.font_change_detector = None
@@ -2310,7 +2313,13 @@ class MainWindow(mainwindow_cls):
         if not self.canvas.start_path_reorder():
             self.titleBar.path_reorder_action.setChecked(False)
 
-    def run_merge_task(self, on_current=False):
+    def run_merge_current_page_using_settings(self) -> None:
+        self.run_merge_task(
+            on_current=True,
+            config=self.module_manager.post_merge_config_from_settings(),
+        )
+
+    def run_merge_task(self, on_current=False, config=None):
         """执行区域合并任务"""
         from ballontranslator.utils import merger
         from qtpy.QtWidgets import QMessageBox
@@ -2319,7 +2328,8 @@ class MainWindow(mainwindow_cls):
             QMessageBox.warning(self, self.tr("Warning"), self.tr("Open a project first."))
             return
         
-        config = self.merge_dialog.get_config()
+        if config is None:
+            config = self.merge_dialog.get_config()
         
         if on_current:
             # 对当前文件运行 - 直接在内存中操作，不读写文件
@@ -2344,26 +2354,10 @@ class MainWindow(mainwindow_cls):
             initial_shapes = [blk.to_dict() for blk in textblocks]
             
             initial_count = len(initial_shapes)
-            mode = config.get("MERGE_MODE", "NONE")
-            total_merged = 0
-            
-            # 在内存中执行合并
-            if mode == "VERTICAL":
-                final_shapes, count = merger.perform_merge(initial_shapes, "VERTICAL", config)
-                total_merged += count
-            elif mode == "HORIZONTAL":
-                final_shapes, count = merger.perform_merge(initial_shapes, "HORIZONTAL", config)
-                total_merged += count
-            elif mode == "VERTICAL_THEN_HORIZONTAL":
-                temp, count1 = merger.perform_merge(initial_shapes, "VERTICAL", config)
-                final_shapes, count2 = merger.perform_merge(temp, "HORIZONTAL", config)
-                total_merged += (count1 + count2)
-            elif mode == "HORIZONTAL_THEN_VERTICAL":
-                temp, count1 = merger.perform_merge(initial_shapes, "HORIZONTAL", config)
-                final_shapes, count2 = merger.perform_merge(temp, "VERTICAL", config)
-                total_merged += (count1 + count2)
-            else:
-                final_shapes = initial_shapes
+            final_shapes, total_merged = merger.perform_configured_merge(
+                initial_shapes,
+                config,
+            )
             
             if total_merged > 0:
                 # 将字典转回 TextBlock 对象并更新内存
@@ -2371,6 +2365,7 @@ class MainWindow(mainwindow_cls):
                 # 刷新画布
                 self.canvas.updateCanvas()
                 self.st_manager.updateSceneTextitems()
+                self.canvas.setProjSaveState(True)
                 final_count = len(final_shapes)
                 QMessageBox.information(
                     self,

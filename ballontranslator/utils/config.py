@@ -153,6 +153,13 @@ class ModuleConfig(Config):
     llm_translate_summary_memory: bool = False
     llm_translate_overwrite_summary: bool = False
 
+    post_merge_textboxes: bool = False
+    post_merge_mode: str = 'VERTICAL_THEN_HORIZONTAL'
+    post_merge_max_vertical_gap: int = 30
+    post_merge_max_horizontal_gap: int = 30
+    post_merge_min_width_overlap_ratio: int = 50
+    post_merge_min_height_overlap_ratio: int = 50
+
     check_need_inpaint: bool = True
     empty_runcache: bool = False
     unload_models_before_llm: bool = False
@@ -248,10 +255,32 @@ class ModuleConfig(Config):
             ('project_glossary_review_enabled', False),
             ('project_glossary_series_enabled', False),
             ('project_glossary_conflict_warnings', True),
+            ('post_merge_textboxes', False),
         ):
             if type(getattr(self, setting_name)) is not bool:
                 LOGGER.warning(
                     f'Discard invalid module.{setting_name} config: expected a boolean.'
+                )
+                setattr(self, setting_name, default)
+        valid_merge_modes = {
+            'VERTICAL',
+            'HORIZONTAL',
+            'VERTICAL_THEN_HORIZONTAL',
+            'HORIZONTAL_THEN_VERTICAL',
+        }
+        if self.post_merge_mode not in valid_merge_modes:
+            LOGGER.warning('Discard invalid module.post_merge_mode config.')
+            self.post_merge_mode = 'VERTICAL_THEN_HORIZONTAL'
+        for setting_name, default, maximum in (
+            ('post_merge_max_vertical_gap', 30, 1000),
+            ('post_merge_max_horizontal_gap', 30, 1000),
+            ('post_merge_min_width_overlap_ratio', 50, 100),
+            ('post_merge_min_height_overlap_ratio', 50, 100),
+        ):
+            value = getattr(self, setting_name)
+            if type(value) is not int or not 0 <= value <= maximum:
+                LOGGER.warning(
+                    f'Discard invalid module.{setting_name} config.'
                 )
                 setattr(self, setting_name, default)
         valid_categories = {

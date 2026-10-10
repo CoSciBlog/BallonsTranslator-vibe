@@ -955,6 +955,66 @@
         <translation>Replace line breaks in new translations and let the text box wrap the text automatically.</translation>
     </message>
     <message>
+        <source>Text Box Merging</source>
+        <translation>Text Box Merging</translation>
+    </message>
+    <message>
+        <source>Merge nearby text boxes after pipeline</source>
+        <translation>Merge nearby text boxes after pipeline</translation>
+    </message>
+    <message>
+        <source>Automatically combine nearby translated text boxes after successful pipeline runs. Disabled by default.</source>
+        <translation>Automatically combine nearby translated text boxes after successful pipeline runs. Disabled by default.</translation>
+    </message>
+    <message>
+        <source>Merge direction</source>
+        <translation>Merge direction</translation>
+    </message>
+    <message>
+        <source>Choose the directions used to find neighboring text boxes.</source>
+        <translation>Choose the directions used to find neighboring text boxes.</translation>
+    </message>
+    <message>
+        <source>Vertical gap</source>
+        <translation>Vertical gap</translation>
+    </message>
+    <message>
+        <source>Maximum pixel gap between boxes above and below each other.</source>
+        <translation>Maximum pixel gap between boxes above and below each other.</translation>
+    </message>
+    <message>
+        <source>Horizontal gap</source>
+        <translation>Horizontal gap</translation>
+    </message>
+    <message>
+        <source>Maximum pixel gap between boxes beside each other.</source>
+        <translation>Maximum pixel gap between boxes beside each other.</translation>
+    </message>
+    <message>
+        <source>Horizontal overlap</source>
+        <translation>Horizontal overlap</translation>
+    </message>
+    <message>
+        <source>Minimum horizontal overlap for a vertical merge.</source>
+        <translation>Minimum horizontal overlap for a vertical merge.</translation>
+    </message>
+    <message>
+        <source>Vertical overlap</source>
+        <translation>Vertical overlap</translation>
+    </message>
+    <message>
+        <source>Minimum vertical overlap for a horizontal merge.</source>
+        <translation>Minimum vertical overlap for a horizontal merge.</translation>
+    </message>
+    <message>
+        <source>Merge Current Page Now</source>
+        <translation>Merge Current Page Now</translation>
+    </message>
+    <message>
+        <source>Apply these compact merge settings to the current page immediately.</source>
+        <translation>Apply these compact merge settings to the current page immediately.</translation>
+    </message>
+    <message>
         <location filename="../../ballontranslator/ui/configpanel.py" line="1310"/>
         <source>Independent text styles for each projects</source>
         <translation>Independent text styles for each projects</translation>

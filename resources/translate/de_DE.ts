@@ -961,6 +961,66 @@
         <translation>Ersetzt Zeilenumbrüche in neuen Übersetzungen und lässt den Text automatisch an der Textbox umbrechen.</translation>
     </message>
     <message>
+        <source>Text Box Merging</source>
+        <translation>Textfelder zusammenführen</translation>
+    </message>
+    <message>
+        <source>Merge nearby text boxes after pipeline</source>
+        <translation>Nahe Textfelder nach der Pipeline zusammenführen</translation>
+    </message>
+    <message>
+        <source>Automatically combine nearby translated text boxes after successful pipeline runs. Disabled by default.</source>
+        <translation>Führt nahe übersetzte Textfelder nach erfolgreichen Pipelines automatisch zusammen. Standardmäßig deaktiviert.</translation>
+    </message>
+    <message>
+        <source>Merge direction</source>
+        <translation>Zusammenführungsrichtung</translation>
+    </message>
+    <message>
+        <source>Choose the directions used to find neighboring text boxes.</source>
+        <translation>Legt die Richtungen fest, in denen benachbarte Textfelder gesucht werden.</translation>
+    </message>
+    <message>
+        <source>Vertical gap</source>
+        <translation>Vertikaler Abstand</translation>
+    </message>
+    <message>
+        <source>Maximum pixel gap between boxes above and below each other.</source>
+        <translation>Maximaler Pixelabstand zwischen übereinanderliegenden Textfeldern.</translation>
+    </message>
+    <message>
+        <source>Horizontal gap</source>
+        <translation>Horizontaler Abstand</translation>
+    </message>
+    <message>
+        <source>Maximum pixel gap between boxes beside each other.</source>
+        <translation>Maximaler Pixelabstand zwischen nebeneinanderliegenden Textfeldern.</translation>
+    </message>
+    <message>
+        <source>Horizontal overlap</source>
+        <translation>Horizontale Überlappung</translation>
+    </message>
+    <message>
+        <source>Minimum horizontal overlap for a vertical merge.</source>
+        <translation>Minimale horizontale Überlappung für eine vertikale Zusammenführung.</translation>
+    </message>
+    <message>
+        <source>Vertical overlap</source>
+        <translation>Vertikale Überlappung</translation>
+    </message>
+    <message>
+        <source>Minimum vertical overlap for a horizontal merge.</source>
+        <translation>Minimale vertikale Überlappung für eine horizontale Zusammenführung.</translation>
+    </message>
+    <message>
+        <source>Merge Current Page Now</source>
+        <translation>Aktuelle Seite jetzt zusammenführen</translation>
+    </message>
+    <message>
+        <source>Apply these compact merge settings to the current page immediately.</source>
+        <translation>Wendet diese kompakten Zusammenführungseinstellungen sofort auf die aktuelle Seite an.</translation>
+    </message>
+    <message>
         <location filename="../../ballontranslator/ui/configpanel.py" line="1310"/>
         <source>Independent text styles for each projects</source>
         <translation>Unabhängige Textstile für jedes Projekt.</translation>

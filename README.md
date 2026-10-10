@@ -40,6 +40,7 @@
   - The compact font-format toolbar provides separate foreground and Stroke color pickers. Stroke color changes use the typed effect stack, support multi-selection, and remain undoable without replacing other Stroke settings.
   - Supports find and replace across all text, source text, or translations, and Word document import/export
   - Enable **Remove translation line breaks** under **Settings → Typesetting** to replace translator-authored line breaks in new translations and let each text box wrap the result automatically. The option is disabled by default and does not alter existing or manually edited text.
+  - **Settings → Typesetting → Text Box Merging** can combine nearby regions automatically after a successful pipeline or immediately on the current page. Direction, maximum gaps, and required overlap are configurable; the advanced **Tools → Region Merge Tool** remains available for label-specific rules and whole-project runs.
 
 * User interface localization
   - Complete English and German UI catalogs; choose **Deutsch** from **View → Display Language**.

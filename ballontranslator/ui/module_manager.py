@@ -1668,6 +1668,8 @@ class ModuleManager(QObject):
         self.parent_widget = None
         self.pipeline_preparation_failed = False
         self._pending_reinpaint_pages = None
+        self._pipeline_pages_to_process = []
+        self._post_pipeline_merge_done = False
 
     def setupThread(
         self,
@@ -2353,6 +2355,8 @@ class ModuleManager(QObject):
                 self.progress_msgbox.hide()
                 self.imgtrans_pipeline_finished.emit()
                 return
+        self._pipeline_pages_to_process = list(pages_to_process or [])
+        self._post_pipeline_merge_done = False
         self.last_finished_index = -1
         self.terminateRunningThread()
         
@@ -2570,9 +2574,102 @@ class ModuleManager(QObject):
             return True
         return False
 
+    def post_merge_config_from_settings(self) -> dict:
+        """Build the compact Typesetting merge configuration."""
+
+        return {
+            'MERGE_MODE': pcfg.module.post_merge_mode,
+            'READING_DIRECTION': 'AUTO',
+            'PER_LABEL_DIRECTIONS': {},
+            'LABELS_TO_EXCLUDE_FROM_MERGE': set(),
+            'LABEL_MERGE_STRATEGY': 'PREFER_SHORTER',
+            'REQUIRE_SAME_LABEL': False,
+            'USE_SPECIFIC_MERGE_GROUPS': False,
+            'SPECIFIC_MERGE_GROUPS': [],
+            'VERTICAL_MERGE_PARAMS': {
+                'max_vertical_gap': pcfg.module.post_merge_max_vertical_gap,
+                'min_width_overlap_ratio': (
+                    pcfg.module.post_merge_min_width_overlap_ratio
+                ),
+                'overlap_epsilon': 1e-6,
+            },
+            'HORIZONTAL_MERGE_PARAMS': {
+                'max_horizontal_gap': (
+                    pcfg.module.post_merge_max_horizontal_gap
+                ),
+                'min_height_overlap_ratio': (
+                    pcfg.module.post_merge_min_height_overlap_ratio
+                ),
+                'overlap_epsilon': 1e-6,
+            },
+            'ADVANCED_MERGE_OPTIONS': {
+                'allow_negative_gap': True,
+                'debug_mode': False,
+            },
+            'OUTPUT_SHAPE_TYPE': 'rectangle',
+        }
+
+    def apply_post_pipeline_textbox_merge(self) -> int:
+        """Merge eligible pipeline pages once and return removed box count.
+
+        >>> manager = ModuleManager.__new__(ModuleManager)
+        >>> manager._post_pipeline_merge_done = True
+        >>> manager.apply_post_pipeline_textbox_merge()
+        0
+        """
+
+        if (
+            self._post_pipeline_merge_done
+            or not pcfg.module.post_merge_textboxes
+        ):
+            return 0
+        self._post_pipeline_merge_done = True
+
+        from ballontranslator.utils import merger
+
+        page_names = self.imgtrans_proj.pipeline_pages(
+            self._pipeline_pages_to_process
+        )
+        total_merged = 0
+        changed_page_indices = []
+        config = self.post_merge_config_from_settings()
+        for page_name in page_names:
+            blocks = self.imgtrans_proj.pages.get(page_name, [])
+            if len(blocks) < 2:
+                continue
+            try:
+                shapes = [block.to_dict(deep_copy=True) for block in blocks]
+                final_shapes, merged_count = merger.perform_configured_merge(
+                    shapes,
+                    config,
+                )
+                if merged_count <= 0:
+                    continue
+                blocks[:] = [TextBlock(**shape) for shape in final_shapes]
+                total_merged += merged_count
+                changed_page_indices.append(
+                    self.imgtrans_proj.pagename2idx(page_name)
+                )
+            except Exception:
+                LOGGER.exception(
+                    'Post-pipeline text box merge failed for %s.',
+                    page_name,
+                )
+
+        if total_merged:
+            LOGGER.info(
+                'Post-pipeline text box merge removed %s boxes.',
+                total_merged,
+            )
+            for page_index in changed_page_indices:
+                self.page_trans_finished.emit(page_index)
+        return total_merged
+
     def finishImgtransPipeline(self) -> None:
         # Stopped runs finish through the worker shutdown path, not progress.
         if not self.imgtrans_thread.isStopRequested() and self.proj_finished():
+            if not self.imgtrans_thread.reinpaint_only:
+                self.apply_post_pipeline_textbox_merge()
             self.progress_msgbox.hide()
             self.imgtrans_pipeline_finished.emit()
     

@@ -827,6 +827,7 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
     font_list_changed = Signal(bool)
     compact_vertical_punctuation_changed = Signal(bool)
     apply_auto_tate_chu_yoko_requested = Signal()
+    merge_current_page_requested = Signal()
     show_pre_MT_keyword_window = Signal()
     show_MT_keyword_window = Signal()
     show_OCR_keyword_window = Signal()
@@ -1305,6 +1306,117 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
         )
         self.remove_translation_line_breaks_checker.toggled.connect(
             self.on_remove_translation_line_breaks_changed
+        )
+
+        typesettingConfigPanel.addBlockWidget(ConfigTextLabel(
+            self.tr('Text Box Merging'),
+            CONFIG_FONTSIZE_CONTENT,
+            QFont.Weight.Normal,
+        ))
+        self.post_merge_checker, _ = typesettingConfigPanel.addCheckBox(
+            self.tr('Merge nearby text boxes after pipeline'),
+            discription=self.tr(
+                'Automatically combine nearby translated text boxes after successful pipeline runs. Disabled by default.'
+            ),
+        )
+        self.post_merge_checker.toggled.connect(self.on_post_merge_changed)
+        self.post_merge_mode_combobox, _ = typesettingConfigPanel.addCombobox(
+            [
+                self.tr('Vertical merge'),
+                self.tr('Horizontal merge'),
+                self.tr('Vertical, then horizontal'),
+                self.tr('Horizontal, then vertical'),
+            ],
+            self.tr('Merge direction'),
+            discription=self.tr(
+                'Choose the directions used to find neighboring text boxes.'
+            ),
+        )
+        self.post_merge_mode_combobox.activated.connect(
+            self.on_post_merge_mode_changed
+        )
+
+        merge_thresholds = QWidget()
+        merge_thresholds.setObjectName('ConfigInlineRow')
+        merge_thresholds.setAttribute(
+            Qt.WidgetAttribute.WA_StyledBackground,
+            True,
+        )
+        merge_threshold_layout = QGridLayout(merge_thresholds)
+        merge_threshold_layout.setContentsMargins(0, 0, 0, 0)
+        merge_threshold_layout.setHorizontalSpacing(12)
+        merge_threshold_layout.setVerticalSpacing(8)
+        threshold_specs = (
+            (
+                'post_merge_vgap_spin',
+                self.tr('Vertical gap'),
+                0,
+                1000,
+                self.tr('Maximum pixel gap between boxes above and below each other.'),
+            ),
+            (
+                'post_merge_hgap_spin',
+                self.tr('Horizontal gap'),
+                0,
+                1000,
+                self.tr('Maximum pixel gap between boxes beside each other.'),
+            ),
+            (
+                'post_merge_woverlap_spin',
+                self.tr('Horizontal overlap'),
+                0,
+                100,
+                self.tr('Minimum horizontal overlap for a vertical merge.'),
+            ),
+            (
+                'post_merge_hoverlap_spin',
+                self.tr('Vertical overlap'),
+                0,
+                100,
+                self.tr('Minimum vertical overlap for a horizontal merge.'),
+            ),
+        )
+        self.post_merge_threshold_widgets = []
+        for row, (attr_name, label_text, minimum, maximum, tooltip) in enumerate(
+            threshold_specs
+        ):
+            label = ConfigTextLabel(
+                label_text,
+                CONFIG_FONTSIZE_CONTENT,
+                QFont.Weight.Normal,
+                parent=merge_thresholds,
+            )
+            label.setToolTip(tooltip)
+            editor = ConfigSpinBox(merge_thresholds)
+            editor.setRange(minimum, maximum)
+            editor.setFixedWidth(CONFIG_COMBOBOX_SHORT)
+            editor.setToolTip(tooltip)
+            if maximum == 100:
+                editor.setSuffix(' %')
+            editor.valueChanged.connect(self.on_post_merge_numeric_changed)
+            setattr(self, attr_name, editor)
+            self.post_merge_threshold_widgets.extend((label, editor))
+            merge_threshold_layout.addWidget(label, row, 0)
+            merge_threshold_layout.addWidget(editor, row, 1)
+        merge_threshold_layout.setColumnStretch(2, 1)
+        typesettingConfigPanel.addBlockWidget(merge_thresholds)
+
+        self.post_merge_current_page_btn = QPushButton(
+            self.tr('Merge Current Page Now'),
+            merge_thresholds,
+        )
+        self.post_merge_current_page_btn.setToolTip(self.tr(
+            'Apply these compact merge settings to the current page immediately.'
+        ))
+        self.post_merge_current_page_btn.clicked.connect(
+            self.on_post_merge_current_page_clicked
+        )
+        merge_threshold_layout.addWidget(
+            self.post_merge_current_page_btn,
+            len(threshold_specs),
+            0,
+            1,
+            2,
         )
 
         self.let_textstyle_indep_checker, _ = typesettingConfigPanel.addCheckBox(self.tr('Independent text styles for each projects'))
@@ -1996,6 +2108,42 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
     def on_remove_translation_line_breaks_changed(self, enabled: bool) -> None:
         pcfg.remove_translation_line_breaks = enabled
 
+    def on_post_merge_changed(self, enabled: bool) -> None:
+        pcfg.module.post_merge_textboxes = enabled
+        self._set_post_merge_controls_enabled(enabled)
+
+    def _set_post_merge_controls_enabled(self, enabled: bool) -> None:
+        self.post_merge_mode_combobox.setEnabled(enabled)
+        for widget in self.post_merge_threshold_widgets:
+            widget.setEnabled(enabled)
+
+    def on_post_merge_mode_changed(self, index: int) -> None:
+        modes = (
+            'VERTICAL',
+            'HORIZONTAL',
+            'VERTICAL_THEN_HORIZONTAL',
+            'HORIZONTAL_THEN_VERTICAL',
+        )
+        if 0 <= index < len(modes):
+            pcfg.module.post_merge_mode = modes[index]
+
+    def on_post_merge_numeric_changed(self) -> None:
+        pcfg.module.post_merge_max_vertical_gap = (
+            self.post_merge_vgap_spin.value()
+        )
+        pcfg.module.post_merge_max_horizontal_gap = (
+            self.post_merge_hgap_spin.value()
+        )
+        pcfg.module.post_merge_min_width_overlap_ratio = (
+            self.post_merge_woverlap_spin.value()
+        )
+        pcfg.module.post_merge_min_height_overlap_ratio = (
+            self.post_merge_hoverlap_spin.value()
+        )
+
+    def on_post_merge_current_page_clicked(self) -> None:
+        self.merge_current_page_requested.emit()
+
     def on_quick_insert_characters_changed(self, text: str) -> None:
         pcfg.quick_insert_characters = text
 
@@ -2235,6 +2383,31 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
         self.let_autolayout_checker.setChecked(pcfg.let_autolayout_flag)
         self.remove_translation_line_breaks_checker.setChecked(
             pcfg.remove_translation_line_breaks
+        )
+        self.post_merge_checker.setChecked(pcfg.module.post_merge_textboxes)
+        post_merge_modes = (
+            'VERTICAL',
+            'HORIZONTAL',
+            'VERTICAL_THEN_HORIZONTAL',
+            'HORIZONTAL_THEN_VERTICAL',
+        )
+        self.post_merge_mode_combobox.setCurrentIndex(
+            post_merge_modes.index(pcfg.module.post_merge_mode)
+        )
+        self.post_merge_vgap_spin.setValue(
+            pcfg.module.post_merge_max_vertical_gap
+        )
+        self.post_merge_hgap_spin.setValue(
+            pcfg.module.post_merge_max_horizontal_gap
+        )
+        self.post_merge_woverlap_spin.setValue(
+            pcfg.module.post_merge_min_width_overlap_ratio
+        )
+        self.post_merge_hoverlap_spin.setValue(
+            pcfg.module.post_merge_min_height_overlap_ratio
+        )
+        self._set_post_merge_controls_enabled(
+            pcfg.module.post_merge_textboxes
         )
         self.quick_insert_characters_edit.setText(pcfg.quick_insert_characters)
         self.let_letter_case_buttons[pcfg.let_letter_case].setChecked(True)

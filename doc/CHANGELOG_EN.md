@@ -1,5 +1,10 @@
 # Changelogs
 
+### 2026-10-11 — 1.5.19+vibe.20
+- Added opt-in nearby text-box merging under **Settings → Typesetting**, with direction, gap, and overlap controls plus a direct current-page action.
+- Successful pipeline runs can now merge only their processed pages; ignored and unselected pages remain untouched, and the existing advanced Region Merge Tool continues to support label rules and whole-project runs.
+- Consolidated the shared merge sequence and now preserves both OCR source content and translations while discarding geometry-bound rich text and masks that are invalid after regions are combined.
+
 ### 2026-10-11 — 1.5.19+vibe.19
 - Added a compact Stroke color picker beside the font-color control in the main text-format toolbar, including English/German tooltips and accessibility text.
 - Stroke color changes now use the existing typed effect stack and preserve width, position, opacity, blending, sibling effects, global styles, and multi-selection behavior in one undoable operation.

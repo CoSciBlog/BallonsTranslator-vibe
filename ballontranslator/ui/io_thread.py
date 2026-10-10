@@ -281,7 +281,6 @@ class MergeThread(ThreadBase):
             self.merge_finished.emit(0, total)
             return
         
-        mode = self.config.get("MERGE_MODE", "NONE")
         modified = False
         
         # 在内存中处理所有图片
@@ -307,24 +306,10 @@ class MergeThread(ThreadBase):
             
             try:
                 initial_count = len(initial_shapes)
-                total_merged = 0
-                
-                if mode == "VERTICAL":
-                    final_shapes, count = merger.perform_merge(initial_shapes, "VERTICAL", self.config)
-                    total_merged += count
-                elif mode == "HORIZONTAL":
-                    final_shapes, count = merger.perform_merge(initial_shapes, "HORIZONTAL", self.config)
-                    total_merged += count
-                elif mode == "VERTICAL_THEN_HORIZONTAL":
-                    temp, count1 = merger.perform_merge(initial_shapes, "VERTICAL", self.config)
-                    final_shapes, count2 = merger.perform_merge(temp, "HORIZONTAL", self.config)
-                    total_merged += (count1 + count2)
-                elif mode == "HORIZONTAL_THEN_VERTICAL":
-                    temp, count1 = merger.perform_merge(initial_shapes, "HORIZONTAL", self.config)
-                    final_shapes, count2 = merger.perform_merge(temp, "VERTICAL", self.config)
-                    total_merged += (count1 + count2)
-                else:
-                    final_shapes = initial_shapes
+                final_shapes, total_merged = merger.perform_configured_merge(
+                    initial_shapes,
+                    self.config,
+                )
                 
                 if total_merged > 0:
                     data['pages'][img_name] = final_shapes
