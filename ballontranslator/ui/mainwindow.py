@@ -375,6 +375,9 @@ class MainWindow(mainwindow_cls):
         self.leftBar.export_src_md.connect(lambda : self.on_export_txt(dump_target='source', suffix='.md'))
         self.leftBar.export_trans_md.connect(lambda : self.on_export_txt(dump_target='translation', suffix='.md'))
         self.leftBar.import_trans_txt.connect(self.on_import_trans_txt)
+        self.leftBar.merge_textboxes_clicked.connect(
+            self.merge_selected_textboxes
+        )
 
         self.pageList = PageListView()
         self.pageList.setObjectName('PageListArea')
@@ -2337,6 +2340,30 @@ class MainWindow(mainwindow_cls):
             on_current=True,
             config=self.module_manager.post_merge_config_from_settings(),
         )
+
+    def merge_selected_textboxes(self) -> None:
+        """Merge the selected page regions through the live text manager."""
+
+        from qtpy.QtWidgets import QMessageBox
+
+        if self.imgtrans_proj.is_empty:
+            QMessageBox.warning(
+                self,
+                self.tr('Warning'),
+                self.tr('Open a project first.'),
+            )
+            return
+        merged_item = self.st_manager.merge_selected_textboxes()
+        if merged_item is None:
+            QMessageBox.information(
+                self,
+                self.tr('Merge Text Boxes'),
+                self.tr(
+                    'Select at least two text boxes in text editing mode.'
+                ),
+            )
+            return
+        self.canvas.gv.ensureVisible(merged_item)
 
     def run_merge_task(self, on_current=False, config=None):
         """执行区域合并任务"""

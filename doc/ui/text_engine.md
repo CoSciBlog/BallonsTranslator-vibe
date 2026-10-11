@@ -122,6 +122,10 @@ to persisted blocks, clears only character-level rich-text overrides, and
 preserves text, logical rectangles, masks, and image state.
 Text commands that also modify image pixels mark drawing dirty independently
 on undo and redo; they must not retain commands owned by the drawing stack.
+The sidebar selected-region merge is a structural text command: it preserves
+the selected page order, inserts one newline between each original source and
+translation, clears geometry-bound rich text and masks, and restores the
+original items and selection on undo.
 
 | Session | Specific boundary |
 | --- | --- |

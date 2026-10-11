@@ -1,5 +1,10 @@
 # Changelogs
 
+### 2026-10-11 — 1.5.19+vibe.30
+- Added a **Merge Selected Text Boxes** button to the left sidebar. It combines two or more selected regions into one bounding box while preserving their page order.
+- Source text and translations now receive one explicit line break between each original selected box. The merge invalidates geometry-bound rich text and masks safely.
+- Sidebar merges are one text-history action with complete undo/redo support, restored selection, synchronized paired editors, and refreshed search results.
+
 ### 2026-10-11 — 1.5.19+vibe.29
 - Added a compact `Aa` control to **Text Transform** that cycles selected text boxes and the global style through normal, lowercase, and uppercase display modes.
 - Text case is a persisted, non-destructive font style: source and translated text remain unchanged, mixed selections are indicated, and changes participate in the existing text-format undo workflow.

@@ -96,6 +96,7 @@ class LeftBar(Widget):
     save_config = Signal()
     run_imgtrans_clicked = Signal()
     quick_run_imgtrans_clicked = Signal()
+    merge_textboxes_clicked = Signal()
     def __init__(self, mainwindow, *args, **kwargs) -> None:
         super().__init__(mainwindow, *args, **kwargs)
         self.mainwindow: QMainWindow = mainwindow
@@ -111,6 +112,20 @@ class LeftBar(Widget):
         self.globalSearchChecker = QCheckBox()
         self.globalSearchChecker.setObjectName('GlobalSearchChecker')
         self.globalSearchChecker.setToolTip(self.tr('Global Search (Ctrl+G)'))
+
+        self.mergeTextboxesBtn = QToolButton(self)
+        self.mergeTextboxesBtn.setObjectName('LeftBarMergeTextboxesButton')
+        self.mergeTextboxesBtn.setIcon(
+            QIcon(themed_icon_path('merge_textboxes.svg'))
+        )
+        self.mergeTextboxesBtn.setIconSize(QSize(28, 28))
+        self.mergeTextboxesBtn.setFixedSize(LEFTBTN_WIDTH, LEFTBTN_WIDTH)
+        merge_text = self.tr('Merge Selected Text Boxes')
+        self.mergeTextboxesBtn.setToolTip(merge_text)
+        self.mergeTextboxesBtn.setAccessibleName(merge_text)
+        self.mergeTextboxesBtn.clicked.connect(
+            self.merge_textboxes_clicked.emit
+        )
 
         self.configChecker = StateChecker('config', uncheckable=True)
         self.configChecker.setObjectName('ConfigChecker')
@@ -210,6 +225,7 @@ class LeftBar(Widget):
         vlayout.addWidget(self.openBtn)
         vlayout.addWidget(self.showPageListLabel)
         vlayout.addWidget(self.globalSearchChecker)
+        vlayout.addWidget(self.mergeTextboxesBtn)
         vlayout.addItem(QSpacerItem(0, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
         vlayout.addWidget(self.configChecker)
         vlayout.addWidget(run_buttons)

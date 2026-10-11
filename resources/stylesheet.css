@@ -1975,20 +1975,23 @@ QToolButton#RunPipelineModuleSelector::menu-indicator {
 }
 
 QToolButton#LeftBarRunButton,
-QToolButton#LeftBarQuickRunButton {
+QToolButton#LeftBarQuickRunButton,
+QToolButton#LeftBarMergeTextboxesButton {
     border: none;
     border-radius: 7px;
     background-color: rgba(0, 0, 0, 0);
 }
 
 QToolButton#LeftBarRunButton:hover,
-QToolButton#LeftBarQuickRunButton:hover {
+QToolButton#LeftBarQuickRunButton:hover,
+QToolButton#LeftBarMergeTextboxesButton:hover {
     border: none;
     background-color: rgba(14, 170, 205, 20%);
 }
 
 QToolButton#LeftBarRunButton:pressed,
-QToolButton#LeftBarQuickRunButton:pressed {
+QToolButton#LeftBarQuickRunButton:pressed,
+QToolButton#LeftBarMergeTextboxesButton:pressed {
     border: none;
     background-color: rgba(14, 170, 205, 32%);
 }

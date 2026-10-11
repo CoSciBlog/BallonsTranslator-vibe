@@ -1607,16 +1607,21 @@ class RunPipelineDialogTests(unittest.TestCase):
         bar = LeftBar(window)
         dialog_spy = QSignalSpy(bar.run_imgtrans_clicked)
         quick_spy = QSignalSpy(bar.quick_run_imgtrans_clicked)
+        merge_spy = QSignalSpy(bar.merge_textboxes_clicked)
 
         bar.quickRunImgtransBtn.click()
+        bar.mergeTextboxesBtn.click()
 
         self.assertEqual(len(dialog_spy), 0)
         self.assertEqual(len(quick_spy), 1)
+        self.assertEqual(len(merge_spy), 1)
         self.assertEqual(
             bar.quickRunImgtransBtn.shortcut().toString(),
             'Ctrl+F5',
         )
         self.assertTrue(bar.quickRunImgtransBtn.accessibleName())
+        self.assertTrue(bar.mergeTextboxesBtn.accessibleName())
+        self.assertFalse(bar.mergeTextboxesBtn.icon().isNull())
 
     def test_view_actions_only_control_bottom_bar_visibility(self):
         window = QMainWindow()

@@ -9,14 +9,27 @@ import json
 import copy
 import math
 import re
-from typing import Iterable, List, Mapping, Tuple
+from typing import Iterable, List, Mapping, Optional, Tuple
 
 
 _CJK_BOUNDARY = re.compile(r'[\uac00-\ud7a3\u3040-\u30ff\u4e00-\u9fff]')
 
 
-def _join_translations(values: Iterable[object]) -> str:
-    """Join translated regions without adding spaces around CJK boundaries."""
+def _join_translations(
+    values: Iterable[object],
+    separator: Optional[str] = None,
+) -> str:
+    """Join translated regions with an optional explicit separator.
+
+    >>> _join_translations(['First', 'Second'], separator='\\n')
+    'First\\nSecond'
+    """
+
+    if separator is not None:
+        return separator.join(
+            value for raw_value in values
+            if (value := str(raw_value or '').strip())
+        )
 
     result = ''
     for value in values:
@@ -308,14 +321,19 @@ def perform_merge(shapes, mode, config):
         return False
 
     merge_pair_count = 0
-    for i in range(len(shapes)):
-        for j in range(i + 1, len(shapes)):
-            if find(i) != find(j):
-                if can_merge_shapes(shapes[i], shapes[j], mode, config):
-                    union(i, j)
-                    merge_pair_count += 1
-                    if debug:
-                        print(f"  ✓ 合并: 框{i} + 框{j}")
+    if config.get('FORCE_SINGLE_GROUP', False):
+        for index in range(1, len(shapes)):
+            union(0, index)
+            merge_pair_count += 1
+    else:
+        for i in range(len(shapes)):
+            for j in range(i + 1, len(shapes)):
+                if find(i) != find(j):
+                    if can_merge_shapes(shapes[i], shapes[j], mode, config):
+                        union(i, j)
+                        merge_pair_count += 1
+                        if debug:
+                            print(f"  ✓ 合并: 框{i} + 框{j}")
 
     if debug:
         print(f"共找到 {merge_pair_count} 对可合并的框")
@@ -353,17 +371,25 @@ def perform_merge(shapes, mode, config):
                 group_shapes.sort(key=lambda s: get_bounding_box(s)[0], reverse=True)
             elif reading_direction == "TTB":
                 group_shapes.sort(key=lambda s: get_bounding_box(s)[1])
-            else:
+            elif reading_direction != 'SELECTION':
                 group_shapes.sort(key=lambda s: get_bounding_box(s)[0])
 
             # 合并文本内容 - BallonsTranslator 使用 text 字段（数组）
             merged_text = []
             for s in group_shapes:
                 text = s.get('text', [])
+                text_parts = []
                 if isinstance(text, list):
-                    merged_text.extend(part for part in text if part)
+                    text_parts.extend(part for part in text if part)
                 elif text:
-                    merged_text.append(str(text))
+                    text_parts.append(str(text))
+                if (
+                    merged_text
+                    and text_parts
+                    and config.get('TEXT_SEPARATOR') is not None
+                ):
+                    merged_text.append(config['TEXT_SEPARATOR'])
+                merged_text.extend(text_parts)
 
             # 获取所有点 - 从 lines 或 xyxy
             all_points = []
@@ -387,7 +413,11 @@ def perform_merge(shapes, mode, config):
             # reused for the larger merged rectangle.
             merged_shape['text'] = merged_text
             merged_shape['translation'] = _join_translations(
-                shape.get('translation', '') for shape in group_shapes
+                (
+                    shape.get('translation', '')
+                    for shape in group_shapes
+                ),
+                separator=config.get('TEXT_SEPARATOR'),
             )
             merged_shape['rich_text'] = ''
             merged_shape['region_mask'] = None
@@ -443,6 +473,37 @@ def perform_merge(shapes, mode, config):
             total_merge_count += len(group_shapes) - 1
 
     return final_shapes, total_merge_count
+
+
+def merge_selected_shapes(
+    shapes: List[dict],
+    separator: str = '\n',
+) -> Tuple[List[dict], int]:
+    """Merge a user-ordered selection into one rectangular text region.
+
+    Selection is explicit intent, so geometric gap and label rules do not
+    filter the supplied regions. Their input order is preserved.
+
+    >>> merged, removed = merge_selected_shapes([
+    ...     {'xyxy': [20, 0, 30, 10], 'text': ['A'], 'translation': 'One'},
+    ...     {'xyxy': [0, 0, 10, 10], 'text': ['B'], 'translation': 'Two'},
+    ... ])
+    >>> removed, merged[0]['translation']
+    (1, 'One\\nTwo')
+    """
+
+    return perform_merge(
+        shapes,
+        'HORIZONTAL',
+        {
+            'FORCE_SINGLE_GROUP': True,
+            'READING_DIRECTION': 'SELECTION',
+            'TEXT_SEPARATOR': separator,
+            'LABEL_MERGE_STRATEGY': 'PREFER_SHORTER',
+            'OUTPUT_SHAPE_TYPE': 'rectangle',
+            'ADVANCED_MERGE_OPTIONS': {'debug_mode': False},
+        },
+    )
 
 
 def perform_configured_merge(

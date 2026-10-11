@@ -6,7 +6,10 @@ os.environ.setdefault('QT_QPA_PLATFORM', 'offscreen')
 
 from ballontranslator.ui.module_manager import ModuleManager
 from ballontranslator.utils.config import ModuleConfig
-from ballontranslator.utils.merger import perform_configured_merge
+from ballontranslator.utils.merger import (
+    merge_selected_shapes,
+    perform_configured_merge,
+)
 from ballontranslator.utils.config import pcfg
 from ballontranslator.utils.textblock import TextBlock
 
@@ -40,6 +43,140 @@ def merge_config(mode: str = 'HORIZONTAL') -> dict:
 
 
 class RegionMergeTests(unittest.TestCase):
+    def test_selected_merge_preserves_order_and_adds_line_breaks(self):
+        shapes = [
+            {
+                'xyxy': [100, 0, 120, 20],
+                'lines': [[[100, 0], [120, 0], [120, 20], [100, 20]]],
+                'text': ['first source'],
+                'translation': 'First translation',
+            },
+            {
+                'xyxy': [0, 0, 20, 20],
+                'lines': [[[0, 0], [20, 0], [20, 20], [0, 20]]],
+                'text': ['second source'],
+                'translation': 'Second translation',
+            },
+        ]
+
+        merged, removed = merge_selected_shapes(shapes)
+
+        self.assertEqual(removed, 1)
+        self.assertEqual(len(merged), 1)
+        self.assertEqual(
+            merged[0]['translation'],
+            'First translation\nSecond translation',
+        )
+        self.assertEqual(
+            TextBlock(**merged[0]).get_text(),
+            'first source\nsecond source',
+        )
+
+    def test_selected_sidebar_merge_is_undoable(self):
+        from qtpy.QtCore import QCoreApplication, QEvent
+        from qtpy.QtWidgets import QApplication, QWidget
+
+        from ballontranslator.ui import shared_widget as SW
+        from ballontranslator.ui.canvas import Canvas
+        from ballontranslator.ui.text_engine.editing.manager import (
+            SceneTextManager,
+            TextPanel,
+        )
+        from ballontranslator.utils import config as C, shared
+        from ballontranslator.utils.fontformat import FontFormat
+        from ballontranslator.utils.proj_imgtrans import ProjImgTrans
+
+        app = QApplication.instance() or QApplication([])
+        host = QWidget()
+        canvas = Canvas(host)
+        canvas.editor_index = 1
+        project = ProjImgTrans()
+        canvas.imgtrans_proj = project
+        previous_active_format = C.active_format
+        try:
+            with (
+                patch.object(SW, 'canvas', canvas),
+                patch.object(
+                    shared,
+                    'register_view_widget',
+                    lambda *_args: None,
+                    create=True,
+                ),
+            ):
+                panel = TextPanel(app, host)
+                panel.formatpanel.global_format = FontFormat()
+                manager = SceneTextManager(
+                    app,
+                    host,
+                    canvas,
+                    panel,
+                    parent=host,
+                )
+                blocks = [
+                    TextBlock(
+                        [0, 0, 80, 40],
+                        _bounding_rect=[0, 0, 80, 40],
+                        text=['source one'],
+                        translation='Translation one',
+                    ),
+                    TextBlock(
+                        [0, 45, 80, 85],
+                        _bounding_rect=[0, 45, 80, 40],
+                        text=['source two'],
+                        translation='Translation two',
+                    ),
+                ]
+                project.pages = {'page.png': blocks}
+                project.current_img = 'page.png'
+                items = [manager.addTextBlock(block) for block in blocks]
+                for item in items:
+                    item.setSelected(True)
+
+                merged_item = manager.merge_selected_textboxes()
+
+                self.assertIsNotNone(merged_item)
+                self.assertEqual(len(manager.textblk_item_list), 1)
+                self.assertEqual(
+                    merged_item.toPlainText(),
+                    'Translation one\nTranslation two',
+                )
+                self.assertEqual(
+                    manager.pairwidget_list[0].e_source.toPlainText(),
+                    'source one\nsource two',
+                )
+                manager.updateTextBlkList()
+                self.assertEqual(len(project.pages['page.png']), 1)
+                self.assertEqual(
+                    project.pages['page.png'][0].translation,
+                    'Translation one\nTranslation two',
+                )
+                canvas.undo_textedit()
+                self.assertEqual(len(manager.textblk_item_list), 2)
+                self.assertEqual(
+                    [item.toPlainText() for item in manager.textblk_item_list],
+                    ['Translation one', 'Translation two'],
+                )
+                manager.updateTextBlkList()
+                self.assertEqual(len(project.pages['page.png']), 2)
+                canvas.redo_textedit()
+                self.assertEqual(len(manager.textblk_item_list), 1)
+                self.assertEqual(
+                    manager.textblk_item_list[0].toPlainText(),
+                    'Translation one\nTranslation two',
+                )
+                canvas.clear_undostack(update_saved_step=True)
+                manager.clearSceneTextitems()
+                panel.deleteLater()
+        finally:
+            C.active_format = previous_active_format
+            canvas.gv.deleteLater()
+            host.deleteLater()
+            QCoreApplication.sendPostedEvents(
+                None,
+                QEvent.Type.DeferredDelete,
+            )
+            app.processEvents()
+
     def test_merge_preserves_source_and_translation_content(self):
         shapes = [
             {

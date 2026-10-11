@@ -5,7 +5,7 @@ import numpy as np
 import copy
 
 from qtpy.QtWidgets import QApplication, QWidget
-from qtpy.QtCore import QObject, QRectF, Qt, Signal, QPointF
+from qtpy.QtCore import QCoreApplication, QObject, QRectF, Qt, Signal, QPointF
 from qtpy.QtGui import QKeyEvent, QTextCursor, QFontMetricsF, QFont, QTextCharFormat, QClipboard
 try:
     from qtpy.QtWidgets import QUndoCommand
@@ -252,6 +252,94 @@ class DeleteBlkItemsCommand(QUndoCommand):
             self.sw.search_counter_list += self.search_counter_list
             self.sw.highlighter_list += self.highlighter_list
             self.sw.updateCounterText()
+
+
+class MergeBlkItemsCommand(QUndoCommand):
+    """Replace selected text items with one undoable merged item.
+
+    >>> callable(MergeBlkItemsCommand.redo)
+    True
+    """
+
+    def __init__(
+        self,
+        blk_items: Sequence[TextBlkItem],
+        merged_block: TextBlock,
+        ctrl,
+        parent=None,
+    ) -> None:
+        super().__init__(parent)
+        self.setText(QCoreApplication.translate(
+            'MergeBlkItemsCommand',
+            'Merge Text Boxes',
+        ))
+        self.ctrl: SceneTextManager = ctrl
+        self.blk_items = sorted(blk_items, key=lambda item: item.idx)
+        self.pair_widgets = [
+            ctrl.pairwidget_list[item.idx] for item in self.blk_items
+        ]
+        self.merged_block = merged_block
+        self.insert_index = self.blk_items[0].idx
+        self.merged_item: Optional[TextBlkItem] = None
+        self.merged_pair: Optional[TransPairWidget] = None
+
+    def _refresh_search(self) -> None:
+        if self.ctrl.canvas.search_widget.isVisible():
+            self.ctrl.canvas.search_widget.page_search()
+
+    def _select_items(self, items: Sequence[TextBlkItem]) -> None:
+        self.ctrl.canvas.block_selection_signal = True
+        try:
+            for item in self.ctrl.textblk_item_list:
+                item.setSelected(item in items)
+        finally:
+            self.ctrl.canvas.block_selection_signal = False
+        primary = items[0] if items else None
+        self.ctrl.canvas.set_primary_selected_text_item(primary)
+        self.ctrl.on_incanvas_selection_changed()
+
+    def _insert_initial_merged_item(self) -> None:
+        self.merged_item = self.ctrl.addTextBlock(self.merged_block)
+        self.merged_pair = self.ctrl.pairwidget_list[-1]
+        current_index = len(self.ctrl.textblk_item_list) - 1
+        if current_index != self.insert_index:
+            self.ctrl.textblk_item_list.pop()
+            self.ctrl.pairwidget_list.pop()
+            self.ctrl.textEditList.removeWidget(self.merged_pair)
+            self.ctrl.textblk_item_list.insert(
+                self.insert_index,
+                self.merged_item,
+            )
+            self.ctrl.pairwidget_list.insert(
+                self.insert_index,
+                self.merged_pair,
+            )
+            self.ctrl.textEditList.insertPairWidget(
+                self.merged_pair,
+                self.insert_index,
+            )
+            self.ctrl.updateTextBlkItemIdx()
+
+    def redo(self) -> None:
+        self.ctrl.deleteTextblkItemList(self.blk_items, self.pair_widgets)
+        if self.merged_item is None:
+            self._insert_initial_merged_item()
+        else:
+            self.ctrl.recoverTextblkItemList(
+                [self.merged_item],
+                [self.merged_pair],
+            )
+        self._select_items([self.merged_item])
+        self._refresh_search()
+
+    def undo(self) -> None:
+        self.ctrl.deleteTextblkItemList(
+            [self.merged_item],
+            [self.merged_pair],
+        )
+        self.ctrl.recoverTextblkItemList(self.blk_items, self.pair_widgets)
+        self._select_items(self.blk_items)
+        self._refresh_search()
 
 
 class PasteBlkItemsCommand(QUndoCommand):
@@ -762,6 +850,37 @@ class SceneTextManager(QObject):
             selected_blks.append(self.txtblkShapeControl.blk_item)
         if len(selected_blks) > 0:
             self.canvas.push_undo_command(DeleteBlkItemsCommand(selected_blks, mode, self))
+
+    def merge_selected_textboxes(self) -> Optional[TextBlkItem]:
+        """Merge two or more selected items with newline-separated content."""
+
+        if not self.canvas.textEditMode():
+            return None
+        editing_item = self.canvas.editing_textblkitem
+        if editing_item is not None and editing_item.isEditing():
+            editing_item.endEdit(keep_focus=False)
+        selected = self.canvas.selected_text_items()
+        if len(selected) < 2:
+            return None
+
+        self.formatpanel.resolve_text_transform_edits_for_history_change()
+        self.updateTextBlkList()
+
+        from ballontranslator.utils.merger import merge_selected_shapes
+
+        merged_shapes, removed_count = merge_selected_shapes([
+            item.blk.to_dict(deep_copy=True) for item in selected
+        ])
+        if removed_count != len(selected) - 1 or len(merged_shapes) != 1:
+            return None
+
+        command = MergeBlkItemsCommand(
+            selected,
+            TextBlock(**merged_shapes[0]),
+            self,
+        )
+        self.canvas.push_text_command(command)
+        return command.merged_item
 
     def onCopyBlkItems(self):
         selected_blks = self.canvas.selected_text_items()
