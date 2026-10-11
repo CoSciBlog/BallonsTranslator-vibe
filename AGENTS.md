@@ -36,7 +36,7 @@ Use `rg` for repo search.
 - Comply with the repository license and all licenses, attribution requirements, redistribution terms, and notices of incorporated dependencies, models, code, and assets. Do not add material with unclear or incompatible licensing.
 - For every release-worthy or user-facing change, review and update the README, changelog, project version, and credits/attribution information together. Keep English and translated documentation consistent where corresponding files exist.
 - Inspect every change for errors and regressions before completion. Run relevant automated tests after changes, plus the verification required by this file, and report failures or unverified behavior clearly.
-- After successful verification, push the resulting commits and version state to the configured upstream branch. Never force-push; report authentication, network, branch-protection, or remote failures instead of bypassing them.
+- Do not push every individual change immediately. Push only when the user explicitly requests it or after several related, successfully verified changes have accumulated into a sensible batch; otherwise keep the commit local and report that it has not been pushed. This batching policy conserves time and quota. Never force-push; report authentication, network, branch-protection, or remote failures instead of bypassing them.
 - Follow this `AGENTS.md` for all work in this repository. When nested `AGENTS.md` files apply, obey their more specific instructions as well.
 
 ## Performance and Maintainability
