@@ -1,5 +1,10 @@
 # Changelogs
 
+### 2026-10-11 — 1.5.19+vibe.26
+- Added **Remove Existing Line Breaks...** under **Settings → Typesetting** so previously translated project text can be normalized as well as new pipeline output.
+- The explicit project-wide cleanup removes persisted rich-text paragraphs that could restore old hard breaks, creates a project backup, and resets stale undo history after saving.
+- Removed the duplicate compact Stroke color picker from the font toolbar; Stroke color remains available in the complete **Text Effect** controls.
+
 ### 2026-10-11 — 1.5.19+vibe.25
 - Fixed glossary extraction dropping aligned translations solely because the translated text contained punctuation or expanded beyond five words.
 - Automatic confirmation now leaves target-less candidates as suggestions, while later successful translations can safely fill confirmed OCR entries that are still empty.

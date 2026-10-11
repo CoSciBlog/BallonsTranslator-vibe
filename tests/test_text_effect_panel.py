@@ -827,67 +827,6 @@ class TextEffectPanelTest(unittest.TestCase):
         ))
         self.assertEqual(self.canvas.stack.count(), 2)
 
-    def test_compact_stroke_color_picker_commits_and_undoes_effect(self):
-        before = self._stack(
-            ShadowEffect(distance=0.2),
-            StrokeEffect(
-                width=0.35,
-                paint=SolidPaint((12, 34, 56)),
-                position='inside',
-            ),
-        )
-        item = self._item(before)
-        self.panel.set_textblk_item(item)
-
-        self.assertEqual(self.panel.strokeColorPicker.rgb(), (12, 34, 56))
-        with patch.object(
-            QColorDialog,
-            'getColor',
-            return_value=QColor(20, 30, 40),
-        ):
-            QTest.mouseClick(
-                self.panel.strokeColorPicker,
-                Qt.MouseButton.LeftButton,
-            )
-
-        after = item.blk.fontformat.text_effects
-        stroke = primary_stroke(after)
-        self.assertEqual(stroke.paint, SolidPaint((20, 30, 40)))
-        self.assertEqual(stroke.width, 0.35)
-        self.assertEqual(stroke.position, 'inside')
-        self.assertEqual(after.effects[0], before.effects[0])
-        self.assertEqual(self.canvas.stack.count(), 1)
-        self.canvas.stack.undo()
-        self.assertEqual(item.blk.fontformat.text_effects, before)
-        self.assertEqual(self.panel.strokeColorPicker.rgb(), (12, 34, 56))
-
-    def test_compact_stroke_color_picker_updates_multiple_items(self):
-        first = self._item(self._stack(StrokeEffect(
-            width=0.2,
-            paint=SolidPaint((1, 2, 3)),
-        )))
-        second = self._item(self._stack(ShadowEffect()))
-        self.canvas.selected = [first, second]
-        self.panel.set_textblk_item(None, multi_select=True)
-
-        self.panel.strokeColorPicker.setPickerColor((70, 80, 90))
-        self.panel.onStrokeColorLabelChanged(True)
-
-        for item in (first, second):
-            self.assertEqual(
-                primary_stroke(item.blk.fontformat.text_effects).paint,
-                SolidPaint((70, 80, 90)),
-            )
-        self.assertEqual(
-            primary_stroke(first.blk.fontformat.text_effects).width,
-            0.2,
-        )
-        self.assertEqual(
-            primary_stroke(second.blk.fontformat.text_effects).width,
-            StrokeEffect().width,
-        )
-        self.assertEqual(self.canvas.stack.count(), 1)
-
     def test_stroke_fill_conversion_and_multi_selection(self):
         solid = self._item(self._stack(StrokeEffect(
             paint=SolidPaint((12, 34, 56))
@@ -4256,10 +4195,7 @@ class TextEffectPanelTest(unittest.TestCase):
             pcfg.expand_teffect_panel = old_expand
 
         self.assertFalse(hasattr(self.panel, 'strokeWidthBox'))
-        self.assertIsInstance(self.panel.strokeColorPicker, ColorPickerLabel)
-        self.assertEqual(
-            self.panel.strokeColorPicker.accessibleName(), 'Stroke Color'
-        )
+        self.assertFalse(hasattr(self.panel, 'strokeColorPicker'))
         self.assertFalse(
             hasattr(self.panel.textadvancedfmt_panel, 'opacity_box')
         )

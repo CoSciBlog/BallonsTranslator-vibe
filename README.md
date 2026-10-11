@@ -37,9 +37,9 @@
 * Text editing
   - Supports WYSIWYG rich-text editing and [text style presets](https://github.com/dmMaze/BallonsTranslator/pull/311), including a theme-aware preset context menu in both light and dark modes.
   - Supports a rich set of [text effects](https://github.com/dmMaze/BallonsTranslator/pull/1296) and [text transforms](https://github.com/dmMaze/BallonsTranslator/pull/1238)
-  - The compact font-format toolbar provides separate foreground and Stroke color pickers. Stroke color changes use the typed effect stack, support multi-selection, and remain undoable without replacing other Stroke settings.
+  - The compact font-format toolbar keeps the foreground color picker beside the font selector. Stroke color is configured with the rest of the Stroke controls under **Text Effect**, avoiding duplicate controls for the same effect.
   - Supports find and replace across all text, source text, or translations, and Word document import/export
-  - Enable **Remove translation line breaks** under **Settings → Typesetting** to replace translator-authored line breaks in new translations and let each text box wrap the result automatically. The option is disabled by default and does not alter existing or manually edited text.
+  - Enable **Remove translation line breaks** under **Settings → Typesetting** to replace translator-authored line breaks in new translations and let each text box wrap the result automatically. **Remove Existing Line Breaks...** performs the same cleanup on already stored project translations after confirmation, saves a backup, and clears stale rich-text paragraphs.
   - **Settings → Typesetting → Text Box Merging** can combine nearby regions automatically after a successful pipeline or immediately on the current page. Direction, maximum gaps, and required overlap are configurable; the advanced **Tools → Region Merge Tool** remains available for label-specific rules and whole-project runs.
 
 * User interface localization

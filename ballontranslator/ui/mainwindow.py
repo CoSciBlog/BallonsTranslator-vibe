@@ -12,7 +12,10 @@ from qtpy.QtCore import Qt, QPoint, QSize, QEvent, Signal, QTimer
 from qtpy.QtGui import QContextMenuEvent, QTextCursor, QGuiApplication, QIcon, QCloseEvent, QKeySequence, QPainter, QClipboard, QColor
 
 from ballontranslator.utils.logger import logger as LOGGER
-from ballontranslator.utils.text_processing import is_cjk
+from ballontranslator.utils.text_processing import (
+    is_cjk,
+    remove_translation_line_breaks,
+)
 from ballontranslator.utils.textblock import TextBlock, TextAlignment
 from ballontranslator.utils.text_effects import (
     SolidPaint,
@@ -726,6 +729,9 @@ class MainWindow(mainwindow_cls):
         )
         self.configPanel.apply_auto_tate_chu_yoko_requested.connect(
             self.apply_auto_tate_chu_yoko_to_project
+        )
+        self.configPanel.normalize_existing_translations_requested.connect(
+            self.remove_existing_translation_line_breaks
         )
         self.configPanel.merge_current_page_requested.connect(
             self.run_merge_current_page_using_settings
@@ -3182,6 +3188,71 @@ class MainWindow(mainwindow_cls):
             pcfg.auto_tate_chu_yoko,
         ):
             self.auto_tate_chu_yoko_progress.show_fitted()
+
+    def remove_existing_translation_line_breaks(self) -> None:
+        """Normalize persisted project translations after explicit approval."""
+
+        if self.imgtrans_proj.is_empty:
+            create_info_dialog(self.tr('Open a project first.'))
+            return
+
+        # Publish live editor content before inspecting the project model. This
+        # also captures paragraph breaks stored only in the current rich text.
+        self.st_manager.updateTextBlkList()
+        target_language = pcfg.module.translate_target
+        changes = []
+        for blocks in self.imgtrans_proj.pages.values():
+            for block in blocks:
+                normalized = remove_translation_line_breaks(
+                    block.translation,
+                    target_language,
+                )
+                if normalized != block.translation:
+                    changes.append(
+                        (block, block.translation, block.rich_text, normalized)
+                    )
+        if not changes:
+            create_info_dialog(self.tr(
+                'No existing translation line breaks were found.'
+            ))
+            return
+
+        answer = QMessageBox.question(
+            self,
+            self.tr('Remove Existing Line Breaks'),
+            self.tr(
+                'Remove hard line breaks from {count} existing translation(s)? '
+                'The project will be saved with a backup and the current undo history will be reset.'
+            ).format(count=len(changes)),
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
+        if answer != QMessageBox.StandardButton.Yes:
+            return
+
+        for block, _translation, _rich_text, normalized in changes:
+            block.translation = normalized
+            # Rich HTML owns its own paragraphs and would otherwise restore the
+            # removed breaks when the page is reconstructed.
+            block.rich_text = ''
+        try:
+            self.imgtrans_proj.save(keep_exist_as_backup=True)
+        except Exception as error:
+            for block, translation, rich_text, _normalized in changes:
+                block.translation = translation
+                block.rich_text = rich_text
+            self.st_manager.updateSceneTextitems()
+            create_error_dialog(error, self.tr(
+                'Failed to remove existing translation line breaks.'
+            ))
+            return
+
+        self._llm_context_dirty = False
+        self.st_manager.updateSceneTextitems()
+        self.canvas.clear_undostack(update_saved_step=True)
+        create_info_dialog(self.tr(
+            'Removed line breaks from {count} translation(s).'
+        ).format(count=len(changes)))
 
     def on_auto_tate_chu_yoko_processing_finished(
         self,

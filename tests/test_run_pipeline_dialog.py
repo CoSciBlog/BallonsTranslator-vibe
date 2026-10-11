@@ -36,6 +36,7 @@ from qtpy.QtWidgets import (
     QLabel,
     QMainWindow,
     QMenu,
+    QMessageBox,
     QRadioButton,
     QListWidgetItem,
     QSpinBox,
@@ -316,6 +317,63 @@ class RunPipelineDialogTests(unittest.TestCase):
         finally:
             panel.close()
             pcfg.remove_translation_line_breaks = original
+
+    def test_typesetting_requests_existing_translation_cleanup(self):
+        panel = ConfigPanel()
+        self.addCleanup(panel.close)
+        requests = QSignalSpy(
+            panel.normalize_existing_translations_requested
+        )
+
+        panel.normalize_existing_translations_btn.click()
+
+        self.assertEqual(len(requests), 1)
+
+    def test_existing_translation_cleanup_removes_rich_text_line_breaks(self):
+        changed = TextBlock(
+            translation='First line\nsecond line',
+            rich_text='<p>First line</p><p>second line</p>',
+        )
+        unchanged = TextBlock(translation='Already continuous')
+        project = SimpleNamespace(
+            is_empty=False,
+            pages={'001.png': [changed, unchanged]},
+            current_img='001.png',
+            save=Mock(),
+        )
+        owner = SimpleNamespace(
+            imgtrans_proj=project,
+            st_manager=SimpleNamespace(
+                updateTextBlkList=Mock(),
+                updateSceneTextitems=Mock(),
+            ),
+            canvas=SimpleNamespace(clear_undostack=Mock()),
+            _llm_context_dirty=True,
+            tr=lambda text: text,
+        )
+        with (
+            patch.object(pcfg.module, 'translate_target', 'English'),
+            patch.object(
+                QMessageBox,
+                'question',
+                return_value=QMessageBox.StandardButton.Yes,
+            ),
+            patch('ballontranslator.ui.mainwindow.create_info_dialog') as info,
+        ):
+            MainWindow.remove_existing_translation_line_breaks(owner)
+
+        self.assertEqual(changed.translation, 'First line second line')
+        self.assertEqual(changed.rich_text, '')
+        self.assertEqual(unchanged.translation, 'Already continuous')
+        project.save.assert_called_once_with(keep_exist_as_backup=True)
+        owner.st_manager.updateSceneTextitems.assert_called_once_with()
+        owner.canvas.clear_undostack.assert_called_once_with(
+            update_saved_step=True
+        )
+        self.assertFalse(owner._llm_context_dirty)
+        info.assert_called_once_with(
+            'Removed line breaks from 1 translation(s).'
+        )
 
     def test_settings_wheel_scrolls_without_changing_field_values(self):
         panel = ConfigPanel()

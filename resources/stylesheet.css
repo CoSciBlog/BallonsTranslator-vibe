@@ -1521,8 +1521,7 @@ ColorPickerLabel::hover {
     border: 2px solid rgb(30, 147, 229);
 }
 
-ColorPickerLabel#FontFormatColorPicker,
-ColorPickerLabel#FontFormatStrokeColorPicker {
+ColorPickerLabel#FontFormatColorPicker {
     max-height: 19px;
     min-height: 19px;
     min-width: 19px;

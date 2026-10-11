@@ -27,8 +27,6 @@ from ballontranslator.utils.text_effects import (
     TexturePaint,
     effect_structure_key,
     effect_paint_fallback_color,
-    primary_stroke,
-    with_primary_stroke,
     without_project_raster_effects,
 )
 from .filters import FilterUnavailableError, get_filter_registry
@@ -426,12 +424,6 @@ class TextEffectEditSession:
                     C.active_format.text_effects = self._state_for_item(item)
         elif controls is not None:
             controls.set_active_format(self.host.global_format)
-        sync_stroke_picker = getattr(
-            self.host, 'sync_stroke_color_picker', None
-        )
-        if callable(sync_stroke_picker):
-            sync_stroke_picker(self._current_states()[0])
-
     def _commit_complete_states(
         self,
         before: Sequence[TextEffectStack],
@@ -509,45 +501,6 @@ class TextEffectEditSession:
             after = self._validate_states(states)
         self.preview_before = None
         self.preview_key = None
-        return self._commit_complete_states(before, after)
-
-    def commit_primary_stroke_color(
-        self,
-        color: Sequence[int],
-    ) -> bool:
-        """Commit one solid primary-Stroke color across the active owners.
-
-        Choosing a Stroke color is an explicit activation gesture. A missing
-        primary Stroke therefore receives the ordinary ``StrokeEffect``
-        defaults, while existing Stroke parameters and sibling effects remain
-        unchanged.
-
-        >>> session = object.__new__(TextEffectEditSession)
-        >>> session.items = []
-        >>> session.preview_before = None
-        >>> session.preview_key = None
-        >>> session.controls = None
-        >>> from ballontranslator.utils.fontformat import FontFormat
-        >>> session.host = type('Host', (), {'global_format': FontFormat()})()
-        >>> session._sync_effect_ui = lambda: None
-        >>> session.commit_primary_stroke_color((12, 34, 56))
-        True
-        >>> primary_stroke(session.host.global_format.text_effects).paint
-        SolidPaint(color=(12, 34, 56), paint_type='solid')
-        """
-
-        self.finish_pending_edits()
-        self.cancel_preview()
-        try:
-            paint = SolidPaint(color)
-        except (TypeError, ValueError):
-            self._sync_effect_ui()
-            return False
-        before = self._current_states()
-        after = tuple(
-            with_primary_stroke(state, paint=paint)
-            for state in before
-        )
         return self._commit_complete_states(before, after)
 
     def _begin_preview(self, key: tuple) -> Tuple[TextEffectStack, ...]:

@@ -828,6 +828,7 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
     font_list_changed = Signal(bool)
     compact_vertical_punctuation_changed = Signal(bool)
     apply_auto_tate_chu_yoko_requested = Signal()
+    normalize_existing_translations_requested = Signal()
     merge_current_page_requested = Signal()
     show_pre_MT_keyword_window = Signal()
     show_MT_keyword_window = Signal()
@@ -1319,6 +1320,18 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
         )
         self.remove_translation_line_breaks_checker.toggled.connect(
             self.on_remove_translation_line_breaks_changed
+        )
+        self.normalize_existing_translations_btn = QPushButton(
+            self.tr('Remove Existing Line Breaks...')
+        )
+        self.normalize_existing_translations_btn.setToolTip(self.tr(
+            'Remove hard line breaks from translations already stored in the current project.'
+        ))
+        self.normalize_existing_translations_btn.clicked.connect(
+            self.on_normalize_existing_translations_clicked
+        )
+        typesettingConfigPanel.addBlockWidget(
+            self.normalize_existing_translations_btn
         )
 
         typesettingConfigPanel.addBlockWidget(ConfigTextLabel(
@@ -2120,6 +2133,9 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
 
     def on_remove_translation_line_breaks_changed(self, enabled: bool) -> None:
         pcfg.remove_translation_line_breaks = enabled
+
+    def on_normalize_existing_translations_clicked(self) -> None:
+        self.normalize_existing_translations_requested.emit()
 
     def on_post_merge_changed(self, enabled: bool) -> None:
         pcfg.module.post_merge_textboxes = enabled
