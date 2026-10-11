@@ -919,6 +919,16 @@ class RunPipelineDialogTests(unittest.TestCase):
         self.assertEqual(pcfg.module.translate_context, translate_context)
         dialog.close()
 
+    def test_two_step_translator_uses_llm_context_controls(self):
+        dialog = RunPipelineDialog(
+            translator_metadata={'name': 'Two-Step (Google/DeepL + Ollama)'},
+        )
+
+        self.assertTrue(dialog.context_row.isHidden())
+        self.assertFalse(dialog.llm_context_header_row.isHidden())
+        self.assertFalse(dialog.llm_context_budget_row.isHidden())
+        dialog.close()
+
     def test_llm_context_uses_summary_memory_and_overwrite_controls(self):
         pcfg.module.llm_translate_context = LLMTranslateContext.PAGE
         pcfg.module.llm_translate_vision = False

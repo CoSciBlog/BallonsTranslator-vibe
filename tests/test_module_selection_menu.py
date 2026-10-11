@@ -10,7 +10,7 @@ os.environ.setdefault('QT_QPA_PLATFORM', 'offscreen')
 
 from qtpy.QtCore import QCoreApplication, QEvent, Qt, Signal
 from qtpy.QtTest import QTest
-from qtpy.QtWidgets import QApplication, QWidget
+from qtpy.QtWidgets import QApplication, QComboBox, QWidget
 
 from ballontranslator.modules import (
     GET_VALID_INPAINTERS, GET_VALID_OCR, GET_VALID_TEXTDETECTORS,
@@ -24,16 +24,25 @@ from ballontranslator.ui.codex_settings import CodexSettingsPanel
 from ballontranslator.ui.configpanel import ConfigPanel
 from ballontranslator.ui.mainwindow import MainWindow
 from ballontranslator.ui.module_manager import ModuleManager
-from ballontranslator.ui.module_tool_button import ModuleSelectionWidget
+from ballontranslator.ui.module_tool_button import ModuleSelectionMenu, ModuleSelectionWidget
 from ballontranslator.ui.translator_language_names import translator_language_name
 from ballontranslator.ui.run_pipeline_dialog import RunPipelineDialog
 from ballontranslator.utils.config import pcfg
-from ballontranslator.utils.llm_profiles import default_codex_profile, LLMProfile, default_profile, sync_codex_profile
+from ballontranslator.utils.llm_profiles import (
+    TWO_STEP_TRANSLATOR_KEY,
+    default_codex_profile,
+    LLMProfile,
+    default_profile,
+    sync_codex_profile,
+)
 from ballontranslator.utils.proj_imgtrans import ProjImgTrans
 
 
 class SelectionConfigPanel(SimpleNamespace):
     syncLLMProfile = ConfigPanel.syncLLMProfile
+
+    def setModuleSettings(self, *_args, **_kwargs) -> None:
+        pass
 
 
 class SelectionWindow(QWidget):
@@ -190,6 +199,30 @@ class ModuleSelectionMenuTest(unittest.TestCase):
         self.assertEqual(japanese_action.text().split('\t', 1)[0], 'Japanese')
         self.assertEqual(japanese_action.data(), '日本語')
         dialog.deleteLater()
+
+    def test_two_step_profile_selection_keeps_translator_and_filters_remote_profiles(self) -> None:
+        ollama = default_profile('Ollama')
+        ollama.model = 'local-model'
+        ollama.model_options = ['local-model']
+        pcfg.module.llm_profiles.append(ollama)
+        selector = QComboBox(self.window)
+        selector.addItems(GET_VALID_TRANSLATORS())
+        selector.setCurrentText(TWO_STEP_TRANSLATOR_KEY)
+        menu = ModuleSelectionMenu(
+            selector, 'translator', LLM_MODALITY_TEXT, self.window
+        )
+
+        menu.rebuildMenu()
+        profile_titles = [
+            action.menu().title()
+            for action in menu.actions()
+            if action.menu() is not None
+        ]
+        self.assertEqual(profile_titles, ['Ollama'])
+
+        menu.selectLLMProfile(ollama.id)
+        self.assertEqual(selector.currentText(), TWO_STEP_TRANSLATOR_KEY)
+        self.assertEqual(pcfg.module.translator_llm_id, ollama.id)
 
     def test_requested_translator_languages_have_english_display_names(self) -> None:
         expected = {

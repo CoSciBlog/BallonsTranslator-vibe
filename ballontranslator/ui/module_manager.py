@@ -54,8 +54,8 @@ from ballontranslator.utils.config import (
     TranslationFailurePolicy,
 )
 from ballontranslator.utils.llm_profiles import (
-    LLM_INPAINT_KEY, LLM_OCR_KEY, LLM_TRANSLATOR_KEY, LLMProfile,
-    profile_by_id, profile_from_config,
+    LLM_INPAINT_KEY, LLM_OCR_KEY, LLMProfile,
+    is_llm_text_translator, profile_by_id, profile_from_config,
 )
 from ballontranslator.utils.global_callbacks import register_global_callback
 cfg_module = pcfg.module
@@ -1263,7 +1263,7 @@ class ImgtransThread(QThread):
             (
                 cfg_module.enable_translate
                 and self.translator is not None
-                and getattr(self.translator, 'name', '') == LLM_TRANSLATOR_KEY
+                and is_llm_text_translator(getattr(self.translator, 'name', ''))
             )
             or (
                 cfg_module.enable_ocr

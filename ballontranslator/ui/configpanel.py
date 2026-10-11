@@ -44,6 +44,7 @@ from ballontranslator.modules import (
     GET_VALID_INPAINTERS,
     GET_VALID_OCR,
     GET_VALID_TEXTDETECTORS,
+    GET_VALID_TRANSLATORS,
 )
 from ballontranslator.glossary import GlossaryCategory
 from .llm_profile_widgets import LLMProfilesWidget
@@ -867,6 +868,7 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
         label_text_detector = self.tr('Text Detector')
         label_ocr = self.tr('OCR')
         label_inpaint = self.tr('Inpaint')
+        label_translator = self.tr('Translator')
         label_glossary = self.tr('Glossary')
         label_llm_profile = self.tr('LLM Profile')
         label_application = self.tr('Application')
@@ -880,6 +882,9 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
         ocrConfigPanel = self.addConfigBlock(label_ocr, moduleTableItem, 'ocr')
         inpaintConfigPanel = self.addConfigBlock(
             label_inpaint, moduleTableItem, 'inpainter'
+        )
+        translatorConfigPanel = self.addConfigBlock(
+            label_translator, moduleTableItem, 'translator'
         )
         glossaryConfigPanel = self.addConfigBlock(label_glossary, moduleTableItem, 'glossary')
         llmProfileConfigPanel = self.addConfigBlock(label_llm_profile, moduleTableItem, 'llm_profile')
@@ -1013,11 +1018,19 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
                 self,
                 self,
             ),
+            'translator': ModuleSettingsWidget(
+                'translator',
+                GET_VALID_TRANSLATORS(),
+                pcfg.module.translator,
+                self,
+                self,
+            ),
         }
         module_panels = {
             'textdetector': textDetectorConfigPanel,
             'ocr': ocrConfigPanel,
             'inpainter': inpaintConfigPanel,
+            'translator': translatorConfigPanel,
         }
         for module_type, settings_widget in self.module_settings_widgets.items():
             module_panels[module_type].addBlockWidget(settings_widget)

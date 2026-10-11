@@ -23,8 +23,23 @@ from ballontranslator.utils.structures import Config, field, nested_dataclass
 
 
 LLM_TRANSLATOR_KEY = "LLMTranslator"
+TWO_STEP_TRANSLATOR_KEY = "Two-Step (Google/DeepL + Ollama)"
+LLM_TEXT_TRANSLATOR_KEYS = frozenset({LLM_TRANSLATOR_KEY, TWO_STEP_TRANSLATOR_KEY})
 LLM_OCR_KEY = "LLMOCR"
 LLM_INPAINT_KEY = "LLMInpaint"
+
+
+def is_llm_text_translator(module_name: str) -> bool:
+    """Return whether a translator uses the selected text LLM profile.
+
+    >>> is_llm_text_translator(LLM_TRANSLATOR_KEY)
+    True
+    >>> is_llm_text_translator('google')
+    False
+    """
+    return module_name in LLM_TEXT_TRANSLATOR_KEYS
+
+
 CODEX_MODEL_OPTIONS = (
     "gpt-5.6", "gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna",
     "gpt-5.5", "gpt-5.4", "gpt-5.4-mini", "gpt-4.1", "gpt-4.1-mini", "gpt-4o", "gpt-4o-mini",

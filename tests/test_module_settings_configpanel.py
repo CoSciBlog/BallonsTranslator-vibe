@@ -26,13 +26,13 @@ class ModuleSettingsConfigPanelTest(unittest.TestCase):
         self.addCleanup(panel.deleteLater)
 
         self.assertTrue(
-            {'textdetector', 'ocr', 'inpainter'}.issubset(
+            {'textdetector', 'ocr', 'inpainter', 'translator'}.issubset(
                 panel.configContent.section_index
             )
         )
         self.assertEqual(
             set(panel.module_settings_widgets),
-            {'textdetector', 'ocr', 'inpainter'},
+            {'textdetector', 'ocr', 'inpainter', 'translator'},
         )
 
     def test_selection_and_parameter_edits_include_module_identity(self) -> None:

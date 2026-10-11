@@ -12,4 +12,4 @@ Copyright and license notices shipped with third-party dependencies remain the r
 
 The primary project documentation is maintained in English. Community-maintained translated guides retain their original language and attribution where provided.
 
-The optional translation line-break normalization, text-box wrapping and merge integration, compact Stroke color control, and Ollama memory-estimate presentation are maintained as original code in this fork and introduce no additional dependency or bundled third-party code.
+The optional translation line-break normalization, text-box wrapping and merge integration, compact Stroke color control, Ollama memory-estimate presentation, and Google/DeepL-to-Ollama two-step orchestration are maintained as original code in this fork. The two-step integration uses the providers' existing HTTP interfaces and introduces no bundled third-party code or new dependency.

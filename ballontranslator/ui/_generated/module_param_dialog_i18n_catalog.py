@@ -655,6 +655,45 @@ MODULE_PARAM_CATALOG = {
     ('translator', 'Sugoi', 'device', 'display_name'): {
         "source": 'device', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'device'),
     },
+    ('translator', 'Two-Step (Google/DeepL + Ollama)', '', 'description'): {
+        "source": 'Translate with Google or DeepL first, then review and refine the draft with the selected local Ollama text profile.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Translate with Google or DeepL first, then review and refine the draft with the selected local Ollama text profile.'),
+    },
+    ('translator', 'Two-Step (Google/DeepL + Ollama)', 'deepl api key', 'display_name'): {
+        "source": 'DeepL API Key', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'DeepL API Key'),
+    },
+    ('translator', 'Two-Step (Google/DeepL + Ollama)', 'delay', 'display_name'): {
+        "source": 'Ollama Request Delay', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Ollama Request Delay'),
+    },
+    ('translator', 'Two-Step (Google/DeepL + Ollama)', 'fallback to first step', 'display_name'): {
+        "source": 'Use Draft If Ollama Fails', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Use Draft If Ollama Fails'),
+    },
+    ('translator', 'Two-Step (Google/DeepL + Ollama)', 'first step delay', 'description'): {
+        "source": 'Delay after machine translation in seconds.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Delay after machine translation in seconds.'),
+    },
+    ('translator', 'Two-Step (Google/DeepL + Ollama)', 'first step delay', 'display_name'): {
+        "source": 'First-Step Delay', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'First-Step Delay'),
+    },
+    ('translator', 'Two-Step (Google/DeepL + Ollama)', 'first step translator', 'display_name'): {
+        "source": 'First-Step Translator', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'First-Step Translator'),
+    },
+    ('translator', 'Two-Step (Google/DeepL + Ollama)', 'google auto detect source', 'display_name'): {
+        "source": 'Google Auto-Detect Source Language', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Google Auto-Detect Source Language'),
+    },
+    ('translator', 'Two-Step (Google/DeepL + Ollama)', 'max requests per minute', 'description'): {
+        "source": 'Global request limit for Ollama refinement.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Global request limit for Ollama refinement.'),
+    },
+    ('translator', 'Two-Step (Google/DeepL + Ollama)', 'max requests per minute', 'display_name'): {
+        "source": 'Max Requests Per Minute', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Max Requests Per Minute'),
+    },
+    ('translator', 'Two-Step (Google/DeepL + Ollama)', 'proxy', 'display_name'): {
+        "source": 'Proxy', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Proxy'),
+    },
+    ('translator', 'Two-Step (Google/DeepL + Ollama)', 'retry attempts', 'display_name'): {
+        "source": 'Ollama Retry Attempts', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Ollama Retry Attempts'),
+    },
+    ('translator', 'Two-Step (Google/DeepL + Ollama)', 'retry timeout', 'display_name'): {
+        "source": 'Ollama Retry Timeout', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Ollama Retry Timeout'),
+    },
     ('translator', 'Yandex', 'api_key', 'display_name'): {
         "source": 'API Key', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'API Key'),
     },

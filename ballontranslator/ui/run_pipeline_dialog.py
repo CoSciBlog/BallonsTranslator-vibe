@@ -62,7 +62,10 @@ from ballontranslator.utils.config import (
     TranslateContext,
     TranslationFailurePolicy,
 )
-from ballontranslator.utils.llm_profiles import LLM_OCR_KEY, LLM_TRANSLATOR_KEY
+from ballontranslator.utils.llm_profiles import (
+    LLM_OCR_KEY,
+    is_llm_text_translator,
+)
 from ballontranslator.utils.logger import logger as LOGGER
 from ballontranslator.utils.proj_imgtrans import ProjImgTrans
 from ballontranslator.modules import (
@@ -939,7 +942,7 @@ class RunPipelineDialog(QDialog):
         layout: QVBoxLayout,
     ) -> None:
         self._llm_settings_visible = (
-            self.translator_metadata.get('name') == LLM_TRANSLATOR_KEY
+            is_llm_text_translator(self.translator_metadata.get('name', ''))
         )
         translation_grid = QGridLayout()
         translation_grid.setContentsMargins(0, 0, 0, 0)
@@ -1332,7 +1335,7 @@ class RunPipelineDialog(QDialog):
             )
 
         self._llm_settings_visible = (
-            self.translator_metadata.get('name') == LLM_TRANSLATOR_KEY
+            is_llm_text_translator(self.translator_metadata.get('name', ''))
         )
         self.context_row.setVisible(not self._llm_settings_visible)
         self.llm_context_header_row.setVisible(

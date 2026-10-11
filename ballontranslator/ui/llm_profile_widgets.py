@@ -45,7 +45,7 @@ from ballontranslator.utils.config import pcfg
 from ballontranslator.utils.llm_profiles import (
     LLM_INPAINT_KEY,
     LLM_OCR_KEY,
-    LLM_TRANSLATOR_KEY,
+    is_llm_text_translator,
     LLMProfile,
     estimate_ollama_memory_gib,
     image_model_choices,
@@ -1023,7 +1023,7 @@ class ProfileCardWidget(QGroupBox):
             for selected_id, color in (
                 (
                     pcfg.module.translator_llm_id
-                    if pcfg.module.translator == LLM_TRANSLATOR_KEY
+                    if is_llm_text_translator(pcfg.module.translator)
                     else '',
                     LLM_MODALITY_TEXT_COLOR,
                 ),

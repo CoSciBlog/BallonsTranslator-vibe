@@ -37,7 +37,7 @@ from ballontranslator.utils.config import (
 )
 from ballontranslator.utils.proj_imgtrans import ProjImgTrans
 from ballontranslator.utils.pipeline_history import PipelineHistoryStore
-from ballontranslator.utils.llm_profiles import LLM_TRANSLATOR_KEY, profile_by_id
+from ballontranslator.utils.llm_profiles import is_llm_text_translator, profile_by_id
 from ballontranslator.utils.batch_processing import (
     BatchOptions,
     BatchTask,
@@ -549,7 +549,7 @@ class MainWindow(mainwindow_cls):
         elif module_key == 'inpainter':
             self.bottomBar.inpaint_selector.setSelectedValue(module_name)
             profile_id = pcfg.module.inpaint_llm_id
-        if module_key in {'textdetector', 'ocr', 'inpainter'}:
+        if module_key in {'textdetector', 'ocr', 'inpainter', 'translator'}:
             self.configPanel.setModuleSettings(
                 module_key,
                 module_name,
@@ -570,6 +570,7 @@ class MainWindow(mainwindow_cls):
             'textdetector': self.module_manager.selectTextDetector,
             'ocr': self.module_manager.selectOCR,
             'inpainter': self.module_manager.selectInpainter,
+            'translator': self.module_manager.selectTranslator,
         }
         selector = selectors.get(module_key)
         if selector is not None:
@@ -635,6 +636,7 @@ class MainWindow(mainwindow_cls):
             ('textdetector', pcfg.module.textdetector),
             ('ocr', pcfg.module.ocr),
             ('inpainter', pcfg.module.inpainter),
+            ('translator', pcfg.module.translator),
         ):
             self.configPanel.setModuleSettings(
                 module_key,
@@ -1514,7 +1516,7 @@ class MainWindow(mainwindow_cls):
                 },
             },
         }
-        if module.enable_translate and module.translator == LLM_TRANSLATOR_KEY:
+        if module.enable_translate and is_llm_text_translator(module.translator):
             profile = profile_by_id(
                 module.llm_profiles,
                 module.translator_llm_id,
@@ -1657,7 +1659,7 @@ class MainWindow(mainwindow_cls):
                     },
                 },
             }
-            if options.translator == LLM_TRANSLATOR_KEY:
+            if is_llm_text_translator(options.translator):
                 profile = profile_by_id(
                     module.llm_profiles,
                     module.translator_llm_id,

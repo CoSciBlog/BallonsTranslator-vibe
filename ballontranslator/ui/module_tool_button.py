@@ -35,10 +35,13 @@ from ballontranslator.utils.llm_profiles import (
     LLM_INPAINT_KEY,
     LLM_OCR_KEY,
     LLM_TRANSLATOR_KEY,
+    LLM_TEXT_TRANSLATOR_KEYS,
+    TWO_STEP_TRANSLATOR_KEY,
     THINKING_AUTO,
     profile_by_id,
     codex_thinking_options,
     image_model_choices,
+    ollama_native_chat_url,
     split_image_model_selection,
 )
 
@@ -293,7 +296,11 @@ class ModuleSelectionMenu(QMenu):
         return self.llm_modality == LLM_MODALITY_TEXT
 
     def isCurrentLLM(self) -> bool:
-        return self._has_llm_modality() and self.selector.currentText() == self.llm_key
+        if not self._has_llm_modality():
+            return False
+        if self._is_text_modality():
+            return self.selector.currentText() in LLM_TEXT_TRANSLATOR_KEYS
+        return self.selector.currentText() == self.llm_key
 
     def selectedProfileId(self) -> str:
         return getattr(pcfg.module, self.profile_id_attr)
@@ -332,6 +339,12 @@ class ModuleSelectionMenu(QMenu):
         for profile in pcfg.module.llm_profiles:
             if not getattr(profile, self.profile_support_attr):
                 continue
+            if (
+                self._is_text_modality()
+                and current_module == TWO_STEP_TRANSLATOR_KEY
+                and not ollama_native_chat_url(profile)
+            ):
+                continue
             added = True
             profile_id = profile.id
             profile_menu = _bottom_submenu(profile.name or profile_id, self)
@@ -339,7 +352,7 @@ class ModuleSelectionMenu(QMenu):
                 self,
                 profile_menu,
                 profile.name or profile_id,
-                current_module == self.llm_key and self.selectedProfileId() == profile_id,
+                self.isCurrentLLM() and self.selectedProfileId() == profile_id,
             )
             self._buildProfileMenu(profile_menu, profile)
         if not added:
@@ -365,7 +378,13 @@ class ModuleSelectionMenu(QMenu):
         setattr(pcfg.module, self.profile_id_attr, profile_id)
         if self.module_attr_to_set:
             setattr(pcfg.module, self.module_attr_to_set, self.llm_key)
-        if self.selector.currentText() != self.llm_key:
+        if (
+            self.selector.currentText() != self.llm_key
+            and not (
+                self._is_text_modality()
+                and self.selector.currentText() in LLM_TEXT_TRANSLATOR_KEYS
+            )
+        ):
             self.selector.setCurrentText(self.llm_key)
         self.llm_profile_changed.emit(profile_id)
 

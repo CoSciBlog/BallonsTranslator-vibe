@@ -58,7 +58,8 @@
   - Scrolling the mouse wheel over combo boxes or numeric fields in **Settings** now scrolls the surrounding page without changing the selected value. Values remain editable by clicking, typing, or using the keyboard.
 
 * Integrated module settings and page workflow
-  - **Settings → Modules** now includes dedicated **Text Detector**, **OCR**, **Inpaint**, and **Glossary** pages. Detector/OCR/inpainter pages edit the same selected-module parameters used by the pipeline, without loading models merely by opening Settings.
+  - **Settings → Modules** now includes dedicated **Text Detector**, **OCR**, **Inpaint**, **Translator**, and **Glossary** pages. These pages edit the same selected-module parameters used by the pipeline, without loading models merely by opening Settings.
+  - Select **Two-Step (Google/DeepL + Ollama)** to create a draft with Google Translate, DeepL Free, or DeepL Pro and then check and refine it with the selected local Ollama text profile. The translator supports a configurable first-step delay and an optional safe fallback to the machine draft if the Ollama request fails. Select **google** for direct Google translation without an LLM pass.
   - LLM profiles can be duplicated with all settings, and **Auto** is the default source-language choice for compatible translators.
   - Use the regular sidebar Run button (`F5`) to review or change pipeline options. The adjacent lightning-marked quick-run button (`Ctrl+F5`) immediately reuses the saved options and last page range.
   - Pages can be excluded from every pipeline stage through **Ignore page** in the thumbnail context menu. Use **Tools → Upscaling → Upscale Current Page / Entire Project 2x** to replace confirmed source images with 2× upscaled copies. Upscaled files carry their effective factor (`001_x2.png`, then `001_x4.png` after another 2× pass), while project page references and metadata are updated with the rename.
