@@ -1,5 +1,10 @@
 # Changelogs
 
+### 2026-10-11 — 1.5.19+vibe.28
+- Changed project runs with **Two-Step (Google/DeepL + Ollama)** into two strict phases: Google or DeepL now finishes every selected page before the first Ollama refinement request starts.
+- The complete first-step result is saved as a recoverable project checkpoint before Ollama begins. A checkpoint failure stops the run without starting refinement.
+- Manual translation of selected text boxes keeps the immediate two-step behavior because it has no project-wide page set.
+
 ### 2026-10-11 — 1.5.19+vibe.27
 - Added **Tools → Apply Current Text Style to All Pages...** to replace every project text box's formatting with the currently displayed Global Font Format, including typed effects and text transforms.
 - The confirmed project-wide update preserves source and translated text, box geometry, masks, and images; only per-character rich-text style overrides are replaced.

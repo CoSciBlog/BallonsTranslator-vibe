@@ -10,6 +10,7 @@ from ballontranslator.modules.translators.trans_two_step import (
 )
 from ballontranslator.utils.config import pcfg
 from ballontranslator.utils.llm_profiles import LLMProfile
+from ballontranslator.utils.textblock import TextBlock
 
 
 class TwoStepTranslatorTest(unittest.TestCase):
@@ -71,6 +72,47 @@ class TwoStepTranslatorTest(unittest.TestCase):
             LLMTranslator, 'translate', side_effect=RuntimeError('offline')
         ):
             self.assertEqual(translator.translate(['原文']), ['Draft'])
+
+    def test_project_stages_finish_drafts_before_ollama_refinement(self) -> None:
+        translator = self._translator()
+        translator._first_step = mock.Mock(return_value=['Machine draft'])
+        block = TextBlock(text=['原文'])
+
+        with (
+            mock.patch.object(
+                LLMTranslator,
+                'translate',
+                autospec=True,
+                return_value=['Refined translation'],
+            ) as llm_translate,
+            mock.patch(
+                'ballontranslator.modules.translators.trans_two_step.'
+                'postprocess_translation_text',
+                side_effect=lambda text, *_args, **_kwargs: text,
+            ) as postprocess,
+        ):
+            translator.translate_first_step_textblk_lst(
+                [block],
+                page_key='001.png',
+                full_page=True,
+            )
+            self.assertEqual(block.translation, 'Machine draft')
+            llm_translate.assert_not_called()
+
+            translator.refine_textblk_lst(
+                [block],
+                page_key='001.png',
+                full_page=True,
+            )
+
+        self.assertEqual(block.translation, 'Refined translation')
+        translator._first_step.assert_called_once_with(['原文'])
+        llm_translate.assert_called_once()
+        postprocess.assert_called_once()
+        self.assertEqual(
+            llm_translate.call_args.args[1],
+            ['{"source": "原文", "draft_translation": "Machine draft"}'],
+        )
 
     def test_deepl_free_uses_configured_endpoint_and_key(self) -> None:
         translator = self._translator(

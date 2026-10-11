@@ -12,6 +12,7 @@
 | API Responses and shared WebSocket transport | [`openai_responses.py`](../../ballontranslator/modules/openai_responses.py), [`responses_ws.py`](../../ballontranslator/modules/responses_ws.py) |
 | Image dispatch and generation | [`llm_image.py`](../../ballontranslator/modules/llm_image.py), [`image_generation.py`](../../ballontranslator/modules/image_generation.py) |
 | History selection, glossary, and context budgeting | [`context/`](../../ballontranslator/modules/context) |
+| Google/DeepL draft and Ollama refinement stages | [`trans_two_step.py`](../../ballontranslator/modules/translators/trans_two_step.py), [`module_manager.py`](../../ballontranslator/ui/module_manager.py) |
 | Workers and request validity | [`module_manager.py`](../../ballontranslator/ui/module_manager.py) |
 | Project completion and saved context | [`proj_imgtrans.py`](../../ballontranslator/utils/proj_imgtrans.py) |
 | Context editing | [`llm_context_editor.py`](../../ballontranslator/ui/llm_context_editor.py) |
@@ -20,6 +21,13 @@ GUI and headless translation share one lifecycle: preprocess blocks, freeze requ
 inputs, validate and finalize translations, then mark completion and save pending
 context. `ProjImgTrans` owns saved state; request snapshots and history windows are
 disposable.
+
+Full project runs with the Two-Step translator are deliberately staged across
+the complete selected page set. Every Google/DeepL draft finishes first, the
+project saves a recoverable checkpoint without marking translation complete,
+and only then may Ollama refine pages in order. A failed checkpoint prevents
+refinement. Manual block selections have no project-wide boundary and therefore
+retain the immediate draft-then-refine request.
 
 ## Profiles and backends
 

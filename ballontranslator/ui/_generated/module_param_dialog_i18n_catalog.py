@@ -656,7 +656,7 @@ MODULE_PARAM_CATALOG = {
         "source": 'device', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'device'),
     },
     ('translator', 'Two-Step (Google/DeepL + Ollama)', '', 'description'): {
-        "source": 'Translate with Google or DeepL first, then review and refine the draft with the selected local Ollama text profile.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Translate with Google or DeepL first, then review and refine the draft with the selected local Ollama text profile.'),
+        "source": 'Translate every selected page with Google or DeepL first, then review and refine all drafts with the selected local Ollama text profile.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Translate every selected page with Google or DeepL first, then review and refine all drafts with the selected local Ollama text profile.'),
     },
     ('translator', 'Two-Step (Google/DeepL + Ollama)', 'deepl api key', 'display_name'): {
         "source": 'DeepL API Key', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'DeepL API Key'),

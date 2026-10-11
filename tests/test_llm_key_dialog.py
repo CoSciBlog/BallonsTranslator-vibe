@@ -122,6 +122,49 @@ class FailingTranslator(SuccessfulTranslator):
         raise RuntimeError('translation failed')
 
 
+class StagedTwoStepTranslator(SuccessfulTranslator):
+    staged_project_translation = True
+
+    def __init__(self):
+        super().__init__()
+        self.stage_calls = []
+
+    def translate_first_step_textblk_lst(
+        self,
+        blocks,
+        *,
+        project=None,
+        page_key=None,
+        full_page=False,
+    ):
+        self.stage_calls.append(('draft', page_key))
+        for block in blocks:
+            block.translation = f'draft:{page_key}'
+
+    def refine_textblk_lst(
+        self,
+        blocks,
+        *,
+        project=None,
+        page_key=None,
+        full_page=False,
+    ):
+        if not any(stage == 'refine' for stage, _page in self.stage_calls):
+            self.assert_all_drafts_ready(project)
+        self.stage_calls.append(('refine', page_key))
+        for block in blocks:
+            block.translation = f'refined:{page_key}'
+
+    @staticmethod
+    def assert_all_drafts_ready(project):
+        if not all(
+            block.translation.startswith('draft:')
+            for blocks in project.pages.values()
+            for block in blocks
+        ):
+            raise AssertionError('Ollama started before every draft was ready')
+
+
 class OutputLimitedTranslator(SuccessfulTranslator):
     def on_page_translation_finished(self, project, page_key):
         raise LLMOutputLimitError('profile-1', 'Profile 1', 8192, 'low')
@@ -544,6 +587,106 @@ class LLMKeyDialogDedupTest(unittest.TestCase):
         finally:
             for index, enabled in enumerate(old_stages):
                 pcfg.module.set_stage_enabled(index, enabled)
+
+    def test_two_step_project_finishes_all_drafts_before_refinement(self):
+        old_stages = [pcfg.module.stage_enabled(index) for index in range(4)]
+        old_unload = pcfg.module.unload_models_before_llm
+        try:
+            for index in range(4):
+                pcfg.module.set_stage_enabled(index, index == 2)
+            pcfg.module.unload_models_before_llm = False
+
+            translator = StagedTwoStepTranslator()
+            translate_thread = FakeTranslateThread(translator)
+            thread = module_manager.ImgtransThread(
+                SimpleNamespace(textdetector=None),
+                FakeOCRThread(None),
+                translate_thread,
+                SimpleNamespace(inpainter=None),
+            )
+            project = ProjImgTrans()
+            project.pages = {
+                page_key: [TextBlock(text=[f'source:{page_key}'])]
+                for page_key in ('one', 'two')
+            }
+            project._image_info = {
+                page_key: {'finish_code': 0}
+                for page_key in project.pages
+            }
+            project.read_img = lambda _page: np.zeros(
+                (12, 12, 3),
+                dtype=np.uint8,
+            )
+            project.save = mock.Mock()
+            thread.imgtrans_proj = project
+            thread.pages_to_process = None
+            thread.process_idx_to_page_idx = {}
+            progress = []
+            thread.update_translate_progress.connect(progress.append)
+
+            thread._imgtrans_pipeline()
+
+            self.assertEqual(
+                translator.stage_calls,
+                [
+                    ('draft', 'one'),
+                    ('draft', 'two'),
+                    ('refine', 'one'),
+                    ('refine', 'two'),
+                ],
+            )
+            project.save.assert_called_once_with(keep_exist_as_backup=True)
+            self.assertEqual(progress, [1, 2])
+            self.assertEqual(thread.translate_counter, 2)
+            self.assertFalse(thread.parallel_trans)
+            for page_key, blocks in project.pages.items():
+                self.assertEqual(
+                    blocks[0].translation,
+                    f'refined:{page_key}',
+                )
+                self.assertTrue(
+                    project._image_info[page_key]['finish_code']
+                    & RunStatus.FIN_TRANSLATE
+                )
+        finally:
+            pcfg.module.unload_models_before_llm = old_unload
+            for index, enabled in enumerate(old_stages):
+                pcfg.module.set_stage_enabled(index, enabled)
+
+    def test_two_step_does_not_start_ollama_when_draft_save_fails(self):
+        translator = StagedTwoStepTranslator()
+        thread = module_manager.ImgtransThread(
+            SimpleNamespace(textdetector=None),
+            FakeOCRThread(None),
+            FakeTranslateThread(translator),
+            SimpleNamespace(inpainter=None),
+        )
+        thread.imgtrans_proj = SimpleNamespace(
+            pages={'one': [], 'two': []},
+            save=mock.Mock(side_effect=OSError('disk full')),
+        )
+        thread.clearStopRequest()
+
+        with (
+            mock.patch.object(
+                thread,
+                '_translate_full_page',
+                return_value=True,
+            ) as translate_page,
+            mock.patch(
+                'ballontranslator.ui.module_manager.create_error_dialog'
+            ) as show_error,
+        ):
+            thread._run_staged_two_step_translation(['one', 'two'])
+
+        self.assertTrue(thread.isStopRequested())
+        self.assertEqual(translate_page.call_count, 2)
+        self.assertTrue(all(
+            call.kwargs['method_name']
+            == 'translate_first_step_textblk_lst'
+            for call in translate_page.call_args_list
+        ))
+        show_error.assert_called_once()
 
     def test_selected_translation_refreshes_complete_page_target(self):
         for saved_target in ('English', '简体中文', None):

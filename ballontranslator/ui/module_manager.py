@@ -1021,6 +1021,7 @@ class ImgtransThread(QThread):
         project: ProjImgTrans = None,
         page_key: str = None,
         full_page: bool = False,
+        method_name: str = 'translate_textblk_lst',
     ) -> bool:
         translator = self.translate_thread.module or self.translate_thread.translator
         if translator is None:
@@ -1035,7 +1036,8 @@ class ImgtransThread(QThread):
         if hasattr(translator, 'set_stop_event'):
             translator.set_stop_event(self.stop_event)
         try:
-            translator.translate_textblk_lst(
+            translate_method = getattr(translator, method_name)
+            translate_method(
                 blk_list,
                 project=project,
                 page_key=page_key,
@@ -1068,14 +1070,20 @@ class ImgtransThread(QThread):
         project: ProjImgTrans,
         page_key: str,
         blk_list: List[TextBlock],
+        *,
+        method_name: str = 'translate_textblk_lst',
+        begin_translation: bool = True,
+        mark_finished: bool = True,
     ) -> bool:
         def translate_once() -> bool:
-            project.begin_full_page_translation(page_key)
+            if begin_translation:
+                project.begin_full_page_translation(page_key)
             return self._translate_textblocks(
                 blk_list,
                 project=project,
                 page_key=page_key,
                 full_page=True,
+                method_name=method_name,
             )
 
         success = _run_translation_attempts(
@@ -1083,7 +1091,7 @@ class ImgtransThread(QThread):
             cfg_module.translation_failure_policy,
             self.stop_event,
         )
-        if success:
+        if success and mark_finished:
             _mark_translation_finished(project, page_key, self.translator)
         elif (
             cfg_module.translation_failure_policy
@@ -1092,6 +1100,65 @@ class ImgtransThread(QThread):
         ):
             self.requestStop()
         return success
+
+    def _run_staged_two_step_translation(
+        self,
+        page_keys: List[str],
+        *,
+        unload_before_refinement: bool = False,
+    ) -> None:
+        """Finish every machine draft before starting Ollama refinement."""
+        drafted_pages = set()
+        for page_key in page_keys:
+            if self.isStopRequested():
+                return
+            if self._translate_full_page(
+                self.imgtrans_proj,
+                page_key,
+                self.imgtrans_proj.pages[page_key],
+                method_name='translate_first_step_textblk_lst',
+                mark_finished=False,
+            ):
+                drafted_pages.add(page_key)
+
+        if self.isStopRequested():
+            return
+        if drafted_pages:
+            try:
+                # Persist a recoverable boundary between external machine
+                # translation and local LLM refinement.
+                self.imgtrans_proj.save(keep_exist_as_backup=True)
+            except Exception as error:
+                create_error_dialog(
+                    error,
+                    self.tr('Failed to save first-step translations.'),
+                    'FirstStepTranslationSaveFailed',
+                )
+                self.requestStop()
+                return
+
+        if unload_before_refinement:
+            unload_modules(self, ['textdetector', 'inpainter', 'ocr'])
+        LOGGER.info(
+            'First-step translation completed for %d page(s); starting '
+            'Ollama refinement.',
+            len(drafted_pages),
+        )
+        for page_key in page_keys:
+            if self.isStopRequested():
+                return
+            if page_key in drafted_pages:
+                self._translate_full_page(
+                    self.imgtrans_proj,
+                    page_key,
+                    self.imgtrans_proj.pages[page_key],
+                    method_name='refine_textblk_lst',
+                    begin_translation=False,
+                )
+                if self.isStopRequested():
+                    return
+            self.translate_counter += 1
+            self.update_translate_progress.emit(self.translate_counter)
 
     def _blktrans_pipeline(
         self,
@@ -1277,12 +1344,22 @@ class ImgtransThread(QThread):
             )
         )
         low_vram_trans = False
+        staged_two_step = False
         if self.translator is not None:
+            staged_two_step = bool(getattr(
+                self.translator,
+                'staged_project_translation',
+                False,
+            ))
             # A local translator must not run while an LLM stage unloads the
             # process-wide model set. The existing serial/low-VRAM path keeps
             # every model transition on this pipeline thread.
             low_vram_trans = self.translator.low_vram_mode or llm_stage_enabled
-            self.parallel_trans = not self.translator.is_computational_intensive() and not low_vram_trans
+            self.parallel_trans = (
+                not staged_two_step
+                and not self.translator.is_computational_intensive()
+                and not low_vram_trans
+            )
         else:
             self.parallel_trans = False
         if self.parallel_trans and cfg_module.enable_translate:
@@ -1408,7 +1485,7 @@ class ImgtransThread(QThread):
             if cfg_module.enable_translate:
                 if self.parallel_trans:
                     self.translate_thread.push_pagekey_queue(imgname)
-                elif not low_vram_trans:
+                elif not low_vram_trans and not staged_two_step:
                     self._translate_full_page(
                         self.imgtrans_proj,
                         imgname,
@@ -1463,7 +1540,16 @@ class ImgtransThread(QThread):
                 if len(blk_removed) > 0:
                     self.imgtrans_proj.load_mask_by_imgname
         
-        if cfg_module.enable_translate and low_vram_trans and not self.isStopRequested():
+        if (
+            cfg_module.enable_translate
+            and staged_two_step
+            and not self.isStopRequested()
+        ):
+            self._run_staged_two_step_translation(
+                list(pages_to_iterate),
+                unload_before_refinement=low_vram_trans,
+            )
+        elif cfg_module.enable_translate and low_vram_trans and not self.isStopRequested():
             unload_modules(self, ['textdetector', 'inpainter', 'ocr'])
             for imgname in pages_to_iterate:
                 # 检查是否请求停止

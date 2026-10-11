@@ -2819,52 +2819,57 @@
     <name>ImgtransThread</name>
     <message>
         <location filename="../../ballontranslator/ui/module_manager.py" line="995"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1032"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1051"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1062"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1123"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1138"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1198"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1384"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1442"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1456"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1518"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1532"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1033"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1053"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1064"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1190"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1205"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1265"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1461"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1519"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1533"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1604"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1618"/>
         <source>Page</source>
         <translation>Page</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1029"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1048"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1059"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1030"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1050"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1061"/>
         <source>Translation Failed.</source>
         <translation>Translation Failed.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1120"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1135"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1381"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1395"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1134"/>
+        <source>Failed to save first-step translations.</source>
+        <translation>Failed to save first-step translations.</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1187"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1202"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1458"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1472"/>
         <source>OCR Failed.</source>
         <translation>OCR Failed.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1195"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1439"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1453"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1515"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1529"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1262"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1516"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1530"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1601"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1615"/>
         <source>Inpainting Failed.</source>
         <translation>Inpainting Failed.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1312"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1389"/>
         <source>Text Detection Failed.</source>
         <translation>Text Detection Failed.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1586"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1595"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1672"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1681"/>
         <source>Image translation failed.</source>
         <translation>Image translation failed.</translation>
     </message>
@@ -4053,122 +4058,122 @@ qipao,qipao2</translation>
 <context>
     <name>ModuleManager</name>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1694"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="2035"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="1780"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="2121"/>
         <source>Preparing module: </source>
         <translation>Preparing module: </translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1919"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="2221"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="2005"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="2307"/>
         <source>Missing packages</source>
         <translation>Missing packages</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1921"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="2007"/>
         <source>Selected modules require missing package(s):
 {modules}</source>
         <translation>Selected modules require missing package(s):
 {modules}</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1925"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="2228"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="2011"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="2314"/>
         <source>Install the missing package(s) now?</source>
         <translation>Install the missing package(s) now?</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1927"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="2230"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="2013"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="2316"/>
         <source>Install</source>
         <translation>Install</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1928"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="2231"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="2014"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="2317"/>
         <source>Not Now</source>
         <translation>Not Now</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1929"/>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="2232"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="2015"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="2318"/>
         <source>Install all missing packages and don&apos;t show again</source>
         <translation>Install all missing packages and don&apos;t show again</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1991"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="2077"/>
         <source>Installing packages: </source>
         <translation>Installing packages: </translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="1995"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="2081"/>
         <source>Installing...</source>
         <translation>Installing...</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="2022"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="2108"/>
         <source>Failed to install packages</source>
         <translation>Failed to install packages</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="2077"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="2163"/>
         <source>Downloading package</source>
         <translation>Downloading package</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="2087"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="2173"/>
         <source>{speed}/s</source>
         <translation>{speed}/s</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="2090"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="2176"/>
         <source>ETA {eta}</source>
         <translation>ETA {eta}</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="2142"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="2228"/>
         <source>Combining archive volumes</source>
         <translation>Combining archive volumes</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="2223"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="2309"/>
         <source>Module &quot;{module}&quot; requires missing package(s):
 {packages}</source>
         <translation>Module &quot;{module}&quot; requires missing package(s):
 {packages}</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="2253"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="2339"/>
         <source>Failed to set module </source>
         <translation>Failed to set module </translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="2321"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="2407"/>
         <source>Module preparation is already running.</source>
         <translation>Module preparation is already running.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="2325"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="2411"/>
         <source>Selected modules are ready.</source>
         <translation>Selected modules are ready.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="2409"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="2495"/>
         <source>Open a project before re-running inpainting.</source>
         <translation>Open a project before re-running inpainting.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="2413"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="2499"/>
         <source>No pipeline-eligible pages selected.</source>
         <translation>No pipeline-eligible pages selected.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="2792"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="2878"/>
         <source>The drawing LLM profile is unavailable. Select a profile in the drawing panel.</source>
         <translation>The drawing LLM profile is unavailable. Select a profile in the drawing panel.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/module_manager.py" line="2794"/>
+        <location filename="../../ballontranslator/ui/module_manager.py" line="2880"/>
         <source>Inpainting Failed.</source>
         <translation>Inpainting Failed.</translation>
     </message>
@@ -5048,8 +5053,12 @@ qipao,qipao2</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="659"/>
+        <source>Translate every selected page with Google or DeepL first, then review and refine all drafts with the selected local Ollama text profile.</source>
+        <translation>Translate every selected page with Google or DeepL first, then review and refine all drafts with the selected local Ollama text profile.</translation>
+    </message>
+    <message>
         <source>Translate with Google or DeepL first, then review and refine the draft with the selected local Ollama text profile.</source>
-        <translation>Translate with Google or DeepL first, then review and refine the draft with the selected local Ollama text profile.</translation>
+        <translation type="vanished">Translate with Google or DeepL first, then review and refine the draft with the selected local Ollama text profile.</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="662"/>

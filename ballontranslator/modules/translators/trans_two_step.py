@@ -7,12 +7,14 @@ from typing import Dict, List, Optional, Union
 import requests
 
 from ballontranslator.modules.exceptions import LLMRequestStopped
+from ballontranslator.utils.config import pcfg
 from ballontranslator.utils.llm_profiles import (
     LLMProfile,
     ollama_native_chat_url,
 )
+from ballontranslator.utils.textblock import TextBlock
 
-from .base import register_translator
+from .base import postprocess_translation_text, register_translator
 from .trans_google import GoogleTranslateProviderPython, ProviderError
 from .trans_llm import LLMTranslator
 
@@ -44,11 +46,13 @@ class TwoStepTranslator(LLMTranslator):
     """
 
     concate_text = False
+    staged_project_translation = True
     dependencies = ['openai>=2.8.1', 'httpx[socks,brotli]', 'tiktoken>=0.7.0']
     params: Dict = {
         "description": (
-            "Translate with Google or DeepL first, then review and refine the "
-            "draft with the selected local Ollama text profile."
+            "Translate every selected page with Google or DeepL first, then "
+            "review and refine all drafts with the selected local Ollama text "
+            "profile."
         ),
         "first step translator": {
             "type": "selector",
@@ -234,22 +238,15 @@ class TwoStepTranslator(LLMTranslator):
             ensure_ascii=False,
         )
 
-    def translate(
+    def _refine(
         self,
-        text: Optional[Union[str, List[str]]],
+        source: List[str],
+        drafts: List[str],
         *,
         project=None,
         page_key: Optional[str] = None,
         commit_history_window: bool = False,
-    ) -> Optional[Union[str, List[str]]]:
-        if text is None or text == "" or text == []:
-            return text
-        # Reject a remote/non-Ollama profile before sending text to the first
-        # provider; configuration errors must not look like a successful draft fallback.
-        _ = self.profile
-        is_list = isinstance(text, list)
-        source = list(text) if is_list else [str(text)]
-        drafts = self._first_step(source)
+    ) -> List[str]:
         review_input = [
             self._review_input(original, draft)
             for original, draft in zip(source, drafts)
@@ -272,7 +269,127 @@ class TwoStepTranslator(LLMTranslator):
                 type(error).__name__,
             )
             refined = drafts
-        result = list(refined) if isinstance(refined, list) else [str(refined or "")]
+        result = (
+            list(refined)
+            if isinstance(refined, list)
+            else [str(refined or "")]
+        )
         if self.fallback_to_first_step:
             result = [final or draft for final, draft in zip(result, drafts)]
+        return result
+
+    def _apply_stage_results(
+        self,
+        textblk_lst: List[TextBlock],
+        non_empty_ids: List[int],
+        translations: List[str],
+        *,
+        full_page: bool,
+        finalize: bool = True,
+    ) -> List[str]:
+        results = list(translations)
+        if finalize:
+            results = [
+                postprocess_translation_text(
+                    translation,
+                    self.lang_source,
+                    self.lang_target,
+                    pcfg.mt_sublist,
+                    letter_case=pcfg.let_letter_case,
+                    convert_to_traditional=self.cht_require_convert,
+                    full_page=full_page,
+                    remove_line_breaks=pcfg.remove_translation_line_breaks,
+                )
+                for translation in results
+            ]
+        for translation, block_index in zip(results, non_empty_ids):
+            textblk_lst[block_index].translation = translation
+        return results
+
+    def translate_first_step_textblk_lst(
+        self,
+        textblk_lst: List[TextBlock],
+        *,
+        project=None,
+        page_key: Optional[str] = None,
+        full_page: bool = False,
+    ) -> None:
+        """Store only Google/DeepL drafts for one project page.
+
+        Project orchestration invokes this for every selected page before any
+        Ollama request is allowed to begin.
+        """
+        # Validate the configured local refinement profile before sending text
+        # to an external first-step provider.
+        _ = self.profile
+        non_empty_ids, sources, _translations = (
+            self._prepare_textblock_sources(textblk_lst)
+        )
+        if not sources:
+            return
+        drafts = self._first_step(sources)
+        self._apply_stage_results(
+            textblk_lst,
+            non_empty_ids,
+            drafts,
+            full_page=full_page,
+            finalize=False,
+        )
+
+    def refine_textblk_lst(
+        self,
+        textblk_lst: List[TextBlock],
+        *,
+        project=None,
+        page_key: Optional[str] = None,
+        full_page: bool = False,
+    ) -> None:
+        """Refine a page from its already completed first-step translations."""
+        non_empty_ids, sources, _translations = (
+            self._prepare_textblock_sources(textblk_lst)
+        )
+        if not sources:
+            return
+        drafts = [
+            str(textblk_lst[index].translation or "")
+            for index in non_empty_ids
+        ]
+        refined = self._refine(
+            sources,
+            drafts,
+            project=project,
+            page_key=page_key,
+            commit_history_window=full_page,
+        )
+        finalized = self._apply_stage_results(
+            textblk_lst,
+            non_empty_ids,
+            refined,
+            full_page=full_page,
+        )
+        self._update_project_glossary(project, sources, finalized)
+
+    def translate(
+        self,
+        text: Optional[Union[str, List[str]]],
+        *,
+        project=None,
+        page_key: Optional[str] = None,
+        commit_history_window: bool = False,
+    ) -> Optional[Union[str, List[str]]]:
+        if text is None or text == "" or text == []:
+            return text
+        # Reject a remote/non-Ollama profile before sending text to the first
+        # provider; configuration errors must not look like a successful draft fallback.
+        _ = self.profile
+        is_list = isinstance(text, list)
+        source = list(text) if is_list else [str(text)]
+        drafts = self._first_step(source)
+        result = self._refine(
+            source,
+            drafts,
+            project=project,
+            page_key=page_key,
+            commit_history_window=commit_history_window,
+        )
         return result if is_list else result[0]
