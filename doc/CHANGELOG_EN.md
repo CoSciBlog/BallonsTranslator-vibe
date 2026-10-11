@@ -1,5 +1,10 @@
 # Changelogs
 
+### 2026-10-11 — 1.5.19+vibe.25
+- Fixed glossary extraction dropping aligned translations solely because the translated text contained punctuation or expanded beyond five words.
+- Automatic confirmation now leaves target-less candidates as suggestions, while later successful translations can safely fill confirmed OCR entries that are still empty.
+- Added **Fill missing translations** to the Glossary Manager. It recovers empty project entries from unambiguous translated text boxes and skips conflicts, protected entries, rejected suggestions, and existing translations.
+
 ### 2026-10-11 — 1.5.19+vibe.24
 - Added non-blocking Ollama reasoning-capability detection to each local LLM profile. **Detect** reads the selected model's `/api/show` metadata and displays its reported default.
 - Thinking Level now offers only the exact controls advertised by that model, including boolean Enabled/Disabled controls or model-defined named levels; unsupported models are locked to Disabled and missing metadata safely uses Auto.

@@ -120,6 +120,21 @@ class GlossaryWindowTests(unittest.TestCase):
             self.window._delete_entry()
         self.assertEqual(self.workspace.project.entries, ())
 
+    def test_fill_missing_translations_uses_project_text_pairs(self) -> None:
+        entry = self.workspace.project.create_entry(
+            original='勇者', translation='', status='Confirmed'
+        )
+        self.window.set_workspace(
+            self.workspace,
+            [('勇者', 'Hero')],
+        )
+        with patch.object(QMessageBox, 'information'):
+            self.window._fill_missing_translations()
+        self.assertEqual(
+            self.workspace.project.get_entry(entry.id).translation,
+            'Hero',
+        )
+
     def test_sources_and_conflicts_are_visible(self) -> None:
         series = self.workspace.assign_series(Path(self.temporary.name) / 'series_glossary.json')
         self.workspace.project.create_entry(

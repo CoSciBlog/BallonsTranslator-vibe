@@ -109,7 +109,14 @@ def extract_and_store_candidates(
     ]
     result = service.merge_automatic_candidates(payloads)
     if confirm_new and payloads:
-        originals = {payload['original'].casefold() for payload in payloads}
+        # Empty mappings are not usable glossary decisions. Keep candidates
+        # without a target as suggestions until a later translation can fill
+        # them or the user reviews them explicitly.
+        originals = {
+            payload['original'].casefold()
+            for payload in payloads
+            if payload['translation']
+        }
         for entry in service.entries:
             if (
                 entry.status.value == 'Suggestion'

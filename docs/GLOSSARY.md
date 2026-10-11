@@ -31,12 +31,19 @@ in **Conflicts** and are never silently overwritten.
 ## Editor and settings
 
 **Entries** supports search, filters, CRUD, aliases, notes, review, protection,
-and JSON import/export. **Sources** assigns series/references and copies
+JSON import/export, and recovery of missing translations from unambiguous
+source/translation pairs already stored in the project's text boxes. **Sources** assigns series/references and copies
 confirmed project entries into a series. **Conflicts** copies a chosen decision
 into the project glossary. **Settings** persists enablement, extraction and its
 categories, translation review, references, series use, warnings, prompt limit,
 and manual/automatic confirmation. Defaults preserve existing projects and keep
 automatic extraction and confirmation opt-in.
+
+Rule-based extraction keeps a complete translated text-box result when its
+source is accepted as a standalone candidate. Candidates without a usable
+target stay suggestions even in automatic-confirmation mode. A later pipeline
+result may fill an empty confirmed OCR mapping, but never changes an existing
+translation, a protected entry, or a rejected suggestion.
 
 ## JSON, import, and migration
 

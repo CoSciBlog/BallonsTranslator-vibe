@@ -160,6 +160,14 @@ class GlossaryPhase2Test(unittest.TestCase):
         self.assertIn('Captain Nemo', terms)
         self.assertNotIn('Hello there', terms)
 
+    def test_exact_ocr_candidate_keeps_its_aligned_sentence_translation(self) -> None:
+        candidates = RuleBasedGlossaryExtractor().extract(
+            ['我が動くのをな'],
+            ["Don't move until I tell you!"],
+        )
+        self.assertEqual(len(candidates), 1)
+        self.assertEqual(candidates[0].translation, "Don't move until I tell you!")
+
     def test_rule_extractor_classifies_places_organizations_abilities_and_items(self) -> None:
         candidates = RuleBasedGlossaryExtractor().extract([
             'Silver City', 'Moon Guild', 'Dragon Strike', 'Sun Blade', '勇者さん',
@@ -200,6 +208,51 @@ class GlossaryPhase2Test(unittest.TestCase):
         self.assertEqual(self.service.entries[0].status, GlossaryStatus.SUGGESTION)
         self.assertEqual(self.service.entries[0].origin, GlossaryOrigin.OCR)
         self.assertIsNotNone(self.service.entries[0].confidence)
+
+    def test_automatic_confirmation_waits_for_a_translation(self) -> None:
+        extract_and_store_candidates(
+            self.service,
+            ['勇者'],
+            [''],
+            extractor=RuleBasedGlossaryExtractor(),
+            confirm_new=True,
+        )
+        self.assertEqual(
+            self.service.entries[0].status,
+            GlossaryStatus.SUGGESTION,
+        )
+
+    def test_confirmed_empty_ocr_entry_is_backfilled_by_later_candidate(self) -> None:
+        entry = self.service.create_entry(
+            original='勇者',
+            translation='',
+            origin=GlossaryOrigin.OCR.value,
+            status=GlossaryStatus.CONFIRMED.value,
+        )
+        result = self.service.merge_automatic_candidates([{
+            'original': '勇者',
+            'translation': 'Hero',
+            'origin': GlossaryOrigin.OCR.value,
+        }])
+        self.assertEqual(result.updated, 1)
+        self.assertEqual(self.service.get_entry(entry.id).translation, 'Hero')
+
+    def test_backfill_missing_translations_skips_ambiguous_and_protected_entries(self) -> None:
+        filled = self.service.create_entry(original='勇者', translation='')
+        ambiguous = self.service.create_entry(original='魔王', translation='')
+        protected = self.service.create_entry(
+            original='僧侶', translation='', protected=True
+        )
+        updated = self.service.backfill_missing_translations([
+            ('勇者', 'Hero'),
+            ('魔王', 'Demon King'),
+            ('魔王', 'Devil King'),
+            ('僧侶', 'Priest'),
+        ])
+        self.assertEqual(updated, 1)
+        self.assertEqual(self.service.get_entry(filled.id).translation, 'Hero')
+        self.assertEqual(self.service.get_entry(ambiguous.id).translation, '')
+        self.assertEqual(self.service.get_entry(protected.id).translation, '')
 
     def test_confirmed_protected_and_rejected_entries_are_not_overwritten(self) -> None:
         confirmed = self._entry(original='Hero', translation='Held')

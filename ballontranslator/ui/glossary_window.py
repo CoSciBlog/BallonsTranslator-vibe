@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Optional
+from typing import Optional, Sequence, Tuple
 
 from qtpy.QtCore import QCoreApplication, Qt
 from qtpy.QtWidgets import (
@@ -137,6 +137,7 @@ class GlossaryWindow(OutsideClickFramelessMixin, FramelessWindow):
         if not opaque:
             self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self._workspace: Optional[GlossaryWorkspace] = None
+        self._translation_pairs: Tuple[Tuple[str, str], ...] = ()
         self._entry_rows = []
         self._conflict_rows = []
 
@@ -170,8 +171,13 @@ class GlossaryWindow(OutsideClickFramelessMixin, FramelessWindow):
     def _preserve_on_outside_click(self) -> bool:
         return True
 
-    def set_workspace(self, workspace: Optional[GlossaryWorkspace]) -> None:
+    def set_workspace(
+        self,
+        workspace: Optional[GlossaryWorkspace],
+        translation_pairs: Sequence[Tuple[str, str]] = (),
+    ) -> None:
         self._workspace = workspace
+        self._translation_pairs = tuple(translation_pairs)
         self._set_enabled_state()
         self.refresh()
 
@@ -226,14 +232,23 @@ class GlossaryWindow(OutsideClickFramelessMixin, FramelessWindow):
             (self.tr('Confirm'), self._confirm_entry),
             (self.tr('Reject'), self._reject_entry),
             (self.tr('Toggle protection'), self._toggle_protection),
-            (self.tr('Import JSON'), self._import_glossary),
-            (self.tr('Export JSON'), self._export_glossary),
         ):
             button = QPushButton(text, tab)
             button.clicked.connect(slot)
             actions.addWidget(button)
         actions.addStretch()
         layout.addLayout(actions)
+        maintenance = QHBoxLayout()
+        for text, slot in (
+            (self.tr('Fill missing translations'), self._fill_missing_translations),
+            (self.tr('Import JSON'), self._import_glossary),
+            (self.tr('Export JSON'), self._export_glossary),
+        ):
+            button = QPushButton(text, tab)
+            button.clicked.connect(slot)
+            maintenance.addWidget(button)
+        maintenance.addStretch()
+        layout.addLayout(maintenance)
         return tab
 
     def _build_sources_tab(self) -> QWidget:
@@ -442,6 +457,25 @@ class GlossaryWindow(OutsideClickFramelessMixin, FramelessWindow):
         if record and service:
             service.protect_entry(record.entry.id, not record.entry.protected)
             self.refresh()
+
+    def _fill_missing_translations(self) -> None:
+        """Recover empty project mappings from translated text blocks."""
+
+        if not self._workspace:
+            return
+        updated = self._workspace.project.backfill_missing_translations(
+            self._translation_pairs
+        )
+        self.refresh()
+        if updated:
+            message = self.tr('Filled {count} missing translation(s).').format(
+                count=updated
+            )
+        else:
+            message = self.tr(
+                'No unambiguous translated text blocks matched empty entries.'
+            )
+        self._information(message)
 
     def _import_glossary(self) -> None:
         if not self._workspace:

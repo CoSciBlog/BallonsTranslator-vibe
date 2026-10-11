@@ -4,7 +4,7 @@ import threading
 import unicodedata
 from dataclasses import dataclass, replace
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
 from uuid import uuid4
 
 from .models import (
@@ -426,11 +426,37 @@ class GlossaryService:
                 if current.status == GlossaryStatus.REJECTED:
                     suppressed += 1
                     continue
-                if current.status == GlossaryStatus.CONFIRMED or current.protected:
+                if current.protected:
                     if (
                         candidate.translation
                         and current.translation
                         and candidate.translation != current.translation
+                    ):
+                        conflicts += 1
+                    else:
+                        duplicates += 1
+                    continue
+                if current.status == GlossaryStatus.CONFIRMED:
+                    if (
+                        current.origin == GlossaryOrigin.OCR
+                        and not current.translation
+                        and candidate.translation
+                    ):
+                        candidate_payload = current.to_dict()
+                        candidate_payload.update({
+                            'translation': candidate.translation,
+                            'updated_at': utc_now(),
+                        })
+                        merged = validate_entry(candidate_payload)
+                        entries = [
+                            merged if entry.id == current.id else entry
+                            for entry in entries
+                        ]
+                        updated += 1
+                        changed = True
+                    elif (
+                        candidate.translation
+                        and current.translation != candidate.translation
                     ):
                         conflicts += 1
                     else:
@@ -489,6 +515,63 @@ class GlossaryService:
                 conflicts=conflicts,
                 suppressed=suppressed,
             )
+
+    def backfill_missing_translations(
+        self,
+        text_pairs: Sequence[Tuple[str, str]],
+    ) -> int:
+        """Fill empty entries from unambiguous translated project blocks.
+
+        Existing translations, protected entries, and rejected suggestions are
+        never changed. Repeated source text with different translations is
+        deliberately skipped instead of guessing.
+
+        >>> service = GlossaryService.in_memory()
+        >>> entry = service.create_entry(original='勇者', translation='')
+        >>> service.backfill_missing_translations([('勇者', 'Hero')])
+        1
+        >>> service.get_entry(entry.id).translation
+        'Hero'
+        """
+
+        translations: Dict[str, Set[str]] = {}
+        for source, translation in text_pairs:
+            source_key = _term_key(' '.join(source.split()))
+            target = translation.strip()
+            if not source_key or not target:
+                continue
+            translations.setdefault(source_key, set()).add(target)
+
+        with self._lock:
+            self._ensure_open()
+            updated_entries: List[GlossaryEntry] = []
+            updated = 0
+            now = utc_now()
+            for entry in self.entries:
+                if (
+                    entry.translation
+                    or entry.protected
+                    or entry.status == GlossaryStatus.REJECTED
+                ):
+                    updated_entries.append(entry)
+                    continue
+                matches = set()
+                for term in (entry.original,) + entry.aliases:
+                    term_key = _term_key(' '.join(term.split()))
+                    matches.update(translations.get(term_key, ()))
+                if len(matches) != 1:
+                    updated_entries.append(entry)
+                    continue
+                payload = entry.to_dict()
+                payload.update({
+                    'translation': matches.pop(),
+                    'updated_at': now,
+                })
+                updated_entries.append(validate_entry(payload))
+                updated += 1
+            if updated:
+                self._replace_entries(tuple(updated_entries))
+            return updated
 
     def export_file(self, path: PathValue) -> None:
         with self._lock:

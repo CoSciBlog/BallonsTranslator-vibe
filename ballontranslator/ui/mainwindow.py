@@ -1474,8 +1474,15 @@ class MainWindow(mainwindow_cls):
             )
         if self.glossary_window is None:
             self.glossary_window = GlossaryWindow(self)
+        translation_pairs = tuple(
+            (source, block.translation)
+            for blocks in self.imgtrans_proj.pages.values()
+            for block in blocks
+            if (source := block.get_text().strip()) and block.translation.strip()
+        )
         self.glossary_window.set_workspace(
-            self.imgtrans_proj.glossary_workspace
+            self.imgtrans_proj.glossary_workspace,
+            translation_pairs,
         )
         self.glossary_window.show()
         self.glossary_window.raise_()

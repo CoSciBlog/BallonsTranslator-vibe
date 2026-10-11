@@ -84,7 +84,12 @@ class RuleBasedGlossaryExtractor:
             )
             exact_term = _standalone_term(source)
             if exact_term:
-                candidates.append(self._candidate(exact_term, target, 0.76))
+                candidates.append(self._candidate(
+                    exact_term,
+                    target,
+                    0.76,
+                    aligned_translation=True,
+                ))
             for quoted in _QUOTED_PATTERN.findall(source):
                 quoted = _clean_term(quoted)
                 if _valid_term(quoted):
@@ -115,10 +120,25 @@ class RuleBasedGlossaryExtractor:
             index = cursor
 
     @staticmethod
-    def _candidate(term: str, translation: str, confidence: float) -> GlossaryCandidate:
+    def _candidate(
+        term: str,
+        translation: str,
+        confidence: float,
+        *,
+        aligned_translation: bool = False,
+    ) -> GlossaryCandidate:
+        # An exact OCR block has a trustworthy aligned result even when the
+        # target language needs more words or punctuation than the source.
+        # Sub-term candidates must stay conservative because their translation
+        # cannot be inferred from the complete translated block.
+        safe_translation = (
+            _safe_aligned_translation(translation)
+            if aligned_translation
+            else _safe_target_term(translation)
+        )
         return GlossaryCandidate(
             original=term,
-            translation=translation if _safe_target_term(translation) else '',
+            translation=translation if safe_translation else '',
             category=classify_term(term),
             confidence=confidence,
         )
@@ -228,6 +248,12 @@ def _safe_target_term(term: str) -> bool:
         and len(term.split()) <= 5
         and not _SENTENCE_PUNCTUATION.search(term)
     )
+
+
+def _safe_aligned_translation(term: str) -> bool:
+    """Accept a complete translated block while bounding persisted data."""
+
+    return 1 <= len(term) <= 512
 
 
 def _contains_unseparated_script(term: str) -> bool:
