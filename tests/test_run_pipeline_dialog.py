@@ -1640,6 +1640,21 @@ class RunPipelineDialogTests(unittest.TestCase):
             self.assertTrue(button.toolTip())
             self.assertFalse(button.icon().isNull())
 
+    def test_footer_config_buttons_open_full_settings_sections(self):
+        config_panel = SimpleNamespace(showConfigDialog=Mock())
+        owner = SimpleNamespace(configPanel=config_panel)
+
+        for handler, section in (
+            (MainWindow.to_detect_config, 'textdetector'),
+            (MainWindow.to_ocr_config, 'ocr'),
+            (MainWindow.to_inpaint_config, 'inpainter'),
+            (MainWindow.to_trans_config, 'translator'),
+        ):
+            with self.subTest(section=section):
+                config_panel.showConfigDialog.reset_mock()
+                handler(owner)
+                config_panel.showConfigDialog.assert_called_once_with(section)
+
     def test_view_actions_only_control_bottom_bar_visibility(self):
         window = QMainWindow()
         self.addCleanup(

@@ -2737,8 +2737,8 @@ class MainWindow(mainwindow_cls):
             if editing_textitem is not None:
                 editing_textitem.startEdit()
         
-    def to_trans_config(self):
-        self.show_module_param_dialog('translator', pcfg.module.translator)
+    def to_trans_config(self) -> None:
+        self.configPanel.showConfigDialog('translator')
 
     def focus_llm_profile(self, profile_id: str = None, expand_details: bool = True, target: str = 'api_key'):
         self.configPanel.focusOnLLMProfile(
@@ -2747,17 +2747,17 @@ class MainWindow(mainwindow_cls):
             target=target,
         )
 
-    def to_inpaint_config(self):
-        self.show_module_param_dialog('inpainter', pcfg.module.inpainter)
+    def to_inpaint_config(self) -> None:
+        self.configPanel.showConfigDialog('inpainter')
 
     def to_drawing_inpaint_config(self) -> None:
         self.show_module_param_dialog('inpainter', pcfg.drawpanel.inpainter)
 
-    def to_ocr_config(self):
-        self.show_module_param_dialog('ocr', pcfg.module.ocr)
+    def to_ocr_config(self) -> None:
+        self.configPanel.showConfigDialog('ocr')
 
-    def to_detect_config(self):
-        self.show_module_param_dialog('textdetector', pcfg.module.textdetector)
+    def to_detect_config(self) -> None:
+        self.configPanel.showConfigDialog('textdetector')
 
     def show_module_param_dialog(
         self,

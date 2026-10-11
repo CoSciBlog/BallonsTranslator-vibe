@@ -1,5 +1,10 @@
 # Changelogs
 
+### 2026-10-11 — 1.5.19+vibe.32
+- Footer gear buttons now open the corresponding full Settings page for Text Detector, OCR, Inpaint, and Translator instead of the compact module-parameter popup.
+- Module dropdowns and the adjacent LLM profile edit actions retain their existing behavior.
+- Added regression coverage for the exact Settings section selected by every footer gear action.
+
 ### 2026-10-11 — 1.5.19+vibe.31
 - Added left-sidebar buttons for re-running inpainting on the current page, opening the Glossary Manager, and opening Pipeline History.
 - The shortcuts reuse the existing Tools-menu workflows, including project validation, busy-state protection, pending-edit saves, pipeline history recording, and cached manager windows.
