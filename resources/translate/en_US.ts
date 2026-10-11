@@ -229,42 +229,42 @@
 <context>
     <name>BottomBar</name>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="763"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="764"/>
         <source>Text Detector</source>
         <translation>Text Detector</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="767"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="768"/>
         <source>OCR</source>
         <translation>OCR</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="768"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="769"/>
         <source>Inpaint</source>
         <translation>Inpaint</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="770"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="771"/>
         <source>Translator</source>
         <translation>Translator</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="778"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="779"/>
         <source>Enable/disable paint mode</source>
         <translation>Enable/disable paint mode</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="782"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="783"/>
         <source>Enable/disable text edit mode</source>
         <translation>Enable/disable text edit mode</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="788"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="789"/>
         <source>Original image opacity</source>
         <translation>Original image opacity</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="792"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="793"/>
         <source>Editing layer opacity</source>
         <translation>Editing layer opacity</translation>
     </message>
@@ -3163,108 +3163,108 @@
 <context>
     <name>LeftBar</name>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="112"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="113"/>
         <source>Page List and Context</source>
         <translation>Page List and Context</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="117"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="118"/>
         <source>Global Search (Ctrl+G)</source>
         <translation>Global Search (Ctrl+G)</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="126"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="127"/>
         <source>Merge Selected Text Boxes</source>
         <translation>Merge Selected Text Boxes</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="145"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="146"/>
         <source>Re-run Inpainting Current Page</source>
         <translation>Re-run Inpainting Current Page</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="159"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="160"/>
         <source>Glossary Manager</source>
         <translation>Glossary Manager</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="171"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="172"/>
         <source>Pipeline History</source>
         <translation>Pipeline History</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="185"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="186"/>
         <source>Open Folder ...</source>
         <translation>Open Folder ...</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="189"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="190"/>
         <source>Open Project ... *.json</source>
         <translation>Open Project ... *.json</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="192"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="193"/>
         <source>Save Project</source>
         <translation>Save Project</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="196"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="197"/>
         <source>Export as Doc</source>
         <translation>Export as Doc</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="198"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="199"/>
         <source>Import from Doc</source>
         <translation>Import from Doc</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="201"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="202"/>
         <source>Export source text as TXT</source>
         <translation>Export source text as TXT</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="203"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="204"/>
         <source>Export translation as TXT</source>
         <translation>Export translation as TXT</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="206"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="207"/>
         <source>Export source text as markdown</source>
         <translation>Export source text as markdown</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="208"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="209"/>
         <source>Export translation as markdown</source>
         <translation>Export translation as markdown</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="211"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="212"/>
         <source>Import translation from TXT/markdown</source>
         <translation>Import translation from TXT/markdown</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="219"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="220"/>
         <source>Open Recent</source>
         <translation>Open Recent</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="241"/>
         <location filename="../../ballontranslator/ui/mainwindowbars.py" line="242"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="243"/>
         <source>Run</source>
         <translation>Run</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="257"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="258"/>
         <source>Quick Run with Saved Settings</source>
         <translation>Quick Run with Saved Settings</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="366"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="367"/>
         <source>Select Directory</source>
         <translation>Select Directory</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="373"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="374"/>
         <source>Import *.docx</source>
         <translation>Import *.docx</translation>
     </message>
@@ -4230,7 +4230,7 @@ qipao,qipao2</translation>
     <message>
         <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="14"/>
         <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="101"/>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="587"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="608"/>
         <source>Delay</source>
         <translation>Delay</translation>
     </message>
@@ -4252,8 +4252,8 @@ qipao,qipao2</translation>
     <message>
         <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="26"/>
         <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="107"/>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="593"/>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="686"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="614"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="707"/>
         <source>Max Requests Per Minute</source>
         <translation>Max Requests Per Minute</translation>
     </message>
@@ -4276,8 +4276,8 @@ qipao,qipao2</translation>
     <message>
         <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="38"/>
         <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="113"/>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="599"/>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="689"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="620"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="710"/>
         <source>Proxy</source>
         <translation>Proxy</translation>
     </message>
@@ -4300,21 +4300,21 @@ qipao,qipao2</translation>
     <message>
         <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="50"/>
         <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="119"/>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="605"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="626"/>
         <source>Retry Attempts</source>
         <translation>Retry Attempts</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="53"/>
         <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="122"/>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="608"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="629"/>
         <source>Delay between retries in seconds.</source>
         <translation>Delay between retries in seconds.</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="56"/>
         <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="125"/>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="611"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="632"/>
         <source>Retry Timeout</source>
         <translation>Retry Timeout</translation>
     </message>
@@ -4335,9 +4335,8 @@ qipao,qipao2</translation>
         <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="245"/>
         <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="269"/>
         <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="344"/>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="440"/>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="656"/>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="731"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="677"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="752"/>
         <source>device</source>
         <translation>device</translation>
     </message>
@@ -4380,7 +4379,7 @@ qipao,qipao2</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="110"/>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="596"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="617"/>
         <source>Proxy address used for LLM requests.</source>
         <translation>Proxy address used for LLM requests.</translation>
     </message>
@@ -4402,14 +4401,14 @@ qipao,qipao2</translation>
     <message>
         <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="140"/>
         <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="188"/>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="545"/>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="551"/>
         <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="566"/>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="578"/>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="614"/>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="701"/>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="704"/>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="728"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="572"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="587"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="599"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="635"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="722"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="725"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="749"/>
         <source>delay</source>
         <translation>delay</translation>
     </message>
@@ -4485,8 +4484,8 @@ qipao,qipao2</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="185"/>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="560"/>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="698"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="581"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="719"/>
         <source>API Key</source>
         <translation>API Key</translation>
     </message>
@@ -4589,31 +4588,31 @@ qipao,qipao2</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="281"/>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="458"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="479"/>
         <source>Password</source>
         <translation>Password</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="284"/>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="461"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="482"/>
         <source>User</source>
         <translation>User</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="287"/>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="464"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="485"/>
         <source>Detect Scale</source>
         <translation>Detect Scale</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="290"/>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="467"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="488"/>
         <source>Disable Skip Area</source>
         <translation>Disable Skip Area</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="293"/>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="473"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="494"/>
         <source>Filtrate</source>
         <translation>Filtrate</translation>
     </message>
@@ -4624,37 +4623,37 @@ qipao,qipao2</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="299"/>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="488"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="509"/>
         <source>Force Expand</source>
         <translation>Force Expand</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="302"/>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="491"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="512"/>
         <source>Low Accuracy Mode</source>
         <translation>Low Accuracy Mode</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="305"/>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="494"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="515"/>
         <source>Merge Threshold</source>
         <translation>Merge Threshold</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="308"/>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="497"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="518"/>
         <source>Refine</source>
         <translation>Refine</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="311"/>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="500"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="521"/>
         <source>Delete the old token and request a new one</source>
         <translation>Delete the old token and request a new one</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="314"/>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="503"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="524"/>
         <source>Refresh Token</source>
         <translation>Refresh Token</translation>
     </message>
@@ -4670,7 +4669,7 @@ qipao,qipao2</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="323"/>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="509"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="530"/>
         <source>Confidence Threshold</source>
         <translation>Confidence Threshold</translation>
     </message>
@@ -4845,331 +4844,351 @@ qipao,qipao2</translation>
         <translation>Text Region Filter</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="431"/>
-        <source>ComicTextDetector</source>
-        <translation>ComicTextDetector</translation>
-    </message>
-    <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="434"/>
-        <source>Max split batch size</source>
-        <translation>Max split batch size</translation>
-    </message>
-    <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="437"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="443"/>
         <source>Detect Size</source>
         <translation>Detect Size</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="443"/>
-        <source>font size max</source>
-        <translation>font size max</translation>
-    </message>
-    <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="446"/>
-        <source>font size min</source>
-        <translation>font size min</translation>
-    </message>
-    <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="449"/>
-        <source>font size multiplier</source>
-        <translation>font size multiplier</translation>
-    </message>
-    <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="452"/>
-        <source>mask dilate size</source>
-        <translation>mask dilate size</translation>
-    </message>
-    <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="455"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="476"/>
         <source>Xinghe Cloud (Tuanzi Translator) OCR text detector</source>
         <translation>Xinghe Cloud (Tuanzi Translator) OCR text detector</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="470"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="491"/>
         <source>Expand Ratio</source>
         <translation>Expand Ratio</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="476"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="497"/>
         <source>Font Size Max (set to -1 to disable)</source>
         <translation>Font Size Max (set to -1 to disable)</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="479"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="500"/>
         <source>Font Size Min (set to -1 to disable)</source>
         <translation>Font Size Min (set to -1 to disable)</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="482"/>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="524"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="467"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="503"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="545"/>
         <source>Font Size Multiplier</source>
         <translation>Font Size Multiplier</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="485"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="506"/>
         <source>Font Size Offset</source>
         <translation>Font Size Offset</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="506"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="527"/>
         <source>IoU Threshold</source>
         <translation>IoU Threshold</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="512"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="533"/>
         <source>Detection Size</source>
         <translation>Detection Size</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="515"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="449"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="536"/>
         <source>Device</source>
         <translation>Device</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="518"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="455"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="539"/>
         <source>Maximum Font Size</source>
         <translation>Maximum Font Size</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="521"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="461"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="542"/>
         <source>Minimum Font Size</source>
         <translation>Minimum Font Size</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="527"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="548"/>
         <source>Label</source>
         <translation>Label</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="530"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="473"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="551"/>
         <source>Mask Dilation Size</source>
         <translation>Mask Dilation Size</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="533"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="431"/>
+        <source>ComicTextDetector locates comic text regions, estimates their font size, and creates masks for OCR and inpainting.</source>
+        <translation>ComicTextDetector locates comic text regions, estimates their font size, and creates masks for OCR and inpainting.</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="434"/>
+        <source>Maximum number of square tiles processed together for very tall or wide pages. Higher values can improve speed but use more VRAM or RAM; lower this value after an out-of-memory error.</source>
+        <translation>Maximum number of square tiles processed together for very tall or wide pages. Higher values can improve speed but use more VRAM or RAM; lower this value after an out-of-memory error.</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="437"/>
+        <source>Max Split Batch Size</source>
+        <translation>Max Split Batch Size</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="440"/>
+        <source>Square input resolution used by the detector. Higher values can find smaller text but take longer and require more VRAM. The listed values are compatible with the model stride. CPU uses the ONNX model at a fixed 1024 px input.</source>
+        <translation>Square input resolution used by the detector. Higher values can find smaller text but take longer and require more VRAM. The listed values are compatible with the model stride. CPU uses the ONNX model at a fixed 1024 px input.</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="446"/>
+        <source>Execution backend. CUDA uses the PyTorch model and honors Detect Size; CPU uses the ONNX model at a fixed 1024 px input.</source>
+        <translation>Execution backend. CUDA uses the PyTorch model and honors Detect Size; CPU uses the ONNX model at a fixed 1024 px input.</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="452"/>
+        <source>Upper limit for detected font sizes. Use -1 to disable the limit.</source>
+        <translation>Upper limit for detected font sizes. Use -1 to disable the limit.</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="458"/>
+        <source>Lower limit for detected font sizes. Use -1 to disable the limit.</source>
+        <translation>Lower limit for detected font sizes. Use -1 to disable the limit.</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="464"/>
+        <source>Scales the detected font size used by automatic typesetting. Use 1.0 to keep the estimated size.</source>
+        <translation>Scales the detected font size used by automatic typesetting. Use 1.0 to keep the estimated size.</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="470"/>
+        <source>Expands the detected text mask by this many pixels before inpainting. Use 0 to disable dilation; larger values cover more area around glyph edges.</source>
+        <translation>Expands the detected text mask by this many pixels before inpainting. Use 0 to disable dilation; larger values cover more area around glyph edges.</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="554"/>
         <source>Merge Text Lines</source>
         <translation>Merge Text Lines</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="536"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="557"/>
         <source>Model Path</source>
         <translation>Model Path</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="539"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="560"/>
         <source>Vertical Text</source>
         <translation>Vertical Text</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="542"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="563"/>
         <source>appId</source>
         <translation>appId</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="548"/>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="554"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="569"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="575"/>
         <source>token</source>
         <translation>token</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="557"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="578"/>
         <source>Return source text as translation</source>
         <translation>Return source text as translation</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="563"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="584"/>
         <source>context</source>
         <translation>context</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="569"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="590"/>
         <source>formality</source>
         <translation>formality</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="572"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="593"/>
         <source>Preserve Formatting</source>
         <translation>Preserve Formatting</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="575"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="596"/>
         <source>API URL</source>
         <translation>API URL</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="581"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="602"/>
         <source>Translate using the selected text-capable LLM profile.</source>
         <translation>Translate using the selected text-capable LLM profile.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="584"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="605"/>
         <source>Delay between LLM requests in seconds.</source>
         <translation>Delay between LLM requests in seconds.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="590"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="611"/>
         <source>Global request limit for LLM translation.</source>
         <translation>Global request limit for LLM translation.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="602"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="623"/>
         <source>Retries for API or parsing failures.</source>
         <translation>Retries for API or parsing failures.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="617"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="638"/>
         <source>api baseurl</source>
         <translation>api baseurl</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="620"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="641"/>
         <source>dict path</source>
         <translation>dict path</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="623"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="644"/>
         <source>Enlarge small kana to normal size</source>
         <translation>Enlarge small kana to normal size</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="626"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="647"/>
         <source>do enlarge small kana</source>
         <translation>do enlarge small kana</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="629"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="650"/>
         <source>Force apply the dictionary regardless of whether the terms appear in the original text
  DO NOT CHECK THIS IF YOU ARE NOT SURE WHAT IT MEANS</source>
         <translation>Force apply the dictionary regardless of whether the terms appear in the original text
  DO NOT CHECK THIS IF YOU ARE NOT SURE WHAT IT MEANS</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="632"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="653"/>
         <source>force apply dict</source>
         <translation>force apply dict</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="635"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="656"/>
         <source>check it if you&apos;re running it locally on a single device and encountered a crash due to vram OOM</source>
         <translation>check it if you&apos;re running it locally on a single device and encountered a crash due to vram OOM</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="638"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="659"/>
         <source>low vram mode</source>
         <translation>low vram mode</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="641"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="662"/>
         <source>max tokens</source>
         <translation>max tokens</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="644"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="665"/>
         <source>repeat detect threshold</source>
         <translation>repeat detect threshold</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="647"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="668"/>
         <source>retry attempts</source>
         <translation>retry attempts</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="650"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="671"/>
         <source>timeout</source>
         <translation>timeout</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="653"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="674"/>
         <source>version</source>
         <translation>version</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="659"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="680"/>
         <source>Translate every selected page with Google or DeepL first, then review and refine all drafts with the selected local Ollama text profile.</source>
         <translation>Translate every selected page with Google or DeepL first, then review and refine all drafts with the selected local Ollama text profile.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="662"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="683"/>
         <source>DeepL API Key</source>
         <translation>DeepL API Key</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="665"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="686"/>
         <source>Ollama Request Delay</source>
         <translation>Ollama Request Delay</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="668"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="689"/>
         <source>Use Draft If Ollama Fails</source>
         <translation>Use Draft If Ollama Fails</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="671"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="692"/>
         <source>Delay after machine translation in seconds.</source>
         <translation>Delay after machine translation in seconds.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="674"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="695"/>
         <source>First-Step Delay</source>
         <translation>First-Step Delay</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="677"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="698"/>
         <source>First-Step Translator</source>
         <translation>First-Step Translator</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="680"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="701"/>
         <source>Google Auto-Detect Source Language</source>
         <translation>Google Auto-Detect Source Language</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="683"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="704"/>
         <source>Global request limit for Ollama refinement.</source>
         <translation>Global request limit for Ollama refinement.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="692"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="713"/>
         <source>Ollama Retry Attempts</source>
         <translation>Ollama Retry Attempts</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="695"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="716"/>
         <source>Ollama Retry Timeout</source>
         <translation>Ollama Retry Timeout</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="707"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="728"/>
         <source>Select the translation service from the FOSWLY library.</source>
         <translation>Select the translation service from the FOSWLY library.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="710"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="731"/>
         <source>service</source>
         <translation>service</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="713"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="734"/>
         <source>API Key for Yandex.Cloud. If empty, a keyless method will be attempted.</source>
         <translation>API Key for Yandex.Cloud. If empty, a keyless method will be attempted.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="716"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="737"/>
         <source>Yandex Cloud API Key</source>
         <translation>Yandex Cloud API Key</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="719"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="740"/>
         <source>DAT Path</source>
         <translation>DAT Path</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="722"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="743"/>
         <source>J2KEngine.dll Path</source>
         <translation>J2KEngine.dll Path</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="725"/>
+        <location filename="../../ballontranslator/ui/_generated/module_param_dialog_i18n_catalog.py" line="746"/>
         <source>ehnd-kor.dll Path (optional)</source>
         <translation>ehnd-kor.dll Path (optional)</translation>
     </message>
@@ -7755,187 +7774,187 @@ Then restart Photoshop. Explorer will now open the source file and destination l
 <context>
     <name>TitleBar</name>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="406"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="407"/>
         <source>Edit</source>
         <translation>Edit</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="408"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="409"/>
         <source>Undo</source>
         <translation>Undo</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="411"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="412"/>
         <source>Redo</source>
         <translation>Redo</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="414"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="415"/>
         <source>Search</source>
         <translation>Search</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="417"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="418"/>
         <source>Global Search</source>
         <translation>Global Search</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="421"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="422"/>
         <source>Keyword substitution for machine translation source text</source>
         <translation>Keyword substitution for machine translation source text</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="423"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="424"/>
         <source>Keyword substitution for machine translation</source>
         <translation>Keyword substitution for machine translation</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="425"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="426"/>
         <source>Keyword substitution for source text</source>
         <translation>Keyword substitution for source text</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="436"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="437"/>
         <source>View</source>
         <translation>View</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="440"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="441"/>
         <source>Display Language</source>
         <translation>Display Language</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="454"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="455"/>
         <source>Drawing Board</source>
         <translation>Drawing Board</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="456"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="457"/>
         <source>Text Editor</source>
         <translation>Text Editor</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="458"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="459"/>
         <source>Import Text Styles</source>
         <translation>Import Text Styles</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="459"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="460"/>
         <source>Export Text Styles</source>
         <translation>Export Text Styles</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="460"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="461"/>
         <source>Dark Mode</source>
         <translation>Dark Mode</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="464"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="465"/>
         <source>Show Text Detection</source>
         <translation>Show Text Detection</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="465"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="466"/>
         <source>Show OCR</source>
         <translation>Show OCR</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="466"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="467"/>
         <source>Show Translation</source>
         <translation>Show Translation</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="467"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="468"/>
         <source>Show Inpainting</source>
         <translation>Show Inpainting</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="495"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="496"/>
         <source>Go</source>
         <translation>Go</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="496"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="497"/>
         <source>Previous Page</source>
         <translation>Previous Page</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="498"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="499"/>
         <source>Next Page</source>
         <translation>Next Page</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="509"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="510"/>
         <source>Tools</source>
         <translation>Tools</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="512"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="513"/>
         <source>Region Merge Tool</source>
         <translation>Region Merge Tool</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="517"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="518"/>
         <source>Photoshop Bridge</source>
         <translation>Photoshop Bridge</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="521"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="522"/>
         <source>Path Reorder</source>
         <translation>Path Reorder</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="525"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="526"/>
         <source>Font Exclusion</source>
         <translation>Font Exclusion</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="529"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="530"/>
         <source>Apply Current Text Style to All Pages...</source>
         <translation>Apply Current Text Style to All Pages...</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="536"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="537"/>
         <source>Glossary Manager</source>
         <translation>Glossary Manager</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="540"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="541"/>
         <source>Batch Processing...</source>
         <translation>Batch Processing...</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="544"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="545"/>
         <source>Pipeline History</source>
         <translation>Pipeline History</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="549"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="550"/>
         <source>Re-run Inpainting Current Page</source>
         <translation>Re-run Inpainting Current Page</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="555"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="556"/>
         <source>Re-run Inpainting All Pages</source>
         <translation>Re-run Inpainting All Pages</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="561"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="562"/>
         <source>Upscale Current Page 2x...</source>
         <translation>Upscale Current Page 2x...</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="566"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="567"/>
         <source>Upscale Entire Project 2x...</source>
         <translation>Upscale Entire Project 2x...</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="570"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="571"/>
         <source>Upscaling</source>
         <translation>Upscaling</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="739"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="740"/>
         <source>{current}/{total} pages</source>
         <translation>{current}/{total} pages</translation>
     </message>

@@ -8,8 +8,18 @@ from .ctd import CTDModel
 CTD_ONNX_PATH = 'data/models/comictextdetector.pt.onnx'
 CTD_TORCH_PATH = 'data/models/comictextdetector.pt'
 
-def load_ctd_model(model_path, device, detect_size=1024) -> CTDModel:
-    model = CTDModel(model_path, detect_size=detect_size, device=device)
+def load_ctd_model(
+    model_path,
+    device,
+    detect_size=1024,
+    det_rearrange_max_batches=4,
+) -> CTDModel:
+    model = CTDModel(
+        model_path,
+        detect_size=detect_size,
+        device=device,
+        det_rearrange_max_batches=det_rearrange_max_batches,
+    )
     
     return model
 
@@ -21,22 +31,73 @@ class ComicTextDetector(TextDetectorBase):
     params = {
         'detect_size': {
             'type': 'selector',
-            'options': [896, 1024, 1152, 1280], 
+            'options': [
+                896, 1024, 1152, 1280, 1408, 1536, 1664, 1792,
+                1920, 2048, 2176, 2304, 2432, 2496,
+            ],
             'value': 1280,
-            'display_name': 'Detect Size'
-        }, 
+            'display_name': 'Detect Size',
+            'description': (
+                'Square input resolution used by the detector. Higher values '
+                'can find smaller text but take longer and require more VRAM. '
+                'The listed values are compatible with the model stride. CPU '
+                'uses the ONNX model at a fixed 1024 px input.'
+            ),
+        },
         'det_rearrange_max_batches': {
             'type': 'selector',
-            'options': [1, 2, 4, 6, 8, 12, 16, 24, 32], 
+            'options': [1, 2, 4, 6, 8, 12, 16, 24, 32],
             'value': 4,
-            'display_name': 'Max split batch size'
+            'display_name': 'Max Split Batch Size',
+            'description': (
+                'Maximum number of square tiles processed together for very '
+                'tall or wide pages. Higher values can improve speed but use '
+                'more VRAM or RAM; lower this value after an out-of-memory error.'
+            ),
         },
-        'device': DEVICE_SELECTOR(),
-        'description': 'ComicTextDetector',
-        'font size multiplier': 1.,
-        'font size max': -1,
-        'font size min': -1,
-        'mask dilate size': 3
+        'device': {
+            **DEVICE_SELECTOR(),
+            'display_name': 'Device',
+            'description': (
+                'Execution backend. CUDA uses the PyTorch model and honors '
+                'Detect Size; CPU uses the ONNX model at a fixed 1024 px input.'
+            ),
+        },
+        'description': (
+            'ComicTextDetector locates comic text regions, estimates their '
+            'font size, and creates masks for OCR and inpainting.'
+        ),
+        'font size multiplier': {
+            'value': 1.0,
+            'display_name': 'Font Size Multiplier',
+            'description': (
+                'Scales the detected font size used by automatic typesetting. '
+                'Use 1.0 to keep the estimated size.'
+            ),
+        },
+        'font size max': {
+            'value': -1,
+            'display_name': 'Maximum Font Size',
+            'description': (
+                'Upper limit for detected font sizes. Use -1 to disable the limit.'
+            ),
+        },
+        'font size min': {
+            'value': -1,
+            'display_name': 'Minimum Font Size',
+            'description': (
+                'Lower limit for detected font sizes. Use -1 to disable the limit.'
+            ),
+        },
+        'mask dilate size': {
+            'value': 3,
+            'display_name': 'Mask Dilation Size',
+            'description': (
+                'Expands the detected text mask by this many pixels before '
+                'inpainting. Use 0 to disable dilation; larger values cover '
+                'more area around glyph edges.'
+            ),
+        },
     }
     _load_model_keys = {'model'}
     download_file_list = [
@@ -67,10 +128,21 @@ class ComicTextDetector(TextDetectorBase):
         return int(self.params['detect_size']['value'])
 
     def _load_model(self):
+        max_batches = int(self.get_param_value('det_rearrange_max_batches'))
         if self.device != 'cpu':
-            self.model = load_ctd_model(CTD_TORCH_PATH, self.device, self.detect_size)
+            self.model = load_ctd_model(
+                CTD_TORCH_PATH,
+                self.device,
+                self.detect_size,
+                max_batches,
+            )
         else:
-            self.model = load_ctd_model(CTD_ONNX_PATH, self.device, self.detect_size)
+            self.model = load_ctd_model(
+                CTD_ONNX_PATH,
+                self.device,
+                self.detect_size,
+                max_batches,
+            )
 
     def _detect(self, img: np.ndarray, proj: ProjImgTrans) -> Tuple[np.ndarray, List[TextBlock]]:
         _, mask, blk_list = self.model(img)
@@ -96,8 +168,13 @@ class ComicTextDetector(TextDetectorBase):
 
     def updateParam(self, param_key: str, param_content):
         super().updateParam(param_key, param_content)
-        device = self.device
-        if param_key == 'device' and self.all_model_loaded():
-            if self.model.device != device:
+        if self.all_model_loaded():
+            if param_key == 'device' and self.model.device != self.device:
                 self.unload_model()
                 self.load_model()
+            elif param_key == 'detect_size':
+                self.model.detect_size = self.detect_size
+            elif param_key == 'det_rearrange_max_batches':
+                self.model.det_rearrange_max_batches = int(
+                    self.get_param_value(param_key)
+                )

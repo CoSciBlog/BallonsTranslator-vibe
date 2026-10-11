@@ -1,5 +1,10 @@
 # Changelogs
 
+### 2026-10-11 — 1.5.19+vibe.33
+- Extended ComicTextDetector's Detect Size selector with stride-compatible GPU resolutions through 2496 px, including 1536, 1920, 2048, 2304, and 2432 px.
+- Added complete localized labels and explanations for detection resolution, split batching, device behavior, font-size controls, and mask dilation, including performance/VRAM guidance and the fixed 1024 px CPU/ONNX limitation.
+- Fixed live Detect Size updates and connected Max Split Batch Size to the CTD runtime; the setting had previously been displayed and saved without being passed to the model.
+
 ### 2026-10-11 — 1.5.19+vibe.32
 - Footer gear buttons now open the corresponding full Settings page for Text Detector, OCR, Inpaint, and Translator instead of the compact module-parameter popup.
 - Module dropdowns and the adjacent LLM profile edit actions retain their existing behavior.

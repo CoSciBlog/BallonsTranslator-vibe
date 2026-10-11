@@ -428,28 +428,49 @@ MODULE_PARAM_CATALOG = {
         "source": 'Text Region Filter', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Text Region Filter'),
     },
     ('textdetector', 'ctd', '', 'description'): {
-        "source": 'ComicTextDetector', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'ComicTextDetector'),
+        "source": 'ComicTextDetector locates comic text regions, estimates their font size, and creates masks for OCR and inpainting.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'ComicTextDetector locates comic text regions, estimates their font size, and creates masks for OCR and inpainting.'),
+    },
+    ('textdetector', 'ctd', 'det_rearrange_max_batches', 'description'): {
+        "source": 'Maximum number of square tiles processed together for very tall or wide pages. Higher values can improve speed but use more VRAM or RAM; lower this value after an out-of-memory error.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Maximum number of square tiles processed together for very tall or wide pages. Higher values can improve speed but use more VRAM or RAM; lower this value after an out-of-memory error.'),
     },
     ('textdetector', 'ctd', 'det_rearrange_max_batches', 'display_name'): {
-        "source": 'Max split batch size', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Max split batch size'),
+        "source": 'Max Split Batch Size', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Max Split Batch Size'),
+    },
+    ('textdetector', 'ctd', 'detect_size', 'description'): {
+        "source": 'Square input resolution used by the detector. Higher values can find smaller text but take longer and require more VRAM. The listed values are compatible with the model stride. CPU uses the ONNX model at a fixed 1024 px input.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Square input resolution used by the detector. Higher values can find smaller text but take longer and require more VRAM. The listed values are compatible with the model stride. CPU uses the ONNX model at a fixed 1024 px input.'),
     },
     ('textdetector', 'ctd', 'detect_size', 'display_name'): {
         "source": 'Detect Size', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Detect Size'),
     },
+    ('textdetector', 'ctd', 'device', 'description'): {
+        "source": 'Execution backend. CUDA uses the PyTorch model and honors Detect Size; CPU uses the ONNX model at a fixed 1024 px input.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Execution backend. CUDA uses the PyTorch model and honors Detect Size; CPU uses the ONNX model at a fixed 1024 px input.'),
+    },
     ('textdetector', 'ctd', 'device', 'display_name'): {
-        "source": 'device', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'device'),
+        "source": 'Device', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Device'),
+    },
+    ('textdetector', 'ctd', 'font size max', 'description'): {
+        "source": 'Upper limit for detected font sizes. Use -1 to disable the limit.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Upper limit for detected font sizes. Use -1 to disable the limit.'),
     },
     ('textdetector', 'ctd', 'font size max', 'display_name'): {
-        "source": 'font size max', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'font size max'),
+        "source": 'Maximum Font Size', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Maximum Font Size'),
+    },
+    ('textdetector', 'ctd', 'font size min', 'description'): {
+        "source": 'Lower limit for detected font sizes. Use -1 to disable the limit.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Lower limit for detected font sizes. Use -1 to disable the limit.'),
     },
     ('textdetector', 'ctd', 'font size min', 'display_name'): {
-        "source": 'font size min', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'font size min'),
+        "source": 'Minimum Font Size', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Minimum Font Size'),
+    },
+    ('textdetector', 'ctd', 'font size multiplier', 'description'): {
+        "source": 'Scales the detected font size used by automatic typesetting. Use 1.0 to keep the estimated size.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Scales the detected font size used by automatic typesetting. Use 1.0 to keep the estimated size.'),
     },
     ('textdetector', 'ctd', 'font size multiplier', 'display_name'): {
-        "source": 'font size multiplier', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'font size multiplier'),
+        "source": 'Font Size Multiplier', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Font Size Multiplier'),
+    },
+    ('textdetector', 'ctd', 'mask dilate size', 'description'): {
+        "source": 'Expands the detected text mask by this many pixels before inpainting. Use 0 to disable dilation; larger values cover more area around glyph edges.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Expands the detected text mask by this many pixels before inpainting. Use 0 to disable dilation; larger values cover more area around glyph edges.'),
     },
     ('textdetector', 'ctd', 'mask dilate size', 'display_name'): {
-        "source": 'mask dilate size', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'mask dilate size'),
+        "source": 'Mask Dilation Size', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Mask Dilation Size'),
     },
     ('textdetector', 'stariver_ocr', '', 'description'): {
         "source": 'Xinghe Cloud (Tuanzi Translator) OCR text detector', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Xinghe Cloud (Tuanzi Translator) OCR text detector'),
