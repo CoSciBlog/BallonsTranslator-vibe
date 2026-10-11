@@ -14,6 +14,7 @@ from qtpy.QtGui import (
 )
 
 from ballontranslator.utils.config import AutoTateChuYokoConfig
+from ballontranslator.utils.fontformat import FontFormat
 from ballontranslator.utils.fontformat import font_weight_to_qt
 from ballontranslator.utils.message import create_error_dialog
 from ballontranslator.utils.textblock import TextBlock
@@ -124,6 +125,32 @@ def apply_auto_tate_chu_yoko(
             line_spacing_fallback=block.fontformat.line_spacing,
             line_spacing_type_fallback=block.fontformat.line_spacing_type,
         )
+        changed += 1
+    return changed
+
+
+def apply_text_style_to_blocks(
+    blocks: Sequence[TextBlock],
+    style: FontFormat,
+) -> int:
+    """Replace each block's complete style without changing its content.
+
+    Persisted rich text contains character-level style overrides, so a whole
+    style replacement clears that derived HTML and lets the unchanged plain
+    translation be reconstructed with the new format.
+
+    >>> block = TextBlock(translation='Hello', rich_text='<p>Hello</p>')
+    >>> apply_text_style_to_blocks([block], FontFormat(font_size=30))
+    1
+    >>> (block.translation, block.font_size, block.rich_text)
+    ('Hello', 30, '')
+    """
+    changed = 0
+    for block in blocks:
+        if block.fontformat == style and not block.rich_text:
+            continue
+        block.fontformat.merge(style)
+        block.rich_text = ''
         changed += 1
     return changed
 

@@ -64,6 +64,7 @@ from ballontranslator.ui.text_engine.annotations import (
 from ballontranslator.ui.text_engine.pipeline_formatting import (
     AutoTateChuYokoThread,
     apply_auto_tate_chu_yoko,
+    apply_text_style_to_blocks,
 )
 from ballontranslator.utils.config import (
     AutoTateChuYokoConfig,
@@ -373,6 +374,125 @@ class RunPipelineDialogTests(unittest.TestCase):
         self.assertFalse(owner._llm_context_dirty)
         info.assert_called_once_with(
             'Removed line breaks from 1 translation(s).'
+        )
+
+    def test_apply_text_style_to_blocks_preserves_content_and_geometry(self):
+        block = TextBlock(
+            xyxy=[1, 2, 30, 40],
+            text=['source'],
+            translation='Translated text',
+            rich_text='<p><b>Translated text</b></p>',
+        )
+        block.font_size = 18
+        style = FontFormat(
+            font_family='DejaVu Sans',
+            font_size=36,
+            italic=True,
+        )
+
+        changed = apply_text_style_to_blocks([block], style)
+
+        self.assertEqual(changed, 1)
+        self.assertEqual(block.xyxy, [1, 2, 30, 40])
+        self.assertEqual(block.text, ['source'])
+        self.assertEqual(block.translation, 'Translated text')
+        self.assertEqual(block.rich_text, '')
+        self.assertEqual(block.fontformat, style)
+
+    def test_apply_current_text_style_updates_and_saves_entire_project(self):
+        first = TextBlock(translation='One', rich_text='<p>One</p>')
+        second = TextBlock(translation='Two')
+        style = FontFormat(font_family='DejaVu Sans', font_size=42)
+        project = SimpleNamespace(
+            is_empty=False,
+            pages={'001.png': [first], '002.png': [second]},
+            save=Mock(),
+        )
+        format_panel = SimpleNamespace(
+            global_format=style,
+            resolve_text_transform_edits_for_save=Mock(),
+        )
+        owner = SimpleNamespace(
+            imgtrans_proj=project,
+            textPanel=SimpleNamespace(formatpanel=format_panel),
+            st_manager=SimpleNamespace(
+                formatpanel=format_panel,
+                updateTextBlkList=Mock(),
+                updateSceneTextitems=Mock(),
+            ),
+            canvas=SimpleNamespace(clear_undostack=Mock()),
+            _llm_context_dirty=True,
+            tr=lambda text: text,
+        )
+        with (
+            patch.object(
+                QMessageBox,
+                'question',
+                return_value=QMessageBox.StandardButton.Yes,
+            ),
+            patch('ballontranslator.ui.mainwindow.create_info_dialog') as info,
+        ):
+            MainWindow.apply_current_text_style_to_project(owner)
+
+        for block in (first, second):
+            self.assertEqual(block.fontformat, style)
+        self.assertEqual(first.translation, 'One')
+        self.assertEqual(second.translation, 'Two')
+        project.save.assert_called_once_with(keep_exist_as_backup=True)
+        format_panel.resolve_text_transform_edits_for_save.assert_called_once_with()
+        owner.st_manager.updateTextBlkList.assert_called_once_with()
+        owner.st_manager.updateSceneTextitems.assert_called_once_with()
+        owner.canvas.clear_undostack.assert_called_once_with(
+            update_saved_step=True
+        )
+        self.assertFalse(owner._llm_context_dirty)
+        info.assert_called_once_with(
+            'Applied the current text style to 2 text box(es).'
+        )
+
+    def test_apply_current_text_style_rolls_back_when_save_fails(self):
+        original = FontFormat(font_family='Original', font_size=17)
+        block = TextBlock(translation='Text', rich_text='<p>Text</p>')
+        block.fontformat.merge(original)
+        style = FontFormat(font_family='Replacement', font_size=50)
+        project = SimpleNamespace(
+            is_empty=False,
+            pages={'001.png': [block]},
+            save=Mock(side_effect=OSError('disk full')),
+        )
+        format_panel = SimpleNamespace(
+            global_format=style,
+            resolve_text_transform_edits_for_save=Mock(),
+        )
+        owner = SimpleNamespace(
+            imgtrans_proj=project,
+            textPanel=SimpleNamespace(formatpanel=format_panel),
+            st_manager=SimpleNamespace(
+                formatpanel=format_panel,
+                updateTextBlkList=Mock(),
+                updateSceneTextitems=Mock(),
+            ),
+            canvas=SimpleNamespace(clear_undostack=Mock()),
+            _llm_context_dirty=True,
+            tr=lambda text: text,
+        )
+        with (
+            patch.object(
+                QMessageBox,
+                'question',
+                return_value=QMessageBox.StandardButton.Yes,
+            ),
+            patch('ballontranslator.ui.mainwindow.create_error_dialog') as error,
+        ):
+            MainWindow.apply_current_text_style_to_project(owner)
+
+        self.assertEqual(block.fontformat, original)
+        self.assertEqual(block.rich_text, '<p>Text</p>')
+        owner.st_manager.updateSceneTextitems.assert_called_once_with()
+        owner.canvas.clear_undostack.assert_not_called()
+        error.assert_called_once_with(
+            project.save.side_effect,
+            'Failed to apply the current text style to all pages.',
         )
 
     def test_settings_wheel_scrolls_without_changing_field_values(self):
@@ -1535,8 +1655,12 @@ class RunPipelineDialogTests(unittest.TestCase):
                 'Region Merge Tool',
                 'Photoshop Bridge',
                 'Path Reorder',
+                'Apply Current Text Style to All Pages...',
                 'Font Exclusion',
             })
+        )
+        self.assertTrue(
+            hasattr(title_bar, 'apply_text_style_project_trigger')
         )
         self.assertTrue(hasattr(title_bar, 'font_exclusion_trigger'))
         upscale_menu = next(

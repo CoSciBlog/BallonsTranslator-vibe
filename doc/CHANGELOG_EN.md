@@ -1,5 +1,10 @@
 # Changelogs
 
+### 2026-10-11 — 1.5.19+vibe.27
+- Added **Tools → Apply Current Text Style to All Pages...** to replace every project text box's formatting with the currently displayed Global Font Format, including typed effects and text transforms.
+- The confirmed project-wide update preserves source and translated text, box geometry, masks, and images; only per-character rich-text style overrides are replaced.
+- Successful updates save the project with a backup, immediately rebuild the current page, and reset undo history that referenced the superseded styles.
+
 ### 2026-10-11 — 1.5.19+vibe.26
 - Added **Remove Existing Line Breaks...** under **Settings → Typesetting** so previously translated project text can be normalized as well as new pipeline output.
 - The explicit project-wide cleanup removes persisted rich-text paragraphs that could restore old hard breaks, creates a project backup, and resets stale undo history after saving.

@@ -116,7 +116,10 @@ invalidates the saved marker until the next save. History
 clearing preserves unsaved state unless the caller explicitly resets it for a
 page/project replacement. Document owners reset their undo-step baseline when
 Qt clears document history. Whole-style replay suppresses user-edit capture
-while keeping layout and painting live; it must not push nested commands.
+while keeping layout and painting live; it must not push nested commands. The
+explicit project-wide style action applies the same complete Global Font Format
+to persisted blocks, clears only character-level rich-text overrides, and
+preserves text, logical rectangles, masks, and image state.
 Text commands that also modify image pixels mark drawing dirty independently
 on undo and redo; they must not retain commands owned by the drawing stack.
 

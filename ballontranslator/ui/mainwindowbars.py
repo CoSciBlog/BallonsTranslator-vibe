@@ -456,6 +456,14 @@ class TitleBar(Widget):
         fontExclusionAction = QAction(self.tr('Font Exclusion'), self)
         self.font_exclusion_trigger = fontExclusionAction.triggered
 
+        applyTextStyleProjectAction = QAction(
+            self.tr('Apply Current Text Style to All Pages...'),
+            self,
+        )
+        self.apply_text_style_project_trigger = (
+            applyTextStyleProjectAction.triggered
+        )
+
         glossaryAction = QAction(self.tr('Glossary Manager'), self)
         glossaryAction.setShortcut(QKeySequence('Ctrl+Shift+G'))
         self.glossary_trigger = glossaryAction.triggered
@@ -505,6 +513,7 @@ class TitleBar(Widget):
         toolsMenu.addAction(batchProcessingAction)
         toolsMenu.addAction(historyAction)
         toolsMenu.addAction(glossaryAction)
+        toolsMenu.addAction(applyTextStyleProjectAction)
         toolsMenu.addAction(fontExclusionAction)
         self.toolsToolBtn.setMenu(toolsMenu)
         self.toolsToolBtn.setPopupMode(QToolButton.InstantPopup)

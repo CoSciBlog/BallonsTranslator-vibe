@@ -89,6 +89,7 @@ from .text_engine.effects.paint import (
 from .text_engine.pipeline_formatting import (
     AutoTateChuYokoThread,
     apply_auto_tate_chu_yoko,
+    apply_text_style_to_blocks,
 )
 from .framelesswindow import FramelessWindow, FramelessMoveResize
 from .drawing_commands import RunBlkTransCommand
@@ -1239,6 +1240,9 @@ class MainWindow(mainwindow_cls):
         )
         self.titleBar.font_exclusion_trigger.connect(
             self.configPanel.show_font_exclusion_dialog
+        )
+        self.titleBar.apply_text_style_project_trigger.connect(
+            self.apply_current_text_style_to_project
         )
 
         shortcutA = QShortcut(QKeySequence("A"), self)
@@ -3253,6 +3257,71 @@ class MainWindow(mainwindow_cls):
         create_info_dialog(self.tr(
             'Removed line breaks from {count} translation(s).'
         ).format(count=len(changes)))
+
+    def apply_current_text_style_to_project(self) -> None:
+        """Apply the current global format to every project text block."""
+
+        if self.imgtrans_proj.is_empty:
+            create_info_dialog(self.tr('Open a project first.'))
+            return
+
+        self.st_manager.formatpanel.resolve_text_transform_edits_for_save()
+        self.st_manager.updateTextBlkList()
+        blocks = [
+            block
+            for page_blocks in self.imgtrans_proj.pages.values()
+            for block in page_blocks
+        ]
+        if not blocks:
+            create_info_dialog(self.tr('The project contains no text boxes.'))
+            return
+
+        answer = QMessageBox.question(
+            self,
+            self.tr('Apply Text Style to All Pages'),
+            self.tr(
+                'Apply the current global text style to {count} text box(es) '
+                'on all pages? Existing per-character formatting will be '
+                'replaced. Text, box geometry, and images will be preserved. '
+                'The project will be saved with a backup and the current undo '
+                'history will be reset.'
+            ).format(count=len(blocks)),
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
+        if answer != QMessageBox.StandardButton.Yes:
+            return
+
+        style = self.textPanel.formatpanel.global_format.deepcopy()
+        previous = [
+            (block, block.fontformat.deepcopy(), block.rich_text)
+            for block in blocks
+        ]
+        changed_count = apply_text_style_to_blocks(blocks, style)
+        if not changed_count:
+            create_info_dialog(self.tr(
+                'All text boxes already use the current text style.'
+            ))
+            return
+
+        try:
+            self.imgtrans_proj.save(keep_exist_as_backup=True)
+        except Exception as error:
+            for block, fontformat, rich_text in previous:
+                block.fontformat.merge(fontformat)
+                block.rich_text = rich_text
+            self.st_manager.updateSceneTextitems()
+            create_error_dialog(error, self.tr(
+                'Failed to apply the current text style to all pages.'
+            ))
+            return
+
+        self._llm_context_dirty = False
+        self.st_manager.updateSceneTextitems()
+        self.canvas.clear_undostack(update_saved_step=True)
+        create_info_dialog(self.tr(
+            'Applied the current text style to {count} text box(es).'
+        ).format(count=changed_count))
 
     def on_auto_tate_chu_yoko_processing_finished(
         self,
