@@ -13,8 +13,9 @@ from qtpy.QtCore import (
     QRect,
     Qt,
 )
+from qtpy.QtGui import QContextMenuEvent
 from qtpy.QtTest import QTest
-from qtpy.QtWidgets import QApplication
+from qtpy.QtWidgets import QApplication, QMenu
 
 from ballontranslator.ui.text_engine.formatting import presets
 from ballontranslator.utils import config, shared
@@ -128,6 +129,26 @@ class TextStylePresetReorderingTest(unittest.TestCase):
             expected_names,
         )
         save_styles.assert_called_once_with()
+
+    def test_context_menu_inherits_the_panel_theme(self) -> None:
+        panel = self._make_panel('Style 1')
+        event = QContextMenuEvent(
+            QContextMenuEvent.Reason.Mouse,
+            QPoint(4, 4),
+            panel.mapToGlobal(QPoint(4, 4)),
+        )
+        opened_menu = None
+
+        def capture_menu(menu: QMenu, *_args):
+            nonlocal opened_menu
+            opened_menu = menu
+            return None
+
+        with patch.object(QMenu, 'exec_', autospec=True, side_effect=capture_menu):
+            panel.contextMenuEvent(event)
+
+        self.assertIsNotNone(opened_menu)
+        self.assertIs(opened_menu.parentWidget(), panel)
 
 
 if __name__ == '__main__':

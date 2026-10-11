@@ -549,7 +549,9 @@ class TextStylePresetPanel(PanelArea):
             save_text_styles()
 
     def contextMenuEvent(self, e: QContextMenuEvent):
-        menu = QMenu()
+        # The application theme is scoped to the main window. Keep the popup in
+        # this widget tree so QMenu inherits its opaque themed background.
+        menu = QMenu(self)
 
         new_act = menu.addAction(self.tr('New Text Style'))
         removeall_act = menu.addAction(self.tr('Remove all'))

@@ -1,5 +1,9 @@
 # Changelogs
 
+### 2026-10-11 — 1.5.19+vibe.23
+- Fixed the text-style preset context menu inheriting no application theme on Windows, which could leave its frameless popup transparent over the formatting controls.
+- The popup now belongs to the preset panel and therefore retains the configured opaque menu background in both light and dark themes.
+
 ### 2026-10-11 — 1.5.19+vibe.22
 - Added **Two-Step (Google/DeepL + Ollama)** translation: Google Translate, DeepL Free, or DeepL Pro creates the first draft and the selected local Ollama text profile reviews and refines it with the existing context, glossary, retry, and structured-response pipeline.
 - Added a dedicated **Settings → Modules → Translator** page for selecting the first-step provider, entering a DeepL key, configuring request delays, and choosing whether a failed Ollama refinement keeps the machine draft.

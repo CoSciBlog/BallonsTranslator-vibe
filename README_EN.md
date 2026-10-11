@@ -35,7 +35,7 @@
   - Adapted to images with extreme aspect ratio such as webtoons
   
 * Text editing
-  - Supports WYSIWYG rich-text editing and [text style presets](https://github.com/dmMaze/BallonsTranslator/pull/311)
+  - Supports WYSIWYG rich-text editing and [text style presets](https://github.com/dmMaze/BallonsTranslator/pull/311), including a theme-aware preset context menu in both light and dark modes.
   - Supports a rich set of [text effects](https://github.com/dmMaze/BallonsTranslator/pull/1296) and [text transforms](https://github.com/dmMaze/BallonsTranslator/pull/1238)
   - The compact font-format toolbar provides separate foreground and Stroke color pickers. Stroke color changes use the typed effect stack, support multi-selection, and remain undoable without replacing other Stroke settings.
   - Supports find and replace across all text, source text, or translations, and Word document import/export
