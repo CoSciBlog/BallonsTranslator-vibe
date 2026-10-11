@@ -97,6 +97,10 @@ class LeftBar(Widget):
     run_imgtrans_clicked = Signal()
     quick_run_imgtrans_clicked = Signal()
     merge_textboxes_clicked = Signal()
+    reinpaint_current_page_clicked = Signal()
+    glossary_clicked = Signal()
+    pipeline_history_clicked = Signal()
+
     def __init__(self, mainwindow, *args, **kwargs) -> None:
         super().__init__(mainwindow, *args, **kwargs)
         self.mainwindow: QMainWindow = mainwindow
@@ -125,6 +129,53 @@ class LeftBar(Widget):
         self.mergeTextboxesBtn.setAccessibleName(merge_text)
         self.mergeTextboxesBtn.clicked.connect(
             self.merge_textboxes_clicked.emit
+        )
+
+        self.reinpaintCurrentPageBtn = QToolButton(self)
+        self.reinpaintCurrentPageBtn.setObjectName(
+            'LeftBarReinpaintCurrentPageButton'
+        )
+        self.reinpaintCurrentPageBtn.setIcon(
+            QIcon(themed_icon_path('reinpaint_current_page.svg'))
+        )
+        self.reinpaintCurrentPageBtn.setIconSize(QSize(28, 28))
+        self.reinpaintCurrentPageBtn.setFixedSize(
+            LEFTBTN_WIDTH,
+            LEFTBTN_WIDTH,
+        )
+        reinpaint_text = self.tr('Re-run Inpainting Current Page')
+        self.reinpaintCurrentPageBtn.setToolTip(
+            f'{reinpaint_text} (Ctrl+Shift+I)'
+        )
+        self.reinpaintCurrentPageBtn.setAccessibleName(reinpaint_text)
+        self.reinpaintCurrentPageBtn.clicked.connect(
+            self.reinpaint_current_page_clicked.emit
+        )
+
+        self.glossaryBtn = QToolButton(self)
+        self.glossaryBtn.setObjectName('LeftBarGlossaryButton')
+        self.glossaryBtn.setIcon(QIcon(themed_icon_path('glossary.svg')))
+        self.glossaryBtn.setIconSize(QSize(28, 28))
+        self.glossaryBtn.setFixedSize(LEFTBTN_WIDTH, LEFTBTN_WIDTH)
+        glossary_text = self.tr('Glossary Manager')
+        self.glossaryBtn.setToolTip(f'{glossary_text} (Ctrl+Shift+G)')
+        self.glossaryBtn.setAccessibleName(glossary_text)
+        self.glossaryBtn.clicked.connect(self.glossary_clicked.emit)
+
+        self.pipelineHistoryBtn = QToolButton(self)
+        self.pipelineHistoryBtn.setObjectName('LeftBarPipelineHistoryButton')
+        self.pipelineHistoryBtn.setIcon(
+            QIcon(themed_icon_path('pipeline_history.svg'))
+        )
+        self.pipelineHistoryBtn.setIconSize(QSize(28, 28))
+        self.pipelineHistoryBtn.setFixedSize(LEFTBTN_WIDTH, LEFTBTN_WIDTH)
+        history_text = self.tr('Pipeline History')
+        self.pipelineHistoryBtn.setToolTip(
+            f'{history_text} (Ctrl+Shift+H)'
+        )
+        self.pipelineHistoryBtn.setAccessibleName(history_text)
+        self.pipelineHistoryBtn.clicked.connect(
+            self.pipeline_history_clicked.emit
         )
 
         self.configChecker = StateChecker('config', uncheckable=True)
@@ -226,6 +277,9 @@ class LeftBar(Widget):
         vlayout.addWidget(self.showPageListLabel)
         vlayout.addWidget(self.globalSearchChecker)
         vlayout.addWidget(self.mergeTextboxesBtn)
+        vlayout.addWidget(self.reinpaintCurrentPageBtn)
+        vlayout.addWidget(self.glossaryBtn)
+        vlayout.addWidget(self.pipelineHistoryBtn)
         vlayout.addItem(QSpacerItem(0, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
         vlayout.addWidget(self.configChecker)
         vlayout.addWidget(run_buttons)

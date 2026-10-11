@@ -378,6 +378,15 @@ class MainWindow(mainwindow_cls):
         self.leftBar.merge_textboxes_clicked.connect(
             self.merge_selected_textboxes
         )
+        self.leftBar.reinpaint_current_page_clicked.connect(
+            self.rerun_inpainting_current_page
+        )
+        self.leftBar.glossary_clicked.connect(
+            self.on_open_glossary_manager
+        )
+        self.leftBar.pipeline_history_clicked.connect(
+            self.on_open_pipeline_history
+        )
 
         self.pageList = PageListView()
         self.pageList.setObjectName('PageListArea')

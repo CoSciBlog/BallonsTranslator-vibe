@@ -1608,13 +1608,22 @@ class RunPipelineDialogTests(unittest.TestCase):
         dialog_spy = QSignalSpy(bar.run_imgtrans_clicked)
         quick_spy = QSignalSpy(bar.quick_run_imgtrans_clicked)
         merge_spy = QSignalSpy(bar.merge_textboxes_clicked)
+        reinpaint_spy = QSignalSpy(bar.reinpaint_current_page_clicked)
+        glossary_spy = QSignalSpy(bar.glossary_clicked)
+        history_spy = QSignalSpy(bar.pipeline_history_clicked)
 
         bar.quickRunImgtransBtn.click()
         bar.mergeTextboxesBtn.click()
+        bar.reinpaintCurrentPageBtn.click()
+        bar.glossaryBtn.click()
+        bar.pipelineHistoryBtn.click()
 
         self.assertEqual(len(dialog_spy), 0)
         self.assertEqual(len(quick_spy), 1)
         self.assertEqual(len(merge_spy), 1)
+        self.assertEqual(len(reinpaint_spy), 1)
+        self.assertEqual(len(glossary_spy), 1)
+        self.assertEqual(len(history_spy), 1)
         self.assertEqual(
             bar.quickRunImgtransBtn.shortcut().toString(),
             'Ctrl+F5',
@@ -1622,6 +1631,14 @@ class RunPipelineDialogTests(unittest.TestCase):
         self.assertTrue(bar.quickRunImgtransBtn.accessibleName())
         self.assertTrue(bar.mergeTextboxesBtn.accessibleName())
         self.assertFalse(bar.mergeTextboxesBtn.icon().isNull())
+        for button in (
+            bar.reinpaintCurrentPageBtn,
+            bar.glossaryBtn,
+            bar.pipelineHistoryBtn,
+        ):
+            self.assertTrue(button.accessibleName())
+            self.assertTrue(button.toolTip())
+            self.assertFalse(button.icon().isNull())
 
     def test_view_actions_only_control_bottom_bar_visibility(self):
         window = QMainWindow()

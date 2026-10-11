@@ -1,5 +1,10 @@
 # Changelogs
 
+### 2026-10-11 — 1.5.19+vibe.31
+- Added left-sidebar buttons for re-running inpainting on the current page, opening the Glossary Manager, and opening Pipeline History.
+- The shortcuts reuse the existing Tools-menu workflows, including project validation, busy-state protection, pending-edit saves, pipeline history recording, and cached manager windows.
+- Added theme-aware SVG icons, localized labels and tooltips, accessibility names, and signal-level UI regression coverage for all three actions.
+
 ### 2026-10-11 — 1.5.19+vibe.30
 - Added a **Merge Selected Text Boxes** button to the left sidebar. It combines two or more selected regions into one bounding box while preserving their page order.
 - Source text and translations now receive one explicit line break between each original selected box. The merge invalidates geometry-bound rich text and masks safely.

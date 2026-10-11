@@ -1976,7 +1976,10 @@ QToolButton#RunPipelineModuleSelector::menu-indicator {
 
 QToolButton#LeftBarRunButton,
 QToolButton#LeftBarQuickRunButton,
-QToolButton#LeftBarMergeTextboxesButton {
+QToolButton#LeftBarMergeTextboxesButton,
+QToolButton#LeftBarReinpaintCurrentPageButton,
+QToolButton#LeftBarGlossaryButton,
+QToolButton#LeftBarPipelineHistoryButton {
     border: none;
     border-radius: 7px;
     background-color: rgba(0, 0, 0, 0);
@@ -1984,14 +1987,20 @@ QToolButton#LeftBarMergeTextboxesButton {
 
 QToolButton#LeftBarRunButton:hover,
 QToolButton#LeftBarQuickRunButton:hover,
-QToolButton#LeftBarMergeTextboxesButton:hover {
+QToolButton#LeftBarMergeTextboxesButton:hover,
+QToolButton#LeftBarReinpaintCurrentPageButton:hover,
+QToolButton#LeftBarGlossaryButton:hover,
+QToolButton#LeftBarPipelineHistoryButton:hover {
     border: none;
     background-color: rgba(14, 170, 205, 20%);
 }
 
 QToolButton#LeftBarRunButton:pressed,
 QToolButton#LeftBarQuickRunButton:pressed,
-QToolButton#LeftBarMergeTextboxesButton:pressed {
+QToolButton#LeftBarMergeTextboxesButton:pressed,
+QToolButton#LeftBarReinpaintCurrentPageButton:pressed,
+QToolButton#LeftBarGlossaryButton:pressed,
+QToolButton#LeftBarPipelineHistoryButton:pressed {
     border: none;
     background-color: rgba(14, 170, 205, 32%);
 }
