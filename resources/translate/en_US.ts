@@ -3510,8 +3510,8 @@
     </message>
     <message>
         <location filename="../../ballontranslator/ui/mainwindow.py" line="2371"/>
-        <source>Select at least two text boxes in text editing mode.</source>
-        <translation>Select at least two text boxes in text editing mode.</translation>
+        <source>Select at least two nearby text boxes in text editing mode.</source>
+        <translation>Select at least two nearby text boxes in text editing mode.</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/mainwindow.py" line="2395"/>

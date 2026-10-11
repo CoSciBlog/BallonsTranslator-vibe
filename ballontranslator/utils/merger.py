@@ -45,6 +45,80 @@ def _join_translations(
     return result
 
 
+def _box_edge_distance(box1: List[float], box2: List[float]) -> float:
+    """Return the shortest distance between two axis-aligned rectangles.
+
+    >>> _box_edge_distance([0, 0, 10, 10], [13, 14, 20, 20])
+    5.0
+    >>> _box_edge_distance([0, 0, 10, 10], [5, 5, 15, 15])
+    0.0
+    """
+
+    gap_x = max(0.0, max(box1[0], box2[0]) - min(box1[2], box2[2]))
+    gap_y = max(0.0, max(box1[1], box2[1]) - min(box1[3], box2[3]))
+    return math.hypot(gap_x, gap_y)
+
+
+def _current_shape_box(shape: Mapping[str, object]) -> List[float]:
+    """Prefer the persisted editable rectangle over detector geometry."""
+
+    rect = shape.get('_bounding_rect')
+    if isinstance(rect, (list, tuple)) and len(rect) == 4:
+        x, y, width, height = (float(value) for value in rect)
+        if width >= 0 and height >= 0:
+            return [x, y, x + width, y + height]
+    return get_bounding_box(shape)
+
+
+def selected_shapes_are_nearby(
+    shapes: List[dict],
+    *,
+    minimum_gap: float = 24.0,
+    size_ratio: float = 0.75,
+) -> bool:
+    """Check that every selected region belongs to one nearby cluster.
+
+    The threshold scales with the selected boxes, so the interaction behaves
+    consistently on original and upscaled comic pages.
+
+    >>> selected_shapes_are_nearby([
+    ...     {'xyxy': [0, 0, 20, 20]}, {'xyxy': [25, 0, 45, 20]},
+    ... ])
+    True
+    >>> selected_shapes_are_nearby([
+    ...     {'xyxy': [0, 0, 20, 20]}, {'xyxy': [200, 0, 220, 20]},
+    ... ])
+    False
+    """
+
+    if len(shapes) < 2:
+        return False
+    boxes = [_current_shape_box(shape) for shape in shapes]
+    diagonals = [
+        math.hypot(max(0.0, box[2] - box[0]), max(0.0, box[3] - box[1]))
+        for box in boxes
+    ]
+    adjacent = [set() for _shape in shapes]
+    for index, box in enumerate(boxes):
+        for other_index in range(index + 1, len(boxes)):
+            threshold = max(
+                minimum_gap,
+                size_ratio * (diagonals[index] + diagonals[other_index]) / 2.0,
+            )
+            if _box_edge_distance(box, boxes[other_index]) <= threshold:
+                adjacent[index].add(other_index)
+                adjacent[other_index].add(index)
+
+    reached = {0}
+    pending = [0]
+    while pending:
+        index = pending.pop()
+        unseen = adjacent[index] - reached
+        reached.update(unseen)
+        pending.extend(unseen)
+    return len(reached) == len(shapes)
+
+
 def cross_product(o, a, b):
     return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
 
@@ -477,23 +551,39 @@ def perform_merge(shapes, mode, config):
 
 def merge_selected_shapes(
     shapes: List[dict],
-    separator: str = '\n',
+    separator: str = '\n\n',
 ) -> Tuple[List[dict], int]:
     """Merge a user-ordered selection into one rectangular text region.
 
-    Selection is explicit intent, so geometric gap and label rules do not
-    filter the supplied regions. Their input order is preserved.
+    The supplied regions must form one nearby cluster. Their input order is
+    preserved, and current editable rectangles replace stale OCR polygons so
+    the merged box stays over the original text boxes.
 
     >>> merged, removed = merge_selected_shapes([
     ...     {'xyxy': [20, 0, 30, 10], 'text': ['A'], 'translation': 'One'},
     ...     {'xyxy': [0, 0, 10, 10], 'text': ['B'], 'translation': 'Two'},
     ... ])
     >>> removed, merged[0]['translation']
-    (1, 'One\\nTwo')
+    (1, 'One\\n\\nTwo')
     """
 
+    if not selected_shapes_are_nearby(shapes):
+        return shapes, 0
+
+    normalized_shapes = []
+    for shape in shapes:
+        normalized = copy.deepcopy(shape)
+        x1, y1, x2, y2 = _current_shape_box(normalized)
+        normalized['xyxy'] = [x1, y1, x2, y2]
+        normalized['_bounding_rect'] = [x1, y1, x2 - x1, y2 - y1]
+        normalized['lines'] = [[
+            [x1, y1], [x2, y1], [x2, y2], [x1, y2],
+        ]]
+        normalized['angle'] = 0.0
+        normalized_shapes.append(normalized)
+
     return perform_merge(
-        shapes,
+        normalized_shapes,
         'HORIZONTAL',
         {
             'FORCE_SINGLE_GROUP': True,

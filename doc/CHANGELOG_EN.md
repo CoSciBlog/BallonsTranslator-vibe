@@ -1,5 +1,10 @@
 # Changelogs
 
+### 2026-10-11 — 1.5.19+vibe.35
+- Sidebar text-box merging now accepts only a connected cluster of nearby regions, using a scale-aware distance threshold to avoid accidental cross-balloon merges.
+- Merged regions use the union of the visible logical boxes instead of stale OCR polygons, preserving their canvas position and saved project geometry through undo/redo.
+- Source and translated content now receive one blank line between each original text box.
+
 ### 2026-10-11 — 1.5.19+vibe.34
 - Added profile-specific **Translate with Google First** controls for text LLM profiles, including source-language auto-detection, request delay, and safe Google-draft fallback.
 - Project translation now completes and saves every Google draft before beginning any LLM refinement; selected-region translation uses the same two-step behavior within its request.

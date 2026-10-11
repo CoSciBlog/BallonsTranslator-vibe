@@ -3540,8 +3540,8 @@ Once you provide the prompt, I will generate the image.  Then, when you want me 
     </message>
     <message>
         <location filename="../../ballontranslator/ui/mainwindow.py" line="2371"/>
-        <source>Select at least two text boxes in text editing mode.</source>
-        <translation>Wählen Sie im Textbearbeitungsmodus mindestens zwei Textboxen aus.</translation>
+        <source>Select at least two nearby text boxes in text editing mode.</source>
+        <translation>Wählen Sie im Textbearbeitungsmodus mindestens zwei nahe beieinanderliegende Textboxen aus.</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/mainwindow.py" line="2395"/>

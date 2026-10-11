@@ -279,6 +279,7 @@ class MergeBlkItemsCommand(QUndoCommand):
             ctrl.pairwidget_list[item.idx] for item in self.blk_items
         ]
         self.merged_block = merged_block
+        self.merged_rect = list(merged_block.bounding_rect())
         self.insert_index = self.blk_items[0].idx
         self.merged_item: Optional[TextBlkItem] = None
         self.merged_pair: Optional[TransPairWidget] = None
@@ -300,6 +301,10 @@ class MergeBlkItemsCommand(QUndoCommand):
 
     def _insert_initial_merged_item(self) -> None:
         self.merged_item = self.ctrl.addTextBlock(self.merged_block)
+        # Constructing the document may auto-grow its logical height to fit
+        # the combined text. Restore the explicit union of the source boxes so
+        # the structural merge does not move or stretch the persisted region.
+        self._restore_merged_geometry()
         self.merged_pair = self.ctrl.pairwidget_list[-1]
         current_index = len(self.ctrl.textblk_item_list) - 1
         if current_index != self.insert_index:
@@ -320,6 +325,18 @@ class MergeBlkItemsCommand(QUndoCommand):
             )
             self.ctrl.updateTextBlkItemIdx()
 
+    def _restore_merged_geometry(self) -> None:
+        layout = self.merged_item.layout
+        signals_were_blocked = layout.blockSignals(True)
+        try:
+            self.merged_item.setRect(
+                self.merged_rect,
+                repaint=False,
+            )
+        finally:
+            layout.blockSignals(signals_were_blocked)
+        self.merged_item.update()
+
     def redo(self) -> None:
         self.ctrl.deleteTextblkItemList(self.blk_items, self.pair_widgets)
         if self.merged_item is None:
@@ -330,6 +347,10 @@ class MergeBlkItemsCommand(QUndoCommand):
                 [self.merged_pair],
             )
         self._select_items([self.merged_item])
+        # Selection projects the merged style into the formatting panel and
+        # can synchronously relayout the document. Reassert the structural
+        # union after that projection so its geometry is deterministic.
+        self._restore_merged_geometry()
         self._refresh_search()
 
     def undo(self) -> None:
@@ -852,7 +873,7 @@ class SceneTextManager(QObject):
             self.canvas.push_undo_command(DeleteBlkItemsCommand(selected_blks, mode, self))
 
     def merge_selected_textboxes(self) -> Optional[TextBlkItem]:
-        """Merge two or more selected items with newline-separated content."""
+        """Merge a nearby selection with blank-line-separated content."""
 
         if not self.canvas.textEditMode():
             return None
@@ -863,14 +884,23 @@ class SceneTextManager(QObject):
         if len(selected) < 2:
             return None
 
+        # Capture what the user selected before pending editor/style commits
+        # can trigger a synchronous document relayout. Content is settled
+        # below, but the structural result must use the visible old boxes.
+        selected_rects = {
+            item: item.absBoundingRect() for item in selected
+        }
         self.formatpanel.resolve_text_transform_edits_for_history_change()
         self.updateTextBlkList()
 
         from ballontranslator.utils.merger import merge_selected_shapes
 
-        merged_shapes, removed_count = merge_selected_shapes([
-            item.blk.to_dict(deep_copy=True) for item in selected
-        ])
+        selected_shapes = []
+        for item in selected:
+            shape = item.blk.to_dict(deep_copy=True)
+            shape['_bounding_rect'] = list(selected_rects[item])
+            selected_shapes.append(shape)
+        merged_shapes, removed_count = merge_selected_shapes(selected_shapes)
         if removed_count != len(selected) - 1 or len(merged_shapes) != 1:
             return None
 

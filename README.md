@@ -36,7 +36,7 @@
   
 * Text editing
   - Supports WYSIWYG rich-text editing and [text style presets](https://github.com/dmMaze/BallonsTranslator/pull/311), including a theme-aware preset context menu in both light and dark modes. The **Text Transform** panel includes a non-destructive `Aa` control that cycles text display through normal, lowercase, and uppercase without replacing the stored translation.
-  - Select two or more nearby text boxes and use the sidebar **Merge Selected Text Boxes** button to combine them into one undoable region. Source and translated content retain the page order, with one line break between each original text box.
+  - Select two or more nearby text boxes and use the sidebar **Merge Selected Text Boxes** button to combine them into one undoable region. Distant selections are rejected, the merged region remains at the union of the visible original boxes, and source and translated content retain page order with one blank line between boxes.
   - The left sidebar also provides direct access to **Re-run Inpainting Current Page**, **Glossary Manager**, and **Pipeline History**, matching the corresponding Tools-menu actions and safeguards.
   - The gear buttons beside the footer module selectors open the corresponding full Settings page for Text Detector, OCR, Inpaint, or Translator. LLM profile editing remains available through the adjacent edit button.
   - Supports a rich set of [text effects](https://github.com/dmMaze/BallonsTranslator/pull/1296) and [text transforms](https://github.com/dmMaze/BallonsTranslator/pull/1238)

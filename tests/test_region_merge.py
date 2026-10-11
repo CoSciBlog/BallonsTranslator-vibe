@@ -46,8 +46,8 @@ class RegionMergeTests(unittest.TestCase):
     def test_selected_merge_preserves_order_and_adds_line_breaks(self):
         shapes = [
             {
-                'xyxy': [100, 0, 120, 20],
-                'lines': [[[100, 0], [120, 0], [120, 20], [100, 20]]],
+                'xyxy': [25, 0, 45, 20],
+                'lines': [[[25, 0], [45, 0], [45, 20], [25, 20]]],
                 'text': ['first source'],
                 'translation': 'First translation',
             },
@@ -65,12 +65,59 @@ class RegionMergeTests(unittest.TestCase):
         self.assertEqual(len(merged), 1)
         self.assertEqual(
             merged[0]['translation'],
-            'First translation\nSecond translation',
+            'First translation\n\nSecond translation',
         )
         self.assertEqual(
             TextBlock(**merged[0]).get_text(),
-            'first source\nsecond source',
+            'first source\n\nsecond source',
         )
+
+    def test_selected_merge_rejects_distant_boxes(self):
+        shapes = [
+            {
+                'xyxy': [0, 0, 20, 20],
+                'text': ['near'],
+                'translation': 'Near',
+            },
+            {
+                'xyxy': [300, 0, 320, 20],
+                'text': ['far'],
+                'translation': 'Far',
+            },
+        ]
+
+        merged, removed = merge_selected_shapes(shapes)
+
+        self.assertEqual(removed, 0)
+        self.assertEqual(merged, shapes)
+
+    def test_selected_merge_uses_current_rectangles_not_stale_ocr_lines(self):
+        shapes = [
+            {
+                'xyxy': [100, 80, 140, 110],
+                '_bounding_rect': [100, 80, 40, 30],
+                'lines': [[[0, 0], [10, 0], [10, 10], [0, 10]]],
+                'text': ['one'],
+                'translation': 'One',
+            },
+            {
+                'xyxy': [145, 85, 180, 115],
+                '_bounding_rect': [145, 85, 35, 30],
+                'lines': [[[20, 0], [30, 0], [30, 10], [20, 10]]],
+                'text': ['two'],
+                'translation': 'Two',
+            },
+        ]
+
+        merged, removed = merge_selected_shapes(shapes)
+
+        self.assertEqual(removed, 1)
+        self.assertEqual(merged[0]['xyxy'], [100.0, 80.0, 180.0, 115.0])
+        self.assertEqual(
+            merged[0]['_bounding_rect'],
+            [100.0, 80.0, 80.0, 35.0],
+        )
+        self.assertEqual(merged[0]['angle'], 0.0)
 
     def test_selected_sidebar_merge_is_undoable(self):
         from qtpy.QtCore import QCoreApplication, QEvent
@@ -131,24 +178,47 @@ class RegionMergeTests(unittest.TestCase):
                 items = [manager.addTextBlock(block) for block in blocks]
                 for item in items:
                     item.setSelected(True)
+                manager.formatpanel.resolve_text_transform_edits_for_history_change()
+                manager.updateTextBlkList()
+                before_rects = [item.absBoundingRect() for item in items]
+                expected_union = [
+                    min(rect[0] for rect in before_rects),
+                    min(rect[1] for rect in before_rects),
+                    max(rect[0] + rect[2] for rect in before_rects)
+                    - min(rect[0] for rect in before_rects),
+                    max(rect[1] + rect[3] for rect in before_rects)
+                    - min(rect[1] for rect in before_rects),
+                ]
 
                 merged_item = manager.merge_selected_textboxes()
 
                 self.assertIsNotNone(merged_item)
+                self.assertEqual(
+                    canvas.text_undo_stack.command(0).merged_rect,
+                    expected_union,
+                )
                 self.assertEqual(len(manager.textblk_item_list), 1)
                 self.assertEqual(
                     merged_item.toPlainText(),
-                    'Translation one\nTranslation two',
+                    'Translation one\n\nTranslation two',
                 )
                 self.assertEqual(
                     manager.pairwidget_list[0].e_source.toPlainText(),
-                    'source one\nsource two',
+                    'source one\n\nsource two',
+                )
+                self.assertEqual(
+                    merged_item.absBoundingRect(),
+                    expected_union,
                 )
                 manager.updateTextBlkList()
                 self.assertEqual(len(project.pages['page.png']), 1)
                 self.assertEqual(
                     project.pages['page.png'][0].translation,
-                    'Translation one\nTranslation two',
+                    'Translation one\n\nTranslation two',
+                )
+                self.assertEqual(
+                    project.pages['page.png'][0].bounding_rect(),
+                    expected_union,
                 )
                 canvas.undo_textedit()
                 self.assertEqual(len(manager.textblk_item_list), 2)
@@ -162,7 +232,7 @@ class RegionMergeTests(unittest.TestCase):
                 self.assertEqual(len(manager.textblk_item_list), 1)
                 self.assertEqual(
                     manager.textblk_item_list[0].toPlainText(),
-                    'Translation one\nTranslation two',
+                    'Translation one\n\nTranslation two',
                 )
                 canvas.clear_undostack(update_saved_step=True)
                 manager.clearSceneTextitems()

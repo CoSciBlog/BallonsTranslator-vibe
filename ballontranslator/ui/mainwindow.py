@@ -2368,7 +2368,7 @@ class MainWindow(mainwindow_cls):
                 self,
                 self.tr('Merge Text Boxes'),
                 self.tr(
-                    'Select at least two text boxes in text editing mode.'
+                    'Select at least two nearby text boxes in text editing mode.'
                 ),
             )
             return
