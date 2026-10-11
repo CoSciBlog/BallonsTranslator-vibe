@@ -51,7 +51,6 @@ from ballontranslator.utils.llm_profiles import (
     THINKING_AUTO,
     THINKING_DISABLED,
     THINKING_LEVEL_OPTIONS,
-    estimate_ollama_memory_gib,
     image_model_choices,
     is_profile_title_url,
     ollama_native_chat_url,
@@ -84,6 +83,10 @@ PROFILE_COMMON_PARAM_DEFS = [
 ]
 PROFILE_MODALITY_PARAM_DEFS = {
     'text': [
+        ('google_first_pass', 'checkbox'),
+        ('google_auto_detect_source', 'checkbox'),
+        ('google_fallback_to_draft', 'checkbox'),
+        ('google_first_pass_delay', 'line_editor'),
         ('thinking_level', 'selector'),
         ('prompt', 'editor'),
     ],
@@ -473,6 +476,10 @@ class ProfileCardWidget(QGroupBox):
             'image_prompt': self.tr('Prompt'),
             'low_vram_mode': self.tr('Low VRAM Mode'),
             'use_glossary': self.tr('Use Glossary for Translation'),
+            'google_first_pass': self.tr('Translate with Google First'),
+            'google_auto_detect_source': self.tr('Google Auto-Detect Source Language'),
+            'google_fallback_to_draft': self.tr('Keep Google Draft If LLM Fails'),
+            'google_first_pass_delay': self.tr('Google Request Delay'),
         }
         self.profile_param_descriptions = {
             'base_url': self.tr('OpenAI-compatible API base URL.'),
@@ -501,6 +508,20 @@ class ProfileCardWidget(QGroupBox):
             'low_vram_mode': self.tr('Preserved compatibility flag for local profiles.'),
             'use_glossary': self.tr(
                 'Include matching project, series, reference, and selected file glossary entries in translation requests.'
+            ),
+            'google_first_pass': self.tr(
+                'Translate every selected page completely with Google Translate '
+                'before the LLM begins reviewing and refining any page.'
+            ),
+            'google_auto_detect_source': self.tr(
+                'Let Google detect the source language instead of using the '
+                'pipeline source-language selection.'
+            ),
+            'google_fallback_to_draft': self.tr(
+                'Keep the saved Google translation when LLM refinement fails.'
+            ),
+            'google_first_pass_delay': self.tr(
+                'Delay after each Google translation request in seconds (0–300).'
             ),
         }
         layout = QVBoxLayout(self)
@@ -828,67 +849,9 @@ class ProfileCardWidget(QGroupBox):
             Qt.AlignmentFlag.AlignLeft,
         )
 
-        self.ollama_memory_card = QFrame(self.details)
-        self.ollama_memory_card.setObjectName('LLMProfileMemoryEstimate')
-        self.ollama_memory_card.setAttribute(
-            Qt.WidgetAttribute.WA_StyledBackground,
-            True,
-        )
-        self.ollama_memory_card.setFixedWidth(LLM_PROMPT_EDITOR_WIDTH)
-        memory_layout = QVBoxLayout(self.ollama_memory_card)
-        memory_layout.setContentsMargins(12, 9, 12, 10)
-        memory_layout.setSpacing(2)
-        memory_header = QHBoxLayout()
-        memory_header.setContentsMargins(0, 0, 0, 0)
-        memory_header.setSpacing(8)
-        self.ollama_memory_title = QLabel(
-            self.tr('Estimated memory'),
-            self.ollama_memory_card,
-        )
-        self.ollama_memory_card.setAccessibleName(
-            self.ollama_memory_title.text()
-        )
-        self.ollama_memory_title.setObjectName('LLMProfileMemoryEstimateTitle')
-        self.ollama_memory_badge = QLabel(
-            self.tr('Approximate'),
-            self.ollama_memory_card,
-        )
-        self.ollama_memory_badge.setObjectName('LLMProfileMemoryEstimateBadge')
-        memory_header.addWidget(self.ollama_memory_title)
-        memory_header.addStretch(1)
-        memory_header.addWidget(self.ollama_memory_badge)
-        memory_layout.addLayout(memory_header)
-        self.ollama_memory_label = QLabel(self.ollama_memory_card)
-        self.ollama_memory_label.setObjectName('LLMProfileMemoryEstimateValue')
-        self.ollama_memory_label.setWordWrap(False)
-        memory_layout.addWidget(self.ollama_memory_label)
-        self.ollama_memory_detail = QLabel(self.ollama_memory_card)
-        self.ollama_memory_detail.setObjectName('LLMProfileMemoryEstimateDetail')
-        self.ollama_memory_detail.setWordWrap(True)
-        memory_layout.addWidget(self.ollama_memory_detail)
-        memory_tooltip = self.tr(
-            'Approximate combined model and context-cache allocation. The '
-            'actual RAM/VRAM split depends on Ollama, GPU offloading, model '
-            'architecture, quantization, and parallel requests.'
-        )
-        self.ollama_memory_card.setToolTip(memory_tooltip)
-        self.ollama_memory_card.setAccessibleDescription(memory_tooltip)
-        self.ollama_memory_label.setToolTip(memory_tooltip)
-        self.ollama_memory_detail.setToolTip(memory_tooltip)
-        # Keep the estimate beside the common Ollama fields instead of below
-        # the prompt editor, where a long wrapped sentence can be overlooked.
-        self.details.layout().insertWidget(
-            1,
-            self.ollama_memory_card,
-            0,
-            Qt.AlignmentFlag.AlignLeft,
-        )
         self._sync_minimum_width_with_content()
         self.details.setVisible(False)
         self.ollama_reasoning_card.hide()
-        self.ollama_memory_card.hide()
-        self.ollama_memory_label.hide()
-        self.ollama_memory_detail.hide()
         self.setActionButtonsVisible(False)
 
         self.model_combo.paramwidget_edited.connect(self.on_model_edited)
@@ -934,6 +897,23 @@ class ProfileCardWidget(QGroupBox):
             glossary_checkbox.blockSignals(True)
             glossary_checkbox.setChecked(bool(self.profile.use_glossary))
             glossary_checkbox.blockSignals(False)
+        for key in (
+            'google_first_pass',
+            'google_auto_detect_source',
+            'google_fallback_to_draft',
+        ):
+            checkbox = self.details.param_widgets.get(key)
+            if checkbox is not None and hasattr(checkbox, 'setChecked'):
+                checkbox.blockSignals(True)
+                checkbox.setChecked(bool(getattr(self.profile, key)))
+                checkbox.blockSignals(False)
+        google_delay_editor = self.details.param_widgets.get(
+            'google_first_pass_delay'
+        )
+        if isinstance(google_delay_editor, QLineEdit):
+            google_delay_editor.blockSignals(True)
+            google_delay_editor.setText(str(self.profile.google_first_pass_delay))
+            google_delay_editor.blockSignals(False)
         context_editor = self.details.param_widgets.get('ollama_context_length')
         if isinstance(context_editor, QLineEdit):
             context_editor.blockSignals(True)
@@ -1157,7 +1137,6 @@ class ProfileCardWidget(QGroupBox):
 
     def setExpanded(self, expanded: bool):
         self.details.setVisible(expanded)
-        self._refreshOllamaMemoryEstimate()
         self._refreshOllamaThinkingCapability()
         self.more_btn.setToolTip(self.tr('Edit'))
         self.more_btn.setIcon(self.edit_icon_active if expanded else self.edit_icon)
@@ -1373,7 +1352,6 @@ class ProfileCardWidget(QGroupBox):
         options = self.profile.model_options
         if value and value not in options:
             options.append(value)
-        self._refreshOllamaMemoryEstimate()
         self.profile_changed.emit()
         self.profile_summary_changed.emit()
 
@@ -1458,7 +1436,6 @@ class ProfileCardWidget(QGroupBox):
         self.model_combo.blockSignals(False)
         self.profile.model = text
         self._invalidateOllamaThinkingCapability()
-        self._refreshOllamaMemoryEstimate()
         if emit_changed:
             self.profile_changed.emit()
             self.profile_summary_changed.emit()
@@ -1648,6 +1625,11 @@ class ProfileCardWidget(QGroupBox):
                 content = float(str(content).strip())
             except (TypeError, ValueError):
                 return
+            if param_key == 'google_first_pass_delay' and not 0 <= content <= 300:
+                editor = self.details.param_widgets.get(param_key)
+                if isinstance(editor, QLineEdit):
+                    editor.setText(str(self.profile.google_first_pass_delay))
+                return
         setattr(self.profile, param_key, content)
         if param_key == 'require_api_key':
             self.refreshConditionalVisibility()
@@ -1659,6 +1641,8 @@ class ProfileCardWidget(QGroupBox):
         elif param_key in ('base_url', 'ollama_context_length'):
             if param_key == 'base_url':
                 self._invalidateOllamaThinkingCapability(force=True)
+            self.refreshConditionalVisibility()
+        elif param_key == 'google_first_pass':
             self.refreshConditionalVisibility()
         self.profile_changed.emit()
         if param_key == 'thinking_level':
@@ -1783,9 +1767,15 @@ class ProfileCardWidget(QGroupBox):
         self.details.setSectionVisible('text', support_text)
         self.details.setSectionVisible('vision', support_vision)
         self.details.setSectionVisible('image', support_image)
+        google_first_pass = support_text and bool(self.profile.google_first_pass)
+        for key in (
+            'google_auto_detect_source',
+            'google_fallback_to_draft',
+            'google_first_pass_delay',
+        ):
+            self.details.setParamVisible(key, google_first_pass)
         self.refreshKeyStatus()
         self._sync_summary_grid()
-        self._refreshOllamaMemoryEstimate()
         self._refreshOllamaThinkingCapability()
         self._sync_minimum_width_with_content()
 
@@ -1935,42 +1925,6 @@ class ProfileCardWidget(QGroupBox):
             return
         self._ollama_thinking_probe = None
         self.ollama_reasoning_detect_btn.setEnabled(bool(self.profile.model))
-
-    def _refreshOllamaMemoryEstimate(self) -> None:
-        is_ollama = bool(ollama_native_chat_url(self.profile))
-        visible = is_ollama and not self.details.isHidden()
-        self.ollama_memory_card.setVisible(visible)
-        self.ollama_memory_label.setVisible(visible)
-        self.ollama_memory_detail.setVisible(visible)
-        if not is_ollama:
-            return
-        context_length = self.profile.ollama_context_length
-        estimate = estimate_ollama_memory_gib(
-            self.profile.model,
-            context_length,
-        )
-        if context_length <= 0:
-            value = self.tr('Ollama default')
-            detail = self.tr(
-                'Set a context length to calculate an estimate.'
-            )
-        elif estimate is None:
-            value = self.tr('Unavailable')
-            detail = self.tr(
-                'The parameter count could not be read from the model name.'
-            )
-        else:
-            value = self.tr('{minimum:.1f}–{maximum:.1f} GiB').format(
-                minimum=estimate[0],
-                maximum=estimate[1],
-            )
-            detail = self.tr(
-                'Combined RAM + VRAM · Context: {context} tokens'
-            ).format(
-                context=f'{context_length:,}'.replace(',', '\u202f'),
-            )
-        self.ollama_memory_label.setText(value)
-        self.ollama_memory_detail.setText(detail)
 
     def refreshKeyStatus(self):
         require_key = bool(self.profile.require_api_key)

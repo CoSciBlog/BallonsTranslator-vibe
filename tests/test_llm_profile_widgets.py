@@ -81,7 +81,7 @@ class LLMProfileModelSelectorTest(unittest.TestCase):
         card.syncFromProfile()
         self.assertTrue(checkbox.isChecked())
 
-    def test_ollama_context_and_memory_estimate_are_profile_scoped(self) -> None:
+    def test_ollama_context_is_profile_scoped(self) -> None:
         profile = default_profile('Ollama')
         profile.model = 'qwen:27b-q3_k_s'
         card = ProfileCardWidget(profile)
@@ -95,22 +95,6 @@ class LLMProfileModelSelectorTest(unittest.TestCase):
         context_editor.editingFinished.emit()
 
         self.assertEqual(profile.ollama_context_length, 32768)
-        self.assertIn('GiB', card.ollama_memory_label.text())
-        self.assertIn('32', card.ollama_memory_detail.text())
-        self.assertIn('Context', card.ollama_memory_detail.text())
-        self.assertIs(card.ollama_memory_card.parentWidget(), card.details)
-        self.assertFalse(card.ollama_memory_label.isHidden())
-
-        profile.ollama_context_length = 0
-        card.syncFromProfile()
-        self.assertEqual(card.ollama_memory_label.text(), 'Ollama default')
-        self.assertIn('context length', card.ollama_memory_detail.text())
-
-        profile.model = 'custom-model'
-        profile.ollama_context_length = 32768
-        card.syncFromProfile()
-        self.assertEqual(card.ollama_memory_label.text(), 'Unavailable')
-        self.assertIn('parameter count', card.ollama_memory_detail.text())
 
         remote = ProfileCardWidget(default_profile('OpenAI'))
         self.addCleanup(remote.deleteLater)
@@ -118,8 +102,28 @@ class LLMProfileModelSelectorTest(unittest.TestCase):
         self.assertFalse(
             remote.details.param_widgets['ollama_context_length'].isVisibleTo(remote)
         )
-        self.assertTrue(remote.ollama_memory_card.isHidden())
-        self.assertTrue(remote.ollama_memory_label.isHidden())
+
+    def test_google_first_pass_profile_controls_reveal_related_settings(self) -> None:
+        profile = LLMProfile(id='google-first', name='Google First')
+        card = ProfileCardWidget(profile)
+        self.addCleanup(card.deleteLater)
+        card.setExpanded(True)
+
+        enabled = card.details.param_widgets['google_first_pass']
+        auto_detect = card.details.param_widgets['google_auto_detect_source']
+        fallback = card.details.param_widgets['google_fallback_to_draft']
+        delay = card.details.param_widgets['google_first_pass_delay']
+        self.assertFalse(enabled.isChecked())
+        self.assertFalse(auto_detect.isVisibleTo(card))
+        self.assertFalse(fallback.isVisibleTo(card))
+        self.assertFalse(delay.isVisibleTo(card))
+
+        enabled.click()
+
+        self.assertTrue(profile.google_first_pass)
+        self.assertTrue(auto_detect.isVisibleTo(card))
+        self.assertTrue(fallback.isVisibleTo(card))
+        self.assertTrue(delay.isVisibleTo(card))
 
     def test_ollama_reasoning_detection_restricts_profile_choices(self) -> None:
         profile = default_profile('Ollama')

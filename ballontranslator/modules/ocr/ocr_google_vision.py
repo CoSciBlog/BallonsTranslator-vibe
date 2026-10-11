@@ -21,7 +21,8 @@ class OCRGoogleVisionAPI(OCRBase):
     params = {
         'api_key': {
             'value': '',
-            'display_name': 'API Key'
+            'display_name': 'API Key',
+            'description': 'Google Cloud Vision API key used to authenticate OCR requests.'
         },
         'language_hints': {
             'value': '',
@@ -30,9 +31,14 @@ class OCRGoogleVisionAPI(OCRBase):
         },
         'proxy': {
             'value': '',
+            'display_name': 'Proxy',
             'description': 'Proxy address (e.g., http(s)://user:password@host:port or socks4/5://user:password@host:port)'
         },
-        'delay': 0.0,
+        'delay': {
+            'value': 0.0,
+            'display_name': 'Request Delay',
+            'description': 'Minimum delay between API requests in seconds.',
+        },
         'newline_handling': {
             'type': 'selector',
             'options': [

@@ -1,5 +1,12 @@
 # Changelogs
 
+### 2026-10-11 — 1.5.19+vibe.34
+- Added profile-specific **Translate with Google First** controls for text LLM profiles, including source-language auto-detection, request delay, and safe Google-draft fallback.
+- Project translation now completes and saves every Google draft before beginning any LLM refinement; selected-region translation uses the same two-step behavior within its request.
+- Removed the approximate Ollama memory-estimate card and its estimation code from LLM profiles.
+- Expanded OCR controls for Manga OCR, Hayai OCR, PaddleOCR-VL Manga, PP-OCRv6, and other providers, with generation, input-size, confidence, batching, and complete localized parameter guidance.
+- Expanded local inpainting controls with OpenCV method/radius, PatchMatch patch size, additional neural-model resolutions through 2560 px, FLUX inference steps, and complete parameter guidance.
+
 ### 2026-10-11 — 1.5.19+vibe.33
 - Extended ComicTextDetector's Detect Size selector with stride-compatible GPU resolutions through 2496 px, including 1536, 1920, 2048, 2304, and 2432 px.
 - Added complete localized labels and explanations for detection resolution, split batching, device behavior, font-size controls, and mask dilation, including performance/VRAM guidance and the fixed 1024 px CPU/ONNX limitation.

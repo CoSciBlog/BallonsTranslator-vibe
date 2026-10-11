@@ -28,7 +28,6 @@ from ballontranslator.utils.llm_profiles import (
     sync_codex_profile,
     image_model_choices,
     image_responses_url,
-    estimate_ollama_memory_gib,
     ollama_native_chat_url,
     ollama_show_url,
     parse_ollama_thinking_capability,
@@ -92,15 +91,6 @@ class CodexProfileConfigTest(unittest.TestCase):
             invalid = LLMProfile(ollama_context_length=-1)
         self.assertEqual(invalid.ollama_context_length, 0)
 
-    def test_ollama_memory_estimate_uses_model_size_quantization_and_context(self) -> None:
-        small = estimate_ollama_memory_gib('qwen:27b-q3_k_s', 8192)
-        large = estimate_ollama_memory_gib('qwen:27b-q3_k_s', 32768)
-        self.assertIsNotNone(small)
-        self.assertIsNotNone(large)
-        self.assertLess(small[0], large[0])
-        self.assertLess(small[1], large[1])
-        self.assertIsNone(estimate_ollama_memory_gib('custom-model', 32768))
-
     def test_glossary_setting_defaults_on_and_roundtrips(self) -> None:
         profile = LLMProfile(id='glossary-profile')
         self.assertTrue(profile.use_glossary)
@@ -108,6 +98,28 @@ class CodexProfileConfigTest(unittest.TestCase):
         restored = LLMProfile(**profile_to_dict(profile))
         self.assertFalse(restored.use_glossary)
         self.assertTrue(LLMProfile(use_glossary='invalid').use_glossary)
+
+    def test_google_first_pass_settings_roundtrip_and_validate(self) -> None:
+        profile = LLMProfile(
+            id='google-first',
+            google_first_pass=True,
+            google_auto_detect_source=False,
+            google_fallback_to_draft=False,
+            google_first_pass_delay=1.5,
+        )
+        restored = LLMProfile(**profile_to_dict(profile))
+        self.assertTrue(restored.google_first_pass)
+        self.assertFalse(restored.google_auto_detect_source)
+        self.assertFalse(restored.google_fallback_to_draft)
+        self.assertEqual(restored.google_first_pass_delay, 1.5)
+
+        with self.assertLogs('BallonTranslator', level='WARNING'):
+            invalid = LLMProfile(
+                google_first_pass='yes',
+                google_first_pass_delay=-1,
+            )
+        self.assertFalse(invalid.google_first_pass)
+        self.assertEqual(invalid.google_first_pass_delay, 0.0)
 
     def test_image_combinations_are_derived_for_gpt_models_and_remain_out_of_saved_options(self) -> None:
         for backend in ('openai', 'codex'):

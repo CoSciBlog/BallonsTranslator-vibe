@@ -146,6 +146,11 @@ def _device_selector(not_supported=None):
         'type': 'selector',
         'options': options,
         'value': _preferred_device_value(options),
+        'display_name': 'Device',
+        'description': (
+            'Processing backend. GPU options are usually faster but require '
+            'compatible drivers and memory; CPU is slower and uses system RAM.'
+        ),
         '__device_not_supported': not_supported,
     }
 

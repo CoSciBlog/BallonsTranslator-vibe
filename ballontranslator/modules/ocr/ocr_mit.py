@@ -10,10 +10,17 @@ mit_params = {
         'type': 'selector',
         'options': [8, 16, 24, 32],
         'value': 16,
-        'display_name': 'Chunk Size'
+        'display_name': 'Chunk Size',
+        'description': (
+            'Number of text-line crops recognized together. Larger batches are '
+            'usually faster on a GPU but require more VRAM.'
+        ),
     },
     'device': DEVICE_SELECTOR(not_supported=['privateuseone']),
-    'description': 'OCRMIT48px'
+    'description': (
+        '48-pixel manga text recognizer. Text regions are normalized to line '
+        'crops and processed in configurable batches.'
+    ),
 }
 
 MIT_DEPENDENCIES = ['torch', 'einops']

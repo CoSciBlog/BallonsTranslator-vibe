@@ -154,7 +154,11 @@ class OCRLensAPI_exp(OCRBase):
     dependencies = ['betterproto']
 
     params = {
-        "delay": 1.5,
+        "delay": {
+            "value": 1.5,
+            "display_name": "Request Delay",
+            "description": "Minimum delay between Google Lens requests in seconds.",
+        },
         "newline_handling": {
             "type": "selector",
             "options": ["preserve", "remove"],
@@ -175,6 +179,7 @@ class OCRLensAPI_exp(OCRBase):
         },
         "proxy": {
             "value": "",
+            "display_name": "Proxy",
             "description": 'Proxy (requests format: e.g., http://user:pass@host:port or {"http": ..., "https": ...})',
         },
         "description": "OCR using Google Lens Protobuf API (requests backend)",

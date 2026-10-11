@@ -15,16 +15,31 @@ class OCRPaddleVL(OCRBase):
     params = {
         'server_url': {
             'value': 'http://127.0.0.1:8080/layout-parsing',
-            'display_name': 'Server URL'
+            'display_name': 'Server URL',
+            'description': 'URL of the local PaddleOCR-VL layout-parsing endpoint.',
         },
         'prettifyMarkdown': {
             'type': 'checkbox',
             'value': False,
-            'display_name': 'Prettify Markdown'
+            'display_name': 'Prettify Markdown',
+            'description': 'Ask the service to clean up and format its Markdown response.',
         },
-        'visualize': {'type': 'checkbox', 'value': False},
-        'max retry times': 3,
-        'retry interval': 1.0,
+        'visualize': {
+            'type': 'checkbox',
+            'value': False,
+            'display_name': 'Generate Visualization',
+            'description': 'Ask the service to generate visualization output when supported.',
+        },
+        'max retry times': {
+            'value': 3,
+            'display_name': 'Maximum Retry Attempts',
+            'description': 'Maximum number of requests after temporary service failures.',
+        },
+        'retry interval': {
+            'value': 1.0,
+            'display_name': 'Retry Interval',
+            'description': 'Delay in seconds before retrying a failed request.',
+        },
         'description': 'Locally deployed Paddle OCR-VL service (POST /layout-parsing)'
     }
 

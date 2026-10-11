@@ -1,4 +1,5 @@
 from dataclasses import replace
+import json
 import traceback
 from typing import Dict, List, Optional, Sequence, Tuple, Union, TYPE_CHECKING
 
@@ -61,7 +62,8 @@ from ..llm_chat import (
     openai_json_response_format,
 )
 from ..llm_vision import EncodedChatImage, encode_chat_image
-from .base import BaseTranslator, register_translator
+from .base import BaseTranslator, postprocess_translation_text, register_translator
+from .trans_google import GoogleTranslateProviderPython, ProviderError
 from .llm_translation_contract import (
     InvalidNumTranslations,
     TranslationPromptSpec,
@@ -101,6 +103,16 @@ from ballontranslator.utils.textblock import TextBlock
 
 MAX_PAGE_LONG_SIDE = 1536
 PAGE_IMAGE_JPEG_QUALITY = 85
+GOOGLE_FIRST_PASS_REFINEMENT_PROMPT = """You are the review step of a translation pipeline.
+Each input item is JSON with `source` and `draft_translation`. Compare the Google
+Translate draft against the source and return a faithful, natural final translation
+in the requested target language. Preserve tone, names, pronouns, honorifics,
+colloquial speech, formatting, and explicit content. Correct omissions and
+mistranslations. If the draft is already accurate, keep it. Output only the final
+translation for each item; never include JSON fields, explanations, or notes.
+
+Additional profile instructions:
+"""
 
 
 def _uses_explicit_cache(profile: LLMProfile) -> bool:
@@ -186,6 +198,13 @@ class LLMTranslator(LLMChatRequester, BaseTranslator):
                 Dict[str, object],
             ],
         ] = {}
+        self._google_provider = GoogleTranslateProviderPython()
+        self._google_refinement_active = False
+
+    @property
+    def staged_project_translation(self) -> bool:
+        """Run all Google drafts before any LLM request when enabled."""
+        return bool(self.profile.google_first_pass)
 
     @property
     def profile(self) -> LLMProfile:
@@ -196,7 +215,186 @@ class LLMTranslator(LLMChatRequester, BaseTranslator):
         if not profile.support_text:
             raise RuntimeError(f'LLM profile "{profile.name}" does not have text translation enabled.')
         self._text_model(profile)
+        if self._google_refinement_active:
+            profile = replace(
+                profile,
+                prompt=(
+                    GOOGLE_FIRST_PASS_REFINEMENT_PROMPT
+                    + str(profile.prompt or '')
+                ),
+            )
         return profile
+
+    @staticmethod
+    def _google_language(language: str, default: str) -> str:
+        codes = {
+            '简体中文': 'zh-CN', '繁體中文': 'zh-TW', '日本語': 'ja',
+            'English': 'en', '한국어': 'ko', 'Tiếng Việt': 'vi',
+            'čeština': 'cs', 'Nederlands': 'nl', 'Français': 'fr',
+            'Deutsch': 'de', 'magyar nyelv': 'hu', 'Italiano': 'it',
+            'Polski': 'pl', 'Português': 'pt', 'limba română': 'ro',
+            'русский язык': 'ru', 'Español': 'es', 'Türk dili': 'tr',
+            'украї́нська мо́ва': 'uk', 'Thai': 'th', 'Arabic': 'ar',
+            'Hindi': 'hi', 'Malayalam': 'ml', 'Tamil': 'ta',
+        }
+        return codes.get(language, default)
+
+    def _google_first_step(self, source: List[str]) -> List[str]:
+        profile = self.profile
+        response = self._google_provider.translate(
+            source,
+            target_language=self._google_language(self.lang_target, 'en'),
+            source_language=(
+                'auto'
+                if profile.google_auto_detect_source or self.lang_source == 'Auto'
+                else self._google_language(self.lang_source, 'auto')
+            ),
+        )
+        translations = response.get('translations', []) if response else []
+        if len(translations) != len(source):
+            raise ProviderError(
+                'Google returned an unexpected translation count.'
+            )
+        delay = max(0.0, float(profile.google_first_pass_delay))
+        if delay:
+            self._wait(delay)
+        return [str(text or '') for text in translations]
+
+    @staticmethod
+    def _google_review_input(source: str, draft: str) -> str:
+        return json.dumps(
+            {'source': source, 'draft_translation': draft},
+            ensure_ascii=False,
+        )
+
+    def _refine_google_drafts(
+        self,
+        source: List[str],
+        drafts: List[str],
+        *,
+        project: Optional[ProjImgTrans] = None,
+        page_key: Optional[str] = None,
+        commit_history_window: bool = False,
+    ) -> List[str]:
+        review_input = [
+            self._google_review_input(original, draft)
+            for original, draft in zip(source, drafts)
+        ]
+        fallback = bool(self.profile.google_fallback_to_draft)
+        self._google_refinement_active = True
+        try:
+            refined = self.translate(
+                review_input,
+                project=project,
+                page_key=page_key,
+                commit_history_window=commit_history_window,
+            )
+        except LLMRequestStopped:
+            raise
+        except Exception as error:
+            if not fallback:
+                raise
+            self.logger.warning(
+                'LLM refinement failed; keeping Google translations (%s).',
+                type(error).__name__,
+            )
+            refined = drafts
+        finally:
+            self._google_refinement_active = False
+        result = (
+            list(refined)
+            if isinstance(refined, list)
+            else [str(refined or '')]
+        )
+        if fallback:
+            result = [final or draft for final, draft in zip(result, drafts)]
+        return result
+
+    def _apply_google_stage_results(
+        self,
+        textblk_lst: List[TextBlock],
+        non_empty_ids: List[int],
+        translations: List[str],
+        *,
+        full_page: bool,
+        finalize: bool = True,
+    ) -> List[str]:
+        results = list(translations)
+        if finalize:
+            results = [
+                postprocess_translation_text(
+                    translation,
+                    self.lang_source,
+                    self.lang_target,
+                    pcfg.mt_sublist,
+                    letter_case=pcfg.let_letter_case,
+                    convert_to_traditional=self.cht_require_convert,
+                    full_page=full_page,
+                    remove_line_breaks=pcfg.remove_translation_line_breaks,
+                )
+                for translation in results
+            ]
+        for translation, block_index in zip(results, non_empty_ids):
+            textblk_lst[block_index].translation = translation
+        return results
+
+    def translate_first_step_textblk_lst(
+        self,
+        textblk_lst: List[TextBlock],
+        *,
+        project: Optional[ProjImgTrans] = None,
+        page_key: Optional[str] = None,
+        full_page: bool = False,
+    ) -> None:
+        """Save Google drafts for one page without starting the LLM."""
+        del project, page_key
+        _ = self.profile
+        non_empty_ids, sources, _translations = (
+            self._prepare_textblock_sources(textblk_lst)
+        )
+        if not sources:
+            return
+        drafts = self._google_first_step(sources)
+        self._apply_google_stage_results(
+            textblk_lst,
+            non_empty_ids,
+            drafts,
+            full_page=full_page,
+            finalize=False,
+        )
+
+    def refine_textblk_lst(
+        self,
+        textblk_lst: List[TextBlock],
+        *,
+        project: Optional[ProjImgTrans] = None,
+        page_key: Optional[str] = None,
+        full_page: bool = False,
+    ) -> None:
+        """Refine a page after its Google draft has been persisted."""
+        non_empty_ids, sources, _translations = (
+            self._prepare_textblock_sources(textblk_lst)
+        )
+        if not sources:
+            return
+        drafts = [
+            str(textblk_lst[index].translation or '')
+            for index in non_empty_ids
+        ]
+        refined = self._refine_google_drafts(
+            sources,
+            drafts,
+            project=project,
+            page_key=page_key,
+            commit_history_window=full_page,
+        )
+        finalized = self._apply_google_stage_results(
+            textblk_lst,
+            non_empty_ids,
+            refined,
+            full_page=full_page,
+        )
+        self._update_project_glossary(project, sources, finalized)
 
     @staticmethod
     def _text_model(profile: LLMProfile) -> str:
@@ -241,6 +439,7 @@ class LLMTranslator(LLMChatRequester, BaseTranslator):
             f'vision={vision_enabled}, '
             f'summary_memory={summary_memory_enabled}, '
             f'overwrite_summary={overwrite_summary}, '
+            f'google_first_pass={bool(profile.google_first_pass)}, '
             f'{output_limit}'
             f'thinking_setting='
             f'{str(profile.thinking_level or THINKING_AUTO)!r}, '
@@ -344,6 +543,22 @@ class LLMTranslator(LLMChatRequester, BaseTranslator):
         >>> LLMTranslator('日本語', '简体中文').translate([])
         []
         """
+        if (
+            not self._google_refinement_active
+            and not text_is_empty(text)
+            and self.profile.google_first_pass
+        ):
+            is_list = isinstance(text, list)
+            source = list(text) if is_list else [str(text)]
+            drafts = self._google_first_step(source)
+            refined = self._refine_google_drafts(
+                source,
+                drafts,
+                project=project,
+                page_key=page_key,
+                commit_history_window=commit_history_window,
+            )
+            return refined if is_list else refined[0]
         vision_enabled = bool(pcfg.module.llm_translate_vision)
         summary_memory_enabled = bool(pcfg.module.llm_translate_summary_memory)
         empty_page_summary = (

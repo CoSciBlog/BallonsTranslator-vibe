@@ -159,6 +159,50 @@ class TwoStepTranslatorTest(unittest.TestCase):
         self.assertEqual(result, ['Hello'])
         llm_translate.assert_not_called()
 
+    def test_profile_google_first_pass_stages_draft_then_llm_refinement(self) -> None:
+        self.ollama_profile.google_first_pass = True
+        self.ollama_profile.google_fallback_to_draft = True
+        translator = LLMTranslator(
+            '日本語',
+            'English',
+            **deepcopy(LLMTranslator.params),
+        )
+        translator._google_first_step = mock.Mock(return_value=['Google draft'])
+        block = TextBlock(text=['原文'])
+
+        self.assertTrue(translator.staged_project_translation)
+        translator.translate_first_step_textblk_lst(
+            [block],
+            page_key='001.png',
+            full_page=True,
+        )
+        self.assertEqual(block.translation, 'Google draft')
+
+        with (
+            mock.patch.object(
+                translator,
+                'translate',
+                return_value=['Natural refinement'],
+            ) as llm_translate,
+            mock.patch(
+                'ballontranslator.modules.translators.trans_llm.'
+                'postprocess_translation_text',
+                side_effect=lambda text, *_args, **_kwargs: text,
+            ),
+        ):
+            translator.refine_textblk_lst(
+                [block],
+                page_key='001.png',
+                full_page=True,
+            )
+
+        self.assertEqual(block.translation, 'Natural refinement')
+        self.assertEqual(
+            llm_translate.call_args.args[0],
+            ['{"source": "原文", "draft_translation": "Google draft"}'],
+        )
+        self.assertFalse(translator._google_refinement_active)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -28,13 +28,43 @@ def torch_no_grad(func):
 @register_inpainter('opencv-tela')
 class OpenCVInpainter(InpainterBase):
 
+    params = {
+        'method': {
+            'type': 'selector',
+            'options': ['Telea', 'Navier-Stokes'],
+            'value': 'Navier-Stokes',
+            'display_name': 'Inpaint Method',
+            'description': (
+                'Telea is fast and works well for small smooth areas. Navier-Stokes '
+                'better follows surrounding edges and matches the previous default.'
+            ),
+        },
+        'radius': {
+            'type': 'selector',
+            'options': [1, 2, 3, 4, 5, 7, 9],
+            'value': 3,
+            'display_name': 'Inpaint Radius',
+            'description': (
+                'Pixel radius around the mask used to reconstruct the area. Small '
+                'values preserve detail; larger values blend a wider neighborhood.'
+            ),
+        },
+        'description': (
+            'Fast CPU inpainting from OpenCV. Best for plain speech-bubble backgrounds.'
+        ),
+    }
+
     def __init__(self, **params) -> None:
         super().__init__(**params)
-        self.inpaint_method = lambda img, mask, *args, **kwargs: cv2.inpaint(img, mask, 3, cv2.INPAINT_NS)
         
     
     def _inpaint(self, img: np.ndarray, mask: np.ndarray, textblock_list: List[TextBlock] = None) -> np.ndarray:
-        return self.inpaint_method(img, mask)
+        method = (
+            cv2.INPAINT_TELEA
+            if self.get_param_value('method') == 'Telea'
+            else cv2.INPAINT_NS
+        )
+        return cv2.inpaint(img, mask, int(self.get_param_value('radius')), method)
 
     def is_computational_intensive(self) -> bool:
         return True
@@ -45,6 +75,22 @@ class OpenCVInpainter(InpainterBase):
 
 @register_inpainter('patchmatch')
 class PatchmatchInpainter(InpainterBase):
+
+    params = {
+        'patch_size': {
+            'type': 'selector',
+            'options': [3, 5, 7, 9, 11, 15],
+            'value': 3,
+            'display_name': 'Patch Size',
+            'description': (
+                'Size of texture patches copied into masked areas. Small patches '
+                'preserve fine screentones; larger patches can reconstruct broader patterns.'
+            ),
+        },
+        'description': (
+            'Texture-aware CPU inpainting that copies matching image patches into masked areas.'
+        ),
+    }
 
     if sys.platform == 'darwin':
         download_file_list = [{
@@ -68,10 +114,14 @@ class PatchmatchInpainter(InpainterBase):
     def __init__(self, **params) -> None:
         super().__init__(**params)
         from . import patch_match
-        self.inpaint_method = lambda img, mask, *args, **kwargs: patch_match.inpaint(img, mask, patch_size=3)
+        self.inpaint_method = patch_match.inpaint
     
     def _inpaint(self, img: np.ndarray, mask: np.ndarray, textblock_list: List[TextBlock] = None) -> np.ndarray:
-        return self.inpaint_method(img, mask)
+        return self.inpaint_method(
+            img,
+            mask,
+            patch_size=int(self.get_param_value('patch_size')),
+        )
 
     def is_computational_intensive(self) -> bool:
         return True
@@ -89,14 +139,20 @@ class AOTInpainter(InpainterBase):
         'inpaint_size': {
             'type': 'selector',
             'options': [
-                1024, 
-                2048
+                512, 768, 1024, 1280, 1536, 1792, 2048, 2304, 2560,
             ], 
             'value': 2048,
-            'display_name': 'Inpaint Size'
+            'display_name': 'Inpaint Size',
+            'description': (
+                'Maximum input width or height. Higher values retain more detail but '
+                'increase processing time and VRAM use.'
+            ),
         }, 
         'device': DEVICE_SELECTOR(),
-        'description': 'manga-image-translator inpainter'
+        'description': (
+            'AOT neural inpainter for comic artwork. Suitable for detailed regions '
+            'where simple color filling is insufficient.'
+        ),
     }
 
     device = DEFAULT_DEVICE
@@ -196,13 +252,20 @@ class LamaInpainterMPE(InpainterBase):
         'inpaint_size': {
             'type': 'selector',
             'options': [
-                1024, 
-                2048
+                512, 768, 1024, 1280, 1536, 1792, 2048, 2304, 2560,
             ], 
             'value': 2048,
-            'display_name': 'Inpaint Size'
+            'display_name': 'Inpaint Size',
+            'description': (
+                'Maximum input width or height. Higher values preserve detail but '
+                'require more processing time and VRAM.'
+            ),
         },
-        'device': DEVICE_SELECTOR(not_supported=['privateuseone'])
+        'device': DEVICE_SELECTOR(not_supported=['privateuseone']),
+        'description': (
+            'LaMa with mask-position encoding for reconstructing comic backgrounds '
+            'and structured artwork.'
+        ),
     }
 
     download_file_list = [{
@@ -335,11 +398,19 @@ class LamaLarge(LamaInpainterMPE):
                 512,
                 768,
                 1024,
+                1280,
                 1536, 
-                2048
+                1792,
+                2048,
+                2304,
+                2560,
             ], 
             'value': 1536,
-            'display_name': 'Inpaint Size'
+            'display_name': 'Inpaint Size',
+            'description': (
+                'Maximum input width or height. Higher values preserve small lines '
+                'and screentones but use substantially more VRAM.'
+            ),
         },
         'device': DEVICE_SELECTOR(not_supported=['privateuseone']),
         'precision': {
@@ -348,8 +419,16 @@ class LamaLarge(LamaInpainterMPE):
                 'fp32',
                 'bf16'
             ], 
-            'value': 'bf16' if BF16_SUPPORTED == 'cuda' else 'fp32'
-        }, 
+            'value': 'bf16' if BF16_SUPPORTED == 'cuda' else 'fp32',
+            'display_name': 'Precision',
+            'description': (
+                'BF16 reduces CUDA memory use and is faster on supported GPUs. '
+                'Use FP32 for maximum compatibility or if BF16 produces errors.'
+            ),
+        },
+        'description': (
+            'Large LaMa model tuned for anime and manga image inpainting.'
+        ),
     }
 
     download_file_list = [{
@@ -394,7 +473,9 @@ class Flux2Klein(InpainterBase):
             'options': [
                 '4b-Q4_K_M', 
             ], 
-            'value': '4b-Q4_K_M'
+            'value': '4b-Q4_K_M',
+            'display_name': 'Model',
+            'description': 'Quantized FLUX.2 Klein model used for generative inpainting.',
         },
         'max_resolution': {
             'type': 'selector',
@@ -404,13 +485,30 @@ class Flux2Klein(InpainterBase):
                 1024,
                 1280,
                 1536,
-                2048
+                2048,
+                2560,
             ], 
             'value': 1024,
-            'display_name': 'Max Resolution'
+            'display_name': 'Maximum Resolution',
+            'description': (
+                'Maximum input width or height. Larger images retain detail but '
+                'consume considerably more VRAM and processing time.'
+            ),
         }, 
         'device': DEVICE_SELECTOR(),
-        'step': 8
+        'step': {
+            'type': 'selector',
+            'options': [4, 6, 8, 12, 16, 20],
+            'value': 8,
+            'display_name': 'Inference Steps',
+            'description': (
+                'Number of diffusion passes. More steps can improve difficult fills '
+                'but increase processing time.'
+            ),
+        },
+        'description': (
+            'Generative FLUX.2 Klein inpainter for complex artwork and large missing areas.'
+        ),
     }
     inpaint_by_block = False
 

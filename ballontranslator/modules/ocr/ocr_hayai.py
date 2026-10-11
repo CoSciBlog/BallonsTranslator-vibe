@@ -36,6 +36,26 @@ class HayaiOCRV2(OCRBase):
                 "for dense panels."
             ),
         },
+        "max_new_tokens": {
+            "type": "selector",
+            "options": [64, 128, 256, 512],
+            "value": 128,
+            "display_name": "Maximum Output Tokens",
+            "description": (
+                "Maximum generated text length for one crop. Increase only for "
+                "very long or dense text regions."
+            ),
+        },
+        "repetition_penalty": {
+            "type": "selector",
+            "options": [1.0, 1.05, 1.1, 1.2],
+            "value": 1.0,
+            "display_name": "Repetition Penalty",
+            "description": (
+                "Discourages repeated output. Keep 1.0 unless the model repeats "
+                "characters or phrases."
+            ),
+        },
         "device": DEVICE_SELECTOR(),
         "description": "Hayai OCR v2 crop recognition model.",
     }
@@ -115,8 +135,8 @@ class HayaiOCRV2(OCRBase):
                 pixel_attention_mask=inputs["pixel_attention_mask"],
                 spatial_shapes=inputs["spatial_shapes"],
                 tokenizer=self.tokenizer,
-                max_new_tokens=128,
-                repetition_penalty=1.0,
+                max_new_tokens=int(self.get_param_value("max_new_tokens")),
+                repetition_penalty=float(self.get_param_value("repetition_penalty")),
             )
         return texts[0]
 

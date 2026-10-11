@@ -256,9 +256,21 @@ class PaddleOCRv6ONNX(OCRBase):
     params = {
         "device": DEVICE_SELECTOR(not_supported=['privateuseone']),
         "rec_batch_num": {
+            "type": "selector",
+            "options": [1, 2, 4, 6, 8, 12, 16],
             "value": 6,
             "description": "Recognition batch size (higher = faster, more VRAM)",
             "display_name": "Recognition Batch Size",
+        },
+        "confidence_threshold": {
+            "type": "selector",
+            "options": [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8],
+            "value": 0.3,
+            "description": (
+                "Discard recognized lines below this confidence. Lower values keep "
+                "more uncertain text; higher values reduce false positives."
+            ),
+            "display_name": "Confidence Threshold",
         },
         "description": "PP-OCRv6 ONNX recognition-only — crops text blocks then recognizes via ONNX Runtime",
     }
@@ -497,7 +509,7 @@ class PaddleOCRv6ONNX(OCRBase):
         for i, blk_idx in enumerate(crop_to_blk):
             if i < len(rec_results):
                 text, score = rec_results[i]
-                if text and score >= 0.3:
+                if text and score >= float(self.get_param_value("confidence_threshold")):
                     block_texts[blk_idx].append(text)
 
         for blk_idx, texts in enumerate(block_texts):

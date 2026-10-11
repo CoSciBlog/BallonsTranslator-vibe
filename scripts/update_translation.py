@@ -168,7 +168,7 @@ def run_lupdate(program_dir: Path, translate_path: Path) -> None:
         raise SystemExit('No Python-capable Qt lupdate executable was found.')
     command = [
         lupdate,
-        '--no-obsolete',
+        '-no-obsolete',
         *_ui_python_files(program_dir),
         '-ts',
         str(translate_path),

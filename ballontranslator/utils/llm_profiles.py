@@ -228,6 +228,10 @@ class LLMProfile(Config):
     use_glossary: bool = True
     json_schema_response_format: bool = False
     low_vram_mode: bool = False
+    google_first_pass: bool = False
+    google_auto_detect_source: bool = True
+    google_fallback_to_draft: bool = True
+    google_first_pass_delay: float = 0.0
 
     def __post_init__(self) -> None:
         if (
@@ -244,6 +248,30 @@ class LLMProfile(Config):
         if not isinstance(self.use_glossary, bool):
             LOGGER.warning('Discard invalid LLM profile use_glossary for %s.', self.id or self.name)
             self.use_glossary = True
+        for key, default in (
+            ('google_first_pass', False),
+            ('google_auto_detect_source', True),
+            ('google_fallback_to_draft', True),
+        ):
+            if not isinstance(getattr(self, key), bool):
+                LOGGER.warning(
+                    'Discard invalid LLM profile %s for %s.',
+                    key,
+                    self.id or self.name,
+                )
+                setattr(self, key, default)
+        if (
+            not isinstance(self.google_first_pass_delay, (int, float))
+            or isinstance(self.google_first_pass_delay, bool)
+            or not 0 <= self.google_first_pass_delay <= 300
+        ):
+            LOGGER.warning(
+                'Discard invalid LLM profile google_first_pass_delay for %s.',
+                self.id or self.name,
+            )
+            self.google_first_pass_delay = 0.0
+        else:
+            self.google_first_pass_delay = float(self.google_first_pass_delay)
         if not isinstance(self.ollama_thinking_model, str):
             LOGGER.warning(
                 'Discard invalid Ollama thinking model for %s.',
@@ -418,62 +446,6 @@ def parse_ollama_thinking_capability(payload: Any) -> OllamaThinkingCapability:
     if default not in normalized:
         default = ''
     return OllamaThinkingCapability(True, tuple(options), default)
-
-
-def estimate_ollama_memory_gib(
-    model: str,
-    context_length: int,
-) -> Optional[Tuple[float, float]]:
-    """Estimate combined model and KV-cache memory from an Ollama model tag.
-
-    The deliberately broad range accounts for architecture-specific grouped
-    query attention and runtime overhead. It predicts combined allocation, not
-    the RAM/VRAM split selected by Ollama.
-
-    >>> estimate_ollama_memory_gib('example:27b-q3_k_s', 32768)
-    (19.8, 33.0)
-    >>> estimate_ollama_memory_gib('model-without-size', 32768) is None
-    True
-    """
-    if not isinstance(context_length, int) or context_length <= 0:
-        return None
-    text = str(model or '')
-    size_matches = list(re.finditer(
-        r'(?<![A-Za-z0-9])(\d+(?:\.\d+)?)\s*[bB](?![A-Za-z])',
-        text,
-    ))
-    if not size_matches:
-        return None
-    parameters_billion = float(size_matches[-1].group(1))
-    if parameters_billion <= 0 or parameters_billion > 1000:
-        return None
-
-    quant_match = re.search(r'(?i)(?:^|[:_-])q([2-8])(?:_[a-z0-9]+)*', text)
-    if quant_match:
-        bits = {
-            2: 2.8,
-            3: 3.5,
-            4: 4.5,
-            5: 5.5,
-            6: 6.5,
-            7: 7.5,
-            8: 8.5,
-        }[int(quant_match.group(1))]
-    elif re.search(r'(?i)(?:^|[:_-])(?:f16|fp16|bf16)(?:$|[:_-])', text):
-        bits = 16.0
-    else:
-        # Most default Ollama library tags are weight-quantized even when the
-        # quantization is omitted from the visible tag.
-        bits = 4.5
-
-    weight_gib = parameters_billion * bits / 8.0
-    context_k = context_length / 1024.0
-    kv_low = parameters_billion * context_k * 0.008
-    kv_high = parameters_billion * context_k * 0.020
-    return (
-        round(weight_gib * 1.05 + kv_low + 0.5, 1),
-        round(weight_gib * 1.20 + kv_high + 1.5, 1),
-    )
 
 
 def split_image_model_selection(value: str) -> Tuple[str, str]:

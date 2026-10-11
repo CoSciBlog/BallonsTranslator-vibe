@@ -10,10 +10,18 @@ from .base import OCRBase, register_OCR, DEFAULT_DEVICE, DEVICE_SELECTOR, TextBl
 
 MANGA_OCR_PATH = r'data/models/manga-ocr-base'
 class MangaOcr:
-    def __init__(self, pretrained_model_name_or_path=MANGA_OCR_PATH, device='cpu'):
+    def __init__(
+        self,
+        pretrained_model_name_or_path=MANGA_OCR_PATH,
+        device='cpu',
+        max_new_tokens=300,
+        num_beams=1,
+    ):
         self.feature_extractor = AutoFeatureExtractor.from_pretrained(pretrained_model_name_or_path)
         self.tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path)
         self.model = VisionEncoderDecoderModel.from_pretrained(pretrained_model_name_or_path)
+        self.max_new_tokens = max_new_tokens
+        self.num_beams = num_beams
         self.to(device)
         
     def to(self, device):
@@ -22,7 +30,11 @@ class MangaOcr:
     @torch.no_grad()
     def __call__(self, img: np.ndarray):
         x = self.feature_extractor(img, return_tensors="pt").pixel_values.squeeze()
-        x = self.model.generate(x[None].to(self.model.device))[0].cpu()
+        x = self.model.generate(
+            x[None].to(self.model.device),
+            max_new_tokens=self.max_new_tokens,
+            num_beams=self.num_beams,
+        )[0].cpu()
         x = self.tokenizer.decode(x, skip_special_tokens=True)
         x = post_process(x)
         return x
@@ -42,7 +54,31 @@ class MangaOCR(OCRBase):
     dependencies = ['torch', 'transformers==4.57.6', 'jaconv', 'fugashi', 'unidic-lite']
 
     params = {
-        'device': DEVICE_SELECTOR()
+        'device': DEVICE_SELECTOR(),
+        'max_new_tokens': {
+            'type': 'selector',
+            'options': [64, 128, 192, 256, 300],
+            'value': 300,
+            'display_name': 'Maximum Output Tokens',
+            'description': (
+                'Maximum number of characters/tokens generated for one text '
+                'crop. Lower values are faster; raise this for unusually long text.'
+            ),
+        },
+        'num_beams': {
+            'type': 'selector',
+            'options': [1, 2, 4, 6],
+            'value': 1,
+            'display_name': 'Beam Search Width',
+            'description': (
+                'Number of candidate sequences considered during recognition. '
+                'Values above 1 can improve difficult text but are slower and use more memory.'
+            ),
+        },
+        'description': (
+            'Japanese manga OCR for cropped text regions. Best suited to Japanese '
+            'printed and handwritten-style comic text.'
+        ),
     }
     device = DEFAULT_DEVICE
 
@@ -62,7 +98,11 @@ class MangaOCR(OCRBase):
 
     def _load_model(self):
         if self.model is None:
-            self.model = MangaOcr(device=self.device)
+            self.model = MangaOcr(
+                device=self.device,
+                max_new_tokens=int(self.get_param_value('max_new_tokens')),
+                num_beams=int(self.get_param_value('num_beams')),
+            )
 
     def ocr_img(self, img: np.ndarray, **kwargs) -> str:
         return self.model(img)
@@ -72,3 +112,9 @@ class MangaOCR(OCRBase):
         device = self.params['device']['value']
         if self.device != device and self.model is not None:
             self.model.to(device)
+        self.device = device
+        if self.model is not None:
+            if param_key == 'max_new_tokens':
+                self.model.max_new_tokens = int(self.get_param_value(param_key))
+            elif param_key == 'num_beams':
+                self.model.num_beams = int(self.get_param_value(param_key))

@@ -56,40 +56,106 @@ MODULE_PARAM_CATALOG = {
         "source": 'Retry Timeout', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Retry Timeout'),
     },
     ('inpainter', 'aot', '', 'description'): {
-        "source": 'manga-image-translator inpainter', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'manga-image-translator inpainter'),
+        "source": 'AOT neural inpainter for comic artwork. Suitable for detailed regions where simple color filling is insufficient.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'AOT neural inpainter for comic artwork. Suitable for detailed regions where simple color filling is insufficient.'),
+    },
+    ('inpainter', 'aot', 'device', 'description'): {
+        "source": 'Processing backend. GPU options are usually faster but require compatible drivers and memory; CPU is slower and uses system RAM.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Processing backend. GPU options are usually faster but require compatible drivers and memory; CPU is slower and uses system RAM.'),
     },
     ('inpainter', 'aot', 'device', 'display_name'): {
-        "source": 'device', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'device'),
+        "source": 'Device', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Device'),
+    },
+    ('inpainter', 'aot', 'inpaint_size', 'description'): {
+        "source": 'Maximum input width or height. Higher values retain more detail but increase processing time and VRAM use.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Maximum input width or height. Higher values retain more detail but increase processing time and VRAM use.'),
     },
     ('inpainter', 'aot', 'inpaint_size', 'display_name'): {
         "source": 'Inpaint Size', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Inpaint Size'),
     },
+    ('inpainter', 'flux2-klein', '', 'description'): {
+        "source": 'Generative FLUX.2 Klein inpainter for complex artwork and large missing areas.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Generative FLUX.2 Klein inpainter for complex artwork and large missing areas.'),
+    },
+    ('inpainter', 'flux2-klein', 'device', 'description'): {
+        "source": 'Processing backend. GPU options are usually faster but require compatible drivers and memory; CPU is slower and uses system RAM.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Processing backend. GPU options are usually faster but require compatible drivers and memory; CPU is slower and uses system RAM.'),
+    },
     ('inpainter', 'flux2-klein', 'device', 'display_name'): {
-        "source": 'device', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'device'),
+        "source": 'Device', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Device'),
+    },
+    ('inpainter', 'flux2-klein', 'max_resolution', 'description'): {
+        "source": 'Maximum input width or height. Larger images retain detail but consume considerably more VRAM and processing time.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Maximum input width or height. Larger images retain detail but consume considerably more VRAM and processing time.'),
     },
     ('inpainter', 'flux2-klein', 'max_resolution', 'display_name'): {
-        "source": 'Max Resolution', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Max Resolution'),
+        "source": 'Maximum Resolution', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Maximum Resolution'),
+    },
+    ('inpainter', 'flux2-klein', 'model', 'description'): {
+        "source": 'Quantized FLUX.2 Klein model used for generative inpainting.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Quantized FLUX.2 Klein model used for generative inpainting.'),
     },
     ('inpainter', 'flux2-klein', 'model', 'display_name'): {
-        "source": 'model', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'model'),
+        "source": 'Model', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Model'),
+    },
+    ('inpainter', 'flux2-klein', 'step', 'description'): {
+        "source": 'Number of diffusion passes. More steps can improve difficult fills but increase processing time.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Number of diffusion passes. More steps can improve difficult fills but increase processing time.'),
     },
     ('inpainter', 'flux2-klein', 'step', 'display_name'): {
-        "source": 'step', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'step'),
+        "source": 'Inference Steps', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Inference Steps'),
+    },
+    ('inpainter', 'lama_large_512px', '', 'description'): {
+        "source": 'Large LaMa model tuned for anime and manga image inpainting.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Large LaMa model tuned for anime and manga image inpainting.'),
+    },
+    ('inpainter', 'lama_large_512px', 'device', 'description'): {
+        "source": 'Processing backend. GPU options are usually faster but require compatible drivers and memory; CPU is slower and uses system RAM.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Processing backend. GPU options are usually faster but require compatible drivers and memory; CPU is slower and uses system RAM.'),
     },
     ('inpainter', 'lama_large_512px', 'device', 'display_name'): {
-        "source": 'device', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'device'),
+        "source": 'Device', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Device'),
+    },
+    ('inpainter', 'lama_large_512px', 'inpaint_size', 'description'): {
+        "source": 'Maximum input width or height. Higher values preserve small lines and screentones but use substantially more VRAM.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Maximum input width or height. Higher values preserve small lines and screentones but use substantially more VRAM.'),
     },
     ('inpainter', 'lama_large_512px', 'inpaint_size', 'display_name'): {
         "source": 'Inpaint Size', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Inpaint Size'),
     },
+    ('inpainter', 'lama_large_512px', 'precision', 'description'): {
+        "source": 'BF16 reduces CUDA memory use and is faster on supported GPUs. Use FP32 for maximum compatibility or if BF16 produces errors.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'BF16 reduces CUDA memory use and is faster on supported GPUs. Use FP32 for maximum compatibility or if BF16 produces errors.'),
+    },
     ('inpainter', 'lama_large_512px', 'precision', 'display_name'): {
-        "source": 'precision', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'precision'),
+        "source": 'Precision', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Precision'),
+    },
+    ('inpainter', 'lama_mpe', '', 'description'): {
+        "source": 'LaMa with mask-position encoding for reconstructing comic backgrounds and structured artwork.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'LaMa with mask-position encoding for reconstructing comic backgrounds and structured artwork.'),
+    },
+    ('inpainter', 'lama_mpe', 'device', 'description'): {
+        "source": 'Processing backend. GPU options are usually faster but require compatible drivers and memory; CPU is slower and uses system RAM.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Processing backend. GPU options are usually faster but require compatible drivers and memory; CPU is slower and uses system RAM.'),
     },
     ('inpainter', 'lama_mpe', 'device', 'display_name'): {
-        "source": 'device', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'device'),
+        "source": 'Device', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Device'),
+    },
+    ('inpainter', 'lama_mpe', 'inpaint_size', 'description'): {
+        "source": 'Maximum input width or height. Higher values preserve detail but require more processing time and VRAM.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Maximum input width or height. Higher values preserve detail but require more processing time and VRAM.'),
     },
     ('inpainter', 'lama_mpe', 'inpaint_size', 'display_name'): {
         "source": 'Inpaint Size', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Inpaint Size'),
+    },
+    ('inpainter', 'opencv-tela', '', 'description'): {
+        "source": 'Fast CPU inpainting from OpenCV. Best for plain speech-bubble backgrounds.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Fast CPU inpainting from OpenCV. Best for plain speech-bubble backgrounds.'),
+    },
+    ('inpainter', 'opencv-tela', 'method', 'description'): {
+        "source": 'Telea is fast and works well for small smooth areas. Navier-Stokes better follows surrounding edges and matches the previous default.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Telea is fast and works well for small smooth areas. Navier-Stokes better follows surrounding edges and matches the previous default.'),
+    },
+    ('inpainter', 'opencv-tela', 'method', 'display_name'): {
+        "source": 'Inpaint Method', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Inpaint Method'),
+    },
+    ('inpainter', 'opencv-tela', 'radius', 'description'): {
+        "source": 'Pixel radius around the mask used to reconstruct the area. Small values preserve detail; larger values blend a wider neighborhood.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Pixel radius around the mask used to reconstruct the area. Small values preserve detail; larger values blend a wider neighborhood.'),
+    },
+    ('inpainter', 'opencv-tela', 'radius', 'display_name'): {
+        "source": 'Inpaint Radius', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Inpaint Radius'),
+    },
+    ('inpainter', 'patchmatch', '', 'description'): {
+        "source": 'Texture-aware CPU inpainting that copies matching image patches into masked areas.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Texture-aware CPU inpainting that copies matching image patches into masked areas.'),
+    },
+    ('inpainter', 'patchmatch', 'patch_size', 'description'): {
+        "source": 'Size of texture patches copied into masked areas. Small patches preserve fine screentones; larger patches can reconstruct broader patterns.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Size of texture patches copied into masked areas. Small patches preserve fine screentones; larger patches can reconstruct broader patterns.'),
+    },
+    ('inpainter', 'patchmatch', 'patch_size', 'display_name'): {
+        "source": 'Patch Size', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Patch Size'),
     },
     ('ocr', 'LLMOCR', '', 'description'): {
         "source": 'OCR using the selected vision-capable LLM profile.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'OCR using the selected vision-capable LLM profile.'),
@@ -124,11 +190,23 @@ MODULE_PARAM_CATALOG = {
     ('ocr', 'LLMOCR', 'retry timeout', 'display_name'): {
         "source": 'Retry Timeout', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Retry Timeout'),
     },
+    ('ocr', 'PaddleOCRVLManga', '', 'description'): {
+        "source": 'Vision-language OCR specialized for Japanese manga text crops.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Vision-language OCR specialized for Japanese manga text crops.'),
+    },
+    ('ocr', 'PaddleOCRVLManga', 'device', 'description'): {
+        "source": 'Processing backend. GPU options are usually faster but require compatible drivers and memory; CPU is slower and uses system RAM.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Processing backend. GPU options are usually faster but require compatible drivers and memory; CPU is slower and uses system RAM.'),
+    },
     ('ocr', 'PaddleOCRVLManga', 'device', 'display_name'): {
-        "source": 'device', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'device'),
+        "source": 'Device', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Device'),
+    },
+    ('ocr', 'PaddleOCRVLManga', 'max_input_size', 'description'): {
+        "source": 'Maximum width or height sent to the vision model. Higher values preserve small glyphs but require more VRAM.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Maximum width or height sent to the vision model. Higher values preserve small glyphs but require more VRAM.'),
+    },
+    ('ocr', 'PaddleOCRVLManga', 'max_input_size', 'display_name'): {
+        "source": 'Maximum Input Size', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Maximum Input Size'),
     },
     ('ocr', 'PaddleOCRVLManga', 'max_new_tokens', 'description'): {
-        "source": 'Max generation tokens', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Max generation tokens'),
+        "source": 'Maximum generated text length for one crop. Larger values allow longer passages but take more time and memory.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Maximum generated text length for one crop. Larger values allow longer passages but take more time and memory.'),
     },
     ('ocr', 'PaddleOCRVLManga', 'max_new_tokens', 'display_name'): {
         "source": 'Max New Tokens', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Max New Tokens'),
@@ -136,8 +214,11 @@ MODULE_PARAM_CATALOG = {
     ('ocr', 'google_lens_exp', '', 'description'): {
         "source": 'OCR using Google Lens Protobuf API (requests backend)', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'OCR using Google Lens Protobuf API (requests backend)'),
     },
+    ('ocr', 'google_lens_exp', 'delay', 'description'): {
+        "source": 'Minimum delay between Google Lens requests in seconds.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Minimum delay between Google Lens requests in seconds.'),
+    },
     ('ocr', 'google_lens_exp', 'delay', 'display_name'): {
-        "source": 'delay', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'delay'),
+        "source": 'Request Delay', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Request Delay'),
     },
     ('ocr', 'google_lens_exp', 'newline_handling', 'description'): {
         "source": 'Handle newline characters in the final OCR string.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Handle newline characters in the final OCR string.'),
@@ -155,7 +236,7 @@ MODULE_PARAM_CATALOG = {
         "source": 'Proxy (requests format: e.g., http://user:pass@host:port or {"http": ..., "https": ...})', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Proxy (requests format: e.g., http://user:pass@host:port or {"http": ..., "https": ...})'),
     },
     ('ocr', 'google_lens_exp', 'proxy', 'display_name'): {
-        "source": 'proxy', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'proxy'),
+        "source": 'Proxy', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Proxy'),
     },
     ('ocr', 'google_lens_exp', 'target_language', 'description'): {
         "source": "Target language code (e.g., 'ja', 'en', 'ru').", "translate": lambda: QCoreApplication.translate('ModuleParamDialog', "Target language code (e.g., 'ja', 'en', 'ru')."),
@@ -181,11 +262,17 @@ MODULE_PARAM_CATALOG = {
     ('ocr', 'google_vision', '', 'description'): {
         "source": 'OCR using Google Vision API', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'OCR using Google Vision API'),
     },
+    ('ocr', 'google_vision', 'api_key', 'description'): {
+        "source": 'Google Cloud Vision API key used to authenticate OCR requests.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Google Cloud Vision API key used to authenticate OCR requests.'),
+    },
     ('ocr', 'google_vision', 'api_key', 'display_name'): {
         "source": 'API Key', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'API Key'),
     },
+    ('ocr', 'google_vision', 'delay', 'description'): {
+        "source": 'Minimum delay between API requests in seconds.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Minimum delay between API requests in seconds.'),
+    },
     ('ocr', 'google_vision', 'delay', 'display_name'): {
-        "source": 'delay', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'delay'),
+        "source": 'Request Delay', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Request Delay'),
     },
     ('ocr', 'google_vision', 'language_hints', 'description'): {
         "source": 'Language codes separated by commas (BCP-47)', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Language codes separated by commas (BCP-47)'),
@@ -209,13 +296,22 @@ MODULE_PARAM_CATALOG = {
         "source": 'Proxy address (e.g., http(s)://user:password@host:port or socks4/5://user:password@host:port)', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Proxy address (e.g., http(s)://user:password@host:port or socks4/5://user:password@host:port)'),
     },
     ('ocr', 'google_vision', 'proxy', 'display_name'): {
-        "source": 'proxy', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'proxy'),
+        "source": 'Proxy', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Proxy'),
     },
     ('ocr', 'hayai_ocr_v2', '', 'description'): {
         "source": 'Hayai OCR v2 crop recognition model.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Hayai OCR v2 crop recognition model.'),
     },
+    ('ocr', 'hayai_ocr_v2', 'device', 'description'): {
+        "source": 'Processing backend. GPU options are usually faster but require compatible drivers and memory; CPU is slower and uses system RAM.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Processing backend. GPU options are usually faster but require compatible drivers and memory; CPU is slower and uses system RAM.'),
+    },
     ('ocr', 'hayai_ocr_v2', 'device', 'display_name'): {
-        "source": 'device', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'device'),
+        "source": 'Device', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Device'),
+    },
+    ('ocr', 'hayai_ocr_v2', 'max_new_tokens', 'description'): {
+        "source": 'Maximum generated text length for one crop. Increase only for very long or dense text regions.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Maximum generated text length for one crop. Increase only for very long or dense text regions.'),
+    },
+    ('ocr', 'hayai_ocr_v2', 'max_new_tokens', 'display_name'): {
+        "source": 'Maximum Output Tokens', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Maximum Output Tokens'),
     },
     ('ocr', 'hayai_ocr_v2', 'max_num_patches', 'description'): {
         "source": 'Maximum image patches. Use 256 for standard lines, or 384/512 for dense panels.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Maximum image patches. Use 256 for standard lines, or 384/512 for dense panels.'),
@@ -223,50 +319,110 @@ MODULE_PARAM_CATALOG = {
     ('ocr', 'hayai_ocr_v2', 'max_num_patches', 'display_name'): {
         "source": 'Max Num Patches', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Max Num Patches'),
     },
+    ('ocr', 'hayai_ocr_v2', 'repetition_penalty', 'description'): {
+        "source": 'Discourages repeated output. Keep 1.0 unless the model repeats characters or phrases.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Discourages repeated output. Keep 1.0 unless the model repeats characters or phrases.'),
+    },
+    ('ocr', 'hayai_ocr_v2', 'repetition_penalty', 'display_name'): {
+        "source": 'Repetition Penalty', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Repetition Penalty'),
+    },
+    ('ocr', 'manga_ocr', '', 'description'): {
+        "source": 'Japanese manga OCR for cropped text regions. Best suited to Japanese printed and handwritten-style comic text.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Japanese manga OCR for cropped text regions. Best suited to Japanese printed and handwritten-style comic text.'),
+    },
+    ('ocr', 'manga_ocr', 'device', 'description'): {
+        "source": 'Processing backend. GPU options are usually faster but require compatible drivers and memory; CPU is slower and uses system RAM.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Processing backend. GPU options are usually faster but require compatible drivers and memory; CPU is slower and uses system RAM.'),
+    },
     ('ocr', 'manga_ocr', 'device', 'display_name'): {
-        "source": 'device', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'device'),
+        "source": 'Device', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Device'),
+    },
+    ('ocr', 'manga_ocr', 'max_new_tokens', 'description'): {
+        "source": 'Maximum number of characters/tokens generated for one text crop. Lower values are faster; raise this for unusually long text.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Maximum number of characters/tokens generated for one text crop. Lower values are faster; raise this for unusually long text.'),
+    },
+    ('ocr', 'manga_ocr', 'max_new_tokens', 'display_name'): {
+        "source": 'Maximum Output Tokens', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Maximum Output Tokens'),
+    },
+    ('ocr', 'manga_ocr', 'num_beams', 'description'): {
+        "source": 'Number of candidate sequences considered during recognition. Values above 1 can improve difficult text but are slower and use more memory.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Number of candidate sequences considered during recognition. Values above 1 can improve difficult text but are slower and use more memory.'),
+    },
+    ('ocr', 'manga_ocr', 'num_beams', 'display_name'): {
+        "source": 'Beam Search Width', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Beam Search Width'),
     },
     ('ocr', 'mit48px', '', 'description'): {
-        "source": 'OCRMIT48px', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'OCRMIT48px'),
+        "source": '48-pixel manga text recognizer. Text regions are normalized to line crops and processed in configurable batches.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', '48-pixel manga text recognizer. Text regions are normalized to line crops and processed in configurable batches.'),
+    },
+    ('ocr', 'mit48px', 'chunk_size', 'description'): {
+        "source": 'Number of text-line crops recognized together. Larger batches are usually faster on a GPU but require more VRAM.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Number of text-line crops recognized together. Larger batches are usually faster on a GPU but require more VRAM.'),
     },
     ('ocr', 'mit48px', 'chunk_size', 'display_name'): {
         "source": 'Chunk Size', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Chunk Size'),
     },
+    ('ocr', 'mit48px', 'device', 'description'): {
+        "source": 'Processing backend. GPU options are usually faster but require compatible drivers and memory; CPU is slower and uses system RAM.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Processing backend. GPU options are usually faster but require compatible drivers and memory; CPU is slower and uses system RAM.'),
+    },
     ('ocr', 'mit48px', 'device', 'display_name'): {
-        "source": 'device', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'device'),
+        "source": 'Device', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Device'),
     },
     ('ocr', 'mit48px_ctc', '', 'description'): {
-        "source": 'OCRMIT48px', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'OCRMIT48px'),
+        "source": '48-pixel manga text recognizer. Text regions are normalized to line crops and processed in configurable batches.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', '48-pixel manga text recognizer. Text regions are normalized to line crops and processed in configurable batches.'),
+    },
+    ('ocr', 'mit48px_ctc', 'chunk_size', 'description'): {
+        "source": 'Number of text-line crops recognized together. Larger batches are usually faster on a GPU but require more VRAM.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Number of text-line crops recognized together. Larger batches are usually faster on a GPU but require more VRAM.'),
     },
     ('ocr', 'mit48px_ctc', 'chunk_size', 'display_name'): {
         "source": 'Chunk Size', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Chunk Size'),
     },
+    ('ocr', 'mit48px_ctc', 'device', 'description'): {
+        "source": 'Processing backend. GPU options are usually faster but require compatible drivers and memory; CPU is slower and uses system RAM.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Processing backend. GPU options are usually faster but require compatible drivers and memory; CPU is slower and uses system RAM.'),
+    },
     ('ocr', 'mit48px_ctc', 'device', 'display_name'): {
-        "source": 'device', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'device'),
+        "source": 'Device', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Device'),
     },
     ('ocr', 'paddle_vl', '', 'description'): {
         "source": 'Locally deployed Paddle OCR-VL service (POST /layout-parsing)', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Locally deployed Paddle OCR-VL service (POST /layout-parsing)'),
     },
+    ('ocr', 'paddle_vl', 'max retry times', 'description'): {
+        "source": 'Maximum number of requests after temporary service failures.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Maximum number of requests after temporary service failures.'),
+    },
     ('ocr', 'paddle_vl', 'max retry times', 'display_name'): {
-        "source": 'max retry times', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'max retry times'),
+        "source": 'Maximum Retry Attempts', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Maximum Retry Attempts'),
+    },
+    ('ocr', 'paddle_vl', 'prettifyMarkdown', 'description'): {
+        "source": 'Ask the service to clean up and format its Markdown response.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Ask the service to clean up and format its Markdown response.'),
     },
     ('ocr', 'paddle_vl', 'prettifyMarkdown', 'display_name'): {
         "source": 'Prettify Markdown', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Prettify Markdown'),
     },
+    ('ocr', 'paddle_vl', 'retry interval', 'description'): {
+        "source": 'Delay in seconds before retrying a failed request.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Delay in seconds before retrying a failed request.'),
+    },
     ('ocr', 'paddle_vl', 'retry interval', 'display_name'): {
-        "source": 'retry interval', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'retry interval'),
+        "source": 'Retry Interval', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Retry Interval'),
+    },
+    ('ocr', 'paddle_vl', 'server_url', 'description'): {
+        "source": 'URL of the local PaddleOCR-VL layout-parsing endpoint.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'URL of the local PaddleOCR-VL layout-parsing endpoint.'),
     },
     ('ocr', 'paddle_vl', 'server_url', 'display_name'): {
         "source": 'Server URL', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Server URL'),
     },
+    ('ocr', 'paddle_vl', 'visualize', 'description'): {
+        "source": 'Ask the service to generate visualization output when supported.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Ask the service to generate visualization output when supported.'),
+    },
     ('ocr', 'paddle_vl', 'visualize', 'display_name'): {
-        "source": 'visualize', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'visualize'),
+        "source": 'Generate Visualization', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Generate Visualization'),
     },
     ('ocr', 'ppv6_onnx', '', 'description'): {
         "source": 'PP-OCRv6 ONNX recognition-only — crops text blocks then recognizes via ONNX Runtime', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'PP-OCRv6 ONNX recognition-only — crops text blocks then recognizes via ONNX Runtime'),
     },
+    ('ocr', 'ppv6_onnx', 'confidence_threshold', 'description'): {
+        "source": 'Discard recognized lines below this confidence. Lower values keep more uncertain text; higher values reduce false positives.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Discard recognized lines below this confidence. Lower values keep more uncertain text; higher values reduce false positives.'),
+    },
+    ('ocr', 'ppv6_onnx', 'confidence_threshold', 'display_name'): {
+        "source": 'Confidence Threshold', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Confidence Threshold'),
+    },
+    ('ocr', 'ppv6_onnx', 'device', 'description'): {
+        "source": 'Processing backend. GPU options are usually faster but require compatible drivers and memory; CPU is slower and uses system RAM.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Processing backend. GPU options are usually faster but require compatible drivers and memory; CPU is slower and uses system RAM.'),
+    },
     ('ocr', 'ppv6_onnx', 'device', 'display_name'): {
-        "source": 'device', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'device'),
+        "source": 'Device', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Device'),
     },
     ('ocr', 'ppv6_onnx', 'rec_batch_num', 'description'): {
         "source": 'Recognition batch size (higher = faster, more VRAM)', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Recognition batch size (higher = faster, more VRAM)'),
@@ -277,20 +433,35 @@ MODULE_PARAM_CATALOG = {
     ('ocr', 'stariver_ocr', '', 'description'): {
         "source": 'Xinghe Cloud (Tuanzi Translator) OCR API', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Xinghe Cloud (Tuanzi Translator) OCR API'),
     },
+    ('ocr', 'stariver_ocr', 'Password', 'description'): {
+        "source": 'Xinghe/Tuanzi account password. It is stored as plain text; do not use this option on a shared computer.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Xinghe/Tuanzi account password. It is stored as plain text; do not use this option on a shared computer.'),
+    },
     ('ocr', 'stariver_ocr', 'Password', 'display_name'): {
         "source": 'Password', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Password'),
     },
+    ('ocr', 'stariver_ocr', 'User', 'description'): {
+        "source": 'Xinghe/Tuanzi account username used for OCR authentication.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Xinghe/Tuanzi account username used for OCR authentication.'),
+    },
     ('ocr', 'stariver_ocr', 'User', 'display_name'): {
-        "source": 'User', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'User'),
+        "source": 'Username', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Username'),
+    },
+    ('ocr', 'stariver_ocr', 'detect_scale', 'description'): {
+        "source": 'Image scaling factor used by the remote text detector.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Image scaling factor used by the remote text detector.'),
     },
     ('ocr', 'stariver_ocr', 'detect_scale', 'display_name'): {
         "source": 'Detect Scale', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Detect Scale'),
     },
+    ('ocr', 'stariver_ocr', 'disable_skip_area', 'description'): {
+        "source": 'Process areas that the service would normally skip.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Process areas that the service would normally skip.'),
+    },
     ('ocr', 'stariver_ocr', 'disable_skip_area', 'display_name'): {
         "source": 'Disable Skip Area', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Disable Skip Area'),
     },
+    ('ocr', 'stariver_ocr', 'filtrate', 'description'): {
+        "source": 'Enable service-side filtering of low-quality OCR results.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Enable service-side filtering of low-quality OCR results.'),
+    },
     ('ocr', 'stariver_ocr', 'filtrate', 'display_name'): {
-        "source": 'Filtrate', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Filtrate'),
+        "source": 'Filter Results', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Filter Results'),
     },
     ('ocr', 'stariver_ocr', 'force_expand', 'description'): {
         "source": 'Force image pixel expansion (slower recognition)', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Force image pixel expansion (slower recognition)'),
@@ -298,11 +469,20 @@ MODULE_PARAM_CATALOG = {
     ('ocr', 'stariver_ocr', 'force_expand', 'display_name'): {
         "source": 'Force Expand', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Force Expand'),
     },
+    ('ocr', 'stariver_ocr', 'low_accuracy_mode', 'description'): {
+        "source": 'Prefer faster processing at the cost of recognition accuracy.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Prefer faster processing at the cost of recognition accuracy.'),
+    },
     ('ocr', 'stariver_ocr', 'low_accuracy_mode', 'display_name'): {
         "source": 'Low Accuracy Mode', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Low Accuracy Mode'),
     },
+    ('ocr', 'stariver_ocr', 'merge_threshold', 'description'): {
+        "source": 'Distance threshold used by the service to merge nearby text.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Distance threshold used by the service to merge nearby text.'),
+    },
     ('ocr', 'stariver_ocr', 'merge_threshold', 'display_name'): {
         "source": 'Merge Threshold', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Merge Threshold'),
+    },
+    ('ocr', 'stariver_ocr', 'refine', 'description'): {
+        "source": 'Enable the service-side text refinement pass.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Enable the service-side text refinement pass.'),
     },
     ('ocr', 'stariver_ocr', 'refine', 'display_name'): {
         "source": 'Refine', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Refine'),
@@ -340,8 +520,11 @@ MODULE_PARAM_CATALOG = {
     ('textdetector', 'ctbd', 'detect_text', 'display_name'): {
         "source": 'Detect Text', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Detect Text'),
     },
+    ('textdetector', 'ctbd', 'device', 'description'): {
+        "source": 'Processing backend. GPU options are usually faster but require compatible drivers and memory; CPU is slower and uses system RAM.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Processing backend. GPU options are usually faster but require compatible drivers and memory; CPU is slower and uses system RAM.'),
+    },
     ('textdetector', 'ctbd', 'device', 'display_name'): {
-        "source": 'device', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'device'),
+        "source": 'Device', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Device'),
     },
     ('textdetector', 'ctbd', 'inpaint_mask_dilate', 'description'): {
         "source": 'Dilation kernel size (px) for the inpaint mask. Merges text fragments.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Dilation kernel size (px) for the inpaint mask. Merges text fragments.'),
@@ -532,6 +715,9 @@ MODULE_PARAM_CATALOG = {
     ('textdetector', 'ysgyolo', 'detect size', 'display_name'): {
         "source": 'Detection Size', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Detection Size'),
     },
+    ('textdetector', 'ysgyolo', 'device', 'description'): {
+        "source": 'Processing backend. GPU options are usually faster but require compatible drivers and memory; CPU is slower and uses system RAM.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Processing backend. GPU options are usually faster but require compatible drivers and memory; CPU is slower and uses system RAM.'),
+    },
     ('textdetector', 'ysgyolo', 'device', 'display_name'): {
         "source": 'Device', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Device'),
     },
@@ -673,8 +859,11 @@ MODULE_PARAM_CATALOG = {
     ('translator', 'Sakura', 'version', 'display_name'): {
         "source": 'version', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'version'),
     },
+    ('translator', 'Sugoi', 'device', 'description'): {
+        "source": 'Processing backend. GPU options are usually faster but require compatible drivers and memory; CPU is slower and uses system RAM.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Processing backend. GPU options are usually faster but require compatible drivers and memory; CPU is slower and uses system RAM.'),
+    },
     ('translator', 'Sugoi', 'device', 'display_name'): {
-        "source": 'device', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'device'),
+        "source": 'Device', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Device'),
     },
     ('translator', 'Two-Step (Google/DeepL + Ollama)', '', 'description'): {
         "source": 'Translate every selected page with Google or DeepL first, then review and refine all drafts with the selected local Ollama text profile.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Translate every selected page with Google or DeepL first, then review and refine all drafts with the selected local Ollama text profile.'),
@@ -748,7 +937,10 @@ MODULE_PARAM_CATALOG = {
     ('translator', 'google', 'delay', 'display_name'): {
         "source": 'delay', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'delay'),
     },
+    ('translator', 'm2m100', 'device', 'description'): {
+        "source": 'Processing backend. GPU options are usually faster but require compatible drivers and memory; CPU is slower and uses system RAM.', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Processing backend. GPU options are usually faster but require compatible drivers and memory; CPU is slower and uses system RAM.'),
+    },
     ('translator', 'm2m100', 'device', 'display_name'): {
-        "source": 'device', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'device'),
+        "source": 'Device', "translate": lambda: QCoreApplication.translate('ModuleParamDialog', 'Device'),
     },
 }

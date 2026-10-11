@@ -46,11 +46,16 @@ if platform.system() == 'Windows' and platform.version() >= '10.0.10240.0':
                 params = {
                     'language': {
                         'type':'selector',
-                        'options': languages_display_name,
-                        'value': languages_display_name[0],
+                        # Runtime options are installed below the class. Keeping
+                        # this metadata literal lets the settings registry inspect
+                        # it without importing WinRT or querying language packs.
+                        'options': ['Auto'],
+                        'value': 'Auto',
+                        'display_name': 'Recognition Language',
+                        'description': 'Installed Windows OCR language pack used for recognition.',
                     }
                 }
-                language = languages_display_name[0]
+                language = 'Auto'
 
                 def __init__(self, **params) -> None:
                     super().__init__(**params)
@@ -68,6 +73,10 @@ if platform.system() == 'Windows' and platform.version() >= '10.0.10240.0':
                 def updateParam(self, param_key: str, param_content):
                     super().updateParam(param_key, param_content)
                     self.engine.lang = self.get_engine_lang()
+
+            OCRWindows.params['language']['options'] = languages_display_name
+            OCRWindows.params['language']['value'] = languages_display_name[0]
+            OCRWindows.language = languages_display_name[0]
 
         else:
             LOGGER.warning(f'No supported language packs found for windows, Windows OCR will be unavailable.')

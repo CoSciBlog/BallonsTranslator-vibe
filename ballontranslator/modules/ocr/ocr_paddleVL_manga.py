@@ -17,10 +17,28 @@ class PaddleOCRVLManga(OCRBase):
     params = {
         'device': DEVICE_SELECTOR(),
         "max_new_tokens": {
+            "type": "selector",
+            "options": [128, 256, 512, 768, 1024],
             "value": 512,
-            "description": "Max generation tokens",
+            "description": (
+                "Maximum generated text length for one crop. Larger values allow "
+                "longer passages but take more time and memory."
+            ),
             "display_name": "Max New Tokens"
-        }
+        },
+        "max_input_size": {
+            "type": "selector",
+            "options": [512, 768, 1024, 1280, 1536],
+            "value": 1024,
+            "description": (
+                "Maximum width or height sent to the vision model. Higher values "
+                "preserve small glyphs but require more VRAM."
+            ),
+            "display_name": "Maximum Input Size",
+        },
+        "description": (
+            "Vision-language OCR specialized for Japanese manga text crops."
+        ),
     }
     device = DEFAULT_DEVICE
 
@@ -77,8 +95,9 @@ class PaddleOCRVLManga(OCRBase):
         # Scale down if excessively large to prevent CUDA OOM on ultra-high-res crops
         rh, rw = img.shape[:2]
         max_dim = max(rh, rw)
-        if max_dim > 1024:
-            scale = 1024.0 / max_dim
+        max_input_size = int(self.get_param_value('max_input_size'))
+        if max_dim > max_input_size:
+            scale = max_input_size / max_dim
             import cv2
             img = cv2.resize(img, (int(round(rw * scale)), int(round(rh * scale))), interpolation=cv2.INTER_AREA)
 

@@ -12,30 +12,46 @@ from ballontranslator.utils.message import create_error_dialog, create_info_dial
 @register_OCR('stariver_ocr')
 class OCRStariver(OCRBase):
     params = {
-        'User': "填入你的用户名",
-        'Password': "填入你的密码。请注意，密码会明文保存，请勿在公共电脑上使用",
+        'User': {
+            'value': "填入你的用户名",
+            'display_name': 'Username',
+            'description': 'Xinghe/Tuanzi account username used for OCR authentication.',
+        },
+        'Password': {
+            'value': "填入你的密码。请注意，密码会明文保存，请勿在公共电脑上使用",
+            'display_name': 'Password',
+            'description': (
+                'Xinghe/Tuanzi account password. It is stored as plain text; do not '
+                'use this option on a shared computer.'
+            ),
+        },
         "refine":{
             'type': 'checkbox',
             'value': True,
-            'display_name': 'Refine'
+            'display_name': 'Refine',
+            'description': 'Enable the service-side text refinement pass.'
         },
         "filtrate":{
             'type': 'checkbox',
             'value': True,
-            'display_name': 'Filtrate'
+            'display_name': 'Filter Results',
+            'description': 'Enable service-side filtering of low-quality OCR results.'
         },
         "disable_skip_area":{
             'type': 'checkbox',
             'value': True,
-            'display_name': 'Disable Skip Area'
+            'display_name': 'Disable Skip Area',
+            'description': 'Process areas that the service would normally skip.'
         },
         "detect_scale": {
             'value': "3",
-            'display_name': 'Detect Scale'
+            'display_name': 'Detect Scale',
+            'description': 'Image scaling factor used by the remote text detector.'
         },
         "merge_threshold": {
             'value': "2",
-            'display_name': 'Merge Threshold'
+            'display_name': 'Merge Threshold',
+            'description': 'Distance threshold used by the service to merge nearby text.'
         },
         "force_expand":{
             'type': 'checkbox',
@@ -47,6 +63,7 @@ class OCRStariver(OCRBase):
             'type': 'checkbox',
             'value': False,
             'display_name': 'Low Accuracy Mode',
+            'description': 'Prefer faster processing at the cost of recognition accuracy.',
         },
         'update_token_btn': {
             'type': 'pushbtn',

@@ -1107,7 +1107,7 @@ class ImgtransThread(QThread):
         *,
         unload_before_refinement: bool = False,
     ) -> None:
-        """Finish every machine draft before starting Ollama refinement."""
+        """Finish every machine draft before starting LLM refinement."""
         drafted_pages = set()
         for page_key in page_keys:
             if self.isStopRequested():
@@ -1141,7 +1141,7 @@ class ImgtransThread(QThread):
             unload_modules(self, ['textdetector', 'inpainter', 'ocr'])
         LOGGER.info(
             'First-step translation completed for %d page(s); starting '
-            'Ollama refinement.',
+            'LLM refinement.',
             len(drafted_pages),
         )
         for page_key in page_keys:

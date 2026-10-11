@@ -102,6 +102,8 @@ if platform.system() == 'Darwin' and platform.mac_ver()[0] >= '10.15':
                     'type':'selector',
                     'options': list(get_supported_languages()[0]),
                     'value': 'en-US',
+                    'display_name': 'Recognition Language',
+                    'description': 'Language model used by Apple Vision OCR.',
                 },
                 # While this does appear 
                 # it doesn't update the languages available
@@ -117,6 +119,10 @@ if platform.system() == 'Darwin' and platform.mac_ver()[0] >= '10.15':
                 'confidence_level': {
                     'value': '0.1',
                     'display_name': 'Confidence Level',
+                    'description': (
+                        'Minimum Apple Vision confidence from 0 to 1. Higher values '
+                        'discard more uncertain results.'
+                    ),
                 },
             }
             language = 'en-US'
