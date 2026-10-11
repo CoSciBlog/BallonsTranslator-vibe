@@ -542,6 +542,8 @@ class ProgramConfig(Config):
     original_transparency: float = 0.
     open_recent_on_startup: bool = True 
     check_update_on_startup: bool = True
+    main_window_geometry: List[int] = field(default_factory=list)
+    main_window_maximized: bool = True
     spellcheck_enabled: bool = False
     spellcheck_external_dict_path: str = ""
     spellcheck_repo_dicts: str = ""
@@ -606,6 +608,27 @@ class ProgramConfig(Config):
     custom_colors: List[str] = field(default_factory=list)
 
     def __post_init__(self) -> None:
+        geometry = self.main_window_geometry
+        valid_geometry = (
+            isinstance(geometry, list)
+            and len(geometry) == 4
+            and all(type(value) is int for value in geometry)
+            and geometry[2] > 0
+            and geometry[3] > 0
+        )
+        if not valid_geometry:
+            if geometry:
+                LOGGER.warning(
+                    'Discard invalid main_window_geometry config %r.',
+                    geometry,
+                )
+            self.main_window_geometry = []
+        if type(self.main_window_maximized) is not bool:
+            LOGGER.warning(
+                'Discard invalid main_window_maximized config %r.',
+                self.main_window_maximized,
+            )
+            self.main_window_maximized = True
         if type(self.run_pipeline_reinpaint_only) is not bool:
             LOGGER.warning(
                 'Discard invalid run_pipeline_reinpaint_only config %r.',

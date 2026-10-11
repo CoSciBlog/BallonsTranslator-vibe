@@ -8,7 +8,7 @@ import time
 
 from tqdm import tqdm
 from qtpy.QtWidgets import QAction, QFileDialog, QMenu, QHBoxLayout, QVBoxLayout, QApplication, QStackedWidget, QSplitter, QListWidget, QShortcut, QListWidgetItem, QMessageBox, QTextEdit, QPlainTextEdit, QDialog, QWidget, QColorDialog
-from qtpy.QtCore import Qt, QPoint, QSize, QEvent, Signal, QTimer
+from qtpy.QtCore import Qt, QPoint, QRect, QSize, QEvent, Signal, QTimer
 from qtpy.QtGui import QContextMenuEvent, QTextCursor, QGuiApplication, QIcon, QCloseEvent, QKeySequence, QPainter, QClipboard, QColor
 
 from ballontranslator.utils.logger import logger as LOGGER
@@ -91,7 +91,7 @@ from .text_engine.pipeline_formatting import (
     apply_auto_tate_chu_yoko,
     apply_text_style_to_blocks,
 )
-from .framelesswindow import FramelessWindow, FramelessMoveResize
+from .framelesswindow import FramelessWindow
 from .drawing_commands import RunBlkTransCommand
 from .keywordsubwidget import KeywordSubWidget
 from .module_parse_widgets import ModuleParamDialog
@@ -111,6 +111,78 @@ def _current_custom_colors() -> List[str]:
         QColorDialog.customColor(index).name()
         for index in range(QColorDialog.customCount())
     ]
+
+
+def restore_main_window_placement(
+    window: QWidget,
+    config: ProgramConfig,
+) -> bool:
+    """Restore a saved normal rectangle and return the maximized preference.
+
+    A disconnected monitor must not strand the application off screen. Qt's
+    available screen rectangles are also used to keep the title bar reachable.
+
+    >>> ProgramConfig().main_window_maximized
+    True
+    """
+
+    geometry = config.main_window_geometry
+    if len(geometry) != 4:
+        return config.main_window_maximized
+
+    saved = QRect(*geometry)
+    available = [
+        screen.availableGeometry()
+        for screen in QGuiApplication.screens()
+        if screen.availableGeometry().isValid()
+    ]
+    if not available:
+        window.setGeometry(saved)
+        return config.main_window_maximized
+
+    def overlap_area(screen_rect: QRect) -> int:
+        overlap = screen_rect.intersected(saved)
+        return overlap.width() * overlap.height()
+
+    target = max(available, key=overlap_area)
+    if overlap_area(target) == 0:
+        primary = QGuiApplication.primaryScreen()
+        if primary is not None and primary.availableGeometry().isValid():
+            target = primary.availableGeometry()
+
+    width = min(
+        max(saved.width(), window.minimumWidth(), 1),
+        target.width(),
+    )
+    height = min(
+        max(saved.height(), window.minimumHeight(), 1),
+        target.height(),
+    )
+    x = min(max(saved.x(), target.x()), target.x() + target.width() - width)
+    y = min(max(saved.y(), target.y()), target.y() + target.height() - height)
+    window.setGeometry(x, y, width, height)
+    return config.main_window_maximized
+
+
+def capture_main_window_placement(
+    window: QWidget,
+    config: ProgramConfig,
+) -> None:
+    """Save the restorable rectangle without losing it while maximized."""
+
+    normal = window.normalGeometry()
+    if not normal.isValid() or normal.width() <= 0 or normal.height() <= 0:
+        normal = window.geometry()
+    if normal.isValid() and normal.width() > 0 and normal.height() > 0:
+        config.main_window_geometry = [
+            normal.x(),
+            normal.y(),
+            normal.width(),
+            normal.height(),
+        ]
+    config.main_window_maximized = bool(
+        window.windowState() & Qt.WindowState.WindowMaximized
+    )
 
 
 class PageListView(QListWidget):
@@ -246,8 +318,6 @@ class MainWindow(mainwindow_cls):
         self.setupConfig()
         self.setupShortcuts()
         self.setupRegisterWidget()
-        if not shared.ON_WINDOWS:
-            FramelessMoveResize.toggleMaxState(self)
         self.setAcceptDrops(True)
 
         if open_dir != '' and osp.exists(open_dir):
@@ -264,7 +334,6 @@ class MainWindow(mainwindow_cls):
         if shared.ON_MACOS:
             # https://bugreports.qt.io/browse/QTBUG-133215
             self.hideSystemTitleBar()
-            self.showMaximized()
 
         show_release_info = exec_args.get('show_release_info', False)
         if not shared.HEADLESS and (show_release_info or pcfg.check_update_on_startup):
@@ -1126,6 +1195,8 @@ class MainWindow(mainwindow_cls):
         self.st_manager.blockSignals(True)
         self.canvas.prepareClose()
         pcfg.custom_colors = _current_custom_colors()
+        if not shared.HEADLESS:
+            capture_main_window_placement(self, pcfg)
         self.save_config()
         return super().closeEvent(event)
 

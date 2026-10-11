@@ -1,5 +1,9 @@
 # Changelogs
 
+### 2026-10-12 — 1.5.19+vibe.37
+- The main window now restores its previous normal size, screen position, and maximized state instead of always starting maximized.
+- Saved positions from disconnected monitors are safely moved onto the current primary screen.
+
 ### 2026-10-11 — 1.5.19+vibe.36
 - Added selected-box merging to the canvas context menu and Ctrl+Alt+M shortcut, plus undoable separation with an 8 px gap within the page.
 - Automatic layout no longer restores hard translation line breaks when their removal is enabled; text still wraps visually to fit the box.

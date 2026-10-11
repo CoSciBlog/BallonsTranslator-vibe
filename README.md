@@ -51,6 +51,9 @@
   - Complete English and German UI catalogs; choose **Deutsch** from **View → Display Language**.
   - Translator source and target languages use localized display names without changing the identifiers stored in projects and configuration.
 
+* Window placement
+  - The main window remembers its normal size, screen position, and maximized state when the application closes. If a saved monitor is no longer connected, the window is moved onto the primary screen.
+
 * Configurable intermediate images
   - Save masks and inpainted project images as PNG, JPEG, WebP, or JPEG XL with an independent quality setting.
 

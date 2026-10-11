@@ -409,7 +409,10 @@ def main():
 
     setup_locks()
 
-    from ballontranslator.ui.mainwindow import MainWindow
+    from ballontranslator.ui.mainwindow import (
+        MainWindow,
+        restore_main_window_placement,
+    )
     from ballontranslator.utils.message import create_info_dialog
     ballontrans = MainWindow(app, config, open_dir=args.proj_dir, **vars(args))
     delete_on_close = getattr(Qt, 'WidgetAttribute', Qt).WA_DeleteOnClose
@@ -420,14 +423,17 @@ def main():
     BT.restart_signal.connect(restart)
 
     if not args.headless:
+        should_maximize = restore_main_window_placement(ballontrans, config)
         ballontrans.show()
-        if shared.ON_WINDOWS:
+        if should_maximize and shared.ON_WINDOWS:
             from ballontranslator.ui.framelesswindow import FramelessMoveResize
             # SC_MAXIMIZE animates only after the normal window is visible.
             QTimer.singleShot(
                 0,
                 lambda: FramelessMoveResize.maximize(ballontrans),
             )
+        elif should_maximize:
+            ballontrans.showMaximized()
     if updated_mirrors:
         create_info_dialog(QApplication.translate(
             'NetworkMirrors',
