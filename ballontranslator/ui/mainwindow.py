@@ -1210,6 +1210,9 @@ class MainWindow(mainwindow_cls):
         self.page_changing = False
 
     def setupShortcuts(self):
+        self.canvas.merge_textboxes.connect(self.merge_selected_textboxes)
+        merge_shortcut = QShortcut(QKeySequence("Ctrl+Alt+M"), self)
+        merge_shortcut.activated.connect(self.merge_selected_textboxes)
         self.titleBar.nextpage_trigger.connect(self.shortcutNext) 
         self.titleBar.prevpage_trigger.connect(self.shortcutBefore)
         self.titleBar.textedit_trigger.connect(self.shortcutTextedit)
@@ -3432,6 +3435,10 @@ class MainWindow(mainwindow_cls):
             if result != RunPipelineDialog.RUN:
                 return
             self._run_imgtrans_wo_textstyle_update = False
+            reinpaint_only = getattr(dialog, 'reinpaint_only', None)
+            if reinpaint_only is not None and reinpaint_only.isChecked():
+                self._request_reinpaint(dialog.selected_pages())
+                return
             self.on_run_imgtrans(pages_to_process=dialog.selected_pages())
         finally:
             dialog.deleteLater()
@@ -3439,10 +3446,14 @@ class MainWindow(mainwindow_cls):
     def quick_run_imgtrans(self) -> None:
         """Start the pipeline with the last saved Run-dialog settings."""
         self._run_imgtrans_wo_textstyle_update = False
+        selected_pages = RunPipelineDialog.pages_from_stored_range(
+            self.imgtrans_proj
+        )
+        if pcfg.run_pipeline_reinpaint_only:
+            self._request_reinpaint(selected_pages)
+            return
         self.on_run_imgtrans(
-            pages_to_process=RunPipelineDialog.pages_from_stored_range(
-                self.imgtrans_proj
-            )
+            pages_to_process=selected_pages
         )
 
     def on_run_imgtrans(

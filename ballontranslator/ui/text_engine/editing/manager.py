@@ -36,7 +36,7 @@ from ..formatting.panel import FontFormatPanel
 from ballontranslator.utils.config import pcfg
 from ballontranslator.utils import shared
 from ballontranslator.utils.imgproc_utils import extract_ballon_region, get_block_mask
-from ballontranslator.utils.text_processing import seg_text, is_cjk
+from ballontranslator.utils.text_processing import seg_text, is_cjk, remove_translation_line_breaks
 from ballontranslator.utils.text_layout import layout_text
 
 
@@ -495,6 +495,7 @@ class SceneTextManager(QObject):
         self.canvas.layout_textblks.connect(self.onAutoLayoutTextblks)
         self.canvas.reset_angle.connect(self.onResetAngle)
         self.canvas.squeeze_blk.connect(self.onSqueezeBlk)
+        self.canvas.separate_textboxes.connect(self.separate_selected_textboxes)
         self.canvas.path_reorder_finished.connect(
             self.on_path_reorder_finished
         )
@@ -912,6 +913,55 @@ class SceneTextManager(QObject):
         self.canvas.push_text_command(command)
         return command.merged_item
 
+    def separate_selected_textboxes(self) -> None:
+        """Place selected boxes in free page space, as one undoable move.
+
+        Unselected boxes are obstacles. Boxes without a free position stay put;
+        this explicit action never resizes text or pushes it outside the page.
+        """
+        if not self.canvas.textEditMode():
+            return
+        editing_item = self.canvas.editing_textblkitem
+        if editing_item is not None and editing_item.isEditing():
+            editing_item.endEdit(keep_focus=False)
+        self.formatpanel.resolve_text_transform_edits_for_history_change()
+        selected = sorted(self.canvas.selected_text_items(), key=lambda item: item.idx)
+        selected_set = set(selected)
+        obstacles = [item.sceneBoundingRect() for item in self.textblk_item_list if item not in selected_set]
+        bounds = self.canvas.sceneRect()
+        before, after = [], []
+        gap = 8.0
+        for item in selected:
+            rect = item.sceneBoundingRect()
+            position = item.logical_position()
+            before.append(QPointF(position))
+            xs = {rect.left(), bounds.left(), bounds.right() - rect.width()}
+            ys = {rect.top(), bounds.top(), bounds.bottom() - rect.height()}
+            for obstacle in obstacles:
+                xs.update((obstacle.left() - gap - rect.width(), obstacle.right() + gap))
+                ys.update((obstacle.top() - gap - rect.height(), obstacle.bottom() + gap))
+            candidates = sorted(
+                ((x, y) for x in xs for y in ys),
+                key=lambda point: ((point[0] - rect.left()) ** 2 + (point[1] - rect.top()) ** 2, point),
+            )
+            for x, y in candidates:
+                candidate = QRectF(x, y, rect.width(), rect.height())
+                if bounds.contains(candidate) and not any(
+                    candidate.intersects(obstacle.adjusted(-gap, -gap, gap, gap))
+                    for obstacle in obstacles
+                ):
+                    parent = item.parentItem()
+                    delta = candidate.topLeft() - rect.topLeft()
+                    if parent is not None:
+                        delta = parent.mapFromScene(candidate.topLeft()) - parent.mapFromScene(rect.topLeft())
+                    position += delta
+                    rect = candidate
+                    break
+            after.append(position)
+            obstacles.append(rect)
+        if before != after:
+            self.canvas.push_text_command(MoveBlkItemsCommand(selected, before, after))
+
     def onCopyBlkItems(self):
         selected_blks = self.canvas.selected_text_items()
         if len(selected_blks) == 0 and self.txtblkShapeControl.blk_item is not None:
@@ -1160,6 +1210,7 @@ class SceneTextManager(QObject):
             ref_src_lines=ref_src_lines
         )
 
+
         # font size post adjustment
         post_resize_ratio = 1
         if adaptive_fntsize:
@@ -1184,6 +1235,10 @@ class SceneTextManager(QObject):
         
         ffmt = QFontMetricsF(blk_font)
         maxw = max([ffmt.horizontalAdvance(t) for t in new_text.split('\n')])
+        # Measure planned lines first, then let Qt wrap continuous text rather
+        # than persisting layout-generated breaks against the user's option.
+        if pcfg.remove_translation_line_breaks:
+            new_text = remove_translation_line_breaks(new_text, pcfg.module.translate_target)
         blkitem.set_size(maxw * 1.5, xywh[3], set_layout_maxsize=True)
         blkitem.setPlainText(new_text)
         if len(self.pairwidget_list) > blkitem.idx:

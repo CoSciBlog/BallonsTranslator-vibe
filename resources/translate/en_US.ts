@@ -286,6 +286,18 @@
 <context>
     <name>Canvas</name>
     <message>
+        <source>Merge Selected Text Boxes</source>
+        <translation>Merge Selected Text Boxes</translation>
+    </message>
+    <message>
+        <source>Separate overlapping text boxes</source>
+        <translation>Separate overlapping text boxes</translation>
+    </message>
+    <message>
+        <source>Move selected boxes apart with an 8 px gap. Undo restores their positions.</source>
+        <translation>Move selected boxes apart with an 8 px gap. Undo restores their positions.</translation>
+    </message>
+    <message>
         <location filename="../../ballontranslator/ui/canvas.py" line="1774"/>
         <source>Copy</source>
         <translation>Copy</translation>
@@ -5610,6 +5622,18 @@ qipao,qipao2</translation>
         <source>Pages to Run</source>
         <translation>Pages to Run</translation>
     </message>
+    <message>
+        <source>Choose the first and last project page included in this run. The complete range is selected when a different project opens.</source>
+        <translation>Choose the first and last project page included in this run. The complete range is selected when a different project opens.</translation>
+    </message>
+    <message>
+        <source>Number of pages whose enabled pipeline stages are already complete.</source>
+        <translation>Number of pages whose enabled pipeline stages are already complete.</translation>
+    </message>
+    <message>
+        <source>Drag the handles to select the page range. Colored segments show the progress of individual pages.</source>
+        <translation>Drag the handles to select the page range. Colored segments show the progress of individual pages.</translation>
+    </message>
 </context>
 <context>
     <name>PageSearchWidget</name>
@@ -6051,8 +6075,8 @@ Then restart Photoshop. Explorer will now open the source file and destination l
     <message>
         <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="216"/>
         <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="217"/>
-        <source>Config</source>
-        <translation>Config</translation>
+        <source>Open settings for this module.</source>
+        <translation>Open settings for this module.</translation>
     </message>
 </context>
 <context>
@@ -6674,6 +6698,114 @@ Then restart Photoshop. Explorer will now open the source file and destination l
 <context>
     <name>RunPipelineDialog</name>
     <message>
+        <source>Choose whether to process the selected pages through enabled modules or only render their existing translations.</source>
+        <translation>Choose whether to process the selected pages through enabled modules or only render their existing translations.</translation>
+    </message>
+    <message>
+        <source>Start a fresh run for the selected page range.</source>
+        <translation>Start a fresh run for the selected page range.</translation>
+    </message>
+    <message>
+        <source>Continue incomplete pages without resetting completed progress.</source>
+        <translation>Continue incomplete pages without resetting completed progress.</translation>
+    </message>
+    <message>
+        <source>Render the existing translations for the selected project.</source>
+        <translation>Render the existing translations for the selected project.</translation>
+    </message>
+    <message>
+        <source>Keep existing text regions when detection runs instead of replacing them with newly detected regions.</source>
+        <translation>Keep existing text regions when detection runs instead of replacing them with newly detected regions.</translation>
+    </message>
+    <message>
+        <source>Merge nearby text boxes</source>
+        <translation>Merge nearby text boxes</translation>
+    </message>
+    <message>
+        <source>After a successful pipeline run, merge compatible nearby text regions on the selected pages using the configured distance and overlap limits.</source>
+        <translation>After a successful pipeline run, merge compatible nearby text regions on the selected pages using the configured distance and overlap limits.</translation>
+    </message>
+    <message>
+        <source>Remove text regions whose recognized source text is empty after OCR finishes.</source>
+        <translation>Remove text regions whose recognized source text is empty after OCR finishes.</translation>
+    </message>
+    <message>
+        <source>Estimate font properties from the source image after OCR. This can add processing time.</source>
+        <translation>Estimate font properties from the source image after OCR. This can add processing time.</translation>
+    </message>
+    <message>
+        <source>Send the full page to the selected LLM OCR instead of recognizing each detected region separately.</source>
+        <translation>Send the full page to the selected LLM OCR instead of recognizing each detected region separately.</translation>
+    </message>
+    <message>
+        <source>Hide non-text image areas from page-level LLM OCR to reduce visual distractions.</source>
+        <translation>Hide non-text image areas from page-level LLM OCR to reduce visual distractions.</translation>
+    </message>
+    <message>
+        <source>Let page-level LLM OCR determine the reading order of the recognized text regions.</source>
+        <translation>Let page-level LLM OCR determine the reading order of the recognized text regions.</translation>
+    </message>
+    <message>
+        <source>Skip regions whose background is simple enough to restore without running the selected inpainting model.</source>
+        <translation>Skip regions whose background is simple enough to restore without running the selected inpainting model.</translation>
+    </message>
+    <message>
+        <source>Limit the inpainting mask to detected text-region bounds to avoid changing unrelated image areas.</source>
+        <translation>Limit the inpainting mask to detected text-region bounds to avoid changing unrelated image areas.</translation>
+    </message>
+    <message>
+        <source>Re-run inpainting only</source>
+        <translation>Re-run inpainting only</translation>
+    </message>
+    <message>
+        <source>Run only the selected inpainter on saved masks and existing text regions for the selected pages. Detection, OCR, and translation are not repeated.</source>
+        <translation>Run only the selected inpainter on saved masks and existing text regions for the selected pages. Detection, OCR, and translation are not repeated.</translation>
+    </message>
+    <message>
+        <source>Source language of the recognized text. Auto-detect lets the translator determine it when supported.</source>
+        <translation>Source language of the recognized text. Auto-detect lets the translator determine it when supported.</translation>
+    </message>
+    <message>
+        <source>Language into which the recognized text will be translated.</source>
+        <translation>Language into which the recognized text will be translated.</translation>
+    </message>
+    <message>
+        <source>Translate each text region separately or translate all regions on a page together for additional context.</source>
+        <translation>Translate each text region separately or translate all regions on a page together for additional context.</translation>
+    </message>
+    <message>
+        <source>Use only the current page or also include prior translated pages within the token budget.</source>
+        <translation>Use only the current page or also include prior translated pages within the token budget.</translation>
+    </message>
+    <message>
+        <source>Optional external glossary file used in addition to the glossary built for the current project.</source>
+        <translation>Optional external glossary file used in addition to the glossary built for the current project.</translation>
+    </message>
+    <message>
+        <source>Select an external glossary file.</source>
+        <translation>Select an external glossary file.</translation>
+    </message>
+    <message>
+        <source>Include only glossary entries matching the current source text, or include every entry from the external glossary file.</source>
+        <translation>Include only glossary entries matching the current source text, or include every entry from the external glossary file.</translation>
+    </message>
+    <message>
+        <source>Project Glossary</source>
+        <translation>Project Glossary</translation>
+    </message>
+    <message>
+        <source>Use matching entries from the glossary built for this project to keep names and terminology consistent during LLM translation. The selected LLM profile must also allow glossary use.</source>
+        <translation>Use matching entries from the glossary built for this project to keep names and terminology consistent during LLM translation. The selected LLM profile must also allow glossary use.</translation>
+    </message>
+    <message>
+        <source>Choose whether a failed translation request is retried, skipped, or stops the complete pipeline.</source>
+        <translation>Choose whether a failed translation request is retried, skipped, or stops the complete pipeline.</translation>
+    </message>
+    <message>
+        <source>Render with each text box’s currently stored style without applying the active global text style first.</source>
+        <translation>Render with each text box’s currently stored style without applying the active global text style first.</translation>
+    </message>
+    <message>
         <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="381"/>
         <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="408"/>
         <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="447"/>
@@ -6771,13 +6903,13 @@ Then restart Photoshop. Explorer will now open the source file and destination l
     </message>
     <message>
         <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="845"/>
-        <source>Letter Case</source>
-        <translation>Letter Case</translation>
+        <source>OCR Letter Case</source>
+        <translation>OCR Letter Case</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="848"/>
-        <source>Choose how OCR text letter case is adjusted after keyword substitution.</source>
-        <translation>Choose how OCR text letter case is adjusted after keyword substitution.</translation>
+        <source>Choose how recognized source text letter case is adjusted after OCR keyword substitution. This does not change translated text.</source>
+        <translation>Choose how recognized source text letter case is adjusted after OCR keyword substitution. This does not change translated text.</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="856"/>

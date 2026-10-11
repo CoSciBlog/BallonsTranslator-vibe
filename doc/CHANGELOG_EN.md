@@ -1,5 +1,12 @@
 # Changelogs
 
+### 2026-10-11 — 1.5.19+vibe.36
+- Added selected-box merging to the canvas context menu and Ctrl+Alt+M shortcut, plus undoable separation with an 8 px gap within the page.
+- Automatic layout no longer restores hard translation line breaks when their removal is enabled; text still wraps visually to fit the box.
+- Added Run-dialog controls for re-running only inpainting from saved masks and merging compatible nearby text boxes after a successful pipeline.
+- Added a visible **Project Glossary** translation option, clarified OCR letter-case behavior, and completed explanatory tooltips across the Run workflow.
+- Page-range selection now resets to all pages when the active project changes while remaining remembered when reopening the Run dialog for the same project.
+
 ### 2026-10-11 — 1.5.19+vibe.35
 - Sidebar text-box merging now accepts only a connected cluster of nearby regions, using a scale-aware distance threshold to avoid accidental cross-balloon merges.
 - Merged regions use the union of the visible logical boxes instead of stale OCR polygons, preserving their canvas position and saved project geometry through undo/redo.

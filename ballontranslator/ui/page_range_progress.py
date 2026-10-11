@@ -467,12 +467,19 @@ class PageRangeProgressWidget(QWidget):
         range_layout.setSpacing(8)
         range_label = QLabel(self.tr('Pages to Run'), range_row)
         range_label.setObjectName('RunPipelineSettingLabel')
+        range_help = self.tr(
+            'Choose the first and last project page included in this run. '
+            'The complete range is selected when a different project opens.'
+        )
+        range_label.setToolTip(range_help)
         range_layout.addWidget(range_label)
 
         self.range_start = PageRangeSpinBox(range_row)
         self.range_start.setObjectName('RunPipelineRangeStart')
         self.range_end = PageRangeSpinBox(range_row)
         self.range_end.setObjectName('RunPipelineRangeEnd')
+        self.range_start.setToolTip(range_help)
+        self.range_end.setToolTip(range_help)
         page_count = len(self.page_names)
         maximum = max(1, page_count)
         saved_end = maximum if end is None else end
@@ -494,10 +501,17 @@ class PageRangeProgressWidget(QWidget):
         self.progress_label = QLabel(range_row)
         self.progress_label.setObjectName('RunPipelineSettingLabel')
         self.progress_label.setTextFormat(Qt.TextFormat.RichText)
+        self.progress_label.setToolTip(self.tr(
+            'Number of pages whose enabled pipeline stages are already complete.'
+        ))
         range_layout.addWidget(self.progress_label)
         layout.addWidget(range_row)
 
         self.range_bar = PageProgressRangeBar(self.page_names, self)
+        self.range_bar.setToolTip(self.tr(
+            'Drag the handles to select the page range. Colored segments show '
+            'the progress of individual pages.'
+        ))
         self.range_bar.set_range(start, saved_end, emit=False)
         self._update_progress_label()
         layout.addWidget(self.range_bar)

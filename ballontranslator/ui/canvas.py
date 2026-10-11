@@ -221,6 +221,8 @@ class Canvas(QGraphicsScene):
     layout_textblks = Signal()
     reset_angle = Signal()
     squeeze_blk = Signal()
+    merge_textboxes = Signal()
+    separate_textboxes = Signal()
 
     run_blktrans = Signal(int)
 
@@ -1771,6 +1773,7 @@ class Canvas(QGraphicsScene):
                 return
 
             menu = QMenu(self.gv)
+            menu.setToolTipsVisible(True)
             copy_act = menu.addAction(self.tr("Copy"))
             copy_act.setShortcut(QKeySequence.StandardKey.Copy)
             paste_act = menu.addAction(self.tr("Paste"))
@@ -1790,6 +1793,11 @@ class Canvas(QGraphicsScene):
             layout_act = menu.addAction(self.tr("Auto layout"))
             angle_act = menu.addAction(self.tr("Reset Angle"))
             squeeze_act = menu.addAction(self.tr("Squeeze"))
+            merge_act = menu.addAction(self.tr("Merge Selected Text Boxes"))
+            merge_act.setShortcut(QKeySequence("Ctrl+Alt+M"))
+            merge_act.setEnabled(len(self.selected_text_items()) >= 2)
+            separate_act = menu.addAction(self.tr("Separate overlapping text boxes"))
+            separate_act.setToolTip(self.tr("Move selected boxes apart with an 8 px gap. Undo restores their positions."))
             menu.addSeparator()
             translate_act = menu.addAction(self.tr("translate"))
             ocr_act = menu.addAction(self.tr("OCR"))
@@ -1819,6 +1827,10 @@ class Canvas(QGraphicsScene):
                 self.reset_angle.emit()
             elif rst == squeeze_act:
                 self.squeeze_blk.emit()
+            elif rst == merge_act:
+                self.merge_textboxes.emit()
+            elif rst == separate_act:
+                self.separate_textboxes.emit()
             elif rst == translate_act:
                 self.run_blktrans.emit(-1)
             elif rst == ocr_act:

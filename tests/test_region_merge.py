@@ -181,6 +181,30 @@ class RegionMergeTests(unittest.TestCase):
                 manager.formatpanel.resolve_text_transform_edits_for_history_change()
                 manager.updateTextBlkList()
                 before_rects = [item.absBoundingRect() for item in items]
+                from qtpy.QtCore import QRectF
+                canvas.setSceneRect(QRectF(0, 0, 800, 800))
+                old_positions = [item.logical_position() for item in items]
+                from qtpy.QtCore import QPoint
+                from qtpy.QtWidgets import QMenu
+                from qtpy.QtTest import QSignalSpy
+                merge_requests = QSignalSpy(canvas.merge_textboxes)
+                with patch.object(QMenu, 'exec', new=lambda menu, _pos: next(
+                    action for action in menu.actions() if action.text() == 'Merge Selected Text Boxes'
+                )):
+                    canvas.on_create_contextmenu(QPoint(), False)
+                self.assertEqual(len(merge_requests), 1)
+                with patch.object(QMenu, 'exec', new=lambda menu, _pos: next(
+                    action for action in menu.actions() if action.text() == 'Separate overlapping text boxes'
+                )):
+                    canvas.on_create_contextmenu(QPoint(), False)
+                first, second = [item.sceneBoundingRect() for item in items]
+                self.assertFalse(first.adjusted(-7.9, -7.9, 7.9, 7.9).intersects(second))
+                moved_positions = [item.logical_position() for item in items]
+                manager.separate_selected_textboxes()
+                self.assertEqual([item.logical_position() for item in items], moved_positions)
+                canvas.undo_textedit()
+                self.assertEqual([item.logical_position() for item in items], old_positions)
+                canvas.text_undo_stack.clear()
                 expected_union = [
                     min(rect[0] for rect in before_rects),
                     min(rect[1] for rect in before_rects),
@@ -234,6 +258,24 @@ class RegionMergeTests(unittest.TestCase):
                     manager.textblk_item_list[0].toPlainText(),
                     'Translation one\n\nTranslation two',
                 )
+                import numpy as np
+                project.img_array = np.zeros((800, 800, 3), dtype=np.uint8)
+                with (
+                    patch.object(pcfg, 'remove_translation_line_breaks', True),
+                    patch.object(pcfg.module, 'translate_target', 'English'),
+                    patch('ballontranslator.ui.text_engine.editing.manager.layout_text', return_value=(
+                        'Hello\nworld', [0, 0, 100, 80], False, False,
+                    )),
+                ):
+                    manager.layout_textblk(
+                        manager.textblk_item_list[0], text='Hello world',
+                        mask=np.ones((80, 100), dtype=np.uint8),
+                        bounding_rect=[0, 0, 100, 80], region_rect=[0, 0, 100, 80],
+                    )
+                    self.assertEqual(manager.textblk_item_list[0].toPlainText(), 'Hello world')
+                    self.assertEqual(manager.pairwidget_list[0].e_trans.toPlainText(), 'Hello world')
+                    manager.updateTextBlkList()
+                    self.assertEqual(project.pages['page.png'][0].translation, 'Hello world')
                 canvas.clear_undostack(update_saved_step=True)
                 manager.clearSceneTextitems()
                 panel.deleteLater()

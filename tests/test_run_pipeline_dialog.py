@@ -119,6 +119,7 @@ class RunPipelineDialogTests(unittest.TestCase):
             RunPipelineDialog._module_settings_expanded
         )
         self._page_range = RunPipelineDialog._page_range
+        self._page_range_project_key = RunPipelineDialog._page_range_project_key
         RunPipelineDialog._module_settings_expanded = (
             False,
             False,
@@ -126,6 +127,7 @@ class RunPipelineDialogTests(unittest.TestCase):
             False,
         )
         RunPipelineDialog._page_range = (1, None)
+        RunPipelineDialog._page_range_project_key = None
         self._stage_states = [pcfg.module.stage_enabled(idx) for idx in range(4)]
         self._pipeline_mode = pcfg.run_pipeline_mode
         self._pipeline_range = (
@@ -152,6 +154,9 @@ class RunPipelineDialogTests(unittest.TestCase):
             pcfg.module.llm_translate_vision,
             pcfg.module.llm_translate_summary_memory,
             pcfg.module.llm_translate_overwrite_summary,
+            pcfg.module.project_glossary_enabled,
+            pcfg.module.post_merge_textboxes,
+            pcfg.run_pipeline_reinpaint_only,
         )
         self._llm_ocr_settings = (
             pcfg.module.ocr,
@@ -174,6 +179,9 @@ class RunPipelineDialogTests(unittest.TestCase):
         pcfg.run_pipeline_mode = 'pipeline'
         pcfg.run_pipeline_range_start = 1
         pcfg.run_pipeline_range_end = 0
+        pcfg.run_pipeline_reinpaint_only = False
+        pcfg.module.post_merge_textboxes = False
+        pcfg.module.project_glossary_enabled = True
         pcfg.render_without_text_style_update = False
 
     def tearDown(self):
@@ -181,6 +189,7 @@ class RunPipelineDialogTests(unittest.TestCase):
             self._module_settings_expanded
         )
         RunPipelineDialog._page_range = self._page_range
+        RunPipelineDialog._page_range_project_key = self._page_range_project_key
         for idx, enabled in enumerate(self._stage_states):
             pcfg.module.set_stage_enabled(idx, enabled)
         (
@@ -214,6 +223,9 @@ class RunPipelineDialogTests(unittest.TestCase):
             pcfg.module.llm_translate_vision,
             pcfg.module.llm_translate_summary_memory,
             pcfg.module.llm_translate_overwrite_summary,
+            pcfg.module.project_glossary_enabled,
+            pcfg.module.post_merge_textboxes,
+            pcfg.run_pipeline_reinpaint_only,
         ) = self._pipeline_general_settings
         (
             pcfg.module.ocr,
@@ -244,7 +256,7 @@ class RunPipelineDialogTests(unittest.TestCase):
         postprocess_label = next(
             label
             for label in dialog.findChildren(QLabel, 'RunPipelineSettingLabel')
-            if label.text() == 'Letter Case'
+            if label.text() == 'OCR Letter Case'
         )
         self.assertTrue(postprocess_label.toolTip())
         self.assertTrue(all(button.toolTip() for button in buttons))
@@ -254,6 +266,25 @@ class RunPipelineDialogTests(unittest.TestCase):
             OCRTextPostprocess.UPPERCASE,
         )
         dialog.close()
+
+    def test_run_specific_merge_reinpaint_and_project_glossary_settings(self):
+        dialog = RunPipelineDialog(translator_metadata={'name': 'LLMTranslator'})
+        self.addCleanup(dialog.close)
+
+        controls = (
+            dialog.merge_textboxes,
+            dialog.reinpaint_only,
+            dialog.project_glossary_checkbox,
+        )
+        self.assertTrue(all(control.toolTip() for control in controls))
+
+        dialog.merge_textboxes.click()
+        dialog.reinpaint_only.click()
+        dialog.project_glossary_checkbox.click()
+
+        self.assertTrue(pcfg.module.post_merge_textboxes)
+        self.assertTrue(pcfg.run_pipeline_reinpaint_only)
+        self.assertFalse(pcfg.module.project_glossary_enabled)
 
     def test_typesetting_letter_case_defaults_without_uppercase_migration(self):
         with tempfile.TemporaryDirectory(dir=os.getcwd()) as directory:
@@ -906,6 +937,34 @@ class RunPipelineDialogTests(unittest.TestCase):
         self.assertEqual((widget.range_start.value(), widget.range_end.value()), (30, 40))
         widget.close()
 
+    def test_switching_projects_resets_page_range_to_all_pages(self) -> None:
+        def project(name: str, count: int):
+            pages = {f'{index:03}.png': [] for index in range(1, count + 1)}
+            return SimpleNamespace(
+                directory=os.path.join(os.getcwd(), name),
+                pages=pages,
+                get_page_progress=lambda _page: False,
+            )
+
+        first = project('first-project', 4)
+        second = project('second-project', 3)
+        first_dialog = RunPipelineDialog(project=first)
+        self.addCleanup(first_dialog.close)
+        first_dialog.page_range_progress.set_range(2, 3)
+        self.assertEqual(first_dialog.selected_pages(), ['002.png', '003.png'])
+
+        same_project_dialog = RunPipelineDialog(project=first)
+        self.addCleanup(same_project_dialog.close)
+        self.assertEqual(same_project_dialog.selected_pages(), ['002.png', '003.png'])
+
+        second_dialog = RunPipelineDialog(project=second)
+        self.addCleanup(second_dialog.close)
+        self.assertEqual(
+            second_dialog.selected_pages(),
+            ['001.png', '002.png', '003.png'],
+        )
+        self.assertEqual((second_dialog.range_start.value(), second_dialog.range_end.value()), (1, 3))
+
     def test_action_buttons_return_the_pipeline_choice(self):
         dialog = RunPipelineDialog()
         dialog.run_button.click()
@@ -1479,6 +1538,7 @@ class RunPipelineDialogTests(unittest.TestCase):
         owner = SimpleNamespace(
             imgtrans_proj=SimpleNamespace(is_all_pages_no_text=True),
             on_run_imgtrans=lambda **kwargs: calls.append(kwargs),
+            _request_reinpaint=lambda pages: calls.append({'reinpaint': pages}),
             module_manager=SimpleNamespace(
                 translator_metadata=lambda: {},
                 module_selection_changed=FakeSignal(),
@@ -1497,6 +1557,7 @@ class RunPipelineDialogTests(unittest.TestCase):
             RENDER = RunPipelineDialog.RENDER
             result = 0
             preserve_style = False
+            reinpaint = False
             pages = ['page-2']
             deleted_count = 0
 
@@ -1511,6 +1572,9 @@ class RunPipelineDialogTests(unittest.TestCase):
                 self.module_config_requested = FakeSignal()
                 self.render_without_text_style_update = SimpleNamespace(
                     isChecked=lambda: self.preserve_style
+                )
+                self.reinpaint_only = SimpleNamespace(
+                    isChecked=lambda: self.reinpaint
                 )
 
             def exec_(self):
@@ -1542,6 +1606,12 @@ class RunPipelineDialogTests(unittest.TestCase):
             self.assertEqual(calls, [{'pages_to_process': ['page-2']}])
 
             calls.clear()
+            FakeDialog.reinpaint = True
+            MainWindow.run_imgtrans(owner)
+            self.assertEqual(calls, [{'reinpaint': ['page-2']}])
+
+            calls.clear()
+            FakeDialog.reinpaint = False
             FakeDialog.result = FakeDialog.RENDER
             FakeDialog.preserve_style = True
             MainWindow.run_imgtrans(owner)
@@ -1552,7 +1622,7 @@ class RunPipelineDialogTests(unittest.TestCase):
             FakeDialog.result = 0
             MainWindow.run_imgtrans(owner)
             self.assertEqual(calls, [])
-            self.assertEqual(FakeDialog.deleted_count, 4)
+            self.assertEqual(FakeDialog.deleted_count, 5)
 
     def test_quick_run_dispatches_last_saved_page_range_without_dialog(self):
         calls = []
@@ -1569,6 +1639,9 @@ class RunPipelineDialogTests(unittest.TestCase):
             on_run_imgtrans=lambda **kwargs: calls.append(kwargs),
         )
         RunPipelineDialog._page_range = (2, 3)
+        RunPipelineDialog._page_range_project_key = (
+            'object', id(owner.imgtrans_proj)
+        )
 
         MainWindow.quick_run_imgtrans(owner)
 
@@ -1578,11 +1651,39 @@ class RunPipelineDialogTests(unittest.TestCase):
             [{'pages_to_process': ['002.png', '003.png']}],
         )
 
+    def test_quick_run_can_repaint_saved_page_range_only(self):
+        calls = []
+        project = SimpleNamespace(
+            directory=os.path.join(os.getcwd(), 'reinpaint-project'),
+            pages={'001.png': [], '002.png': [], '003.png': []},
+        )
+        owner = SimpleNamespace(
+            imgtrans_proj=project,
+            _run_imgtrans_wo_textstyle_update=True,
+            on_run_imgtrans=lambda **kwargs: self.fail(
+                f'normal pipeline called: {kwargs}'
+            ),
+            _request_reinpaint=lambda pages: calls.append(pages),
+        )
+        RunPipelineDialog._page_range_project_key = (
+            'directory',
+            os.path.normcase(os.path.abspath(project.directory)),
+            None,
+        )
+        RunPipelineDialog._page_range = (2, 3)
+        pcfg.run_pipeline_reinpaint_only = True
+
+        MainWindow.quick_run_imgtrans(owner)
+
+        self.assertFalse(owner._run_imgtrans_wo_textstyle_update)
+        self.assertEqual(calls, [['002.png', '003.png']])
+
     def test_quick_run_range_uses_safe_persisted_defaults_and_clamps(self):
         project = SimpleNamespace(
             pages={'001.png': [], '002.png': [], '003.png': []}
         )
         RunPipelineDialog._page_range = None
+        RunPipelineDialog._page_range_project_key = ('object', id(project))
         pcfg.run_pipeline_range_start = 'invalid'
         pcfg.run_pipeline_range_end = -5
 
@@ -1766,13 +1867,18 @@ class RunPipelineDialogTests(unittest.TestCase):
             run_pipeline_mode='rendering',
             run_pipeline_range_start=2,
             run_pipeline_range_end=5,
+            run_pipeline_reinpaint_only=True,
             render_without_text_style_update=True,
         )
         restored = ProgramConfig(**json.loads(json_dump_program_config(config)))
         self.assertEqual(restored.run_pipeline_mode, 'rendering')
         self.assertEqual(restored.run_pipeline_range_start, 2)
         self.assertEqual(restored.run_pipeline_range_end, 5)
+        self.assertTrue(restored.run_pipeline_reinpaint_only)
         self.assertTrue(restored.render_without_text_style_update)
+
+        invalid = ProgramConfig(run_pipeline_reinpaint_only='yes')
+        self.assertFalse(invalid.run_pipeline_reinpaint_only)
 
         pcfg.run_pipeline_mode = 'automation'
         dialog = RunPipelineDialog()

@@ -287,6 +287,18 @@
 <context>
     <name>Canvas</name>
     <message>
+        <source>Merge Selected Text Boxes</source>
+        <translation>Ausgewählte Textboxen zusammenführen</translation>
+    </message>
+    <message>
+        <source>Separate overlapping text boxes</source>
+        <translation>Überlappende Textboxen entzerren</translation>
+    </message>
+    <message>
+        <source>Move selected boxes apart with an 8 px gap. Undo restores their positions.</source>
+        <translation>Ausgewählte Textboxen mit 8 px Abstand verschieben. Rückgängig stellt ihre Positionen wieder her.</translation>
+    </message>
+    <message>
         <location filename="../../ballontranslator/ui/canvas.py" line="1774"/>
         <source>Copy</source>
         <translation>Kopieren</translation>
@@ -912,8 +924,7 @@
     <message>
         <location filename="../../ballontranslator/ui/configpanel.py" line="1255"/>
         <source>Letter Case</source>
-        <translation>Groß-/Kleinschreibung
-```</translation>
+        <translation>Groß-/Kleinschreibung</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/configpanel.py" line="1263"/>
@@ -5645,6 +5656,18 @@ qipao,qipao2</source>
         <source>Pages to Run</source>
         <translation>Seiten zum Ausführen</translation>
     </message>
+    <message>
+        <source>Choose the first and last project page included in this run. The complete range is selected when a different project opens.</source>
+        <translation>Wählen Sie die erste und letzte Projektseite für diesen Durchlauf. Beim Öffnen eines anderen Projekts wird der vollständige Bereich ausgewählt.</translation>
+    </message>
+    <message>
+        <source>Number of pages whose enabled pipeline stages are already complete.</source>
+        <translation>Anzahl der Seiten, deren aktivierte Pipeline-Schritte bereits abgeschlossen sind.</translation>
+    </message>
+    <message>
+        <source>Drag the handles to select the page range. Colored segments show the progress of individual pages.</source>
+        <translation>Ziehen Sie die Griffe, um den Seitenbereich auszuwählen. Farbige Segmente zeigen den Fortschritt der einzelnen Seiten.</translation>
+    </message>
 </context>
 <context>
     <name>PageSearchWidget</name>
@@ -6090,8 +6113,8 @@ Starten Sie dann Photoshop neu. Der Explorer öffnet nun die Quelldatei und den 
     <message>
         <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="216"/>
         <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="217"/>
-        <source>Config</source>
-        <translation>Konfiguration</translation>
+        <source>Open settings for this module.</source>
+        <translation>Einstellungen für dieses Modul öffnen.</translation>
     </message>
 </context>
 <context>
@@ -6719,6 +6742,114 @@ Starten Sie dann Photoshop neu. Der Explorer öffnet nun die Quelldatei und den 
 <context>
     <name>RunPipelineDialog</name>
     <message>
+        <source>Choose whether to process the selected pages through enabled modules or only render their existing translations.</source>
+        <translation>Wählen Sie, ob die ausgewählten Seiten mit den aktivierten Modulen verarbeitet oder vorhandene Übersetzungen nur gerendert werden.</translation>
+    </message>
+    <message>
+        <source>Start a fresh run for the selected page range.</source>
+        <translation>Einen neuen Durchlauf für den ausgewählten Seitenbereich starten.</translation>
+    </message>
+    <message>
+        <source>Continue incomplete pages without resetting completed progress.</source>
+        <translation>Unvollständige Seiten fortsetzen, ohne abgeschlossenen Fortschritt zurückzusetzen.</translation>
+    </message>
+    <message>
+        <source>Render the existing translations for the selected project.</source>
+        <translation>Vorhandene Übersetzungen des ausgewählten Projekts rendern.</translation>
+    </message>
+    <message>
+        <source>Keep existing text regions when detection runs instead of replacing them with newly detected regions.</source>
+        <translation>Vorhandene Textregionen bei der Erkennung behalten, statt sie durch neu erkannte Regionen zu ersetzen.</translation>
+    </message>
+    <message>
+        <source>Merge nearby text boxes</source>
+        <translation>Nahe Textboxen zusammenführen</translation>
+    </message>
+    <message>
+        <source>After a successful pipeline run, merge compatible nearby text regions on the selected pages using the configured distance and overlap limits.</source>
+        <translation>Nach einem erfolgreichen Durchlauf passende nahe Textregionen auf den ausgewählten Seiten gemäß den eingestellten Abstands- und Überlappungsgrenzen zusammenführen.</translation>
+    </message>
+    <message>
+        <source>Remove text regions whose recognized source text is empty after OCR finishes.</source>
+        <translation>Textregionen entfernen, deren erkannter Quelltext nach OCR leer ist.</translation>
+    </message>
+    <message>
+        <source>Estimate font properties from the source image after OCR. This can add processing time.</source>
+        <translation>Schrifteigenschaften nach OCR anhand des Quellbildes schätzen. Dies kann zusätzliche Zeit benötigen.</translation>
+    </message>
+    <message>
+        <source>Send the full page to the selected LLM OCR instead of recognizing each detected region separately.</source>
+        <translation>Die ganze Seite an das ausgewählte OCR-LLM senden, statt jede erkannte Region einzeln zu verarbeiten.</translation>
+    </message>
+    <message>
+        <source>Hide non-text image areas from page-level LLM OCR to reduce visual distractions.</source>
+        <translation>Bildbereiche ohne Text für seitenbasierte LLM-OCR ausblenden, um Ablenkungen zu reduzieren.</translation>
+    </message>
+    <message>
+        <source>Let page-level LLM OCR determine the reading order of the recognized text regions.</source>
+        <translation>Die Lesereihenfolge der erkannten Textregionen durch seitenbasierte LLM-OCR bestimmen lassen.</translation>
+    </message>
+    <message>
+        <source>Skip regions whose background is simple enough to restore without running the selected inpainting model.</source>
+        <translation>Regionen mit einfachem Hintergrund ohne das ausgewählte Inpainting-Modell wiederherstellen.</translation>
+    </message>
+    <message>
+        <source>Limit the inpainting mask to detected text-region bounds to avoid changing unrelated image areas.</source>
+        <translation>Die Inpainting-Maske auf erkannte Textregionen begrenzen, um andere Bildbereiche nicht zu verändern.</translation>
+    </message>
+    <message>
+        <source>Re-run inpainting only</source>
+        <translation>Nur Inpainting erneut ausführen</translation>
+    </message>
+    <message>
+        <source>Run only the selected inpainter on saved masks and existing text regions for the selected pages. Detection, OCR, and translation are not repeated.</source>
+        <translation>Nur das ausgewählte Inpainting-Modell mit gespeicherten Masken und vorhandenen Textregionen auf den ausgewählten Seiten ausführen. Erkennung, OCR und Übersetzung werden nicht wiederholt.</translation>
+    </message>
+    <message>
+        <source>Source language of the recognized text. Auto-detect lets the translator determine it when supported.</source>
+        <translation>Sprache des erkannten Textes. Automatische Erkennung wird genutzt, wenn der Übersetzer sie unterstützt.</translation>
+    </message>
+    <message>
+        <source>Language into which the recognized text will be translated.</source>
+        <translation>Sprache, in die der erkannte Text übersetzt wird.</translation>
+    </message>
+    <message>
+        <source>Translate each text region separately or translate all regions on a page together for additional context.</source>
+        <translation>Jede Textregion einzeln oder alle Regionen einer Seite gemeinsam mit zusätzlichem Kontext übersetzen.</translation>
+    </message>
+    <message>
+        <source>Use only the current page or also include prior translated pages within the token budget.</source>
+        <translation>Nur die aktuelle Seite oder auch zuvor übersetzte Seiten innerhalb des Tokenbudgets verwenden.</translation>
+    </message>
+    <message>
+        <source>Optional external glossary file used in addition to the glossary built for the current project.</source>
+        <translation>Optionale externe Glossardatei, die zusätzlich zum aufgebauten Projektglossar verwendet wird.</translation>
+    </message>
+    <message>
+        <source>Select an external glossary file.</source>
+        <translation>Eine externe Glossardatei auswählen.</translation>
+    </message>
+    <message>
+        <source>Include only glossary entries matching the current source text, or include every entry from the external glossary file.</source>
+        <translation>Nur zum aktuellen Quelltext passende Einträge oder alle Einträge aus der externen Glossardatei einbeziehen.</translation>
+    </message>
+    <message>
+        <source>Project Glossary</source>
+        <translation>Projektglossar</translation>
+    </message>
+    <message>
+        <source>Use matching entries from the glossary built for this project to keep names and terminology consistent during LLM translation. The selected LLM profile must also allow glossary use.</source>
+        <translation>Passende Einträge des aufgebauten Projektglossars verwenden, um Namen und Begriffe bei LLM-Übersetzungen konsistent zu halten. Auch das ausgewählte LLM-Profil muss die Glossarnutzung erlauben.</translation>
+    </message>
+    <message>
+        <source>Choose whether a failed translation request is retried, skipped, or stops the complete pipeline.</source>
+        <translation>Festlegen, ob eine fehlgeschlagene Übersetzung wiederholt, übersprungen oder der gesamte Durchlauf abgebrochen wird.</translation>
+    </message>
+    <message>
+        <source>Render with each text box’s currently stored style without applying the active global text style first.</source>
+        <translation>Mit den gespeicherten Stilen der Textboxen rendern, ohne zuerst den aktiven globalen Textstil anzuwenden.</translation>
+    </message>
+    <message>
         <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="381"/>
         <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="408"/>
         <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="447"/>
@@ -6816,14 +6947,13 @@ Starten Sie dann Photoshop neu. Der Explorer öffnet nun die Quelldatei und den 
     </message>
     <message>
         <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="845"/>
-        <source>Letter Case</source>
-        <translation>Groß-/Kleinschreibung
-```</translation>
+        <source>OCR Letter Case</source>
+        <translation>OCR-Groß-/Kleinschreibung</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="848"/>
-        <source>Choose how OCR text letter case is adjusted after keyword substitution.</source>
-        <translation>Wählen Sie, wie die Groß- und Kleinschreibung des OCR-Textes nach der Schlüsselwortsubstitution angepasst wird.</translation>
+        <source>Choose how recognized source text letter case is adjusted after OCR keyword substitution. This does not change translated text.</source>
+        <translation>Wählen Sie, wie die Groß-/Kleinschreibung des erkannten Quelltexts nach der OCR-Schlüsselwortersetzung angepasst wird. Übersetzter Text wird dadurch nicht verändert.</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="856"/>

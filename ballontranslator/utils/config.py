@@ -554,6 +554,7 @@ class ProgramConfig(Config):
     run_pipeline_mode: str = 'pipeline'
     run_pipeline_range_start: int = 1
     run_pipeline_range_end: int = 0
+    run_pipeline_reinpaint_only: bool = False
     render_without_text_style_update: bool = False
 
     let_fntsize_flag: int = 0
@@ -605,6 +606,12 @@ class ProgramConfig(Config):
     custom_colors: List[str] = field(default_factory=list)
 
     def __post_init__(self) -> None:
+        if type(self.run_pipeline_reinpaint_only) is not bool:
+            LOGGER.warning(
+                'Discard invalid run_pipeline_reinpaint_only config %r.',
+                self.run_pipeline_reinpaint_only,
+            )
+            self.run_pipeline_reinpaint_only = False
         if type(self.remove_translation_line_breaks) is not bool:
             LOGGER.warning(
                 'Discard invalid remove_translation_line_breaks config %r.',

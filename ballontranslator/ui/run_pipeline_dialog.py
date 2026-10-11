@@ -213,8 +213,9 @@ class PipelineModuleActivator(QWidget):
         self.config_button.setIcon(
             QIcon(themed_icon_path('leftbar_config_activate.svg'))
         )
-        self.config_button.setToolTip(self.tr('Config'))
-        self.config_button.setAccessibleName(self.tr('Config'))
+        config_help = self.tr('Open settings for this module.')
+        self.config_button.setToolTip(config_help)
+        self.config_button.setAccessibleName(config_help)
         self.config_button.clicked.connect(self._request_config)
         self.module_combo = QComboBox(self)
         self.module_combo.hide()
@@ -365,6 +366,7 @@ class RunPipelineDialog(QDialog):
     RESIZE_BORDER_WIDTH = 5
     _module_settings_expanded = (False, False, False, False)
     _page_range = None
+    _page_range_project_key = None
 
     def __init__(
         self,
@@ -413,6 +415,10 @@ class RunPipelineDialog(QDialog):
         self.workflow_selector = BottomBorderComboBox(surface)
         self.workflow_selector.setObjectName('RunPipelineWorkflowSelector')
         self.workflow_selector.addItems((self.tr('Pipeline'), self.tr('Rendering')))
+        self.workflow_selector.setToolTip(self.tr(
+            'Choose whether to process the selected pages through enabled '
+            'modules or only render their existing translations.'
+        ))
         pipeline_mode = str(pcfg.run_pipeline_mode).lower()
         mode_indexes = {'pipeline': 0, 'rendering': 1}
         self.workflow_selector.setCurrentIndex(mode_indexes.get(pipeline_mode, 0))
@@ -446,10 +452,16 @@ class RunPipelineDialog(QDialog):
 
         self.run_button = QPushButton(self.tr('Run'), surface)
         self.run_button.setObjectName('RunPipelinePrimaryButton')
+        self.run_button.setToolTip(self.tr(
+            'Start a fresh run for the selected page range.'
+        ))
         self.run_button.clicked.connect(self._finish_run)
 
         self.continue_button = QPushButton(self.tr('Continue'), surface)
         self.continue_button.setObjectName('RunPipelineSecondaryButton')
+        self.continue_button.setToolTip(self.tr(
+            'Continue incomplete pages without resetting completed progress.'
+        ))
         self.continue_button.setDefault(True)
         self.continue_button.clicked.connect(self._finish_continue)
         button_row.addWidget(self.run_button)
@@ -457,6 +469,9 @@ class RunPipelineDialog(QDialog):
 
         self.render_button = QPushButton(self.tr('Render'), surface)
         self.render_button.setObjectName('RunPipelinePrimaryButton')
+        self.render_button.setToolTip(self.tr(
+            'Render the existing translations for the selected project.'
+        ))
         self.render_button.clicked.connect(self._finish_render)
         self.render_button.hide()
         button_row.addWidget(self.render_button)
@@ -718,7 +733,7 @@ class RunPipelineDialog(QDialog):
         return page
 
     def _build_general_settings(self, section: QWidget, layout: QVBoxLayout):
-        start, end = type(self)._stored_page_range()
+        start, end = type(self)._stored_page_range(self.project)
         self.page_range_progress = PageRangeProgressWidget(
             self._project_page_names(),
             start=start,
@@ -743,10 +758,13 @@ class RunPipelineDialog(QDialog):
         checked: bool,
         target: object,
         attribute: str,
+        tooltip: str = '',
     ) -> QCheckBox:
         checkbox = QCheckBox(text, parent)
         checkbox.setObjectName(object_name)
         checkbox.setChecked(checked)
+        if tooltip:
+            checkbox.setToolTip(tooltip)
         self._checkbox_settings[checkbox] = (target, attribute)
         checkbox.toggled.connect(self._on_checkbox_setting_toggled)
         layout.addWidget(checkbox)
@@ -771,6 +789,24 @@ class RunPipelineDialog(QDialog):
             pcfg.module.keep_exist_textlines,
             pcfg.module,
             'keep_exist_textlines',
+            self.tr(
+                'Keep existing text regions when detection runs instead of '
+                'replacing them with newly detected regions.'
+            ),
+        )
+        self.merge_textboxes = self._add_checkbox_setting(
+            section,
+            layout,
+            'RunPipelineMergeTextboxes',
+            self.tr('Merge nearby text boxes'),
+            pcfg.module.post_merge_textboxes,
+            pcfg.module,
+            'post_merge_textboxes',
+            self.tr(
+                'After a successful pipeline run, merge compatible nearby '
+                'text regions on the selected pages using the configured '
+                'distance and overlap limits.'
+            ),
         )
 
     def _build_ocr_settings(self, section: QWidget, layout: QVBoxLayout):
@@ -782,6 +818,10 @@ class RunPipelineDialog(QDialog):
             pcfg.restore_ocr_empty,
             pcfg,
             'restore_ocr_empty',
+            self.tr(
+                'Remove text regions whose recognized source text is empty '
+                'after OCR finishes.'
+            ),
         )
         self.font_detection = self._add_checkbox_setting(
             section,
@@ -791,6 +831,10 @@ class RunPipelineDialog(QDialog):
             pcfg.module.ocr_font_detect,
             pcfg.module,
             'ocr_font_detect',
+            self.tr(
+                'Estimate font properties from the source image after OCR. '
+                'This can add processing time.'
+            ),
         )
 
         self.llm_ocr_settings = QWidget(section)
@@ -806,6 +850,10 @@ class RunPipelineDialog(QDialog):
             pcfg.module.ocr_llm_page_level,
             pcfg.module,
             'ocr_llm_page_level',
+            self.tr(
+                'Send the full page to the selected LLM OCR instead of '
+                'recognizing each detected region separately.'
+            ),
         )
         self.llm_ocr_mask_non_text = self._add_checkbox_setting(
             self.llm_ocr_settings,
@@ -815,6 +863,10 @@ class RunPipelineDialog(QDialog):
             pcfg.module.ocr_llm_mask_non_text,
             pcfg.module,
             'ocr_llm_mask_non_text',
+            self.tr(
+                'Hide non-text image areas from page-level LLM OCR to reduce '
+                'visual distractions.'
+            ),
         )
         self.llm_ocr_reading_order = self._add_checkbox_setting(
             self.llm_ocr_settings,
@@ -824,6 +876,10 @@ class RunPipelineDialog(QDialog):
             pcfg.module.ocr_llm_sort_reading_order,
             pcfg.module,
             'ocr_llm_sort_reading_order',
+            self.tr(
+                'Let page-level LLM OCR determine the reading order of the '
+                'recognized text regions.'
+            ),
         )
         self.llm_ocr_page_level.toggled.connect(
             self._sync_llm_ocr_option_state
@@ -842,10 +898,14 @@ class RunPipelineDialog(QDialog):
         postprocess_layout.setContentsMargins(0, 0, 0, 0)
         postprocess_layout.setSpacing(12)
 
-        postprocess_label = QLabel(self.tr('Letter Case'), postprocess_options_row)
+        postprocess_label = QLabel(
+            self.tr('OCR Letter Case'),
+            postprocess_options_row,
+        )
         postprocess_label.setObjectName('RunPipelineSettingLabel')
         postprocess_label.setToolTip(self.tr(
-            'Choose how OCR text letter case is adjusted after keyword substitution.'
+            'Choose how recognized source text letter case is adjusted after '
+            'OCR keyword substitution. This does not change translated text.'
         ))
         postprocess_layout.addWidget(postprocess_label)
 
@@ -908,6 +968,10 @@ class RunPipelineDialog(QDialog):
             pcfg.module.check_need_inpaint,
             pcfg.module,
             'check_need_inpaint',
+            self.tr(
+                'Skip regions whose background is simple enough to restore '
+                'without running the selected inpainting model.'
+            ),
         )
         self.filter_mask_by_text_boxes = self._add_checkbox_setting(
             section,
@@ -917,6 +981,24 @@ class RunPipelineDialog(QDialog):
             pcfg.module.filter_mask_by_bboxes,
             pcfg.module,
             'filter_mask_by_bboxes',
+            self.tr(
+                'Limit the inpainting mask to detected text-region bounds to '
+                'avoid changing unrelated image areas.'
+            ),
+        )
+        self.reinpaint_only = self._add_checkbox_setting(
+            section,
+            layout,
+            'RunPipelineReinpaintOnly',
+            self.tr('Re-run inpainting only'),
+            pcfg.run_pipeline_reinpaint_only,
+            pcfg,
+            'run_pipeline_reinpaint_only',
+            self.tr(
+                'Run only the selected inpainter on saved masks and existing '
+                'text regions for the selected pages. Detection, OCR, and '
+                'translation are not repeated.'
+            ),
         )
 
     def _translation_options(self, key: str, current: str):
@@ -975,6 +1057,12 @@ class RunPipelineDialog(QDialog):
             source_language,
         )
         self.source_combobox.setFixedWidth(RUN_PIPELINE_SETTING_CONTROL_WIDTH)
+        source_help = self.tr(
+            'Source language of the recognized text. Auto-detect lets the '
+            'translator determine it when supported.'
+        )
+        source_label.setToolTip(source_help)
+        self.source_combobox.setToolTip(source_help)
         source_layout.addWidget(self.source_combobox)
 
         target_row = QWidget(section)
@@ -1000,6 +1088,11 @@ class RunPipelineDialog(QDialog):
             target_language,
         )
         self.target_combobox.setFixedWidth(RUN_PIPELINE_SETTING_CONTROL_WIDTH)
+        target_help = self.tr(
+            'Language into which the recognized text will be translated.'
+        )
+        target_label.setToolTip(target_help)
+        self.target_combobox.setToolTip(target_help)
         target_layout.addWidget(self.target_combobox)
         translation_grid.addWidget(source_row, 0, 0)
         translation_grid.addWidget(target_row, 0, 1)
@@ -1021,6 +1114,12 @@ class RunPipelineDialog(QDialog):
         context_index = self.context_combobox.findData(pcfg.module.translate_context)
         self.context_combobox.setCurrentIndex(max(context_index, 0))
         self.context_combobox.setFixedWidth(RUN_PIPELINE_SETTING_CONTROL_WIDTH)
+        context_help = self.tr(
+            'Translate each text region separately or translate all regions '
+            'on a page together for additional context.'
+        )
+        context_label.setToolTip(context_help)
+        self.context_combobox.setToolTip(context_help)
         context_layout.addWidget(self.context_combobox)
 
         llm_context_row = QWidget(section)
@@ -1050,6 +1149,12 @@ class RunPipelineDialog(QDialog):
         self.llm_context_combobox.setFixedWidth(
             RUN_PIPELINE_SETTING_CONTROL_WIDTH
         )
+        llm_context_help = self.tr(
+            'Use only the current page or also include prior translated '
+            'pages within the token budget.'
+        )
+        llm_context_label.setToolTip(llm_context_help)
+        self.llm_context_combobox.setToolTip(llm_context_help)
         llm_context_layout.addWidget(self.llm_context_combobox)
         llm_context_row.setVisible(self._llm_settings_visible)
 
@@ -1106,9 +1211,15 @@ class RunPipelineDialog(QDialog):
         self.glossary_path_edit.setReadOnly(True)
         self.glossary_path_edit.setFixedWidth(RUN_PIPELINE_GLOSSARY_DISPLAY_WIDTH)
         self._set_glossary_path_display(pcfg.module.llm_glossary_path)
+        glossary_file_help = self.tr(
+            'Optional external glossary file used in addition to the glossary '
+            'built for the current project.'
+        )
+        glossary_label.setToolTip(glossary_file_help)
+        self.glossary_path_edit.setToolTip(glossary_file_help)
         glossary_layout.addWidget(self.glossary_path_edit)
         self.glossary_file_button = self.glossary_path_edit.select_button
-        select_glossary_text = self.tr('Select Glossary File')
+        select_glossary_text = self.tr('Select an external glossary file.')
         self.glossary_file_button.setToolTip(select_glossary_text)
         self.glossary_file_button.setAccessibleName(select_glossary_text)
 
@@ -1131,6 +1242,10 @@ class RunPipelineDialog(QDialog):
         self.glossary_mode_combobox.setFixedWidth(
             RUN_PIPELINE_SETTING_CONTROL_WIDTH
         )
+        glossary_mode_help = self.tr(
+            'Include only glossary entries matching the current source text, '
+            'or include every entry from the external glossary file.'
+        )
         glossary_row.setVisible(self._llm_settings_visible)
         mode_row = QWidget(section)
         self.glossary_mode_row = mode_row
@@ -1140,6 +1255,8 @@ class RunPipelineDialog(QDialog):
         mode_layout.setSpacing(8)
         mode_label = QLabel(self.tr('Mode'), mode_row)
         mode_label.setObjectName('RunPipelineSettingLabel')
+        mode_label.setToolTip(glossary_mode_help)
+        self.glossary_mode_combobox.setToolTip(glossary_mode_help)
         mode_layout.addWidget(mode_label)
         mode_layout.addStretch()
         mode_layout.addWidget(self.glossary_mode_combobox)
@@ -1186,9 +1303,32 @@ class RunPipelineDialog(QDialog):
         self.llm_summary_memory_checkbox.setChecked(
             pcfg.module.llm_translate_summary_memory
         )
+        self.project_glossary_checkbox = QCheckBox(
+            self.tr('Project Glossary'),
+            self.llm_context_header_row,
+        )
+        self.project_glossary_checkbox.setObjectName(
+            'RunPipelineLLMFeatureCheckBox'
+        )
+        self.project_glossary_checkbox.setChecked(
+            pcfg.module.project_glossary_enabled
+        )
+        self._checkbox_settings[self.project_glossary_checkbox] = (
+            pcfg.module,
+            'project_glossary_enabled',
+        )
+        self.project_glossary_checkbox.toggled.connect(
+            self._on_checkbox_setting_toggled
+        )
+        self.project_glossary_checkbox.setToolTip(self.tr(
+            'Use matching entries from the glossary built for this project '
+            'to keep names and terminology consistent during LLM translation. '
+            'The selected LLM profile must also allow glossary use.'
+        ))
         for checkbox in (
             self.llm_vision_checkbox,
             self.llm_summary_memory_checkbox,
+            self.project_glossary_checkbox,
         ):
             checkbox.setSizePolicy(
                 QSizePolicy.Policy.Fixed,
@@ -1197,6 +1337,9 @@ class RunPipelineDialog(QDialog):
         llm_context_header_layout.addWidget(self.llm_vision_checkbox)
         llm_context_header_layout.addWidget(
             self.llm_summary_memory_checkbox
+        )
+        llm_context_header_layout.addWidget(
+            self.project_glossary_checkbox
         )
         llm_context_header_layout.addStretch()
         self.llm_context_header_row.setVisible(
@@ -1273,6 +1416,12 @@ class RunPipelineDialog(QDialog):
         self.translation_failure_combobox.setFixedWidth(
             RUN_PIPELINE_SETTING_CONTROL_WIDTH
         )
+        failure_help = self.tr(
+            'Choose whether a failed translation request is retried, skipped, '
+            'or stops the complete pipeline.'
+        )
+        failure_label.setToolTip(failure_help)
+        self.translation_failure_combobox.setToolTip(failure_help)
         failure_layout.addWidget(self.translation_failure_combobox)
         translation_grid.addWidget(failure_row, 5, 0, 1, 2)
 
@@ -1488,8 +1637,30 @@ class RunPipelineDialog(QDialog):
             return []
         return pages[self.range_start.value() - 1 : self.range_end.value()]
 
+    @staticmethod
+    def _project_page_range_key(project: ProjImgTrans):
+        """Return a stable in-session key for page-range ownership."""
+
+        directory = str(getattr(project, 'directory', '') or '')
+        if directory:
+            return ('directory', os.path.normcase(os.path.abspath(directory)), getattr(project, 'load_identity', None))
+        return ('object', id(project))
+
     @classmethod
-    def _stored_page_range(cls) -> Tuple[int, Optional[int]]:
+    def _stored_page_range(
+        cls,
+        project: ProjImgTrans = None,
+    ) -> Tuple[int, Optional[int]]:
+        if project is not None:
+            project_key = cls._project_page_range_key(project)
+            if project_key != cls._page_range_project_key:
+                # A page interval belongs to one project only. Starting a new
+                # project with an old interval can silently omit pages.
+                cls._page_range_project_key = project_key
+                cls._page_range = (1, None)
+                pcfg.run_pipeline_range_start = 1
+                pcfg.run_pipeline_range_end = 0
+                return cls._page_range
         if cls._page_range is not None:
             return cls._page_range
         start = pcfg.run_pipeline_range_start
@@ -1519,7 +1690,7 @@ class RunPipelineDialog(QDialog):
         pages = list(getattr(project, 'pages', {}) or {})
         if not pages:
             return []
-        start, end = cls._stored_page_range()
+        start, end = cls._stored_page_range(project)
         start_index = min(max(start - 1, 0), len(pages) - 1)
         end_index = len(pages) if end is None else min(max(end, start), len(pages))
         return pages[start_index:end_index]
@@ -1682,12 +1853,18 @@ class RunPipelineDialog(QDialog):
         self.render_without_text_style_update.setChecked(
             pcfg.render_without_text_style_update
         )
+        render_style_help = self.tr(
+            'Render with each text box’s currently stored style without '
+            'applying the active global text style first.'
+        )
+        self.render_without_text_style_update.setToolTip(render_style_help)
         self.render_without_text_style_update.toggled.connect(
             self._on_render_without_text_style_update_changed
         )
         setting_layout.addWidget(self.render_without_text_style_update)
         setting_label = QLabel(self.tr('Render without update text style'), setting_row)
         setting_label.setObjectName('RunPipelineRenderingSettingLabel')
+        setting_label.setToolTip(render_style_help)
         setting_layout.addWidget(setting_label)
         setting_layout.addStretch()
         layout.addWidget(setting_row)
