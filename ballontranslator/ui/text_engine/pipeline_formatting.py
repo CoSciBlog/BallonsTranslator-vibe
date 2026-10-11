@@ -19,6 +19,7 @@ from ballontranslator.utils.fontformat import font_weight_to_qt
 from ballontranslator.utils.message import create_error_dialog
 from ballontranslator.utils.textblock import TextBlock
 from .font_family import qfont_with_family
+from .formatting.text_case import text_case_capitalization
 from .annotations import (
     apply_auto_text_combine_upright,
     apply_letter_spacing,
@@ -43,6 +44,7 @@ def _load_text_block_document(block: TextBlock) -> QTextDocument:
     )))
     font.setItalic(font_format.italic)
     font.setUnderline(font_format.underline)
+    font.setCapitalization(text_case_capitalization(font_format.text_case))
     document.setDefaultFont(font)
 
     if block.rich_text:

@@ -51,6 +51,33 @@ TEXT_TRANSFORM_GRID_DIVISION_MIN = 1
 TEXT_TRANSFORM_GRID_DIVISION_MAX = 32
 TEXT_TRANSFORM_PRECISION = 6
 
+TEXT_CASE_NORMAL = 'normal'
+TEXT_CASE_LOWERCASE = 'lowercase'
+TEXT_CASE_UPPERCASE = 'uppercase'
+TEXT_CASE_VALUES = (
+    TEXT_CASE_NORMAL,
+    TEXT_CASE_LOWERCASE,
+    TEXT_CASE_UPPERCASE,
+)
+
+
+def normalize_text_case(value: object) -> str:
+    """Return a supported non-destructive text-case display mode.
+
+    >>> normalize_text_case('UPPERCASE')
+    'uppercase'
+    >>> normalize_text_case('invalid')
+    'normal'
+    """
+    if not isinstance(value, str):
+        return TEXT_CASE_NORMAL
+    normalized = value.strip().lower()
+    return (
+        normalized
+        if normalized in TEXT_CASE_VALUES
+        else TEXT_CASE_NORMAL
+    )
+
 
 def _transform_value_field_names(
     transform: Union["TextTransform", type["TextTransform"]],
@@ -733,6 +760,7 @@ class FontFormat(Config):
     gradient_size: float = 1.0
     _style_name: str = ''
     line_spacing_type: int = LineSpacingType.Proportional
+    text_case: str = TEXT_CASE_NORMAL
 
     # Runtime owns one value; persistence keeps its existing list and flat
     # Glyph Slant fields for project/config compatibility.
@@ -859,6 +887,14 @@ class FontFormat(Config):
                     getattr(self, name),
                 )
                 setattr(self, name, 'default')
+
+        normalized_text_case = normalize_text_case(self.text_case)
+        if normalized_text_case != self.text_case:
+            LOGGER.warning(
+                'Ignoring invalid text case value (%r); using normal.',
+                self.text_case,
+            )
+        self.text_case = normalized_text_case
 
         self.font_weight = coerce_font_weight(self.font_weight)
         if not isinstance(self.text_transform, TextTransformStack):

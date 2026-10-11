@@ -19,6 +19,7 @@ from qtpy.QtGui import (
     QCursor,
     QDragEnterEvent,
     QDropEvent,
+    QFont,
     QImage,
     QInputMethodEvent,
     QKeyEvent,
@@ -104,6 +105,9 @@ from ballontranslator.utils.fontformat import (
     GridTextTransform,
     ProjectiveTextTransform,
     SineTextTransform,
+    TEXT_CASE_LOWERCASE,
+    TEXT_CASE_NORMAL,
+    TEXT_CASE_UPPERCASE,
     TextTransformStack,
 )
 from ballontranslator.utils import shared
@@ -272,6 +276,16 @@ class TextTransformTestBase(unittest.TestCase):
 
 
 class ExtendedTextTransformModelTest(TextTransformTestBase):
+    def test_text_case_round_trips_and_invalid_values_are_discarded(self):
+        font_format = FontFormat(text_case=TEXT_CASE_UPPERCASE)
+        serialized = font_format.to_serializable_dict()
+        self.assertEqual(serialized['text_case'], TEXT_CASE_UPPERCASE)
+        self.assertEqual(
+            FontFormat(**serialized).text_case,
+            TEXT_CASE_UPPERCASE,
+        )
+        self.assertEqual(FontFormat(text_case='invalid').text_case, 'normal')
+
     def test_projective_and_bend_payloads_round_trip(self):
         payloads = (
             {
@@ -838,6 +852,62 @@ class TextTransformPanelTest(TextTransformTestBase):
         with self.assertRaisesRegex(TypeError, 'requires TextTransformStack'):
             panel._set_transform_states([font_format])
 
+    def test_text_case_button_cycles_without_changing_source_text(self):
+        panel = self._make_panel()
+        requested = []
+        panel.text_case_requested.connect(requested.append)
+
+        panel.set_active_format(FontFormat(text_case=TEXT_CASE_NORMAL))
+        self.assertEqual(panel.text_case_button.text(), 'Aa')
+        panel.text_case_button.click()
+        self.assertEqual(panel.text_case_button.text(), 'aa')
+        panel.text_case_button.click()
+        self.assertEqual(panel.text_case_button.text(), 'AA')
+        panel.text_case_button.click()
+        self.assertEqual(panel.text_case_button.text(), 'Aa')
+        self.assertEqual(
+            requested,
+            [
+                TEXT_CASE_LOWERCASE,
+                TEXT_CASE_UPPERCASE,
+                TEXT_CASE_NORMAL,
+            ],
+        )
+
+        item, _pair = self._make_pair(0, 'MiXeD Text', False)
+        self.addCleanup(item.deleteLater)
+        item.setTextCase(TEXT_CASE_UPPERCASE)
+        self.assertEqual(item.toPlainText(), 'MiXeD Text')
+        self.assertEqual(
+            item.get_fontformat().text_case,
+            TEXT_CASE_UPPERCASE,
+        )
+        self.assertEqual(
+            item.textCursor().charFormat().fontCapitalization(),
+            QFont.Capitalization.AllUppercase,
+        )
+        item.document().undo()
+        self.assertEqual(item.toPlainText(), 'MiXeD Text')
+        self.assertEqual(item.get_fontformat().text_case, TEXT_CASE_NORMAL)
+
+    def test_text_case_button_reports_mixed_selection(self):
+        panel = self._make_panel()
+        items = [
+            SimpleNamespace(blk=SimpleNamespace(fontformat=font_format))
+            for font_format in (
+                FontFormat(text_case=TEXT_CASE_LOWERCASE),
+                FontFormat(text_case=TEXT_CASE_UPPERCASE),
+            )
+        ]
+        panel.set_transform_items(items)
+        self.assertEqual(panel.text_case_button.text(), '—')
+
+        requested = []
+        panel.text_case_requested.connect(requested.append)
+        panel.text_case_button.click()
+        self.assertEqual(requested, [TEXT_CASE_NORMAL])
+        self.assertEqual(panel.text_case_button.text(), 'Aa')
+
     def test_stack_shape_update_syncs_content_height_once(self):
         panel = self._make_panel()
         with patch.object(
@@ -879,6 +949,37 @@ class TextTransformPanelTest(TextTransformTestBase):
             format_panel.set_textblk_item(item)
 
         set_transform_states.assert_called_once()
+
+    def test_font_format_panel_applies_text_case_to_selected_item(self):
+        previous_canvas = getattr(SW, 'canvas', None)
+        previous_active_format = C.active_format
+        canvas = Canvas()
+        SW.canvas = canvas
+        self.addCleanup(setattr, SW, 'canvas', previous_canvas)
+        self.addCleanup(setattr, C, 'active_format', previous_active_format)
+        self.addCleanup(canvas.gv.deleteLater)
+        item, _ = self._make_pair(0, 'MiXeD Text', False)
+        item.setParentItem(canvas.textLayer)
+
+        with patch.object(
+            shared,
+            'register_view_widget',
+            lambda *_args: None,
+            create=True,
+        ):
+            format_panel = FontFormatPanel(self.app)
+        format_panel.global_format = FontFormat()
+        self.addCleanup(format_panel.deleteLater)
+
+        format_panel.set_textblk_item(item)
+        format_panel.texttransform_panel.text_case_button.click()
+
+        self.assertEqual(item.toPlainText(), 'MiXeD Text')
+        self.assertEqual(item.get_fontformat().text_case, TEXT_CASE_LOWERCASE)
+        self.assertEqual(
+            item.textCursor().charFormat().fontCapitalization(),
+            QFont.Capitalization.AllLowercase,
+        )
 
     def test_cursor_letter_spacing_does_not_replace_item_default(self):
         previous_canvas = getattr(SW, 'canvas', None)

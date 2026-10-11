@@ -42,6 +42,10 @@ from .font_family import (
     font_family_for_project,
     qfont_with_family,
 )
+from .formatting.text_case import (
+    text_case_capitalization,
+    text_case_from_capitalization,
+)
 from .editing.context_menu import create_text_edit_context_menu
 from ..misc import td_pattern, table_pattern
 from .horizontal_layout import HorizontalTextDocumentLayout
@@ -1558,6 +1562,9 @@ class TextBlkItem(QGraphicsTextItem):
             fontformat.font_size = self.minFontSize()
         fontformat.underline = font.underline()
         fontformat.italic = font.italic()
+        fontformat.text_case = text_case_from_capitalization(
+            font.capitalization()
+        )
         fontformat.letter_spacing = self.letter_spacing_value()
         if self.document().isEmpty():
             for axis in (
@@ -1611,6 +1618,7 @@ class TextBlkItem(QGraphicsTextItem):
             font_weight_to_qt(ffmat.font_weight, qt6=QT6)
         )
         font.setWeight(fweight)
+        font.setCapitalization(text_case_capitalization(ffmat.text_case))
 
         self.document().setDefaultFont(font)
         format.setFont(font)
@@ -1861,6 +1869,32 @@ class TextBlkItem(QGraphicsTextItem):
         cfmt.setFontUnderline(value)
         self.set_cursor_cfmt(cursor, cfmt, True)
         self._after_set_ffmt(cursor, repaint_background, restore_cursor, **after_kwargs)
+
+    def setTextCase(
+        self,
+        value: str,
+        repaint_background: bool = True,
+        set_selected: bool = False,
+        restore_cursor: bool = False,
+    ) -> None:
+        """Apply item-wide display casing without changing stored text.
+
+        >>> callable(TextBlkItem.setTextCase)
+        True
+        """
+        del set_selected  # Text Transform controls always target whole items.
+        cursor, after_kwargs = self._before_set_ffmt(False, restore_cursor)
+        capitalization = text_case_capitalization(value)
+        cfmt = QTextCharFormat()
+        cfmt.setFontCapitalization(capitalization)
+        self.set_cursor_cfmt(cursor, cfmt, True)
+        self.layout.reLayoutEverything()
+        self._after_set_ffmt(
+            cursor,
+            repaint_background,
+            restore_cursor,
+            **after_kwargs,
+        )
 
     def _active_char_format(self) -> QTextCharFormat:
         """Return a direction-independent format for panel synchronization."""

@@ -1012,6 +1012,9 @@ class FontFormatPanel(Widget):
             config_name='text_transform_panel',
             config_expand_name='expand_ttransform_panel',
         )
+        self.texttransform_panel.text_case_requested.connect(
+            self.on_text_case_requested
+        )
         self.text_transform_session = TextTransformEditSession(
             self,
             self.texttransform_panel,
@@ -1118,6 +1121,9 @@ class FontFormatPanel(Widget):
             self.update_text_style_label()
         else:
             func(param_name, value, C.active_format, is_global=False, blkitems=self.textblk_item, set_focus=True, **func_kwargs)
+
+    def on_text_case_requested(self, value: str) -> None:
+        self.on_param_changed('text_case', value)
 
     def on_font_family_changed(
         self, param_name: str, font_family: str

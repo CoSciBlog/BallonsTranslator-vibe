@@ -35,7 +35,7 @@
   - Adapted to images with extreme aspect ratio such as webtoons
   
 * Text editing
-  - Supports WYSIWYG rich-text editing and [text style presets](https://github.com/dmMaze/BallonsTranslator/pull/311), including a theme-aware preset context menu in both light and dark modes.
+  - Supports WYSIWYG rich-text editing and [text style presets](https://github.com/dmMaze/BallonsTranslator/pull/311), including a theme-aware preset context menu in both light and dark modes. The **Text Transform** panel includes a non-destructive `Aa` control that cycles text display through normal, lowercase, and uppercase without replacing the stored translation.
   - Supports a rich set of [text effects](https://github.com/dmMaze/BallonsTranslator/pull/1296) and [text transforms](https://github.com/dmMaze/BallonsTranslator/pull/1238)
   - The compact font-format toolbar keeps the foreground color picker beside the font selector. Stroke color is configured with the rest of the Stroke controls under **Text Effect**, avoiding duplicate controls for the same effect.
   - Use **Tools → Apply Current Text Style to All Pages...** to copy the displayed Global Font Format—including effects and transforms—to every text box in the project. The confirmed operation preserves text and geometry, saves a backup, and replaces per-character style overrides.

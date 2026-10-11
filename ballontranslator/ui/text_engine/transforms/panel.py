@@ -14,7 +14,14 @@ from qtpy.QtWidgets import (
     QWidget,
 )
 
-from ballontranslator.utils.fontformat import FontFormat, TextTransformStack
+from ballontranslator.utils.fontformat import (
+    FontFormat,
+    TEXT_CASE_LOWERCASE,
+    TEXT_CASE_NORMAL,
+    TEXT_CASE_UPPERCASE,
+    TextTransformStack,
+    normalize_text_case,
+)
 
 from ...custom_widget import PanelArea
 from ...misc import themed_icon_path
@@ -43,6 +50,7 @@ class TextTransformPanel(PanelArea):
     transform_remove_requested = Signal(int)
     transform_move_requested = Signal(int, int)
     transform_selected = Signal(int)
+    text_case_requested = Signal(str)
 
     MAX_CONTENT_HEIGHT = 480
 
@@ -127,6 +135,15 @@ class TextTransformPanel(PanelArea):
             )
         self.add_transform_button.setMenu(add_menu)
 
+        self.text_case_button = QToolButton(self.scrollContent)
+        self.text_case_button.setObjectName('TextCaseTransformButton')
+        self.text_case_button.setAccessibleName(self.tr('Text Case'))
+        self.text_case_button.setFixedSize(42, 26)
+        self.text_case_button.clicked.connect(self._cycle_text_case)
+        self._text_case = TEXT_CASE_NORMAL
+        self._text_case_mixed = False
+        self._sync_text_case_button()
+
         self.transform_mixed_label = QLabel(
             self.tr('Mixed'), self.scrollContent
         )
@@ -150,6 +167,10 @@ class TextTransformPanel(PanelArea):
         self.add_transform_layout.setContentsMargins(0, 0, 0, 0)
         self.add_transform_layout.addWidget(
             self.add_transform_button,
+            alignment=Qt.AlignmentFlag.AlignVCenter,
+        )
+        self.add_transform_layout.addWidget(
+            self.text_case_button,
             alignment=Qt.AlignmentFlag.AlignVCenter,
         )
         self.add_transform_layout.addStretch()
@@ -305,12 +326,59 @@ class TextTransformPanel(PanelArea):
                 panel.set_values([state[index] for state in states])
         self._sync_content_height()
 
+    def _sync_text_case_button(self) -> None:
+        if self._text_case_mixed:
+            text = '—'
+            tooltip = self.tr('Text Case: Mixed')
+        elif self._text_case == TEXT_CASE_LOWERCASE:
+            text = 'aa'
+            tooltip = self.tr('Text Case: Lowercase')
+        elif self._text_case == TEXT_CASE_UPPERCASE:
+            text = 'AA'
+            tooltip = self.tr('Text Case: Uppercase')
+        else:
+            text = 'Aa'
+            tooltip = self.tr('Text Case: Normal')
+        self.text_case_button.setText(text)
+        self.text_case_button.setToolTip(tooltip)
+
+    def _set_text_case_values(self, values: Sequence[str]) -> None:
+        normalized = [normalize_text_case(value) for value in values]
+        self._text_case_mixed = bool(normalized) and any(
+            value != normalized[0] for value in normalized[1:]
+        )
+        self._text_case = (
+            normalized[0] if normalized else TEXT_CASE_NORMAL
+        )
+        self._sync_text_case_button()
+
+    def _cycle_text_case(self) -> None:
+        if self._text_case_mixed:
+            next_value = TEXT_CASE_NORMAL
+        else:
+            sequence = (
+                TEXT_CASE_NORMAL,
+                TEXT_CASE_LOWERCASE,
+                TEXT_CASE_UPPERCASE,
+            )
+            next_value = sequence[
+                (sequence.index(self._text_case) + 1) % len(sequence)
+            ]
+        self._text_case_mixed = False
+        self._text_case = next_value
+        self._sync_text_case_button()
+        self.text_case_requested.emit(next_value)
+
     def set_active_format(self, font_format: FontFormat) -> None:
         self._set_transform_states([font_format.text_transform])
+        self._set_text_case_values([font_format.text_case])
 
     def set_transform_items(self, items) -> None:
         self._set_transform_states(
             [item.blk.fontformat.text_transform for item in items]
+        )
+        self._set_text_case_values(
+            [item.blk.fontformat.text_case for item in items]
         )
 
     def iter_transform_controls(self):

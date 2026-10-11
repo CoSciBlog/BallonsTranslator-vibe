@@ -55,7 +55,7 @@
 <context>
     <name>AutoTateChuYokoThread</name>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/pipeline_formatting.py" line="223"/>
+        <location filename="../../ballontranslator/ui/text_engine/pipeline_formatting.py" line="225"/>
         <source>Failed to apply automatic Tate-chu-yoko.</source>
         <translation>Automatische Tate-chu-yoko-Anpassung fehlgeschlagen.</translation>
     </message>
@@ -1674,68 +1674,68 @@
         <translation>Texttransformation</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1029"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1032"/>
         <source>Unfold</source>
         <translation>Entfalten</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1029"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1032"/>
         <source>Fold</source>
         <translation>Falten</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1030"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1033"/>
         <source>Source</source>
         <translation>Quelle</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1031"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1034"/>
         <source>Translation</source>
         <translation>Übersetzung</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1219"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1225"/>
         <source>Tate-chu-yoko cannot overlap Ruby.</source>
         <translation>&quot;Tate-chu-yoko&quot; darf nicht mit Ruby überlappen.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1222"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1228"/>
         <source>Unable to apply Tate-chu-yoko to this selection.</source>
         <translation>Es konnte keine &quot;Tate-chu-yoko&quot;-Formatierung auf diese Auswahl angewendet werden.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1255"/>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1263"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1261"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1269"/>
         <source>Select base text to apply Ruby.</source>
         <translation>Wählen Sie den Basistext aus, um Ruby anzuwenden.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1266"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1272"/>
         <source>Ruby text cannot be empty.</source>
         <translation>Der Ruby-Text darf nicht leer sein.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1269"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1275"/>
         <source>Mono Ruby needs one whitespace-separated reading per base grapheme.</source>
         <translation>Mono-Ruby benötigt für jedes Basissymbol genau ein Leerzeichen-getrenntes Leseelement.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1272"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1278"/>
         <source>Ruby cannot partially overlap an existing container.</source>
         <translation>Ruby darf keinen bestehenden Container teilweise überlappen.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1275"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1281"/>
         <source>Ruby cannot overlap Tate-chu-yoko.</source>
         <translation>Ruby darf &quot;Tate-chu-yoko&quot; nicht überlappen.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1278"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1284"/>
         <source>Ruby base text cannot contain paragraph or forced line breaks.</source>
         <translation>Der Ruby-Basistext darf keine Absatz- oder erzwungenen Zeilenumbrüche enthalten.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1284"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1290"/>
         <source>Unable to apply Ruby to this selection.</source>
         <translation>Es konnte keine Ruby-Formatierung auf diese Auswahl angewendet werden.</translation>
     </message>
@@ -7592,20 +7592,45 @@ Starten Sie dann Photoshop neu. Der Explorer öffnet nun die Quelldatei und den 
 <context>
     <name>TextTransformPanel</name>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/transforms/panel.py" line="107"/>
+        <location filename="../../ballontranslator/ui/text_engine/transforms/panel.py" line="115"/>
         <source>Add</source>
         <translation>Hinzufügen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/transforms/panel.py" line="108"/>
-        <location filename="../../ballontranslator/ui/text_engine/transforms/panel.py" line="109"/>
+        <location filename="../../ballontranslator/ui/text_engine/transforms/panel.py" line="116"/>
+        <location filename="../../ballontranslator/ui/text_engine/transforms/panel.py" line="117"/>
         <source>Add Transform</source>
         <translation>Transformation hinzufügen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/transforms/panel.py" line="131"/>
+        <location filename="../../ballontranslator/ui/text_engine/transforms/panel.py" line="140"/>
+        <source>Text Case</source>
+        <translation>Groß-/Kleinschreibung</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/text_engine/transforms/panel.py" line="148"/>
         <source>Mixed</source>
         <translation>Gemischt</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/text_engine/transforms/panel.py" line="332"/>
+        <source>Text Case: Mixed</source>
+        <translation>Groß-/Kleinschreibung: Gemischt</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/text_engine/transforms/panel.py" line="335"/>
+        <source>Text Case: Lowercase</source>
+        <translation>Groß-/Kleinschreibung: Kleinbuchstaben</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/text_engine/transforms/panel.py" line="338"/>
+        <source>Text Case: Uppercase</source>
+        <translation>Groß-/Kleinschreibung: Großbuchstaben</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/text_engine/transforms/panel.py" line="341"/>
+        <source>Text Case: Normal</source>
+        <translation>Groß-/Kleinschreibung: Normal</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/text_engine/transforms/registry.py" line="89"/>

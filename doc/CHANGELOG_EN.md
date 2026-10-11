@@ -1,5 +1,10 @@
 # Changelogs
 
+### 2026-10-11 — 1.5.19+vibe.29
+- Added a compact `Aa` control to **Text Transform** that cycles selected text boxes and the global style through normal, lowercase, and uppercase display modes.
+- Text case is a persisted, non-destructive font style: source and translated text remain unchanged, mixed selections are indicated, and changes participate in the existing text-format undo workflow.
+- Headless/project-wide style application now preserves the selected text-case mode.
+
 ### 2026-10-11 — 1.5.19+vibe.28
 - Changed project runs with **Two-Step (Google/DeepL + Ollama)** into two strict phases: Google or DeepL now finishes every selected page before the first Ollama refinement request starts.
 - The complete first-step result is saved as a recoverable project checkpoint before Ollama begins. A checkpoint failure stops the run without starting refinement.

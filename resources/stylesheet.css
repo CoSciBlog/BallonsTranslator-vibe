@@ -2946,6 +2946,26 @@ QToolButton#AddTextEffectButton::menu-indicator {
     right: 4px;
 }
 
+QToolButton#TextCaseTransformButton {
+    color: @qwidgetForegroundColor;
+    background-color: @widgetBackgroundColor;
+    border: 1px solid @borderColor;
+    border-radius: 6px;
+    padding: 0px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+QToolButton#TextCaseTransformButton:hover,
+QToolButton#TextCaseTransformButton:focus {
+    border-color: rgb(30, 147, 229);
+}
+
+QToolButton#TextCaseTransformButton:pressed {
+    color: white;
+    background-color: rgb(30, 147, 229);
+}
+
 QCheckBox#TextEffectFasterPreviewToggle {
     background-color: transparent;
     font-size: 12px;

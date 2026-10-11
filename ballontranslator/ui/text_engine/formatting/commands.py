@@ -131,6 +131,19 @@ def ffmt_change_font_weight(
         blkitem.setFontWeight(value, **set_kwargs)
 
 
+@font_formating()
+def ffmt_change_text_case(
+    param_name: str,
+    values: List[str],
+    act_ffmt: FontFormat,
+    is_global: bool,
+    blkitems: List[TextBlkItem],
+    **kwargs,
+) -> None:
+    for blkitem, value in zip(blkitems, values):
+        blkitem.setTextCase(value, restore_cursor=True)
+
+
 def ffmt_change_font_family_and_weight(
     font_family: str,
     font_weight: FontWeight,
