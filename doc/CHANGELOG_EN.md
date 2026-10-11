@@ -1,5 +1,10 @@
 # Changelogs
 
+### 2026-10-11 — 1.5.19+vibe.24
+- Added non-blocking Ollama reasoning-capability detection to each local LLM profile. **Detect** reads the selected model's `/api/show` metadata and displays its reported default.
+- Thinking Level now offers only the exact controls advertised by that model, including boolean Enabled/Disabled controls or model-defined named levels; unsupported models are locked to Disabled and missing metadata safely uses Auto.
+- Detected controls are persisted per model and use Ollama's native chat request even when the context length remains at the server default. Changing the model or endpoint invalidates stale detected choices.
+
 ### 2026-10-11 — 1.5.19+vibe.23
 - Fixed the text-style preset context menu inheriting no application theme on Windows, which could leave its frameless popup transparent over the formatting controls.
 - The popup now belongs to the preset panel and therefore retains the configured opaque menu background in both light and dark themes.

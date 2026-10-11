@@ -12,11 +12,13 @@ from ballontranslator.utils.llm_profiles import (
     PROVIDER_DEFAULTS,
     THINKING_AUTO,
     THINKING_DISABLED,
+    THINKING_ENABLED,
     VISION_DETAIL_LEVEL_OPTIONS,
     copy_profile,
     default_profile,
     default_profiles,
     profile_by_id,
+    profile_from_config,
     load_profiles,
     profile_to_dict,
     profile_to_export_dict,
@@ -28,12 +30,50 @@ from ballontranslator.utils.llm_profiles import (
     image_responses_url,
     estimate_ollama_memory_gib,
     ollama_native_chat_url,
+    ollama_show_url,
+    parse_ollama_thinking_capability,
     split_image_model_selection,
 )
 from ballontranslator.utils.secret_store import SecretStore, is_portable_secret
 
 
 class CodexProfileConfigTest(unittest.TestCase):
+    def test_ollama_thinking_metadata_preserves_exact_model_controls(self) -> None:
+        capability = parse_ollama_thinking_capability({
+            'thinking': {
+                'values': [False, True, 'low', 'high', 'low'],
+                'default': 'low',
+            },
+        })
+        self.assertTrue(capability.supported)
+        self.assertEqual(
+            capability.options,
+            (THINKING_AUTO, THINKING_DISABLED, THINKING_ENABLED, 'low', 'high'),
+        )
+        self.assertEqual(capability.default, 'low')
+
+        unsupported = parse_ollama_thinking_capability({
+            'thinking': {'values': [False], 'default': False},
+        })
+        self.assertFalse(unsupported.supported)
+        self.assertEqual(unsupported.options, (THINKING_DISABLED,))
+        self.assertEqual(unsupported.default, THINKING_DISABLED)
+
+        unknown = parse_ollama_thinking_capability({})
+        self.assertIsNone(unknown.supported)
+        self.assertEqual(unknown.options, (THINKING_AUTO,))
+
+        profile = default_profile('Ollama')
+        profile.model = 'no-thinking'
+        profile.ollama_thinking_model = profile.model
+        profile.ollama_thinking_supported = False
+        profile.ollama_thinking_default = THINKING_DISABLED
+        profile.thinking_level = THINKING_DISABLED
+        profile.thinking_level_options = [THINKING_DISABLED]
+        restored = profile_from_config(profile_to_dict(profile))
+        self.assertEqual(restored.thinking_level, THINKING_DISABLED)
+        self.assertEqual(restored.thinking_level_options, [THINKING_DISABLED])
+
     def test_ollama_context_length_roundtrips_and_invalid_values_are_safe(self) -> None:
         profile = default_profile('Ollama')
         self.assertEqual(profile.ollama_context_length, 0)
@@ -43,6 +83,10 @@ class CodexProfileConfigTest(unittest.TestCase):
         self.assertEqual(
             ollama_native_chat_url(restored),
             'http://localhost:11434/api/chat',
+        )
+        self.assertEqual(
+            ollama_show_url(restored),
+            'http://localhost:11434/api/show',
         )
         with self.assertLogs('BallonTranslator', level='WARNING'):
             invalid = LLMProfile(ollama_context_length=-1)

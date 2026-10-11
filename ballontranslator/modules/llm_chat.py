@@ -26,6 +26,7 @@ from ballontranslator.utils.llm_profiles import (
     PROVIDER_DEFAULTS,
     THINKING_AUTO,
     THINKING_DISABLED,
+    THINKING_ENABLED,
     normalize_thinking_level,
     ollama_native_chat_url,
     resolve_api_key,
@@ -219,7 +220,9 @@ def ollama_native_chat_payload(
             message['images'] = images
         messages.append(message)
 
-    options: Dict[str, Any] = {'num_ctx': int(context_length)}
+    options: Dict[str, Any] = {}
+    if context_length > 0:
+        options['num_ctx'] = int(context_length)
     for source, target in (
         ('max_tokens', 'num_predict'),
         ('max_completion_tokens', 'num_predict'),
@@ -251,6 +254,8 @@ def ollama_native_chat_payload(
     reasoning = normalize_thinking_level(api_args.get('reasoning_effort'))
     if reasoning == THINKING_DISABLED or str(reasoning).lower() == 'none':
         payload['think'] = False
+    elif reasoning == THINKING_ENABLED:
+        payload['think'] = True
     elif reasoning != THINKING_AUTO:
         payload['think'] = reasoning
     return payload
@@ -435,7 +440,7 @@ class LLMChatRequester:
                 profile.ollama_context_length,
             )
             response = client.post(endpoint, json=payload, timeout=None)
-            if response.status_code == 400 and payload.get('think'):
+            if response.status_code == 400 and 'think' in payload:
                 self.logger.warning(
                     'Ollama rejected the requested thinking level; retrying '
                     'without explicit thinking control.'
@@ -535,7 +540,14 @@ class LLMChatRequester:
         if profile.backend != 'openai':
             raise LLMUserActionRequiredError('This LLM profile backend is unavailable.')
         ollama_endpoint = ollama_native_chat_url(profile)
-        if profile.ollama_context_length > 0 and ollama_endpoint:
+        has_detected_thinking_controls = (
+            profile.ollama_thinking_model == profile.model
+            and profile.ollama_thinking_supported is not None
+        )
+        if ollama_endpoint and (
+            profile.ollama_context_length > 0
+            or has_detected_thinking_controls
+        ):
             return self._request_ollama_native(
                 profile,
                 api_args,

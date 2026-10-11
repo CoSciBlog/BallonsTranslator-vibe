@@ -1,7 +1,7 @@
 import json
 import uuid
 from html import escape
-from typing import get_type_hints
+from typing import Optional, get_type_hints
 
 from qtpy.QtWidgets import (
     QApplication,
@@ -22,7 +22,7 @@ from qtpy.QtWidgets import (
     QStyle,
     QStyleOptionGroupBox,
 )
-from qtpy.QtCore import QEvent, QRectF, QTimer, Qt, QUrl, Signal
+from qtpy.QtCore import QEvent, QRectF, QThread, QTimer, Qt, QUrl, Signal
 from qtpy.QtGui import QColor, QDesktopServices, QFont, QIcon, QLinearGradient, QMouseEvent, QPaintEvent, QPainter, QPainterPath, QPen, QPixmap, QRegion
 
 try:
@@ -47,10 +47,16 @@ from ballontranslator.utils.llm_profiles import (
     LLM_OCR_KEY,
     is_llm_text_translator,
     LLMProfile,
+    OllamaThinkingCapability,
+    THINKING_AUTO,
+    THINKING_DISABLED,
+    THINKING_LEVEL_OPTIONS,
     estimate_ollama_memory_gib,
     image_model_choices,
     is_profile_title_url,
     ollama_native_chat_url,
+    ollama_show_url,
+    parse_ollama_thinking_capability,
     parse_profile_title,
     copy_profile,
     profile_by_id,
@@ -91,10 +97,63 @@ PROFILE_MODALITY_PARAM_DEFS = {
     ],
 }
 PROFILE_FIELD_TYPES = get_type_hints(LLMProfile)
+_OLLAMA_THINKING_PROBE_THREADS = set()
 
 
 def _widen_profile_editor(editor: QWidget) -> None:
     editor.setFixedWidth(round(editor.width() * LLM_PROFILE_EDITOR_WIDTH_SCALE))
+
+
+class OllamaThinkingProbeThread(QThread):
+    """Read one model's thinking metadata without blocking the Qt UI."""
+
+    probe_succeeded = Signal(str, str, str, object)
+    probe_failed = Signal(str, str, str, str)
+
+    def __init__(self, profile: LLMProfile) -> None:
+        super().__init__()
+        self.profile_id = profile.id
+        self.model = profile.model
+        self.endpoint = ollama_show_url(profile)
+        self.api_key = resolve_api_key(profile).strip()
+        self.finished.connect(self._release)
+        self.finished.connect(self.deleteLater)
+
+    def startProbe(self) -> None:
+        _OLLAMA_THINKING_PROBE_THREADS.add(self)
+        self.start()
+
+    def _release(self) -> None:
+        _OLLAMA_THINKING_PROBE_THREADS.discard(self)
+
+    def run(self) -> None:
+        try:
+            import httpx
+
+            headers = (
+                {'Authorization': f'Bearer {self.api_key}'}
+                if self.api_key else None
+            )
+            with httpx.Client(headers=headers, timeout=10.0) as client:
+                response = client.post(
+                    self.endpoint,
+                    json={'model': self.model},
+                )
+                response.raise_for_status()
+                payload = response.json()
+            self.probe_succeeded.emit(
+                self.profile_id,
+                self.model,
+                self.endpoint,
+                payload,
+            )
+        except Exception as error:
+            self.probe_failed.emit(
+                self.profile_id,
+                self.model,
+                self.endpoint,
+                str(error),
+            )
 
 
 class ProfileNameEdit(QLineEdit):
@@ -390,6 +449,9 @@ class ProfileCardWidget(QGroupBox):
         self._previous_model_text = ''
         self._previous_vision_model_text = ''
         self._previous_image_model_text = ''
+        self._ollama_thinking_probe: Optional[
+            OllamaThinkingProbeThread
+        ] = None
         self._action_buttons_visible = False
         self.profile_param_display_names = {
             'base_url': self.tr('Base URL'),
@@ -721,6 +783,51 @@ class ProfileCardWidget(QGroupBox):
         self._install_detail_editor_scrollbars()
         layout.addWidget(self.details)
 
+        self.ollama_reasoning_card = QFrame(
+            self.details.section_widgets['text'],
+        )
+        self.ollama_reasoning_card.setObjectName(
+            'LLMProfileReasoningCapability',
+        )
+        self.ollama_reasoning_card.setAttribute(
+            Qt.WidgetAttribute.WA_StyledBackground,
+            True,
+        )
+        self.ollama_reasoning_card.setFixedWidth(LLM_PROMPT_EDITOR_WIDTH)
+        reasoning_layout = QHBoxLayout(self.ollama_reasoning_card)
+        reasoning_layout.setContentsMargins(10, 7, 8, 7)
+        reasoning_layout.setSpacing(8)
+        self.ollama_reasoning_status = QLabel(self.ollama_reasoning_card)
+        self.ollama_reasoning_status.setObjectName(
+            'LLMProfileReasoningCapabilityStatus',
+        )
+        self.ollama_reasoning_status.setWordWrap(True)
+        self.ollama_reasoning_status.setSizePolicy(
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Preferred,
+        )
+        self.ollama_reasoning_detect_btn = NoBorderPushBtn(
+            self.tr('Detect'),
+            self.ollama_reasoning_card,
+        )
+        self.ollama_reasoning_detect_btn.setObjectName(
+            'LLMProfileReasoningDetectButton',
+        )
+        self.ollama_reasoning_detect_btn.setToolTip(self.tr(
+            'Read the selected model’s supported reasoning controls from '
+            'the local Ollama server.'
+        ))
+        self.ollama_reasoning_detect_btn.clicked.connect(
+            self.detectOllamaThinkingCapability,
+        )
+        reasoning_layout.addWidget(self.ollama_reasoning_status, 1)
+        reasoning_layout.addWidget(self.ollama_reasoning_detect_btn, 0)
+        self.details.section_widgets['text'].layout().addWidget(
+            self.ollama_reasoning_card,
+            0,
+            Qt.AlignmentFlag.AlignLeft,
+        )
+
         self.ollama_memory_card = QFrame(self.details)
         self.ollama_memory_card.setObjectName('LLMProfileMemoryEstimate')
         self.ollama_memory_card.setAttribute(
@@ -778,6 +885,7 @@ class ProfileCardWidget(QGroupBox):
         )
         self._sync_minimum_width_with_content()
         self.details.setVisible(False)
+        self.ollama_reasoning_card.hide()
         self.ollama_memory_card.hide()
         self.ollama_memory_label.hide()
         self.ollama_memory_detail.hide()
@@ -1050,6 +1158,7 @@ class ProfileCardWidget(QGroupBox):
     def setExpanded(self, expanded: bool):
         self.details.setVisible(expanded)
         self._refreshOllamaMemoryEstimate()
+        self._refreshOllamaThinkingCapability()
         self.more_btn.setToolTip(self.tr('Edit'))
         self.more_btn.setIcon(self.edit_icon_active if expanded else self.edit_icon)
 
@@ -1260,6 +1369,7 @@ class ProfileCardWidget(QGroupBox):
         if self._model_editing:
             return
         self.profile.model = value
+        self._invalidateOllamaThinkingCapability()
         options = self.profile.model_options
         if value and value not in options:
             options.append(value)
@@ -1347,6 +1457,7 @@ class ProfileCardWidget(QGroupBox):
         self.model_combo.setCurrentText(text)
         self.model_combo.blockSignals(False)
         self.profile.model = text
+        self._invalidateOllamaThinkingCapability()
         self._refreshOllamaMemoryEstimate()
         if emit_changed:
             self.profile_changed.emit()
@@ -1546,6 +1657,8 @@ class ProfileCardWidget(QGroupBox):
         elif param_key == 'image_base_url':
             self._syncImageModelCombo()
         elif param_key in ('base_url', 'ollama_context_length'):
+            if param_key == 'base_url':
+                self._invalidateOllamaThinkingCapability(force=True)
             self.refreshConditionalVisibility()
         self.profile_changed.emit()
         if param_key == 'thinking_level':
@@ -1673,7 +1786,155 @@ class ProfileCardWidget(QGroupBox):
         self.refreshKeyStatus()
         self._sync_summary_grid()
         self._refreshOllamaMemoryEstimate()
+        self._refreshOllamaThinkingCapability()
         self._sync_minimum_width_with_content()
+
+    def _invalidateOllamaThinkingCapability(self, force: bool = False) -> None:
+        if not force and self.profile.ollama_thinking_model == self.profile.model:
+            return
+        self.profile.ollama_thinking_model = ''
+        self.profile.ollama_thinking_supported = None
+        self.profile.ollama_thinking_default = ''
+        self.profile.thinking_level_options = list(THINKING_LEVEL_OPTIONS)
+        if self.profile.thinking_level not in self.profile.thinking_level_options:
+            self.profile.thinking_level = THINKING_AUTO
+        combo = self.details.param_widgets.get('thinking_level')
+        if isinstance(combo, ParamComboBox):
+            self._syncComboBox(
+                combo,
+                self.profile.thinking_level_options,
+                self.profile.thinking_level,
+            )
+        self._refreshOllamaThinkingCapability()
+
+    def _refreshOllamaThinkingCapability(self) -> None:
+        is_ollama = bool(ollama_show_url(self.profile))
+        visible = (
+            is_ollama
+            and bool(self.profile.support_text)
+            and not self.details.isHidden()
+        )
+        self.ollama_reasoning_card.setVisible(visible)
+        combo = self.details.param_widgets.get('thinking_level')
+        detected = (
+            is_ollama
+            and bool(self.profile.ollama_thinking_model)
+            and self.profile.ollama_thinking_model == self.profile.model
+        )
+        if isinstance(combo, ParamComboBox):
+            combo.setEnabled(
+                bool(self.profile.support_text)
+                and (
+                    not detected
+                    or self.profile.ollama_thinking_supported is True
+                )
+            )
+        if not is_ollama:
+            return
+        if not self.profile.model:
+            status = self.tr('Select a text model before detection.')
+            self.ollama_reasoning_detect_btn.setEnabled(False)
+        elif not detected:
+            status = self.tr('Reasoning support has not been checked.')
+            self.ollama_reasoning_detect_btn.setEnabled(True)
+        elif self.profile.ollama_thinking_supported is False:
+            status = self.tr('Reasoning is not supported by this model.')
+            self.ollama_reasoning_detect_btn.setEnabled(True)
+        elif self.profile.ollama_thinking_supported is None:
+            status = self.tr(
+                'No reasoning metadata was reported; Auto is used.'
+            )
+            self.ollama_reasoning_detect_btn.setEnabled(True)
+        else:
+            supported = ', '.join(
+                option for option in self.profile.thinking_level_options
+                if option != THINKING_AUTO
+            )
+            default = self.profile.ollama_thinking_default or self.tr('Auto')
+            status = self.tr(
+                'Supported: {values} · Default: {default}'
+            ).format(values=supported, default=default)
+            self.ollama_reasoning_detect_btn.setEnabled(True)
+        self.ollama_reasoning_status.setText(status)
+        self.ollama_reasoning_status.setToolTip(status)
+
+    def detectOllamaThinkingCapability(self) -> None:
+        if not self.profile.model or not ollama_show_url(self.profile):
+            self._refreshOllamaThinkingCapability()
+            return
+        self.ollama_reasoning_status.setText(
+            self.tr('Checking Ollama model metadata…')
+        )
+        self.ollama_reasoning_detect_btn.setEnabled(False)
+        probe = OllamaThinkingProbeThread(self.profile)
+        probe.probe_succeeded.connect(self._onOllamaThinkingProbeSucceeded)
+        probe.probe_failed.connect(self._onOllamaThinkingProbeFailed)
+        probe.finished.connect(self._onOllamaThinkingProbeFinished)
+        self._ollama_thinking_probe = probe
+        probe.startProbe()
+
+    def _onOllamaThinkingProbeSucceeded(
+        self,
+        profile_id: str,
+        model: str,
+        endpoint: str,
+        payload: object,
+    ) -> None:
+        if (
+            profile_id != self.profile.id
+            or model != self.profile.model
+            or endpoint != ollama_show_url(self.profile)
+        ):
+            return
+        capability = parse_ollama_thinking_capability(payload)
+        self._applyOllamaThinkingCapability(model, capability)
+
+    def _applyOllamaThinkingCapability(
+        self,
+        model: str,
+        capability: OllamaThinkingCapability,
+    ) -> None:
+        self.profile.ollama_thinking_model = model
+        self.profile.ollama_thinking_supported = capability.supported
+        self.profile.ollama_thinking_default = capability.default
+        self.profile.thinking_level_options = list(capability.options)
+        if capability.supported is False:
+            self.profile.thinking_level = THINKING_DISABLED
+        elif self.profile.thinking_level not in capability.options:
+            self.profile.thinking_level = THINKING_AUTO
+        combo = self.details.param_widgets.get('thinking_level')
+        if isinstance(combo, ParamComboBox):
+            self._syncComboBox(
+                combo,
+                self.profile.thinking_level_options,
+                self.profile.thinking_level,
+            )
+        self._refreshOllamaThinkingCapability()
+        self.profile_changed.emit()
+        self.profile_summary_changed.emit()
+
+    def _onOllamaThinkingProbeFailed(
+        self,
+        profile_id: str,
+        model: str,
+        endpoint: str,
+        error: str,
+    ) -> None:
+        if (
+            profile_id != self.profile.id
+            or model != self.profile.model
+            or endpoint != ollama_show_url(self.profile)
+        ):
+            return
+        status = self.tr('Detection failed: {error}').format(error=error)
+        self.ollama_reasoning_status.setText(status)
+        self.ollama_reasoning_status.setToolTip(status)
+
+    def _onOllamaThinkingProbeFinished(self) -> None:
+        if self.sender() is not self._ollama_thinking_probe:
+            return
+        self._ollama_thinking_probe = None
+        self.ollama_reasoning_detect_btn.setEnabled(bool(self.profile.model))
 
     def _refreshOllamaMemoryEstimate(self) -> None:
         is_ollama = bool(ollama_native_chat_url(self.profile))

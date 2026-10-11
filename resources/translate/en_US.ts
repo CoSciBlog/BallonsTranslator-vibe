@@ -3070,72 +3070,72 @@
 <context>
     <name>LLMProfilesWidget</name>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1762"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="2023"/>
         <source>New</source>
         <translation>New</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1766"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="2027"/>
         <source>New Empty Profile</source>
         <translation>New Empty Profile</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1767"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="2028"/>
         <source>Import from Clipboard</source>
         <translation>Import from Clipboard</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1771"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="2032"/>
         <source>Restore Built-ins...</source>
         <translation>Restore Built-ins...</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1778"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="2039"/>
         <source>Filter profiles</source>
         <translation>Filter profiles</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1779"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="2040"/>
         <source>Filter displayed profiles by name, model, or base URL.</source>
         <translation>Filter displayed profiles by name, model, or base URL.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1902"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="2163"/>
         <source>New Profile</source>
         <translation>New Profile</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1924"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="2185"/>
         <source>Import Profiles</source>
         <translation>Import Profiles</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1925"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="2186"/>
         <source>The clipboard does not contain valid LLM profile JSON.</source>
         <translation>The clipboard does not contain valid LLM profile JSON.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1980"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="2241"/>
         <source>Restore Built-in Profiles</source>
         <translation>Restore Built-in Profiles</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1981"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="2242"/>
         <source>Restore built-in LLM profiles to their default values?</source>
         <translation>Restore built-in LLM profiles to their default values?</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1983"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="2244"/>
         <source>This may overwrite current built-in profile settings such as base URL, model, and prompts. Filled API keys will be kept.</source>
         <translation>This may overwrite current built-in profile settings such as base URL, model, and prompts. Filled API keys will be kept.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1986"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="2247"/>
         <source>Restore</source>
         <translation>Restore</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="2037"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="2298"/>
         <source>Image Base URL</source>
         <translation>Image Base URL</translation>
     </message>
@@ -5658,418 +5658,468 @@ Then restart Photoshop. Explorer will now open the source file and destination l
 <context>
     <name>ProfileCardWidget</name>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="382"/>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1101"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="441"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1210"/>
         <source>Double click the name to edit. Right click for profile actions.</source>
         <translation>Double click the name to edit. Right click for profile actions.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="395"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="457"/>
         <source>Base URL</source>
         <translation>Base URL</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="396"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="458"/>
         <source>Image Base URL</source>
         <translation>Image Base URL</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="397"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="459"/>
         <source>Require API Key</source>
         <translation>Require API Key</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="398"/>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="591"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="460"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="653"/>
         <source>Vision Model</source>
         <translation>Vision Model</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="399"/>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="643"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="461"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="705"/>
         <source>Image Model</source>
         <translation>Image Model</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="400"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="462"/>
         <source>Vision Detail Level</source>
         <translation>Vision Detail Level</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="401"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="463"/>
         <source>Thinking Level</source>
         <translation>Thinking Level</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="402"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="464"/>
         <source>Max Tokens</source>
         <translation>Max Tokens</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="403"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="465"/>
         <source>Ollama Context Length</source>
         <translation>Ollama Context Length</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="404"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="466"/>
         <source>Temperature</source>
         <translation>Temperature</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="405"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="467"/>
         <source>Top P</source>
         <translation>Top P</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="406"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="468"/>
         <source>Frequency Penalty</source>
         <translation>Frequency Penalty</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="407"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="469"/>
         <source>Presence Penalty</source>
         <translation>Presence Penalty</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="408"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="470"/>
         <source>JSON Schema Response</source>
         <translation>JSON Schema Response</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="409"/>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="410"/>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="411"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="471"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="472"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="473"/>
         <source>Prompt</source>
         <translation>Prompt</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="412"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="474"/>
         <source>Low VRAM Mode</source>
         <translation>Low VRAM Mode</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="413"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="475"/>
         <source>Use Glossary for Translation</source>
         <translation>Use Glossary for Translation</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="416"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="478"/>
         <source>OpenAI-compatible API base URL.</source>
         <translation>OpenAI-compatible API base URL.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="417"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="479"/>
         <source>OpenAI-compatible image API base URL used only by LLMInpaint.</source>
         <translation>OpenAI-compatible image API base URL used only by LLMInpaint.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="418"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="480"/>
         <source>Require API key before running this LLM task.</source>
         <translation>Require API key before running this LLM task.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="419"/>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="595"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="481"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="657"/>
         <source>Model used by LLMOCR for image OCR.</source>
         <translation>Model used by LLMOCR for image OCR.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="420"/>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="647"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="482"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="709"/>
         <source>Model used by LLMInpaint for image cleanup.</source>
         <translation>Model used by LLMInpaint for image cleanup.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="421"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="483"/>
         <source>Image detail level sent to vision-capable providers.</source>
         <translation>Image detail level sent to vision-capable providers.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="423"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="485"/>
         <source>Auto uses the provider default. Disabled requests no reasoning; explicit levels set the reasoning effort.</source>
         <translation>Auto uses the provider default. Disabled requests no reasoning; explicit levels set the reasoning effort.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="426"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="488"/>
         <source>Additional translation instructions for style and wording.</source>
         <translation>Additional translation instructions for style and wording.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="427"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="489"/>
         <source>Instructions sent to the vision model for OCR.</source>
         <translation>Instructions sent to the vision model for OCR.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="428"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="490"/>
         <source>Instructions sent to the image model for cleanup.</source>
         <translation>Instructions sent to the image model for cleanup.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="429"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="491"/>
         <source>Maximum generated response tokens, not input/context tokens.</source>
         <translation>Maximum generated response tokens, not input/context tokens.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="431"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="493"/>
         <source>Context tokens requested from a local Ollama server. Use 0 to keep the Ollama default.</source>
         <translation>Context tokens requested from a local Ollama server. Use 0 to keep the Ollama default.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="434"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="496"/>
         <source>Sampling temperature.</source>
         <translation>Sampling temperature.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="435"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="497"/>
         <source>Top-p sampling.</source>
         <translation>Top-p sampling.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="436"/>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="437"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="498"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="499"/>
         <source>Sent only when greater than 0. Some OpenAI-compatible providers may ignore or reject it.</source>
         <translation>Sent only when greater than 0. Some OpenAI-compatible providers may ignore or reject it.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="438"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="500"/>
         <source>Request responses with the translation JSON schema. Useful for LM Studio; disable it if a provider rejects json_schema response_format.</source>
         <translation>Request responses with the translation JSON schema. Useful for LM Studio; disable it if a provider rejects json_schema response_format.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="439"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="501"/>
         <source>Preserved compatibility flag for local profiles.</source>
         <translation>Preserved compatibility flag for local profiles.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="441"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="503"/>
         <source>Include matching project, series, reference, and selected file glossary entries in translation requests.</source>
         <translation>Include matching project, series, reference, and selected file glossary entries in translation requests.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="451"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="513"/>
         <source>Use a plain name or [Name](https://example.com).</source>
         <translation>Use a plain name or [Name](https://example.com).</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="479"/>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1053"/>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1205"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="541"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1162"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1314"/>
         <source>Edit</source>
         <translation>Edit</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="487"/>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1203"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="549"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1312"/>
         <source>Duplicate profile</source>
         <translation>Duplicate profile</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="494"/>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1202"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="556"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1311"/>
         <source>Delete</source>
         <translation>Delete</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="513"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="575"/>
         <source>API Key</source>
         <translation>API Key</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="547"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="609"/>
         <source>Text Model</source>
         <translation>Text Model</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="551"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="613"/>
         <source>Text translation model used by LLMTranslator.</source>
         <translation>Text translation model used by LLMTranslator.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="555"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="617"/>
         <source>Add model</source>
         <translation>Add model</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="561"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="623"/>
         <source>Delete current model</source>
         <translation>Delete current model</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="599"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="661"/>
         <source>Add vision model</source>
         <translation>Add vision model</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="605"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="667"/>
         <source>Delete current vision model</source>
         <translation>Delete current vision model</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="651"/>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1471"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="713"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1582"/>
         <source>Add image model</source>
         <translation>Add image model</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="657"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="719"/>
         <source>Delete current image model and all its reasoning combinations</source>
         <translation>Delete current image model and all its reasoning combinations</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="714"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="776"/>
         <source>Text</source>
         <translation>Text</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="715"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="777"/>
         <source>Vision</source>
         <translation>Vision</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="716"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="778"/>
         <source>Image</source>
         <translation>Image</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="738"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="845"/>
         <source>Estimated memory</source>
         <translation>Estimated memory</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="746"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="853"/>
         <source>Approximate</source>
         <translation>Approximate</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="763"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="870"/>
         <source>Approximate combined model and context-cache allocation. The actual RAM/VRAM split depends on Ollama, GPU offloading, model architecture, quantization, and parallel requests.</source>
         <translation>Approximate combined model and context-cache allocation. The actual RAM/VRAM split depends on Ollama, GPU offloading, model architecture, quantization, and parallel requests.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1096"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1205"/>
         <source>Right click to edit the name or link.</source>
         <translation>Right click to edit the name or link.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1109"/>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1123"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1218"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1232"/>
         <source>LLM Profile</source>
         <translation>LLM Profile</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1201"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1310"/>
         <source>Edit name</source>
         <translation>Edit name</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1204"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1313"/>
         <source>Copy Profile as JSON</source>
         <translation>Copy Profile as JSON</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1206"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1315"/>
         <source>Set for Translator</source>
         <translation>Set for Translator</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1207"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1316"/>
         <source>Set for OCR</source>
         <translation>Set for OCR</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1208"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1317"/>
         <source>Set for Inpainter</source>
         <translation>Set for Inpainter</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1298"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1408"/>
         <source>Model name</source>
         <translation>Model name</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1365"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1476"/>
         <source>Vision model name</source>
         <translation>Vision model name</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1443"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1554"/>
         <source>Image model name</source>
         <translation>Image model name</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1472"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1583"/>
         <source>Enter an image model ID. Reasoning combinations are added automatically from vision models.</source>
         <translation>Enter an image model ID. Reasoning combinations are added automatically from vision models.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1617"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1730"/>
         <source>Text translation model used by LLMTranslator. Click to disable text translation for this profile.</source>
         <translation>Text translation model used by LLMTranslator. Click to disable text translation for this profile.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1619"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1732"/>
         <source>Text translation model used by LLMTranslator. Click to enable text translation for this profile.</source>
         <translation>Text translation model used by LLMTranslator. Click to enable text translation for this profile.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1631"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1744"/>
         <source>Vision OCR model used by LLMOCR. Click to disable vision OCR for this profile.</source>
         <translation>Vision OCR model used by LLMOCR. Click to disable vision OCR for this profile.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1633"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1746"/>
         <source>Vision OCR model used by LLMOCR. Click to enable vision OCR for this profile.</source>
         <translation>Vision OCR model used by LLMOCR. Click to enable vision OCR for this profile.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1645"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1758"/>
         <source>Image cleanup model used by LLMInpaint. Click to disable image cleanup for this profile.</source>
         <translation>Image cleanup model used by LLMInpaint. Click to disable image cleanup for this profile.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1647"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1760"/>
         <source>Image cleanup model used by LLMInpaint. Click to enable image cleanup for this profile.</source>
         <translation>Image cleanup model used by LLMInpaint. Click to enable image cleanup for this profile.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1692"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1853"/>
+        <source>Auto</source>
+        <translation>Auto</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1953"/>
         <source>Ollama default</source>
         <translation>Ollama default</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1694"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1955"/>
         <source>Set a context length to calculate an estimate.</source>
         <translation>Set a context length to calculate an estimate.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1697"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1958"/>
         <source>Unavailable</source>
         <translation>Unavailable</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1699"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1960"/>
         <source>The parameter count could not be read from the model name.</source>
         <translation>The parameter count could not be read from the model name.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1702"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1963"/>
         <source>{minimum:.1f}–{maximum:.1f} GiB</source>
         <translation>{minimum:.1f}–{maximum:.1f} GiB</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1707"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1968"/>
         <source>Combined RAM + VRAM · Context: {context} tokens</source>
         <translation>Combined RAM + VRAM · Context: {context} tokens</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1723"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1984"/>
         <source>Required API key is configured.</source>
         <translation>Required API key is configured.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1727"/>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1988"/>
         <source>Required API key is missing.</source>
         <translation>Required API key is missing.</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="810"/>
+        <source>Detect</source>
+        <translation>Detect</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="817"/>
+        <source>Read the selected model’s supported reasoning controls from the local Ollama server.</source>
+        <translation>Read the selected model’s supported reasoning controls from the local Ollama server.</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1835"/>
+        <source>Select a text model before detection.</source>
+        <translation>Select a text model before detection.</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1838"/>
+        <source>Reasoning support has not been checked.</source>
+        <translation>Reasoning support has not been checked.</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1841"/>
+        <source>Reasoning is not supported by this model.</source>
+        <translation>Reasoning is not supported by this model.</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1845"/>
+        <source>No reasoning metadata was reported; Auto is used.</source>
+        <translation>No reasoning metadata was reported; Auto is used.</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1855"/>
+        <source>Supported: {values} · Default: {default}</source>
+        <translation>Supported: {values} · Default: {default}</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1866"/>
+        <source>Checking Ollama model metadata…</source>
+        <translation>Checking Ollama model metadata…</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1929"/>
+        <source>Detection failed: {error}</source>
+        <translation>Detection failed: {error}</translation>
     </message>
 </context>
 <context>
@@ -7346,7 +7396,7 @@ Then restart Photoshop. Explorer will now open the source file and destination l
     </message>
     <message>
         <location filename="../../ballontranslator/ui/text_engine/formatting/presets.py" line="329"/>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/presets.py" line="554"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/presets.py" line="556"/>
         <source>New Text Style</source>
         <translation>New Text Style</translation>
     </message>
@@ -7361,17 +7411,17 @@ Then restart Photoshop. Explorer will now open the source file and destination l
         <translation>Remove all styles?</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/presets.py" line="555"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/presets.py" line="557"/>
         <source>Remove all</source>
         <translation>Remove all</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/presets.py" line="557"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/presets.py" line="559"/>
         <source>Import Text Styles</source>
         <translation>Import Text Styles</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/formatting/presets.py" line="558"/>
+        <location filename="../../ballontranslator/ui/text_engine/formatting/presets.py" line="560"/>
         <source>Export Text Styles</source>
         <translation>Export Text Styles</translation>
     </message>

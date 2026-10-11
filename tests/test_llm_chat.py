@@ -17,7 +17,7 @@ from ballontranslator.modules.llm_chat import (
     openai_chat_completion_args,
     openai_json_response_format,
 )
-from ballontranslator.utils.llm_profiles import default_profile
+from ballontranslator.utils.llm_profiles import THINKING_ENABLED, default_profile
 
 
 class FakeAuthError(Exception):
@@ -58,6 +58,45 @@ class RequesterHarness(LLMChatRequester):
 
 
 class LLMChatRequesterTest(unittest.TestCase):
+    def test_native_ollama_enabled_thinking_uses_boolean_control(self) -> None:
+        payload = ollama_native_chat_payload({
+            'model': 'qwen3',
+            'messages': [],
+            'reasoning_effort': THINKING_ENABLED,
+        }, 4096)
+        self.assertIs(payload['think'], True)
+
+        default_context = ollama_native_chat_payload({
+            'model': 'qwen3',
+            'messages': [],
+            'reasoning_effort': THINKING_ENABLED,
+        }, 0)
+        self.assertNotIn('num_ctx', default_context['options'])
+
+    def test_detected_ollama_controls_use_native_api_with_default_context(self) -> None:
+        profile = default_profile('Ollama')
+        profile.model = 'qwen3'
+        profile.ollama_context_length = 0
+        profile.ollama_thinking_model = profile.model
+        profile.ollama_thinking_supported = True
+        expected = object()
+        with (
+            mock.patch.object(
+                self.requester,
+                '_request_ollama_native',
+                return_value=expected,
+            ) as native_request,
+            mock.patch.object(self.requester, '_openai_module') as openai_module,
+        ):
+            result = self.requester.request_chat_completion(profile, {
+                'model': profile.model,
+                'messages': [],
+            })
+
+        self.assertIs(result, expected)
+        native_request.assert_called_once()
+        openai_module.assert_not_called()
+
     def setUp(self) -> None:
         self.requester = RequesterHarness()
         self.profile = default_profile('OpenAI')

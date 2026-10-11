@@ -784,6 +784,25 @@ QGroupBox#LLMProfileCard QLabel#LLMProfileMemoryEstimateDetail {
     font-size: 11px;
 }
 
+QGroupBox#LLMProfileCard QFrame#LLMProfileReasoningCapability {
+    border: 1px solid @borderColor;
+    border-radius: 6px;
+    background-color: @emptyContentBackgroundColor;
+}
+
+QGroupBox#LLMProfileCard QLabel#LLMProfileReasoningCapabilityStatus {
+    border: none;
+    background-color: transparent;
+    color: @qwidgetForegroundColor;
+    font-size: 11px;
+}
+
+QGroupBox#LLMProfileCard NoBorderPushBtn#LLMProfileReasoningDetectButton {
+    min-width: 58px;
+    height: 26px;
+    padding: 0px 8px;
+}
+
 QGroupBox#LLMProfileCard QFrame#LLMProfileDetailSectionLine {
     border: none;
     border-top: 1px solid @borderColor;

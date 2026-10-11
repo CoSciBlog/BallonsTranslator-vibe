@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import json
 import re
+from dataclasses import dataclass
 from collections.abc import Mapping
 from typing import (
     Any,
@@ -47,6 +48,7 @@ CODEX_MODEL_OPTIONS = (
 
 THINKING_AUTO = "Auto"
 THINKING_DISABLED = "Disabled"
+THINKING_ENABLED = "Enabled"
 THINKING_LEVEL_OPTIONS = [
     THINKING_AUTO,
     THINKING_DISABLED,
@@ -211,6 +213,9 @@ class LLMProfile(Config):
     image_model_options: List[str] = field(default_factory=list)
     thinking_level: str = THINKING_AUTO
     thinking_level_options: List[str] = field(default_factory=lambda: list(THINKING_LEVEL_OPTIONS))
+    ollama_thinking_model: str = ""
+    ollama_thinking_supported: Optional[bool] = None
+    ollama_thinking_default: str = ""
     prompt: str = DEFAULT_TRANSLATION_PROMPT
     vision_prompt: str = DEFAULT_OCR_PROMPT
     image_prompt: str = DEFAULT_INPAINT_PROMPT
@@ -239,6 +244,27 @@ class LLMProfile(Config):
         if not isinstance(self.use_glossary, bool):
             LOGGER.warning('Discard invalid LLM profile use_glossary for %s.', self.id or self.name)
             self.use_glossary = True
+        if not isinstance(self.ollama_thinking_model, str):
+            LOGGER.warning(
+                'Discard invalid Ollama thinking model for %s.',
+                self.id or self.name,
+            )
+            self.ollama_thinking_model = ''
+        if (
+            self.ollama_thinking_supported is not None
+            and not isinstance(self.ollama_thinking_supported, bool)
+        ):
+            LOGGER.warning(
+                'Discard invalid Ollama thinking support state for %s.',
+                self.id or self.name,
+            )
+            self.ollama_thinking_supported = None
+        if not isinstance(self.ollama_thinking_default, str):
+            LOGGER.warning(
+                'Discard invalid Ollama thinking default for %s.',
+                self.id or self.name,
+            )
+            self.ollama_thinking_default = ''
         if self.backend not in ('openai', 'codex', 'unavailable'):
             LOGGER.warning('Discard invalid LLM profile backend for %s.', self.id or self.name)
             # An unknown backend must never fall through to a paid API request.
@@ -318,6 +344,80 @@ def ollama_native_chat_url(profile: LLMProfile) -> str:
     return url._replace(
         path=path.rstrip('/') + '/api/chat', query='', fragment=''
     ).geturl()
+
+
+def ollama_show_url(profile: LLMProfile) -> str:
+    """Return Ollama's model-metadata endpoint for a recognized profile.
+
+    >>> ollama_show_url(LLMProfile(base_url='http://127.0.0.1:11434/v1'))
+    'http://127.0.0.1:11434/api/show'
+    """
+    chat_url = ollama_native_chat_url(profile)
+    if not chat_url:
+        return ''
+    return chat_url[:-len('/api/chat')] + '/api/show'
+
+
+@dataclass(frozen=True)
+class OllamaThinkingCapability:
+    """Normalized thinking controls returned by Ollama ``/api/show``.
+
+    ``supported`` is ``None`` when an older server or model publishes no
+    thinking metadata. In that case only provider-default behavior is safe.
+
+    >>> parse_ollama_thinking_capability({
+    ...     'thinking': {'values': ['low', 'high'], 'default': 'low'},
+    ... }).options
+    ('Auto', 'low', 'high')
+    """
+
+    supported: Optional[bool]
+    options: Tuple[str, ...]
+    default: str = ''
+
+
+def _ollama_thinking_value(value: Any) -> str:
+    if value is True:
+        return THINKING_ENABLED
+    if value is False:
+        return THINKING_DISABLED
+    if not isinstance(value, str):
+        return ''
+    value = value.strip()
+    return value if value else ''
+
+
+def parse_ollama_thinking_capability(payload: Any) -> OllamaThinkingCapability:
+    """Normalize model-defined Ollama thinking controls without guessing.
+
+    >>> parse_ollama_thinking_capability(
+    ...     {'thinking': {'values': [False]}}
+    ... ).supported
+    False
+    >>> parse_ollama_thinking_capability({}).options
+    ('Auto',)
+    """
+    thinking = payload.get('thinking') if isinstance(payload, Mapping) else None
+    values = thinking.get('values') if isinstance(thinking, Mapping) else None
+    if not isinstance(values, list):
+        return OllamaThinkingCapability(None, (THINKING_AUTO,))
+
+    normalized = []
+    for value in values:
+        option = _ollama_thinking_value(value)
+        if option and option not in normalized:
+            normalized.append(option)
+    if not normalized:
+        return OllamaThinkingCapability(None, (THINKING_AUTO,))
+    supports_thinking = any(option != THINKING_DISABLED for option in normalized)
+    if not supports_thinking:
+        return OllamaThinkingCapability(False, (THINKING_DISABLED,), THINKING_DISABLED)
+
+    options = [THINKING_AUTO, *normalized]
+    default = _ollama_thinking_value(thinking.get('default'))
+    if default not in normalized:
+        default = ''
+    return OllamaThinkingCapability(True, tuple(options), default)
 
 
 def estimate_ollama_memory_gib(
@@ -521,13 +621,32 @@ def _normalize_profile_thinking(profile: LLMProfile) -> LLMProfile:
             profile.id or profile.name or '<unnamed>',
         )
 
+    detected_ollama_model = (
+        bool(profile.ollama_thinking_model)
+        and profile.ollama_thinking_model == profile.model
+    )
+    if profile.ollama_thinking_model and not detected_ollama_model:
+        profile.ollama_thinking_model = ''
+        profile.ollama_thinking_supported = None
+        profile.ollama_thinking_default = ''
+    required_options = [] if detected_ollama_model else [
+        THINKING_AUTO,
+        THINKING_DISABLED,
+    ]
     normalized_options = []
-    for option in [THINKING_AUTO, THINKING_DISABLED, *raw_options]:
+    for option in [*required_options, *raw_options]:
         if not isinstance(option, str):
             continue
         option = normalize_thinking_level(option)
         if option not in normalized_options:
             normalized_options.append(option)
+    if not normalized_options:
+        normalized_options.append(THINKING_AUTO)
+    if detected_ollama_model and profile.ollama_thinking_supported is False:
+        normalized_options = [THINKING_DISABLED]
+        profile.thinking_level = THINKING_DISABLED
+    elif detected_ollama_model and profile.thinking_level not in normalized_options:
+        profile.thinking_level = THINKING_AUTO
     if profile.thinking_level not in normalized_options:
         normalized_options.append(profile.thinking_level)
     profile.thinking_level_options = normalized_options

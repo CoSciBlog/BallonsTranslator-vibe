@@ -12,7 +12,15 @@ from qtpy.QtWidgets import QApplication, QMenu, QVBoxLayout, QWidget
 from ballontranslator.ui.llm_profile_widgets import LLMProfilesWidget, ProfileCardWidget
 from ballontranslator.ui.misc import parse_stylesheet
 from ballontranslator.utils.config import pcfg
-from ballontranslator.utils.llm_profiles import default_codex_profile, LLMProfile, default_profile, profile_to_dict
+from ballontranslator.utils.llm_profiles import (
+    OllamaThinkingCapability,
+    THINKING_AUTO,
+    THINKING_DISABLED,
+    default_codex_profile,
+    LLMProfile,
+    default_profile,
+    profile_to_dict,
+)
 
 
 class LLMProfileModelSelectorTest(unittest.TestCase):
@@ -112,6 +120,54 @@ class LLMProfileModelSelectorTest(unittest.TestCase):
         )
         self.assertTrue(remote.ollama_memory_card.isHidden())
         self.assertTrue(remote.ollama_memory_label.isHidden())
+
+    def test_ollama_reasoning_detection_restricts_profile_choices(self) -> None:
+        profile = default_profile('Ollama')
+        profile.model = 'gpt-oss:20b'
+        profile.thinking_level = 'xhigh'
+        card = ProfileCardWidget(profile)
+        self.addCleanup(card.deleteLater)
+        card.setExpanded(True)
+
+        self.assertFalse(card.ollama_reasoning_card.isHidden())
+        self.assertIn('not been checked', card.ollama_reasoning_status.text())
+        card._applyOllamaThinkingCapability(
+            profile.model,
+            OllamaThinkingCapability(
+                True,
+                (THINKING_AUTO, 'low', 'medium', 'high'),
+                'medium',
+            ),
+        )
+
+        combo = card.details.param_widgets['thinking_level']
+        self.assertEqual(profile.thinking_level, THINKING_AUTO)
+        self.assertEqual(
+            [combo.itemText(index) for index in range(combo.count())],
+            [THINKING_AUTO, 'low', 'medium', 'high'],
+        )
+        self.assertIn('Default: medium', card.ollama_reasoning_status.text())
+        self.assertTrue(combo.isEnabled())
+
+        card._applyOllamaThinkingCapability(
+            profile.model,
+            OllamaThinkingCapability(
+                False,
+                (THINKING_DISABLED,),
+                THINKING_DISABLED,
+            ),
+        )
+        self.assertEqual(profile.thinking_level, THINKING_DISABLED)
+        self.assertEqual(combo.count(), 1)
+        self.assertFalse(combo.isEnabled())
+        self.assertIn('not supported', card.ollama_reasoning_status.text())
+
+        card._setModelText('qwen3', emit_changed=True)
+        self.assertEqual(profile.ollama_thinking_model, '')
+        self.assertEqual(profile.thinking_level, THINKING_DISABLED)
+        self.assertIn('medium', profile.thinking_level_options)
+        self.assertTrue(combo.isEnabled())
+        self.assertIn('not been checked', card.ollama_reasoning_status.text())
 
     def image_card(self) -> ProfileCardWidget:
         card = ProfileCardWidget(LLMProfile(
