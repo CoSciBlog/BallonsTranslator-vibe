@@ -88,7 +88,21 @@ class LLMProfileModelSelectorTest(unittest.TestCase):
 
         self.assertEqual(profile.ollama_context_length, 32768)
         self.assertIn('GiB', card.ollama_memory_label.text())
+        self.assertIn('32', card.ollama_memory_detail.text())
+        self.assertIn('Context', card.ollama_memory_detail.text())
+        self.assertIs(card.ollama_memory_card.parentWidget(), card.details)
         self.assertFalse(card.ollama_memory_label.isHidden())
+
+        profile.ollama_context_length = 0
+        card.syncFromProfile()
+        self.assertEqual(card.ollama_memory_label.text(), 'Ollama default')
+        self.assertIn('context length', card.ollama_memory_detail.text())
+
+        profile.model = 'custom-model'
+        profile.ollama_context_length = 32768
+        card.syncFromProfile()
+        self.assertEqual(card.ollama_memory_label.text(), 'Unavailable')
+        self.assertIn('parameter count', card.ollama_memory_detail.text())
 
         remote = ProfileCardWidget(default_profile('OpenAI'))
         self.addCleanup(remote.deleteLater)
@@ -96,6 +110,7 @@ class LLMProfileModelSelectorTest(unittest.TestCase):
         self.assertFalse(
             remote.details.param_widgets['ollama_context_length'].isVisibleTo(remote)
         )
+        self.assertTrue(remote.ollama_memory_card.isHidden())
         self.assertTrue(remote.ollama_memory_label.isHidden())
 
     def image_card(self) -> ProfileCardWidget:

@@ -720,19 +720,67 @@ class ProfileCardWidget(QGroupBox):
         )
         self._install_detail_editor_scrollbars()
         layout.addWidget(self.details)
-        self.ollama_memory_label = QLabel(self)
-        self.ollama_memory_label.setObjectName('LLMProfileMemoryEstimate')
-        self.ollama_memory_label.setWordWrap(True)
-        self.ollama_memory_label.setMaximumWidth(LLM_PROMPT_EDITOR_WIDTH)
-        self.ollama_memory_label.setToolTip(self.tr(
+
+        self.ollama_memory_card = QFrame(self.details)
+        self.ollama_memory_card.setObjectName('LLMProfileMemoryEstimate')
+        self.ollama_memory_card.setAttribute(
+            Qt.WidgetAttribute.WA_StyledBackground,
+            True,
+        )
+        self.ollama_memory_card.setFixedWidth(LLM_PROMPT_EDITOR_WIDTH)
+        memory_layout = QVBoxLayout(self.ollama_memory_card)
+        memory_layout.setContentsMargins(12, 9, 12, 10)
+        memory_layout.setSpacing(2)
+        memory_header = QHBoxLayout()
+        memory_header.setContentsMargins(0, 0, 0, 0)
+        memory_header.setSpacing(8)
+        self.ollama_memory_title = QLabel(
+            self.tr('Estimated memory'),
+            self.ollama_memory_card,
+        )
+        self.ollama_memory_card.setAccessibleName(
+            self.ollama_memory_title.text()
+        )
+        self.ollama_memory_title.setObjectName('LLMProfileMemoryEstimateTitle')
+        self.ollama_memory_badge = QLabel(
+            self.tr('Approximate'),
+            self.ollama_memory_card,
+        )
+        self.ollama_memory_badge.setObjectName('LLMProfileMemoryEstimateBadge')
+        memory_header.addWidget(self.ollama_memory_title)
+        memory_header.addStretch(1)
+        memory_header.addWidget(self.ollama_memory_badge)
+        memory_layout.addLayout(memory_header)
+        self.ollama_memory_label = QLabel(self.ollama_memory_card)
+        self.ollama_memory_label.setObjectName('LLMProfileMemoryEstimateValue')
+        self.ollama_memory_label.setWordWrap(False)
+        memory_layout.addWidget(self.ollama_memory_label)
+        self.ollama_memory_detail = QLabel(self.ollama_memory_card)
+        self.ollama_memory_detail.setObjectName('LLMProfileMemoryEstimateDetail')
+        self.ollama_memory_detail.setWordWrap(True)
+        memory_layout.addWidget(self.ollama_memory_detail)
+        memory_tooltip = self.tr(
             'Approximate combined model and context-cache allocation. The '
             'actual RAM/VRAM split depends on Ollama, GPU offloading, model '
             'architecture, quantization, and parallel requests.'
-        ))
-        layout.addWidget(self.ollama_memory_label, 0, Qt.AlignmentFlag.AlignLeft)
+        )
+        self.ollama_memory_card.setToolTip(memory_tooltip)
+        self.ollama_memory_card.setAccessibleDescription(memory_tooltip)
+        self.ollama_memory_label.setToolTip(memory_tooltip)
+        self.ollama_memory_detail.setToolTip(memory_tooltip)
+        # Keep the estimate beside the common Ollama fields instead of below
+        # the prompt editor, where a long wrapped sentence can be overlooked.
+        self.details.layout().insertWidget(
+            1,
+            self.ollama_memory_card,
+            0,
+            Qt.AlignmentFlag.AlignLeft,
+        )
         self._sync_minimum_width_with_content()
         self.details.setVisible(False)
+        self.ollama_memory_card.hide()
         self.ollama_memory_label.hide()
+        self.ollama_memory_detail.hide()
         self.setActionButtonsVisible(False)
 
         self.model_combo.paramwidget_edited.connect(self.on_model_edited)
@@ -1629,9 +1677,10 @@ class ProfileCardWidget(QGroupBox):
 
     def _refreshOllamaMemoryEstimate(self) -> None:
         is_ollama = bool(ollama_native_chat_url(self.profile))
-        self.ollama_memory_label.setVisible(
-            is_ollama and not self.details.isHidden()
-        )
+        visible = is_ollama and not self.details.isHidden()
+        self.ollama_memory_card.setVisible(visible)
+        self.ollama_memory_label.setVisible(visible)
+        self.ollama_memory_detail.setVisible(visible)
         if not is_ollama:
             return
         context_length = self.profile.ollama_context_length
@@ -1640,21 +1689,27 @@ class ProfileCardWidget(QGroupBox):
             context_length,
         )
         if context_length <= 0:
-            text = self.tr(
-                'Estimated RAM/VRAM: Ollama default. Set a context length '
-                'to calculate an estimate.'
+            value = self.tr('Ollama default')
+            detail = self.tr(
+                'Set a context length to calculate an estimate.'
             )
         elif estimate is None:
-            text = self.tr(
-                'Estimated RAM/VRAM: unavailable because the parameter count '
-                'could not be read from the model name.'
+            value = self.tr('Unavailable')
+            detail = self.tr(
+                'The parameter count could not be read from the model name.'
             )
         else:
-            text = self.tr(
-                'Estimated model + context memory: {minimum:.1f}–{maximum:.1f} '
-                'GiB combined RAM/VRAM.'
-            ).format(minimum=estimate[0], maximum=estimate[1])
-        self.ollama_memory_label.setText(text)
+            value = self.tr('{minimum:.1f}–{maximum:.1f} GiB').format(
+                minimum=estimate[0],
+                maximum=estimate[1],
+            )
+            detail = self.tr(
+                'Combined RAM + VRAM · Context: {context} tokens'
+            ).format(
+                context=f'{context_length:,}'.replace(',', '\u202f'),
+            )
+        self.ollama_memory_label.setText(value)
+        self.ollama_memory_detail.setText(detail)
 
     def refreshKeyStatus(self):
         require_key = bool(self.profile.require_api_key)

@@ -5878,6 +5878,14 @@ Starten Sie dann Photoshop neu. Der Explorer öffnet nun die Quelldatei und den 
         <translation>Bild</translation>
     </message>
     <message>
+        <source>Estimated memory</source>
+        <translation>Geschätzter Speicherbedarf</translation>
+    </message>
+    <message>
+        <source>Approximate</source>
+        <translation>Näherungswert</translation>
+    </message>
+    <message>
         <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="728"/>
         <source>Approximate combined model and context-cache allocation. The actual RAM/VRAM split depends on Ollama, GPU offloading, model architecture, quantization, and parallel requests.</source>
         <translation>Ungefähre gemeinsame Speicherbelegung von Modell und Kontext-Cache. Die tatsächliche Aufteilung auf RAM und VRAM hängt von Ollama, GPU-Auslagerung, Modellarchitektur, Quantisierung und parallelen Anfragen ab.</translation>
@@ -5969,19 +5977,28 @@ Starten Sie dann Photoshop neu. Der Explorer öffnet nun die Quelldatei und den 
         <translation>Bildbereinigungsmodell, das von LLMInpaint verwendet wird. Klicken Sie, um die Bildbereinigung für dieses Profil zu aktivieren.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1644"/>
-        <source>Estimated RAM/VRAM: Ollama default. Set a context length to calculate an estimate.</source>
-        <translation>Geschätzter RAM/VRAM-Bedarf: Ollama-Standard. Lege eine Kontextlänge fest, um eine Schätzung zu berechnen.</translation>
+        <source>Ollama default</source>
+        <translation>Ollama-Standard</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1649"/>
-        <source>Estimated RAM/VRAM: unavailable because the parameter count could not be read from the model name.</source>
-        <translation>Geschätzter RAM/VRAM-Bedarf: nicht verfügbar, da die Parameterzahl nicht aus dem Modellnamen gelesen werden konnte.</translation>
+        <source>Set a context length to calculate an estimate.</source>
+        <translation>Lege eine Kontextlänge fest, um eine Schätzung zu berechnen.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1654"/>
-        <source>Estimated model + context memory: {minimum:.1f}–{maximum:.1f} GiB combined RAM/VRAM.</source>
-        <translation>Geschätzter Speicherbedarf für Modell und Kontext: insgesamt {minimum:.1f}–{maximum:.1f} GiB RAM/VRAM.</translation>
+        <source>Unavailable</source>
+        <translation>Nicht verfügbar</translation>
+    </message>
+    <message>
+        <source>The parameter count could not be read from the model name.</source>
+        <translation>Die Parameterzahl konnte nicht aus dem Modellnamen gelesen werden.</translation>
+    </message>
+    <message>
+        <source>{minimum:.1f}–{maximum:.1f} GiB</source>
+        <translation>{minimum:.1f}–{maximum:.1f} GiB</translation>
+    </message>
+    <message>
+        <source>Combined RAM + VRAM · Context: {context} tokens</source>
+        <translation>RAM + VRAM kombiniert · Kontext: {context} Token</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="1668"/>

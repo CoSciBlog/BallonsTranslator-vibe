@@ -1,5 +1,9 @@
 # Changelogs
 
+### 2026-10-11 — 1.5.19+vibe.21
+- Redesigned the Ollama memory estimate as a compact themed card placed beside the relevant profile settings instead of an easily clipped sentence below the prompt editor.
+- The estimated GiB range, active context length, approximate status, default state, and unavailable state are now visually separated and remain fully explained through a detailed tooltip.
+
 ### 2026-10-11 — 1.5.19+vibe.20
 - Added opt-in nearby text-box merging under **Settings → Typesetting**, with direction, gap, and overlap controls plus a direct current-page action.
 - Successful pipeline runs can now merge only their processed pages; ignored and unselected pages remain untouched, and the existing advanced Region Merge Tool continues to support label rules and whole-project runs.
