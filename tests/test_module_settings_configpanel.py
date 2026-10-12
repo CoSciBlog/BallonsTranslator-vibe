@@ -77,7 +77,7 @@ class ModuleSettingsConfigPanelTest(unittest.TestCase):
         self.assertIsNone(editor.param_widget)
         self.assertFalse(editor.empty_label.isHidden())
 
-    def test_typesetting_merge_controls_persist_and_request_current_page(self) -> None:
+    def test_post_merge_controls_persist_and_request_current_page(self) -> None:
         with (
             patch.object(pcfg.module, 'post_merge_textboxes', False),
             patch.object(
@@ -85,10 +85,19 @@ class ModuleSettingsConfigPanelTest(unittest.TestCase):
                 'post_merge_mode',
                 'VERTICAL_THEN_HORIZONTAL',
             ),
+            patch.object(pcfg.module, 'post_merge_max_vertical_gap', 41),
+            patch.object(pcfg.module, 'post_merge_max_horizontal_gap', 42),
+            patch.object(pcfg.module, 'post_merge_min_width_overlap_ratio', 43),
+            patch.object(pcfg.module, 'post_merge_min_height_overlap_ratio', 44),
         ):
             panel = ConfigPanel()
             self.addCleanup(panel.deleteLater)
             panel.setupConfig()
+            self.assertIn('post_merge', panel.configContent.section_index)
+            self.assertEqual(panel.post_merge_vgap_spin.value(), 41)
+            self.assertEqual(panel.post_merge_hgap_spin.value(), 42)
+            self.assertEqual(panel.post_merge_woverlap_spin.value(), 43)
+            self.assertEqual(panel.post_merge_hoverlap_spin.value(), 44)
             requests = []
             panel.merge_current_page_requested.connect(
                 lambda: requests.append(True)

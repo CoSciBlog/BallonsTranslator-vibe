@@ -1,5 +1,8 @@
 # Changelogs
 
+### 2026-10-12 — 1.5.19+vibe.42
+- Moved the automatic and current-page text-box merge controls from **Settings → Typesetting** to a dedicated **Settings → Post-merge** page, keeping all merge behavior and saved settings unchanged.
+
 ### 2026-10-12 — 1.5.19+vibe.41
 - Restored the 1.4-vibe **Limit auto-layout boxes to speech bubbles** and **Auto layout without stored line breaks** options under **Settings → Typesetting**, adapted to the current text geometry engine.
 - Automatic layout now always keeps generated boxes inside the page, can constrain them to the detected speech-bubble region, and can retain visual wrapping without saving generated hard line breaks. The existing Letter Case controls continue to provide the requested uppercase mode.

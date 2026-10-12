@@ -618,7 +618,7 @@
     <name>ConfigPanel</name>
     <message>
         <location filename="../../ballontranslator/ui/configpanel.py" line="852"/>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1773"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1777"/>
         <source>Settings</source>
         <translation>Einstellungen</translation>
     </message>
@@ -674,662 +674,663 @@
     </message>
     <message>
         <location filename="../../ballontranslator/ui/configpanel.py" line="876"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1375"/>
+        <source>Post-merge</source>
+        <translation>Post-Merge</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="877"/>
         <source>Typesetting</source>
         <translation>Layout</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="877"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="878"/>
         <source>Spell Checker</source>
         <translation>Rechtschreibprüfung</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="892"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="893"/>
         <source>Codex</source>
         <translation>Codex</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="910"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="914"/>
         <source>Torch</source>
         <translation>Taschenlampe</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="923"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="927"/>
         <source>Empty cache after RUN</source>
         <translation>Cache nach Ausführung leeren</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="926"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="930"/>
         <source>Empty cache after RUN to save memory.</source>
         <translation>Cache nach Ausführung leeren, um Speicherplatz zu sparen.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="931"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="935"/>
         <source>Unload local models before LLM requests</source>
         <translation>Lokale Modelle vor LLM-Anfragen entladen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="938"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="942"/>
         <source>Unload detector, OCR, translator, and inpainter models before an LLM or Ollama request to free RAM and VRAM. Models are loaded again when needed.</source>
         <translation>Detector-, OCR-, Übersetzer- und Inpainting-Modelle vor einer LLM- oder Ollama-Anfrage entladen, um RAM und VRAM freizugeben. Die Modelle werden bei Bedarf erneut geladen.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="948"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="952"/>
         <source>Auto install missing packages</source>
         <translation>Automatische Installation fehlender Pakete</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="955"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="959"/>
         <source>Install missing Python packages automatically when a selected module requires them.</source>
         <translation>Automatische Installation fehlender Python-Pakete, wenn ein ausgewähltes Modul sie benötigt.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="969"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="973"/>
         <source>Prepare Selected Modules</source>
         <translation>Ausgewählte Module vorbereiten</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="974"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="978"/>
         <source>Unload All Models</source>
         <translation>Alle Modelle entladen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="981"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="985"/>
         <source>Keyword substitution for source text</source>
         <translation>Schlüsselwort-Substitution für den Quelltext</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="988"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="992"/>
         <source>Keyword substitution for machine translation source text</source>
         <translation>Schlüsselwort-Substitution für den Quelltext der maschinellen Übersetzung</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="997"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1001"/>
         <source>Keyword substitution for machine translation</source>
         <translation>Schlüsselwort-Substitution für die maschinelle Übersetzung</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1053"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1057"/>
         <source>Current version: </source>
         <translation>Aktuelle Version: </translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1058"/>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="2142"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1062"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="2146"/>
         <source>Latest version: </source>
         <translation>Neueste Version: </translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1058"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1062"/>
         <source>Not checked</source>
         <translation>Nicht überprüft</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1067"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1071"/>
         <source>Check update</source>
         <translation>Update prüfen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1078"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1082"/>
         <source>Reopen last project on startup</source>
         <translation>Letztes Projekt beim Start öffnen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1081"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1085"/>
         <source>Check update on startup</source>
         <translation>Update beim Start prüfen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1084"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1088"/>
         <source>Enable</source>
         <translation>Aktivieren</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1087"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1091"/>
         <source>Apply for source text</source>
         <translation>Für Quelltext anwenden</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1095"/>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1102"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1099"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1106"/>
         <source>Higher value, slower analysis</source>
         <translation>Höherer Wert, langsamere Analyse</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1101"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1105"/>
         <source>Edit Distance</source>
         <translation>Editierdistanz</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1116"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1120"/>
         <source>Dictionary Words...</source>
         <translation>Wörterbucheinträge...</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1123"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1127"/>
         <source>Repository Dictionaries</source>
         <translation>Repository-Wörterbücher</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1138"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1142"/>
         <source>External Dictionaries</source>
         <translation>Externe Wörterbücher</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1149"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1153"/>
         <source>Add Dictionary...</source>
         <translation>Wörterbuch hinzufügen...</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1152"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1156"/>
         <source>Remove Selected</source>
         <translation>Ausgewählte entfernen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1162"/>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1271"/>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="2150"/>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="2156"/>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="2437"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1166"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1275"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="2154"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="2160"/>
         <location filename="../../ballontranslator/ui/configpanel.py" line="2441"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="2445"/>
         <source>None</source>
         <translation>Keine</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1165"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1169"/>
         <source>Huggingface Mirrors</source>
         <translation>Huggingface-Server</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1172"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1176"/>
         <source>PyPI Mirrors</source>
         <translation>PyPI-Server</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1178"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1182"/>
         <source>decide by program</source>
         <translation>Entscheidung durch Programm</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1179"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1183"/>
         <source>use global setting</source>
         <translation>Globale Einstellungen verwenden</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1192"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1196"/>
         <source>Pipeline Font Formatting</source>
         <translation>Formatierung der Pipeline-Schrift</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1197"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1201"/>
         <source>Font Size</source>
         <translation>Schriftgröße</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1201"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1205"/>
         <source>Stroke Size</source>
         <translation>Strichstärke</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1205"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1209"/>
         <source>Font Color</source>
         <translation>Schriftfarbe</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1208"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1212"/>
         <source>Stroke Color</source>
         <translation>Strichfarbe</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1212"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1216"/>
         <source>Effect</source>
         <translation>Effekt</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1215"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1219"/>
         <source>Alignment</source>
         <translation>Ausrichtung</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1219"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1223"/>
         <source>Writing-mode</source>
         <translation>Schreibrichtung</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1222"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1226"/>
         <source>Keep existing</source>
         <translation>Bestehende Einstellungen beibehalten</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1222"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1226"/>
         <source>Always use global setting</source>
         <translation>Immer globale Einstellungen verwenden</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1222"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1226"/>
         <source>Font Family</source>
         <translation>Schriftfamilie</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1229"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1233"/>
         <source>Quick insert characters</source>
         <translation>Schnelle Zeicheneingabe</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1236"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1240"/>
         <source>Hide Unused Fonts</source>
         <translation>Unbenutzte Schriftarten ausblenden</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1239"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1243"/>
         <source>Font Exclusion</source>
         <translation>Schriftart-Ausschluss</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1255"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1259"/>
         <source>Letter Case</source>
         <translation>Groß-/Kleinschreibung</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1263"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1267"/>
         <source>Choose how translated text letter case is adjusted after keyword substitution.</source>
         <translation>Wählen Sie, wie die Groß- und Kleinschreibung des übersetzten Textes nach der Schlüsselwortsubstitution angepasst wird.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1273"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1277"/>
         <source>Keep translated text letter case unchanged.</source>
         <translation>Behalten Sie die Groß- und Kleinschreibung des übersetzten Textes unverändert.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1276"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1280"/>
         <source>Capitalize</source>
         <translation>Großschreibung</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1279"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1283"/>
         <source>Lowercase translated text, then capitalize the first letter of each sentence.</source>
         <translation>Kleinschreibung des übersetzten Textes, gefolgt von der Großschreibung des ersten Buchstabens jedes Satzes.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1283"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1287"/>
         <source>Uppercase</source>
         <translation>Großschreibung (gesamter Text)</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1285"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1289"/>
         <source>Convert translated text to uppercase.</source>
         <translation>Konvertieren Sie den übersetzten Text in Großbuchstaben.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1305"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1309"/>
         <source>Auto layout</source>
         <translation>Automatische Anordnung</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1307"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1311"/>
         <source>Wraps and scales translated text to fit the detected speech bubble. Longer translations are broken across lines instead of expanding into very wide text boxes.</source>
         <translation>Bricht übersetzten Text um und skaliert ihn passend zur erkannten Sprechblase. Längere Übersetzungen werden auf mehrere Zeilen verteilt, statt sehr breite Textboxen zu erzeugen.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1317"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1321"/>
         <source>Limit auto-layout boxes to speech bubbles</source>
         <translation>Auto-Layout-Textboxen auf Sprechblasen begrenzen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1319"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1323"/>
         <source>Keeps automatically laid-out text boxes within the detected speech-bubble area and always inside the page edge. Disable only for captions or sound effects that intentionally extend outside a bubble.</source>
         <translation>Hält automatisch angeordnete Textboxen innerhalb der erkannten Sprechblase und immer innerhalb des Seitenrands. Nur für Bildunterschriften oder Soundeffekte deaktivieren, die absichtlich über eine Sprechblase hinausragen.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1333"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1337"/>
         <source>Auto layout without stored line breaks</source>
         <translation>Auto-Layout ohne gespeicherte Zeilenumbrüche</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1335"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1339"/>
         <source>Optimizes box size without persisting line breaks in project text. Rendering can still wrap inside the constrained text box.</source>
         <translation>Optimiert die Textboxgröße, ohne Zeilenumbrüche im Projekttext zu speichern. Bei der Darstellung kann der Text innerhalb der begrenzten Textbox weiterhin umbrechen.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1349"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1353"/>
         <source>Remove translation line breaks</source>
         <translation>Zeilenumbrüche aus Übersetzungen entfernen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1351"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1355"/>
         <source>Replace line breaks in new translations and let the text box wrap the text automatically.</source>
         <translation>Ersetzt Zeilenumbrüche in neuen Übersetzungen und lässt den Text automatisch an der Textbox umbrechen.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1358"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1362"/>
         <source>Remove Existing Line Breaks...</source>
         <translation>Vorhandene Zeilenumbrüche entfernen...</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1361"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1365"/>
         <source>Remove hard line breaks from translations already stored in the current project.</source>
         <translation>Entfernt harte Zeilenumbrüche aus bereits im aktuellen Projekt gespeicherten Übersetzungen.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1371"/>
-        <source>Text Box Merging</source>
-        <translation>Textfelder zusammenführen</translation>
-    </message>
-    <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1376"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1380"/>
         <source>Merge nearby text boxes after pipeline</source>
         <translation>Nahe Textfelder nach der Pipeline zusammenführen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1378"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1382"/>
         <source>Automatically combine nearby translated text boxes after successful pipeline runs. Disabled by default.</source>
         <translation>Führt nahe übersetzte Textfelder nach erfolgreichen Pipelines automatisch zusammen. Standardmäßig deaktiviert.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1384"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1388"/>
         <source>Vertical merge</source>
         <translation>Vertikale Zusammenführung</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1385"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1389"/>
         <source>Horizontal merge</source>
         <translation>Horizontale Zusammenführung</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1386"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1390"/>
         <source>Vertical, then horizontal</source>
         <translation>Vertikal, dann horizontal</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1387"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1391"/>
         <source>Horizontal, then vertical</source>
         <translation>Horizontal, dann vertikal</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1389"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1393"/>
         <source>Merge direction</source>
         <translation>Zusammenführungsrichtung</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1391"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1395"/>
         <source>Choose the directions used to find neighboring text boxes.</source>
         <translation>Legt die Richtungen fest, in denen benachbarte Textfelder gesucht werden.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1412"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1416"/>
         <source>Vertical gap</source>
         <translation>Vertikaler Abstand</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1415"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1419"/>
         <source>Maximum pixel gap between boxes above and below each other.</source>
         <translation>Maximaler Pixelabstand zwischen übereinanderliegenden Textfeldern.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1419"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1423"/>
         <source>Horizontal gap</source>
         <translation>Horizontaler Abstand</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1422"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1426"/>
         <source>Maximum pixel gap between boxes beside each other.</source>
         <translation>Maximaler Pixelabstand zwischen nebeneinanderliegenden Textfeldern.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1426"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1430"/>
         <source>Horizontal overlap</source>
         <translation>Horizontale Überlappung</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1429"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1433"/>
         <source>Minimum horizontal overlap for a vertical merge.</source>
         <translation>Minimale horizontale Überlappung für eine vertikale Zusammenführung.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1433"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1437"/>
         <source>Vertical overlap</source>
         <translation>Vertikale Überlappung</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1436"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1440"/>
         <source>Minimum vertical overlap for a horizontal merge.</source>
         <translation>Minimale vertikale Überlappung für eine horizontale Zusammenführung.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1465"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1469"/>
         <source>Merge Current Page Now</source>
         <translation>Aktuelle Seite jetzt zusammenführen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1469"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1473"/>
         <source>Apply these compact merge settings to the current page immediately.</source>
         <translation>Wendet diese kompakten Zusammenführungseinstellungen sofort auf die aktuelle Seite an.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1482"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1486"/>
         <source>Independent text styles for each projects</source>
         <translation>Unabhängige Textstile für jedes Projekt.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1485"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1489"/>
         <source>Show only custom fonts</source>
         <translation>Zeigen Sie nur benutzerdefinierte Schriftarten an.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1496"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1500"/>
         <source>Vertical Text Layout</source>
         <translation>Vertikale Textausrichtung</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1505"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1509"/>
         <source>Compact punctuation spacing</source>
         <translation>Kompakte Interpunktion</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1507"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1511"/>
         <source>Remove extra spacing around punctuation in vertical text.</source>
         <translation>Entfernen Sie zusätzlichen Abstand um die Interpunktion in vertikalem Text.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1535"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1539"/>
         <source>Automatic Tate-chu-yoko</source>
         <translation>Automatische Tate-chu-yoko</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1544"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1548"/>
         <source>Automatically combine matching character runs into one upright horizontal unit in vertical text.</source>
         <translation>Kombinieren Sie automatisch übereinstimmende Zeichenketten zu einer einzigen, aufrechten horizontalen Einheit in vertikalem Text.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1551"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1555"/>
         <source>Apply</source>
         <translation>Anwenden</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1576"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1580"/>
         <source>Maximum Run Length</source>
         <translation>Maximale Zeichenkettenlänge</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1584"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1588"/>
         <source>Maximum number of consecutive matching characters to combine.</source>
         <translation>Maximale Anzahl aufeinanderfolgender übereinstimmender Zeichen, die zusammengefasst werden.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1608"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1612"/>
         <source>Numbers</source>
         <translation>Zahlen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1616"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1620"/>
         <source>Include consecutive digits from 0 to 9 in automatic runs.</source>
         <translation>Berücksichtigen Sie aufeinanderfolgende Ziffern von 0 bis 9 bei automatischen Abläufen.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1626"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1630"/>
         <source>Letters</source>
         <translation>Buchstaben</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1634"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1638"/>
         <source>Include consecutive Latin letters from A to Z and a to z in automatic runs.</source>
         <translation>Berücksichtigen Sie aufeinanderfolgende lateinische Buchstaben von A bis Z und a bis z bei automatischen Abläufen.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1653"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1657"/>
         <source>Additional Characters</source>
         <translation>Zusätzliche Zeichen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1661"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1665"/>
         <source>Other characters that can participate in an automatic run.</source>
         <translation>Andere Zeichen, die an einem automatischen Ablauf teilnehmen können.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1720"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1724"/>
         <source>Result image format</source>
         <translation>Format des Ergebnisbildes</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1726"/>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1739"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1730"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1743"/>
         <source>Quality</source>
         <translation>Qualität</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1731"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1735"/>
         <source>Intermediate image format</source>
         <translation>Zwischenformat des Bildes</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1780"/>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1781"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1784"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1785"/>
         <source>Close</source>
         <translation>Schließen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1804"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1808"/>
         <source>Enable project glossaries</source>
         <translation>Projektglossare aktivieren</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1805"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1809"/>
         <source>Automatically create project glossaries</source>
         <translation>Projektglossare automatisch erstellen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1806"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1810"/>
         <source>Automatically detect glossary candidates</source>
         <translation>Glossarkandidaten automatisch erkennen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1807"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1811"/>
         <source>Use glossary in translation review</source>
         <translation>Glossar bei der Übersetzungsprüfung verwenden</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1808"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1812"/>
         <source>Use series glossary</source>
         <translation>Serienglossar verwenden</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1809"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1813"/>
         <source>Show conflict warnings</source>
         <translation>Konfliktwarnungen anzeigen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1817"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1821"/>
         <source>Manual confirmation</source>
         <translation>Manuelle Bestätigung</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1817"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1821"/>
         <source>Automatic confirmation</source>
         <translation>Automatische Bestätigung</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1818"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1822"/>
         <source>Candidate confirmation</source>
         <translation>Bestätigung von Kandidaten</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1830"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1834"/>
         <source>Maximum prompt terms</source>
         <translation>Maximale Anzahl Begriffe pro Anfrage</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1849"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1853"/>
         <source>Automatic detection categories</source>
         <translation>Kategorien für die automatische Erkennung</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1932"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1936"/>
         <source>Installed ({version}, {device})</source>
         <translation>Installiert ({version}, {device})</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1935"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1939"/>
         <source>Not installed</source>
         <translation>Nicht installiert</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1938"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1942"/>
         <source>Reinstall Torch</source>
         <translation>Torch neu installieren</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1938"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1942"/>
         <source>Install Torch</source>
         <translation>Torch installieren</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="1943"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="1947"/>
         <source>Installing...</source>
         <translation>Wird installiert...</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="2074"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="2078"/>
         <source>Downloading dictionary...</source>
         <translation>Herunterladen des Wörterbuchs...</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="2074"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="2078"/>
         <source>Cancel</source>
         <translation>Abbrechen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="2092"/>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="2093"/>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="2392"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="2096"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="2097"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="2396"/>
         <source> - Installed</source>
         <translation> - Installiert</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="2099"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="2103"/>
         <source>Download Complete</source>
         <translation>Download abgeschlossen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="2099"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="2103"/>
         <source>Dictionary downloaded successfully!</source>
         <translation>Wörterbuch erfolgreich heruntergeladen!</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="2103"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="2107"/>
         <source>Download Failed</source>
         <translation>Download fehlgeschlagen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="2103"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="2107"/>
         <source>Failed to download dictionary: </source>
         <translation>Fehler beim Herunterladen des Wörterbuchs: </translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="2117"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="2121"/>
         <source>Select Dictionary File</source>
         <translation>Wörterbuchdatei auswählen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/configpanel.py" line="2119"/>
+        <location filename="../../ballontranslator/ui/configpanel.py" line="2123"/>
         <source>Dictionary files (*.txt *.dic)</source>
         <translation>Wörterbuchdateien (*.txt *.dic)</translation>
     </message>

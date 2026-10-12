@@ -873,6 +873,7 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
         label_glossary = self.tr('Glossary')
         label_llm_profile = self.tr('LLM Profile')
         label_application = self.tr('Application')
+        label_post_merge = self.tr('Post-merge')
         label_typesetting = self.tr('Typesetting')
         label_spellcheck = self.tr('Spell Checker')
 
@@ -891,6 +892,9 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
         llmProfileConfigPanel = self.addConfigBlock(label_llm_profile, moduleTableItem, 'llm_profile')
         codexConfigPanel = self.addConfigBlock(self.tr('Codex'), moduleTableItem, 'codex')
         applicationConfigPanel = self.addConfigBlock(label_application, generalTableItem, 'application')
+        postMergeConfigPanel = self.addConfigBlock(
+            label_post_merge, generalTableItem, 'post_merge'
+        )
         typesettingConfigPanel = self.addConfigBlock(label_typesetting, generalTableItem, 'typesetting')
         spellcheckConfigPanel = self.addConfigBlock(label_spellcheck, generalTableItem, 'spellcheck')
         
@@ -1367,19 +1371,19 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
             self.normalize_existing_translations_btn
         )
 
-        typesettingConfigPanel.addBlockWidget(ConfigTextLabel(
-            self.tr('Text Box Merging'),
+        postMergeConfigPanel.addBlockWidget(ConfigTextLabel(
+            self.tr('Post-merge'),
             CONFIG_FONTSIZE_CONTENT,
             QFont.Weight.Normal,
         ))
-        self.post_merge_checker, _ = typesettingConfigPanel.addCheckBox(
+        self.post_merge_checker, _ = postMergeConfigPanel.addCheckBox(
             self.tr('Merge nearby text boxes after pipeline'),
             discription=self.tr(
                 'Automatically combine nearby translated text boxes after successful pipeline runs. Disabled by default.'
             ),
         )
         self.post_merge_checker.toggled.connect(self.on_post_merge_changed)
-        self.post_merge_mode_combobox, _ = typesettingConfigPanel.addCombobox(
+        self.post_merge_mode_combobox, _ = postMergeConfigPanel.addCombobox(
             [
                 self.tr('Vertical merge'),
                 self.tr('Horizontal merge'),
@@ -1459,7 +1463,7 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
             merge_threshold_layout.addWidget(label, row, 0)
             merge_threshold_layout.addWidget(editor, row, 1)
         merge_threshold_layout.setColumnStretch(2, 1)
-        typesettingConfigPanel.addBlockWidget(merge_thresholds)
+        postMergeConfigPanel.addBlockWidget(merge_thresholds)
 
         self.post_merge_current_page_btn = QPushButton(
             self.tr('Merge Current Page Now'),
@@ -2469,18 +2473,26 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
         self.post_merge_mode_combobox.setCurrentIndex(
             post_merge_modes.index(pcfg.module.post_merge_mode)
         )
-        self.post_merge_vgap_spin.setValue(
-            pcfg.module.post_merge_max_vertical_gap
+        post_merge_values = (
+            pcfg.module.post_merge_max_vertical_gap,
+            pcfg.module.post_merge_max_horizontal_gap,
+            pcfg.module.post_merge_min_width_overlap_ratio,
+            pcfg.module.post_merge_min_height_overlap_ratio,
         )
-        self.post_merge_hgap_spin.setValue(
-            pcfg.module.post_merge_max_horizontal_gap
+        post_merge_editors = (
+            self.post_merge_vgap_spin,
+            self.post_merge_hgap_spin,
+            self.post_merge_woverlap_spin,
+            self.post_merge_hoverlap_spin,
         )
-        self.post_merge_woverlap_spin.setValue(
-            pcfg.module.post_merge_min_width_overlap_ratio
-        )
-        self.post_merge_hoverlap_spin.setValue(
-            pcfg.module.post_merge_min_height_overlap_ratio
-        )
+        for editor in post_merge_editors:
+            editor.blockSignals(True)
+        try:
+            for editor, value in zip(post_merge_editors, post_merge_values):
+                editor.setValue(value)
+        finally:
+            for editor in post_merge_editors:
+                editor.blockSignals(False)
         self._set_post_merge_controls_enabled(
             pcfg.module.post_merge_textboxes
         )

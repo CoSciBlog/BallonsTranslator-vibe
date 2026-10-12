@@ -134,6 +134,8 @@ overlap, and label criteria from the 1.4-vibe region merger. Groups use complete
 cross-pair compatibility: each original box in one candidate group must be
 merge-compatible with every original box in the other group. This keeps merges
 local instead of allowing a chain of neighboring boxes to bridge a whole page.
+The compact controls for this behavior live on the dedicated **Post-merge**
+settings page rather than in the Typesetting section.
 
 Horizontal automatic layout always constrains its generated logical rectangle
 to the page. When `let_autolayout_fit_bubble_flag` is enabled, the detected

@@ -9,7 +9,7 @@ from qtpy.QtWidgets import QApplication, QLabel
 from ballontranslator.ui.configpanel import ConfigPanel
 
 
-class TypesettingConfigLayoutTests(unittest.TestCase):
+class PostMergeConfigLayoutTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.app = QApplication.instance() or QApplication([])
@@ -17,7 +17,6 @@ class TypesettingConfigLayoutTests(unittest.TestCase):
     def setUp(self) -> None:
         self.panel = ConfigPanel()
         self.panel.resize(1125, 900)
-        self.panel.showSection('typesetting')
         self.panel.show()
         self.app.processEvents()
 
@@ -27,7 +26,30 @@ class TypesettingConfigLayoutTests(unittest.TestCase):
         QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
         self.app.processEvents()
 
+    def test_post_merge_controls_use_dedicated_page(self) -> None:
+        self.assertIn('post_merge', self.panel.configContent.section_index)
+
+        self.panel.showSection('post_merge')
+        self.app.processEvents()
+        post_merge_content = self.panel.configContent.currentWidget().widget()
+        typesetting_index = self.panel.configContent.section_index['typesetting']
+        typesetting_content = self.panel.configContent.widget(
+            typesetting_index
+        ).widget()
+
+        self.assertTrue(
+            post_merge_content.isAncestorOf(self.panel.post_merge_checker)
+        )
+        self.assertTrue(
+            post_merge_content.isAncestorOf(self.panel.post_merge_mode_combobox)
+        )
+        self.assertFalse(
+            typesetting_content.isAncestorOf(self.panel.post_merge_checker)
+        )
+
     def test_merge_direction_selector_is_below_its_labels(self) -> None:
+        self.panel.showSection('post_merge')
+        self.app.processEvents()
         selector = self.panel.post_merge_mode_combobox
         row = selector.parentWidget()
         labels = row.findChildren(
