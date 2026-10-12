@@ -982,8 +982,8 @@
     </message>
     <message>
         <location filename="../../ballontranslator/ui/configpanel.py" line="1323"/>
-        <source>Keeps automatically laid-out text boxes within the detected speech-bubble area and always inside the page edge. Disable only for captions or sound effects that intentionally extend outside a bubble.</source>
-        <translation>Hält automatisch angeordnete Textboxen innerhalb der erkannten Sprechblase und immer innerhalb des Seitenrands. Nur für Bildunterschriften oder Soundeffekte deaktivieren, die absichtlich über eine Sprechblase hinausragen.</translation>
+        <source>Uses the detected speech bubble as the preferred auto-layout boundary and keeps rendered text visible if it needs more room. Disable for captions or sound effects that intentionally extend outside a bubble.</source>
+        <translation>Verwendet die erkannte Sprechblase als bevorzugte Begrenzung für das automatische Layout und hält gerenderten Text sichtbar, wenn er mehr Platz benötigt. Für Bildunterschriften oder Soundeffekte deaktivieren, die absichtlich über eine Blase hinausragen.</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/configpanel.py" line="1337"/>

@@ -1320,7 +1320,7 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
         ) = typesettingConfigPanel.addCheckBox(
             self.tr('Limit auto-layout boxes to speech bubbles'),
             discription=self.tr(
-                'Keeps automatically laid-out text boxes within the detected speech-bubble area and always inside the page edge. Disable only for captions or sound effects that intentionally extend outside a bubble.'
+                'Uses the detected speech bubble as the preferred auto-layout boundary and keeps rendered text visible if it needs more room. Disable for captions or sound effects that intentionally extend outside a bubble.'
             ),
         )
         self.let_autolayout_fit_bubble_checker.setChecked(

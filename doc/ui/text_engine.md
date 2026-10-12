@@ -137,11 +137,12 @@ local instead of allowing a chain of neighboring boxes to bridge a whole page.
 The compact controls for this behavior live on the dedicated **Post-merge**
 settings page rather than in the Typesetting section.
 
-Horizontal automatic layout always constrains its generated logical rectangle
-to the page. When `let_autolayout_fit_bubble_flag` is enabled, the detected
-bubble-region rectangle is the tighter boundary. The final bound is published
-after text and character formats settle while suppressing the layout's normal
-size-enlargement request for that explicit constraint. With
+Horizontal automatic layout uses the page as its outer boundary. When
+`let_autolayout_fit_bubble_flag` is enabled, the detected bubble-region
+rectangle is the preferred initial wrapping boundary. Text and character
+formats settle before the box is squeezed to the actual rendered content;
+content-driven growth must not be suppressed because that clips later lines.
+The settled box is moved fully onto the page whenever its dimensions fit. With
 `let_autolayout_no_linebreak_flag`, generated hard line breaks are removed from
 the stored translation while the constrained document still wraps visually.
 This is distinct from `remove_translation_line_breaks`, which also normalizes

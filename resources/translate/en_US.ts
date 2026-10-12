@@ -977,8 +977,8 @@
     </message>
     <message>
         <location filename="../../ballontranslator/ui/configpanel.py" line="1323"/>
-        <source>Keeps automatically laid-out text boxes within the detected speech-bubble area and always inside the page edge. Disable only for captions or sound effects that intentionally extend outside a bubble.</source>
-        <translation>Keeps automatically laid-out text boxes within the detected speech-bubble area and always inside the page edge. Disable only for captions or sound effects that intentionally extend outside a bubble.</translation>
+        <source>Uses the detected speech bubble as the preferred auto-layout boundary and keeps rendered text visible if it needs more room. Disable for captions or sound effects that intentionally extend outside a bubble.</source>
+        <translation>Uses the detected speech bubble as the preferred auto-layout boundary and keeps rendered text visible if it needs more room. Disable for captions or sound effects that intentionally extend outside a bubble.</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/configpanel.py" line="1337"/>

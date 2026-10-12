@@ -1335,13 +1335,15 @@ class SceneTextManager(QObject):
                 region_rect[2],
                 region_rect[3],
             ]
+        layout_inset = float(np.ceil(blkitem.padding()))
         safe_rect = fit_textbox_rect_to_bounds(
             xywh,
             im_w,
             im_h,
             bounds=bubble_rect,
-            inset=np.ceil(blkitem.padding()),
+            inset=layout_inset,
         )
+        blkitem.setRect(QRectF(*safe_rect), padding=True, repaint=False)
         if (
             pcfg.let_autolayout_no_linebreak_flag
             or pcfg.remove_translation_line_breaks
@@ -1355,14 +1357,35 @@ class SceneTextManager(QObject):
             self.pairwidget_list[blkitem.idx].e_trans.setPlainText(new_text)
         if restore_charfmts:
             self.restore_charfmts(blkitem, text, new_text, char_fmts)
-        # Setting text and restoring formats can expand the modern document
-        # layout again. Publish the final constrained geometry last without
-        # letting its deliberate small maximum emit an enlargement request.
-        signals_were_blocked = blkitem.layout.blockSignals(True)
-        try:
-            blkitem.setRect(QRectF(*safe_rect), padding=True, repaint=False)
-        finally:
-            blkitem.layout.blockSignals(signals_were_blocked)
+        # Qt's final wrapping metrics can require more room than the detector's
+        # approximate layout. Keep that content-driven growth instead of
+        # forcing the preliminary bubble rectangle and clipping later lines.
+        blkitem.squeezeBoundingRect(repaint=False)
+        final_rect = blkitem.absBoundingRect(qrect=True)
+        page_rect = fit_textbox_rect_to_bounds(
+            [
+                final_rect.x(),
+                final_rect.y(),
+                final_rect.width(),
+                final_rect.height(),
+            ],
+            im_w,
+            im_h,
+            inset=layout_inset,
+        )
+        available_width = max(1.0, im_w - layout_inset * 2)
+        available_height = max(1.0, im_h - layout_inset * 2)
+        final_x = (
+            page_rect[0]
+            if final_rect.width() <= available_width
+            else final_rect.x()
+        )
+        final_y = (
+            page_rect[1]
+            if final_rect.height() <= available_height
+            else final_rect.y()
+        )
+        blkitem.set_logical_position(QPointF(final_x, final_y))
         blkitem.update()
         return True
     

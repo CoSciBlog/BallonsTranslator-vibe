@@ -1,5 +1,8 @@
 # Changelogs
 
+### 2026-10-12 — 1.5.19+vibe.43
+- Fixed auto-layout text boxes clipping later rendered lines when Qt required more height than the preliminary speech-bubble rectangle. The bubble remains the preferred wrapping boundary, while the final box now grows to its complete rendered content and is kept on-page when it fits.
+
 ### 2026-10-12 — 1.5.19+vibe.42
 - Moved the automatic and current-page text-box merge controls from **Settings → Typesetting** to a dedicated **Settings → Post-merge** page, keeping all merge behavior and saved settings unchanged.
 

@@ -49,7 +49,7 @@ class TextboxBoundsTests(unittest.TestCase):
 
         self.assertEqual(fitted, [118, 2, 80, 50])
 
-    def test_auto_layout_applies_bubble_bounds_without_stored_breaks(self) -> None:
+    def test_auto_layout_does_not_clip_content_at_bubble_bounds(self) -> None:
         item = TextBlkItem(
             TextBlock(
                 xyxy=[0, 0, 20, 20],
@@ -58,20 +58,19 @@ class TextboxBoundsTests(unittest.TestCase):
             ),
             0,
         )
-        item.squeezeBoundingRect = lambda *args, **kwargs: None
         manager = SimpleNamespace(
             imgtrans_proj=SimpleNamespace(
-                img_array=np.zeros((100, 200, 3), dtype=np.uint8)
+                img_array=np.zeros((400, 200, 3), dtype=np.uint8)
             ),
             pairwidget_list=[],
             auto_textlayout_flag=True,
         )
         bubble_rect = [20, 10, 50, 40]
         padding = float(np.ceil(item.padding()))
-        expected = QRectF(*fit_textbox_rect_to_bounds(
+        constrained = QRectF(*fit_textbox_rect_to_bounds(
             [10, 15, 90, 30],
             200,
-            100,
+            400,
             bounds=bubble_rect,
             inset=padding,
         ))
@@ -105,8 +104,22 @@ class TextboxBoundsTests(unittest.TestCase):
             )
 
         self.assertTrue(changed)
-        self.assertEqual(item.absBoundingRect(qrect=True), expected)
         self.assertEqual(item.toPlainText(), 'Hello world')
+        min_height, min_width = item.layout.minSize()
+        logical_rect = item.absBoundingRect(qrect=True)
+        self.assertGreaterEqual(
+            logical_rect.width(),
+            min_width + padding * 2,
+        )
+        self.assertGreaterEqual(
+            logical_rect.height(),
+            min_height + padding * 2,
+        )
+        self.assertGreater(logical_rect.height(), constrained.height())
+        self.assertGreaterEqual(logical_rect.left(), 0)
+        self.assertGreaterEqual(logical_rect.top(), 0)
+        self.assertLessEqual(logical_rect.right(), 200)
+        self.assertLessEqual(logical_rect.bottom(), 400)
 
 
 if __name__ == '__main__':
