@@ -40,6 +40,7 @@
   - Use **Separate overlapping text boxes** in the canvas context menu to move selected boxes into available page space with an 8 px gap. Unselected boxes remain fixed, Undo restores positions, and boxes stay unchanged when no free placement is available.
   - The left sidebar also provides direct access to **Re-run Inpainting Current Page**, **Glossary Manager**, and **Pipeline History**, matching the corresponding Tools-menu actions and safeguards.
   - The gear buttons beside the footer module selectors open the corresponding full Settings page for Text Detector, OCR, Inpaint, or Translator. LLM profile editing remains available through the adjacent edit button.
+  - Post-pipeline text-box merging is configured under **Settings → Typesetting**, where its direction selector is arranged below the explanatory text to remain within the settings window.
   - Supports a rich set of [text effects](https://github.com/dmMaze/BallonsTranslator/pull/1296) and [text transforms](https://github.com/dmMaze/BallonsTranslator/pull/1238)
   - The compact font-format toolbar keeps the foreground color picker beside the font selector. Stroke color is configured with the rest of the Stroke controls under **Text Effect**, avoiding duplicate controls for the same effect.
   - Use **Tools → Apply Current Text Style to All Pages...** to copy the displayed Global Font Format—including effects and transforms—to every text box in the project. The confirmed operation preserves text and geometry, saves a backup, and replaces per-character style overrides.

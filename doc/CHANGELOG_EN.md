@@ -1,5 +1,8 @@
 # Changelogs
 
+### 2026-10-12 — 1.5.19+vibe.38
+- The text-box merge-direction selector under **Settings → Typesetting** now sits below its description instead of extending beyond the right edge of the window.
+
 ### 2026-10-12 — 1.5.19+vibe.37
 - The main window now restores its previous normal size, screen position, and maximized state instead of always starting maximized.
 - Saved positions from disconnected monitors are safely moved onto the current primary screen.

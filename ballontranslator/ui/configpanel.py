@@ -1357,6 +1357,7 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
             discription=self.tr(
                 'Choose the directions used to find neighboring text boxes.'
             ),
+            vertical_layout=True,
         )
         self.post_merge_mode_combobox.activated.connect(
             self.on_post_merge_mode_changed
