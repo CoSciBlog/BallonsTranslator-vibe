@@ -1,5 +1,9 @@
 # Changelogs
 
+### 2026-10-12 — 1.5.19+vibe.40
+- Automatic and current-page text-box merging now forms bounded local groups instead of joining an entire page through a chain of individually nearby boxes.
+- The direction, maximum-gap, overlap, and label rules remain compatible with the 1.4-vibe merge behavior; every pair inside a resulting group must now satisfy them.
+
 ### 2026-10-12 — 1.5.19+vibe.39
 - **Separate overlapping text boxes** now finds a joint in-page placement for the complete selection, moving the first box too when keeping it fixed would leave avoidable overlaps.
 - The result continues to keep an 8 px gap from unselected boxes while preserving Undo and page-boundary protection.

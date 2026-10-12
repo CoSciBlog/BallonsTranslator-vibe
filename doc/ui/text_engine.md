@@ -129,6 +129,12 @@ of the current logical rectangles rather than stale OCR polygons. It clears
 geometry-bound rich text and masks, and restores the original items and
 selection on undo.
 
+Configured current-page and post-pipeline merging retains the directional gap,
+overlap, and label criteria from the 1.4-vibe region merger. Groups use complete
+cross-pair compatibility: each original box in one candidate group must be
+merge-compatible with every original box in the other group. This keeps merges
+local instead of allowing a chain of neighboring boxes to bridge a whole page.
+
 The selected overlap-separation action searches one bounded in-page placement
 for the complete selection before moving anything. It may reposition an earlier
 box when fixing that box in place would strand a later one, keeps unselected

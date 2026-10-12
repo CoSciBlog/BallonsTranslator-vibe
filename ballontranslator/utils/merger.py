@@ -9,7 +9,7 @@ import json
 import copy
 import math
 import re
-from typing import Iterable, List, Mapping, Optional, Tuple
+from typing import Callable, Iterable, List, Mapping, Optional, Tuple
 
 
 _CJK_BOUNDARY = re.compile(r'[\uac00-\ud7a3\u3040-\u30ff\u4e00-\u9fff]')
@@ -365,6 +365,29 @@ def can_merge_shapes(shape1, shape2, mode, config):
     return False
 
 
+def _all_cross_pairs_match(
+    first_indices: Iterable[int],
+    second_indices: Iterable[int],
+    predicate: Callable[[int, int], bool],
+) -> bool:
+    """Return whether every cross-group pair satisfies ``predicate``.
+
+    Requiring complete compatibility prevents a chain of individually nearby
+    regions from bridging otherwise distant areas of a page.
+
+    >>> _all_cross_pairs_match([0, 1], [2], lambda left, right: right - left <= 1)
+    False
+    >>> _all_cross_pairs_match([0], [1], lambda left, right: right - left <= 1)
+    True
+    """
+
+    return all(
+        predicate(first_index, second_index)
+        for first_index in first_indices
+        for second_index in second_indices
+    )
+
+
 def perform_merge(shapes, mode, config):
     debug = config.get("ADVANCED_MERGE_OPTIONS", {}).get("debug_mode", False)
 
@@ -379,6 +402,7 @@ def perform_merge(shapes, mode, config):
         print(f"标签统计: {dict((label, sum(1 for s in shapes if s.get('label')==label)) for label in set(s.get('label') for s in shapes))}")
 
     parent = list(range(len(shapes)))
+    group_members = [{index} for index in range(len(shapes))]
 
     def find(i):
         if parent[i] == i:
@@ -391,6 +415,8 @@ def perform_merge(shapes, mode, config):
         root_j = find(j)
         if root_i != root_j:
             parent[root_j] = root_i
+            group_members[root_i].update(group_members[root_j])
+            group_members[root_j].clear()
             return True
         return False
 
@@ -402,12 +428,24 @@ def perform_merge(shapes, mode, config):
     else:
         for i in range(len(shapes)):
             for j in range(i + 1, len(shapes)):
-                if find(i) != find(j):
-                    if can_merge_shapes(shapes[i], shapes[j], mode, config):
-                        union(i, j)
-                        merge_pair_count += 1
-                        if debug:
-                            print(f"  ✓ 合并: 框{i} + 框{j}")
+                root_i = find(i)
+                root_j = find(j)
+                if root_i == root_j:
+                    continue
+                if _all_cross_pairs_match(
+                    group_members[root_i],
+                    group_members[root_j],
+                    lambda first_index, second_index: can_merge_shapes(
+                        shapes[first_index],
+                        shapes[second_index],
+                        mode,
+                        config,
+                    ),
+                ):
+                    union(root_i, root_j)
+                    merge_pair_count += 1
+                    if debug:
+                        print(f"  ✓ 合并: 组{root_i} + 组{root_j}")
 
     if debug:
         print(f"共找到 {merge_pair_count} 对可合并的框")

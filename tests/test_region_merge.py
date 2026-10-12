@@ -43,6 +43,39 @@ def merge_config(mode: str = 'HORIZONTAL') -> dict:
 
 
 class RegionMergeTests(unittest.TestCase):
+    def test_configured_merge_does_not_chain_across_page(self):
+        shapes = [
+            {
+                'xyxy': [left, 0, left + 20, 20],
+                'lines': [[
+                    [left, 0],
+                    [left + 20, 0],
+                    [left + 20, 20],
+                    [left, 20],
+                ]],
+                'translation': str(index),
+            }
+            for index, left in enumerate((0, 25, 50, 75, 100, 125))
+        ]
+        config = merge_config('HORIZONTAL')
+        config['HORIZONTAL_MERGE_PARAMS']['max_horizontal_gap'] = 10
+
+        merged, removed = perform_configured_merge(shapes, config)
+
+        self.assertEqual(removed, 3)
+        self.assertEqual(
+            [shape['translation'] for shape in merged],
+            ['0 1', '2 3', '4 5'],
+        )
+        self.assertEqual(
+            [shape['xyxy'] for shape in merged],
+            [
+                [0, 0, 45, 20],
+                [50, 0, 95, 20],
+                [100, 0, 145, 20],
+            ],
+        )
+
     def test_selected_merge_preserves_order_and_adds_line_breaks(self):
         shapes = [
             {
