@@ -129,6 +129,13 @@ of the current logical rectangles rather than stale OCR polygons. It clears
 geometry-bound rich text and masks, and restores the original items and
 selection on undo.
 
+The selected overlap-separation action searches one bounded in-page placement
+for the complete selection before moving anything. It may reposition an earlier
+box when fixing that box in place would strand a later one, keeps unselected
+items as fixed obstacles, and publishes the result as one undoable move. If no
+complete placement exists, it retains the safe per-box fallback; no box is
+resized or pushed outside the page.
+
 | Session | Specific boundary |
 | --- | --- |
 | [`move_session.py`](../../ballontranslator/ui/text_engine/editing/move_session.py) | Position-only movement; no transform stage. Cancel before zoom changes or competing geometry capture. |

@@ -355,6 +355,100 @@ class RegionMergeTests(unittest.TestCase):
 
         self.assertEqual(merged[0]['translation'], 'first second')
 
+    def test_separation_can_move_the_first_selected_box_to_make_room(
+        self,
+    ) -> None:
+        from qtpy.QtCore import QCoreApplication, QEvent, QRectF
+        from qtpy.QtWidgets import QApplication, QWidget
+
+        from ballontranslator.ui import shared_widget as SW
+        from ballontranslator.ui.canvas import Canvas
+        from ballontranslator.ui.text_engine.editing.manager import (
+            SceneTextManager,
+            TextPanel,
+        )
+        from ballontranslator.utils import config as C, shared
+        from ballontranslator.utils.fontformat import FontFormat
+        from ballontranslator.utils.proj_imgtrans import ProjImgTrans
+
+        app = QApplication.instance() or QApplication([])
+        host = QWidget()
+        canvas = Canvas(host)
+        canvas.editor_index = 1
+        project = ProjImgTrans()
+        canvas.imgtrans_proj = project
+        previous_active_format = C.active_format
+        try:
+            with (
+                patch.object(SW, 'canvas', canvas),
+                patch.object(
+                    shared,
+                    'register_view_widget',
+                    lambda *_args: None,
+                    create=True,
+                ),
+            ):
+                panel = TextPanel(app, host)
+                panel.formatpanel.global_format = FontFormat()
+                manager = SceneTextManager(
+                    app,
+                    host,
+                    canvas,
+                    panel,
+                    parent=host,
+                )
+                blocks = [
+                    TextBlock(
+                        [65, 10, 185, 90],
+                        _bounding_rect=[65, 10, 120, 80],
+                        translation='First',
+                    ),
+                    TextBlock(
+                        [65, 10, 185, 90],
+                        _bounding_rect=[65, 10, 120, 80],
+                        translation='Second',
+                    ),
+                ]
+                project.pages = {'page.png': blocks}
+                project.current_img = 'page.png'
+                items = [manager.addTextBlock(block) for block in blocks]
+                for item in items:
+                    item.setSelected(True)
+                canvas.setSceneRect(QRectF(0, 0, 250, 100))
+                original_positions = [
+                    item.logical_position() for item in items
+                ]
+                self.assertTrue(
+                    items[0].sceneBoundingRect().intersects(
+                        items[1].sceneBoundingRect()
+                    )
+                )
+
+                manager.separate_selected_textboxes()
+
+                first, second = [item.sceneBoundingRect() for item in items]
+                self.assertFalse(
+                    first.adjusted(-7.9, -7.9, 7.9, 7.9).intersects(second)
+                )
+                self.assertTrue(canvas.sceneRect().contains(first))
+                self.assertTrue(canvas.sceneRect().contains(second))
+                canvas.undo_textedit()
+                self.assertEqual(
+                    [item.logical_position() for item in items],
+                    original_positions,
+                )
+                canvas.clear_undostack(update_saved_step=True)
+                manager.clearSceneTextitems()
+                panel.deleteLater()
+        finally:
+            C.active_format = previous_active_format
+            host.deleteLater()
+            QCoreApplication.sendPostedEvents(
+                None,
+                QEvent.Type.DeferredDelete,
+            )
+            app.processEvents()
+
     def test_invalid_persisted_settings_fall_back_safely(self):
         config = ModuleConfig(
             post_merge_textboxes='yes',

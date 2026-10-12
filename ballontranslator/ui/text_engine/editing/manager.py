@@ -66,6 +66,85 @@ def build_path_reorder_map(
     return source_ids, target_ids
 
 
+def _find_separated_rects(
+    rects: Sequence[QRectF],
+    bounds: QRectF,
+    fixed_obstacles: Sequence[QRectF],
+    gap: float,
+    max_search_nodes: int = 20_000,
+) -> Optional[List[QRectF]]:
+    """Find an in-bounds, non-overlapping placement near the input rectangles.
+
+    Earlier boxes are allowed to move when keeping one fixed would strand a
+    later box. Candidate edges remain aligned with the page or another box, so
+    the bounded search avoids scanning every page pixel.
+
+    >>> result = _find_separated_rects(
+    ...     [QRectF(65, 10, 120, 80), QRectF(65, 10, 120, 80)],
+    ...     QRectF(0, 0, 250, 100),
+    ...     [],
+    ...     8,
+    ... )
+    >>> result is not None and not result[0].adjusted(-7.9, -7.9, 7.9, 7.9).intersects(result[1])
+    True
+    """
+
+    originals = [QRectF(rect) for rect in rects]
+    obstacles = [QRectF(rect) for rect in fixed_obstacles]
+    placed: List[QRectF] = []
+    search_nodes = 0
+
+    def candidates(rect: QRectF) -> List[QRectF]:
+        active_obstacles = obstacles + placed
+        xs = {rect.left(), bounds.left(), bounds.right() - rect.width()}
+        ys = {rect.top(), bounds.top(), bounds.bottom() - rect.height()}
+        for obstacle in active_obstacles:
+            xs.update((
+                obstacle.left() - gap - rect.width(),
+                obstacle.right() + gap,
+            ))
+            ys.update((
+                obstacle.top() - gap - rect.height(),
+                obstacle.bottom() + gap,
+            ))
+        valid = []
+        for x in xs:
+            for y in ys:
+                candidate = QRectF(x, y, rect.width(), rect.height())
+                if bounds.contains(candidate) and not any(
+                    candidate.intersects(
+                        obstacle.adjusted(-gap, -gap, gap, gap)
+                    )
+                    for obstacle in active_obstacles
+                ):
+                    valid.append(candidate)
+        return sorted(
+            valid,
+            key=lambda candidate: (
+                (candidate.left() - rect.left()) ** 2
+                + (candidate.top() - rect.top()) ** 2,
+                candidate.left(),
+                candidate.top(),
+            ),
+        )
+
+    def search(index: int) -> bool:
+        nonlocal search_nodes
+        if index == len(originals):
+            return True
+        for candidate in candidates(originals[index]):
+            search_nodes += 1
+            if search_nodes > max_search_nodes:
+                return False
+            placed.append(candidate)
+            if search(index + 1):
+                return True
+            placed.pop()
+        return False
+
+    return [QRectF(rect) for rect in placed] if search(0) else None
+
+
 class SceneTextReplacementReason(Enum):
     """Describe why every scene text item is being replaced.
 
@@ -925,40 +1004,52 @@ class SceneTextManager(QObject):
         if editing_item is not None and editing_item.isEditing():
             editing_item.endEdit(keep_focus=False)
         self.formatpanel.resolve_text_transform_edits_for_history_change()
-        selected = sorted(self.canvas.selected_text_items(), key=lambda item: item.idx)
+        selected = sorted(
+            self.canvas.selected_text_items(),
+            key=lambda item: item.idx,
+        )
         selected_set = set(selected)
-        obstacles = [item.sceneBoundingRect() for item in self.textblk_item_list if item not in selected_set]
+        obstacles = [
+            item.sceneBoundingRect()
+            for item in self.textblk_item_list
+            if item not in selected_set
+        ]
         bounds = self.canvas.sceneRect()
-        before, after = [], []
+        before = [QPointF(item.logical_position()) for item in selected]
+        original_rects = [item.sceneBoundingRect() for item in selected]
         gap = 8.0
-        for item in selected:
-            rect = item.sceneBoundingRect()
-            position = item.logical_position()
-            before.append(QPointF(position))
-            xs = {rect.left(), bounds.left(), bounds.right() - rect.width()}
-            ys = {rect.top(), bounds.top(), bounds.bottom() - rect.height()}
-            for obstacle in obstacles:
-                xs.update((obstacle.left() - gap - rect.width(), obstacle.right() + gap))
-                ys.update((obstacle.top() - gap - rect.height(), obstacle.bottom() + gap))
-            candidates = sorted(
-                ((x, y) for x in xs for y in ys),
-                key=lambda point: ((point[0] - rect.left()) ** 2 + (point[1] - rect.top()) ** 2, point),
-            )
-            for x, y in candidates:
-                candidate = QRectF(x, y, rect.width(), rect.height())
-                if bounds.contains(candidate) and not any(
-                    candidate.intersects(obstacle.adjusted(-gap, -gap, gap, gap))
-                    for obstacle in obstacles
-                ):
-                    parent = item.parentItem()
-                    delta = candidate.topLeft() - rect.topLeft()
-                    if parent is not None:
-                        delta = parent.mapFromScene(candidate.topLeft()) - parent.mapFromScene(rect.topLeft())
-                    position += delta
-                    rect = candidate
-                    break
-            after.append(position)
-            obstacles.append(rect)
+        target_rects = _find_separated_rects(
+            original_rects,
+            bounds,
+            obstacles,
+            gap,
+        )
+        if target_rects is None:
+            target_rects = []
+            for rect in original_rects:
+                result = _find_separated_rects(
+                    [rect],
+                    bounds,
+                    obstacles + target_rects,
+                    gap,
+                )
+                target_rects.append(result[0] if result is not None else rect)
+
+        after = []
+        for item, position, rect, target in zip(
+            selected,
+            before,
+            original_rects,
+            target_rects,
+        ):
+            parent = item.parentItem()
+            delta = target.topLeft() - rect.topLeft()
+            if parent is not None:
+                delta = (
+                    parent.mapFromScene(target.topLeft())
+                    - parent.mapFromScene(rect.topLeft())
+                )
+            after.append(position + delta)
         if before != after:
             self.canvas.push_text_command(MoveBlkItemsCommand(selected, before, after))
 

@@ -1,5 +1,9 @@
 # Changelogs
 
+### 2026-10-12 — 1.5.19+vibe.39
+- **Separate overlapping text boxes** now finds a joint in-page placement for the complete selection, moving the first box too when keeping it fixed would leave avoidable overlaps.
+- The result continues to keep an 8 px gap from unselected boxes while preserving Undo and page-boundary protection.
+
 ### 2026-10-12 — 1.5.19+vibe.38
 - The text-box merge-direction selector under **Settings → Typesetting** now sits below its description instead of extending beyond the right edge of the window.
 
