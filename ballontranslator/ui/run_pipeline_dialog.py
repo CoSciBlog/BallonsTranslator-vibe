@@ -995,9 +995,10 @@ class RunPipelineDialog(QDialog):
             pcfg,
             'run_pipeline_reinpaint_only',
             self.tr(
-                'Run only the selected inpainter on saved masks and existing '
-                'text regions for the selected pages. Detection, OCR, and '
-                'translation are not repeated.'
+                'Run only the selected inpainter on every pixel of each saved '
+                'mask. If no mask exists for a maskless inpainter, existing '
+                'text regions are used. Detection, OCR, and translation are '
+                'not repeated.'
             ),
         )
 

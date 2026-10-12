@@ -107,8 +107,8 @@
     </message>
     <message>
         <location filename="../../ballontranslator/ui/batch_processing_dialog.py" line="91"/>
-        <source>Re-run inpainting for existing masks and text regions</source>
-        <translation>Re-run inpainting for existing masks and text regions</translation>
+        <source>Re-run inpainting for saved masks or maskless text regions</source>
+        <translation>Re-run inpainting for saved masks or maskless text regions</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/batch_processing_dialog.py" line="94"/>
@@ -6800,8 +6800,8 @@ Then restart Photoshop. Explorer will now open the source file and destination l
     </message>
     <message>
         <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="998"/>
-        <source>Run only the selected inpainter on saved masks and existing text regions for the selected pages. Detection, OCR, and translation are not repeated.</source>
-        <translation>Run only the selected inpainter on saved masks and existing text regions for the selected pages. Detection, OCR, and translation are not repeated.</translation>
+        <source>Run only the selected inpainter on every pixel of each saved mask. If no mask exists for a maskless inpainter, existing text regions are used. Detection, OCR, and translation are not repeated.</source>
+        <translation>Run only the selected inpainter on every pixel of each saved mask. If no mask exists for a maskless inpainter, existing text regions are used. Detection, OCR, and translation are not repeated.</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1061"/>

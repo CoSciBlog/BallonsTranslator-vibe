@@ -1,5 +1,9 @@
 # Changelogs
 
+### 2026-10-12 — 1.5.19+vibe.44
+- **Re-run Inpainting Current Page/All Pages** now processes every pixel in each saved mask, including missed glyph edges and manual extensions outside OCR text-box crops.
+- Re-inpainting still starts from the original page rather than compounding an earlier inpainting result.
+
 ### 2026-10-12 — 1.5.19+vibe.43
 - Fixed auto-layout text boxes clipping later rendered lines when Qt required more height than the preliminary speech-bubble rectangle. The bubble remains the preferred wrapping boundary, while the final box now grows to its complete rendered content and is kept on-page when it fits.
 

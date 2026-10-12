@@ -88,7 +88,7 @@ class BatchProcessingDialog(QDialog):
         )
         form.addRow(self.inpaint_check, self.inpaint_combo)
         self.reinpaint_check = QCheckBox(
-            self.tr('Re-run inpainting for existing masks and text regions'),
+            self.tr('Re-run inpainting for saved masks or maskless text regions'),
             self,
         )
         form.addRow(self.tr('Re-inpainting'), self.reinpaint_check)

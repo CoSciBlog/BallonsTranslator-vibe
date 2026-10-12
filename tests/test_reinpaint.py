@@ -34,7 +34,7 @@ class _Inpainter:
         return np.full_like(image, 23)
 
 
-def test_reinpaint_uses_original_image_mask_and_existing_blocks():
+def test_reinpaint_uses_original_image_and_complete_saved_mask():
     mask = np.zeros((4, 5), dtype=np.uint8)
     mask[1:3, 2:4] = 255
     project = _Project(mask)
@@ -44,7 +44,7 @@ def test_reinpaint_uses_original_image_mask_and_existing_blocks():
     source, used_mask, blocks = inpainter.calls[0]
     assert np.all(source == 7)
     assert used_mask is mask
-    assert blocks is project.pages['001.png']
+    assert blocks is None
     assert project.saved[0] == '001.png'
     assert np.all(project.saved[1] == 23)
     assert np.all(project.inpainted_array == 23)

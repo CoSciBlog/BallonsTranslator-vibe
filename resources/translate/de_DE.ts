@@ -107,8 +107,8 @@
     </message>
     <message>
         <location filename="../../ballontranslator/ui/batch_processing_dialog.py" line="91"/>
-        <source>Re-run inpainting for existing masks and text regions</source>
-        <translation>Inpainting für vorhandene Masken und Textbereiche erneut ausführen</translation>
+        <source>Re-run inpainting for saved masks or maskless text regions</source>
+        <translation>Inpainting für gespeicherte Masken oder vorhandene Textbereiche ohne Maske erneut ausführen</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/batch_processing_dialog.py" line="94"/>
@@ -6844,8 +6844,8 @@ Starten Sie dann Photoshop neu. Der Explorer öffnet nun die Quelldatei und den 
     </message>
     <message>
         <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="998"/>
-        <source>Run only the selected inpainter on saved masks and existing text regions for the selected pages. Detection, OCR, and translation are not repeated.</source>
-        <translation>Nur das ausgewählte Inpainting-Modell mit gespeicherten Masken und vorhandenen Textregionen auf den ausgewählten Seiten ausführen. Erkennung, OCR und Übersetzung werden nicht wiederholt.</translation>
+        <source>Run only the selected inpainter on every pixel of each saved mask. If no mask exists for a maskless inpainter, existing text regions are used. Detection, OCR, and translation are not repeated.</source>
+        <translation>Nur das ausgewählte Inpainting-Modell auf jedem Pixel der gespeicherten Masken ausführen. Wenn für ein maskenloses Inpainting-Modell keine Maske vorhanden ist, werden die vorhandenen Textbereiche verwendet. Erkennung, OCR und Übersetzung werden nicht wiederholt.</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1061"/>
