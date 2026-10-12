@@ -311,6 +311,28 @@ class RunPipelineDialogTests(unittest.TestCase):
         self.assertTrue(enabled.remove_translation_line_breaks)
         self.assertFalse(invalid.remove_translation_line_breaks)
 
+    def test_auto_layout_option_config_is_validated(self):
+        with tempfile.TemporaryDirectory(dir=os.getcwd()) as directory:
+            valid_path = os.path.join(directory, 'valid.json')
+            invalid_path = os.path.join(directory, 'invalid.json')
+            with open(valid_path, 'w', encoding='utf8') as config_file:
+                json.dump({
+                    'let_autolayout_fit_bubble_flag': False,
+                    'let_autolayout_no_linebreak_flag': True,
+                }, config_file)
+            with open(invalid_path, 'w', encoding='utf8') as config_file:
+                json.dump({
+                    'let_autolayout_fit_bubble_flag': 'yes',
+                    'let_autolayout_no_linebreak_flag': 'yes',
+                }, config_file)
+            valid = ProgramConfig.load(valid_path)
+            invalid = ProgramConfig.load(invalid_path)
+
+        self.assertFalse(valid.let_autolayout_fit_bubble_flag)
+        self.assertTrue(valid.let_autolayout_no_linebreak_flag)
+        self.assertTrue(invalid.let_autolayout_fit_bubble_flag)
+        self.assertFalse(invalid.let_autolayout_no_linebreak_flag)
+
     def test_typesetting_letter_case_buttons_update_config(self):
         original = pcfg.let_letter_case
         pcfg.let_letter_case = OCRTextPostprocess.CAPITALIZE
@@ -349,6 +371,34 @@ class RunPipelineDialogTests(unittest.TestCase):
         finally:
             panel.close()
             pcfg.remove_translation_line_breaks = original
+
+    def test_typesetting_auto_layout_options_update_config(self):
+        original_enabled = pcfg.let_autolayout_flag
+        original_fit = pcfg.let_autolayout_fit_bubble_flag
+        original_linebreak = pcfg.let_autolayout_no_linebreak_flag
+        pcfg.let_autolayout_flag = True
+        pcfg.let_autolayout_fit_bubble_flag = True
+        pcfg.let_autolayout_no_linebreak_flag = False
+        panel = ConfigPanel()
+        try:
+            self.assertTrue(panel.let_autolayout_checker.isChecked())
+            self.assertTrue(
+                panel.let_autolayout_fit_bubble_checker.isChecked()
+            )
+            self.assertFalse(
+                panel.let_autolayout_no_linebreak_checker.isChecked()
+            )
+
+            panel.let_autolayout_fit_bubble_checker.click()
+            panel.let_autolayout_no_linebreak_checker.click()
+
+            self.assertFalse(pcfg.let_autolayout_fit_bubble_flag)
+            self.assertTrue(pcfg.let_autolayout_no_linebreak_flag)
+        finally:
+            panel.close()
+            pcfg.let_autolayout_flag = original_enabled
+            pcfg.let_autolayout_fit_bubble_flag = original_fit
+            pcfg.let_autolayout_no_linebreak_flag = original_linebreak
 
     def test_typesetting_requests_existing_translation_cleanup(self):
         panel = ConfigPanel()

@@ -46,6 +46,7 @@
   - Use **Tools → Apply Current Text Style to All Pages...** to copy the displayed Global Font Format—including effects and transforms—to every text box in the project. The confirmed operation preserves text and geometry, saves a backup, and replaces per-character style overrides.
   - Supports find and replace across all text, source text, or translations, and Word document import/export
   - Enable **Remove translation line breaks** under **Settings → Typesetting** to replace translator-authored line breaks in new translations and let each text box wrap the result automatically. **Remove Existing Line Breaks...** performs the same cleanup on already stored project translations after confirmation, saves a backup, and clears stale rich-text paragraphs.
+  - Auto layout can keep generated boxes inside the detected speech bubble and always inside the page. **Auto layout without stored line breaks** preserves visual wrapping while keeping the saved project translation continuous; uppercase output remains available through **Letter Case → Uppercase**.
   - **Settings → Typesetting → Text Box Merging** can combine nearby regions automatically after a successful pipeline or immediately on the current page. Direction, maximum gaps, and required overlap are configurable, and every box in a local merge group must remain compatible so a neighbor chain cannot absorb an entire page. The advanced **Tools → Region Merge Tool** remains available for label-specific rules and whole-project runs.
 
 * User interface localization

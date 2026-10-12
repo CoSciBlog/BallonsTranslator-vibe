@@ -135,6 +135,16 @@ cross-pair compatibility: each original box in one candidate group must be
 merge-compatible with every original box in the other group. This keeps merges
 local instead of allowing a chain of neighboring boxes to bridge a whole page.
 
+Horizontal automatic layout always constrains its generated logical rectangle
+to the page. When `let_autolayout_fit_bubble_flag` is enabled, the detected
+bubble-region rectangle is the tighter boundary. The final bound is published
+after text and character formats settle while suppressing the layout's normal
+size-enlargement request for that explicit constraint. With
+`let_autolayout_no_linebreak_flag`, generated hard line breaks are removed from
+the stored translation while the constrained document still wraps visually.
+This is distinct from `remove_translation_line_breaks`, which also normalizes
+translator-authored breaks before layout.
+
 The selected overlap-separation action searches one bounded in-page placement
 for the complete selection before moving anything. It may reposition an earlier
 box when fixing that box in place would strand a later one, keeps unselected

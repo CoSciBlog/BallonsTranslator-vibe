@@ -37,7 +37,10 @@ from ballontranslator.utils.config import pcfg
 from ballontranslator.utils import shared
 from ballontranslator.utils.imgproc_utils import extract_ballon_region, get_block_mask
 from ballontranslator.utils.text_processing import seg_text, is_cjk, remove_translation_line_breaks
-from ballontranslator.utils.text_layout import layout_text
+from ballontranslator.utils.text_layout import (
+    fit_textbox_rect_to_bounds,
+    layout_text,
+)
 
 
 def build_path_reorder_map(
@@ -1173,6 +1176,7 @@ class SceneTextManager(QObject):
         img = self.imgtrans_proj.img_array
         if img is None:
             return
+        im_h, im_w = img.shape[:2]
 
         src_is_cjk = is_cjk(pcfg.module.translate_source)
         tgt_is_cjk = is_cjk(pcfg.module.translate_target)
@@ -1200,7 +1204,6 @@ class SceneTextManager(QObject):
             return
 
         if mask is None:
-            im_h, im_w = img.shape[:2]
             bounding_rect = blkitem.absBoundingRect(max_h=im_h, max_w=im_w)
             if bounding_rect[2] <= 0 or bounding_rect[3] <= 0:
                 blkitem.setPlainText(text)
@@ -1324,19 +1327,43 @@ class SceneTextManager(QObject):
         if restore_charfmts:
             char_fmts = blkitem.get_char_fmts()        
         
-        ffmt = QFontMetricsF(blk_font)
-        maxw = max([ffmt.horizontalAdvance(t) for t in new_text.split('\n')])
-        # Measure planned lines first, then let Qt wrap continuous text rather
-        # than persisting layout-generated breaks against the user's option.
-        if pcfg.remove_translation_line_breaks:
-            new_text = remove_translation_line_breaks(new_text, pcfg.module.translate_target)
-        blkitem.set_size(maxw * 1.5, xywh[3], set_layout_maxsize=True)
+        bubble_rect = None
+        if pcfg.let_autolayout_fit_bubble_flag and region_rect is not None:
+            bubble_rect = [
+                mask_xyxy[0] + region_rect[0],
+                mask_xyxy[1] + region_rect[1],
+                region_rect[2],
+                region_rect[3],
+            ]
+        safe_rect = fit_textbox_rect_to_bounds(
+            xywh,
+            im_w,
+            im_h,
+            bounds=bubble_rect,
+            inset=np.ceil(blkitem.padding()),
+        )
+        if (
+            pcfg.let_autolayout_no_linebreak_flag
+            or pcfg.remove_translation_line_breaks
+        ):
+            new_text = remove_translation_line_breaks(
+                new_text,
+                pcfg.module.translate_target,
+            )
         blkitem.setPlainText(new_text)
         if len(self.pairwidget_list) > blkitem.idx:
             self.pairwidget_list[blkitem.idx].e_trans.setPlainText(new_text)
         if restore_charfmts:
             self.restore_charfmts(blkitem, text, new_text, char_fmts)
-        blkitem.squeezeBoundingRect()
+        # Setting text and restoring formats can expand the modern document
+        # layout again. Publish the final constrained geometry last without
+        # letting its deliberate small maximum emit an enlargement request.
+        signals_were_blocked = blkitem.layout.blockSignals(True)
+        try:
+            blkitem.setRect(QRectF(*safe_rect), padding=True, repaint=False)
+        finally:
+            blkitem.layout.blockSignals(signals_were_blocked)
+        blkitem.update()
         return True
     
     def restore_charfmts(self, blkitem: TextBlkItem, text: str, new_text: str, char_fmts: List[QTextCharFormat]):

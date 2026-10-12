@@ -568,6 +568,8 @@ class ProgramConfig(Config):
     let_writing_mode_flag: int = 0
     let_family_flag: int = 0
     let_autolayout_flag: bool = True
+    let_autolayout_fit_bubble_flag: bool = True
+    let_autolayout_no_linebreak_flag: bool = False
     remove_translation_line_breaks: bool = False
     let_letter_case: str = OCRTextPostprocess.NONE
     let_show_only_custom_fonts_flag: bool = False
@@ -635,6 +637,18 @@ class ProgramConfig(Config):
                 self.run_pipeline_reinpaint_only,
             )
             self.run_pipeline_reinpaint_only = False
+        for setting_name, default in (
+            ('let_autolayout_fit_bubble_flag', True),
+            ('let_autolayout_no_linebreak_flag', False),
+        ):
+            value = getattr(self, setting_name)
+            if type(value) is not bool:
+                LOGGER.warning(
+                    'Discard invalid %s config %r.',
+                    setting_name,
+                    value,
+                )
+                setattr(self, setting_name, default)
         if type(self.remove_translation_line_breaks) is not bool:
             LOGGER.warning(
                 'Discard invalid remove_translation_line_breaks config %r.',

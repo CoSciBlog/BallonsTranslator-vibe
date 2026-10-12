@@ -1,8 +1,65 @@
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 import numpy as np
 
 from .imgproc_utils import rotate_image
 from .textblock import TextBlock, TextAlignment
+
+
+def fit_textbox_rect_to_bounds(
+    rect: List[float],
+    image_width: int,
+    image_height: int,
+    bounds: Optional[List[float]] = None,
+    inset: float = 0,
+) -> List[int]:
+    """Constrain an auto-layout rectangle to the page and optional bubble.
+
+    >>> fit_textbox_rect_to_bounds([-20, 80, 60, 40], 100, 100)
+    [0, 60, 60, 40]
+    >>> fit_textbox_rect_to_bounds(
+    ...     [10, 15, 90, 30], 200, 100, bounds=[20, 10, 50, 40], inset=2)
+    [22, 15, 46, 30]
+    >>> fit_textbox_rect_to_bounds(
+    ...     [250, -30, 80, 50], 200, 100,
+    ...     bounds=[240, -40, 60, 20], inset=2)
+    [118, 2, 80, 50]
+    """
+
+    page_left = max(0.0, inset)
+    page_top = max(0.0, inset)
+    page_right = max(page_left + 1, float(image_width) - inset)
+    page_bottom = max(page_top + 1, float(image_height) - inset)
+    if bounds is not None:
+        bound_x, bound_y, bound_width, bound_height = bounds
+        bound_left = max(page_left, float(bound_x) + inset)
+        bound_top = max(page_top, float(bound_y) + inset)
+        bound_right = min(
+            page_right,
+            float(bound_x + bound_width) - inset,
+        )
+        bound_bottom = min(
+            page_bottom,
+            float(bound_y + bound_height) - inset,
+        )
+        if bound_right > bound_left:
+            page_left, page_right = bound_left, bound_right
+        if bound_bottom > bound_top:
+            page_top, page_bottom = bound_top, bound_bottom
+
+    x, y, width, height = [float(value) for value in rect]
+    available_width = max(1.0, page_right - page_left)
+    available_height = max(1.0, page_bottom - page_top)
+    width = min(max(1.0, width), available_width)
+    height = min(max(1.0, height), available_height)
+    x = min(max(x, page_left), page_right - width)
+    y = min(max(y, page_top), page_bottom - height)
+    return [
+        int(round(x)),
+        int(round(y)),
+        int(round(width)),
+        int(round(height)),
+    ]
+
 
 class Line:
 

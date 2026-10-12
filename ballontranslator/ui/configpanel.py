@@ -1304,10 +1304,43 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
         self.let_autolayout_checker, sublock = typesettingConfigPanel.addCheckBox(
             self.tr('Auto layout'),
             discription=self.tr(
-                'Split translation into multi-lines according to the extracted balloon region.'
+                'Wraps and scales translated text to fit the detected speech bubble. Longer translations are broken across lines instead of expanding into very wide text boxes.'
             ),
         )
+        self.let_autolayout_checker.setChecked(pcfg.let_autolayout_flag)
         self.let_autolayout_checker.stateChanged.connect(self.on_autolayout_changed)
+
+        (
+            self.let_autolayout_fit_bubble_checker,
+            _,
+        ) = typesettingConfigPanel.addCheckBox(
+            self.tr('Limit auto-layout boxes to speech bubbles'),
+            discription=self.tr(
+                'Keeps automatically laid-out text boxes within the detected speech-bubble area and always inside the page edge. Disable only for captions or sound effects that intentionally extend outside a bubble.'
+            ),
+        )
+        self.let_autolayout_fit_bubble_checker.setChecked(
+            pcfg.let_autolayout_fit_bubble_flag
+        )
+        self.let_autolayout_fit_bubble_checker.toggled.connect(
+            self.on_autolayout_fit_bubble_changed
+        )
+
+        (
+            self.let_autolayout_no_linebreak_checker,
+            _,
+        ) = typesettingConfigPanel.addCheckBox(
+            self.tr('Auto layout without stored line breaks'),
+            discription=self.tr(
+                'Optimizes box size without persisting line breaks in project text. Rendering can still wrap inside the constrained text box.'
+            ),
+        )
+        self.let_autolayout_no_linebreak_checker.setChecked(
+            pcfg.let_autolayout_no_linebreak_flag
+        )
+        self.let_autolayout_no_linebreak_checker.toggled.connect(
+            self.on_autolayout_no_linebreak_changed
+        )
 
         (
             self.remove_translation_line_breaks_checker,
@@ -2132,6 +2165,12 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
     def on_autolayout_changed(self):
         pcfg.let_autolayout_flag = self.let_autolayout_checker.isChecked()
 
+    def on_autolayout_fit_bubble_changed(self, enabled: bool) -> None:
+        pcfg.let_autolayout_fit_bubble_flag = enabled
+
+    def on_autolayout_no_linebreak_changed(self, enabled: bool) -> None:
+        pcfg.let_autolayout_no_linebreak_flag = enabled
+
     def on_remove_translation_line_breaks_changed(self, enabled: bool) -> None:
         pcfg.remove_translation_line_breaks = enabled
 
@@ -2411,6 +2450,12 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
         self.let_family_combox.setCurrentIndex(pcfg.let_family_flag)
         self.let_writing_mode_combox.setCurrentIndex(pcfg.let_writing_mode_flag)
         self.let_autolayout_checker.setChecked(pcfg.let_autolayout_flag)
+        self.let_autolayout_fit_bubble_checker.setChecked(
+            pcfg.let_autolayout_fit_bubble_flag
+        )
+        self.let_autolayout_no_linebreak_checker.setChecked(
+            pcfg.let_autolayout_no_linebreak_flag
+        )
         self.remove_translation_line_breaks_checker.setChecked(
             pcfg.remove_translation_line_breaks
         )
