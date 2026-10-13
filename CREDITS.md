@@ -12,6 +12,6 @@ Copyright and license notices shipped with third-party dependencies remain the r
 
 The primary project documentation is maintained in English. Community-maintained translated guides retain their original language and attribution where provided.
 
-The batch pre-upscaling page-list synchronization fix is original maintenance work in this fork and adds no third-party code or dependencies.
+The batch pre-upscaling page-list synchronization fix and editable parent-folder input are original maintenance work in this fork and add no third-party code or dependencies.
 
 The optional main-window placement persistence, responsive Typesetting and Post-merge settings layouts, non-clipping speech-bubble-aware auto layout, translation line-break normalization, bounded local text-box merge integration, undoable selected-region merge, joint overlap separation, complete saved-mask re-inpainting, workflow controls and shortcuts, direct footer-to-settings navigation, extended detector/OCR/inpaint controls and parameter guidance, project-wide text-style application, non-destructive text-case transform control, Ollama reasoning-capability presentation, theme-aware text-style popup integration, glossary translation recovery, and staged project-wide Google/DeepL-to-LLM orchestration are maintained as original code in this fork. The Ollama and two-step integrations use the providers' existing HTTP interfaces and introduce no bundled third-party code or new dependency.

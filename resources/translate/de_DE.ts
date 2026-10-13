@@ -63,6 +63,10 @@
 <context>
     <name>BatchProcessingDialog</name>
     <message>
+        <source>Enter or paste a parent folder path</source>
+        <translation>Pfad zum übergeordneten Ordner eingeben oder einfügen</translation>
+    </message>
+    <message>
         <location filename="../../ballontranslator/ui/batch_processing_dialog.py" line="49"/>
         <location filename="../../ballontranslator/ui/batch_processing_dialog.py" line="180"/>
         <location filename="../../ballontranslator/ui/batch_processing_dialog.py" line="193"/>

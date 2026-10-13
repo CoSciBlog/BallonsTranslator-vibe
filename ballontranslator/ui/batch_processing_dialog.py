@@ -48,20 +48,27 @@ class BatchProcessingDialog(QDialog):
         super().__init__(parent)
         self.setWindowTitle(self.tr('Batch Processing'))
         self.setMinimumWidth(620)
-        self._project_directories = []
+        self._project_directories: list[str] = []
+        self._scanned_directory: str | None = None
 
         root_layout = QVBoxLayout(self)
-        folder_layout = QHBoxLayout()
         self.folder_edit = QLineEdit(self)
-        self.folder_edit.setReadOnly(True)
+        self.folder_edit.setClearButtonEnabled(True)
+        self.folder_edit.setPlaceholderText(self.tr('Enter or paste a parent folder path'))
+        folder_label = QLabel(self.tr('Select batch parent folder'), self)
+        folder_label.setBuddy(self.folder_edit)
+        root_layout.addWidget(folder_label)
+        root_layout.addWidget(self.folder_edit)
         self.folder_button = QPushButton(self.tr('Select folder...'), self)
+        self.folder_edit.setMinimumHeight(self.folder_button.sizeHint().height())
         self.folder_button.clicked.connect(self._select_folder)
-        folder_layout.addWidget(self.folder_edit, 1)
+        folder_layout = QHBoxLayout()
+        self.project_count = QLabel(self.tr('No project folders selected.'), self)
+        folder_layout.addWidget(self.project_count, 1)
         folder_layout.addWidget(self.folder_button)
         root_layout.addLayout(folder_layout)
-
-        self.project_count = QLabel(self.tr('No project folders selected.'), self)
-        root_layout.addWidget(self.project_count)
+        self.folder_edit.textChanged.connect(self._invalidate_project_directories)
+        self.folder_edit.editingFinished.connect(self._update_project_directories)
 
         form = QFormLayout()
         self.detect_check, self.detect_combo = self._stage_row(
@@ -166,7 +173,22 @@ class BatchProcessingDialog(QDialog):
         if not directory:
             return
         self.folder_edit.setText(directory)
+        self._update_project_directories()
+
+    def _invalidate_project_directories(self) -> None:
+        self._scanned_directory = None
+        self._project_directories = []
+        self.project_count.setText(self.tr('No project folders selected.'))
+
+    def _update_project_directories(self) -> None:
+        # Windows "Copy as path" adds quotes. Normalize only at commit time so
+        # typing stays uninterrupted and invalid edits cannot reuse old projects.
+        directory = self.folder_edit.text().strip().strip('"')
+        self.folder_edit.setText(directory)
+        if directory == self._scanned_directory:
+            return
         self._project_directories = collect_batch_project_dirs(directory)
+        self._scanned_directory = directory
         self.project_count.setText(
             self.tr('{count} direct project folder(s) found.').format(
                 count=len(self._project_directories)
@@ -174,6 +196,7 @@ class BatchProcessingDialog(QDialog):
         )
 
     def accept(self) -> None:
+        self._update_project_directories()
         if not self._project_directories:
             QMessageBox.warning(
                 self,
@@ -230,5 +253,5 @@ class BatchProcessingDialog(QDialog):
         )
 
     @property
-    def project_directories(self):
+    def project_directories(self) -> list[str]:
         return list(self._project_directories)

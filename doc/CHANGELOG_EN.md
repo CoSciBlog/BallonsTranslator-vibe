@@ -1,5 +1,8 @@
 # Changelogs
 
+### 2026-10-14 — 1.5.19+vibe.46
+- Expanded the Batch Processing parent-folder input to the full dialog width and enabled typing, pasting, and clearing paths. The folder picker remains available below the field; quoted Windows paths are supported, and changing the path discards previously discovered project folders before validation.
+
 ### 2026-10-13 — 1.5.19+vibe.45
 - Fixed batch processing crashing with `ImgnameNotInProjectException` after pre-upscaling renamed source images. The page list and canvas now reload the saved project before the pipeline starts, preserving the current page and using the updated filenames for subsequent page changes.
 
