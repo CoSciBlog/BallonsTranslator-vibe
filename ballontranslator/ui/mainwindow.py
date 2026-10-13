@@ -2237,9 +2237,13 @@ class MainWindow(mainwindow_cls):
                     )
                     self._batch_failed = True
                 elif replacements:
+                    project_path = self.imgtrans_proj.proj_path
                     self.imgtrans_proj.replace_pages_with_upscaled_files(
                         replacements
                     )
+                    # Activation renames pages; refresh the list and scene before
+                    # pipeline completion signals select the next page.
+                    self.openJsonProj(project_path)
             except Exception as error:
                 create_error_dialog(
                     error,

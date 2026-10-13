@@ -6,7 +6,11 @@ import tempfile
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import Mock, patch
+
+os.environ.setdefault('QT_QPA_PLATFORM', 'offscreen')
+
+from qtpy.QtWidgets import QApplication
 
 import numpy as np
 
@@ -19,10 +23,78 @@ from ballontranslator.utils.upscale import (
     upscale_image_2x,
     upscaled_page_name,
 )
-from ballontranslator.ui.mainwindow import MainWindow
+from ballontranslator.ui.mainwindow import MainWindow, PageListView
+
+
+class _UpscaleWindow(SimpleNamespace):
+    openJsonProj = MainWindow.openJsonProj
+    updatePageList = MainWindow.updatePageList
+    pageListCurrentItemChanged = MainWindow.pageListCurrentItemChanged
 
 
 class ProjectUpscaleTest(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.app = QApplication.instance() or QApplication([])
+
+    def test_batch_upscale_refreshes_pages_before_pipeline_and_navigation(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            project = self._project(directory)
+            imwrite(
+                osp.join(directory, '002.png'),
+                np.zeros((3, 4, 3), np.uint8), ext='.png',
+            )
+            project.pages['002.png'] = []
+            project._pagename2idx['002.png'] = 1
+            project._idx2pagename[1] = '002.png'
+            project.save()
+            page_list = PageListView()
+            self.addCleanup(page_list.deleteLater)
+            owner = _UpscaleWindow(
+                imgtrans_proj=project,
+                pageList=page_list,
+                st_manager=Mock(), canvas=Mock(), llmContextEditor=Mock(),
+                leftBar=Mock(), module_manager=Mock(), drawingPanel=Mock(),
+                project_upscale_progress=Mock(),
+                glossary_window=None, pipeline_history_window=None,
+                _batch_upscale_active=True, _batch_cancel_requested=False,
+                _batch_failed=False, opening_dir=False, save_on_page_changed=True,
+                conditional_save=Mock(), _update_project_title=Mock(),
+                _run_current_batch_pipeline=Mock(), _run_next_batch_task=Mock(),
+                tr=str,
+            )
+            page_list.currentItemChanged.connect(owner.pageListCurrentItemChanged)
+            owner.openJsonProj(project.proj_path)
+            self.assertEqual(page_list.currentItem().text(), '001.png')
+
+            replacements, failures, stopped, staging_dir = stage_upscaled_pages(
+                directory, list(project.pages)
+            )
+            self.addCleanup(shutil.rmtree, staging_dir, True)
+            with patch('ballontranslator.ui.mainwindow.QTimer.singleShot') as schedule, \
+                    patch('ballontranslator.ui.mainwindow.create_error_dialog') as error_dialog:
+                MainWindow.on_project_upscale_finished(
+                    owner, replacements, failures, stopped, staging_dir
+                )
+                error_dialog.assert_not_called()
+                schedule.assert_called_once_with(0, owner._run_current_batch_pipeline)
+                self.assertEqual(
+                    [page_list.item(i).text() for i in range(page_list.count())],
+                    ['001_x2.png', '002_x2.png'],
+                )
+                self.assertEqual(page_list.currentItem().text(), project.current_img)
+                self.assertEqual(project.current_img, '001_x2.png')
+                self.assertEqual(project.img_array.shape[:2], (6, 8))
+                self.assertEqual(project.pages['001_x2.png'][0].xyxy, [2, 4, 6, 8])
+                self.assertTrue(project.is_page_ignored('001_x2.png'))
+                self.assertFalse(owner._batch_failed)
+                # Pipeline page completions use this same selection signal.
+                page_list.setCurrentRow(1)
+                self.assertEqual(project.current_img, '002_x2.png')
+                self.assertFalse(owner.page_changing)
+                self.assertFalse(owner.opening_dir)
+                self.assertFalse(osp.exists(staging_dir))
 
     def test_current_page_and_project_actions_select_expected_pages(self):
         selected = []

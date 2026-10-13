@@ -81,6 +81,7 @@
 
 * Batch processing
   - Open **Tools → Batch Processing** (`Ctrl+Shift+B`) and select a parent folder to process its image-bearing direct child folders sequentially. Detector, primary/fallback OCR, inpainter, translator, glossary scope, and optional pre-upscaling are selectable per run.
+  - After pre-upscaling, the page list and canvas reload the saved project before processing continues, keeping page navigation in sync with renamed source images.
   - Choose complete-project order or run detector/OCR/inpaint for every project first, unload local models, and then translate every project while keeping the LLM available. On successful completion the app can do nothing, close, hibernate, shut down, or restart Windows.
   - An optional re-inpainting step runs the selected inpainter again from the original pages using every pixel of the saved masks, including manual mask extensions beyond detected text regions. The same operation is available for the current page or all pages under **Tools** (`Ctrl+Shift+I` for the current page).
 

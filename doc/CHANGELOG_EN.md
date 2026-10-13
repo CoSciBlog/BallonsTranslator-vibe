@@ -1,5 +1,8 @@
 # Changelogs
 
+### 2026-10-13 — 1.5.19+vibe.45
+- Fixed batch processing crashing with `ImgnameNotInProjectException` after pre-upscaling renamed source images. The page list and canvas now reload the saved project before the pipeline starts, preserving the current page and using the updated filenames for subsequent page changes.
+
 ### 2026-10-12 — 1.5.19+vibe.44
 - **Re-run Inpainting Current Page/All Pages** now processes every pixel in each saved mask, including missed glyph edges and manual extensions outside OCR text-box crops.
 - Re-inpainting still starts from the original page rather than compounding an earlier inpainting result.
