@@ -1328,6 +1328,7 @@ QWidget#RunPipelineSettingsSection QCheckBox::indicator {
 
 QSpinBox#RunPipelineRangeStart,
 QSpinBox#RunPipelineRangeEnd,
+QSpinBox#RunPipelineReinpaintMaskExpansion,
 QSpinBox#RunPipelinePriorContextTokenBudget {
     min-height: 24px;
     max-height: 24px;
@@ -1345,6 +1346,8 @@ QSpinBox#RunPipelineRangeStart:hover,
 QSpinBox#RunPipelineRangeStart:focus,
 QSpinBox#RunPipelineRangeEnd:hover,
 QSpinBox#RunPipelineRangeEnd:focus,
+QSpinBox#RunPipelineReinpaintMaskExpansion:hover,
+QSpinBox#RunPipelineReinpaintMaskExpansion:focus,
 QSpinBox#RunPipelinePriorContextTokenBudget:hover,
 QSpinBox#RunPipelinePriorContextTokenBudget:focus {
     border: none;
@@ -1355,6 +1358,8 @@ QSpinBox#RunPipelineRangeStart::up-button,
 QSpinBox#RunPipelineRangeStart::down-button,
 QSpinBox#RunPipelineRangeEnd::up-button,
 QSpinBox#RunPipelineRangeEnd::down-button,
+QSpinBox#RunPipelineReinpaintMaskExpansion::up-button,
+QSpinBox#RunPipelineReinpaintMaskExpansion::down-button,
 QSpinBox#RunPipelinePriorContextTokenBudget::up-button,
 QSpinBox#RunPipelinePriorContextTokenBudget::down-button {
     width: 0px;

@@ -108,6 +108,7 @@ class ModuleConfig(Config):
     enable_ocr: bool = True
     enable_translate: bool = True
     enable_inpaint: bool = True
+    enable_inpaint_optimization: bool = False
     # 是否在 OCR 后进行字体检测（默认不启用）
     ocr_font_detect: bool = False
     ocr_text_postprocess: str = OCRTextPostprocess.NONE
@@ -241,6 +242,7 @@ class ModuleConfig(Config):
 
     def __post_init__(self) -> None:
         for setting_name, default in (
+            ('enable_inpaint_optimization', False),
             ('ocr_llm_page_level', False),
             ('ocr_llm_mask_non_text', True),
             ('ocr_llm_sort_reading_order', True),
@@ -403,6 +405,7 @@ class DrawPanelConfig(Config):
     rectool_use_mask: bool = True
     rectool_method: int = 0
     recttool_dilate_ksize: int = 2
+    reinpaint_dilate_ksize: int = 0
     shape_fill_shape: str = 'rectangle'
     shape_fill_color: str = '#ffffff'
     shape_fill_alpha: int = 255
@@ -411,6 +414,15 @@ class DrawPanelConfig(Config):
     shape_border_color: str = '#000000'
 
     def __post_init__(self) -> None:
+        if (
+            type(self.reinpaint_dilate_ksize) is not int
+            or not 0 <= self.reinpaint_dilate_ksize <= 100
+        ):
+            LOGGER.warning(
+                'Discard invalid drawpanel.reinpaint_dilate_ksize %r.',
+                self.reinpaint_dilate_ksize,
+            )
+            self.reinpaint_dilate_ksize = 0
         if not isinstance(self.rectool_use_mask, bool):
             LOGGER.warning('Discard invalid drawpanel.rectool_use_mask config.')
             self.rectool_use_mask = True

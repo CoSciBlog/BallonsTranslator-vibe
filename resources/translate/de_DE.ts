@@ -6772,6 +6772,22 @@ Starten Sie dann Photoshop neu. Der Explorer öffnet nun die Quelldatei und den 
 <context>
     <name>RunPipelineDialog</name>
     <message>
+        <source>Optimize masks during re-inpainting</source>
+        <translation>Masken beim erneuten Inpainting optimieren</translation>
+    </message>
+    <message>
+        <source>After re-inpainting, use the selected text detector to find remaining text. Repair it on the fresh result and add it to the saved mask. OCR and translations are preserved. Also applies to Tools and Batch Processing re-inpainting.</source>
+        <translation>Nach dem erneuten Inpainting sucht der gewählte Textdetektor nach verbliebenem Text. Dieser wird auf dem frisch erzeugten Ergebnis repariert und zur gespeicherten Maske hinzugefügt. OCR und Übersetzungen bleiben erhalten. Gilt auch für Re-Inpainting über Werkzeuge und Stapelverarbeitung.</translation>
+    </message>
+    <message>
+        <source>Re-inpainting mask expansion</source>
+        <translation>Maskenerweiterung beim Re-Inpainting</translation>
+    </message>
+    <message>
+        <source>Expand saved and residual masks by this radius using an ellipse. 0 keeps their current edges. Successful re-inpainting saves the expanded mask; another run expands it again. Applies to current, selected, all-page, and batch re-inpainting.</source>
+        <translation>Gespeicherte Masken und Resttextmasken werden mit einer Ellipse um diesen Radius erweitert. 0 behält die bisherigen Ränder bei. Erfolgreiches Re-Inpainting speichert die erweiterte Maske; ein weiterer Durchlauf erweitert sie erneut. Gilt für aktuelle, ausgewählte und alle Seiten sowie die Stapelverarbeitung.</translation>
+    </message>
+    <message>
         <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="419"/>
         <source>Choose whether to process the selected pages through enabled modules or only render their existing translations.</source>
         <translation>Wählen Sie, ob die ausgewählten Seiten mit den aktivierten Modulen verarbeitet oder vorhandene Übersetzungen nur gerendert werden.</translation>
@@ -6848,8 +6864,8 @@ Starten Sie dann Photoshop neu. Der Explorer öffnet nun die Quelldatei und den 
     </message>
     <message>
         <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="998"/>
-        <source>Run only the selected inpainter on every pixel of each saved mask. If no mask exists for a maskless inpainter, existing text regions are used. Detection, OCR, and translation are not repeated.</source>
-        <translation>Nur das ausgewählte Inpainting-Modell auf jedem Pixel der gespeicherten Masken ausführen. Wenn für ein maskenloses Inpainting-Modell keine Maske vorhanden ist, werden die vorhandenen Textbereiche verwendet. Erkennung, OCR und Übersetzung werden nicht wiederholt.</translation>
+        <source>Run only the selected inpainter on every pixel of each saved mask. If no mask exists for a maskless inpainter, existing text regions are used. OCR and translation are not repeated.</source>
+        <translation>Nur das ausgewählte Inpainting-Modell auf jedem Pixel der gespeicherten Masken ausführen. Wenn für ein maskenloses Inpainting-Modell keine Maske vorhanden ist, werden die vorhandenen Textbereiche verwendet. OCR und Übersetzung werden nicht wiederholt.</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1061"/>

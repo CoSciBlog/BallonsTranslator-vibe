@@ -997,10 +997,56 @@ class RunPipelineDialog(QDialog):
             self.tr(
                 'Run only the selected inpainter on every pixel of each saved '
                 'mask. If no mask exists for a maskless inpainter, existing '
-                'text regions are used. Detection, OCR, and translation are '
+                'text regions are used. OCR and translation are '
                 'not repeated.'
             ),
         )
+        self.optimize_reinpaint_masks = self._add_checkbox_setting(
+            section,
+            layout,
+            'RunPipelineOptimizeReinpaintMasks',
+            self.tr('Optimize masks during re-inpainting'),
+            pcfg.module.enable_inpaint_optimization,
+            pcfg.module,
+            'enable_inpaint_optimization',
+            self.tr(
+                'After re-inpainting, use the selected text detector to find '
+                'remaining text. Repair it on the fresh result and add it '
+                'to the saved mask. OCR and translations are preserved. '
+                'Also applies to Tools and Batch Processing re-inpainting.'
+            ),
+        )
+        expansion_row = QWidget(section)
+        expansion_row.setObjectName('RunPipelineGeneralSettingRow')
+        expansion_layout = QHBoxLayout(expansion_row)
+        expansion_layout.setContentsMargins(0, 0, 0, 0)
+        expansion_label = QLabel(self.tr('Re-inpainting mask expansion'), expansion_row)
+        expansion_label.setObjectName('RunPipelineSettingLabel')
+        self.reinpaint_mask_expansion = PageRangeSpinBox(expansion_row)
+        self.reinpaint_mask_expansion.setObjectName('RunPipelineReinpaintMaskExpansion')
+        self.reinpaint_mask_expansion.setFixedWidth(RUN_PIPELINE_SETTING_CONTROL_WIDTH)
+        self.reinpaint_mask_expansion.setRange(0, 100)
+        self.reinpaint_mask_expansion.setSuffix(' px')
+        self.reinpaint_mask_expansion.setValue(pcfg.drawpanel.reinpaint_dilate_ksize)
+        expansion_label.setBuddy(self.reinpaint_mask_expansion)
+        expansion_help = self.tr(
+            'Expand saved and residual masks by this radius using an ellipse. '
+            '0 keeps their current edges. Successful re-inpainting saves the '
+            'expanded mask; another run expands it again. Applies to current, '
+            'selected, all-page, and batch re-inpainting.'
+        )
+        expansion_label.setToolTip(expansion_help)
+        self.reinpaint_mask_expansion.setToolTip(expansion_help)
+        self.reinpaint_mask_expansion.valueChanged.connect(
+            self._on_reinpaint_mask_expansion_changed
+        )
+        expansion_layout.addWidget(expansion_label)
+        expansion_layout.addStretch()
+        expansion_layout.addWidget(self.reinpaint_mask_expansion)
+        layout.addWidget(expansion_row)
+
+    def _on_reinpaint_mask_expansion_changed(self, radius: int) -> None:
+        pcfg.drawpanel.reinpaint_dilate_ksize = radius
 
     def _translation_options(self, key: str, current: str):
         options = list(self.translator_metadata.get(key, ()))

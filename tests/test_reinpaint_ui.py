@@ -1,4 +1,5 @@
 import os
+from unittest.mock import patch
 
 os.environ.setdefault('QT_QPA_PLATFORM', 'offscreen')
 
@@ -7,6 +8,8 @@ from qtpy.QtWidgets import QAction, QApplication, QMainWindow
 
 from ballontranslator.ui.batch_processing_dialog import BatchProcessingDialog
 from ballontranslator.ui.mainwindowbars import TitleBar
+from ballontranslator.ui.run_pipeline_dialog import RunPipelineDialog
+from ballontranslator.utils.config import pcfg
 
 
 def _app():
@@ -34,6 +37,20 @@ def test_tools_menu_exposes_current_and_all_page_reinpainting():
     title_bar.deleteLater()
     window.deleteLater()
     app.processEvents()
+
+
+def test_run_dialog_updates_shared_reinpaint_mask_options(monkeypatch):
+    app = _app()
+    monkeypatch.setattr(pcfg.module, 'enable_inpaint_optimization', False)
+    monkeypatch.setattr(pcfg.drawpanel, 'reinpaint_dilate_ksize', 0)
+    with patch('ballontranslator.ui.run_pipeline_dialog.save_config'):
+        dialog = RunPipelineDialog()
+        dialog.optimize_reinpaint_masks.click()
+        dialog.reinpaint_mask_expansion.setValue(3)
+        assert pcfg.module.enable_inpaint_optimization is True
+        assert pcfg.drawpanel.reinpaint_dilate_ksize == 3
+        dialog.deleteLater()
+        app.processEvents()
 
 
 def test_batch_dialog_exports_reinpaint_option():

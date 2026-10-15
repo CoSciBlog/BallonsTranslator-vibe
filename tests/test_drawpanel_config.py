@@ -7,6 +7,28 @@ from ballontranslator.utils.config import DrawPanelConfig, ProgramConfig, json_d
 
 
 class DrawPanelConfigTest(unittest.TestCase):
+    def test_legacy_reinpaint_settings_round_trip_and_invalid_fields_default(self) -> None:
+        payload = {
+            'module': {'enable_inpaint_optimization': True},
+            'drawpanel': {'reinpaint_dilate_ksize': 3, 'pentool_width': 12.5},
+        }
+        config = self.load_config(payload)
+        restarted = self.load_config(json.loads(json_dump_program_config(config)))
+        self.assertTrue(restarted.module.enable_inpaint_optimization)
+        self.assertEqual(restarted.drawpanel.reinpaint_dilate_ksize, 3)
+        self.assertFalse(self.load_config({}).module.enable_inpaint_optimization)
+        self.assertEqual(self.load_config({}).drawpanel.reinpaint_dilate_ksize, 0)
+        for invalid in (None, True, '3', 2.5, -1, 101, [], {}):
+            with self.subTest(value=invalid), self.assertLogs('BallonTranslator', level='WARNING'):
+                loaded = self.load_config({
+                    'drawpanel': {**payload['drawpanel'], 'reinpaint_dilate_ksize': invalid},
+                })
+            self.assertEqual(loaded.drawpanel.reinpaint_dilate_ksize, 0)
+            self.assertEqual(loaded.drawpanel.pentool_width, 12.5)
+        with self.assertLogs('BallonTranslator', level='WARNING'):
+            loaded = self.load_config({'module': {'enable_inpaint_optimization': 'yes'}})
+        self.assertFalse(loaded.module.enable_inpaint_optimization)
+
     def load_config(self, payload: dict) -> ProgramConfig:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / 'config.json'

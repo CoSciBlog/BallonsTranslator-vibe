@@ -1,5 +1,9 @@
 # Changelogs
 
+### 2026-10-16 — 1.5.19+vibe.47
+- Restored 1.4-vibe mask expansion and residual-text detection for re-inpainting. **Run → Inpainting** now offers an elliptical expansion radius and opt-in mask optimization for current, selected, all-page, and batch re-inpainting.
+- A further pass repairs detected residual text on the fresh result and adds it to the complete saved mask, preserving OCR, translations, and manual mask pixels outside text boxes. Each run starts from the original page. Expanded/combined masks are saved after successful inference; cancellation or inference failure keeps the previous files. Existing settings default to no expansion and no residual detection.
+
 ### 2026-10-14 — 1.5.19+vibe.46
 - Expanded the Batch Processing parent-folder input to the full dialog width and enabled typing, pasting, and clearing paths. The folder picker remains available below the field; quoted Windows paths are supported, and changing the path discards previously discovered project folders before validation.
 

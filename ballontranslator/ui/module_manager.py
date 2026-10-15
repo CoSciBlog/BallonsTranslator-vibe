@@ -1571,7 +1571,7 @@ class ImgtransThread(QThread):
         self._emit_pipeline_stopped_if_ready(imgtrans_running=False)
 
     def _reinpaint_pipeline(self) -> None:
-        """Regenerate inpainted files without repeating detection or OCR."""
+        """Rebuild saved masks, optionally detecting and repairing residual text."""
 
         self.detect_counter = 0
         self.ocr_counter = 0
@@ -1580,6 +1580,8 @@ class ImgtransThread(QThread):
         if hasattr(self.inpainter, 'set_stop_event'):
             self.inpainter.set_stop_event(self.stop_event)
 
+        mask_expansion = pcfg.drawpanel.reinpaint_dilate_ksize
+        detector = self.textdetector if cfg_module.enable_inpaint_optimization else None
         for page_name in self.pages_to_process:
             if self.isStopRequested():
                 break
@@ -1589,7 +1591,12 @@ class ImgtransThread(QThread):
                     self.inpainter,
                     page_name,
                     allow_maskless=(cfg_module.inpainter == LLM_INPAINT_KEY),
+                    dilate=mask_expansion,
+                    textdetector=detector,
+                    stop_requested=self.isStopRequested,
                 )
+                if self.isStopRequested():
+                    break
                 if not changed:
                     LOGGER.info(
                         'Re-inpainting skipped %s: no saved mask or text region.',
@@ -2501,8 +2508,11 @@ class ModuleManager(QObject):
         self.last_finished_index = -1
         self.terminateRunningThread()
         self._pending_reinpaint_pages = pages
+        required_modules = [('inpainter', cfg_module.inpainter)]
+        if cfg_module.enable_inpaint_optimization:
+            required_modules.insert(0, ('textdetector', cfg_module.textdetector))
         self._prepare_modules_then(
-            [('inpainter', cfg_module.inpainter)],
+            required_modules,
             self._startPendingReinpaintPipeline,
             on_failure=self._on_pipeline_preparation_failed,
         )

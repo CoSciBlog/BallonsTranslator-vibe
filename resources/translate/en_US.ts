@@ -6728,6 +6728,22 @@ Then restart Photoshop. Explorer will now open the source file and destination l
 <context>
     <name>RunPipelineDialog</name>
     <message>
+        <source>Optimize masks during re-inpainting</source>
+        <translation>Optimize masks during re-inpainting</translation>
+    </message>
+    <message>
+        <source>After re-inpainting, use the selected text detector to find remaining text. Repair it on the fresh result and add it to the saved mask. OCR and translations are preserved. Also applies to Tools and Batch Processing re-inpainting.</source>
+        <translation>After re-inpainting, use the selected text detector to find remaining text. Repair it on the fresh result and add it to the saved mask. OCR and translations are preserved. Also applies to Tools and Batch Processing re-inpainting.</translation>
+    </message>
+    <message>
+        <source>Re-inpainting mask expansion</source>
+        <translation>Re-inpainting mask expansion</translation>
+    </message>
+    <message>
+        <source>Expand saved and residual masks by this radius using an ellipse. 0 keeps their current edges. Successful re-inpainting saves the expanded mask; another run expands it again. Applies to current, selected, all-page, and batch re-inpainting.</source>
+        <translation>Expand saved and residual masks by this radius using an ellipse. 0 keeps their current edges. Successful re-inpainting saves the expanded mask; another run expands it again. Applies to current, selected, all-page, and batch re-inpainting.</translation>
+    </message>
+    <message>
         <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="419"/>
         <source>Choose whether to process the selected pages through enabled modules or only render their existing translations.</source>
         <translation>Choose whether to process the selected pages through enabled modules or only render their existing translations.</translation>
@@ -6804,8 +6820,8 @@ Then restart Photoshop. Explorer will now open the source file and destination l
     </message>
     <message>
         <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="998"/>
-        <source>Run only the selected inpainter on every pixel of each saved mask. If no mask exists for a maskless inpainter, existing text regions are used. Detection, OCR, and translation are not repeated.</source>
-        <translation>Run only the selected inpainter on every pixel of each saved mask. If no mask exists for a maskless inpainter, existing text regions are used. Detection, OCR, and translation are not repeated.</translation>
+        <source>Run only the selected inpainter on every pixel of each saved mask. If no mask exists for a maskless inpainter, existing text regions are used. OCR and translation are not repeated.</source>
+        <translation>Run only the selected inpainter on every pixel of each saved mask. If no mask exists for a maskless inpainter, existing text regions are used. OCR and translation are not repeated.</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/run_pipeline_dialog.py" line="1061"/>
