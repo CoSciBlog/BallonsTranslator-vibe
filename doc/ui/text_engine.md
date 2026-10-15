@@ -122,20 +122,27 @@ to persisted blocks, clears only character-level rich-text overrides, and
 preserves text, logical rectangles, masks, and image state.
 Text commands that also modify image pixels mark drawing dirty independently
 on undo and redo; they must not retain commands owned by the drawing stack.
-The sidebar selected-region merge is a structural text command: it accepts only
-a connected cluster of nearby boxes, preserves the selected page order, inserts
-one blank line between each original source and translation, and uses the union
-of the current logical rectangles rather than stale OCR polygons. It clears
-geometry-bound rich text and masks, and restores the original items and
-selection on undo.
+The sidebar selected-region merge is one structural text command. It applies
+the Post-merge direction, gap, and overlap settings through the region merger,
+keeps independent neighbor groups separate, and leaves singletons untouched.
+Each group preserves selected page order, inserts one blank line between each
+original source and translation, and uses the union of current logical
+rectangles rather than stale OCR polygons. It clears geometry-bound rich text
+and masks only for merged groups, and restores original items and selection
+with one undo step.
 
 Configured current-page and post-pipeline merging retains the directional gap,
 overlap, and label criteria from the 1.4-vibe region merger. Groups use complete
 cross-pair compatibility: each original box in one candidate group must be
 merge-compatible with every original box in the other group. This keeps merges
 local instead of allowing a chain of neighboring boxes to bridge a whole page.
+Original membership survives both directional passes, so an expanded first-pass
+rectangle cannot create artificial overlap in the second pass. A zero overlap
+threshold still requires actual alignment on the perpendicular axis.
 The compact controls for this behavior live on the dedicated **Post-merge**
 settings page rather than in the Typesetting section.
+Its thresholds remain editable when automatic post-pipeline merging is off,
+because manual selection and current-page merging use the same settings.
 
 Horizontal automatic layout uses the page as its outer boundary. When
 `let_autolayout_fit_bubble_flag` is enabled, the detected bubble-region

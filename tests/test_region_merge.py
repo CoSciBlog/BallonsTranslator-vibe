@@ -43,6 +43,63 @@ def merge_config(mode: str = 'HORIZONTAL') -> dict:
 
 
 class RegionMergeTests(unittest.TestCase):
+    def test_two_direction_merge_does_not_invent_alignment_from_merged_bounds(self):
+        shapes = [
+            {'xyxy': [0, 0, 20, 20], 'translation': 'A'},
+            {'xyxy': [0, 25, 20, 45], 'translation': 'B'},
+            {'xyxy': [25, 17, 45, 28], 'translation': 'C'},
+        ]
+        for mode in ('VERTICAL_THEN_HORIZONTAL', 'HORIZONTAL_THEN_VERTICAL'):
+            with self.subTest(mode=mode):
+                if mode == 'HORIZONTAL_THEN_VERTICAL':
+                    shapes = [
+                        {**shape, 'xyxy': [shape['xyxy'][index] for index in (1, 0, 3, 2)]}
+                        for shape in shapes
+                    ]
+                merged, removed = perform_configured_merge(shapes, merge_config(mode))
+                self.assertEqual(removed, 1)
+                self.assertEqual([shape['translation'] for shape in merged], ['A B', 'C'])
+
+    def test_zero_overlap_threshold_still_requires_spatial_alignment(self):
+        shapes = [{'xyxy': [0, 0, 20, 20]}, {'xyxy': [300, 0, 320, 20]}]
+        config = merge_config('VERTICAL')
+        config['VERTICAL_MERGE_PARAMS']['min_width_overlap_ratio'] = 0
+        merged, removed = perform_configured_merge(shapes, config)
+        self.assertEqual(removed, 0)
+        self.assertEqual(merged, shapes)
+
+    def test_selected_merge_keeps_separate_neighbor_groups(self):
+        shapes = [
+            {'xyxy': [x, 0, x + 20, 20], 'translation': str(index)}
+            for index, x in enumerate((0, 25, 300, 325, 700))
+        ]
+        merged, groups = merge_selected_shapes(shapes, config=merge_config())
+        self.assertEqual(groups, [[0, 1], [2, 3], [4]])
+        self.assertEqual([shape['translation'] for shape in merged], ['0\n\n1', '2\n\n3', '4'])
+
+    def test_selected_merge_does_not_bridge_neighbor_chains(self):
+        shapes = [
+            {'xyxy': [x, 0, x + 20, 20], 'translation': str(index)}
+            for index, x in enumerate((0, 25, 50, 75, 100, 125))
+        ]
+        config = merge_config()
+        config['HORIZONTAL_MERGE_PARAMS']['max_horizontal_gap'] = 10
+        merged, groups = merge_selected_shapes(shapes, config=config)
+        self.assertEqual(groups, [[0, 1], [2, 3], [4, 5]])
+        self.assertEqual(len(merged), 3)
+
+    def test_selected_merge_obeys_direction_overlap_and_label_rules(self):
+        shapes = [
+            {'xyxy': [0, 0, 20, 20], 'label': 'balloon'},
+            {'xyxy': [25, 25, 45, 45], 'label': 'balloon'},
+            {'xyxy': [25, 0, 45, 20], 'label': 'other'},
+        ]
+        config = merge_config('VERTICAL_THEN_HORIZONTAL')
+        config['LABELS_TO_EXCLUDE_FROM_MERGE'] = {'other'}
+        merged, groups = merge_selected_shapes(shapes, config=config)
+        self.assertEqual(groups, [[0], [1], [2]])
+        self.assertEqual(merged, shapes)
+
     def test_configured_merge_does_not_chain_across_page(self):
         shapes = [
             {
@@ -92,9 +149,9 @@ class RegionMergeTests(unittest.TestCase):
             },
         ]
 
-        merged, removed = merge_selected_shapes(shapes)
+        merged, groups = merge_selected_shapes(shapes, merge_config())
 
-        self.assertEqual(removed, 1)
+        self.assertEqual(groups, [[0, 1]])
         self.assertEqual(len(merged), 1)
         self.assertEqual(
             merged[0]['translation'],
@@ -119,9 +176,9 @@ class RegionMergeTests(unittest.TestCase):
             },
         ]
 
-        merged, removed = merge_selected_shapes(shapes)
+        merged, groups = merge_selected_shapes(shapes, merge_config())
 
-        self.assertEqual(removed, 0)
+        self.assertEqual(groups, [[0], [1]])
         self.assertEqual(merged, shapes)
 
     def test_selected_merge_uses_current_rectangles_not_stale_ocr_lines(self):
@@ -142,9 +199,9 @@ class RegionMergeTests(unittest.TestCase):
             },
         ]
 
-        merged, removed = merge_selected_shapes(shapes)
+        merged, groups = merge_selected_shapes(shapes, merge_config())
 
-        self.assertEqual(removed, 1)
+        self.assertEqual(groups, [[0, 1]])
         self.assertEqual(merged[0]['xyxy'], [100.0, 80.0, 180.0, 115.0])
         self.assertEqual(
             merged[0]['_bounding_rect'],
@@ -247,13 +304,10 @@ class RegionMergeTests(unittest.TestCase):
                     - min(rect[1] for rect in before_rects),
                 ]
 
-                merged_item = manager.merge_selected_textboxes()
+                merged_items = manager.merge_selected_textboxes(merge_config('VERTICAL_THEN_HORIZONTAL'))
 
-                self.assertIsNotNone(merged_item)
-                self.assertEqual(
-                    canvas.text_undo_stack.command(0).merged_rect,
-                    expected_union,
-                )
+                self.assertEqual(len(merged_items), 1)
+                merged_item = merged_items[0]
                 self.assertEqual(len(manager.textblk_item_list), 1)
                 self.assertEqual(
                     merged_item.toPlainText(),
@@ -320,6 +374,75 @@ class RegionMergeTests(unittest.TestCase):
                 None,
                 QEvent.Type.DeferredDelete,
             )
+            app.processEvents()
+
+    def test_multiple_selected_groups_preserve_singletons_order_and_one_step_undo(self):
+        from qtpy.QtCore import QCoreApplication, QEvent, QRectF
+        from qtpy.QtWidgets import QApplication, QWidget
+        from ballontranslator.ui import shared_widget as SW
+        from ballontranslator.ui.canvas import Canvas
+        from ballontranslator.ui.text_engine.editing.manager import SceneTextManager, TextPanel
+        from ballontranslator.utils import config as C, shared
+        from ballontranslator.utils.fontformat import FontFormat
+        from ballontranslator.utils.proj_imgtrans import ProjImgTrans
+
+        app = QApplication.instance() or QApplication([])
+        host = QWidget()
+        canvas = Canvas(host)
+        canvas.editor_index = 1
+        canvas.setSceneRect(QRectF(0, 0, 1000, 300))
+        project = ProjImgTrans()
+        canvas.imgtrans_proj = project
+        active_format = C.active_format
+        try:
+            with patch.object(SW, 'canvas', canvas), patch.object(shared, 'register_view_widget', lambda *_: None, create=True):
+                panel = TextPanel(app, host)
+                panel.formatpanel.global_format = FontFormat()
+                manager = SceneTextManager(app, host, canvas, panel, parent=host)
+                # Page order interleaves the two independent spatial groups.
+                blocks = [
+                    TextBlock([x, 0, x + 80, 40], _bounding_rect=[x, 0, 80, 40],
+                              font_size=12, text=[name], translation=name)
+                    for x, name in ((0, 'A1'), (400, 'B1'), (250, 'untouched'),
+                                    (85, 'A2'), (485, 'B2'), (800, 'single'))
+                ]
+                project.pages = {'page.png': blocks}
+                project.current_img = 'page.png'
+                items = [manager.addTextBlock(block) for block in blocks]
+                for index, item in enumerate(items):
+                    item.setSelected(index != 2)
+                manager.formatpanel.resolve_text_transform_edits_for_history_change()
+                manager.updateTextBlkList()
+                originals = [item.toPlainText() for item in items]
+                merged = manager.merge_selected_textboxes(merge_config('VERTICAL_THEN_HORIZONTAL'))
+                self.assertEqual([item.toPlainText() for item in merged], ['A1\n\nA2', 'B1\n\nB2'])
+                self.assertEqual(canvas.text_undo_stack.count(), 1)
+                for cycle in range(3):
+                    with self.subTest(cycle=cycle):
+                        current = manager.textblk_item_list
+                        self.assertEqual([item.toPlainText() for item in current],
+                                         ['A1\n\nA2', 'B1\n\nB2', 'untouched', 'single'])
+                        self.assertIs(current[2], items[2])
+                        self.assertIs(current[3], items[5])
+                        self.assertEqual(canvas.selected_text_items(), [current[0], current[1], current[3]])
+                        manager.updateTextBlkList()
+                        self.assertEqual([block.translation for block in project.pages['page.png']],
+                                         ['A1\n\nA2', 'B1\n\nB2', 'untouched', 'single'])
+                        canvas.undo_textedit()
+                        self.assertEqual(manager.textblk_item_list, items)
+                        self.assertEqual([item.toPlainText() for item in items], originals)
+                        self.assertEqual(canvas.selected_text_items(), [item for index, item in enumerate(items) if index != 2])
+                        manager.updateTextBlkList()
+                        self.assertEqual([block.translation for block in project.pages['page.png']], originals)
+                        canvas.redo_textedit()
+                canvas.clear_undostack(update_saved_step=True)
+                manager.clearSceneTextitems()
+                panel.deleteLater()
+        finally:
+            C.active_format = active_format
+            canvas.gv.deleteLater()
+            host.deleteLater()
+            QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
             app.processEvents()
 
     def test_merge_preserves_source_and_translation_content(self):

@@ -1,5 +1,10 @@
 # Changelogs
 
+### 2026-10-16 — 1.5.19+vibe.48
+- Post-merge geometry settings remain editable while automatic pipeline merging is disabled, so manual merging can be configured independently.
+- Selected text-box merging now uses the 1.4-vibe region tool's configurable direction, gap, overlap, and label predicates instead of forcing a connected selection into one box. It merges independent neighboring groups, preserves isolated boxes, and restores all original items and selection with one Undo.
+- Current-page, post-pipeline, and project-wide region merging retain original group membership across both directions. Enlarged first-pass rectangles cannot bridge unrelated regions; a 0% overlap threshold still requires spatial alignment.
+
 ### 2026-10-16 — 1.5.19+vibe.47
 - Restored 1.4-vibe mask expansion and residual-text detection for re-inpainting. **Run → Inpainting** now offers an elliptical expansion radius and opt-in mask optimization for current, selected, all-page, and batch re-inpainting.
 - A further pass repairs detected residual text on the fresh result and adds it to the complete saved mask, preserving OCR, translations, and manual mask pixels outside text boxes. Each run starts from the original page. Expanded/combined masks are saved after successful inference; cancellation or inference failure keeps the previous files. Existing settings default to no expansion and no residual detection.

@@ -45,20 +45,6 @@ def _join_translations(
     return result
 
 
-def _box_edge_distance(box1: List[float], box2: List[float]) -> float:
-    """Return the shortest distance between two axis-aligned rectangles.
-
-    >>> _box_edge_distance([0, 0, 10, 10], [13, 14, 20, 20])
-    5.0
-    >>> _box_edge_distance([0, 0, 10, 10], [5, 5, 15, 15])
-    0.0
-    """
-
-    gap_x = max(0.0, max(box1[0], box2[0]) - min(box1[2], box2[2]))
-    gap_y = max(0.0, max(box1[1], box2[1]) - min(box1[3], box2[3]))
-    return math.hypot(gap_x, gap_y)
-
-
 def _current_shape_box(shape: Mapping[str, object]) -> List[float]:
     """Prefer the persisted editable rectangle over detector geometry."""
 
@@ -68,55 +54,6 @@ def _current_shape_box(shape: Mapping[str, object]) -> List[float]:
         if width >= 0 and height >= 0:
             return [x, y, x + width, y + height]
     return get_bounding_box(shape)
-
-
-def selected_shapes_are_nearby(
-    shapes: List[dict],
-    *,
-    minimum_gap: float = 24.0,
-    size_ratio: float = 0.75,
-) -> bool:
-    """Check that every selected region belongs to one nearby cluster.
-
-    The threshold scales with the selected boxes, so the interaction behaves
-    consistently on original and upscaled comic pages.
-
-    >>> selected_shapes_are_nearby([
-    ...     {'xyxy': [0, 0, 20, 20]}, {'xyxy': [25, 0, 45, 20]},
-    ... ])
-    True
-    >>> selected_shapes_are_nearby([
-    ...     {'xyxy': [0, 0, 20, 20]}, {'xyxy': [200, 0, 220, 20]},
-    ... ])
-    False
-    """
-
-    if len(shapes) < 2:
-        return False
-    boxes = [_current_shape_box(shape) for shape in shapes]
-    diagonals = [
-        math.hypot(max(0.0, box[2] - box[0]), max(0.0, box[3] - box[1]))
-        for box in boxes
-    ]
-    adjacent = [set() for _shape in shapes]
-    for index, box in enumerate(boxes):
-        for other_index in range(index + 1, len(boxes)):
-            threshold = max(
-                minimum_gap,
-                size_ratio * (diagonals[index] + diagonals[other_index]) / 2.0,
-            )
-            if _box_edge_distance(box, boxes[other_index]) <= threshold:
-                adjacent[index].add(other_index)
-                adjacent[other_index].add(index)
-
-    reached = {0}
-    pending = [0]
-    while pending:
-        index = pending.pop()
-        unseen = adjacent[index] - reached
-        reached.update(unseen)
-        pending.extend(unseen)
-    return len(reached) == len(shapes)
 
 
 def cross_product(o, a, b):
@@ -295,12 +232,17 @@ def merge_labels(label1, label2, strategy):
         return label1
 
 
-def vertical_can_merge(box1, box2, params, advanced_options):
+def vertical_can_merge(
+    box1: List[float], box2: List[float], params: Mapping[str, float],
+    advanced_options: Mapping[str, bool],
+) -> bool:
     eps = params.get("overlap_epsilon", 0.0)
     overlap_x = max(0.0, min(box1[2], box2[2]) - max(box1[0], box2[0]))
     overlap_x_adj = max(0.0, overlap_x + eps)
     width1 = max(0.0, box1[2] - box1[0])
     width2 = max(0.0, box2[2] - box2[0])
+    if overlap_x <= 0 or min(width1, width2) <= 0:
+        return False
     min_width = max(1e-6, min(width1, width2))
     overlap_ratio_w = (overlap_x_adj / min_width) * 100.0
     vertical_gap = max(box1[1], box2[1]) - min(box1[3], box2[3])
@@ -314,12 +256,17 @@ def vertical_can_merge(box1, box2, params, advanced_options):
         return 0 <= vertical_gap <= params["max_vertical_gap"]
 
 
-def horizontal_can_merge(box1, box2, params, advanced_options):
+def horizontal_can_merge(
+    box1: List[float], box2: List[float], params: Mapping[str, float],
+    advanced_options: Mapping[str, bool],
+) -> bool:
     eps = params.get("overlap_epsilon", 0.0)
     overlap_y = max(0.0, min(box1[3], box2[3]) - max(box1[1], box2[1]))
     overlap_y_adj = max(0.0, overlap_y + eps)
     height1 = max(0.0, box1[3] - box1[1])
     height2 = max(0.0, box2[3] - box2[1])
+    if overlap_y <= 0 or min(height1, height2) <= 0:
+        return False
     min_height = max(1e-6, min(height1, height2))
     overlap_ratio_h = (overlap_y_adj / min_height) * 100.0
     horizontal_gap = max(box1[0], box2[0]) - min(box1[2], box2[2])
@@ -388,81 +335,59 @@ def _all_cross_pairs_match(
     )
 
 
-def perform_merge(shapes, mode, config):
-    debug = config.get("ADVANCED_MERGE_OPTIONS", {}).get("debug_mode", False)
+def _merge_directions(mode: str) -> Tuple[str, ...]:
+    return {
+        'VERTICAL': ('VERTICAL',),
+        'HORIZONTAL': ('HORIZONTAL',),
+        'VERTICAL_THEN_HORIZONTAL': ('VERTICAL', 'HORIZONTAL'),
+        'HORIZONTAL_THEN_VERTICAL': ('HORIZONTAL', 'VERTICAL'),
+    }.get(mode, ())
 
-    shapes = [shape for shape in shapes if shape is not None]
 
-    # BallonsTranslator 没有 shape_type 字段，不需要过滤
-    if not shapes:
-        return [], 0
+def _find_merge_groups(
+    shapes: List[dict], mode: str, config: Mapping[str, object],
+    previous_groups: Optional[List[List[int]]] = None,
+) -> List[List[int]]:
+    """Group compatible original boxes, retaining membership across directions.
 
-    if debug:
-        print(f"\n开始合并: 模式={mode}, 共 {len(shapes)} 个框")
-        print(f"标签统计: {dict((label, sum(1 for s in shapes if s.get('label')==label)) for label in set(s.get('label') for s in shapes))}")
+    Every cross-group pair must satisfy the same direction's geometry and label
+    rules. Expanded bounds from an earlier pass must not create new neighbors.
 
-    parent = list(range(len(shapes)))
-    group_members = [{index} for index in range(len(shapes))]
+    >>> _find_merge_groups([{'xyxy': [0, 0, 10, 10]}], 'HORIZONTAL', {})
+    [[0]]
+    """
+    groups = (
+        [list(group) for group in previous_groups] if previous_groups is not None
+        else [[index] for index in range(len(shapes))]
+    )
+    for index, first in enumerate(groups):
+        if not first:
+            continue
+        for other in range(index + 1, len(groups)):
+            second = groups[other]
+            if second and _all_cross_pairs_match(
+                first,
+                second,
+                lambda left, right: can_merge_shapes(shapes[left], shapes[right], mode, config),
+            ):
+                first.extend(second)
+                groups[other] = []
+    return [sorted(group) for group in groups if group]
 
-    def find(i):
-        if parent[i] == i:
-            return i
-        parent[i] = find(parent[i])
-        return parent[i]
 
-    def union(i, j):
-        root_i = find(i)
-        root_j = find(j)
-        if root_i != root_j:
-            parent[root_j] = root_i
-            group_members[root_i].update(group_members[root_j])
-            group_members[root_j].clear()
-            return True
-        return False
+def _merge_shapes_in_groups(
+    shapes: List[dict], groups: List[List[int]], config: Mapping[str, object],
+) -> Tuple[List[dict], int]:
+    """Build merged content/geometry while leaving singleton shapes untouched.
 
-    merge_pair_count = 0
-    if config.get('FORCE_SINGLE_GROUP', False):
-        for index in range(1, len(shapes)):
-            union(0, index)
-            merge_pair_count += 1
-    else:
-        for i in range(len(shapes)):
-            for j in range(i + 1, len(shapes)):
-                root_i = find(i)
-                root_j = find(j)
-                if root_i == root_j:
-                    continue
-                if _all_cross_pairs_match(
-                    group_members[root_i],
-                    group_members[root_j],
-                    lambda first_index, second_index: can_merge_shapes(
-                        shapes[first_index],
-                        shapes[second_index],
-                        mode,
-                        config,
-                    ),
-                ):
-                    union(root_i, root_j)
-                    merge_pair_count += 1
-                    if debug:
-                        print(f"  ✓ 合并: 组{root_i} + 组{root_j}")
-
-    if debug:
-        print(f"共找到 {merge_pair_count} 对可合并的框")
-
-    groups = {}
-    for i in range(len(shapes)):
-        root = find(i)
-        if root not in groups:
-            groups[root] = []
-        groups[root].append(i)
-
+    >>> _merge_shapes_in_groups([], [], {})
+    ([], 0)
+    """
     final_shapes = []
     total_merge_count = 0
     output_shape_type = config.get("OUTPUT_SHAPE_TYPE", "rectangle")
 
-    for root_index in groups:
-        indices = groups[root_index]
+    for indices in groups:
         if len(indices) == 1:
             final_shapes.append(shapes[indices[0]])
         else:
@@ -587,27 +512,28 @@ def perform_merge(shapes, mode, config):
     return final_shapes, total_merge_count
 
 
+def perform_merge(
+    shapes: List[dict], mode: str, config: Mapping[str, object],
+) -> Tuple[List[dict], int]:
+    """Merge compatible neighboring regions using the configured geometry rules."""
+    shapes = [shape for shape in shapes if shape is not None]
+    return _merge_shapes_in_groups(shapes, _find_merge_groups(shapes, mode, config), config)
+
+
 def merge_selected_shapes(
     shapes: List[dict],
+    config: Mapping[str, object],
     separator: str = '\n\n',
-) -> Tuple[List[dict], int]:
-    """Merge a user-ordered selection into one rectangular text region.
+) -> Tuple[List[dict], List[List[int]]]:
+    """Return local merge results and their original selection indices.
 
-    The supplied regions must form one nearby cluster. Their input order is
-    preserved, and current editable rectangles replace stale OCR polygons so
-    the merged box stays over the original text boxes.
+    Use the region tool's direction, gap, overlap, and label rules. Current
+    editable rectangles replace stale OCR geometry; selection order and blank
+    lines are preserved within each result. Singletons retain their data.
 
-    >>> merged, removed = merge_selected_shapes([
-    ...     {'xyxy': [20, 0, 30, 10], 'text': ['A'], 'translation': 'One'},
-    ...     {'xyxy': [0, 0, 10, 10], 'text': ['B'], 'translation': 'Two'},
-    ... ])
-    >>> removed, merged[0]['translation']
-    (1, 'One\\n\\nTwo')
+    >>> merge_selected_shapes([], {'MERGE_MODE': 'NONE'})
+    ([], [])
     """
-
-    if not selected_shapes_are_nearby(shapes):
-        return shapes, 0
-
     normalized_shapes = []
     for shape in shapes:
         normalized = copy.deepcopy(shape)
@@ -620,18 +546,22 @@ def merge_selected_shapes(
         normalized['angle'] = 0.0
         normalized_shapes.append(normalized)
 
-    return perform_merge(
-        normalized_shapes,
-        'HORIZONTAL',
-        {
-            'FORCE_SINGLE_GROUP': True,
-            'READING_DIRECTION': 'SELECTION',
-            'TEXT_SEPARATOR': separator,
-            'LABEL_MERGE_STRATEGY': 'PREFER_SHORTER',
-            'OUTPUT_SHAPE_TYPE': 'rectangle',
-            'ADVANCED_MERGE_OPTIONS': {'debug_mode': False},
-        },
-    )
+    groups = [[index] for index in range(len(shapes))]
+    for direction in _merge_directions(config.get('MERGE_MODE', 'NONE')):
+        groups = _find_merge_groups(normalized_shapes, direction, config, groups)
+    selected_config = dict(config)
+    selected_config.update({
+        'READING_DIRECTION': 'SELECTION',
+        'PER_LABEL_DIRECTIONS': {},
+        'TEXT_SEPARATOR': separator,
+        'OUTPUT_SHAPE_TYPE': 'rectangle',
+    })
+    merged, _ = _merge_shapes_in_groups(normalized_shapes, groups, selected_config)
+    # Do not normalize or recreate isolated items in the live scene.
+    return [
+        shapes[group[0]] if len(group) == 1 else shape
+        for group, shape in zip(groups, merged)
+    ], groups
 
 
 def perform_configured_merge(
@@ -653,36 +583,29 @@ def perform_configured_merge(
         )
         return directional_config
 
-    mode = config.get('MERGE_MODE', 'NONE')
-    if mode == 'VERTICAL':
-        return perform_merge(shapes, 'VERTICAL', config_for('VERTICAL'))
-    if mode == 'HORIZONTAL':
-        return perform_merge(shapes, 'HORIZONTAL', config_for('HORIZONTAL'))
-    if mode == 'VERTICAL_THEN_HORIZONTAL':
-        interim, first_count = perform_merge(
-            shapes,
-            'VERTICAL',
-            config_for('VERTICAL'),
+    directions = _merge_directions(config.get('MERGE_MODE', 'NONE'))
+    if not directions:
+        return shapes, 0
+    originals = [shape for shape in shapes if shape is not None]
+    current = originals
+    memberships = [[index] for index in range(len(originals))]
+    total_removed = 0
+    for direction in directions:
+        groups = _find_merge_groups(originals, direction, config, memberships)
+        # Render in the same per-pass reading order as the 1.4 region tool,
+        # but validate each candidate using its original members, not its union.
+        previous_owner = {
+            member: index for index, group in enumerate(memberships) for member in group
+        }
+        current_groups = [
+            list(dict.fromkeys(previous_owner[member] for member in group)) for group in groups
+        ]
+        current, removed = _merge_shapes_in_groups(
+            current, current_groups, config_for(direction),
         )
-        final, second_count = perform_merge(
-            interim,
-            'HORIZONTAL',
-            config_for('HORIZONTAL'),
-        )
-        return final, first_count + second_count
-    if mode == 'HORIZONTAL_THEN_VERTICAL':
-        interim, first_count = perform_merge(
-            shapes,
-            'HORIZONTAL',
-            config_for('HORIZONTAL'),
-        )
-        final, second_count = perform_merge(
-            interim,
-            'VERTICAL',
-            config_for('VERTICAL'),
-        )
-        return final, first_count + second_count
-    return shapes, 0
+        total_removed += removed
+        memberships = groups
+    return current, total_removed
 
 
 def process_file(file_path, config):

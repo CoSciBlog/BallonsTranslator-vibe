@@ -1026,8 +1026,8 @@
     </message>
     <message>
         <location filename="../../ballontranslator/ui/configpanel.py" line="1382"/>
-        <source>Automatically combine nearby translated text boxes after successful pipeline runs. Disabled by default.</source>
-        <translation>Führt nahe übersetzte Textfelder nach erfolgreichen Pipelines automatisch zusammen. Standardmäßig deaktiviert.</translation>
+        <source>Automatically combine nearby translated text boxes after successful pipeline runs. Disabled by default. The geometry settings also apply to manual merging and remain editable.</source>
+        <translation>Führt nahe übersetzte Textfelder nach erfolgreichen Pipelines automatisch zusammen. Standardmäßig deaktiviert. Die Geometrieeinstellungen gelten auch für manuelles Zusammenführen und bleiben bearbeitbar.</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/configpanel.py" line="1388"/>
@@ -3231,6 +3231,10 @@ Once you provide the prompt, I will generate the image.  Then, when you want me 
 <context>
     <name>LeftBar</name>
     <message>
+        <source>Merge neighboring groups using Settings → Post-merge. Distant boxes stay separate.</source>
+        <translation>Benachbarte Gruppen gemäß Einstellungen → Post-Merge zusammenführen. Entfernte Textboxen bleiben getrennt.</translation>
+    </message>
+    <message>
         <location filename="../../ballontranslator/ui/mainwindowbars.py" line="113"/>
         <source>Page List and Context</source>
         <translation>Seitenliste und Kontext
@@ -3579,8 +3583,8 @@ Once you provide the prompt, I will generate the image.  Then, when you want me 
     </message>
     <message>
         <location filename="../../ballontranslator/ui/mainwindow.py" line="2445"/>
-        <source>Select at least two nearby text boxes in text editing mode.</source>
-        <translation>Wählen Sie im Textbearbeitungsmodus mindestens zwei nahe beieinanderliegende Textboxen aus.</translation>
+        <source>Select at least two text boxes in text editing mode. Only neighboring groups matching Settings → Post-merge are combined.</source>
+        <translation>Wählen Sie im Textbearbeitungsmodus mindestens zwei Textboxen aus. Nur benachbarte Gruppen, die den Regeln unter Einstellungen → Post-Merge entsprechen, werden zusammengeführt.</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/mainwindow.py" line="2469"/>

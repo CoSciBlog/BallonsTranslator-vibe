@@ -2440,17 +2440,20 @@ class MainWindow(mainwindow_cls):
                 self.tr('Open a project first.'),
             )
             return
-        merged_item = self.st_manager.merge_selected_textboxes()
-        if merged_item is None:
+        merged_items = self.st_manager.merge_selected_textboxes(
+            self.module_manager.post_merge_config_from_settings(),
+        )
+        if not merged_items:
             QMessageBox.information(
                 self,
                 self.tr('Merge Text Boxes'),
                 self.tr(
-                    'Select at least two nearby text boxes in text editing mode.'
+                    'Select at least two text boxes in text editing mode. Only '
+                    'neighboring groups matching Settings → Post-merge are combined.'
                 ),
             )
             return
-        self.canvas.gv.ensureVisible(merged_item)
+        self.canvas.gv.ensureVisible(merged_items[0])
 
     def run_merge_task(self, on_current=False, config=None):
         """执行区域合并任务"""

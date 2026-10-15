@@ -1,6 +1,6 @@
 
 from enum import Enum
-from typing import List, Optional, Sequence, Union, Tuple
+from typing import List, Mapping, Optional, Sequence, Union, Tuple
 import numpy as np
 import copy
 
@@ -336,10 +336,10 @@ class DeleteBlkItemsCommand(QUndoCommand):
             self.sw.updateCounterText()
 
 
-class MergeBlkItemsCommand(QUndoCommand):
-    """Replace selected text items with one undoable merged item.
+class _MergeTextGroupCommand(QUndoCommand):
+    """Replace one compatible group inside a multi-group merge command.
 
-    >>> callable(MergeBlkItemsCommand.redo)
+    >>> callable(_MergeTextGroupCommand.redo)
     True
     """
 
@@ -365,21 +365,6 @@ class MergeBlkItemsCommand(QUndoCommand):
         self.insert_index = self.blk_items[0].idx
         self.merged_item: Optional[TextBlkItem] = None
         self.merged_pair: Optional[TransPairWidget] = None
-
-    def _refresh_search(self) -> None:
-        if self.ctrl.canvas.search_widget.isVisible():
-            self.ctrl.canvas.search_widget.page_search()
-
-    def _select_items(self, items: Sequence[TextBlkItem]) -> None:
-        self.ctrl.canvas.block_selection_signal = True
-        try:
-            for item in self.ctrl.textblk_item_list:
-                item.setSelected(item in items)
-        finally:
-            self.ctrl.canvas.block_selection_signal = False
-        primary = items[0] if items else None
-        self.ctrl.canvas.set_primary_selected_text_item(primary)
-        self.ctrl.on_incanvas_selection_changed()
 
     def _insert_initial_merged_item(self) -> None:
         self.merged_item = self.ctrl.addTextBlock(self.merged_block)
@@ -428,12 +413,6 @@ class MergeBlkItemsCommand(QUndoCommand):
                 [self.merged_item],
                 [self.merged_pair],
             )
-        self._select_items([self.merged_item])
-        # Selection projects the merged style into the formatting panel and
-        # can synchronously relayout the document. Reassert the structural
-        # union after that projection so its geometry is deterministic.
-        self._restore_merged_geometry()
-        self._refresh_search()
 
     def undo(self) -> None:
         self.ctrl.deleteTextblkItemList(
@@ -441,7 +420,69 @@ class MergeBlkItemsCommand(QUndoCommand):
             [self.merged_pair],
         )
         self.ctrl.recoverTextblkItemList(self.blk_items, self.pair_widgets)
-        self._select_items(self.blk_items)
+
+
+class MergeBlkItemsCommand(QUndoCommand):
+    """Merge independent neighbor groups as one reversible selection action.
+
+    >>> callable(MergeBlkItemsCommand.undo)
+    True
+    """
+
+    def __init__(
+        self,
+        selected: Sequence[TextBlkItem],
+        groups: Sequence[Tuple[Sequence[TextBlkItem], TextBlock]],
+        ctrl,
+    ) -> None:
+        super().__init__()
+        self.setText(QCoreApplication.translate('MergeBlkItemsCommand', 'Merge Text Boxes'))
+        self.ctrl: SceneTextManager = ctrl
+        self.selected = list(selected)
+        grouped_items = {item for items, _block in groups for item in items}
+        self.unchanged_items = [item for item in selected if item not in grouped_items]
+        # Later page indices are replaced first; Qt undoes children in reverse
+        # order so both insertion indices and untouched items survive each cycle.
+        self.group_commands = [
+            _MergeTextGroupCommand(items, block, ctrl, self)
+            for items, block in sorted(groups, key=lambda group: group[0][0].idx, reverse=True)
+        ]
+
+    @property
+    def merged_items(self) -> List[TextBlkItem]:
+        return sorted(
+            [command.merged_item for command in self.group_commands],
+            key=lambda item: item.idx,
+        )
+
+    def _refresh_search(self) -> None:
+        if self.ctrl.canvas.search_widget.isVisible():
+            self.ctrl.canvas.search_widget.page_search()
+
+    def _select_items(self, items: Sequence[TextBlkItem]) -> None:
+        selected = set(items)
+        self.ctrl.canvas.block_selection_signal = True
+        try:
+            for item in self.ctrl.textblk_item_list:
+                item.setSelected(item in selected)
+        finally:
+            self.ctrl.canvas.block_selection_signal = False
+        primary = items[0] if items else None
+        self.ctrl.canvas.set_primary_selected_text_item(primary)
+        self.ctrl.on_incanvas_selection_changed()
+
+    def redo(self) -> None:
+        super().redo()
+        self._select_items(sorted(self.merged_items + self.unchanged_items, key=lambda item: item.idx))
+        # Selection projects formatting and may relayout text. Restore each
+        # group's original union only after that projection has settled.
+        for command in self.group_commands:
+            command._restore_merged_geometry()
+        self._refresh_search()
+
+    def undo(self) -> None:
+        super().undo()
+        self._select_items(self.selected)
         self._refresh_search()
 
 
@@ -955,17 +996,19 @@ class SceneTextManager(QObject):
         if len(selected_blks) > 0:
             self.canvas.push_undo_command(DeleteBlkItemsCommand(selected_blks, mode, self))
 
-    def merge_selected_textboxes(self) -> Optional[TextBlkItem]:
-        """Merge a nearby selection with blank-line-separated content."""
+    def merge_selected_textboxes(
+        self, config: Mapping[str, object],
+    ) -> List[TextBlkItem]:
+        """Merge only compatible neighbors in the selection, as one undo step."""
 
         if not self.canvas.textEditMode():
-            return None
+            return []
         editing_item = self.canvas.editing_textblkitem
         if editing_item is not None and editing_item.isEditing():
             editing_item.endEdit(keep_focus=False)
-        selected = self.canvas.selected_text_items()
+        selected = sorted(self.canvas.selected_text_items(), key=lambda item: item.idx)
         if len(selected) < 2:
-            return None
+            return []
 
         # Capture what the user selected before pending editor/style commits
         # can trigger a synchronous document relayout. Content is settled
@@ -983,17 +1026,16 @@ class SceneTextManager(QObject):
             shape = item.blk.to_dict(deep_copy=True)
             shape['_bounding_rect'] = list(selected_rects[item])
             selected_shapes.append(shape)
-        merged_shapes, removed_count = merge_selected_shapes(selected_shapes)
-        if removed_count != len(selected) - 1 or len(merged_shapes) != 1:
-            return None
-
-        command = MergeBlkItemsCommand(
-            selected,
-            TextBlock(**merged_shapes[0]),
-            self,
-        )
+        merged_shapes, indices = merge_selected_shapes(selected_shapes, config)
+        groups = [
+            ([selected[index] for index in group], TextBlock(**shape))
+            for shape, group in zip(merged_shapes, indices) if len(group) > 1
+        ]
+        if not groups:
+            return []
+        command = MergeBlkItemsCommand(selected, groups, self)
         self.canvas.push_text_command(command)
-        return command.merged_item
+        return command.merged_items
 
     def separate_selected_textboxes(self) -> None:
         """Place selected boxes in free page space, as one undoable move.

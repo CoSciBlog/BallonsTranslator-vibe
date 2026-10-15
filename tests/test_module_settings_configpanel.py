@@ -103,7 +103,11 @@ class ModuleSettingsConfigPanelTest(unittest.TestCase):
                 lambda: requests.append(True)
             )
 
-            self.assertFalse(panel.post_merge_mode_combobox.isEnabled())
+            self.assertTrue(panel.post_merge_mode_combobox.isEnabled())
+            self.assertTrue(panel.post_merge_hgap_spin.isEnabled())
+            panel.post_merge_hgap_spin.setValue(8)
+            self.assertEqual(pcfg.module.post_merge_max_horizontal_gap, 8)
+            self.assertFalse(pcfg.module.post_merge_textboxes)
             panel.post_merge_checker.click()
             panel.post_merge_mode_combobox.activated.emit(1)
             panel.post_merge_current_page_btn.click()

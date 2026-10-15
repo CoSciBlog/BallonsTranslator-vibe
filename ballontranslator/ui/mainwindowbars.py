@@ -125,7 +125,12 @@ class LeftBar(Widget):
         self.mergeTextboxesBtn.setIconSize(QSize(28, 28))
         self.mergeTextboxesBtn.setFixedSize(LEFTBTN_WIDTH, LEFTBTN_WIDTH)
         merge_text = self.tr('Merge Selected Text Boxes') + ' (Ctrl+Alt+M)'
-        self.mergeTextboxesBtn.setToolTip(merge_text)
+        self.mergeTextboxesBtn.setToolTip(
+            merge_text + '\n' + self.tr(
+                'Merge neighboring groups using Settings → Post-merge. '
+                'Distant boxes stay separate.'
+            )
+        )
         self.mergeTextboxesBtn.setAccessibleName(merge_text)
         self.mergeTextboxesBtn.clicked.connect(
             self.merge_textboxes_clicked.emit

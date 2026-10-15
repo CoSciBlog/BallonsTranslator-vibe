@@ -1021,8 +1021,8 @@
     </message>
     <message>
         <location filename="../../ballontranslator/ui/configpanel.py" line="1382"/>
-        <source>Automatically combine nearby translated text boxes after successful pipeline runs. Disabled by default.</source>
-        <translation>Automatically combine nearby translated text boxes after successful pipeline runs. Disabled by default.</translation>
+        <source>Automatically combine nearby translated text boxes after successful pipeline runs. Disabled by default. The geometry settings also apply to manual merging and remain editable.</source>
+        <translation>Automatically combine nearby translated text boxes after successful pipeline runs. Disabled by default. The geometry settings also apply to manual merging and remain editable.</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/configpanel.py" line="1388"/>
@@ -3203,6 +3203,10 @@
 <context>
     <name>LeftBar</name>
     <message>
+        <source>Merge neighboring groups using Settings → Post-merge. Distant boxes stay separate.</source>
+        <translation>Merge neighboring groups using Settings → Post-merge. Distant boxes stay separate.</translation>
+    </message>
+    <message>
         <location filename="../../ballontranslator/ui/mainwindowbars.py" line="113"/>
         <source>Page List and Context</source>
         <translation>Page List and Context</translation>
@@ -3550,8 +3554,8 @@
     </message>
     <message>
         <location filename="../../ballontranslator/ui/mainwindow.py" line="2445"/>
-        <source>Select at least two nearby text boxes in text editing mode.</source>
-        <translation>Select at least two nearby text boxes in text editing mode.</translation>
+        <source>Select at least two text boxes in text editing mode. Only neighboring groups matching Settings → Post-merge are combined.</source>
+        <translation>Select at least two text boxes in text editing mode. Only neighboring groups matching Settings → Post-merge are combined.</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/mainwindow.py" line="2469"/>

@@ -1379,7 +1379,8 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
         self.post_merge_checker, _ = postMergeConfigPanel.addCheckBox(
             self.tr('Merge nearby text boxes after pipeline'),
             discription=self.tr(
-                'Automatically combine nearby translated text boxes after successful pipeline runs. Disabled by default.'
+                'Automatically combine nearby translated text boxes after successful pipeline runs. '
+                'Disabled by default. The geometry settings also apply to manual merging and remain editable.'
             ),
         )
         self.post_merge_checker.toggled.connect(self.on_post_merge_changed)
@@ -1440,7 +1441,6 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
                 self.tr('Minimum vertical overlap for a horizontal merge.'),
             ),
         )
-        self.post_merge_threshold_widgets = []
         for row, (attr_name, label_text, minimum, maximum, tooltip) in enumerate(
             threshold_specs
         ):
@@ -1459,7 +1459,6 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
                 editor.setSuffix(' %')
             editor.valueChanged.connect(self.on_post_merge_numeric_changed)
             setattr(self, attr_name, editor)
-            self.post_merge_threshold_widgets.extend((label, editor))
             merge_threshold_layout.addWidget(label, row, 0)
             merge_threshold_layout.addWidget(editor, row, 1)
         merge_threshold_layout.setColumnStretch(2, 1)
@@ -2183,12 +2182,6 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
 
     def on_post_merge_changed(self, enabled: bool) -> None:
         pcfg.module.post_merge_textboxes = enabled
-        self._set_post_merge_controls_enabled(enabled)
-
-    def _set_post_merge_controls_enabled(self, enabled: bool) -> None:
-        self.post_merge_mode_combobox.setEnabled(enabled)
-        for widget in self.post_merge_threshold_widgets:
-            widget.setEnabled(enabled)
 
     def on_post_merge_mode_changed(self, index: int) -> None:
         modes = (
@@ -2493,9 +2486,6 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
         finally:
             for editor in post_merge_editors:
                 editor.blockSignals(False)
-        self._set_post_merge_controls_enabled(
-            pcfg.module.post_merge_textboxes
-        )
         self.quick_insert_characters_edit.setText(pcfg.quick_insert_characters)
         self.let_letter_case_buttons[pcfg.let_letter_case].setChecked(True)
         self.compact_vertical_punctuation_checker.setChecked(
