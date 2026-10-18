@@ -31,6 +31,7 @@ Prend en charge l’export/import vers/depuis des documents Word
   - Amélioration du lettrage manga->Anglais, Anglais->Chinois (basé sur l'extraction des zones de bulles).
   
 * Édition d’image  
+  - Faites un clic droit sur une page et choisissez **Reset page data...** pour supprimer, après confirmation, ses blocs de texte, OCR, traductions, masques, retouches, dessins et images de résultat. L’image originale et les autres pages sont conservées ; les données enregistrées sont sauvegardées dans `.page_reset_backup_*` dans le projet.
   - Prise en charge de l'édition et de la retouche des masques (similaire à l'outil Pinceau correcteur dans Photoshop)
   - Adapté aux images à rapport hauteur/largeur extrême comme les webtoons
   

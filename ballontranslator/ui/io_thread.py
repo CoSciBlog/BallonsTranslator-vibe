@@ -1,10 +1,11 @@
 import numpy as np
 import os.path as osp
 import traceback
+from typing import Optional
 
-from qtpy.QtCore import Qt, Signal, QUrl, QThread
-from qtpy.QtGui import QImage, QPixmap
-from qtpy.QtWidgets import QDialog, QMessageBox, QFileDialog
+from qtpy.QtCore import Qt, Signal, QUrl, QThread, QTimer
+from qtpy.QtGui import QCloseEvent, QImage, QPixmap
+from qtpy.QtWidgets import QDialog, QMessageBox, QFileDialog, QWidget
 
 from ballontranslator.utils.logger import logger as LOGGER
 from ballontranslator.utils.io_utils import imread, imwrite
@@ -78,6 +79,47 @@ class ImgSaveThread(ThreadBase):
                     create_error_dialog(e, self._thread_error_msg, self._thread_exception_type)
 
 
+
+
+class PageResetThread(QThread):
+    """Run the page reset transaction without blocking Qt image IO."""
+
+    def __init__(self, project: ProjImgTrans, page_name: str, parent: QDialog) -> None:
+        super().__init__(parent)
+        self.project = project
+        self.page_name = page_name
+        self.backup_dir = ''
+        self.error: Optional[Exception] = None
+
+    def run(self) -> None:
+        try:
+            self.backup_dir = self.project.reset_page_data(self.page_name)
+        except Exception as error:
+            self.error = error
+
+
+class PageResetDialog(ProgressMessageBox):
+    """Keep project editing blocked until the reset transaction has settled."""
+
+    def __init__(self, project: ProjImgTrans, page_name: str, parent: QWidget) -> None:
+        super().__init__('', parent=parent)
+        self.setTaskName(self.tr('Resetting page data...'))
+        self.worker = PageResetThread(project, page_name, self)
+        self.worker.finished.connect(self.accept)
+
+    def exec_(self) -> int:
+        # Finish modal focus-out handlers before the worker reads project state.
+        QTimer.singleShot(0, self.worker.start)
+        result = super().exec_()
+        self.worker.wait()
+        return result
+
+    def reject(self) -> None:
+        # Escape cannot release the modal project lock during filesystem changes.
+        pass
+
+    def closeEvent(self, event: QCloseEvent) -> None:
+        event.ignore()
 
 
 class ImgTransProjFileIOThread(ThreadBase):

@@ -22,6 +22,7 @@
   - Typesetting optimal untuk manga->bahasa Inggris, bahasa Inggris->Mandarin (berdasarkan ekstraksi daerah balon.).
   
 * Pengeditan gambar  
+  - Klik kanan halaman dan pilih **Reset page data...** untuk menghapus kotak teks, OCR, terjemahan, mask, hasil inpainting, gambar manual, dan gambar hasil halaman tersebut setelah konfirmasi. Gambar asli dan halaman lain tetap tersimpan; data yang telah disimpan dicadangkan dalam `.page_reset_backup_*` di folder proyek.
   - Mendukung pengeditan mask & inpainting (seperti alat content aware fill di PS) 
   - Mendukung gambar dengan rasio aspek ekstrim seperti webtoon
   

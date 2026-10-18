@@ -748,6 +748,9 @@ class ProjImgTrans:
                     p,
                 )
                 img_info.pop('pipeline_ignore', None)
+            if 'inpainted_reset' in img_info and not isinstance(img_info['inpainted_reset'], bool):
+                LOGGER.warning('Invalid inpainted_reset value for page %s; ignoring it.', p)
+                img_info.pop('inpainted_reset', None)
             summary_record = img_info.get('llm_visual_summary')
             if (
                 summary_record is not None
@@ -913,7 +916,7 @@ class ProjImgTrans:
         block.region_mask = state['region_mask']
         block.region_inpaint_dict = state['region_inpaint_dict']
 
-    def _remove_generated_page_outputs(self, page_name: str) -> None:
+    def _generated_page_outputs(self, page_name: str) -> Iterable[str]:
         page_stem = osp.splitext(page_name)[0]
         for directory in (
             self.mask_dir(),
@@ -923,15 +926,97 @@ class ProjImgTrans:
             if not osp.isdir(directory):
                 continue
             for filename in os.listdir(directory):
-                if osp.splitext(filename)[0] == page_stem:
-                    try:
-                        os.remove(osp.join(directory, filename))
-                    except OSError as error:
-                        LOGGER.warning(
-                            'Unable to remove stale generated page output %s: %s',
-                            filename,
-                            error,
-                        )
+                path = osp.join(directory, filename)
+                stem, extension = osp.splitext(filename)
+                if (
+                    stem == page_stem
+                    and extension.lower() in INTERMEDIATE_IMAGE_EXTENSIONS
+                    and osp.isfile(path)
+                ):
+                    yield path
+
+    def _remove_generated_page_outputs(self, page_name: str) -> None:
+        for path in self._generated_page_outputs(page_name):
+            try:
+                os.remove(path)
+            except OSError as error:
+                LOGGER.warning(
+                    'Unable to remove stale generated page output %s: %s',
+                    path,
+                    error,
+                )
+
+    def reset_page_data(self, page_name: str) -> str:
+        """Reset one page, retaining a recoverable snapshot and generated files.
+
+        Call with project writers idle. Outputs are moved on the same filesystem
+        before the atomic project save; any failure restores files and metadata.
+        Shared raster assets and project-wide glossary/memory remain untouched.
+
+        >>> project = ProjImgTrans()
+        >>> project.reset_page_data('missing.png')
+        Traceback (most recent call last):
+            ...
+        ballontranslator.utils.proj_imgtrans.ImgnameNotInProjectException: missing.png
+        """
+        if page_name not in self.pages:
+            raise ImgnameNotInProjectException(page_name)
+
+        page_stem = osp.normcase(osp.splitext(page_name)[0])
+        if any(
+            other != page_name and osp.normcase(osp.splitext(other)[0]) == page_stem
+            for other in self.pages
+        ):
+            raise ValueError('Pages with the same base filename share generated images and cannot be reset separately.')
+
+        reset_arrays = None
+        if page_name == self.current_img and self.img_array is not None:
+            reset_arrays = (
+                np.zeros(self.img_array.shape[:2], dtype=np.uint8),
+                self.img_array.copy(),
+            )
+        blocks = self.pages[page_name]
+        previous_blocks = blocks[:]
+        image_info = self._image_info[page_name]
+        previous_info = image_info.copy()
+        backup_dir = tempfile.mkdtemp(prefix='.page_reset_backup_', dir=self.directory)
+        moved_files: List[Tuple[str, str]] = []
+        try:
+            with open(osp.join(backup_dir, osp.basename(self.proj_path)), 'w', encoding='utf-8') as stream:
+                json.dump(self.to_dict(), stream, ensure_ascii=False, cls=TextBlkEncoder)
+            for source in self._generated_page_outputs(page_name):
+                backup = osp.join(backup_dir, osp.relpath(source, self.directory))
+                os.makedirs(osp.dirname(backup), exist_ok=True)
+                os.replace(source, backup)
+                moved_files.append((source, backup))
+
+            blocks[:] = []
+            image_info['finish_code'] = 0
+            image_info.pop('translation_target', None)
+            image_info.pop('llm_visual_summary', None)
+            # A missing output must not resolve to a different page's inpainting
+            # when the optional filename-by-index compatibility mode is enabled.
+            image_info['inpainted_reset'] = True
+            self.save()
+        except Exception as error:
+            blocks[:] = previous_blocks
+            image_info.clear()
+            image_info.update(previous_info)
+            restore_failed = False
+            for source, backup in reversed(moved_files):
+                try:
+                    os.replace(backup, source)
+                except OSError:
+                    restore_failed = True
+                    LOGGER.exception('Unable to restore %s; backup retained at %s', source, backup_dir)
+            if restore_failed:
+                raise RuntimeError(f'{error}. Some files could not be restored. Backup: {backup_dir}') from error
+            raise
+
+        self._fuzzy_inpainted_list = None
+        if reset_arrays is not None:
+            self.mask_array, self.inpainted_array = reset_arrays
+        return backup_dir
 
     def replace_pages_with_upscaled_files(
         self,
@@ -1439,7 +1524,11 @@ class ProjImgTrans:
         else:
             p = fileprefix+pcfg.intermediate_imgsave_ext
 
-        if not osp.exists(p) and shared.FUZZY_MATCH_IMAGE_NAME:
+        if (
+            not osp.exists(p)
+            and shared.FUZZY_MATCH_IMAGE_NAME
+            and not self._image_info.get(imgname, {}).get('inpainted_reset', False)
+        ):
             if self._fuzzy_inpainted_list is None:
                 if osp.exists(self.inpainted_dir()):
                     self._fuzzy_inpainted_list = find_all_imgs(self.inpainted_dir(), sort=True)

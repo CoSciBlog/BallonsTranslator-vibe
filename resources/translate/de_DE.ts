@@ -4001,6 +4001,30 @@ Erfolgreich: {success_count}/{total} Regionszusammenführung fehlgeschlagen: {fa
         <source>Fill URL</source>
         <translation>URL ausfüllen</translation>
     </message>
+    <message>
+        <source>Reset page data</source>
+        <translation>Seitendaten zurücksetzen</translation>
+    </message>
+    <message>
+        <source>Reset all data for page "{page}"?
+
+Text boxes, OCR text, translations, masks, inpainting, drawings and result images will be removed. The original image is preserved. Saved data is backed up in the project folder. The current page's undo history will be cleared if it is reset.</source>
+        <translation>Alle Daten der Seite "{page}" zurücksetzen?
+
+Textboxen, OCR-Texte, Übersetzungen, Masken, Inpainting, Zeichnungen und Ergebnisbilder werden entfernt. Das Originalbild bleibt erhalten. Gespeicherte Daten werden im Projektordner gesichert. Wird die geöffnete Seite zurückgesetzt, wird auch ihr Undo-Verlauf gelöscht.</translation>
+    </message>
+    <message>
+        <source>Wait for active processing and image saving to finish before resetting page data.</source>
+        <translation>Bitte warten, bis die laufende Verarbeitung und Bildspeicherung abgeschlossen sind, bevor die Seitendaten zurückgesetzt werden.</translation>
+    </message>
+    <message>
+        <source>Failed to reset page data</source>
+        <translation>Seitendaten konnten nicht zurückgesetzt werden</translation>
+    </message>
+    <message>
+        <source>Page data reset. Backup: {path}</source>
+        <translation>Seitendaten zurückgesetzt. Sicherung: {path}</translation>
+    </message>
 </context>
 <context>
     <name>MergeBlkItemsCommand</name>
@@ -5747,6 +5771,10 @@ qipao,qipao2</source>
         <location filename="../../ballontranslator/ui/mainwindow.py" line="237"/>
         <source>Reveal in File Explorer</source>
         <translation>Im Datei-Explorer anzeigen</translation>
+    </message>
+    <message>
+        <source>Reset page data...</source>
+        <translation>Seitendaten zurücksetzen…</translation>
     </message>
 </context>
 <context>
@@ -9012,6 +9040,13 @@ Starten Sie dann Photoshop neu. Der Explorer öffnet nun die Quelldatei und den 
     <message>
         <source>Toggle underlined text</source>
         <translation>Unterstreichung ein- oder ausschalten</translation>
+    </message>
+</context>
+<context>
+    <name>PageResetDialog</name>
+    <message>
+        <source>Resetting page data...</source>
+        <translation>Seitendaten werden zurückgesetzt…</translation>
     </message>
 </context>
 </TS>

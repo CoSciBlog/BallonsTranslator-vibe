@@ -1,5 +1,9 @@
 # Changelogs
 
+### 2026-10-18 — 1.5.19+vibe.52
+- Added **Reset page data...** to the page context menu. After confirmation it clears only the clicked page's text boxes, OCR, translations, masks, inpainting, drawings, generated results, and processing progress, while preserving the original image, page order, and pipeline exclusion.
+- Retains the previous project snapshot and generated files in a unique `.page_reset_backup_*` folder. File or save failures restore the page data; active processing/saving blocks reset, and disk IO runs in a worker. Resetting the open page clears its scene and undo history. English and German UI text is included.
+
 ### 2026-10-18 — 1.5.19+vibe.51
 - Replaced the cycling `Aa` button with a labeled Text Case selector offering Normal, Uppercase, and Lowercase directly. Existing saved formatting, mixed selections, and undo retain their behavior; stored source and translation strings remain unchanged.
 - Completed the selector labels and tooltip in all nine available UI languages.

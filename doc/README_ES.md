@@ -25,6 +25,7 @@
   - Diseño mejorado para manga->inglés, inglés->chino (basado en la extracción de regiones de globos).
   
 * **Edición de imágenes:**
+  - Haz clic derecho en una página y elige **Reset page data...** para borrar, tras confirmarlo, sus cuadros de texto, OCR, traducciones, máscaras, retoques, dibujos e imágenes de resultado. Se conservan la imagen original y las demás páginas; los datos guardados se respaldan en `.page_reset_backup_*` dentro del proyecto.
   - Permite editar máscaras e inpainting (similar a la herramienta Pincel recuperador de imperfecciones de Photoshop).
   - Adaptado para imágenes con una relación de aspecto extrema, como los webtoons.
   

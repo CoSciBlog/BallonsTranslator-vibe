@@ -3968,6 +3968,30 @@ Failed: {fail_count}/{total}</translation>
         <source>Fill URL</source>
         <translation>Fill URL</translation>
     </message>
+    <message>
+        <source>Reset page data</source>
+        <translation>Reset page data</translation>
+    </message>
+    <message>
+        <source>Reset all data for page "{page}"?
+
+Text boxes, OCR text, translations, masks, inpainting, drawings and result images will be removed. The original image is preserved. Saved data is backed up in the project folder. The current page's undo history will be cleared if it is reset.</source>
+        <translation>Reset all data for page "{page}"?
+
+Text boxes, OCR text, translations, masks, inpainting, drawings and result images will be removed. The original image is preserved. Saved data is backed up in the project folder. The current page's undo history will be cleared if it is reset.</translation>
+    </message>
+    <message>
+        <source>Wait for active processing and image saving to finish before resetting page data.</source>
+        <translation>Wait for active processing and image saving to finish before resetting page data.</translation>
+    </message>
+    <message>
+        <source>Failed to reset page data</source>
+        <translation>Failed to reset page data</translation>
+    </message>
+    <message>
+        <source>Page data reset. Backup: {path}</source>
+        <translation>Page data reset. Backup: {path}</translation>
+    </message>
 </context>
 <context>
     <name>MergeBlkItemsCommand</name>
@@ -5713,6 +5737,10 @@ qipao,qipao2</translation>
         <location filename="../../ballontranslator/ui/mainwindow.py" line="237"/>
         <source>Reveal in File Explorer</source>
         <translation>Reveal in File Explorer</translation>
+    </message>
+    <message>
+        <source>Reset page data...</source>
+        <translation>Reset page data...</translation>
     </message>
 </context>
 <context>
@@ -8942,6 +8970,13 @@ Then restart Photoshop. Explorer will now open the source file and destination l
     <message>
         <source>Toggle underlined text</source>
         <translation>Toggle underlined text</translation>
+    </message>
+</context>
+<context>
+    <name>PageResetDialog</name>
+    <message>
+        <source>Resetting page data...</source>
+        <translation>Resetting page data...</translation>
     </message>
 </context>
 </TS>

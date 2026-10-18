@@ -68,6 +68,7 @@ from .io_thread import (
     ExportDocThread,
     ImgSaveThread,
     ImportDocThread,
+    PageResetDialog,
     ProjectUpscaleThread,
 )
 from .update_thread import UpdateCheckThread
@@ -189,6 +190,7 @@ class PageListView(QListWidget):
 
     reveal_file = Signal()
     ignore_page_changed = Signal(str, bool)
+    reset_page_requested = Signal(str)
     _IGNORED_ROLE = int(Qt.ItemDataRole.UserRole) + 1
 
     def __init__(self, *args, **kwargs) -> None:
@@ -226,6 +228,7 @@ class PageListView(QListWidget):
         item = self.itemAt(e.pos())
         menu = QMenu(self)
         ignore_act = None
+        reset_act = None
         if item is not None:
             ignored = bool(item.data(self._IGNORED_ROLE))
             ignore_act = menu.addAction(
@@ -233,6 +236,7 @@ class PageListView(QListWidget):
                 if ignored
                 else self.tr('Ignore page')
             )
+            reset_act = menu.addAction(self.tr('Reset page data...'))
             menu.addSeparator()
         reveal_act = menu.addAction(self.tr('Reveal in File Explorer'))
         rst = menu.exec_(e.globalPos())
@@ -242,6 +246,9 @@ class PageListView(QListWidget):
             self.ignore_page_changed.emit(item.text(), ignored)
         elif rst == reveal_act:
             self.reveal_file.emit()
+        elif reset_act is not None and rst == reset_act:
+            self.reset_page_requested.emit(item.text())
+        menu.deleteLater()
         e.accept()
 
 mainwindow_cls = Widget if shared.HEADLESS else FramelessWindow
@@ -463,6 +470,7 @@ class MainWindow(mainwindow_cls):
         self.pageList.ignore_page_changed.connect(
             self.on_page_ignore_changed
         )
+        self.pageList.reset_page_requested.connect(self.on_reset_page_data)
         self.pageList.currentItemChanged.connect(self.pageListCurrentItemChanged)
 
         self.leftStackWidget = QStackedWidget(self)
@@ -3762,6 +3770,75 @@ class MainWindow(mainwindow_cls):
         elif sys.platform == 'darwin':
             p = "\""+current_img_path+"\""
             subprocess.Popen("open -R "+p, shell=True)
+
+    def on_reset_page_data(self, page_name: str) -> None:
+        if shared.HEADLESS or page_name not in self.imgtrans_proj.pages:
+            return
+        answer = QMessageBox.question(
+            self,
+            self.tr('Reset page data'),
+            self.tr(
+                'Reset all data for page "{page}"?\n\n'
+                'Text boxes, OCR text, translations, masks, inpainting, drawings and result images '
+                'will be removed. The original image is preserved. Saved data is backed up in '
+                'the project folder. The current page\'s undo history will be cleared if it is reset.'
+            ).format(page=page_name),
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
+        if answer != QMessageBox.StandardButton.Yes:
+            return
+        # Recheck after the confirmation's event loop: queued pipeline/save work
+        # may have started while the question was visible.
+        if (
+            self.module_manager.pipelineBusy()
+            or self.imsave_thread.isRunning()
+            or self.imsave_thread.im_save_list
+            or self.project_upscale_thread.isRunning()
+            or self.auto_tate_chu_yoko_thread.isRunning()
+            or self.import_doc_thread.isRunning()
+            or self.export_doc_thread.isRunning()
+            or self.global_search_widget.replace_thread.isRunning()
+            or (hasattr(self, 'merge_thread') and self.merge_thread.isRunning())
+            or self._batch_options is not None
+            or self._pending_reinpaint_request is not None
+            or self._pending_project_upscale is not None
+        ):
+            create_info_dialog(self.tr(
+                'Wait for active processing and image saving to finish before resetting page data.'
+            ))
+            return
+
+        self.st_manager.formatpanel.resolve_text_transform_edits_for_save()
+        self.st_manager.updateTextBlkList()
+        is_current = page_name == self.imgtrans_proj.current_img
+        if is_current:
+            self.module_manager.handle_page_changed()
+        dialog = PageResetDialog(self.imgtrans_proj, page_name, self)
+        try:
+            dialog.exec_()
+            error = dialog.worker.error
+            backup_dir = dialog.worker.backup_dir
+        finally:
+            dialog.deleteLater()
+        if error is not None:
+            create_error_dialog(error, self.tr('Failed to reset page data'))
+            return
+
+        self._llm_context_dirty = False
+        self.global_search_widget.set_document_edited()
+        if is_current:
+            self.page_changing = True
+            try:
+                self.st_manager.clearSceneTextitems(SceneTextReplacementReason.PAGE_CHANGE)
+                self.canvas.clear_undostack(update_saved_step=True)
+                self.canvas.updateCanvas()
+                self.st_manager.populateSceneTextitems()
+                self.llmContextEditor.set_page(page_name)
+                self.drawingPanel.handle_page_changed()
+            finally:
+                self.page_changing = False
+        create_info_dialog(self.tr('Page data reset. Backup: {path}').format(path=backup_dir))
 
     def on_page_ignore_changed(
         self,

@@ -12,6 +12,8 @@ Copyright and license notices shipped with third-party dependencies remain the r
 
 The primary project documentation is maintained in English. Community-maintained translated guides retain their original language and attribution where provided.
 
+The confirmed page-data reset, transactional project/output backup, and background IO integration are original code in this fork and add no third-party code or dependencies.
+
 Selected text-box grouping reuses the region merger and its geometry/label rules from the GPL-licensed 1.4-vibe branch, retaining the existing X-AnyLabeling port attribution in `utils/merger.py`. The grouped undo integration and safeguards across directional passes add no third-party code or dependency.
 
 The batch pre-upscaling page-list synchronization fix, editable parent-folder input, inclusion of ignored pages during upscaling, and English/German text-format tooltips are original maintenance work in this fork and add no third-party code or dependencies.
