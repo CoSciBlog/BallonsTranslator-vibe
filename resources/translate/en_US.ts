@@ -1345,6 +1345,14 @@
         <source>Dictionary files (*.txt *.dic)</source>
         <translation>Dictionary files (*.txt *.dic)</translation>
     </message>
+    <message>
+        <source>Show page thumbnails</source>
+        <translation>Show page thumbnails</translation>
+    </message>
+    <message>
+        <source>Show image previews beside page names in the sidebar. Turn off for a compact list of filenames.</source>
+        <translation>Show image previews beside page names in the sidebar. Turn off for a compact list of filenames.</translation>
+    </message>
 </context>
 <context>
     <name>DialogCloseButton</name>

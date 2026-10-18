@@ -1,11 +1,12 @@
 import numpy as np
 import os.path as osp
 import traceback
-from typing import Optional
+from threading import Event
+from typing import List, Optional
 
-from qtpy.QtCore import Qt, Signal, QUrl, QThread, QTimer
-from qtpy.QtGui import QCloseEvent, QImage, QPixmap
-from qtpy.QtWidgets import QDialog, QMessageBox, QFileDialog, QWidget
+from qtpy.QtCore import Qt, Signal, QUrl, QThread, QTimer, QObject, QRunnable, QSize, QThreadPool
+from qtpy.QtGui import QCloseEvent, QImage, QImageReader, QPainter, QPixmap
+from qtpy.QtWidgets import QApplication, QDialog, QMessageBox, QFileDialog, QWidget
 
 from ballontranslator.utils.logger import logger as LOGGER
 from ballontranslator.utils.io_utils import imread, imwrite
@@ -79,6 +80,86 @@ class ImgSaveThread(ThreadBase):
                     create_error_dialog(e, self._thread_error_msg, self._thread_exception_type)
 
 
+
+
+class _PageThumbnailSignals(QObject):
+    loaded = Signal(int, int, str, QImage)
+
+
+class PageThumbnailLoader(QRunnable):
+    """Decode one project's small previews without retaining source images.
+
+    One decoder at a time bounds temporary memory for large/upscaled pages.
+    Cancellation is checked between reads and before delivering a result; the
+    view also validates generations because queued signals can outlive a job.
+
+    >>> loader = PageThumbnailLoader('', ['missing.png'], QSize(48, 48), 1.0, 0)
+    >>> loader.cancelled.set()
+    >>> loader.run()  # Cancelled work performs no file IO.
+    """
+
+    @staticmethod
+    def thread_pool() -> QThreadPool:
+        # The pool belongs to this QApplication, not a module-level wrapper
+        # that becomes invalid when Qt is shut down and constructed again.
+        app = QApplication.instance()
+        if app is None:
+            raise RuntimeError('Page thumbnails require a QApplication.')
+        pool = app.findChild(QThreadPool, 'PageThumbnailPool', Qt.FindChildOption.FindDirectChildrenOnly)
+        if pool is None:
+            pool = QThreadPool(app)
+            pool.setObjectName('PageThumbnailPool')
+            pool.setMaxThreadCount(1)
+        return pool
+
+    def __init__(
+        self, directory: str, page_names: List[str], size: QSize,
+        device_pixel_ratio: float, generation: int,
+    ) -> None:
+        super().__init__()
+        self.signals = _PageThumbnailSignals()
+        self.cancelled = Event()
+        self.directory = directory
+        self.page_names = page_names
+        self.size = size
+        self.device_pixel_ratio = device_pixel_ratio
+        self.generation = generation
+
+    def run(self) -> None:
+        for row, page_name in enumerate(self.page_names):
+            if self.cancelled.is_set():
+                return
+            try:
+                reader = QImageReader(osp.join(self.directory, page_name))
+                reader.setAutoTransform(True)
+                source_size = reader.size()
+                if source_size.isValid():
+                    reader.setScaledSize(source_size.scaled(self.size, Qt.AspectRatioMode.KeepAspectRatio))
+                image = reader.read()
+                if image.isNull():
+                    LOGGER.warning('Cannot load page thumbnail %s: %s', page_name, reader.errorString())
+                    continue
+                image = image.scaled(
+                    self.size, Qt.AspectRatioMode.KeepAspectRatio,
+                    Qt.TransformationMode.SmoothTransformation,
+                )
+                # Keep decoration bounds stable for landscape/portrait pages.
+                thumbnail = QImage(self.size, QImage.Format.Format_ARGB32_Premultiplied)
+                thumbnail.fill(Qt.GlobalColor.transparent)
+                painter = QPainter(thumbnail)
+                try:
+                    painter.drawImage(
+                        (self.size.width() - image.width()) // 2,
+                        (self.size.height() - image.height()) // 2, image,
+                    )
+                finally:
+                    painter.end()
+                thumbnail.setDevicePixelRatio(self.device_pixel_ratio)
+                if self.cancelled.is_set():
+                    return
+                self.signals.loaded.emit(self.generation, row, page_name, thumbnail)
+            except Exception:
+                LOGGER.exception('Cannot load page thumbnail %s', page_name)
 
 
 class PageResetThread(QThread):

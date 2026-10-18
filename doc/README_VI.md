@@ -22,6 +22,7 @@
   - Dùng siu xịn khi mà Manga -> Tiếng Anh, Tiếng Anh -> tiếng Trung (Zì app này các pháp sư Trung Hoa làm mà :> ).
   
 * Chỉnh sửa hình ảnh
+  - Ảnh thu nhỏ của trang được hiển thị cả trong dự án có từ 100 trang trở lên. Bật hoặc tắt **Settings → General → Application → Show page thumbnails** để chuyển ngay giữa ảnh xem trước và danh sách tên tệp gọn hơn. Lựa chọn được lưu và ảnh xem trước được tải ở chế độ nền.
   - Nhấp chuột phải vào một trang và chọn **Reset page data...** để xóa hộp văn bản, OCR, bản dịch, mặt nạ, kết quả inpainting, nét vẽ và ảnh kết quả của trang đó sau khi xác nhận. Ảnh gốc và các trang khác được giữ nguyên; dữ liệu đã lưu được sao lưu vào `.page_reset_backup_*` trong thư mục dự án.
   - Hỗ trợ Chỉnh sửa & Inpainting (na ná brush tool trong Photoshop)
   - Thích nghi với hình ảnh có tỷ lệ khung hình cực cao như Webtoons (?? hem hỉu lém, nhưng mà nói chung sài được với cả webtoons)

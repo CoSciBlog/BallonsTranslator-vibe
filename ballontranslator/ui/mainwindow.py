@@ -7,9 +7,9 @@ from functools import partial
 import time
 
 from tqdm import tqdm
-from qtpy.QtWidgets import QAction, QFileDialog, QMenu, QHBoxLayout, QVBoxLayout, QApplication, QStackedWidget, QSplitter, QListWidget, QShortcut, QListWidgetItem, QMessageBox, QTextEdit, QPlainTextEdit, QDialog, QWidget, QColorDialog
+from qtpy.QtWidgets import QAction, QFileDialog, QMenu, QHBoxLayout, QVBoxLayout, QApplication, QStackedWidget, QSplitter, QListWidget, QShortcut, QListWidgetItem, QMessageBox, QTextEdit, QPlainTextEdit, QDialog, QWidget, QColorDialog, QAbstractItemView
 from qtpy.QtCore import Qt, QPoint, QRect, QSize, QEvent, Signal, QTimer
-from qtpy.QtGui import QContextMenuEvent, QTextCursor, QGuiApplication, QIcon, QCloseEvent, QKeySequence, QPainter, QClipboard, QColor
+from qtpy.QtGui import QContextMenuEvent, QTextCursor, QGuiApplication, QIcon, QCloseEvent, QKeySequence, QPainter, QClipboard, QColor, QImage, QPixmap
 
 from ballontranslator.utils.logger import logger as LOGGER
 from ballontranslator.utils.text_processing import (
@@ -69,6 +69,7 @@ from .io_thread import (
     ImgSaveThread,
     ImportDocThread,
     PageResetDialog,
+    PageThumbnailLoader,
     ProjectUpscaleThread,
 )
 from .update_thread import UpdateCheckThread
@@ -195,6 +196,10 @@ class PageListView(QListWidget):
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
+        self._thumbnails_visible = pcfg.show_page_thumbnails
+        self._thumbnail_directory = ''
+        self._thumbnail_generation = 0
+        self._thumbnail_cancel = None
         self.setIconSize(QSize(shared.PAGELIST_THUMBNAIL_SIZE, shared.PAGELIST_THUMBNAIL_SIZE))
         self.scrollbar_h = ScrollBar(
             Qt.Orientation.Horizontal, self, fadeout=True
@@ -207,6 +212,65 @@ class PageListView(QListWidget):
         self.scrollbar_v = ScrollBar(
             Qt.Orientation.Vertical, self, fadeout=True
         )
+
+    def _cancel_thumbnail_loading(self) -> None:
+        self._thumbnail_generation += 1
+        if self._thumbnail_cancel is not None:
+            self._thumbnail_cancel.set()
+            self.destroyed.disconnect(self._thumbnail_cancel.set)
+            self._thumbnail_cancel = None
+
+    def clear(self) -> None:
+        self._cancel_thumbnail_loading()
+        self._thumbnail_directory = ''
+        super().clear()
+
+    def loadThumbnails(self, directory: str) -> None:
+        """Load previews for the current list after a project/page-list refresh."""
+        self._thumbnail_directory = directory
+        self._refresh_thumbnails()
+
+    def setThumbnailsVisible(self, visible: bool) -> None:
+        if visible == self._thumbnails_visible:
+            return
+        self._thumbnails_visible = visible
+        self._refresh_thumbnails()
+
+    def _refresh_thumbnails(self) -> None:
+        self._cancel_thumbnail_loading()
+        enabled = self._thumbnails_visible and not shared.HEADLESS
+        top_item = self.itemAt(QPoint(0, 0))
+        icon = QIcon()
+        if enabled:
+            # Reserve the final row height while previews arrive, avoiding
+            # repeated layout/scroll jumps for each decoded page.
+            placeholder = QPixmap(self.iconSize())
+            placeholder.fill(Qt.GlobalColor.transparent)
+            icon = QIcon(placeholder)
+        for row in range(self.count()):
+            self.item(row).setIcon(icon)
+        self.doItemsLayout()
+        if top_item is not None:
+            self.scrollToItem(top_item, QAbstractItemView.ScrollHint.PositionAtTop)
+        if not enabled or not self._thumbnail_directory or not self.count():
+            return
+        ratio = self.devicePixelRatioF()
+        loader = PageThumbnailLoader(
+            self._thumbnail_directory,
+            [self.item(row).text() for row in range(self.count())],
+            self.iconSize() * ratio, ratio, self._thumbnail_generation,
+        )
+        loader.signals.loaded.connect(self._on_thumbnail_loaded)
+        self._thumbnail_cancel = loader.cancelled
+        self.destroyed.connect(loader.cancelled.set)
+        PageThumbnailLoader.thread_pool().start(loader)
+
+    def _on_thumbnail_loaded(self, generation: int, row: int, page_name: str, image: QImage) -> None:
+        if generation != self._thumbnail_generation:
+            return
+        item = self.item(row)
+        if item is not None and item.text() == page_name:
+            item.setIcon(QIcon(QPixmap.fromImage(image)))
 
     def setItemIgnored(
         self,
@@ -811,6 +875,7 @@ class MainWindow(mainwindow_cls):
 
         self.configPanel.setupConfig()
         self.configPanel.save_config.connect(self.save_config)
+        self.configPanel.page_thumbnails_changed.connect(self.pageList.setThumbnailsVisible)
         self.configPanel.check_update.connect(self.check_for_updates)
         self.configPanel.reload_textstyle.connect(self.load_textstyle_from_proj_dir)
         self.configPanel.font_list_changed.connect(self.on_show_only_custom_font)
@@ -1120,16 +1185,11 @@ class MainWindow(mainwindow_cls):
             self.opening_dir = False
             create_error_dialog(e, self.tr('Failed to load project from') + json_path)
         
-    def updatePageList(self):
+    def updatePageList(self) -> None:
         if self.pageList.count() != 0:
             self.pageList.clear()
-        if len(self.imgtrans_proj.pages) >= shared.PAGELIST_THUMBNAIL_MAXNUM:
-            item_func = lambda imgname: QListWidgetItem(imgname)
-        else:
-            item_func = lambda imgname:\
-                QListWidgetItem(QIcon(osp.join(self.imgtrans_proj.directory, imgname)), imgname)
         for imgname in self.imgtrans_proj.pages:
-            lstitem =  item_func(imgname)
+            lstitem = QListWidgetItem(imgname)
             self.pageList.setItemIgnored(
                 lstitem,
                 self.imgtrans_proj.is_page_ignored(imgname),
@@ -1137,6 +1197,7 @@ class MainWindow(mainwindow_cls):
             self.pageList.addItem(lstitem)
             if imgname == self.imgtrans_proj.current_img:
                 self.pageList.setCurrentItem(lstitem)
+        self.pageList.loadThumbnails(self.imgtrans_proj.directory)
         self.llmContextEditor.set_project(self.imgtrans_proj)
 
     def _update_project_title(self, project_name: str = None) -> None:

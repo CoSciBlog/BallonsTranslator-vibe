@@ -1,5 +1,9 @@
 # Changelogs
 
+### 2026-10-18 — 1.5.19+vibe.53
+- Restored sidebar page thumbnails for projects with 100 or more pages. **Settings → General → Application → Show page thumbnails** switches previews on/off immediately and remembers the choice; existing configurations default to enabled.
+- Previews decode to small images in a background worker, with one decoder at a time. Page/project changes, disabling previews, and view destruction cancel obsolete work; late results cannot replace another project's thumbnails. Corrupt previews leave the page available, and toggling preserves page selection and ignored status. English/German labels and translated README guidance are included.
+
 ### 2026-10-18 — 1.5.19+vibe.52
 - Added **Reset page data...** to the page context menu. After confirmation it clears only the clicked page's text boxes, OCR, translations, masks, inpainting, drawings, generated results, and processing progress, while preserving the original image, page order, and pipeline exclusion.
 - Retains the previous project snapshot and generated files in a unique `.page_reset_backup_*` folder. File or save failures restore the page data; active processing/saving blocks reset, and disk IO runs in a worker. Resetting the open page clears its scene and undo history. English and German UI text is included.

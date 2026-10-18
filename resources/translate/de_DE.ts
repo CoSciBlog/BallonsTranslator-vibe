@@ -1350,6 +1350,14 @@
         <source>Dictionary files (*.txt *.dic)</source>
         <translation>Wörterbuchdateien (*.txt *.dic)</translation>
     </message>
+    <message>
+        <source>Show page thumbnails</source>
+        <translation>Seitenminiaturen anzeigen</translation>
+    </message>
+    <message>
+        <source>Show image previews beside page names in the sidebar. Turn off for a compact list of filenames.</source>
+        <translation>Bildvorschauen neben den Seitennamen in der Seitenleiste anzeigen. Für eine kompakte Dateinamenliste ausschalten.</translation>
+    </message>
 </context>
 <context>
     <name>DialogCloseButton</name>

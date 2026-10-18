@@ -543,6 +543,7 @@ class ProgramConfig(Config):
     global_fontformat: FontFormat = field(default_factory=lambda: FontFormat())
     recent_proj_list: List = field(default_factory=lambda: list())
     show_page_list: bool = False
+    show_page_thumbnails: bool = True
     show_llm_page_summary: bool = True
     expand_llm_page_summary: bool = True
     show_llm_compact_memory: bool = True
@@ -650,6 +651,7 @@ class ProgramConfig(Config):
             )
             self.run_pipeline_reinpaint_only = False
         for setting_name, default in (
+            ('show_page_thumbnails', True),
             ('let_autolayout_fit_bubble_flag', True),
             ('let_autolayout_no_linebreak_flag', False),
         ):
