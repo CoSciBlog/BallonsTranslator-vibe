@@ -1,5 +1,8 @@
 # Changelogs
 
+### 2026-10-18 — 1.5.19+vibe.49
+- Batch pre-upscaling now includes ignored pages, even when every page in a project is ignored. Text detection, OCR, inpainting, and translation continue to skip them, and their ignored status survives the upscaled file renaming.
+
 ### 2026-10-16 — 1.5.19+vibe.48
 - Post-merge geometry settings remain editable while automatic pipeline merging is disabled, so manual merging can be configured independently.
 - Selected text-box merging now uses the 1.4-vibe region tool's configurable direction, gap, overlap, and label predicates instead of forcing a connected selection into one box. It merges independent neighboring groups, preserves isolated boxes, and restores all original items and selection with one Undo.

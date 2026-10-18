@@ -14,7 +14,7 @@ The primary project documentation is maintained in English. Community-maintained
 
 Selected text-box grouping reuses the region merger and its geometry/label rules from the GPL-licensed 1.4-vibe branch, retaining the existing X-AnyLabeling port attribution in `utils/merger.py`. The grouped undo integration and safeguards across directional passes add no third-party code or dependency.
 
-The batch pre-upscaling page-list synchronization fix and editable parent-folder input are original maintenance work in this fork and add no third-party code or dependencies.
+The batch pre-upscaling page-list synchronization fix, editable parent-folder input, and inclusion of ignored pages during upscaling are original maintenance work in this fork and add no third-party code or dependencies.
 
 Re-inpainting mask normalization, elliptical expansion, and residual-text repair are adapted from this fork's GPL-licensed 1.4-vibe implementation to the 1.5-vibe worker and project persistence paths. They use the existing OpenCV dependency and selected detector/inpainter modules; no new dependency or model is bundled.
 

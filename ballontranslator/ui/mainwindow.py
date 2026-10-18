@@ -1869,14 +1869,13 @@ class MainWindow(mainwindow_cls):
             self._batch_task_history = None
 
         if task.upscale_first:
-            eligible_pages = self.imgtrans_proj.pipeline_pages(
-                list(self.imgtrans_proj.pages)
-            )
-            if not eligible_pages:
+            # Upscaling includes ignored pages; the following pipeline filters them.
+            pages = list(self.imgtrans_proj.pages)
+            if not pages:
                 QTimer.singleShot(0, self._complete_batch_task)
                 return
             self._batch_upscale_active = True
-            self._start_project_upscale(eligible_pages)
+            self._start_project_upscale(pages)
             if not self.project_upscale_thread.isRunning():
                 self._batch_upscale_active = False
                 self._batch_failed = True

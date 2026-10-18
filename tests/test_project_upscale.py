@@ -15,6 +15,8 @@ from qtpy.QtWidgets import QApplication
 import numpy as np
 
 from ballontranslator.utils.io_utils import imread, imwrite
+from ballontranslator.utils.batch_processing import BatchOptions, build_batch_tasks
+from ballontranslator.utils.config import pcfg
 from ballontranslator.utils.proj_imgtrans import ProjImgTrans
 from ballontranslator.utils.textblock import TextBlock
 from ballontranslator.utils.upscale import (
@@ -37,6 +39,67 @@ class ProjectUpscaleTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.app = QApplication.instance() or QApplication([])
+
+    def test_batch_upscales_ignored_pages_before_filtering_pipeline(self) -> None:
+        module_state = {
+            key: getattr(pcfg.module, key)
+            for key in (
+                'enable_detect', 'enable_ocr', 'enable_inpaint',
+                'enable_translate', 'finish_code',
+            )
+        }
+        for all_ignored in (False, True):
+            with self.subTest(all_ignored=all_ignored), \
+                    tempfile.TemporaryDirectory() as directory, \
+                    patch.multiple(pcfg.module, **module_state):
+                for page_name in ('001.png', '002.png'):
+                    imwrite(
+                        osp.join(directory, page_name),
+                        np.zeros((3, 4, 3), np.uint8), ext='.png',
+                    )
+                project = ProjImgTrans(directory)
+                self.addCleanup(project.close_project_glossary)
+                project.set_page_ignored('001.png', True)
+                project.set_page_ignored('002.png', all_ignored)
+                options = BatchOptions(
+                    directory, 'detector', 'ocr', '', 'inpainter', 'translator',
+                    upscale_first=True,
+                )
+                owner = SimpleNamespace(
+                    imgtrans_proj=project,
+                    _batch_options=options,
+                    _batch_tasks=build_batch_tasks([directory], options),
+                    _batch_task=None,
+                    _batch_cancel_requested=False,
+                    _batch_failed=False,
+                    _history_details=Mock(return_value={}),
+                    _start_project_upscale=Mock(),
+                    project_upscale_thread=Mock(isRunning=Mock(return_value=True)),
+                    _run_current_batch_pipeline=Mock(),
+                    on_run_imgtrans=Mock(),
+                    _complete_batch_task=Mock(),
+                    _finish_batch_processing=Mock(),
+                )
+                with patch('ballontranslator.ui.mainwindow.QTimer.singleShot') as schedule:
+                    MainWindow._run_next_batch_task(owner)
+
+                    owner._start_project_upscale.assert_called_once_with(
+                        ['001.png', '002.png']
+                    )
+                    schedule.assert_not_called()
+                    owner._run_current_batch_pipeline.assert_not_called()
+                    owner._finish_batch_processing.assert_not_called()
+
+                    MainWindow._run_current_batch_pipeline(owner)
+
+                    if all_ignored:
+                        owner.on_run_imgtrans.assert_not_called()
+                        schedule.assert_called_once_with(0, owner._complete_batch_task)
+                    else:
+                        owner.on_run_imgtrans.assert_called_once_with(
+                            pages_to_process=['002.png']
+                        )
+                        schedule.assert_not_called()
 
     def test_batch_upscale_refreshes_pages_before_pipeline_and_navigation(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -88,6 +151,7 @@ class ProjectUpscaleTest(unittest.TestCase):
                 self.assertEqual(project.img_array.shape[:2], (6, 8))
                 self.assertEqual(project.pages['001_x2.png'][0].xyxy, [2, 4, 6, 8])
                 self.assertTrue(project.is_page_ignored('001_x2.png'))
+                self.assertEqual(project.pipeline_pages(), ['002_x2.png'])
                 self.assertFalse(owner._batch_failed)
                 # Pipeline page completions use this same selection signal.
                 page_list.setCurrentRow(1)
