@@ -1,5 +1,9 @@
 # Changelogs
 
+### 2026-10-18 — 1.5.19+vibe.51
+- Replaced the cycling `Aa` button with a labeled Text Case selector offering Normal, Uppercase, and Lowercase directly. Existing saved formatting, mixed selections, and undo retain their behavior; stored source and translation strings remain unchanged.
+- Completed the selector labels and tooltip in all nine available UI languages.
+
 ### 2026-10-18 — 1.5.19+vibe.50
 - Added missing English and German tooltips throughout the text-format panel, including toolbar icons, section controls, Ruby/Furigana, ligatures, effect options, eraser settings, and numeric effect/transform controls. Transform shortcut hints remain available alongside editing instructions.
 

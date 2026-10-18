@@ -19,10 +19,11 @@ Glyph Slant is a typography effect applied before the global stack. It is not
 reorderable. The global stack transforms the completed text-and-effects box;
 its order is significant and duplicate transform types are allowed.
 
-The `Aa` Text Case control is a separate, non-destructive whole-item font
-style. It cycles normal, lowercase, and uppercase display capitalization while
-leaving the stored source and translation strings unchanged. It is persisted
-in `FontFormat`, follows text-format undo, supports mixed selections, and is
+The Text Case selector is a separate, non-destructive whole-item font
+style. It offers Normal, Uppercase, and Lowercase directly; mixed selections
+show a placeholder until a mode is chosen. Changing the selection changes
+display capitalization while leaving the stored source and translation strings
+unchanged. It is persisted in `FontFormat`, follows text-format undo, and is
 applied by headless project-wide style formatting. It does not enter geometry
 compilation or the ordered transform stack.
 

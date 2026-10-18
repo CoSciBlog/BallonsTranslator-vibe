@@ -24,6 +24,7 @@ from ballontranslator.utils.fontformat import (
 )
 
 from ...custom_widget import PanelArea
+from ...custom_widget.combobox import BottomBorderComboBox
 from ...misc import themed_icon_path
 from .controls import (
     CommittedTransformControl,
@@ -142,14 +143,26 @@ class TextTransformPanel(PanelArea):
             )
         self.add_transform_button.setMenu(add_menu)
 
-        self.text_case_button = QToolButton(self.scrollContent)
-        self.text_case_button.setObjectName('TextCaseTransformButton')
-        self.text_case_button.setAccessibleName(self.tr('Text Case'))
-        self.text_case_button.setFixedSize(42, 26)
-        self.text_case_button.clicked.connect(self._cycle_text_case)
-        self._text_case = TEXT_CASE_NORMAL
-        self._text_case_mixed = False
-        self._sync_text_case_button()
+        self.text_case_label = QLabel(self.tr('Text Case'), self.scrollContent)
+        self.text_case_label.setObjectName('TextTransformParamLabel')
+        self.text_case_selector = BottomBorderComboBox(self.scrollContent)
+        self.text_case_selector.setObjectName('TextTransformParamEditor')
+        self.text_case_selector.setAccessibleName(self.tr('Text Case'))
+        self.text_case_selector.setPlaceholderText(self.tr('Mixed'))
+        for label, value in (
+            (self.tr('Normal'), TEXT_CASE_NORMAL),
+            (self.tr('Uppercase'), TEXT_CASE_UPPERCASE),
+            (self.tr('Lowercase'), TEXT_CASE_LOWERCASE),
+        ):
+            self.text_case_selector.addItem(label, value)
+        case_hint = self.tr(
+            'Display text as written, in uppercase, or in lowercase without '
+            'changing the stored source or translation.'
+        )
+        self.text_case_label.setToolTip(case_hint)
+        self.text_case_label.setBuddy(self.text_case_selector)
+        self.text_case_selector.setToolTip(case_hint)
+        self.text_case_selector.activated.connect(self._on_text_case_activated)
 
         self.transform_mixed_label = QLabel(
             self.tr('Mixed'), self.scrollContent
@@ -176,14 +189,16 @@ class TextTransformPanel(PanelArea):
             self.add_transform_button,
             alignment=Qt.AlignmentFlag.AlignVCenter,
         )
-        self.add_transform_layout.addWidget(
-            self.text_case_button,
-            alignment=Qt.AlignmentFlag.AlignVCenter,
-        )
         self.add_transform_layout.addStretch()
         self.transform_header_layout.addLayout(self.add_transform_layout, 1)
         self.transform_header_layout.addWidget(self.glyph_slant_control, 1)
         self.transform_layout.addLayout(self.transform_header_layout)
+        case_layout = QHBoxLayout()
+        case_layout.setContentsMargins(0, 0, 0, 0)
+        case_layout.setSpacing(8)
+        case_layout.addWidget(self.text_case_label)
+        case_layout.addWidget(self.text_case_selector, 1)
+        self.transform_layout.addLayout(case_layout)
         self.transform_layout.addSpacing(6)
         self.transform_layout.addWidget(self.transform_mixed_label)
         self.transform_layout.addLayout(self.transform_rows_layout)
@@ -333,48 +348,22 @@ class TextTransformPanel(PanelArea):
                 panel.set_values([state[index] for state in states])
         self._sync_content_height()
 
-    def _sync_text_case_button(self) -> None:
-        if self._text_case_mixed:
-            text = '—'
-            tooltip = self.tr('Text Case: Mixed')
-        elif self._text_case == TEXT_CASE_LOWERCASE:
-            text = 'aa'
-            tooltip = self.tr('Text Case: Lowercase')
-        elif self._text_case == TEXT_CASE_UPPERCASE:
-            text = 'AA'
-            tooltip = self.tr('Text Case: Uppercase')
-        else:
-            text = 'Aa'
-            tooltip = self.tr('Text Case: Normal')
-        self.text_case_button.setText(text)
-        self.text_case_button.setToolTip(tooltip)
-
     def _set_text_case_values(self, values: Sequence[str]) -> None:
         normalized = [normalize_text_case(value) for value in values]
-        self._text_case_mixed = bool(normalized) and any(
+        mixed = bool(normalized) and any(
             value != normalized[0] for value in normalized[1:]
         )
-        self._text_case = (
-            normalized[0] if normalized else TEXT_CASE_NORMAL
+        value = (
+            None if mixed else (normalized[0] if normalized else TEXT_CASE_NORMAL)
         )
-        self._sync_text_case_button()
+        self.text_case_selector.setCurrentIndex(
+            self.text_case_selector.findData(value)
+        )
 
-    def _cycle_text_case(self) -> None:
-        if self._text_case_mixed:
-            next_value = TEXT_CASE_NORMAL
-        else:
-            sequence = (
-                TEXT_CASE_NORMAL,
-                TEXT_CASE_LOWERCASE,
-                TEXT_CASE_UPPERCASE,
-            )
-            next_value = sequence[
-                (sequence.index(self._text_case) + 1) % len(sequence)
-            ]
-        self._text_case_mixed = False
-        self._text_case = next_value
-        self._sync_text_case_button()
-        self.text_case_requested.emit(next_value)
+    def _on_text_case_activated(self, index: int) -> None:
+        value = self.text_case_selector.itemData(index)
+        if value is not None:
+            self.text_case_requested.emit(value)
 
     def set_active_format(self, font_format: FontFormat) -> None:
         self._set_transform_states([font_format.text_transform])

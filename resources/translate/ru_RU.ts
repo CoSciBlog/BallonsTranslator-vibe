@@ -4464,6 +4464,26 @@ qipao,qipao2</translation>
         <source>Grid</source>
         <translation>Сетка</translation>
     </message>
+    <message>
+        <source>Text Case</source>
+        <translation>Регистр текста</translation>
+    </message>
+    <message>
+        <source>Normal</source>
+        <translation>Исходный</translation>
+    </message>
+    <message>
+        <source>Uppercase</source>
+        <translation>Прописные</translation>
+    </message>
+    <message>
+        <source>Lowercase</source>
+        <translation>Строчные</translation>
+    </message>
+    <message>
+        <source>Display text as written, in uppercase, or in lowercase without changing the stored source or translation.</source>
+        <translation>Показывать текст в исходном виде, прописными или строчными буквами, не изменяя сохранённый исходный текст или перевод.</translation>
+    </message>
 </context>
 <context>
     <name>TitleBar</name>

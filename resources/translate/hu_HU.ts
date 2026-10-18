@@ -6286,7 +6286,27 @@ Ezután indítsa újra a Photoshopot. A Fájlkezelő ezután megnyitja a forrás
     <message>
         <location filename="../../ballontranslator/ui/text_engine/transforms/panel.py" line="132"/>
         <source>Mixed</source>
-        <translation>Keverés</translation>
+        <translation>Vegyes</translation>
+    </message>
+    <message>
+        <source>Text Case</source>
+        <translation>Kis- és nagybetűk</translation>
+    </message>
+    <message>
+        <source>Normal</source>
+        <translation>Eredeti</translation>
+    </message>
+    <message>
+        <source>Uppercase</source>
+        <translation>Nagybetűs</translation>
+    </message>
+    <message>
+        <source>Lowercase</source>
+        <translation>Kisbetűs</translation>
+    </message>
+    <message>
+        <source>Display text as written, in uppercase, or in lowercase without changing the stored source or translation.</source>
+        <translation>A szöveg megjelenítése eredeti alakban, nagybetűkkel vagy kisbetűkkel a mentett forrásszöveg és fordítás módosítása nélkül.</translation>
     </message>
 </context>
 <context>

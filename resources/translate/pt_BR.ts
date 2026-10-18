@@ -1228,4 +1228,31 @@
       <translation>Alvo: </translation>
     </message>
   </context>
+<context>
+    <name>TextTransformPanel</name>
+    <message>
+        <source>Text Case</source>
+        <translation>Maiúsculas/minúsculas</translation>
+    </message>
+    <message>
+        <source>Normal</source>
+        <translation>Original</translation>
+    </message>
+    <message>
+        <source>Uppercase</source>
+        <translation>Maiúsculas</translation>
+    </message>
+    <message>
+        <source>Lowercase</source>
+        <translation>Minúsculas</translation>
+    </message>
+    <message>
+        <source>Mixed</source>
+        <translation>Misto</translation>
+    </message>
+    <message>
+        <source>Display text as written, in uppercase, or in lowercase without changing the stored source or translation.</source>
+        <translation>Exibir o texto como foi escrito, em maiúsculas ou em minúsculas, sem alterar o texto original ou a tradução salvos.</translation>
+    </message>
+</context>
 </TS>

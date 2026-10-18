@@ -1368,4 +1368,31 @@ Tous les résultats de traduction existants seront effacés !</translation>
         <translation>Cible</translation>
     </message>
 </context>
+<context>
+    <name>TextTransformPanel</name>
+    <message>
+        <source>Text Case</source>
+        <translation>Casse</translation>
+    </message>
+    <message>
+        <source>Normal</source>
+        <translation>Normal</translation>
+    </message>
+    <message>
+        <source>Uppercase</source>
+        <translation>Majuscules</translation>
+    </message>
+    <message>
+        <source>Lowercase</source>
+        <translation>Minuscules</translation>
+    </message>
+    <message>
+        <source>Mixed</source>
+        <translation>Mixte</translation>
+    </message>
+    <message>
+        <source>Display text as written, in uppercase, or in lowercase without changing the stored source or translation.</source>
+        <translation>Afficher le texte tel quel, en majuscules ou en minuscules sans modifier le texte source ni la traduction enregistrés.</translation>
+    </message>
+</context>
 </TS>

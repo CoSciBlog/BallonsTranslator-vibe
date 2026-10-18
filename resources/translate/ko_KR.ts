@@ -6190,7 +6190,7 @@ Then restart Photoshop. Explorer will now open the source file and destination l
     <message>
         <location filename="../../ballontranslator/ui/text_engine/transforms/panel.py" line="131"/>
         <source>Mixed</source>
-        <translation>혼합됨</translation>
+        <translation>혼합</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/text_engine/transforms/registry.py" line="89"/>
@@ -6356,6 +6356,26 @@ Then restart Photoshop. Explorer will now open the source file and destination l
         <location filename="../../ballontranslator/ui/text_engine/transforms/registry.py" line="419"/>
         <source>Grid</source>
         <translation>격자</translation>
+    </message>
+    <message>
+        <source>Text Case</source>
+        <translation>대소문자</translation>
+    </message>
+    <message>
+        <source>Normal</source>
+        <translation>원문대로</translation>
+    </message>
+    <message>
+        <source>Uppercase</source>
+        <translation>대문자</translation>
+    </message>
+    <message>
+        <source>Lowercase</source>
+        <translation>소문자</translation>
+    </message>
+    <message>
+        <source>Display text as written, in uppercase, or in lowercase without changing the stored source or translation.</source>
+        <translation>저장된 원문이나 번역을 변경하지 않고 텍스트를 입력한 대로, 대문자 또는 소문자로 표시합니다.</translation>
     </message>
 </context>
 <context>

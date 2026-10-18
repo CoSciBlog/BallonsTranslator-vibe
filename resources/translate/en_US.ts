@@ -8165,26 +8165,6 @@ Then restart Photoshop. Explorer will now open the source file and destination l
         <translation>Mixed</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/transforms/panel.py" line="332"/>
-        <source>Text Case: Mixed</source>
-        <translation>Text Case: Mixed</translation>
-    </message>
-    <message>
-        <location filename="../../ballontranslator/ui/text_engine/transforms/panel.py" line="335"/>
-        <source>Text Case: Lowercase</source>
-        <translation>Text Case: Lowercase</translation>
-    </message>
-    <message>
-        <location filename="../../ballontranslator/ui/text_engine/transforms/panel.py" line="338"/>
-        <source>Text Case: Uppercase</source>
-        <translation>Text Case: Uppercase</translation>
-    </message>
-    <message>
-        <location filename="../../ballontranslator/ui/text_engine/transforms/panel.py" line="341"/>
-        <source>Text Case: Normal</source>
-        <translation>Text Case: Normal</translation>
-    </message>
-    <message>
         <location filename="../../ballontranslator/ui/text_engine/transforms/registry.py" line="89"/>
         <location filename="../../ballontranslator/ui/text_engine/transforms/registry.py" line="123"/>
         <location filename="../../ballontranslator/ui/text_engine/transforms/registry.py" line="334"/>
@@ -8352,6 +8332,22 @@ Then restart Photoshop. Explorer will now open the source file and destination l
     <message>
         <source>Slant each glyph before applying the transform stack. Drag the label or enter an angle in degrees.</source>
         <translation>Slant each glyph before applying the transform stack. Drag the label or enter an angle in degrees.</translation>
+    </message>
+    <message>
+        <source>Normal</source>
+        <translation>Normal</translation>
+    </message>
+    <message>
+        <source>Uppercase</source>
+        <translation>Uppercase</translation>
+    </message>
+    <message>
+        <source>Lowercase</source>
+        <translation>Lowercase</translation>
+    </message>
+    <message>
+        <source>Display text as written, in uppercase, or in lowercase without changing the stored source or translation.</source>
+        <translation>Display text as written, in uppercase, or in lowercase without changing the stored source or translation.</translation>
     </message>
 </context>
 <context>

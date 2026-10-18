@@ -6939,6 +6939,26 @@ Then restart Photoshop. Explorer will now open the source file and destination l
         <source>Mixed</source>
         <translation>混合</translation>
     </message>
+    <message>
+        <source>Text Case</source>
+        <translation>文字大小寫</translation>
+    </message>
+    <message>
+        <source>Normal</source>
+        <translation>原樣</translation>
+    </message>
+    <message>
+        <source>Uppercase</source>
+        <translation>大寫</translation>
+    </message>
+    <message>
+        <source>Lowercase</source>
+        <translation>小寫</translation>
+    </message>
+    <message>
+        <source>Display text as written, in uppercase, or in lowercase without changing the stored source or translation.</source>
+        <translation>以原樣、大寫或小寫顯示文字，不修改已儲存的原文或譯文。</translation>
+    </message>
 </context>
 <context>
     <name>ThreadBase</name>

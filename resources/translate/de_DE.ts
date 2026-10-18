@@ -8229,26 +8229,6 @@ Starten Sie dann Photoshop neu. Der Explorer öffnet nun die Quelldatei und den 
         <translation>Gemischt</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/text_engine/transforms/panel.py" line="332"/>
-        <source>Text Case: Mixed</source>
-        <translation>Groß-/Kleinschreibung: Gemischt</translation>
-    </message>
-    <message>
-        <location filename="../../ballontranslator/ui/text_engine/transforms/panel.py" line="335"/>
-        <source>Text Case: Lowercase</source>
-        <translation>Groß-/Kleinschreibung: Kleinbuchstaben</translation>
-    </message>
-    <message>
-        <location filename="../../ballontranslator/ui/text_engine/transforms/panel.py" line="338"/>
-        <source>Text Case: Uppercase</source>
-        <translation>Groß-/Kleinschreibung: Großbuchstaben</translation>
-    </message>
-    <message>
-        <location filename="../../ballontranslator/ui/text_engine/transforms/panel.py" line="341"/>
-        <source>Text Case: Normal</source>
-        <translation>Groß-/Kleinschreibung: Normal</translation>
-    </message>
-    <message>
         <location filename="../../ballontranslator/ui/text_engine/transforms/registry.py" line="89"/>
         <location filename="../../ballontranslator/ui/text_engine/transforms/registry.py" line="123"/>
         <location filename="../../ballontranslator/ui/text_engine/transforms/registry.py" line="334"/>
@@ -8420,6 +8400,22 @@ Starten Sie dann Photoshop neu. Der Explorer öffnet nun die Quelldatei und den 
     <message>
         <source>Slant each glyph before applying the transform stack. Drag the label or enter an angle in degrees.</source>
         <translation>Jede Glyphe vor den Transformationen neigen. An der Beschriftung ziehen oder einen Winkel in Grad eingeben.</translation>
+    </message>
+    <message>
+        <source>Normal</source>
+        <translation>Normal</translation>
+    </message>
+    <message>
+        <source>Uppercase</source>
+        <translation>Großbuchstaben</translation>
+    </message>
+    <message>
+        <source>Lowercase</source>
+        <translation>Kleinbuchstaben</translation>
+    </message>
+    <message>
+        <source>Display text as written, in uppercase, or in lowercase without changing the stored source or translation.</source>
+        <translation>Text wie eingegeben, in Großbuchstaben oder in Kleinbuchstaben anzeigen, ohne den gespeicherten Quelltext oder die Übersetzung zu verändern.</translation>
     </message>
 </context>
 <context>

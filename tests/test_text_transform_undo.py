@@ -852,24 +852,25 @@ class TextTransformPanelTest(TextTransformTestBase):
         with self.assertRaisesRegex(TypeError, 'requires TextTransformStack'):
             panel._set_transform_states([font_format])
 
-    def test_text_case_button_cycles_without_changing_source_text(self):
+    def test_text_case_selector_changes_display_without_replacing_source_text(self) -> None:
         panel = self._make_panel()
         requested = []
         panel.text_case_requested.connect(requested.append)
 
         panel.set_active_format(FontFormat(text_case=TEXT_CASE_NORMAL))
-        self.assertEqual(panel.text_case_button.text(), 'Aa')
-        panel.text_case_button.click()
-        self.assertEqual(panel.text_case_button.text(), 'aa')
-        panel.text_case_button.click()
-        self.assertEqual(panel.text_case_button.text(), 'AA')
-        panel.text_case_button.click()
-        self.assertEqual(panel.text_case_button.text(), 'Aa')
+        self.assertEqual(requested, [])
+        selector = panel.text_case_selector
+        QTest.keyClick(selector, Qt.Key.Key_Down)
+        self.assertEqual(selector.currentData(), TEXT_CASE_UPPERCASE)
+        QTest.keyClick(selector, Qt.Key.Key_Down)
+        self.assertEqual(selector.currentData(), TEXT_CASE_LOWERCASE)
+        QTest.keyClick(selector, Qt.Key.Key_Home)
+        self.assertEqual(selector.currentData(), TEXT_CASE_NORMAL)
         self.assertEqual(
             requested,
             [
-                TEXT_CASE_LOWERCASE,
                 TEXT_CASE_UPPERCASE,
+                TEXT_CASE_LOWERCASE,
                 TEXT_CASE_NORMAL,
             ],
         )
@@ -890,7 +891,7 @@ class TextTransformPanelTest(TextTransformTestBase):
         self.assertEqual(item.toPlainText(), 'MiXeD Text')
         self.assertEqual(item.get_fontformat().text_case, TEXT_CASE_NORMAL)
 
-    def test_text_case_button_reports_mixed_selection(self):
+    def test_text_case_selector_reports_mixed_selection(self) -> None:
         panel = self._make_panel()
         items = [
             SimpleNamespace(blk=SimpleNamespace(fontformat=font_format))
@@ -900,13 +901,18 @@ class TextTransformPanelTest(TextTransformTestBase):
             )
         ]
         panel.set_transform_items(items)
-        self.assertEqual(panel.text_case_button.text(), '—')
+        self.assertEqual(panel.text_case_selector.currentIndex(), -1)
+        self.assertEqual(panel.text_case_selector.placeholderText(), 'Mixed')
 
         requested = []
         panel.text_case_requested.connect(requested.append)
-        panel.text_case_button.click()
-        self.assertEqual(requested, [TEXT_CASE_NORMAL])
-        self.assertEqual(panel.text_case_button.text(), 'Aa')
+        QTest.keyClick(panel.text_case_selector, Qt.Key.Key_End)
+        self.assertEqual(requested, [TEXT_CASE_LOWERCASE])
+        self.assertEqual(panel.text_case_selector.currentData(), TEXT_CASE_LOWERCASE)
+
+        panel.set_active_format(FontFormat(text_case=TEXT_CASE_UPPERCASE))
+        self.assertEqual(requested, [TEXT_CASE_LOWERCASE])
+        self.assertEqual(panel.text_case_selector.currentData(), TEXT_CASE_UPPERCASE)
 
     def test_stack_shape_update_syncs_content_height_once(self):
         panel = self._make_panel()
@@ -950,7 +956,7 @@ class TextTransformPanelTest(TextTransformTestBase):
 
         set_transform_states.assert_called_once()
 
-    def test_font_format_panel_applies_text_case_to_selected_item(self):
+    def test_font_format_panel_applies_text_case_to_selected_item(self) -> None:
         previous_canvas = getattr(SW, 'canvas', None)
         previous_active_format = C.active_format
         canvas = Canvas()
@@ -972,13 +978,15 @@ class TextTransformPanelTest(TextTransformTestBase):
         self.addCleanup(format_panel.deleteLater)
 
         format_panel.set_textblk_item(item)
-        format_panel.texttransform_panel.text_case_button.click()
+        QTest.keyClick(
+            format_panel.texttransform_panel.text_case_selector, Qt.Key.Key_Down
+        )
 
         self.assertEqual(item.toPlainText(), 'MiXeD Text')
-        self.assertEqual(item.get_fontformat().text_case, TEXT_CASE_LOWERCASE)
+        self.assertEqual(item.get_fontformat().text_case, TEXT_CASE_UPPERCASE)
         self.assertEqual(
             item.textCursor().charFormat().fontCapitalization(),
-            QFont.Capitalization.AllLowercase,
+            QFont.Capitalization.AllUppercase,
         )
 
     def test_cursor_letter_spacing_does_not_replace_item_default(self):
