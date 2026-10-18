@@ -1,5 +1,8 @@
 # Changelogs
 
+### 2026-10-18 — 1.5.19+vibe.50
+- Added missing English and German tooltips throughout the text-format panel, including toolbar icons, section controls, Ruby/Furigana, ligatures, effect options, eraser settings, and numeric effect/transform controls. Transform shortcut hints remain available alongside editing instructions.
+
 ### 2026-10-18 — 1.5.19+vibe.49
 - Batch pre-upscaling now includes ignored pages, even when every page in a project is ignored. Text detection, OCR, inpainting, and translation continue to skip them, and their ignored status survives the upscaled file renaming.
 

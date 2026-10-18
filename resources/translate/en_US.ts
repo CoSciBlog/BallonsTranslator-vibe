@@ -51,6 +51,18 @@
         <source>Clear</source>
         <translation>Clear</translation>
     </message>
+    <message>
+        <source>Brush diameter in pixels. Drag Size or enter a value.</source>
+        <translation>Brush diameter in pixels. Drag Size or enter a value.</translation>
+    </message>
+    <message>
+        <source>Clear the eraser mask and restore all text-effect pixels</source>
+        <translation>Clear the eraser mask and restore all text-effect pixels</translation>
+    </message>
+    <message>
+        <source>Erase text-effect pixels or restore previously erased areas</source>
+        <translation>Erase text-effect pixels or restore previously erased areas</translation>
+    </message>
 </context>
 <context>
     <name>AutoTateChuYokoThread</name>
@@ -1548,6 +1560,10 @@
         <source>Missing Filter: {id}</source>
         <translation>Missing Filter: {id}</translation>
     </message>
+    <message>
+        <source>Choose {parameter}</source>
+        <translation>Choose {parameter}</translation>
+    </message>
 </context>
 <context>
     <name>FontExcludeDialog</name>
@@ -1760,6 +1776,42 @@
         <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1290"/>
         <source>Unable to apply Ruby to this selection.</source>
         <translation>Unable to apply Ruby to this selection.</translation>
+    </message>
+    <message>
+        <source>Click to expand or collapse this section</source>
+        <translation>Click to expand or collapse this section</translation>
+    </message>
+    <message>
+        <source>Collapse or expand the text editors</source>
+        <translation>Collapse or expand the text editors</translation>
+    </message>
+    <message>
+        <source>Drag to adjust letter spacing</source>
+        <translation>Drag to adjust letter spacing</translation>
+    </message>
+    <message>
+        <source>Drag to adjust line spacing</source>
+        <translation>Drag to adjust line spacing</translation>
+    </message>
+    <message>
+        <source>Hide this section</source>
+        <translation>Hide this section</translation>
+    </message>
+    <message>
+        <source>Keep Latin letters upright and centered in vertical text. Disable to rotate them clockwise.</source>
+        <translation>Keep Latin letters upright and centered in vertical text. Disable to rotate them clockwise.</translation>
+    </message>
+    <message>
+        <source>Show or hide source text editors</source>
+        <translation>Show or hide source text editors</translation>
+    </message>
+    <message>
+        <source>Show or hide translation text editors</source>
+        <translation>Show or hide translation text editors</translation>
+    </message>
+    <message>
+        <source>Toggle vertical writing</source>
+        <translation>Toggle vertical writing</translation>
     </message>
 </context>
 <context>
@@ -2498,6 +2550,14 @@
         <source>Glow Color</source>
         <translation>Glow Color</translation>
     </message>
+    <message>
+        <source>Choose a solid color or linear gradient for this effect</source>
+        <translation>Choose a solid color or linear gradient for this effect</translation>
+    </message>
+    <message>
+        <source>Place the glow outside or inside the glyphs</source>
+        <translation>Place the glow outside or inside the glyphs</translation>
+    </message>
 </context>
 <context>
     <name>GradientAngleDial</name>
@@ -2710,6 +2770,10 @@
         <location filename="../../ballontranslator/ui/text_engine/effects/cards.py" line="3003"/>
         <source>Generate Image</source>
         <translation>Generate Image</translation>
+    </message>
+    <message>
+        <source>Choose the page image sent as generation context: original source, inpainted page, page with text, or no image.</source>
+        <translation>Choose the page image sent as generation context: original source, inpainted page, page with text, or no image.</translation>
     </message>
 </context>
 <context>
@@ -2958,6 +3022,10 @@
         <location filename="../../ballontranslator/ui/text_engine/effects/gradient_editor.py" line="691"/>
         <source>Scale</source>
         <translation>Scale</translation>
+    </message>
+    <message>
+        <source>{parameter}: drag the label to adjust, or type a value and press Enter. Press Escape to cancel.</source>
+        <translation>{parameter}: drag the label to adjust, or type a value and press Enter. Press Escape to cancel.</translation>
     </message>
 </context>
 <context>
@@ -6728,6 +6796,22 @@ Then restart Photoshop. Explorer will now open the source file and destination l
         <source>Remove</source>
         <translation>Remove</translation>
     </message>
+    <message>
+        <source>Apply the reading to the selected text</source>
+        <translation>Apply the reading to the selected text</translation>
+    </message>
+    <message>
+        <source>Group Ruby shares one reading across the selection. Mono Ruby assigns one whitespace-separated reading to each base character.</source>
+        <translation>Group Ruby shares one reading across the selection. Mono Ruby assigns one whitespace-separated reading to each base character.</translation>
+    </message>
+    <message>
+        <source>Place readings above or below horizontal text, or to the right or left of vertical text.</source>
+        <translation>Place readings above or below horizontal text, or to the right or left of vertical text.</translation>
+    </message>
+    <message>
+        <source>Remove Ruby readings from the selected text</source>
+        <translation>Remove Ruby readings from the selected text</translation>
+    </message>
 </context>
 <context>
     <name>RunPipelineDialog</name>
@@ -7295,6 +7379,14 @@ Then restart Photoshop. Explorer will now open the source file and destination l
         <source>Shadow Color</source>
         <translation>Shadow Color</translation>
     </message>
+    <message>
+        <source>Choose a drop shadow, an inner shadow, or a long extruded shadow.</source>
+        <translation>Choose a drop shadow, an inner shadow, or a long extruded shadow.</translation>
+    </message>
+    <message>
+        <source>Choose a solid color or linear gradient for this effect</source>
+        <translation>Choose a solid color or linear gradient for this effect</translation>
+    </message>
 </context>
 <context>
     <name>ShapeFillPanel</name>
@@ -7417,6 +7509,14 @@ Then restart Photoshop. Explorer will now open the source file and destination l
         <source>Stroke Color</source>
         <translation>Stroke Color</translation>
     </message>
+    <message>
+        <source>Choose a solid color or linear gradient for this effect</source>
+        <translation>Choose a solid color or linear gradient for this effect</translation>
+    </message>
+    <message>
+        <source>Place the stroke inside, centered on, or outside the glyph edge.</source>
+        <translation>Place the stroke inside, centered on, or outside the glyph edge.</translation>
+    </message>
 </context>
 <context>
     <name>SyntheticBoldEffectCard</name>
@@ -7532,6 +7632,14 @@ Then restart Photoshop. Explorer will now open the source file and destination l
         <location filename="../../ballontranslator/ui/text_engine/formatting/advanced.py" line="304"/>
         <source>Off</source>
         <translation>Off</translation>
+    </message>
+    <message>
+        <source>Control font ligatures and alternate glyphs for the selected text. Default uses the font setting; On and Off override it.</source>
+        <translation>Control font ligatures and alternate glyphs for the selected text. Default uses the font setting; On and Off override it.</translation>
+    </message>
+    <message>
+        <source>Proportional scales line spacing with font size. Distance sets a fixed spacing value.</source>
+        <translation>Proportional scales line spacing with font size. Distance sets a fixed spacing value.</translation>
     </message>
 </context>
 <context>
@@ -7966,6 +8074,10 @@ Then restart Photoshop. Explorer will now open the source file and destination l
         <source>Missing: {name}</source>
         <translation>Missing: {name}</translation>
     </message>
+    <message>
+        <source>Stretch, fit, crop, or tile the image within the text bounds.</source>
+        <translation>Stretch, fit, crop, or tile the image within the text bounds.</translation>
+    </message>
 </context>
 <context>
     <name>TextStyleLabel</name>
@@ -8236,6 +8348,10 @@ Then restart Photoshop. Explorer will now open the source file and destination l
         <location filename="../../ballontranslator/ui/text_engine/transforms/registry.py" line="419"/>
         <source>Grid</source>
         <translation>Grid</translation>
+    </message>
+    <message>
+        <source>Slant each glyph before applying the transform stack. Drag the label or enter an angle in degrees.</source>
+        <translation>Slant each glyph before applying the transform stack. Drag the label or enter an angle in degrees.</translation>
     </message>
 </context>
 <context>
@@ -8779,6 +8895,57 @@ Then restart Photoshop. Explorer will now open the source file and destination l
         <location filename="../../ballontranslator/ui/text_engine/effects/cards.py" line="549"/>
         <source>Images (*.png *.jpg *.jpeg *.webp *.bmp *.jxl)</source>
         <translation>Images (*.png *.jpg *.jpeg *.webp *.bmp *.jxl)</translation>
+    </message>
+</context>
+<context>
+    <name>AlignmentBtnGroup</name>
+    <message>
+        <source>Align text left</source>
+        <translation>Align text left</translation>
+    </message>
+    <message>
+        <source>Align text right</source>
+        <translation>Align text right</translation>
+    </message>
+    <message>
+        <source>Center text</source>
+        <translation>Center text</translation>
+    </message>
+</context>
+<context>
+    <name>CommittedTransformChoiceControl</name>
+    <message>
+        <source>Choose {parameter}</source>
+        <translation>Choose {parameter}</translation>
+    </message>
+</context>
+<context>
+    <name>CommittedTransformControl</name>
+    <message>
+        <source>{parameter}: drag the label to adjust, or type a value and press Enter. Press Escape to cancel.</source>
+        <translation>{parameter}: drag the label to adjust, or type a value and press Enter. Press Escape to cancel.</translation>
+    </message>
+</context>
+<context>
+    <name>FontSizeBox</name>
+    <message>
+        <source>Decrease font size</source>
+        <translation>Decrease font size</translation>
+    </message>
+    <message>
+        <source>Increase font size</source>
+        <translation>Increase font size</translation>
+    </message>
+</context>
+<context>
+    <name>FormatGroupBtn</name>
+    <message>
+        <source>Toggle italic text</source>
+        <translation>Toggle italic text</translation>
+    </message>
+    <message>
+        <source>Toggle underlined text</source>
+        <translation>Toggle underlined text</translation>
     </message>
 </context>
 </TS>

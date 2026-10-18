@@ -59,7 +59,7 @@ class TextTransformPanel(PanelArea):
         panel_name: str,
         config_name: str,
         config_expand_name: str,
-    ):
+    ) -> None:
         super().__init__(panel_name, config_name, config_expand_name)
         self._base_width_hint = 1
         self.setSizePolicy(
@@ -86,6 +86,13 @@ class TextTransformPanel(PanelArea):
         self.glyph_slant_control.editor.setProperty(
             'glyphSlantEditor', True
         )
+        glyph_hint = self.tr(
+            'Slant each glyph before applying the transform stack. '
+            'Drag the label or enter an angle in degrees.'
+        )
+        self.glyph_slant_control.setToolTip(glyph_hint)
+        self.glyph_slant_control.label.setToolTip(glyph_hint)
+        self.glyph_slant_control.editor.setToolTip(glyph_hint)
         self.glyph_slant_control.editor.setFixedWidth(84)
         self.glyph_slant_control.label.setAlignment(
             Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter

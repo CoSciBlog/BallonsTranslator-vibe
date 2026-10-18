@@ -520,6 +520,7 @@ def _labeled_effect_editor(
 ) -> QWidget:
     """Build the shared compact label/editor row used by effect cards."""
     label = QLabel(label_text, parent)
+    label.setToolTip(editor.toolTip())
     label.setObjectName('TextEffectParamLabel')
     label.setAlignment(
         Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
@@ -849,6 +850,9 @@ class StrokeEffectCard(_EffectCard):
         )
         self.position_selector.setObjectName('TextEffectParamEditor')
         self.position_selector.setAccessibleName(self.tr('Stroke Position'))
+        self.position_selector.setToolTip(self.tr(
+            'Place the stroke inside, centered on, or outside the glyph edge.'
+        ))
         for label, value in (
             (self.tr('Inside'), 'inside'),
             (self.tr('Center'), 'center'),
@@ -895,6 +899,9 @@ class StrokeEffectCard(_EffectCard):
         )
         self.fill_type_selector.setObjectName('TextEffectParamEditor')
         self.fill_type_selector.setAccessibleName(self.tr('Stroke Fill'))
+        fill_hint = self.tr('Choose a solid color or linear gradient for this effect')
+        fill_label.setToolTip(fill_hint)
+        self.fill_type_selector.setToolTip(fill_hint)
         self.fill_type_selector.addItem(self.tr('Solid'), 'solid')
         self.fill_type_selector.addItem(self.tr('Gradient'), 'linear_gradient')
         self.fill_type_selector.currentIndexChanged.connect(
@@ -1150,6 +1157,9 @@ class ShadowEffectCard(_EffectCard):
         )
         self.type_selector.setObjectName('TextEffectParamEditor')
         self.type_selector.setAccessibleName(self.tr('Shadow Type'))
+        self.type_selector.setToolTip(self.tr(
+            'Choose a drop shadow, an inner shadow, or a long extruded shadow.'
+        ))
         for label, value in (
             (self.tr('Drop'), 'drop'),
             (self.tr('Inner'), 'inner'),
@@ -1238,6 +1248,9 @@ class ShadowEffectCard(_EffectCard):
         )
         self.fill_type_selector.setObjectName('TextEffectParamEditor')
         self.fill_type_selector.setAccessibleName(self.tr('Shadow Fill'))
+        fill_hint = self.tr('Choose a solid color or linear gradient for this effect')
+        fill_label.setToolTip(fill_hint)
+        self.fill_type_selector.setToolTip(fill_hint)
         self.fill_type_selector.addItem(self.tr('Solid'), 'solid')
         self.fill_type_selector.addItem(
             self.tr('Gradient'), 'linear_gradient'
@@ -1531,6 +1544,7 @@ class GlowEffectCard(_EffectCard):
         )
         self.type_selector.setObjectName('TextEffectParamEditor')
         self.type_selector.setAccessibleName(self.tr('Glow Type'))
+        self.type_selector.setToolTip(self.tr('Place the glow outside or inside the glyphs'))
         self.type_selector.addItem(self.tr('Outer'), 'outer')
         self.type_selector.addItem(self.tr('Inner'), 'inner')
         _set_effect_header_selector_width(self.type_selector)
@@ -1587,6 +1601,9 @@ class GlowEffectCard(_EffectCard):
         )
         self.fill_type_selector.setObjectName('TextEffectParamEditor')
         self.fill_type_selector.setAccessibleName(self.tr('Glow Fill'))
+        fill_hint = self.tr('Choose a solid color or linear gradient for this effect')
+        fill_label.setToolTip(fill_hint)
+        self.fill_type_selector.setToolTip(fill_hint)
         self.fill_type_selector.addItem(self.tr('Solid'), 'solid')
         self.fill_type_selector.addItem(
             self.tr('Gradient'), 'linear_gradient'
@@ -1906,6 +1923,9 @@ class TextFillEffectCard(_EffectCard):
             self.texture_mapping_selector.setAccessibleName(
                 self.tr('Texture Mapping')
             )
+            self.texture_mapping_selector.setToolTip(self.tr(
+                'Stretch, fit, crop, or tile the image within the text bounds.'
+            ))
             for label, value in (
                 (self.tr('Fill'), 'fill'),
                 (self.tr('Fit'), 'fit'),
@@ -2238,6 +2258,9 @@ class FilterEffectCard(_EffectCard):
         selector.setObjectName('TextEffectParamEditor')
         selector.setProperty('filter-param', parameter.key)
         selector.setAccessibleName(label_text)
+        hint = self.tr('Choose {parameter}').format(parameter=label_text)
+        label.setToolTip(hint)
+        selector.setToolTip(hint)
         choices = (
             (('Off', False), ('On', True))
             if parameter.kind == 'bool'
@@ -2773,6 +2796,10 @@ class ImageEffectCard(_EffectCard):
         self.context_selector.setAccessibleName(
             self.tr('Image Generation Context')
         )
+        self.context_selector.setToolTip(self.tr(
+            'Choose the page image sent as generation context: original source, '
+            'inpainted page, page with text, or no image.'
+        ))
         self.context_selector.addItem(self.tr('Source'), 'source')
         self.context_selector.addItem(self.tr('Inpainted'), 'inpainted')
         self.context_selector.addItem(self.tr('Lettered'), 'lettered')
@@ -2791,6 +2818,7 @@ class ImageEffectCard(_EffectCard):
         self.prompt_editor.setAccessibleName(
             self.tr('Image Generation Prompt')
         )
+        self.prompt_editor.setToolTip(self.tr('Describe the image to generate or edit'))
         self.prompt_editor.textChanged.connect(self._on_prompt_changed)
         self.prompt_editor.natural_height_changed.connect(
             self._on_prompt_height_changed
@@ -3141,6 +3169,9 @@ class AlphaMaskCard(_EffectCard):
         self.mode_selector.setObjectName('TextEffectParamEditor')
         self.mode_selector.addItem(self.tr('Erase'), 'erase')
         self.mode_selector.addItem(self.tr('Restore'), 'restore')
+        mode_hint = self.tr('Erase text-effect pixels or restore previously erased areas')
+        mode_label.setToolTip(mode_hint)
+        self.mode_selector.setToolTip(mode_hint)
         self.mode_selector.currentIndexChanged.connect(
             self._on_mode_changed
         )
@@ -3171,6 +3202,9 @@ class AlphaMaskCard(_EffectCard):
         self.diameter_editor.setDecimals(1)
         self.diameter_editor.setSingleStep(1.0)
         self.diameter_editor.setSuffix(self.tr(' px'))
+        size_hint = self.tr('Brush diameter in pixels. Drag Size or enter a value.')
+        self.size_label.setToolTip(size_hint)
+        self.diameter_editor.setToolTip(size_hint)
         button_symbols = getattr(
             QAbstractSpinBox, 'ButtonSymbols', QAbstractSpinBox
         )
@@ -3194,6 +3228,7 @@ class AlphaMaskCard(_EffectCard):
 
         self.clear_button = QToolButton(self)
         self.clear_button.setObjectName('TextAlphaMaskClearButton')
+        self.clear_button.setToolTip(self.tr('Clear the eraser mask and restore all text-effect pixels'))
         self.clear_button.setText(self.tr('Clear'))
         self.clear_button.setToolButtonStyle(
             Qt.ToolButtonStyle.ToolButtonTextOnly

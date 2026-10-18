@@ -2,7 +2,7 @@
 
 import math
 
-from qtpy.QtCore import QEvent, QPoint, QRect, QSize, Signal, Qt
+from qtpy.QtCore import QCoreApplication, QEvent, QPoint, QRect, QSize, Signal, Qt
 from qtpy.QtGui import QColor, QIcon, QKeyEvent, QPainter
 from qtpy.QtWidgets import (
     QFrame,
@@ -202,7 +202,7 @@ class CommittedTransformControl(QWidget):
         drag_step: float,
         parent=None,
         decimals: int = 1,
-    ):
+    ) -> None:
         super().__init__(parent)
         self.setObjectName('TextTransformControl')
         if display_factor == 0 or not math.isfinite(display_factor):
@@ -241,6 +241,14 @@ class CommittedTransformControl(QWidget):
             else _TransformValueEdit(self)
         )
         self.editor.setObjectName('TextTransformParamEditor')
+        hint = QCoreApplication.translate(
+            'CommittedTransformControl',
+            '{parameter}: drag the label to adjust, or type a value and press '
+            'Enter. Press Escape to cancel.',
+        ).format(parameter=title)
+        self.setToolTip(hint)
+        self.label.setToolTip(hint)
+        self.editor.setToolTip(hint)
         self.editor.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.editor.setFixedSize(80 if self.decimals == 0 else 56, 22)
         self.editor.setSizePolicy(
@@ -497,7 +505,7 @@ class CommittedTransformChoiceControl(QWidget):
     commit_requested = Signal(str, object)
     user_interacted = Signal()
 
-    def __init__(self, title, param_name, choices, parent=None):
+    def __init__(self, title: str, param_name: str, choices, parent=None) -> None:
         super().__init__(parent)
         self.setObjectName('TextTransformControl')
         self.param_name = param_name
@@ -509,6 +517,10 @@ class CommittedTransformChoiceControl(QWidget):
             self, text_alignment=Qt.AlignmentFlag.AlignCenter
         )
         self.combobox.setObjectName('TextTransformParamEditor')
+        hint = self.tr('Choose {parameter}').format(parameter=title)
+        self.setToolTip(hint)
+        self.label.setToolTip(hint)
+        self.combobox.setToolTip(hint)
         for value, label in self.choices:
             self.combobox.addItem(label(), value)
         self.combobox.activated.connect(self._commit_index)
@@ -554,7 +566,7 @@ class TransformParameterPanel(QFrame):
     card_clicked = Signal(int)
     selected = Signal(int)
 
-    def __init__(self, index, variant, parent=None):
+    def __init__(self, index: int, variant, parent=None) -> None:
         super().__init__(parent)
         self.index = int(index)
         self._hovered = False
@@ -666,8 +678,9 @@ class TransformParameterPanel(QFrame):
                 )
                 if spec.shortcut is not None:
                     shortcut = spec.shortcut()
-                    control.label.setToolTip(shortcut)
-                    control.editor.setToolTip(shortcut)
+                    hint = control.toolTip() + '\n' + shortcut
+                    control.label.setToolTip(hint)
+                    control.editor.setToolTip(hint)
             control.layout().setSpacing(8)
             control.layout().setStretch(0, 1)
             control.layout().setStretch(1, 2)

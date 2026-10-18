@@ -51,6 +51,18 @@
         <source>Clear</source>
         <translation>Löschen</translation>
     </message>
+    <message>
+        <source>Brush diameter in pixels. Drag Size or enter a value.</source>
+        <translation>Pinseldurchmesser in Pixeln. An Größe ziehen oder einen Wert eingeben.</translation>
+    </message>
+    <message>
+        <source>Clear the eraser mask and restore all text-effect pixels</source>
+        <translation>Die Radiermaske leeren und alle Pixel der Texteffekte wiederherstellen</translation>
+    </message>
+    <message>
+        <source>Erase text-effect pixels or restore previously erased areas</source>
+        <translation>Pixel der Texteffekte radieren oder zuvor radierte Bereiche wiederherstellen</translation>
+    </message>
 </context>
 <context>
     <name>AutoTateChuYokoThread</name>
@@ -1554,6 +1566,10 @@
         <source>Missing Filter: {id}</source>
         <translation>Fehlender Filter: {id}</translation>
     </message>
+    <message>
+        <source>Choose {parameter}</source>
+        <translation>{parameter} auswählen</translation>
+    </message>
 </context>
 <context>
     <name>FontExcludeDialog</name>
@@ -1769,6 +1785,42 @@
         <location filename="../../ballontranslator/ui/text_engine/formatting/panel.py" line="1290"/>
         <source>Unable to apply Ruby to this selection.</source>
         <translation>Es konnte keine Ruby-Formatierung auf diese Auswahl angewendet werden.</translation>
+    </message>
+    <message>
+        <source>Click to expand or collapse this section</source>
+        <translation>Klicken, um diesen Abschnitt ein- oder auszuklappen</translation>
+    </message>
+    <message>
+        <source>Collapse or expand the text editors</source>
+        <translation>Texteditoren ein- oder ausklappen</translation>
+    </message>
+    <message>
+        <source>Drag to adjust letter spacing</source>
+        <translation>Ziehen, um den Zeichenabstand anzupassen</translation>
+    </message>
+    <message>
+        <source>Drag to adjust line spacing</source>
+        <translation>Ziehen, um den Zeilenabstand anzupassen</translation>
+    </message>
+    <message>
+        <source>Hide this section</source>
+        <translation>Diesen Abschnitt ausblenden</translation>
+    </message>
+    <message>
+        <source>Keep Latin letters upright and centered in vertical text. Disable to rotate them clockwise.</source>
+        <translation>Lateinische Buchstaben in vertikalem Text aufrecht und zentriert darstellen. Ausschalten, um sie im Uhrzeigersinn zu drehen.</translation>
+    </message>
+    <message>
+        <source>Show or hide source text editors</source>
+        <translation>Editoren für den Quelltext ein- oder ausblenden</translation>
+    </message>
+    <message>
+        <source>Show or hide translation text editors</source>
+        <translation>Editoren für die Übersetzung ein- oder ausblenden</translation>
+    </message>
+    <message>
+        <source>Toggle vertical writing</source>
+        <translation>Vertikale Schreibrichtung ein- oder ausschalten</translation>
     </message>
 </context>
 <context>
@@ -2511,6 +2563,14 @@
         <source>Glow Color</source>
         <translation>Leuchtfarbe</translation>
     </message>
+    <message>
+        <source>Choose a solid color or linear gradient for this effect</source>
+        <translation>Eine Vollfarbe oder einen linearen Farbverlauf für diesen Effekt auswählen</translation>
+    </message>
+    <message>
+        <source>Place the glow outside or inside the glyphs</source>
+        <translation>Das Leuchten außerhalb oder innerhalb der Glyphen platzieren</translation>
+    </message>
 </context>
 <context>
     <name>GradientAngleDial</name>
@@ -2731,6 +2791,10 @@ Once you provide the prompt, I will generate the image.  Then, when you want me 
         <location filename="../../ballontranslator/ui/text_engine/effects/cards.py" line="3003"/>
         <source>Generate Image</source>
         <translation>Bild generieren</translation>
+    </message>
+    <message>
+        <source>Choose the page image sent as generation context: original source, inpainted page, page with text, or no image.</source>
+        <translation>Das Seitenbild für den Generierungskontext auswählen: Original, bereinigte Seite, Seite mit Text oder kein Bild.</translation>
     </message>
 </context>
 <context>
@@ -2986,6 +3050,10 @@ Once you provide the prompt, I will generate the image.  Then, when you want me 
   ]
 }
 ```</translation>
+    </message>
+    <message>
+        <source>{parameter}: drag the label to adjust, or type a value and press Enter. Press Escape to cancel.</source>
+        <translation>{parameter}: Zum Anpassen an der Beschriftung ziehen oder einen Wert eingeben und Enter drücken. Escape bricht die Änderung ab.</translation>
     </message>
 </context>
 <context>
@@ -6772,6 +6840,22 @@ Starten Sie dann Photoshop neu. Der Explorer öffnet nun die Quelldatei und den 
         <source>Remove</source>
         <translation>Entfernen</translation>
     </message>
+    <message>
+        <source>Apply the reading to the selected text</source>
+        <translation>Die Lesung auf den ausgewählten Text anwenden</translation>
+    </message>
+    <message>
+        <source>Group Ruby shares one reading across the selection. Mono Ruby assigns one whitespace-separated reading to each base character.</source>
+        <translation>Gruppen-Ruby verwendet eine gemeinsame Lesung für die Auswahl. Mono-Ruby ordnet jedem Basiszeichen eine durch Leerzeichen getrennte Lesung zu.</translation>
+    </message>
+    <message>
+        <source>Place readings above or below horizontal text, or to the right or left of vertical text.</source>
+        <translation>Lesungen über oder unter horizontalem Text bzw. rechts oder links von vertikalem Text platzieren.</translation>
+    </message>
+    <message>
+        <source>Remove Ruby readings from the selected text</source>
+        <translation>Ruby-Lesungen vom ausgewählten Text entfernen</translation>
+    </message>
 </context>
 <context>
     <name>RunPipelineDialog</name>
@@ -7340,6 +7424,14 @@ Starten Sie dann Photoshop neu. Der Explorer öffnet nun die Quelldatei und den 
         <source>Shadow Color</source>
         <translation>Schattenfarbe</translation>
     </message>
+    <message>
+        <source>Choose a drop shadow, an inner shadow, or a long extruded shadow.</source>
+        <translation>Einen Schlagschatten, inneren Schatten oder langen extrudierten Schatten auswählen.</translation>
+    </message>
+    <message>
+        <source>Choose a solid color or linear gradient for this effect</source>
+        <translation>Eine Vollfarbe oder einen linearen Farbverlauf für diesen Effekt auswählen</translation>
+    </message>
 </context>
 <context>
     <name>ShapeFillPanel</name>
@@ -7466,6 +7558,14 @@ Starten Sie dann Photoshop neu. Der Explorer öffnet nun die Quelldatei und den 
         <source>Stroke Color</source>
         <translation>Strichfarbe</translation>
     </message>
+    <message>
+        <source>Choose a solid color or linear gradient for this effect</source>
+        <translation>Eine Vollfarbe oder einen linearen Farbverlauf für diesen Effekt auswählen</translation>
+    </message>
+    <message>
+        <source>Place the stroke inside, centered on, or outside the glyph edge.</source>
+        <translation>Die Kontur innerhalb, mittig auf oder außerhalb des Glyphenrands platzieren.</translation>
+    </message>
 </context>
 <context>
     <name>SyntheticBoldEffectCard</name>
@@ -7585,6 +7685,14 @@ Starten Sie dann Photoshop neu. Der Explorer öffnet nun die Quelldatei und den 
         <location filename="../../ballontranslator/ui/text_engine/formatting/advanced.py" line="304"/>
         <source>Off</source>
         <translation>Aus</translation>
+    </message>
+    <message>
+        <source>Control font ligatures and alternate glyphs for the selected text. Default uses the font setting; On and Off override it.</source>
+        <translation>Ligaturen und alternative Glyphen für den ausgewählten Text einstellen. Standard verwendet die Vorgabe der Schrift; Ein und Aus überschreiben sie.</translation>
+    </message>
+    <message>
+        <source>Proportional scales line spacing with font size. Distance sets a fixed spacing value.</source>
+        <translation>Proportional passt den Zeilenabstand an die Schriftgröße an. Abstand verwendet einen festen Abstandswert.</translation>
     </message>
 </context>
 <context>
@@ -8030,6 +8138,10 @@ Starten Sie dann Photoshop neu. Der Explorer öffnet nun die Quelldatei und den 
         <source>Missing: {name}</source>
         <translation>Fehlend: {name}</translation>
     </message>
+    <message>
+        <source>Stretch, fit, crop, or tile the image within the text bounds.</source>
+        <translation>Das Bild innerhalb des Textbereichs strecken, einpassen, zuschneiden oder kacheln.</translation>
+    </message>
 </context>
 <context>
     <name>TextStyleLabel</name>
@@ -8304,6 +8416,10 @@ Starten Sie dann Photoshop neu. Der Explorer öffnet nun die Quelldatei und den 
         <location filename="../../ballontranslator/ui/text_engine/transforms/registry.py" line="419"/>
         <source>Grid</source>
         <translation>Raster</translation>
+    </message>
+    <message>
+        <source>Slant each glyph before applying the transform stack. Drag the label or enter an angle in degrees.</source>
+        <translation>Jede Glyphe vor den Transformationen neigen. An der Beschriftung ziehen oder einen Winkel in Grad eingeben.</translation>
     </message>
 </context>
 <context>
@@ -8849,6 +8965,57 @@ Starten Sie dann Photoshop neu. Der Explorer öffnet nun die Quelldatei und den 
         <location filename="../../ballontranslator/ui/text_engine/effects/cards.py" line="549"/>
         <source>Images (*.png *.jpg *.jpeg *.webp *.bmp *.jxl)</source>
         <translation>Images (*.png *.jpg *.jpeg *.webp *.bmp *.jxl)</translation>
+    </message>
+</context>
+<context>
+    <name>AlignmentBtnGroup</name>
+    <message>
+        <source>Align text left</source>
+        <translation>Text linksbündig ausrichten</translation>
+    </message>
+    <message>
+        <source>Align text right</source>
+        <translation>Text rechtsbündig ausrichten</translation>
+    </message>
+    <message>
+        <source>Center text</source>
+        <translation>Text zentrieren</translation>
+    </message>
+</context>
+<context>
+    <name>CommittedTransformChoiceControl</name>
+    <message>
+        <source>Choose {parameter}</source>
+        <translation>{parameter} auswählen</translation>
+    </message>
+</context>
+<context>
+    <name>CommittedTransformControl</name>
+    <message>
+        <source>{parameter}: drag the label to adjust, or type a value and press Enter. Press Escape to cancel.</source>
+        <translation>{parameter}: Zum Anpassen an der Beschriftung ziehen oder einen Wert eingeben und Enter drücken. Escape bricht die Änderung ab.</translation>
+    </message>
+</context>
+<context>
+    <name>FontSizeBox</name>
+    <message>
+        <source>Decrease font size</source>
+        <translation>Schriftgröße verkleinern</translation>
+    </message>
+    <message>
+        <source>Increase font size</source>
+        <translation>Schriftgröße vergrößern</translation>
+    </message>
+</context>
+<context>
+    <name>FormatGroupBtn</name>
+    <message>
+        <source>Toggle italic text</source>
+        <translation>Kursivschrift ein- oder ausschalten</translation>
+    </message>
+    <message>
+        <source>Toggle underlined text</source>
+        <translation>Unterstreichung ein- oder ausschalten</translation>
     </message>
 </context>
 </TS>

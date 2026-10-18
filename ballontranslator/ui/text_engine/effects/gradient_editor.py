@@ -671,6 +671,7 @@ class InlineLinearGradientEditor(QWidget):
         self.angle_editor.setMinimumWidth(48)
         self.scale_editor.setMinimumWidth(48)
         self.angle_dial = GradientAngleDial(self)
+        self.angle_editor.setToolTip(self.angle_dial.toolTip())
         self.angle_dial.angle_previewed.connect(
             self._on_angle_dial_preview
         )
@@ -755,6 +756,12 @@ class InlineLinearGradientEditor(QWidget):
             ),
         )
         label.setObjectName('TextEffectParamLabel')
+        hint = self.tr(
+            '{parameter}: drag the label to adjust, or type a value and press '
+            'Enter. Press Escape to cancel.'
+        ).format(parameter=title)
+        label.setToolTip(hint)
+        editor.setToolTip(hint)
         label.drag_started.connect(self._on_label_drag_started)
         label.size_ctrl_changed.connect(self._on_label_dragged)
         label.btn_released.connect(self._commit_current)

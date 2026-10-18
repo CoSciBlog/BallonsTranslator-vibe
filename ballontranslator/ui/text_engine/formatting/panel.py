@@ -128,13 +128,16 @@ class IncrementalBtn(QPushButton):
 
 class AlignmentBtnGroup(QFrame):
     param_changed = Signal(str, int)
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.alignLeftChecker = AlignmentChecker(self)
+        self.alignLeftChecker.setToolTip(self.tr('Align text left'))
         self.alignLeftChecker.clicked.connect(self.alignBtnPressed)
         self.alignCenterChecker = AlignmentChecker(self)
+        self.alignCenterChecker.setToolTip(self.tr('Center text'))
         self.alignCenterChecker.clicked.connect(self.alignBtnPressed)
         self.alignRightChecker = AlignmentChecker(self)
+        self.alignRightChecker.setToolTip(self.tr('Align text right'))
         self.alignRightChecker.clicked.connect(self.alignBtnPressed)
         self.alignLeftChecker.setObjectName("AlignLeftChecker")
         self.alignRightChecker.setObjectName("AlignRightChecker")
@@ -384,9 +387,11 @@ class FormatGroupBtn(QFrame):
         super().__init__(*args, **kwargs)
         self.italicBtn = QFontChecker(self)
         self.italicBtn.setObjectName("FontItalicChecker")
+        self.italicBtn.setToolTip(self.tr('Toggle italic text'))
         self.italicBtn.clicked.connect(self.setItalic)
         self.underlineBtn = QFontChecker(self)
         self.underlineBtn.setObjectName("FontUnderlineChecker")
+        self.underlineBtn.setToolTip(self.tr('Toggle underlined text'))
         self.underlineBtn.clicked.connect(self.setUnderline)
         self.emphasisBtn = EmphasisToolButton(self)
         hlayout = QHBoxLayout(self)
@@ -511,8 +516,10 @@ class FontSizeBox(QFrame):
         super().__init__(*args, **kwargs)
         self.upBtn = IncrementalBtn(self)
         self.upBtn.setObjectName("FsizeIncrementUp")
+        self.upBtn.setToolTip(self.tr('Increase font size'))
         self.downBtn = IncrementalBtn(self)
         self.downBtn.setObjectName("FsizeIncrementDown")
+        self.downBtn.setToolTip(self.tr('Decrease font size'))
         self.upBtn.clicked.connect(self.onUpBtnClicked)
         self.downBtn.clicked.connect(self.onDownBtnClicked)
         self.drag_label = FontSizeDragLabel(self)
@@ -902,6 +909,7 @@ class FontFormatPanel(Widget):
         
         self.lineSpacingLabel = SizeControlLabel(self, direction=1, transparent_bg=False)
         self.lineSpacingLabel.setObjectName("lineSpacingLabel")
+        self.lineSpacingLabel.setToolTip(self.tr('Drag to adjust line spacing'))
         self.lineSpacingLabel.size_ctrl_changed.connect(self.onLineSpacingCtrlChanged)
         self.lineSpacingLabel.btn_released.connect(lambda : self.on_param_changed('line_spacing', self.lineSpacingBox.value()))
 
@@ -931,6 +939,7 @@ class FontFormatPanel(Widget):
 
         self.verticalChecker = QFontChecker(self)
         self.verticalChecker.setObjectName("FontVerticalChecker")
+        self.verticalChecker.setToolTip(self.tr('Toggle vertical writing'))
         self.verticalChecker.clicked.connect(lambda : self.on_param_changed('vertical', self.verticalChecker.isChecked()))
 
         self._tate_chu_yoko_tooltip = self.tr(
@@ -947,7 +956,10 @@ class FontFormatPanel(Widget):
             'FontRomanAlignmentChecker'
         )
         self.romanAlignmentChecker.setToolTip(
-            self.tr('Standard Vertical Roman Alignment')
+            self.tr(
+                'Keep Latin letters upright and centered in vertical text. '
+                'Disable to rotate them clockwise.'
+            )
         )
         self.romanAlignmentChecker.clicked.connect(
             lambda checked: self.on_param_changed(
@@ -964,6 +976,7 @@ class FontFormatPanel(Widget):
 
         self.letterSpacingLabel = SizeControlLabel(self, direction=0, transparent_bg=False)
         self.letterSpacingLabel.setObjectName("letterSpacingLabel")
+        self.letterSpacingLabel.setToolTip(self.tr('Drag to adjust letter spacing'))
         self.letterSpacingLabel.size_ctrl_changed.connect(self.letterSpacingBox.changeByDelta)
         self.letterSpacingLabel.btn_released.connect(lambda : self.on_param_changed('letter_spacing', self.letterSpacingBox.value()))
 
@@ -1032,8 +1045,21 @@ class FontFormatPanel(Widget):
         self.foldTextBtn = CheckableLabel(self.tr("Unfold"), self.tr("Fold"), False)
         self.sourceBtn = TextCheckerLabel(self.tr("Source"))
         self.transBtn = TextCheckerLabel(self.tr("Translation"))
+        self.foldTextBtn.setToolTip(self.tr('Collapse or expand the text editors'))
+        self.sourceBtn.setToolTip(self.tr('Show or hide source text editors'))
+        self.transBtn.setToolTip(self.tr('Show or hide translation text editors'))
         for label in (self.foldTextBtn, self.sourceBtn, self.transBtn):
             label.setObjectName("FontFormatActionLabel")
+        for panel in (
+            self.textstyle_panel, self.textadvancedfmt_panel,
+            self.texteffect_panel, self.texttransform_panel,
+        ):
+            panel.view_widget.title_label.setToolTip(
+                self.tr('Click to expand or collapse this section')
+            )
+            panel.view_widget.title_label.hidelabel.setToolTip(
+                self.tr('Hide this section')
+            )
 
         FONTFORMAT_SPACING = 5
 

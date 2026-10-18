@@ -101,6 +101,12 @@ class RubyFuriganaGroup(QGroupBox):
         self.type_label = _word_wrap_label(
             SmallParamLabel(self.tr('Type'), parent=self)
         )
+        type_hint = self.tr(
+            'Group Ruby shares one reading across the selection. Mono Ruby '
+            'assigns one whitespace-separated reading to each base character.'
+        )
+        self.type_label.setToolTip(type_hint)
+        self.type_combobox.setToolTip(type_hint)
 
         self.text_edit = QLineEdit(self)
         self.text_edit.setObjectName('TextAdvancedFormatParamEditor')
@@ -112,6 +118,7 @@ class RubyFuriganaGroup(QGroupBox):
         self.text_label = _word_wrap_label(
             SmallParamLabel(self.tr('Reading'), parent=self)
         )
+        self.text_label.setToolTip(self.text_edit.toolTip())
 
         self.position_combobox = BottomBorderComboBox(parent=self)
         self.position_combobox.setObjectName('TextAdvancedFormatParamEditor')
@@ -120,13 +127,21 @@ class RubyFuriganaGroup(QGroupBox):
         self.position_label = _word_wrap_label(
             SmallParamLabel(self.tr('Position'), parent=self)
         )
+        position_hint = self.tr(
+            'Place readings above or below horizontal text, or to the right '
+            'or left of vertical text.'
+        )
+        self.position_label.setToolTip(position_hint)
+        self.position_combobox.setToolTip(position_hint)
 
         self.apply_button = QPushButton(self.tr('Apply'), self)
+        self.apply_button.setToolTip(self.tr('Apply the reading to the selected text'))
         self.apply_button.setSizePolicy(
             QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Preferred
         )
         self.apply_button.clicked.connect(self._emit_apply)
         self.remove_button = QPushButton(self.tr('Remove'), self)
+        self.remove_button.setToolTip(self.tr('Remove Ruby readings from the selected text'))
         self.remove_button.setSizePolicy(
             QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Preferred
         )
@@ -199,7 +214,7 @@ class TextAdvancedFormatPanel(PanelArea):
         config_name: str,
         config_expand_name: str,
         on_format_changed: Callable,
-    ):
+    ) -> None:
         super().__init__(panel_name, config_name, config_expand_name)
 
         self.on_format_changed = on_format_changed
@@ -250,6 +265,12 @@ class TextAdvancedFormatPanel(PanelArea):
                 self.tr('Line Spacing Type'), parent=self.top_section
             )
         )
+        spacing_hint = self.tr(
+            'Proportional scales line spacing with font size. Distance sets '
+            'a fixed spacing value.'
+        )
+        self.linespacing_type_label.setToolTip(spacing_hint)
+        self.linespacing_type_combobox.setToolTip(spacing_hint)
         self.linespacing_type_unit = _atomic_unit(
             self.top_section,
             self.linespacing_type_label,
@@ -262,6 +283,10 @@ class TextAdvancedFormatPanel(PanelArea):
         self.ligature_group.setSizePolicy(
             QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred
         )
+        self.ligature_group.setToolTip(self.tr(
+            'Control font ligatures and alternate glyphs for the selected text. '
+            'Default uses the font setting; On and Off override it.'
+        ))
         ligature_specs = [(
             LIGATURE_COMMON,
             self.tr('Common'),
@@ -309,11 +334,13 @@ class TextAdvancedFormatPanel(PanelArea):
             combo.setToolTip(tooltip)
             combo.activated.connect(self.on_ligature_axis_changed)
             self.ligature_comboboxes[axis] = combo
+            axis_label = _word_wrap_label(
+                SmallParamLabel(label, parent=self.ligature_group)
+            )
+            axis_label.setToolTip(tooltip)
             ligature_units.append(_atomic_unit(
                 self.ligature_group,
-                _word_wrap_label(
-                    SmallParamLabel(label, parent=self.ligature_group)
-                ),
+                axis_label,
                 combo,
             ))
         unit_rows = (
