@@ -200,7 +200,7 @@ class PageListView(QListWidget):
         self._thumbnail_directory = ''
         self._thumbnail_generation = 0
         self._thumbnail_cancel = None
-        self.setIconSize(QSize(shared.PAGELIST_THUMBNAIL_SIZE, shared.PAGELIST_THUMBNAIL_SIZE))
+        self.setIconSize(QSize(pcfg.page_thumbnail_size, pcfg.page_thumbnail_size))
         self.scrollbar_h = ScrollBar(
             Qt.Orientation.Horizontal, self, fadeout=True
         )
@@ -234,6 +234,15 @@ class PageListView(QListWidget):
         if visible == self._thumbnails_visible:
             return
         self._thumbnails_visible = visible
+        self._refresh_thumbnails()
+
+    def setThumbnailSize(self, size: int) -> None:
+        if type(size) is not int or size not in shared.PAGELIST_THUMBNAIL_SIZES:
+            raise ValueError(f'Unsupported page thumbnail size: {size!r}')
+        icon_size = QSize(size, size)
+        if icon_size == self.iconSize():
+            return
+        self.setIconSize(icon_size)
         self._refresh_thumbnails()
 
     def _refresh_thumbnails(self) -> None:
@@ -876,6 +885,7 @@ class MainWindow(mainwindow_cls):
         self.configPanel.setupConfig()
         self.configPanel.save_config.connect(self.save_config)
         self.configPanel.page_thumbnails_changed.connect(self.pageList.setThumbnailsVisible)
+        self.configPanel.page_thumbnail_size_changed.connect(self.pageList.setThumbnailSize)
         self.configPanel.check_update.connect(self.check_for_updates)
         self.configPanel.reload_textstyle.connect(self.load_textstyle_from_proj_dir)
         self.configPanel.font_list_changed.connect(self.on_show_only_custom_font)

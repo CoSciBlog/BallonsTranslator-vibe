@@ -1358,6 +1358,14 @@
         <source>Show image previews beside page names in the sidebar. Turn off for a compact list of filenames.</source>
         <translation>Bildvorschauen neben den Seitennamen in der Seitenleiste anzeigen. Für eine kompakte Dateinamenliste ausschalten.</translation>
     </message>
+    <message>
+        <source>Page thumbnail size</source>
+        <translation>Größe der Seitenminiaturen</translation>
+    </message>
+    <message>
+        <source>Maximum width and height of page previews. Changes apply immediately and are remembered.</source>
+        <translation>Maximale Breite und Höhe der Seitenvorschauen. Änderungen werden sofort angewendet und gespeichert.</translation>
+    </message>
 </context>
 <context>
     <name>DialogCloseButton</name>

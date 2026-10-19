@@ -828,6 +828,7 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
     font_list_changed = Signal(bool)
     compact_vertical_punctuation_changed = Signal(bool)
     page_thumbnails_changed = Signal(bool)
+    page_thumbnail_size_changed = Signal(int)
     apply_auto_tate_chu_yoko_requested = Signal()
     normalize_existing_translations_requested = Signal()
     merge_current_page_requested = Signal()
@@ -1091,6 +1092,17 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
             self.tr('Show image previews beside page names in the sidebar. Turn off for a compact list of filenames.'),
         )
         self.page_thumbnails_checker.stateChanged.connect(self.on_page_thumbnails_changed)
+
+        self.page_thumbnail_size_combobox, _ = applicationConfigPanel.addCombobox(
+            [f'{size} px' for size in shared.PAGELIST_THUMBNAIL_SIZES],
+            self.tr('Page thumbnail size'),
+        )
+        self.page_thumbnail_size_combobox.setToolTip(
+            self.tr('Maximum width and height of page previews. Changes apply immediately and are remembered.'),
+        )
+        for index, size in enumerate(shared.PAGELIST_THUMBNAIL_SIZES):
+            self.page_thumbnail_size_combobox.setItemData(index, size)
+        self.page_thumbnail_size_combobox.currentIndexChanged.connect(self.on_page_thumbnail_size_changed)
 
         self.spellcheck_checker, _ = spellcheckConfigPanel.addCheckBox(self.tr('Enable'))
         self.spellcheck_checker.stateChanged.connect(self.on_spellcheck_changed)
@@ -1998,10 +2010,19 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
 
     def on_page_thumbnails_changed(self) -> None:
         visible = self.page_thumbnails_checker.isChecked()
+        self.page_thumbnail_size_combobox.setEnabled(visible)
         if visible == pcfg.show_page_thumbnails:
             return
         pcfg.show_page_thumbnails = visible
         self.page_thumbnails_changed.emit(visible)
+        self.save_config.emit()
+
+    def on_page_thumbnail_size_changed(self) -> None:
+        size = self.page_thumbnail_size_combobox.currentData()
+        if size == pcfg.page_thumbnail_size:
+            return
+        pcfg.page_thumbnail_size = size
+        self.page_thumbnail_size_changed.emit(size)
         self.save_config.emit()
 
     def on_spellcheck_changed(self):
@@ -2387,6 +2408,10 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
             self.open_on_startup_checker.setChecked(True)
         self.check_update_on_startup_checker.setChecked(pcfg.check_update_on_startup)
         self.page_thumbnails_checker.setChecked(pcfg.show_page_thumbnails)
+        self.page_thumbnail_size_combobox.setCurrentIndex(
+            self.page_thumbnail_size_combobox.findData(pcfg.page_thumbnail_size)
+        )
+        self.page_thumbnail_size_combobox.setEnabled(pcfg.show_page_thumbnails)
         
         # Setup repository dictionaries
         active_repos = pcfg.spellcheck_repo_dicts.split(',')

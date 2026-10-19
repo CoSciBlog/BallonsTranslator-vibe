@@ -33,6 +33,7 @@ def app() -> QApplication:
 @pytest.fixture(autouse=True)
 def thumbnail_config(monkeypatch) -> None:
     monkeypatch.setattr(pcfg, 'show_page_thumbnails', True)
+    monkeypatch.setattr(pcfg, 'page_thumbnail_size', 48)
 
 
 @pytest.fixture
@@ -76,9 +77,19 @@ def test_more_than_100_pages_keep_thumbnails(app, tmp_path: Path) -> None:
 
 def test_thumbnail_preference_defaults_and_round_trip() -> None:
     assert ProgramConfig().show_page_thumbnails is True
-    config = ProgramConfig(show_page_thumbnails=False)
+    assert ProgramConfig().page_thumbnail_size == 48
+    config = ProgramConfig(show_page_thumbnails=False, page_thumbnail_size=96)
     loaded = ProgramConfig(**json.loads(json_dump_program_config(config)))
     assert loaded.show_page_thumbnails is False
+    assert loaded.page_thumbnail_size == 96
+
+
+@pytest.mark.parametrize('invalid', [None, '96', True, 48.0, 0, -1, 49, 10000, {}, []])
+def test_invalid_thumbnail_size_preserves_other_settings(invalid, caplog) -> None:
+    config = ProgramConfig(page_thumbnail_size=invalid, show_page_list=True)
+    assert config.page_thumbnail_size == 48
+    assert config.show_page_list is True
+    assert 'page_thumbnail_size' in caplog.text
 
 
 @pytest.mark.parametrize('invalid', [None, 'false', 1, {}, []])
@@ -122,12 +133,78 @@ def test_checkbox_applies_immediately_without_changing_selected_or_ignored_page(
         QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
 
 
+def test_size_setting_reloads_previews_and_preserves_selection(view, tmp_path, app) -> None:
+    Image.new('RGB', (300, 300), '#e02040').save(tmp_path / '001.png')
+    view.addItem('001.png')
+    view.setCurrentRow(0)
+    view.setItemIgnored(view.item(0), True)
+    view.loadThumbnails(str(tmp_path))
+    wait_for_preview(view, 0, '#e02040')
+    current = view.currentItem()
+    selection_changes = QSignalSpy(view.currentItemChanged)
+    panel = ConfigPanel()
+    try:
+        panel.setupConfig()
+        panel.page_thumbnail_size_changed.connect(view.setThumbnailSize)
+        panel.page_thumbnails_changed.connect(view.setThumbnailsVisible)
+        changes = QSignalSpy(panel.page_thumbnail_size_changed)
+        saves = QSignalSpy(panel.save_config)
+        for size in (32, 64, 96, 128, 48):
+            panel.page_thumbnail_size_combobox.setCurrentIndex(
+                panel.page_thumbnail_size_combobox.findData(size)
+            )
+            wait_for_preview(view, 0, '#e02040')
+            assert pcfg.page_thumbnail_size == size
+            pixmap = view.item(0).icon().pixmap(view.iconSize())
+            assert pixmap.width() == pixmap.height() == size
+            assert view.currentItem() is current
+            assert view.item(0).font().strikeOut()
+        assert len(changes) == len(saves) == 5
+        assert len(selection_changes) == 0
+        panel.page_thumbnails_checker.click()
+        assert not panel.page_thumbnail_size_combobox.isEnabled()
+        panel.page_thumbnails_checker.click()
+        assert panel.page_thumbnail_size_combobox.isEnabled()
+        assert panel.page_thumbnail_size_combobox.currentData() == 48
+    finally:
+        panel.deleteLater()
+        QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+
+
+def test_resize_discards_queued_old_size_previews(view, tmp_path, app) -> None:
+    Image.new('RGB', (300, 300), '#e02040').save(tmp_path / '001.png')
+    view.addItem('001.png')
+    view.loadThumbnails(str(tmp_path))
+    assert PageThumbnailLoader.thread_pool().waitForDone(5000)
+    # Keep the old result queued, then prevent the replacement job from running.
+    with patch.object(PageThumbnailLoader.thread_pool(), 'start'):
+        view.setThumbnailSize(96)
+        app.processEvents()
+        image = view.item(0).icon().pixmap(view.iconSize()).toImage()
+        assert image.pixelColor(image.width() // 2, image.height() // 2).alpha() == 0
+
+
+def test_saved_thumbnail_size_is_used_for_new_views(app, monkeypatch) -> None:
+    monkeypatch.setattr(pcfg, 'page_thumbnail_size', 96)
+    view = PageListView()
+    panel = ConfigPanel()
+    try:
+        panel.setupConfig()
+        assert panel.page_thumbnail_size_combobox.currentData() == 96
+        assert view.iconSize().width() == view.iconSize().height() == 96
+    finally:
+        panel.deleteLater()
+        view.deleteLater()
+        QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+
+
 def test_disabled_previews_do_not_read_images_and_ignore_queued_results(view, tmp_path, app) -> None:
     Image.new('RGB', (30, 60), '#e02040').save(tmp_path / '001.png')
     view.addItem('001.png')
     view.setThumbnailsVisible(False)
     with patch.object(PageThumbnailLoader.thread_pool(), 'start') as start:
         view.loadThumbnails(str(tmp_path))
+        view.setThumbnailSize(96)
         start.assert_not_called()
     view.setThumbnailsVisible(True)
     # Leave emitted thumbnails queued until after the setting changes again.
@@ -194,6 +271,7 @@ def test_headless_mode_does_not_start_thumbnail_io(view, tmp_path, monkeypatch) 
     view.addItem('001.png')
     with patch.object(PageThumbnailLoader.thread_pool(), 'start') as start:
         view.loadThumbnails(str(tmp_path))
+        view.setThumbnailSize(96)
     start.assert_not_called()
     assert view.item(0).icon().isNull()
 

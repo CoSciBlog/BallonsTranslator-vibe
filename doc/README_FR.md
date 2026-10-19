@@ -31,7 +31,7 @@ Prend en charge l’export/import vers/depuis des documents Word
   - Amélioration du lettrage manga->Anglais, Anglais->Chinois (basé sur l'extraction des zones de bulles).
   
 * Édition d’image  
-  - Les miniatures de page sont aussi disponibles pour les projets de 100 pages ou plus. Activez ou désactivez **Settings → General → Application → Show page thumbnails** pour passer immédiatement aux aperçus ou à une liste compacte de noms. Le choix est mémorisé et les aperçus se chargent en arrière-plan.
+  - Les miniatures de page sont aussi disponibles pour les projets de 100 pages ou plus. Activez ou désactivez **Settings → General → Application → Show page thumbnails** pour passer immédiatement aux aperçus ou à une liste compacte de noms. Le choix est mémorisé et les aperçus se chargent en arrière-plan. Choisissez **Page thumbnail size** parmi 32, 48 (par défaut), 64, 96 ou 128 px ; la taille est appliquée immédiatement et mémorisée.
   - L’agrandissement des images se termine sans fenêtre de réussite ; les erreurs d’agrandissement ou d’application du résultat restent signalées.
   - Faites un clic droit sur une page et choisissez **Reset page data...** pour supprimer, après confirmation, ses blocs de texte, OCR, traductions, masques, retouches, dessins et images de résultat. L’image originale et les autres pages sont conservées ; les données enregistrées sont sauvegardées dans `.page_reset_backup_*` dans le projet.
   - Prise en charge de l'édition et de la retouche des masques (similaire à l'outil Pinceau correcteur dans Photoshop)

@@ -22,7 +22,7 @@
   - Diagramação aprimorada para mangás->inglês, inglês->chinês (baseado na extração de regiões de balões).
   
 * **Edição de imagem:**
-  - As miniaturas de página também estão disponíveis em projetos com 100 páginas ou mais. Use **Settings → General → Application → Show page thumbnails** para alternar imediatamente entre prévias e uma lista compacta de nomes. A opção é salva e as prévias são carregadas em segundo plano.
+  - As miniaturas de página também estão disponíveis em projetos com 100 páginas ou mais. Use **Settings → General → Application → Show page thumbnails** para alternar imediatamente entre prévias e uma lista compacta de nomes. A opção é salva e as prévias são carregadas em segundo plano. Escolha **Page thumbnail size** entre 32, 48 (padrão), 64, 96 ou 128 px; o tamanho é aplicado imediatamente e salvo.
   - A ampliação de imagens termina sem uma mensagem de sucesso; erros ao ampliar ou aplicar o resultado continuam sendo exibidos.
   - Clique com o botão direito em uma página e escolha **Reset page data...** para remover, após confirmação, suas caixas de texto, OCR, traduções, máscaras, retoques, desenhos e imagens de resultado. A imagem original e as outras páginas são preservadas; os dados salvos ficam em uma cópia de segurança `.page_reset_backup_*` dentro do projeto.
   - Permite editar máscaras e inpainting (similar à ferramenta Pincel de Recuperação para Manchas no Photoshop).

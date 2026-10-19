@@ -544,6 +544,7 @@ class ProgramConfig(Config):
     recent_proj_list: List = field(default_factory=lambda: list())
     show_page_list: bool = False
     show_page_thumbnails: bool = True
+    page_thumbnail_size: int = shared.PAGELIST_THUMBNAIL_SIZE
     show_llm_page_summary: bool = True
     expand_llm_page_summary: bool = True
     show_llm_compact_memory: bool = True
@@ -623,6 +624,15 @@ class ProgramConfig(Config):
     custom_colors: List[str] = field(default_factory=list)
 
     def __post_init__(self) -> None:
+        if (
+            type(self.page_thumbnail_size) is not int
+            or self.page_thumbnail_size not in shared.PAGELIST_THUMBNAIL_SIZES
+        ):
+            LOGGER.warning(
+                'Discard invalid page_thumbnail_size config %r.',
+                self.page_thumbnail_size,
+            )
+            self.page_thumbnail_size = shared.PAGELIST_THUMBNAIL_SIZE
         geometry = self.main_window_geometry
         valid_geometry = (
             isinstance(geometry, list)

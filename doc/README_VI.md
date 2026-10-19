@@ -22,7 +22,7 @@
   - Dùng siu xịn khi mà Manga -> Tiếng Anh, Tiếng Anh -> tiếng Trung (Zì app này các pháp sư Trung Hoa làm mà :> ).
   
 * Chỉnh sửa hình ảnh
-  - Ảnh thu nhỏ của trang được hiển thị cả trong dự án có từ 100 trang trở lên. Bật hoặc tắt **Settings → General → Application → Show page thumbnails** để chuyển ngay giữa ảnh xem trước và danh sách tên tệp gọn hơn. Lựa chọn được lưu và ảnh xem trước được tải ở chế độ nền.
+  - Ảnh thu nhỏ của trang được hiển thị cả trong dự án có từ 100 trang trở lên. Bật hoặc tắt **Settings → General → Application → Show page thumbnails** để chuyển ngay giữa ảnh xem trước và danh sách tên tệp gọn hơn. Lựa chọn được lưu và ảnh xem trước được tải ở chế độ nền. Chọn **Page thumbnail size** từ 32, 48 (mặc định), 64, 96 hoặc 128 px; kích thước được áp dụng ngay và lưu lại.
   - Phóng to ảnh hoàn tất mà không hiện thông báo thành công; lỗi khi phóng to hoặc áp dụng kết quả vẫn được hiển thị.
   - Nhấp chuột phải vào một trang và chọn **Reset page data...** để xóa hộp văn bản, OCR, bản dịch, mặt nạ, kết quả inpainting, nét vẽ và ảnh kết quả của trang đó sau khi xác nhận. Ảnh gốc và các trang khác được giữ nguyên; dữ liệu đã lưu được sao lưu vào `.page_reset_backup_*` trong thư mục dự án.
   - Hỗ trợ Chỉnh sửa & Inpainting (na ná brush tool trong Photoshop)

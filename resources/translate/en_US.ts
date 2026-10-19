@@ -1353,6 +1353,14 @@
         <source>Show image previews beside page names in the sidebar. Turn off for a compact list of filenames.</source>
         <translation>Show image previews beside page names in the sidebar. Turn off for a compact list of filenames.</translation>
     </message>
+    <message>
+        <source>Page thumbnail size</source>
+        <translation>Page thumbnail size</translation>
+    </message>
+    <message>
+        <source>Maximum width and height of page previews. Changes apply immediately and are remembered.</source>
+        <translation>Maximum width and height of page previews. Changes apply immediately and are remembered.</translation>
+    </message>
 </context>
 <context>
     <name>DialogCloseButton</name>
