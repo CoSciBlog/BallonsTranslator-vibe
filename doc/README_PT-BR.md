@@ -23,6 +23,7 @@
   
 * **Edição de imagem:**
   - As miniaturas de página também estão disponíveis em projetos com 100 páginas ou mais. Use **Settings → General → Application → Show page thumbnails** para alternar imediatamente entre prévias e uma lista compacta de nomes. A opção é salva e as prévias são carregadas em segundo plano.
+  - A ampliação de imagens termina sem uma mensagem de sucesso; erros ao ampliar ou aplicar o resultado continuam sendo exibidos.
   - Clique com o botão direito em uma página e escolha **Reset page data...** para remover, após confirmação, suas caixas de texto, OCR, traduções, máscaras, retoques, desenhos e imagens de resultado. A imagem original e as outras páginas são preservadas; os dados salvos ficam em uma cópia de segurança `.page_reset_backup_*` dentro do projeto.
   - Permite editar máscaras e inpainting (similar à ferramenta Pincel de Recuperação para Manchas no Photoshop).
   - Adaptado para imagens com proporção de aspecto extrema, como webtoons.

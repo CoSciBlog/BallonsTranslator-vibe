@@ -32,6 +32,7 @@
   
 * Image editing
   - Page thumbnails are enabled by default for projects of every page count. Toggle **Settings → General → Application → Show page thumbnails** to switch immediately between image previews and a compact filename list. The preference is remembered, and previews load at thumbnail resolution in the background.
+  - Image upscaling finishes without a success popup; errors during upscaling or activation still display a message.
   - Right-click a page and choose **Reset page data...** to remove that page's text boxes, OCR, translations, masks, inpainting, drawings, and generated result images after confirmation. The original image and other pages are preserved; previous saved data is retained in a `.page_reset_backup_*` folder inside the project.
   - Support mask editing & inpainting (something like spot healing brush tool in PS)
   - Adapted to images with extreme aspect ratio such as webtoons

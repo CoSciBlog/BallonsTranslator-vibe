@@ -2349,11 +2349,6 @@ class MainWindow(mainwindow_cls):
             project_path = self.imgtrans_proj.proj_path
             self.imgtrans_proj.replace_pages_with_upscaled_files(replacements)
             self.openJsonProj(project_path)
-            create_info_dialog(
-                self.tr('Upscaled and replaced {count} page(s).').format(
-                    count=len(replacements)
-                )
-            )
         except Exception as error:
             create_error_dialog(
                 error,

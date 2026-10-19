@@ -26,6 +26,7 @@
   
 * **Edición de imágenes:**
   - Las miniaturas de página vuelven a mostrarse también en proyectos de 100 páginas o más. Activa o desactiva **Settings → General → Application → Show page thumbnails** para alternar inmediatamente con una lista compacta de nombres. La opción se guarda y las vistas previas se cargan en segundo plano.
+  - El escalado de imágenes termina sin un aviso de éxito; los errores al escalar o aplicar el resultado siguen mostrándose.
   - Haz clic derecho en una página y elige **Reset page data...** para borrar, tras confirmarlo, sus cuadros de texto, OCR, traducciones, máscaras, retoques, dibujos e imágenes de resultado. Se conservan la imagen original y las demás páginas; los datos guardados se respaldan en `.page_reset_backup_*` dentro del proyecto.
   - Permite editar máscaras e inpainting (similar a la herramienta Pincel recuperador de imperfecciones de Photoshop).
   - Adaptado para imágenes con una relación de aspecto extrema, como los webtoons.

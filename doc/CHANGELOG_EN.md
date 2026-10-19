@@ -1,5 +1,8 @@
 # Changelogs
 
+### 2026-10-19 — 1.5.19+vibe.54
+- Image upscaling now finishes without a success popup. Errors during upscaling or activation still display a message.
+
 ### 2026-10-18 — 1.5.19+vibe.53
 - Restored sidebar page thumbnails for projects with 100 or more pages. **Settings → General → Application → Show page thumbnails** switches previews on/off immediately and remembers the choice; existing configurations default to enabled.
 - Previews decode to small images in a background worker, with one decoder at a time. Page/project changes, disabling previews, and view destruction cancel obsolete work; late results cannot replace another project's thumbnails. Corrupt previews leave the page available, and toggling preserves page selection and ignored status. English/German labels and translated README guidance are included.
