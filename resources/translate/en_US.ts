@@ -75,6 +75,18 @@
 <context>
     <name>BatchProcessingDialog</name>
     <message>
+        <source>Continue saved progress after an interrupted batch</source>
+        <translation>Continue saved progress after an interrupted batch</translation>
+    </message>
+    <message>
+        <source>Skip saved completed pages and completed batch tasks from a matching interrupted run. Disable this to process everything again.</source>
+        <translation>Skip saved completed pages and completed batch tasks from a matching interrupted run. Disable this to process everything again.</translation>
+    </message>
+    <message>
+        <source>Resume</source>
+        <translation>Resume</translation>
+    </message>
+    <message>
         <source>Enter or paste a parent folder path</source>
         <translation>Enter or paste a parent folder path</translation>
     </message>

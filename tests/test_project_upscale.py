@@ -64,6 +64,7 @@ class ProjectUpscaleTest(unittest.TestCase):
                 options = BatchOptions(
                     directory, 'detector', 'ocr', '', 'inpainter', 'translator',
                     upscale_first=True,
+                    resume=False,
                 )
                 owner = SimpleNamespace(
                     imgtrans_proj=project,
@@ -114,6 +115,81 @@ class ProjectUpscaleTest(unittest.TestCase):
 
         schedule.assert_called_once_with(0, owner._complete_batch_task)
         owner.on_run_imgtrans.assert_not_called()
+
+    def test_batch_resume_dispatches_only_incomplete_pages(self) -> None:
+        project = ProjImgTrans()
+        project.pages = {'001.png': [], '002.png': [], '003.png': []}
+        project._image_info = {
+            '001.png': {'finish_code': 15},
+            '002.png': {'finish_code': 0},
+            '003.png': {'finish_code': 15},
+        }
+        owner = SimpleNamespace(
+            _batch_task=SimpleNamespace(
+                project_directory='project',
+                phase='complete',
+                rerun_inpaint=False,
+            ),
+            _batch_options=SimpleNamespace(resume=True),
+            imgtrans_proj=project,
+            on_run_imgtrans=Mock(),
+            _complete_batch_task=Mock(),
+        )
+
+        with patch('ballontranslator.ui.mainwindow.QTimer.singleShot') as schedule:
+            MainWindow._run_current_batch_pipeline(owner)
+
+        owner.on_run_imgtrans.assert_called_once_with(continue_mode=True)
+        schedule.assert_not_called()
+
+    def test_batch_resume_completes_task_when_every_page_is_finished(self) -> None:
+        project = ProjImgTrans()
+        project.pages = {'001.png': [], '002.png': []}
+        project._image_info = {
+            '001.png': {'finish_code': 15},
+            '002.png': {'finish_code': 15},
+        }
+        owner = SimpleNamespace(
+            _batch_task=SimpleNamespace(
+                project_directory='project',
+                phase='complete',
+                rerun_inpaint=False,
+            ),
+            _batch_options=SimpleNamespace(resume=True),
+            imgtrans_proj=project,
+            on_run_imgtrans=Mock(),
+            _complete_batch_task=Mock(),
+        )
+
+        with patch('ballontranslator.ui.mainwindow.QTimer.singleShot') as schedule:
+            MainWindow._run_current_batch_pipeline(owner)
+
+        owner.on_run_imgtrans.assert_not_called()
+        schedule.assert_called_once_with(0, owner._complete_batch_task)
+
+    def test_batch_can_start_fresh_when_resume_is_disabled(self) -> None:
+        project = ProjImgTrans()
+        project.pages = {'001.png': []}
+        project._image_info = {'001.png': {'finish_code': 15}}
+        owner = SimpleNamespace(
+            _batch_task=SimpleNamespace(
+                project_directory='project',
+                phase='complete',
+                rerun_inpaint=False,
+            ),
+            _batch_options=SimpleNamespace(resume=False),
+            imgtrans_proj=project,
+            on_run_imgtrans=Mock(),
+            _complete_batch_task=Mock(),
+        )
+
+        with patch('ballontranslator.ui.mainwindow.QTimer.singleShot') as schedule:
+            MainWindow._run_current_batch_pipeline(owner)
+
+        owner.on_run_imgtrans.assert_called_once_with(
+            pages_to_process=['001.png']
+        )
+        schedule.assert_not_called()
 
     def test_batch_upscale_refreshes_pages_before_pipeline_and_navigation(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

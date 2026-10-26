@@ -75,6 +75,18 @@
 <context>
     <name>BatchProcessingDialog</name>
     <message>
+        <source>Continue saved progress after an interrupted batch</source>
+        <translation>Gespeicherten Fortschritt nach einem unterbrochenen Stapel fortsetzen</translation>
+    </message>
+    <message>
+        <source>Skip saved completed pages and completed batch tasks from a matching interrupted run. Disable this to process everything again.</source>
+        <translation>Gespeicherte abgeschlossene Seiten und abgeschlossene Stapelaufgaben eines passenden unterbrochenen Laufs überspringen. Deaktivieren, um alles erneut zu verarbeiten.</translation>
+    </message>
+    <message>
+        <source>Resume</source>
+        <translation>Fortsetzen</translation>
+    </message>
+    <message>
         <source>Enter or paste a parent folder path</source>
         <translation>Pfad zum übergeordneten Ordner eingeben oder einfügen</translation>
     </message>

@@ -123,6 +123,17 @@ class BatchProcessingDialog(QDialog):
         )
         form.addRow(self.tr('Processing order'), self.order_combo)
 
+        self.resume_check = QCheckBox(
+            self.tr('Continue saved progress after an interrupted batch'),
+            self,
+        )
+        self.resume_check.setChecked(True)
+        self.resume_check.setToolTip(self.tr(
+            'Skip saved completed pages and completed batch tasks from a '
+            'matching interrupted run. Disable this to process everything again.'
+        ))
+        form.addRow(self.tr('Resume'), self.resume_check)
+
         self.completion_combo = QComboBox(self)
         for label, value in (
             (self.tr('Do nothing'), COMPLETION_NONE),
@@ -251,6 +262,7 @@ class BatchProcessingDialog(QDialog):
             rerun_inpaint=self.reinpaint_check.isChecked(),
             order=self.order_combo.currentData(),
             completion_action=self.completion_combo.currentData(),
+            resume=self.resume_check.isChecked(),
         )
 
     @property

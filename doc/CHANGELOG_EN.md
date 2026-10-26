@@ -1,5 +1,8 @@
 # Changelogs
 
+### 2026-10-26 — 1.5.19+vibe.57
+- Single-project pipelines continue to save completion per page and can resume at the failed page with **Continue**. Batch Processing now has a default-enabled **Resume** option: saved completed pages are reused immediately, while matching completed project phases and pre-upscaling tasks are recovered from an atomic checkpoint in the batch root. The checkpoint is removed after full success; disable Resume to process everything again.
+
 ### 2026-10-26 — 1.5.19+vibe.56
 - Optional batch pre-upscaling now completes for every selected project folder before detection, OCR, inpainting, or translation begins in any project. The chosen per-project or staged processing order applies after this shared prerequisite, and ignored pages continue to participate only in upscaling.
 

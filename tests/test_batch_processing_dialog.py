@@ -87,3 +87,11 @@ class BatchProcessingDialogTest(unittest.TestCase):
         self.dialog.accept()
         self.assertEqual(self.dialog.result(), QDialog.DialogCode.Accepted)
         self.assertEqual(self.dialog.project_directories, [str(self.chapter)])
+
+    def test_resume_completed_progress_is_enabled_by_default(self) -> None:
+        self.assertTrue(self.dialog.resume_check.isChecked())
+        self.assertTrue(self.dialog.options().resume)
+
+        self.dialog.resume_check.setChecked(False)
+
+        self.assertFalse(self.dialog.options().resume)

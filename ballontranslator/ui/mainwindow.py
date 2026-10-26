@@ -42,11 +42,14 @@ from ballontranslator.utils.proj_imgtrans import ProjImgTrans
 from ballontranslator.utils.pipeline_history import PipelineHistoryStore
 from ballontranslator.utils.llm_profiles import is_llm_text_translator, profile_by_id
 from ballontranslator.utils.batch_processing import (
+    BatchResumeStore,
     BatchOptions,
     BatchTask,
     COMPLETION_CLOSE,
     GLOSSARY_GLOBAL,
     ORDER_STAGED,
+    batch_resume_plan,
+    batch_task_key,
     build_batch_tasks,
     windows_completion_command,
 )
@@ -381,6 +384,8 @@ class MainWindow(mainwindow_cls):
         self._batch_task: Optional[BatchTask] = None
         self._batch_project_count = 0
         self._batch_finished_projects = set()
+        self._batch_resume_store: Optional[BatchResumeStore] = None
+        self._batch_resume_plan = None
         self._batch_config_snapshot = None
         self._batch_cancel_requested = False
         self._batch_failed = False
@@ -1772,8 +1777,8 @@ class MainWindow(mainwindow_cls):
     ) -> None:
         """Start a sequential GUI batch using the normal project pipeline."""
 
-        tasks = build_batch_tasks(project_directories, options)
-        if not tasks:
+        all_tasks = build_batch_tasks(project_directories, options)
+        if not all_tasks:
             create_info_dialog(self.tr('No batch tasks were created.'))
             return
         self.conditional_save(keep_exist_as_backup=True)
@@ -1789,11 +1794,34 @@ class MainWindow(mainwindow_cls):
                 'project_glossary_series_path',
             )
         }
+        resume_store = BatchResumeStore(options.root_directory)
+        resume_plan = batch_resume_plan(options, project_directories, all_tasks)
+        try:
+            completed_tasks = resume_store.prepare(
+                resume_plan,
+                resume=options.resume,
+            )
+        except OSError as error:
+            LOGGER.warning('Could not save the batch resume checkpoint: %s', error)
+            resume_store = None
+            completed_tasks = set()
         self._batch_options = options
-        self._batch_tasks = tasks
+        self._batch_tasks = [
+            task for task in all_tasks
+            if batch_task_key(task) not in completed_tasks
+        ]
         self._batch_task = None
         self._batch_project_count = len(project_directories)
-        self._batch_finished_projects = set()
+        self._batch_finished_projects = {
+            directory for directory in project_directories
+            if all(
+                batch_task_key(task) in completed_tasks
+                for task in all_tasks
+                if task.project_directory == directory
+            )
+        }
+        self._batch_resume_store = resume_store
+        self._batch_resume_plan = resume_plan
         self._batch_cancel_requested = False
         self._batch_failed = False
         module.empty_runcache = False
@@ -1974,6 +2002,22 @@ class MainWindow(mainwindow_cls):
             LOGGER.info('Batch project has no pipeline-eligible pages; skipping.')
             QTimer.singleShot(0, self._complete_batch_task)
             return
+        resume_active = self._batch_options.resume
+        if resume_active:
+            incomplete_pages = [
+                page for page in pages
+                if not self.imgtrans_proj.get_page_progress(page)
+            ]
+            if not incomplete_pages:
+                if task is not None and task.rerun_inpaint:
+                    self._batch_running_reinpaint = True
+                    self._schedule_batch_reinpaint(pages)
+                else:
+                    LOGGER.info(
+                        'Batch task already has saved completion progress; skipping.'
+                    )
+                    QTimer.singleShot(0, self._complete_batch_task)
+                return
         if (
             task is not None
             and task.rerun_inpaint
@@ -1987,7 +2031,10 @@ class MainWindow(mainwindow_cls):
             self._batch_running_reinpaint = True
             self._start_reinpaint(pages, manual=False)
             return
-        self.on_run_imgtrans(pages_to_process=pages)
+        if resume_active:
+            self.on_run_imgtrans(continue_mode=True)
+        else:
+            self.on_run_imgtrans(pages_to_process=pages)
 
     def _complete_batch_task(self) -> None:
         if self._batch_options is None or self._batch_task is None:
@@ -2009,6 +2056,17 @@ class MainWindow(mainwindow_cls):
         self._finish_batch_task_history(
             'failed' if self._batch_failed else 'completed'
         )
+
+        if not self._batch_failed and self._batch_resume_store is not None:
+            try:
+                self._batch_resume_store.mark_completed(
+                    self._batch_resume_plan,
+                    batch_task_key(self._batch_task),
+                )
+            except (OSError, ValueError) as error:
+                LOGGER.warning(
+                    'Could not update the batch resume checkpoint: %s', error
+                )
 
         directory = self._batch_task.project_directory
         if not any(task.project_directory == directory for task in self._batch_tasks):
@@ -2082,6 +2140,14 @@ class MainWindow(mainwindow_cls):
         self._batch_history = None
         self._batch_task_history = None
         self._batch_id = ''
+
+        if successful and self._batch_resume_store is not None:
+            try:
+                self._batch_resume_store.clear()
+            except OSError as error:
+                LOGGER.warning('Could not remove the batch resume checkpoint: %s', error)
+        self._batch_resume_store = None
+        self._batch_resume_plan = None
 
         if not successful:
             message = (

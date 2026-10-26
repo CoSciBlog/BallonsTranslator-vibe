@@ -1,8 +1,11 @@
 from pathlib import Path
 
 from ballontranslator.utils.batch_processing import (
+    BatchResumeStore,
     BatchOptions,
     ORDER_STAGED,
+    batch_resume_plan,
+    batch_task_key,
     build_batch_tasks,
     collect_batch_project_dirs,
     windows_completion_command,
@@ -129,3 +132,41 @@ def test_windows_completion_commands_are_argument_lists():
         'shutdown', '/r', '/t', '0'
     ]
     assert windows_completion_command('none') == []
+
+
+def test_batch_resume_checkpoint_round_trips_only_for_matching_plan(tmp_path: Path):
+    projects = [str(tmp_path / 'chapter1'), str(tmp_path / 'chapter2')]
+    options = _options(root_directory=str(tmp_path), upscale_first=True)
+    tasks = build_batch_tasks(projects, options)
+    plan = batch_resume_plan(options, projects, tasks)
+    store = BatchResumeStore(str(tmp_path))
+
+    assert store.prepare(plan, resume=True) == set()
+    completed_key = batch_task_key(tasks[0])
+    store.mark_completed(plan, completed_key)
+
+    assert store.prepare(plan, resume=True) == {completed_key}
+    changed_plan = batch_resume_plan(
+        _options(root_directory=str(tmp_path), enable_translate=False),
+        projects,
+        build_batch_tasks(
+            projects,
+            _options(root_directory=str(tmp_path), enable_translate=False),
+        ),
+    )
+    assert store.prepare(changed_plan, resume=True) == set()
+
+
+def test_batch_resume_can_explicitly_start_over_and_clear_checkpoint(tmp_path: Path):
+    projects = [str(tmp_path / 'chapter')]
+    options = _options(root_directory=str(tmp_path))
+    tasks = build_batch_tasks(projects, options)
+    plan = batch_resume_plan(options, projects, tasks)
+    store = BatchResumeStore(str(tmp_path))
+    store.prepare(plan, resume=True)
+    store.mark_completed(plan, batch_task_key(tasks[0]))
+
+    assert store.prepare(plan, resume=False) == set()
+    assert store.prepare(plan, resume=True) == set()
+    store.clear()
+    assert not store.path.exists()
