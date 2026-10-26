@@ -563,19 +563,11 @@ class TitleBar(Widget):
         )
         self.reinpaint_all_pages_trigger = reinpaintAllAction.triggered
 
-        upscaleCurrentPageAction = QAction(
-            self.tr('Upscale Current Page 2x...'),
-            self,
-        )
-        self.upscale_current_page_trigger = upscaleCurrentPageAction.triggered
         upscaleProjectAction = QAction(
             self.tr('Upscale Entire Project 2x...'),
             self,
         )
         self.upscale_project_trigger = upscaleProjectAction.triggered
-        upscaleMenu = QMenu(self.tr('Upscaling'), self.toolsToolBtn)
-        upscaleMenu.addAction(upscaleCurrentPageAction)
-        upscaleMenu.addAction(upscaleProjectAction)
         
         toolsMenu = QMenu(self.toolsToolBtn)
         toolsMenu.addAction(mergeToolAction)
@@ -584,7 +576,7 @@ class TitleBar(Widget):
         toolsMenu.addSeparator()
         toolsMenu.addAction(reinpaintCurrentAction)
         toolsMenu.addAction(reinpaintAllAction)
-        toolsMenu.addMenu(upscaleMenu)
+        toolsMenu.addAction(upscaleProjectAction)
         toolsMenu.addAction(batchProcessingAction)
         toolsMenu.addAction(historyAction)
         toolsMenu.addAction(glossaryAction)

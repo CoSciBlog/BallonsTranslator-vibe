@@ -1,5 +1,8 @@
 # Changelogs
 
+### 2026-10-26 — 1.5.19+vibe.59
+- Simplified the Tools menu to one direct **Upscale Entire Project 2x...** action. Removed the Upscaling submenu and its current-page action while retaining project and batch upscaling behavior.
+
 ### 2026-10-26 — 1.5.19+vibe.58
 - Added default-off **Review and optimize translation with LLM** to every LLM profile’s Text settings. When enabled, each page draft receives a second LLM review using the source, page context, glossary, memory, and available image to improve natural wording, accuracy, pronouns, speaker/addressee references, gendered wording, and formality. Only the reviewed translation enters page history; this adds one LLM request per page.
 

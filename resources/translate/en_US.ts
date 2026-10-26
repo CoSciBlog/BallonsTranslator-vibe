@@ -8582,22 +8582,12 @@ Then restart Photoshop. Explorer will now open the source file and destination l
         <translation>Re-run Inpainting All Pages</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="562"/>
-        <source>Upscale Current Page 2x...</source>
-        <translation>Upscale Current Page 2x...</translation>
-    </message>
-    <message>
         <location filename="../../ballontranslator/ui/mainwindowbars.py" line="567"/>
         <source>Upscale Entire Project 2x...</source>
         <translation>Upscale Entire Project 2x...</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="571"/>
-        <source>Upscaling</source>
-        <translation>Upscaling</translation>
-    </message>
-    <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="740"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="737"/>
         <source>{current}/{total} pages</source>
         <translation>{current}/{total} pages</translation>
     </message>

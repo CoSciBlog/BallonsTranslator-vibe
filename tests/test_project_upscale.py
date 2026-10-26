@@ -250,23 +250,18 @@ class ProjectUpscaleTest(unittest.TestCase):
                 self.assertFalse(owner.opening_dir)
                 self.assertFalse(osp.exists(staging_dir))
 
-    def test_current_page_and_project_actions_select_expected_pages(self):
+    def test_project_action_selects_all_pages(self):
         selected = []
         owner = SimpleNamespace(
             imgtrans_proj=SimpleNamespace(
-                current_img='002.png',
                 pages={'001.png': [], '002.png': []},
             ),
             _run_page_upscale=selected.append,
         )
 
-        MainWindow.run_current_page_upscale(owner)
         MainWindow.run_project_upscale(owner)
 
-        self.assertEqual(
-            selected,
-            [['002.png'], ['001.png', '002.png']],
-        )
+        self.assertEqual(selected, [['001.png', '002.png']])
 
     def test_upscale_image_is_exactly_twice_the_source_size(self):
         source = np.zeros((3, 5, 4), dtype=np.uint8)

@@ -8650,22 +8650,12 @@ Starten Sie dann Photoshop neu. Der Explorer öffnet nun die Quelldatei und den 
         <translation>Inpainting aller Seiten erneut ausführen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="562"/>
-        <source>Upscale Current Page 2x...</source>
-        <translation>Aktuelle Seite 2× hochskalieren...</translation>
-    </message>
-    <message>
         <location filename="../../ballontranslator/ui/mainwindowbars.py" line="567"/>
         <source>Upscale Entire Project 2x...</source>
         <translation>Gesamtes Projekt 2× hochskalieren...</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="571"/>
-        <source>Upscaling</source>
-        <translation>Upscaling</translation>
-    </message>
-    <message>
-        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="740"/>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="737"/>
         <source>{current}/{total} pages</source>
         <translation>{current}/{total} Seiten</translation>
     </message>

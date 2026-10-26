@@ -1399,9 +1399,6 @@ class MainWindow(mainwindow_cls):
         self.titleBar.reinpaint_all_pages_trigger.connect(
             self.rerun_inpainting_all_pages
         )
-        self.titleBar.upscale_current_page_trigger.connect(
-            self.run_current_page_upscale
-        )
         self.titleBar.upscale_project_trigger.connect(
             self.run_project_upscale
         )
@@ -2265,10 +2262,6 @@ class MainWindow(mainwindow_cls):
         pages = self._scheduled_batch_reinpaint_pages
         self._scheduled_batch_reinpaint_pages = []
         self._start_reinpaint(pages, manual=False)
-
-    def run_current_page_upscale(self) -> None:
-        page_name = self.imgtrans_proj.current_img
-        self._run_page_upscale([page_name] if page_name else [])
 
     def run_project_upscale(self) -> None:
         self._run_page_upscale(list(self.imgtrans_proj.pages))

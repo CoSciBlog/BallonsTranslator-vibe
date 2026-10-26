@@ -1851,17 +1851,18 @@ class RunPipelineDialogTests(unittest.TestCase):
             hasattr(title_bar, 'apply_text_style_project_trigger')
         )
         self.assertTrue(hasattr(title_bar, 'font_exclusion_trigger'))
-        upscale_menu = next(
-            action.menu()
-            for action in title_bar.toolsToolBtn.menu().actions()
-            if action.menu() is not None and action.text() == 'Upscaling'
+        tools_actions = title_bar.toolsToolBtn.menu().actions()
+        self.assertFalse(any(
+            action.menu() is not None and action.text() == 'Upscaling'
+            for action in tools_actions
+        ))
+        self.assertIn(
+            'Upscale Entire Project 2x...',
+            [action.text() for action in tools_actions],
         )
-        self.assertEqual(
-            [action.text() for action in upscale_menu.actions()],
-            [
-                'Upscale Current Page 2x...',
-                'Upscale Entire Project 2x...',
-            ],
+        self.assertNotIn(
+            'Upscale Current Page 2x...',
+            [action.text() for action in tools_actions],
         )
 
         emitted = []
