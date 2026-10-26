@@ -90,6 +90,7 @@ class ProjectUpscaleTest(unittest.TestCase):
                     owner._run_current_batch_pipeline.assert_not_called()
                     owner._finish_batch_processing.assert_not_called()
 
+                    owner._batch_task = owner._batch_tasks.pop(0)
                     MainWindow._run_current_batch_pipeline(owner)
 
                     if all_ignored:
@@ -100,6 +101,19 @@ class ProjectUpscaleTest(unittest.TestCase):
                             pages_to_process=['002.png']
                         )
                         schedule.assert_not_called()
+
+    def test_batch_upscale_phase_completes_without_starting_pipeline(self) -> None:
+        owner = SimpleNamespace(
+            _batch_task=SimpleNamespace(phase='upscale'),
+            _complete_batch_task=Mock(),
+            on_run_imgtrans=Mock(),
+        )
+
+        with patch('ballontranslator.ui.mainwindow.QTimer.singleShot') as schedule:
+            MainWindow._run_current_batch_pipeline(owner)
+
+        schedule.assert_called_once_with(0, owner._complete_batch_task)
+        owner.on_run_imgtrans.assert_not_called()
 
     def test_batch_upscale_refreshes_pages_before_pipeline_and_navigation(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

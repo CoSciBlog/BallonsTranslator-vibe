@@ -98,14 +98,35 @@ def build_batch_tasks(
     >>> opts = BatchOptions('root', 'det', 'ocr', '', 'paint', 'trans')
     >>> [task.phase for task in build_batch_tasks(['a', 'b'], opts)]
     ['complete', 'complete']
+    >>> upscaled = BatchOptions('root', 'det', 'ocr', '', 'paint', 'trans', upscale_first=True)
+    >>> [task.phase for task in build_batch_tasks(['a', 'b'], upscaled)]
+    ['upscale', 'upscale', 'complete', 'complete']
     >>> staged = BatchOptions('root', 'det', 'ocr', '', 'paint', 'trans', order='staged')
     >>> [task.phase for task in build_batch_tasks(['a', 'b'], staged)]
     ['local', 'local', 'translation', 'translation']
     """
 
     projects = list(project_directories)
+    tasks: List[BatchTask] = []
+    if options.upscale_first:
+        # This is a batch-wide prerequisite: no project's pipeline may start
+        # until every selected project has finished upscaling.
+        tasks.extend(
+            BatchTask(
+                directory,
+                'upscale',
+                False,
+                False,
+                False,
+                False,
+                True,
+                False,
+            )
+            for directory in projects
+        )
+
     if options.order != ORDER_STAGED:
-        return [
+        tasks.extend(
             BatchTask(
                 directory,
                 'complete',
@@ -113,13 +134,13 @@ def build_batch_tasks(
                 options.enable_ocr,
                 options.enable_inpaint,
                 options.enable_translate,
-                options.upscale_first,
+                False,
                 options.rerun_inpaint,
             )
             for directory in projects
-        ]
+        )
+        return tasks
 
-    tasks: List[BatchTask] = []
     local_enabled = (
         options.enable_detect
         or options.enable_ocr
@@ -135,7 +156,7 @@ def build_batch_tasks(
                 options.enable_ocr,
                 options.enable_inpaint,
                 False,
-                options.upscale_first,
+                False,
                 options.rerun_inpaint,
             )
             for directory in projects
@@ -149,7 +170,7 @@ def build_batch_tasks(
                 False,
                 False,
                 True,
-                options.upscale_first and not local_enabled,
+                False,
                 False,
             )
             for directory in projects

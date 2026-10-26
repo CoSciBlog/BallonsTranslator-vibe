@@ -84,7 +84,7 @@
   - **On translation error** in the Run dialog can retry a failed page once, skip it, or abort the remaining pipeline. Skip remains the compatibility default.
 
 * Batch processing
-  - Open **Tools → Batch Processing** (`Ctrl+Shift+B`) and select a parent folder to process its image-bearing direct child folders sequentially. Detector, primary/fallback OCR, inpainter, translator, glossary scope, and optional pre-upscaling are selectable per run.
+  - Open **Tools → Batch Processing** (`Ctrl+Shift+B`) and select a parent folder to process its image-bearing direct child folders sequentially. Detector, primary/fallback OCR, inpainter, translator, glossary scope, and optional pre-upscaling are selectable per run. When pre-upscaling is enabled, every selected project is upscaled before detection, OCR, inpainting, or translation starts in any project.
   - The full-width parent-folder field accepts typed or pasted paths, including quoted Windows paths. Confirm the entry or start the batch to discover its project folders; **Select folder...** remains available below the field.
   - After pre-upscaling, the page list and canvas reload the saved project before processing continues, keeping page navigation in sync with renamed source images.
   - Choose complete-project order or run detector/OCR/inpaint for every project first, unload local models, and then translate every project while keeping the LLM available. On successful completion the app can do nothing, close, hibernate, shut down, or restart Windows.

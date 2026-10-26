@@ -138,7 +138,8 @@ class BatchProcessingDialog(QDialog):
         note = QLabel(
             self.tr(
                 'Only direct child folders containing images are processed. '
-                'Ignored pages remain excluded from every stage.'
+                'Upscaling finishes for every project before other stages start. '
+                'Ignored pages are upscaled but remain excluded from the pipeline.'
             ),
             self,
         )

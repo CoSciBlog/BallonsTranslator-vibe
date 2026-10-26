@@ -1963,6 +1963,10 @@ class MainWindow(mainwindow_cls):
         self._run_current_batch_pipeline()
 
     def _run_current_batch_pipeline(self) -> None:
+        task = self._batch_task
+        if task is not None and task.phase == 'upscale':
+            QTimer.singleShot(0, self._complete_batch_task)
+            return
         pages = self.imgtrans_proj.pipeline_pages(
             list(self.imgtrans_proj.pages)
         )
@@ -1970,7 +1974,6 @@ class MainWindow(mainwindow_cls):
             LOGGER.info('Batch project has no pipeline-eligible pages; skipping.')
             QTimer.singleShot(0, self._complete_batch_task)
             return
-        task = self._batch_task
         if (
             task is not None
             and task.rerun_inpaint
@@ -1991,7 +1994,7 @@ class MainWindow(mainwindow_cls):
             return
         try:
             workspace = self.imgtrans_proj.glossary_workspace
-            if workspace is not None:
+            if workspace is not None and self._batch_task.phase != 'upscale':
                 if self._batch_options.glossary_mode == GLOSSARY_GLOBAL:
                     workspace.promote_confirmed_to_series()
                 workspace.complete_project()

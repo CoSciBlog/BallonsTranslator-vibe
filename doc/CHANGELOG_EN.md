@@ -1,5 +1,8 @@
 # Changelogs
 
+### 2026-10-26 — 1.5.19+vibe.56
+- Optional batch pre-upscaling now completes for every selected project folder before detection, OCR, inpainting, or translation begins in any project. The chosen per-project or staged processing order applies after this shared prerequisite, and ignored pages continue to participate only in upscaling.
+
 ### 2026-10-19 — 1.5.19+vibe.55
 - Added **Settings → General → Application → Page thumbnail size** with 32, 48 (default), 64, 96, and 128 px options. The saved size applies immediately, preserves page selection and ignored status, and reloads previews in the background while discarding obsolete results. Invalid saved sizes fall back to 48 px with a warning.
 

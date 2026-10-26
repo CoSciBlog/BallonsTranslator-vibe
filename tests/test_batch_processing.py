@@ -41,12 +41,16 @@ def test_collect_batch_projects_uses_direct_children_only(tmp_path: Path):
     ]
 
 
-def test_complete_order_builds_one_task_per_project():
+def test_complete_order_upscales_every_project_before_any_pipeline():
     tasks = build_batch_tasks(['a', 'b'], _options(upscale_first=True))
 
-    assert [task.phase for task in tasks] == ['complete', 'complete']
-    assert all(task.upscale_first for task in tasks)
-    assert all(task.enable_translate for task in tasks)
+    assert [task.phase for task in tasks] == [
+        'upscale', 'upscale', 'complete', 'complete'
+    ]
+    assert [task.project_directory for task in tasks] == ['a', 'b', 'a', 'b']
+    assert [task.upscale_first for task in tasks] == [True, True, False, False]
+    assert all(not task.enable_translate for task in tasks[:2])
+    assert all(task.enable_translate for task in tasks[2:])
 
 
 def test_complete_order_can_request_reinpainting_after_pipeline():
@@ -63,15 +67,19 @@ def test_staged_order_keeps_translation_model_phase_contiguous():
     )
 
     assert [task.phase for task in tasks] == [
-        'local', 'local', 'translation', 'translation'
+        'upscale', 'upscale', 'local', 'local', 'translation', 'translation'
     ]
-    assert [task.project_directory for task in tasks] == ['a', 'b', 'a', 'b']
-    assert [task.upscale_first for task in tasks] == [True, True, False, False]
-    assert all(not task.enable_translate for task in tasks[:2])
-    assert all(task.enable_translate for task in tasks[2:])
+    assert [task.project_directory for task in tasks] == [
+        'a', 'b', 'a', 'b', 'a', 'b'
+    ]
+    assert [task.upscale_first for task in tasks] == [
+        True, True, False, False, False, False
+    ]
+    assert all(not task.enable_translate for task in tasks[:4])
+    assert all(task.enable_translate for task in tasks[4:])
     assert all(
         not (task.enable_detect or task.enable_ocr or task.enable_inpaint)
-        for task in tasks[2:]
+        for task in tasks[4:]
     )
 
 
@@ -87,9 +95,8 @@ def test_staged_translation_only_upscales_once():
         ),
     )
 
-    assert len(tasks) == 1
-    assert tasks[0].phase == 'translation'
-    assert tasks[0].upscale_first is True
+    assert [task.phase for task in tasks] == ['upscale', 'translation']
+    assert [task.upscale_first for task in tasks] == [True, False]
 
 
 def test_staged_reinpaint_only_uses_local_phase():

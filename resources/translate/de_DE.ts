@@ -208,8 +208,8 @@
     </message>
     <message>
         <location filename="../../ballontranslator/ui/batch_processing_dialog.py" line="133"/>
-        <source>Only direct child folders containing images are processed. Ignored pages remain excluded from every stage.</source>
-        <translation>Es werden nur direkte Unterordner mit Bildern verarbeitet. Ignorierte Seiten bleiben in allen Schritten ausgeschlossen.</translation>
+        <source>Only direct child folders containing images are processed. Upscaling finishes for every project before other stages start. Ignored pages are upscaled but remain excluded from the pipeline.</source>
+        <translation>Es werden nur direkte Unterordner mit Bildern verarbeitet. Zuerst werden alle Projekte hochskaliert, danach beginnen die übrigen Schritte. Ignorierte Seiten werden hochskaliert, bleiben aber von der Pipeline ausgeschlossen.</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/batch_processing_dialog.py" line="146"/>
