@@ -6335,6 +6335,14 @@ Then restart Photoshop. Explorer will now open the source file and destination l
         <translation>Use Glossary for Translation</translation>
     </message>
     <message>
+        <source>Review and optimize translation with LLM</source>
+        <translation>Review and optimize translation with LLM</translation>
+    </message>
+    <message>
+        <source>Runs an extra LLM review for natural wording, source accuracy, pronouns, speaker/addressee references, gendered wording, and formality. Adds LLM requests.</source>
+        <translation>Runs an extra LLM review for natural wording, source accuracy, pronouns, speaker/addressee references, gendered wording, and formality. Adds LLM requests.</translation>
+    </message>
+    <message>
         <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="479"/>
         <source>Translate with Google First</source>
         <translation>Translate with Google First</translation>

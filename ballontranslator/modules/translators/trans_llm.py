@@ -67,8 +67,10 @@ from .trans_google import GoogleTranslateProviderPython, ProviderError
 from .llm_translation_contract import (
     InvalidNumTranslations,
     TranslationPromptSpec,
+    assemble_translation_review_request,
     assemble_translation_request,
     parse_translation_response,
+    render_assistant_response,
     render_history_page,
     render_user_prompt,
     translation_json_schema,
@@ -439,6 +441,7 @@ class LLMTranslator(LLMChatRequester, BaseTranslator):
             f'vision={vision_enabled}, '
             f'summary_memory={summary_memory_enabled}, '
             f'overwrite_summary={overwrite_summary}, '
+            f'review_translation={bool(profile.review_translation)}, '
             f'google_first_pass={bool(profile.google_first_pass)}, '
             f'{output_limit}'
             f'thinking_setting='
@@ -1501,6 +1504,83 @@ class LLMTranslator(LLMChatRequester, BaseTranslator):
             self._translation_codex_response = result
         return result.content
 
+    def _review_translations(
+        self,
+        profile: LLMProfile,
+        translation_messages: List[Dict],
+        draft_response: str,
+        *,
+        expected_translations: int,
+        target_language: str,
+        array_response: bool,
+        usage_page_key: Optional[str],
+    ) -> Tuple[List[str], Optional[LLMChatResult]]:
+        """Review one parsed draft without committing a second history page."""
+
+        include_context = True
+        retry_attempt = 0
+        provider_attempt = 0
+        codex_turn = None
+        if profile.backend == 'codex':
+            from ..codex import CodexTurnState
+            codex_turn = CodexTurnState()
+        while True:
+            if self.stop_event is not None and self.stop_event.is_set():
+                raise LLMRequestStopped()
+            messages = assemble_translation_review_request(
+                translation_messages,
+                draft_response,
+                profile_prompt=profile.prompt,
+                target_language=target_language,
+                array_response=array_response,
+                include_context=include_context,
+            )
+            try:
+                provider_attempt += 1
+                self._translation_codex_response = None
+                raw_response = self._request_translation(
+                    profile,
+                    messages,
+                    expected_translations=expected_translations,
+                    usage_page_key=(
+                        f'{usage_page_key} [review]'
+                        if usage_page_key is not None
+                        else 'review'
+                    ),
+                    usage_attempt=provider_attempt,
+                    codex_turn=codex_turn,
+                )
+                codex_response = self._translation_codex_response
+                self._translation_codex_response = None
+                parsed = parse_translation_response(
+                    raw_response,
+                    expected_translations,
+                    array_response=array_response,
+                )
+                return list(parsed.translations), codex_response
+            except ContextLengthError:
+                if include_context and len(translation_messages) > 2:
+                    include_context = False
+                    self.logger.debug(
+                        'LLM translation review exceeded context; retrying '
+                        'without optional prior-page context.'
+                    )
+                    continue
+                raise
+            except (LLMUserActionRequiredError, LLMRequestStopped):
+                raise
+            except Exception as error:
+                retry_attempt += 1
+                if retry_attempt >= self.get_param_value('retry attempts'):
+                    self.logger.error('LLM translation review failed: %s', error)
+                    raise
+                self.logger.warning(
+                    'LLM translation review failed due to %s. Attempt: %s',
+                    error,
+                    retry_attempt,
+                )
+                self._wait(self.get_param_value('retry timeout'))
+
     def _translate(
         self,
         src_list: Sequence[str],
@@ -1653,6 +1733,25 @@ class LLMTranslator(LLMChatRequester, BaseTranslator):
                     raise
                 self.logger.warning(f"LLM translation failed due to {e}. Attempt: {retry_attempt}")
                 self._wait(self.get_param_value('retry timeout'))
+
+        if profile.review_translation and queries:
+            draft_response = render_assistant_response(
+                tuple(translations),
+                array_response=prompt_spec.array_response,
+            )
+            reviewed, review_codex_response = self._review_translations(
+                profile,
+                messages,
+                draft_response,
+                expected_translations=len(queries),
+                target_language=prompt_spec.target_language,
+                array_response=prompt_spec.array_response,
+                usage_page_key=usage_page_key,
+            )
+            translations = reviewed
+            parsed = replace(parsed, translations=tuple(reviewed))
+            if review_codex_response is not None:
+                codex_response = review_codex_response
 
         if (
             commit_history_window

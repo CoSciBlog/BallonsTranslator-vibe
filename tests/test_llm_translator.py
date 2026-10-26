@@ -252,6 +252,7 @@ class LLMTranslatorTest(unittest.TestCase):
                 profile.model = 'selected-model'
                 profile.model_options = ['selected-model']
                 profile.max_tokens = 1234
+                profile.review_translation = True
                 with mock.patch.object(pcfg.module, 'llm_profiles', [profile]), \
                         mock.patch.object(pcfg.module, 'translator_llm_id', profile.id):
                     description = self.translator.translation_run_description()
@@ -260,6 +261,7 @@ class LLMTranslatorTest(unittest.TestCase):
                 else:
                     self.assertIn('max_output_tokens=1234', description)
                 self.assertIn(f'model={profile.model!r}', description)
+                self.assertIn('review_translation=True', description)
                 self.assertIn('thinking_setting=', description)
 
     def test_legacy_provider_keeps_page_id_schema_and_message_content(self):
@@ -303,6 +305,55 @@ class LLMTranslatorTest(unittest.TestCase):
 
         self.assertEqual(result, ['甲', '乙', '丙'])
         self.assertEqual(request.call_args.kwargs['expected_translations'], 3)
+
+    def test_optional_review_replaces_draft_with_second_llm_response(self):
+        profile = default_profile('LM Studio')
+        profile.review_translation = True
+        with mock.patch.object(
+            self.translator,
+            '_request_translation',
+            side_effect=(
+                '{"1":"rough one","2":"rough two"}',
+                '{"1":"natural one","2":"natural two"}',
+            ),
+        ) as request:
+            result = self.translator._translate(
+                ['source one', 'source two'],
+                profile=profile,
+                prompt_spec=self._prompt_spec(profile),
+                page_key='review.png',
+            )
+
+        self.assertEqual(result, ['natural one', 'natural two'])
+        self.assertEqual(request.call_count, 2)
+        review_messages = request.call_args_list[1].args[1]
+        self.assertIn('final translation reviewer', review_messages[0]['content'])
+        self.assertEqual(review_messages[-2], {
+            'role': 'assistant',
+            'content': '{"1":"rough one","2":"rough two"}',
+        })
+        self.assertEqual(review_messages[-1]['role'], 'user')
+        self.assertIn('Review the immediately preceding draft', review_messages[-1]['content'])
+        self.assertEqual(
+            request.call_args_list[1].kwargs['expected_translations'],
+            2,
+        )
+
+    def test_review_is_not_requested_when_profile_option_is_disabled(self):
+        profile = default_profile('LM Studio')
+        with mock.patch.object(
+            self.translator,
+            '_request_translation',
+            return_value='{"1":"translated"}',
+        ) as request:
+            result = self.translator._translate(
+                ['source'],
+                profile=profile,
+                prompt_spec=self._prompt_spec(profile),
+            )
+
+        self.assertEqual(result, ['translated'])
+        request.assert_called_once()
 
     def test_context_status_error_is_typed_and_preserves_provider_message(self):
         provider_message = (

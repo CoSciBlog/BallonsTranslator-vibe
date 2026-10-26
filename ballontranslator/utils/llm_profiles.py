@@ -226,6 +226,7 @@ class LLMProfile(Config):
     frequency_penalty: float = 0.0
     presence_penalty: float = 0.0
     use_glossary: bool = True
+    review_translation: bool = False
     json_schema_response_format: bool = False
     low_vram_mode: bool = False
     google_first_pass: bool = False
@@ -248,6 +249,12 @@ class LLMProfile(Config):
         if not isinstance(self.use_glossary, bool):
             LOGGER.warning('Discard invalid LLM profile use_glossary for %s.', self.id or self.name)
             self.use_glossary = True
+        if not isinstance(self.review_translation, bool):
+            LOGGER.warning(
+                'Discard invalid LLM profile review_translation for %s.',
+                self.id or self.name,
+            )
+            self.review_translation = False
         for key, default in (
             ('google_first_pass', False),
             ('google_auto_detect_source', True),

@@ -83,6 +83,7 @@ PROFILE_COMMON_PARAM_DEFS = [
 ]
 PROFILE_MODALITY_PARAM_DEFS = {
     'text': [
+        ('review_translation', 'checkbox'),
         ('google_first_pass', 'checkbox'),
         ('google_auto_detect_source', 'checkbox'),
         ('google_fallback_to_draft', 'checkbox'),
@@ -476,6 +477,7 @@ class ProfileCardWidget(QGroupBox):
             'image_prompt': self.tr('Prompt'),
             'low_vram_mode': self.tr('Low VRAM Mode'),
             'use_glossary': self.tr('Use Glossary for Translation'),
+            'review_translation': self.tr('Review and optimize translation with LLM'),
             'google_first_pass': self.tr('Translate with Google First'),
             'google_auto_detect_source': self.tr('Google Auto-Detect Source Language'),
             'google_fallback_to_draft': self.tr('Keep Google Draft If LLM Fails'),
@@ -508,6 +510,11 @@ class ProfileCardWidget(QGroupBox):
             'low_vram_mode': self.tr('Preserved compatibility flag for local profiles.'),
             'use_glossary': self.tr(
                 'Include matching project, series, reference, and selected file glossary entries in translation requests.'
+            ),
+            'review_translation': self.tr(
+                'Runs an extra LLM review for natural wording, source accuracy, '
+                'pronouns, speaker/addressee references, gendered wording, and '
+                'formality. Adds LLM requests.'
             ),
             'google_first_pass': self.tr(
                 'Translate every selected page completely with Google Translate '
@@ -898,6 +905,7 @@ class ProfileCardWidget(QGroupBox):
             glossary_checkbox.setChecked(bool(self.profile.use_glossary))
             glossary_checkbox.blockSignals(False)
         for key in (
+            'review_translation',
             'google_first_pass',
             'google_auto_detect_source',
             'google_fallback_to_draft',

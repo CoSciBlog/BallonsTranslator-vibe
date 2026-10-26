@@ -81,6 +81,24 @@ class LLMProfileModelSelectorTest(unittest.TestCase):
         card.syncFromProfile()
         self.assertTrue(checkbox.isChecked())
 
+    def test_translation_review_checkbox_updates_profile_setting(self) -> None:
+        profile = LLMProfile(id='test', name='Test')
+        card = ProfileCardWidget(profile)
+        self.addCleanup(card.deleteLater)
+        checkbox = card.details.param_widgets['review_translation']
+
+        self.assertFalse(checkbox.isChecked())
+        self.assertEqual(
+            card.profile_param_display_names['review_translation'],
+            'Review and optimize translation with LLM',
+        )
+        checkbox.click()
+        self.assertTrue(profile.review_translation)
+
+        profile.review_translation = False
+        card.syncFromProfile()
+        self.assertFalse(checkbox.isChecked())
+
     def test_ollama_context_is_profile_scoped(self) -> None:
         profile = default_profile('Ollama')
         profile.model = 'qwen:27b-q3_k_s'

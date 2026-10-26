@@ -51,6 +51,36 @@ class LLMTranslationHistoryTest(
     LLMTranslationTestMixin,
     unittest.TestCase,
 ):
+    def test_reviewed_translation_owns_the_reusable_history_window(self) -> None:
+        project = self._project(2)
+        self._complete(project, '001.png')
+        pcfg.module.llm_translate_context = LLMTranslateContext.HISTORY
+        self.profile.review_translation = True
+        self.translator.set_stop_event(threading.Event())
+        context = self._snapshot_request_context(
+            project,
+            '002.png',
+            self.profile,
+        )
+
+        with mock.patch.object(
+            self.translator,
+            '_request_translation',
+            side_effect=('{"1":"draft"}', '{"1":"reviewed"}'),
+        ):
+            result = self._translate(
+                ['source-2'],
+                profile=self.profile,
+                request_context=context,
+                page_key='002.png',
+            )
+
+        self.assertEqual(result, ['reviewed'])
+        self.assertEqual(
+            self.translator._history_window.last_response.snapshot.translations,
+            ('reviewed',),
+        )
+
     def test_same_run_originals_do_not_mask_edits_to_saved_history(self) -> None:
         project = self._project(3)
         self._complete(project, '001.png')

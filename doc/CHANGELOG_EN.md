@@ -1,5 +1,8 @@
 # Changelogs
 
+### 2026-10-26 — 1.5.19+vibe.58
+- Added default-off **Review and optimize translation with LLM** to every LLM profile’s Text settings. When enabled, each page draft receives a second LLM review using the source, page context, glossary, memory, and available image to improve natural wording, accuracy, pronouns, speaker/addressee references, gendered wording, and formality. Only the reviewed translation enters page history; this adds one LLM request per page.
+
 ### 2026-10-26 — 1.5.19+vibe.57
 - Single-project pipelines continue to save completion per page and can resume at the failed page with **Continue**. Batch Processing now has a default-enabled **Resume** option: saved completed pages are reused immediately, while matching completed project phases and pre-upscaling tasks are recovered from an atomic checkpoint in the batch root. The checkpoint is removed after full success; disable Resume to process everything again.
 

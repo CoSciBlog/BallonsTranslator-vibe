@@ -6377,6 +6377,14 @@ Starten Sie dann Photoshop neu. Der Explorer öffnet nun die Quelldatei und den 
         <translation>Glossar für Übersetzungen verwenden</translation>
     </message>
     <message>
+        <source>Review and optimize translation with LLM</source>
+        <translation>Übersetzung mit LLM prüfen und optimieren</translation>
+    </message>
+    <message>
+        <source>Runs an extra LLM review for natural wording, source accuracy, pronouns, speaker/addressee references, gendered wording, and formality. Adds LLM requests.</source>
+        <translation>Führt eine zusätzliche LLM-Prüfung für natürliche Formulierungen, Genauigkeit gegenüber dem Original, Pronomen, Bezüge zwischen Sprecher und angesprochener Person, geschlechtsspezifische Formulierungen und Höflichkeitsstufen aus. Fügt LLM-Anfragen hinzu.</translation>
+    </message>
+    <message>
         <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="479"/>
         <source>Translate with Google First</source>
         <translation>Zuerst mit Google übersetzen</translation>

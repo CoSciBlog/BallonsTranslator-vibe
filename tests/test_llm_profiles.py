@@ -99,6 +99,18 @@ class CodexProfileConfigTest(unittest.TestCase):
         self.assertFalse(restored.use_glossary)
         self.assertTrue(LLMProfile(use_glossary='invalid').use_glossary)
 
+    def test_translation_review_defaults_off_roundtrips_and_validates(self) -> None:
+        profile = LLMProfile(id='review-profile')
+        self.assertFalse(profile.review_translation)
+
+        profile.review_translation = True
+        restored = LLMProfile(**profile_to_dict(profile))
+        self.assertTrue(restored.review_translation)
+
+        with self.assertLogs('BallonTranslator', level='WARNING'):
+            invalid = LLMProfile(review_translation='yes')
+        self.assertFalse(invalid.review_translation)
+
     def test_google_first_pass_settings_roundtrip_and_validate(self) -> None:
         profile = LLMProfile(
             id='google-first',
