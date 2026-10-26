@@ -52,6 +52,7 @@ class BatchOptions:
     order: str = ORDER_PROJECT
     completion_action: str = COMPLETION_NONE
     resume: bool = True
+    translator_llm_id: str = ''
 
 
 @dataclass(frozen=True)
@@ -103,6 +104,7 @@ def batch_resume_plan(
             'fallback_ocr': options.fallback_ocr,
             'inpainter': options.inpainter,
             'translator': options.translator,
+            'translator_llm_id': options.translator_llm_id,
             'enable_detect': options.enable_detect,
             'enable_ocr': options.enable_ocr,
             'enable_inpaint': options.enable_inpaint,

@@ -149,6 +149,21 @@
         <translation>Übersetzung</translation>
     </message>
     <message>
+        <location filename="../../ballontranslator/ui/batch_processing_dialog.py" line="108"/>
+        <source>LLM profile</source>
+        <translation>LLM-Profil</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/batch_processing_dialog.py" line="124"/>
+        <source>LLM profile used for every translated project in this batch.</source>
+        <translation>LLM-Profil, das für jedes übersetzte Projekt dieser Stapelverarbeitung verwendet wird.</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/batch_processing_dialog.py" line="277"/>
+        <source>Select an LLM profile for batch translation.</source>
+        <translation>Wählen Sie ein LLM-Profil für die Stapelübersetzung aus.</translation>
+    </message>
+    <message>
         <location filename="../../ballontranslator/ui/batch_processing_dialog.py" line="101"/>
         <source>Individual glossary per project</source>
         <translation>Eigenes Glossar je Projekt</translation>

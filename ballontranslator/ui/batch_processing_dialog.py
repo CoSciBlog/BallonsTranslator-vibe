@@ -35,6 +35,7 @@ from ballontranslator.utils.batch_processing import (
     collect_batch_project_dirs,
 )
 from ballontranslator.utils.config import pcfg
+from ballontranslator.utils.llm_profiles import is_llm_text_translator
 
 
 class BatchProcessingDialog(QDialog):
@@ -103,6 +104,31 @@ class BatchProcessingDialog(QDialog):
             self.tr('Translation'), GET_VALID_TRANSLATORS(), pcfg.module.translator
         )
         form.addRow(self.translate_check, self.translate_combo)
+
+        self.llm_profile_label = QLabel(self.tr('LLM profile'), self)
+        self.llm_profile_combo = QComboBox(self)
+        self.llm_profile_label.setBuddy(self.llm_profile_combo)
+        for profile in pcfg.module.llm_profiles:
+            if not profile.support_text:
+                continue
+            label = profile.name or profile.id
+            if profile.model:
+                label = f'{label} — {profile.model}'
+            self.llm_profile_combo.addItem(label, profile.id)
+        selected_profile = self.llm_profile_combo.findData(
+            pcfg.module.translator_llm_id
+        )
+        if selected_profile >= 0:
+            self.llm_profile_combo.setCurrentIndex(selected_profile)
+        self.llm_profile_combo.setToolTip(self.tr(
+            'LLM profile used for every translated project in this batch.'
+        ))
+        form.addRow(self.llm_profile_label, self.llm_profile_combo)
+        self.translate_combo.currentTextChanged.connect(
+            self._sync_llm_profile_row
+        )
+        self.translate_check.toggled.connect(self._sync_llm_profile_row)
+        self._sync_llm_profile_row()
 
         self.glossary_combo = QComboBox(self)
         self.glossary_combo.addItem(self.tr('Individual glossary per project'), GLOSSARY_INDIVIDUAL)
@@ -176,6 +202,17 @@ class BatchProcessingDialog(QDialog):
         checker.toggled.connect(combo.setEnabled)
         return checker, combo
 
+    def _sync_llm_profile_row(self, *_args) -> None:
+        visible = (
+            self.translate_check.isChecked()
+            and is_llm_text_translator(self.translate_combo.currentText())
+        )
+        self.llm_profile_label.setVisible(visible)
+        self.llm_profile_combo.setVisible(visible)
+        self.llm_profile_combo.setEnabled(
+            visible and self.llm_profile_combo.count() > 0
+        )
+
     def _select_folder(self) -> None:
         directory = QFileDialog.getExistingDirectory(
             self,
@@ -230,6 +267,17 @@ class BatchProcessingDialog(QDialog):
             )
             return
         if (
+            self.translate_check.isChecked()
+            and is_llm_text_translator(self.translate_combo.currentText())
+            and not self.llm_profile_combo.currentData()
+        ):
+            QMessageBox.warning(
+                self,
+                self.tr('Batch Processing'),
+                self.tr('Select an LLM profile for batch translation.'),
+            )
+            return
+        if (
             self.fallback_check.isChecked()
             and self.fallback_combo.currentText() == self.ocr_combo.currentText()
         ):
@@ -253,6 +301,12 @@ class BatchProcessingDialog(QDialog):
             ),
             inpainter=self.inpaint_combo.currentText(),
             translator=self.translate_combo.currentText(),
+            translator_llm_id=(
+                str(self.llm_profile_combo.currentData() or '')
+                if self.translate_check.isChecked()
+                and is_llm_text_translator(self.translate_combo.currentText())
+                else ''
+            ),
             enable_detect=self.detect_check.isChecked(),
             enable_ocr=self.ocr_check.isChecked(),
             enable_inpaint=self.inpaint_check.isChecked(),

@@ -1,5 +1,8 @@
 # Changelogs
 
+### 2026-10-26 — 1.5.19+vibe.61
+- Added a context-sensitive LLM profile selector to Batch Processing. Text-capable profiles can be selected for LLM translators, the chosen profile is used and logged for every project, and changing it creates a distinct resume plan while the previous global selection is restored after the batch.
+
 ### 2026-10-26 — 1.5.19+vibe.60
 - Improved the initial Pipeline History column widths and made every table column freely resizable with the mouse. Manually adjusted widths are preserved when the history is refreshed.
 

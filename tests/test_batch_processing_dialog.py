@@ -12,6 +12,8 @@ from qtpy.QtWidgets import QApplication, QDialog
 
 from ballontranslator.ui.batch_processing_dialog import BatchProcessingDialog
 from ballontranslator.utils.batch_processing import collect_batch_project_dirs
+from ballontranslator.utils.config import pcfg
+from ballontranslator.utils.llm_profiles import LLMProfile, LLM_TRANSLATOR_KEY
 
 
 class BatchProcessingDialogTest(unittest.TestCase):
@@ -95,3 +97,42 @@ class BatchProcessingDialogTest(unittest.TestCase):
         self.dialog.resume_check.setChecked(False)
 
         self.assertFalse(self.dialog.options().resume)
+
+    def test_llm_profile_selector_uses_text_profiles_for_llm_translation(self) -> None:
+        profiles = [
+            LLMProfile(id='text-a', name='Text A', model='model-a'),
+            LLMProfile(id='text-b', name='Text B', model='model-b'),
+            LLMProfile(
+                id='image-only',
+                name='Image only',
+                support_text=False,
+                support_image=True,
+            ),
+        ]
+        with patch.multiple(
+            pcfg.module,
+            llm_profiles=profiles,
+            translator_llm_id='text-b',
+            translator='google',
+        ):
+            dialog = BatchProcessingDialog()
+            self.addCleanup(dialog.deleteLater)
+
+        self.assertTrue(dialog.llm_profile_combo.isHidden())
+        dialog.translate_combo.setCurrentText(LLM_TRANSLATOR_KEY)
+
+        self.assertFalse(dialog.llm_profile_combo.isHidden())
+        self.assertEqual(
+            [
+                dialog.llm_profile_combo.itemData(index)
+                for index in range(dialog.llm_profile_combo.count())
+            ],
+            ['text-a', 'text-b'],
+        )
+        self.assertEqual(dialog.llm_profile_combo.currentData(), 'text-b')
+
+        dialog.llm_profile_combo.setCurrentIndex(0)
+        self.assertEqual(dialog.options().translator_llm_id, 'text-a')
+
+        dialog.translate_check.setChecked(False)
+        self.assertTrue(dialog.llm_profile_combo.isHidden())

@@ -1784,6 +1784,7 @@ class MainWindow(mainwindow_cls):
             key: getattr(module, key)
             for key in (
                 'textdetector', 'ocr', 'inpainter', 'translator',
+                'translator_llm_id',
                 'enable_detect', 'enable_ocr', 'enable_inpaint',
                 'enable_translate', 'empty_runcache',
                 'project_glossary_enabled',
@@ -1832,6 +1833,13 @@ class MainWindow(mainwindow_cls):
         else:
             module.project_glossary_series_enabled = False
             module.project_glossary_series_path = ''
+        if is_llm_text_translator(options.translator):
+            selected_profile = profile_by_id(
+                module.llm_profiles,
+                options.translator_llm_id,
+            )
+            if selected_profile is not None and selected_profile.support_text:
+                module.translator_llm_id = selected_profile.id
         self.module_manager.selectTextDetector(options.textdetector)
         self.module_manager.selectOCR(options.ocr)
         self.module_manager.selectInpainter(options.inpainter)

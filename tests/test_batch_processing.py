@@ -1,5 +1,9 @@
+import json
 from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import Mock, patch
 
+from ballontranslator.ui.mainwindow import MainWindow
 from ballontranslator.utils.batch_processing import (
     BatchResumeStore,
     BatchOptions,
@@ -10,6 +14,8 @@ from ballontranslator.utils.batch_processing import (
     collect_batch_project_dirs,
     windows_completion_command,
 )
+from ballontranslator.utils.config import pcfg
+from ballontranslator.utils.llm_profiles import LLMProfile, LLM_TRANSLATOR_KEY
 
 
 def _options(**overrides):
@@ -170,3 +176,82 @@ def test_batch_resume_can_explicitly_start_over_and_clear_checkpoint(tmp_path: P
     assert store.prepare(plan, resume=True) == set()
     store.clear()
     assert not store.path.exists()
+
+
+def test_batch_resume_plan_distinguishes_selected_llm_profile():
+    first = _options(
+        translator='LLMTranslator',
+        translator_llm_id='profile-a',
+    )
+    second = _options(
+        translator='LLMTranslator',
+        translator_llm_id='profile-b',
+    )
+
+    first_plan = batch_resume_plan(
+        first,
+        ['chapter'],
+        build_batch_tasks(['chapter'], first),
+    )
+    second_plan = batch_resume_plan(
+        second,
+        ['chapter'],
+        build_batch_tasks(['chapter'], second),
+    )
+
+    assert first_plan['pipeline']['translator_llm_id'] == 'profile-a'
+    assert first_plan != second_plan
+
+
+def test_batch_uses_selected_llm_profile_and_restores_previous_one(tmp_path: Path):
+    previous = LLMProfile(id='previous', name='Previous', model='old-model')
+    selected = LLMProfile(id='selected', name='Selected', model='new-model')
+    project = tmp_path / 'chapter'
+    project.mkdir()
+    options = _options(
+        root_directory=str(tmp_path),
+        translator=LLM_TRANSLATOR_KEY,
+        translator_llm_id=selected.id,
+        enable_detect=False,
+        enable_ocr=False,
+        enable_inpaint=False,
+    )
+    manager = SimpleNamespace(
+        selectTextDetector=Mock(),
+        selectOCR=Mock(),
+        selectInpainter=Mock(),
+        selectTranslator=Mock(),
+        configure_ocr_fallback=Mock(),
+    )
+    owner = SimpleNamespace(
+        module_manager=manager,
+        conditional_save=Mock(),
+        _run_next_batch_task=Mock(),
+        _batch_options=None,
+        _batch_config_snapshot=None,
+    )
+
+    with patch.multiple(
+        pcfg.module,
+        llm_profiles=[previous, selected],
+        translator='google',
+        translator_llm_id=previous.id,
+    ), patch('ballontranslator.ui.mainwindow.QTimer.singleShot') as schedule:
+        MainWindow.start_batch_processing(owner, options, [str(project)])
+
+        assert pcfg.module.translator_llm_id == selected.id
+        assert owner._batch_config_snapshot['translator_llm_id'] == previous.id
+        manager.selectTranslator.assert_called_once_with(LLM_TRANSLATOR_KEY)
+        schedule.assert_called_once_with(0, owner._run_next_batch_task)
+        payload = json.loads(
+            (tmp_path / 'pipeline_history.json').read_text(encoding='utf-8')
+        )
+        assert payload['entries'][0]['details']['translation_llm'] == {
+            'profile_id': selected.id,
+            'profile_name': selected.name,
+            'backend': selected.backend,
+            'model': selected.model,
+        }
+
+        MainWindow._restore_batch_config(owner)
+        assert pcfg.module.translator_llm_id == previous.id
