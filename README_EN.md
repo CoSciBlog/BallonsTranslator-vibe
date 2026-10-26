@@ -94,7 +94,7 @@
   - In **Run (F5) → Inpainting**, enable **Optimize masks during re-inpainting** to detect remaining text after the first pass, repair it on the fresh result, and add it to the complete saved mask. **Re-inpainting mask expansion** restores the 1.4-vibe elliptical Dilate control (0–100 px radius, default 0); try a small radius for missed glyph edges. Successful runs save the expanded/combined mask, so another run with a positive radius expands it again; set it back to 0 to reuse the repaired mask. Both settings apply to current-page, selected-page, all-page, and batch re-inpainting while preserving OCR and translations. Optimization is off by default and prepares the selected detector only when enabled.
 
 * Pipeline history
-  - **Tools → Pipeline History** (`Ctrl+Shift+H`) shows start time, duration, status, stages, modules, and the LLM profile/model used for translation.
+  - **Tools → Pipeline History** (`Ctrl+Shift+H`) shows start time, duration, status, stages, modules, and the LLM profile/model used for translation. Its columns start with balanced widths and can be resized freely by dragging their header dividers.
   - Normal runs, continue/render operations, re-inpainting, complete batches, and individual batch phases are atomically stored in a separate `pipeline_history.json`.
 
 * Project glossary backend

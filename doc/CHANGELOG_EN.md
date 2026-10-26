@@ -1,5 +1,8 @@
 # Changelogs
 
+### 2026-10-26 — 1.5.19+vibe.60
+- Improved the initial Pipeline History column widths and made every table column freely resizable with the mouse. Manually adjusted widths are preserved when the history is refreshed.
+
 ### 2026-10-26 — 1.5.19+vibe.59
 - Simplified the Tools menu to one direct **Upscale Entire Project 2x...** action. Removed the Upscaling submenu and its current-page action while retaining project and batch upscaling behavior.
 

@@ -33,6 +33,8 @@ from .framelesswindow import (
 class PipelineHistoryWindow(OutsideClickFramelessMixin, FramelessWindow):
     """Read-only history viewer for the active project."""
 
+    _DEFAULT_COLUMN_WIDTHS = (160, 85, 100, 140, 145, 145, 185)
+
     def __init__(self, parent: Optional[QWidget] = None) -> None:
         window_type = getattr(Qt, 'WindowType', Qt)
         super().__init__(parent, window_type.Dialog)
@@ -78,8 +80,12 @@ class PipelineHistoryWindow(OutsideClickFramelessMixin, FramelessWindow):
         ])
         self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
-        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
-        self.table.horizontalHeader().setStretchLastSection(True)
+        header = self.table.horizontalHeader()
+        header.setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
+        header.setMinimumSectionSize(48)
+        header.setStretchLastSection(False)
+        for column, width in enumerate(self._DEFAULT_COLUMN_WIDTHS):
+            self.table.setColumnWidth(column, width)
         self.table.itemSelectionChanged.connect(self._show_selected_details)
         layout.addWidget(self.table, 2)
 

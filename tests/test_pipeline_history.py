@@ -6,7 +6,7 @@ from unittest.mock import patch
 os.environ.setdefault('QT_QPA_PLATFORM', 'offscreen')
 
 import pytest
-from qtpy.QtWidgets import QApplication
+from qtpy.QtWidgets import QApplication, QHeaderView
 
 from ballontranslator.ui.pipeline_history_window import PipelineHistoryWindow
 from ballontranslator.ui.mainwindow import MainWindow
@@ -70,6 +70,16 @@ def test_history_window_shows_duration_and_llm_model(tmp_path):
     assert window.table.rowCount() == 1
     assert window.table.item(0, 2).text() == 'Completed'
     assert window.table.item(0, 6).text() == 'gpt-6.1-sol'
+    header = window.table.horizontalHeader()
+    assert all(
+        header.sectionResizeMode(column) == QHeaderView.ResizeMode.Interactive
+        for column in range(window.table.columnCount())
+    )
+    assert header.stretchLastSection() is False
+
+    header.resizeSection(0, 230)
+    window.refresh()
+    assert header.sectionSize(0) == 230
 
     window.deleteLater()
     app.processEvents()
