@@ -135,7 +135,7 @@ class BatchProcessingDialog(QDialog):
         self.glossary_combo.addItem(self.tr('One global glossary for the batch'), GLOSSARY_GLOBAL)
         form.addRow(self.tr('Glossary'), self.glossary_combo)
 
-        self.upscale_check = QCheckBox(self.tr('Upscale images 2x before processing'), self)
+        self.upscale_check = QCheckBox(self.tr('Upscale images 2x'), self)
         form.addRow(self.tr('Upscaling'), self.upscale_check)
 
         self.order_combo = QComboBox(self)
@@ -259,11 +259,12 @@ class BatchProcessingDialog(QDialog):
             self.inpaint_check.isChecked(),
             self.translate_check.isChecked(),
             self.reinpaint_check.isChecked(),
+            self.upscale_check.isChecked(),
         )):
             QMessageBox.warning(
                 self,
                 self.tr('Batch Processing'),
-                self.tr('Enable at least one pipeline stage.'),
+                self.tr('Enable at least one pipeline stage or upscaling.'),
             )
             return
         if (

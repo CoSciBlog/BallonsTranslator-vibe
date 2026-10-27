@@ -98,6 +98,59 @@ class BatchProcessingDialogTest(unittest.TestCase):
 
         self.assertFalse(self.dialog.options().resume)
 
+    def test_upscaling_can_run_without_any_pipeline_stage(self) -> None:
+        self.dialog.folder_edit.setText(str(self.root))
+        for checkbox in (
+            self.dialog.detect_check,
+            self.dialog.ocr_check,
+            self.dialog.inpaint_check,
+            self.dialog.translate_check,
+            self.dialog.reinpaint_check,
+        ):
+            checkbox.setChecked(False)
+        self.dialog.upscale_check.setChecked(True)
+
+        with patch(
+            'ballontranslator.ui.batch_processing_dialog.QMessageBox.warning'
+        ) as warning:
+            self.dialog.accept()
+
+        self.assertEqual(self.dialog.result(), QDialog.DialogCode.Accepted)
+        warning.assert_not_called()
+        options = self.dialog.options()
+        self.assertTrue(options.upscale_first)
+        self.assertFalse(any((
+            options.enable_detect,
+            options.enable_ocr,
+            options.enable_inpaint,
+            options.enable_translate,
+            options.rerun_inpaint,
+        )))
+
+    def test_batch_still_requires_one_operation(self) -> None:
+        self.dialog.folder_edit.setText(str(self.root))
+        for checkbox in (
+            self.dialog.detect_check,
+            self.dialog.ocr_check,
+            self.dialog.inpaint_check,
+            self.dialog.translate_check,
+            self.dialog.reinpaint_check,
+            self.dialog.upscale_check,
+        ):
+            checkbox.setChecked(False)
+
+        with patch(
+            'ballontranslator.ui.batch_processing_dialog.QMessageBox.warning'
+        ) as warning:
+            self.dialog.accept()
+
+        self.assertEqual(self.dialog.result(), QDialog.DialogCode.Rejected)
+        warning.assert_called_once_with(
+            self.dialog,
+            'Batch Processing',
+            'Enable at least one pipeline stage or upscaling.',
+        )
+
     def test_llm_profile_selector_uses_text_profiles_for_llm_translation(self) -> None:
         profiles = [
             LLMProfile(id='text-a', name='Text A', model='model-a'),

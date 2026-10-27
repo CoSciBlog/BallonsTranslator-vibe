@@ -69,6 +69,24 @@ def test_complete_order_can_request_reinpainting_after_pipeline():
     assert tasks[0].rerun_inpaint is True
 
 
+def test_upscale_only_plan_does_not_create_empty_pipeline_tasks():
+    for order in ('project', ORDER_STAGED):
+        options = _options(
+            order=order,
+            enable_detect=False,
+            enable_ocr=False,
+            enable_inpaint=False,
+            enable_translate=False,
+            rerun_inpaint=False,
+            upscale_first=True,
+        )
+
+        tasks = build_batch_tasks(['a', 'b'], options)
+
+        assert [task.phase for task in tasks] == ['upscale', 'upscale']
+        assert all(task.upscale_first for task in tasks)
+
+
 def test_staged_order_keeps_translation_model_phase_contiguous():
     tasks = build_batch_tasks(
         ['a', 'b'],

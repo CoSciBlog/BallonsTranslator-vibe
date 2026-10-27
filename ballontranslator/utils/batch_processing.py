@@ -279,6 +279,13 @@ def build_batch_tasks(
     >>> upscaled = BatchOptions('root', 'det', 'ocr', '', 'paint', 'trans', upscale_first=True)
     >>> [task.phase for task in build_batch_tasks(['a', 'b'], upscaled)]
     ['upscale', 'upscale', 'complete', 'complete']
+    >>> only_upscale = BatchOptions(
+    ...     'root', 'det', 'ocr', '', 'paint', 'trans',
+    ...     enable_detect=False, enable_ocr=False, enable_inpaint=False,
+    ...     enable_translate=False, upscale_first=True,
+    ... )
+    >>> [task.phase for task in build_batch_tasks(['a', 'b'], only_upscale)]
+    ['upscale', 'upscale']
     >>> staged = BatchOptions('root', 'det', 'ocr', '', 'paint', 'trans', order='staged')
     >>> [task.phase for task in build_batch_tasks(['a', 'b'], staged)]
     ['local', 'local', 'translation', 'translation']
@@ -302,6 +309,16 @@ def build_batch_tasks(
             )
             for directory in projects
         )
+
+    pipeline_enabled = any((
+        options.enable_detect,
+        options.enable_ocr,
+        options.enable_inpaint,
+        options.enable_translate,
+        options.rerun_inpaint,
+    ))
+    if not pipeline_enabled:
+        return tasks
 
     if options.order != ORDER_STAGED:
         tasks.extend(

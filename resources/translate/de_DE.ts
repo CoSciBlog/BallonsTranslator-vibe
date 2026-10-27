@@ -179,9 +179,9 @@
         <translation>Glossar</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/batch_processing_dialog.py" line="105"/>
-        <source>Upscale images 2x before processing</source>
-        <translation>Bilder vor der Verarbeitung 2× hochskalieren</translation>
+        <location filename="../../ballontranslator/ui/batch_processing_dialog.py" line="138"/>
+        <source>Upscale images 2x</source>
+        <translation>Bilder 2× hochskalieren</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/batch_processing_dialog.py" line="106"/>
@@ -259,9 +259,9 @@
         <translation>Wählen Sie einen Ordner mit bildhaltigen Projektordnern aus.</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/batch_processing_dialog.py" line="194"/>
-        <source>Enable at least one pipeline stage.</source>
-        <translation>Aktivieren Sie mindestens einen Pipeline-Schritt.</translation>
+        <location filename="../../ballontranslator/ui/batch_processing_dialog.py" line="267"/>
+        <source>Enable at least one pipeline stage or upscaling.</source>
+        <translation>Aktivieren Sie mindestens einen Pipeline-Schritt oder die Hochskalierung.</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/batch_processing_dialog.py" line="204"/>
