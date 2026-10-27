@@ -2076,6 +2076,13 @@ class MainWindow(mainwindow_cls):
         directory = self._batch_task.project_directory
         if not any(task.project_directory == directory for task in self._batch_tasks):
             self._batch_finished_projects.add(directory)
+            reset_context = getattr(
+                self.module_manager.translator,
+                'reset_translation_context',
+                None,
+            )
+            if callable(reset_context):
+                reset_context()
         QTimer.singleShot(0, self._run_next_batch_task)
 
     def _finish_batch_task_history(self, status: str) -> None:

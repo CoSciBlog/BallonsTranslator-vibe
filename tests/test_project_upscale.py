@@ -191,6 +191,81 @@ class ProjectUpscaleTest(unittest.TestCase):
         )
         schedule.assert_not_called()
 
+    def test_completed_batch_project_resets_llm_context_before_next(self) -> None:
+        reset_context = Mock()
+        current_task = SimpleNamespace(
+            project_directory='first-project',
+            phase='complete',
+        )
+        owner = SimpleNamespace(
+            _batch_options=SimpleNamespace(glossary_mode='individual'),
+            _batch_task=current_task,
+            _batch_tasks=[SimpleNamespace(
+                project_directory='second-project',
+                phase='complete',
+            )],
+            _batch_failed=False,
+            _batch_resume_store=None,
+            _batch_resume_plan=None,
+            _batch_finished_projects=set(),
+            _batch_task_history=None,
+            imgtrans_proj=SimpleNamespace(
+                glossary_workspace=None,
+                save=Mock(),
+            ),
+            module_manager=SimpleNamespace(
+                translator=SimpleNamespace(
+                    reset_translation_context=reset_context,
+                ),
+            ),
+            _finish_batch_task_history=Mock(),
+            _run_next_batch_task=Mock(),
+        )
+
+        with patch('ballontranslator.ui.mainwindow.QTimer.singleShot') as schedule:
+            MainWindow._complete_batch_task(owner)
+
+        reset_context.assert_called_once_with()
+        self.assertEqual(owner._batch_finished_projects, {'first-project'})
+        schedule.assert_called_once_with(0, owner._run_next_batch_task)
+
+    def test_batch_project_context_is_kept_between_its_phases(self) -> None:
+        reset_context = Mock()
+        current_task = SimpleNamespace(
+            project_directory='project',
+            phase='upscale',
+        )
+        owner = SimpleNamespace(
+            _batch_options=SimpleNamespace(glossary_mode='individual'),
+            _batch_task=current_task,
+            _batch_tasks=[SimpleNamespace(
+                project_directory='project',
+                phase='complete',
+            )],
+            _batch_failed=False,
+            _batch_resume_store=None,
+            _batch_resume_plan=None,
+            _batch_finished_projects=set(),
+            _batch_task_history=None,
+            imgtrans_proj=SimpleNamespace(
+                glossary_workspace=None,
+                save=Mock(),
+            ),
+            module_manager=SimpleNamespace(
+                translator=SimpleNamespace(
+                    reset_translation_context=reset_context,
+                ),
+            ),
+            _finish_batch_task_history=Mock(),
+            _run_next_batch_task=Mock(),
+        )
+
+        with patch('ballontranslator.ui.mainwindow.QTimer.singleShot'):
+            MainWindow._complete_batch_task(owner)
+
+        reset_context.assert_not_called()
+        self.assertEqual(owner._batch_finished_projects, set())
+
     def test_batch_upscale_refreshes_pages_before_pipeline_and_navigation(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             project = self._project(directory)

@@ -50,6 +50,7 @@ from ..context.translation_context import (
     memory_window_signature,
     page_summary_context_token_count,
     recover_context_length,
+    recover_output_limit,
     saved_page_summary_text,
     snapshot_page_summaries,
 )
@@ -80,6 +81,7 @@ from .llm_translation_contract import (
 from ballontranslator.modules.exceptions import (
     LLMMemoryCompactionError,
     LLMModelRequiredError,
+    LLMOutputLimitError,
     LLMRequestStopped,
     LLMUserActionRequiredError,
 )
@@ -450,10 +452,14 @@ class LLMTranslator(LLMChatRequester, BaseTranslator):
             f'prompt_cache={cache_mode!r}'
         )
 
-    def unload_model(self, empty_cache=False):
+    def reset_translation_context(self) -> None:
+        """Discard project-specific context without unloading the LLM client."""
         self._history_window = None
         self._translation_codex_response = None
         getattr(self, '_pending_visual_summaries', {}).clear()
+
+    def unload_model(self, empty_cache=False):
+        self.reset_translation_context()
         return super().unload_model(empty_cache=empty_cache)
 
     @staticmethod
@@ -1604,11 +1610,11 @@ class LLMTranslator(LLMChatRequester, BaseTranslator):
         []
         """
         queries = tuple(src_list)
-        response_run = self.stop_event
         if not queries and not (
             prompt_spec.summary_enabled and vision_request is not None
         ):
             return []
+        response_run = self.stop_event
         if profile is None:
             profile = self.profile
         summary_enabled = prompt_spec.summary_enabled
@@ -1646,6 +1652,7 @@ class LLMTranslator(LLMChatRequester, BaseTranslator):
             else 0
         )
         recovery_attempts = 0
+        output_limit_recovered = False
         codex_turn = None
         if profile.backend == 'codex':
             from ..codex import CodexTurnState
@@ -1708,6 +1715,40 @@ class LLMTranslator(LLMChatRequester, BaseTranslator):
                     'optional context without consuming the retry budget.'
                 )
                 recovery_attempts += 1
+                active_context = recovered_context
+                messages, prompt = assemble_translation_request(
+                    queries,
+                    prompt_spec=prompt_spec,
+                    request_context=active_context,
+                    codex_replay=profile.backend == 'codex',
+                    image_part=(
+                        vision_request.image_part()
+                        if vision_request is not None
+                        else None
+                    ),
+                )
+                continue
+            except LLMOutputLimitError as error:
+                # A provider can consume its output allowance while reasoning.
+                # Retry once with current input, image, and glossary only. This
+                # keeps batch runs moving when accumulated project context was
+                # the trigger, while a genuinely insufficient profile limit is
+                # still reported after the minimal retry.
+                if output_limit_recovered:
+                    raise
+                recovered_context = recover_output_limit(active_context)
+                if recovered_context is None:
+                    raise
+                safe_error = str(error).replace('\r', ' ').replace('\n', ' ')
+                self.logger.warning(
+                    'LLM output-limit recovery: provider_attempt=%s, '
+                    'trigger=%r; retrying with glossary and current input only.',
+                    provider_attempt,
+                    safe_error,
+                )
+                output_limit_recovered = True
+                self._history_window = None
+                self._translation_codex_response = None
                 active_context = recovered_context
                 messages, prompt = assemble_translation_request(
                     queries,

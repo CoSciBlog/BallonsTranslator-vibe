@@ -1,5 +1,8 @@
 # Changelogs
 
+### 2026-10-27 — 1.5.19+vibe.63
+- Batch Processing now clears reusable LLM context after each completed project and silently skips fully completed work when Resume is enabled. An output-limited translation is retried once with only the current input and glossary, while the batch still reports one final completion message after all projects.
+
 ### 2026-10-27 — 1.5.19+vibe.62
 - Batch Processing now accepts upscaling as the only enabled operation. Upscaling-only plans contain no empty pipeline tasks, so detection, OCR, inpainting, re-inpainting, and translation remain disabled throughout the batch.
 

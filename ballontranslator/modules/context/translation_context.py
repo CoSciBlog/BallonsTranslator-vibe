@@ -350,3 +350,47 @@ def recover_context_length(
         summary_token_count=request_context.summary_token_count,
         current_summary_token_count=request_context.current_summary_token_count,
     )
+
+
+def recover_output_limit(
+    request_context: Optional[RequestContext],
+) -> Optional[RequestContext]:
+    """Keep only the glossary when retrying an output-limited request.
+
+    The current source text and image are assembled outside ``RequestContext``.
+    Returning ``None`` means that no optional project context can be removed.
+
+    >>> recover_output_limit(RequestContext(())) is None
+    True
+    >>> recovered = recover_output_limit(RequestContext(
+    ...     (RenderedHistoryPage(None, (), 4),),
+    ...     glossary=(GlossaryEntry('name', 'Name'),),
+    ... ))
+    >>> recovered.history, recovered.glossary
+    ((), (GlossaryEntry(source='name', translation='Name', note=''),))
+    """
+    if request_context is None or not any((
+        request_context.history,
+        request_context.memory is not None,
+        request_context.page_summaries,
+    )):
+        return None
+
+    diagnostic = ContextDiagnostic(
+        page_key=str(request_context.request_page_key or ''),
+        action=ContextAction.CONTEXT_RECOVERY,
+        page_count=0,
+        token_count=0,
+        token_budget=request_context.history_budget,
+        evicted=len(request_context.history),
+        summaries_evicted=len(request_context.page_summaries),
+    )
+    return RequestContext(
+        history=(),
+        glossary=request_context.glossary,
+        glossary_mode=request_context.glossary_mode,
+        history_budget=request_context.history_budget,
+        window_key=request_context.window_key,
+        request_page_key=request_context.request_page_key,
+        diagnostic=diagnostic,
+    )

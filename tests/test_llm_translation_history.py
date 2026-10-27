@@ -30,7 +30,9 @@ from ballontranslator.modules.context.translation_context import (
     PageSummary,
     RequestContext,
     recover_context_length,
+    recover_output_limit,
 )
+from ballontranslator.modules.exceptions import LLMOutputLimitError
 from ballontranslator.modules.translators.llm_translation_contract import (
     assemble_translation_request,
     render_history_page,
@@ -51,6 +53,95 @@ class LLMTranslationHistoryTest(
     LLMTranslationTestMixin,
     unittest.TestCase,
 ):
+    def test_output_limit_retries_once_with_glossary_only(self) -> None:
+        pcfg.module.llm_translate_context = LLMTranslateContext.HISTORY
+        history_page = render_history_page(
+            HistoryPage('001.png', ('old source',), ('old target',)),
+            'test-model',
+            self._prompt_spec(history_enabled=True),
+        )
+        context = RequestContext(
+            history=(history_page,),
+            glossary=(GlossaryEntry('hero', 'Held'),),
+            glossary_mode=LLMGlossaryMode.All,
+            request_page_key='002.png',
+            memory=MemoryCheckpoint('old memory', ('001.png',), 3),
+            page_summaries=(PageSummary('001.png', 'old summary'),),
+        )
+        error = LLMOutputLimitError(
+            'profile-1', 'Profile 1', 36864, 'enabled'
+        )
+
+        with mock.patch.object(
+            self.translator,
+            '_request_translation',
+            side_effect=(error, '{"1":"translated"}'),
+        ) as request:
+            translated = self._translate(
+                ['hero current source'],
+                profile=self.profile,
+                request_context=context,
+            )
+
+        self.assertEqual(translated, ['translated'])
+        self.assertEqual(request.call_count, 2)
+        first_messages = json.dumps(request.call_args_list[0].args[1])
+        retry_messages = json.dumps(request.call_args_list[1].args[1])
+        self.assertIn('old source', first_messages)
+        self.assertNotIn('old source', retry_messages)
+        self.assertNotIn('old memory', retry_messages)
+        self.assertNotIn('old summary', retry_messages)
+        self.assertIn('hero', retry_messages)
+        self.assertIn('hero current source', retry_messages)
+
+    def test_output_limit_recovery_is_not_repeated(self) -> None:
+        context = RequestContext(
+            history=(RenderedHistoryPage(
+                HistoryPage('001.png', ('old',), ('translated',)), (), 4,
+            ),),
+        )
+        error = LLMOutputLimitError(
+            'profile-1', 'Profile 1', 36864, 'enabled'
+        )
+
+        with mock.patch.object(
+            self.translator,
+            '_request_translation',
+            side_effect=(error, error),
+        ) as request, self.assertRaises(LLMOutputLimitError):
+            self._translate(
+                ['current'], profile=self.profile, request_context=context,
+            )
+
+        self.assertEqual(request.call_count, 2)
+
+    def test_reset_translation_context_keeps_loaded_model_state(self) -> None:
+        self.translator._history_window = mock.Mock()
+        self.translator._translation_codex_response = mock.Mock()
+        self.translator._pending_visual_summaries['001.png'] = (None, {})
+
+        self.translator.reset_translation_context()
+
+        self.assertIsNone(self.translator._history_window)
+        self.assertIsNone(self.translator._translation_codex_response)
+        self.assertEqual(self.translator._pending_visual_summaries, {})
+
+    def test_output_limit_context_keeps_only_glossary(self) -> None:
+        glossary = (GlossaryEntry('hero', 'Held'),)
+        recovered = recover_output_limit(RequestContext(
+            history=(RenderedHistoryPage(
+                HistoryPage('001.png', ('old',), ('translated',)), (), 4,
+            ),),
+            glossary=glossary,
+            memory=MemoryCheckpoint('memory', ('001.png',), 3),
+            page_summaries=(PageSummary('001.png', 'summary'),),
+        ))
+
+        self.assertEqual(recovered.history, ())
+        self.assertEqual(recovered.glossary, glossary)
+        self.assertIsNone(recovered.memory)
+        self.assertEqual(recovered.page_summaries, ())
+
     def test_reviewed_translation_owns_the_reusable_history_window(self) -> None:
         project = self._project(2)
         self._complete(project, '001.png')
