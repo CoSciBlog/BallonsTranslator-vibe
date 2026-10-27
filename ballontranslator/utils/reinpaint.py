@@ -37,34 +37,16 @@ def normalize_inpaint_mask(
     return mask
 
 
-def _merge_overlapping_regions(
-    regions: list[tuple[int, int, int, int]],
-) -> list[tuple[int, int, int, int]]:
-    """Merge expanded crop rectangles so a mask pixel is inferred only once."""
-
-    merged: list[tuple[int, int, int, int]] = []
-    for region in regions:
-        x1, y1, x2, y2 = region
-        index = 0
-        while index < len(merged):
-            mx1, my1, mx2, my2 = merged[index]
-            if x1 < mx2 and mx1 < x2 and y1 < my2 and my1 < y2:
-                x1, y1 = min(x1, mx1), min(y1, my1)
-                x2, y2 = max(x2, mx2), max(y2, my2)
-                merged.pop(index)
-                index = 0
-                continue
-            index += 1
-        merged.append((x1, y1, x2, y2))
-    return sorted(merged, key=lambda region: (region[1], region[0]))
-
-
-def _mask_inpaint_regions(mask: np.ndarray) -> list[tuple[int, int, int, int]]:
+def _mask_inpaint_regions(
+    mask: np.ndarray,
+) -> list[tuple[tuple[int, int, int, int], np.ndarray]]:
     """Build local context crops while keeping nearby glyphs together.
 
     The saved mask remains unchanged. A temporary dilation is used only to
     group neighbouring character strokes, after which each group receives
-    enough surrounding artwork for reconstruction.
+    enough surrounding artwork for reconstruction. Group masks stay isolated
+    even when their context crops overlap; otherwise a chain of overlaps can
+    accidentally turn many local groups back into a near-full-page request.
 
     >>> mask = np.zeros((100, 200), np.uint8)
     >>> mask[10:20, 10:20] = mask[70:80, 170:180] = 255
@@ -78,20 +60,25 @@ def _mask_inpaint_regions(mask: np.ndarray) -> list[tuple[int, int, int, int]]:
         cv2.MORPH_ELLIPSE, (2 * join_radius + 1, 2 * join_radius + 1),
     )
     grouped_mask = cv2.dilate((mask > 0).astype(np.uint8), kernel)
-    count, _, stats, _ = cv2.connectedComponentsWithStats(
+    count, labels, stats, _ = cv2.connectedComponentsWithStats(
         grouped_mask, connectivity=8,
     )
-    regions: list[tuple[int, int, int, int]] = []
+    regions: list[tuple[tuple[int, int, int, int], np.ndarray]] = []
     for label in range(1, count):
         x, y, group_width, group_height, _ = stats[label]
         context = max(24, min(256, round(max(group_width, group_height) * 0.5)))
-        regions.append((
+        bounds = (
             max(0, int(x) - context),
             max(0, int(y) - context),
             min(width, int(x + group_width) + context),
             min(height, int(y + group_height) + context),
-        ))
-    return _merge_overlapping_regions(regions)
+        )
+        x1, y1, x2, y2 = bounds
+        region_mask = mask[y1:y2, x1:x2].copy()
+        # Context may overlap another group, but inference ownership may not.
+        region_mask[labels[y1:y2, x1:x2] != label] = 0
+        regions.append((bounds, region_mask))
+    return sorted(regions, key=lambda region: (region[0][1], region[0][0]))
 
 
 def _inpaint_complete_mask(
@@ -103,17 +90,16 @@ def _inpaint_complete_mask(
     """Inpaint every mask pixel through local, resolution-preserving crops."""
 
     inpainted = image.copy()
-    for x1, y1, x2, y2 in _mask_inpaint_regions(mask):
+    for (x1, y1, x2, y2), crop_mask in _mask_inpaint_regions(mask):
         if stop_requested is not None and stop_requested():
             return None
         crop = inpainted[y1:y2, x1:x2]
-        crop_mask = mask[y1:y2, x1:x2]
-        repaired = inpainter.inpaint(crop, crop_mask.copy(), None)
+        repaired = inpainter.inpaint(crop.copy(), crop_mask.copy(), None)
         if repaired.shape != crop.shape:
             raise ValueError(
                 'Inpainter returned an image with a different shape for a mask crop.'
             )
-        inpainted[y1:y2, x1:x2] = repaired
+        crop[crop_mask > 0] = repaired[crop_mask > 0]
     return inpainted
 
 

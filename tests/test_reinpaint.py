@@ -54,8 +54,10 @@ def test_reinpaint_uses_original_image_and_complete_saved_mask():
     np.testing.assert_array_equal(used_mask, mask)
     assert blocks is None
     assert project.saved[0] == '001.png'
-    assert np.all(project.saved[1] == 23)
-    assert np.all(project.inpainted_array == 23)
+    expected = np.full((4, 5, 3), 7, dtype=np.uint8)
+    expected[mask > 0] = 23
+    np.testing.assert_array_equal(project.saved[1], expected)
+    np.testing.assert_array_equal(project.inpainted_array, expected)
 
 
 def test_reinpaint_splits_distant_mask_areas_into_local_high_resolution_calls():
@@ -92,6 +94,24 @@ def test_reinpaint_groups_nearby_character_masks_into_one_local_call():
     assert call_image.shape[1] < image.shape[1]
     assert np.count_nonzero(call_mask) == np.count_nonzero(mask)
     assert blocks is None
+
+
+def test_reinpaint_does_not_chain_separate_groups_through_context_overlap():
+    image = np.full((600, 900, 3), 7, dtype=np.uint8)
+    mask = np.zeros(image.shape[:2], dtype=np.uint8)
+    mask[200:225, 100:120] = 255
+    mask[200:225, 180:200] = 255
+    mask[200:225, 260:280] = 255
+    project = _Project(mask, image)
+    inpainter = _Inpainter()
+
+    assert reinpaint_project_page(project, inpainter, '001.png') is True
+
+    assert len(inpainter.calls) == 3
+    assert sum(
+        np.count_nonzero(call_mask)
+        for _, call_mask, _ in inpainter.calls
+    ) == np.count_nonzero(mask)
 
 
 def test_reinpaint_skips_missing_mask_without_overwriting_result():
@@ -152,11 +172,13 @@ def test_reinpaint_detects_residual_text_and_preserves_the_combined_mask():
     )
 
     assert len(seen) == 1
-    assert np.all(seen[0] == 23)
+    assert np.all(seen[0][0, 0] == 23)
+    assert np.all(seen[0][mask == 0] == 7)
     assert len(inpainter.calls) == 2
     source, used_mask, blocks = inpainter.calls[1]
     assert np.all(inpainter.calls[0][0] == 7)
-    assert np.all(source == 23)
+    assert np.all(source[0, 0] == 23)
+    assert np.all(source[3, 4] == 7)
     assert blocks is None
     assert used_mask[0, 0] == 0
     assert used_mask[3, 4] == 255
