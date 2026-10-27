@@ -37,6 +37,86 @@ def normalize_inpaint_mask(
     return mask
 
 
+def _merge_overlapping_regions(
+    regions: list[tuple[int, int, int, int]],
+) -> list[tuple[int, int, int, int]]:
+    """Merge expanded crop rectangles so a mask pixel is inferred only once."""
+
+    merged: list[tuple[int, int, int, int]] = []
+    for region in regions:
+        x1, y1, x2, y2 = region
+        index = 0
+        while index < len(merged):
+            mx1, my1, mx2, my2 = merged[index]
+            if x1 < mx2 and mx1 < x2 and y1 < my2 and my1 < y2:
+                x1, y1 = min(x1, mx1), min(y1, my1)
+                x2, y2 = max(x2, mx2), max(y2, my2)
+                merged.pop(index)
+                index = 0
+                continue
+            index += 1
+        merged.append((x1, y1, x2, y2))
+    return sorted(merged, key=lambda region: (region[1], region[0]))
+
+
+def _mask_inpaint_regions(mask: np.ndarray) -> list[tuple[int, int, int, int]]:
+    """Build local context crops while keeping nearby glyphs together.
+
+    The saved mask remains unchanged. A temporary dilation is used only to
+    group neighbouring character strokes, after which each group receives
+    enough surrounding artwork for reconstruction.
+
+    >>> mask = np.zeros((100, 200), np.uint8)
+    >>> mask[10:20, 10:20] = mask[70:80, 170:180] = 255
+    >>> len(_mask_inpaint_regions(mask))
+    2
+    """
+
+    height, width = mask.shape[:2]
+    join_radius = max(8, min(32, round(min(height, width) * 0.02)))
+    kernel = cv2.getStructuringElement(
+        cv2.MORPH_ELLIPSE, (2 * join_radius + 1, 2 * join_radius + 1),
+    )
+    grouped_mask = cv2.dilate((mask > 0).astype(np.uint8), kernel)
+    count, _, stats, _ = cv2.connectedComponentsWithStats(
+        grouped_mask, connectivity=8,
+    )
+    regions: list[tuple[int, int, int, int]] = []
+    for label in range(1, count):
+        x, y, group_width, group_height, _ = stats[label]
+        context = max(24, min(256, round(max(group_width, group_height) * 0.5)))
+        regions.append((
+            max(0, int(x) - context),
+            max(0, int(y) - context),
+            min(width, int(x + group_width) + context),
+            min(height, int(y + group_height) + context),
+        ))
+    return _merge_overlapping_regions(regions)
+
+
+def _inpaint_complete_mask(
+    inpainter: InpainterBase,
+    image: np.ndarray,
+    mask: np.ndarray,
+    stop_requested: Optional[Callable[[], bool]],
+) -> Optional[np.ndarray]:
+    """Inpaint every mask pixel through local, resolution-preserving crops."""
+
+    inpainted = image.copy()
+    for x1, y1, x2, y2 in _mask_inpaint_regions(mask):
+        if stop_requested is not None and stop_requested():
+            return None
+        crop = inpainted[y1:y2, x1:x2]
+        crop_mask = mask[y1:y2, x1:x2]
+        repaired = inpainter.inpaint(crop, crop_mask.copy(), None)
+        if repaired.shape != crop.shape:
+            raise ValueError(
+                'Inpainter returned an image with a different shape for a mask crop.'
+            )
+        inpainted[y1:y2, x1:x2] = repaired
+    return inpainted
+
+
 def reinpaint_project_page(
     project: Optional[ProjImgTrans],
     inpainter: Optional[InpainterBase],
@@ -50,10 +130,11 @@ def reinpaint_project_page(
     """Rebuild one inpainted page from its original image and saved mask.
 
     Each run starts from the original so repeated runs cannot accumulate
-    artifacts from an earlier saved result. Saved masks are applied as
-    complete page masks rather than being cropped again by existing text
-    regions. Optional residual detection repairs the fresh result once more
-    and adds missed text to the saved mask, preserving OCR and translations.
+    artifacts from an earlier saved result. Saved masks are grouped into local
+    context crops independently of existing text regions, so every manual mask
+    pixel is retained without downscaling the complete page for one request.
+    Optional residual detection repairs the fresh result once more and adds
+    missed text to the saved mask, preserving OCR and translations.
     The expanded/combined mask is saved only after inference succeeds.
     ``False`` means there was no reusable input or cancellation was requested.
 
@@ -75,13 +156,16 @@ def reinpaint_project_page(
         return False
 
     # Passing text blocks makes block-based inpainters discard mask pixels
-    # outside their OCR-derived crops. Re-inpainting must consume every saved
-    # mask pixel, including manual mask extensions and missed glyph edges.
-    inpainted = inpainter.inpaint(
-        source_image,
-        mask.copy() if mask is not None else None,
-        None if has_mask else blocks,
-    )
+    # outside their OCR-derived crops. Local crops retain every saved mask
+    # pixel while avoiding a resolution-losing full-page model invocation.
+    if has_mask:
+        inpainted = _inpaint_complete_mask(
+            inpainter, source_image, mask, stop_requested,
+        )
+        if inpainted is None:
+            return False
+    else:
+        inpainted = inpainter.inpaint(source_image, None, blocks)
     if stop_requested is not None and stop_requested():
         return False
     if textdetector is not None:
@@ -94,7 +178,12 @@ def reinpaint_project_page(
             # Repair the fresh result so text inside the original mask can
             # improve too, rather than repeating identical inference on source.
             # Keep the complete residual mask, including pixels outside OCR crops.
-            inpainted = inpainter.inpaint(inpainted, residual.copy(), None)
+            repaired = _inpaint_complete_mask(
+                inpainter, inpainted, residual, stop_requested,
+            )
+            if repaired is None:
+                return False
+            inpainted = repaired
     if stop_requested is not None and stop_requested():
         return False
     project.save_inpainted(page_name, inpainted)

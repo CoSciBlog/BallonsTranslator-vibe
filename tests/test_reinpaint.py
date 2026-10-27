@@ -7,16 +7,19 @@ from ballontranslator.utils.reinpaint import reinpaint_project_page
 
 
 class _Project:
-    def __init__(self, mask):
+    def __init__(self, mask, image=None):
         self.pages = {'001.png': [SimpleNamespace(text='hello')]}
         self.current_img = '001.png'
         self.inpainted_array = None
         self._mask = mask
         self.saved = None
         self.saved_mask = None
+        self._image = image
 
     def read_img(self, page_name):
         assert page_name == '001.png'
+        if self._image is not None:
+            return self._image.copy()
         return np.full((4, 5, 3), 7, dtype=np.uint8)
 
     def load_mask_by_imgname(self, page_name):
@@ -53,6 +56,42 @@ def test_reinpaint_uses_original_image_and_complete_saved_mask():
     assert project.saved[0] == '001.png'
     assert np.all(project.saved[1] == 23)
     assert np.all(project.inpainted_array == 23)
+
+
+def test_reinpaint_splits_distant_mask_areas_into_local_high_resolution_calls():
+    image = np.full((600, 900, 3), 7, dtype=np.uint8)
+    mask = np.zeros(image.shape[:2], dtype=np.uint8)
+    mask[80:120, 70:100] = 255
+    mask[470:520, 780:825] = 255
+    project = _Project(mask, image)
+    inpainter = _Inpainter()
+
+    assert reinpaint_project_page(project, inpainter, '001.png') is True
+
+    assert len(inpainter.calls) == 2
+    assert all(call_image.shape[0] < image.shape[0] for call_image, _, _ in inpainter.calls)
+    assert all(call_image.shape[1] < image.shape[1] for call_image, _, _ in inpainter.calls)
+    assert sum(np.count_nonzero(call_mask) for _, call_mask, _ in inpainter.calls) == np.count_nonzero(mask)
+    assert all(blocks is None for _, _, blocks in inpainter.calls)
+
+
+def test_reinpaint_groups_nearby_character_masks_into_one_local_call():
+    image = np.full((600, 900, 3), 7, dtype=np.uint8)
+    mask = np.zeros(image.shape[:2], dtype=np.uint8)
+    mask[100:125, 100:120] = 255
+    mask[140:165, 102:122] = 255
+    mask[180:205, 98:118] = 255
+    project = _Project(mask, image)
+    inpainter = _Inpainter()
+
+    assert reinpaint_project_page(project, inpainter, '001.png') is True
+
+    assert len(inpainter.calls) == 1
+    call_image, call_mask, blocks = inpainter.calls[0]
+    assert call_image.shape[0] < image.shape[0]
+    assert call_image.shape[1] < image.shape[1]
+    assert np.count_nonzero(call_mask) == np.count_nonzero(mask)
+    assert blocks is None
 
 
 def test_reinpaint_skips_missing_mask_without_overwriting_result():
