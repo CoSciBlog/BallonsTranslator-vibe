@@ -201,7 +201,15 @@ class ImgtransProgressMessageBox(ProgressMessageBox):
     
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(None, False, *args, **kwargs)
-        
+        # The pipeline can run for a long time. Give its progress display a
+        # native title bar so the window manager can move it independently,
+        # but keep closing owned by the Stop action and pipeline lifecycle.
+        self.setWindowFlags(
+            Qt.WindowType.Window
+            | Qt.WindowType.CustomizeWindowHint
+            | Qt.WindowType.WindowTitleHint
+        )
+        self.setWindowTitle('BallonsTranslator')
         self.detect_bar = TaskProgressBar(self.tr('Detecting: '), True, self)
         self.ocr_bar = TaskProgressBar(self.tr('OCR: '), True, self)
         self.inpaint_bar = TaskProgressBar(self.tr('Inpainting: '), True, self)

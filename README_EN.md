@@ -59,6 +59,7 @@
 
 * Window placement
   - The main window remembers its normal size, screen position, and maximized state when the application closes. If a saved monitor is no longer connected, the window is moved onto the primary screen.
+  - The pipeline progress display uses its own native title bar, so it can be moved independently while detection, OCR, inpainting, or translation is running. Stopping remains available through its dedicated **Stop** button.
 
 * Configurable intermediate images
   - Save masks and inpainted project images as PNG, JPEG, WebP, or JPEG XL with an independent quality setting.

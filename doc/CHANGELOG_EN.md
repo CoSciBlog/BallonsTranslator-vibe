@@ -1,5 +1,8 @@
 # Changelogs
 
+### 2026-10-27 — 1.5.19+vibe.64
+- The pipeline progress display is now a separate native window with a draggable title bar. It remains protected from accidental closing while processing; use its Stop button to cancel safely.
+
 ### 2026-10-27 — 1.5.19+vibe.63
 - Batch Processing now clears reusable LLM context after each completed project and silently skips fully completed work when Resume is enabled. An output-limited translation is retried once with only the current input and glossary, while the batch still reports one final completion message after all projects.
 
