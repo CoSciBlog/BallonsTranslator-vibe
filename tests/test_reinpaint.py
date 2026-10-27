@@ -152,6 +152,33 @@ def test_reinpaint_expands_mask_and_preserves_the_stored_input():
     np.testing.assert_array_equal(project.mask_array, used_mask)
 
 
+def test_reinpaint_applies_inpainter_mask_preparation_to_the_composite():
+    mask = np.zeros((7, 7), dtype=np.uint8)
+    mask[3, 3] = 255
+    project = _Project(mask, np.full((7, 7, 3), 7, dtype=np.uint8))
+
+    class DilatingInpainter:
+        def __init__(self):
+            self.prepared_flags = []
+
+        def prepare_inpaint_mask(self, source_mask):
+            prepared = np.zeros_like(source_mask)
+            prepared[2:5, 2:5] = 255
+            return prepared
+
+        def inpaint(self, image, used_mask, blocks, *, mask_prepared=False):
+            self.prepared_flags.append(mask_prepared)
+            return np.full_like(image, 23)
+
+    inpainter = DilatingInpainter()
+    assert reinpaint_project_page(project, inpainter, '001.png')
+
+    result = project.saved[1]
+    assert np.count_nonzero(np.all(result == 23, axis=2)) == 9
+    assert inpainter.prepared_flags == [True]
+    assert project.saved_mask is None
+
+
 def test_reinpaint_detects_residual_text_and_preserves_the_combined_mask():
     mask = np.zeros((4, 5), dtype=np.uint8)
     mask[0, 0] = 255

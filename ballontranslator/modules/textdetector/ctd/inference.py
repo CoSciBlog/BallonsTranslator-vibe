@@ -293,6 +293,8 @@ class TextDetector:
         if isinstance(self.net, TextDetBase):
             batch = einops.rearrange(batch.astype(np.float32) / 255., 'n h w c -> n c h w')
             batch = torch.from_numpy(batch).to(device)
+            if self.half:
+                batch = batch.half()
             _, mask, lines = self.net(batch)
             mask = mask.cpu().numpy()
             lines = lines.cpu().numpy()

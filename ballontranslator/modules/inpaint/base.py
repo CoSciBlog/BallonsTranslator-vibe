@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-from typing import List
+from typing import List, Optional
 
 from ballontranslator.utils.registry import Registry
 from ballontranslator.utils.textblock_mask import extract_ballon_mask
@@ -82,6 +82,47 @@ class InpainterBase(BaseModule):
             if INPAINTERS.module_dict[key] == self.__class__:
                 self.name = key
                 break
+
+    def mask_dilation_size(self) -> int:
+        if self.params is None or 'mask_dilation_size' not in self.params:
+            return 0
+        return max(0, int(self.get_param_value('mask_dilation_size')))
+
+    def mask_dilation_kernel(self) -> str:
+        if self.params is None or 'mask_dilation_kernel' not in self.params:
+            return 'ellipse'
+        kernel = str(self.get_param_value('mask_dilation_kernel'))
+        return kernel if kernel in {'ellipse', 'rectangle', 'cross'} else 'ellipse'
+
+    def inpaint_enlarge_ratio(self) -> float:
+        if self.params is None or 'inpaint_enlarge_ratio' not in self.params:
+            return 1.7
+        return max(1.0, float(self.get_param_value('inpaint_enlarge_ratio')))
+
+    def prepare_inpaint_mask(
+        self, mask: Optional[np.ndarray],
+    ) -> Optional[np.ndarray]:
+        """Apply the inpainter's optional mask-growth policy once.
+
+        >>> InpainterBase.prepare_inpaint_mask(InpainterBase(), np.zeros((2, 2), np.uint8)).shape
+        (2, 2)
+        """
+        if mask is None:
+            return mask
+        size = self.mask_dilation_size()
+        if size <= 0:
+            return mask
+        # OpenCV kernels are centered reliably at odd sizes.
+        size += 1 - size % 2
+        shapes = {
+            'ellipse': cv2.MORPH_ELLIPSE,
+            'rectangle': cv2.MORPH_RECT,
+            'cross': cv2.MORPH_CROSS,
+        }
+        kernel = cv2.getStructuringElement(
+            shapes[self.mask_dilation_kernel()], (size, size),
+        )
+        return cv2.dilate(mask, kernel)
     
     def memory_safe_inpaint(self, img: np.ndarray, mask: np.ndarray, textblock_list: List[TextBlock] = None, **kwargs: object) -> np.ndarray:
         '''
@@ -120,7 +161,7 @@ class InpainterBase(BaseModule):
             else:
                 raise e
 
-    def inpaint(self, img: np.ndarray, mask: np.ndarray, textblock_list: List[TextBlock] = None, check_need_inpaint: bool = False, **kwargs: object) -> np.ndarray:
+    def inpaint(self, img: np.ndarray, mask: np.ndarray, textblock_list: List[TextBlock] = None, check_need_inpaint: bool = False, mask_prepared: bool = False, **kwargs: object) -> np.ndarray:
         """Preserve crop and alpha handling for request-specific module options.
 
         >>> result = inpainter.inpaint(image, mask, profile=profile)  # doctest: +SKIP
@@ -136,6 +177,9 @@ class InpainterBase(BaseModule):
             img_rgb = img[:, :, :3]  # Use only RGB for inpainting
         else:
             img_rgb = img
+
+        if mask is not None and not mask_prepared:
+            mask = self.prepare_inpaint_mask(mask)
 
         if pcfg.module.filter_mask_by_bboxes:
             mask = filter_mask_by_bboxes(mask, textblock_list)
@@ -172,7 +216,9 @@ class InpainterBase(BaseModule):
             
             for blk in textblock_list:
                 xyxy = blk.xyxy
-                xyxy_e = enlarge_window(xyxy, im_w, im_h, ratio=1.7)
+                xyxy_e = enlarge_window(
+                    xyxy, im_w, im_h, ratio=self.inpaint_enlarge_ratio(),
+                )
                 im = inpainted[xyxy_e[1]:xyxy_e[3], xyxy_e[0]:xyxy_e[2]]
                 msk = mask[xyxy_e[1]:xyxy_e[3], xyxy_e[0]:xyxy_e[2]]
                 need_inpaint = True

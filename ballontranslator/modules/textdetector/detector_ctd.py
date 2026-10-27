@@ -13,12 +13,19 @@ def load_ctd_model(
     device,
     detect_size=1024,
     det_rearrange_max_batches=4,
+    *,
+    half=False,
+    nms_thresh=.35,
+    conf_thresh=.4,
 ) -> CTDModel:
     model = CTDModel(
         model_path,
         detect_size=detect_size,
         device=device,
         det_rearrange_max_batches=det_rearrange_max_batches,
+        half=half,
+        nms_thresh=nms_thresh,
+        conf_thresh=conf_thresh,
     )
     
     return model
@@ -53,6 +60,30 @@ class ComicTextDetector(TextDetectorBase):
                 'Maximum number of square tiles processed together for very '
                 'tall or wide pages. Higher values can improve speed but use '
                 'more VRAM or RAM; lower this value after an out-of-memory error.'
+            ),
+        },
+        'confidence threshold': {
+            'value': 0.4,
+            'display_name': 'Confidence Threshold',
+            'description': (
+                'Minimum confidence required for a detected text region. Lower '
+                'values find more faint text but can add false positives.'
+            ),
+        },
+        'NMS threshold': {
+            'value': 0.35,
+            'display_name': 'NMS Threshold',
+            'description': (
+                'Overlap threshold used to merge competing detections. Lower '
+                'values remove more overlapping boxes; higher values retain more.'
+            ),
+        },
+        'half precision': {
+            'value': False,
+            'display_name': 'Half Precision',
+            'description': (
+                'Uses FP16 inference on supported GPUs to reduce VRAM use and '
+                'often improve speed. CPU inference always uses full precision.'
             ),
         },
         'device': {
@@ -127,14 +158,39 @@ class ComicTextDetector(TextDetectorBase):
     def detect_size(self):
         return int(self.params['detect_size']['value'])
 
+    @property
+    def half_precision(self) -> bool:
+        return bool(self.get_param_value('half precision'))
+
+    def _bounded_threshold(self, key: str, default: float) -> float:
+        value = float(self.get_param_value(key))
+        if 0.0 <= value <= 1.0:
+            return value
+        self.logger.warning(
+            '%s must be between 0 and 1; using %s instead.', key, default,
+        )
+        return default
+
+    @property
+    def confidence_threshold(self) -> float:
+        return self._bounded_threshold('confidence threshold', 0.4)
+
+    @property
+    def nms_threshold(self) -> float:
+        return self._bounded_threshold('NMS threshold', 0.35)
+
     def _load_model(self):
         max_batches = int(self.get_param_value('det_rearrange_max_batches'))
+        half = self.half_precision if self.device != 'cpu' else False
         if self.device != 'cpu':
             self.model = load_ctd_model(
                 CTD_TORCH_PATH,
                 self.device,
                 self.detect_size,
                 max_batches,
+                half=half,
+                nms_thresh=self.nms_threshold,
+                conf_thresh=self.confidence_threshold,
             )
         else:
             self.model = load_ctd_model(
@@ -142,6 +198,9 @@ class ComicTextDetector(TextDetectorBase):
                 self.device,
                 self.detect_size,
                 max_batches,
+                half=half,
+                nms_thresh=self.nms_threshold,
+                conf_thresh=self.confidence_threshold,
             )
 
     def _detect(self, img: np.ndarray, proj: ProjImgTrans) -> Tuple[np.ndarray, List[TextBlock]]:
@@ -169,7 +228,9 @@ class ComicTextDetector(TextDetectorBase):
     def updateParam(self, param_key: str, param_content):
         super().updateParam(param_key, param_content)
         if self.all_model_loaded():
-            if param_key == 'device' and self.model.device != self.device:
+            if param_key == 'half precision' or (
+                param_key == 'device' and self.model.device != self.device
+            ):
                 self.unload_model()
                 self.load_model()
             elif param_key == 'detect_size':
@@ -178,3 +239,7 @@ class ComicTextDetector(TextDetectorBase):
                 self.model.det_rearrange_max_batches = int(
                     self.get_param_value(param_key)
                 )
+            elif param_key == 'confidence threshold':
+                self.model.conf_thresh = self.confidence_threshold
+            elif param_key == 'NMS threshold':
+                self.model.nms_thresh = self.nms_threshold

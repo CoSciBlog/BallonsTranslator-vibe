@@ -1043,6 +1043,19 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
             module_panels[module_type].addBlockWidget(settings_widget)
             settings_widget.module_selected.connect(self.module_selected)
             settings_widget.paramwidget_edited.connect(self.module_param_edited)
+        self.check_need_inpaint_checker, _ = inpaintConfigPanel.addCheckBox(
+            self.tr(
+                'Let the program decide whether the selected inpaint method '
+                'is necessary.'
+            ),
+            self.tr(
+                'Skip neural inpainting for simple, uniform regions that can '
+                'be filled safely from their surrounding color.'
+            ),
+        )
+        self.check_need_inpaint_checker.toggled.connect(
+            self.on_check_need_inpaint_changed
+        )
         self._buildGlossarySettings(glossaryConfigPanel)
         self.llm_profiles_panel = LLMProfilesWidget(scrollWidget=self)
         llmProfileConfigPanel.addBlockWidget(self.llm_profiles_panel)
@@ -1818,6 +1831,9 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
             self.unload_before_llm_checker.isChecked()
         )
 
+    def on_check_need_inpaint_changed(self, checked: bool) -> None:
+        pcfg.module.check_need_inpaint = checked
+
     def on_package_auto_install_changed(self):
         pcfg.package_manager.auto_install_missing_packages = self.package_auto_install_checker.isChecked()
 
@@ -2550,6 +2566,9 @@ class ConfigPanel(OutsideClickFramelessMixin, FramelessWindow):
         self.empty_runcache_checker.setChecked(pcfg.module.empty_runcache)
         self.unload_before_llm_checker.setChecked(
             pcfg.module.unload_models_before_llm
+        )
+        self.check_need_inpaint_checker.setChecked(
+            pcfg.module.check_need_inpaint
         )
         self.package_auto_install_checker.setChecked(pcfg.package_manager.auto_install_missing_packages)
         self._syncGlossarySettings()

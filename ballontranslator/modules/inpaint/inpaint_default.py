@@ -426,6 +426,32 @@ class LamaLarge(LamaInpainterMPE):
                 'Use FP32 for maximum compatibility or if BF16 produces errors.'
             ),
         },
+        'mask_dilation_size': {
+            'value': 0,
+            'display_name': 'Mask Dilation Size',
+            'description': (
+                'Expands the mask before LaMa inference. Use 0 to keep the '
+                'original mask; larger odd values cover more glyph-edge residue.'
+            ),
+        },
+        'mask_dilation_kernel': {
+            'type': 'selector',
+            'options': ['ellipse', 'rectangle', 'cross'],
+            'value': 'ellipse',
+            'display_name': 'Mask Dilation Kernel',
+            'description': (
+                'Shape used to expand the mask. Ellipse gives smooth edges, '
+                'rectangle covers corners, and cross expands mainly by axis.'
+            ),
+        },
+        'inpaint_enlarge_ratio': {
+            'value': 1.7,
+            'display_name': 'Inpaint Context Ratio',
+            'description': (
+                'Expands each text-region crop to include surrounding artwork. '
+                'Higher values provide more context but use more memory.'
+            ),
+        },
         'description': (
             'Large LaMa model tuned for anime and manga image inpainting.'
         ),

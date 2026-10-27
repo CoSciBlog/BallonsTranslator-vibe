@@ -77,6 +77,18 @@ class ModuleSettingsConfigPanelTest(unittest.TestCase):
         self.assertIsNone(editor.param_widget)
         self.assertFalse(editor.empty_label.isHidden())
 
+    def test_inpaint_skip_simple_cases_setting_is_visible_and_persistent(self) -> None:
+        with patch.object(pcfg.module, 'check_need_inpaint', True):
+            panel = ConfigPanel()
+            self.addCleanup(panel.deleteLater)
+            panel.setupConfig()
+
+            self.assertTrue(panel.check_need_inpaint_checker.isChecked())
+            self.assertTrue(panel.check_need_inpaint_checker.toolTip())
+            panel.check_need_inpaint_checker.click()
+
+            self.assertFalse(pcfg.module.check_need_inpaint)
+
     def test_post_merge_controls_persist_and_request_current_page(self) -> None:
         with (
             patch.object(pcfg.module, 'post_merge_textboxes', False),

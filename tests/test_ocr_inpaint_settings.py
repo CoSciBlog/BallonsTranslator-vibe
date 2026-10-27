@@ -20,6 +20,12 @@ from ballontranslator.modules.ocr.ocr_ppv6_onnx import PaddleOCRv6ONNX
 
 
 class OCRAndInpaintSettingsTest(unittest.TestCase):
+    def setUp(self) -> None:
+        LamaLarge.params['mask_dilation_size']['value'] = 0
+        LamaLarge.params['mask_dilation_kernel']['value'] = 'ellipse'
+        LamaLarge.params['inpaint_enlarge_ratio']['value'] = 1.7
+        super().setUp()
+
     def test_all_visible_ocr_and_inpaint_params_have_help(self) -> None:
         specs = [
             spec
@@ -121,6 +127,34 @@ class OCRAndInpaintSettingsTest(unittest.TestCase):
             Flux2Klein.params['step']['options'],
             [4, 6, 8, 12, 16, 20],
         )
+
+    def test_lama_large_exposes_mask_and_context_controls(self) -> None:
+        self.assertEqual(LamaLarge.params['mask_dilation_size']['value'], 0)
+        self.assertEqual(
+            LamaLarge.params['mask_dilation_kernel']['options'],
+            ['ellipse', 'rectangle', 'cross'],
+        )
+        self.assertEqual(LamaLarge.params['inpaint_enlarge_ratio']['value'], 1.7)
+
+    def test_lama_large_mask_dilation_is_applied_before_inference(self) -> None:
+        params = copy.deepcopy(LamaLarge.params)
+        params['mask_dilation_size']['value'] = 3
+        params['mask_dilation_kernel']['value'] = 'rectangle'
+        inpainter = LamaLarge(**params)
+        mask = np.zeros((7, 7), dtype=np.uint8)
+        mask[3, 3] = 255
+
+        prepared = inpainter.prepare_inpaint_mask(mask)
+
+        self.assertEqual(np.count_nonzero(prepared), 9)
+        self.assertTrue(np.all(prepared[2:5, 2:5] == 255))
+
+    def test_lama_large_context_ratio_uses_safe_minimum(self) -> None:
+        params = copy.deepcopy(LamaLarge.params)
+        params['inpaint_enlarge_ratio']['value'] = 0.25
+        inpainter = LamaLarge(**params)
+
+        self.assertEqual(inpainter.inpaint_enlarge_ratio(), 1.0)
 
 
 if __name__ == '__main__':

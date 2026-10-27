@@ -89,12 +89,15 @@ def _inpaint_complete_mask(
 ) -> Optional[np.ndarray]:
     """Inpaint every mask pixel through local, resolution-preserving crops."""
 
+    prepare_mask = getattr(inpainter, 'prepare_inpaint_mask', None)
+    effective_mask = prepare_mask(mask) if callable(prepare_mask) else mask
     inpainted = image.copy()
-    for (x1, y1, x2, y2), crop_mask in _mask_inpaint_regions(mask):
+    for (x1, y1, x2, y2), crop_mask in _mask_inpaint_regions(effective_mask):
         if stop_requested is not None and stop_requested():
             return None
         crop = inpainted[y1:y2, x1:x2]
-        repaired = inpainter.inpaint(crop.copy(), crop_mask.copy(), None)
+        kwargs = {'mask_prepared': True} if callable(prepare_mask) else {}
+        repaired = inpainter.inpaint(crop.copy(), crop_mask.copy(), None, **kwargs)
         if repaired.shape != crop.shape:
             raise ValueError(
                 'Inpainter returned an image with a different shape for a mask crop.'
