@@ -444,6 +444,42 @@ class LamaLarge(LamaInpainterMPE):
                 'rectangle covers corners, and cross expands mainly by axis.'
             ),
         },
+        'mask_closing_size': {
+            'value': 7,
+            'display_name': 'Mask Closing Size',
+            'description': (
+                'Closes small gaps and dark specks inside fragmented text masks '
+                'without permanently expanding their outer edge. Use 0 to disable.'
+            ),
+        },
+        'mask_closing_iterations': {
+            'type': 'selector',
+            'options': [1, 2, 3],
+            'value': 1,
+            'display_name': 'Mask Closing Passes',
+            'description': (
+                'Number of closing passes. One is safest; additional passes join '
+                'larger gaps but may cover nearby artwork.'
+            ),
+        },
+        'mask_closing_kernel': {
+            'type': 'selector',
+            'options': ['ellipse', 'rectangle', 'cross'],
+            'value': 'ellipse',
+            'display_name': 'Mask Closing Kernel',
+            'description': (
+                'Shape used to close mask gaps. Ellipse is the safest default '
+                'for rounded and vertical comic glyphs.'
+            ),
+        },
+        'mask_hole_fill_area': {
+            'value': 256,
+            'display_name': 'Maximum Mask Hole Area',
+            'description': (
+                'Fills enclosed black pinholes up to this source-image pixel area. '
+                'Exterior background is never filled; use 0 to disable.'
+            ),
+        },
         'inpaint_enlarge_ratio': {
             'value': 1.7,
             'display_name': 'Inpaint Context Ratio',

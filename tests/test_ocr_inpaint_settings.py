@@ -23,6 +23,10 @@ class OCRAndInpaintSettingsTest(unittest.TestCase):
     def setUp(self) -> None:
         LamaLarge.params['mask_dilation_size']['value'] = 0
         LamaLarge.params['mask_dilation_kernel']['value'] = 'ellipse'
+        LamaLarge.params['mask_closing_size']['value'] = 7
+        LamaLarge.params['mask_closing_iterations']['value'] = 1
+        LamaLarge.params['mask_closing_kernel']['value'] = 'ellipse'
+        LamaLarge.params['mask_hole_fill_area']['value'] = 256
         LamaLarge.params['inpaint_enlarge_ratio']['value'] = 1.7
         super().setUp()
 
@@ -135,6 +139,13 @@ class OCRAndInpaintSettingsTest(unittest.TestCase):
             ['ellipse', 'rectangle', 'cross'],
         )
         self.assertEqual(LamaLarge.params['inpaint_enlarge_ratio']['value'], 1.7)
+        self.assertEqual(LamaLarge.params['mask_closing_size']['value'], 7)
+        self.assertEqual(LamaLarge.params['mask_closing_iterations']['value'], 1)
+        self.assertEqual(
+            LamaLarge.params['mask_closing_kernel']['options'],
+            ['ellipse', 'rectangle', 'cross'],
+        )
+        self.assertEqual(LamaLarge.params['mask_hole_fill_area']['value'], 256)
 
     def test_lama_large_mask_dilation_is_applied_before_inference(self) -> None:
         params = copy.deepcopy(LamaLarge.params)
@@ -155,6 +166,40 @@ class OCRAndInpaintSettingsTest(unittest.TestCase):
         inpainter = LamaLarge(**params)
 
         self.assertEqual(inpainter.inpaint_enlarge_ratio(), 1.0)
+
+    def test_lama_large_closing_connects_spots_without_growing_outer_edges(self) -> None:
+        params = copy.deepcopy(LamaLarge.params)
+        params['mask_closing_size']['value'] = 3
+        params['mask_closing_kernel']['value'] = 'rectangle'
+        params['mask_hole_fill_area']['value'] = 0
+        inpainter = LamaLarge(**params)
+        mask = np.zeros((9, 12), dtype=np.uint8)
+        mask[3:6, 2:5] = 255
+        mask[3:6, 6:9] = 255
+
+        repaired = inpainter.repair_inpaint_mask(mask)
+
+        self.assertTrue(np.all(repaired[3:6, 5] == 255))
+        self.assertFalse(np.any(repaired[:, :2]))
+        self.assertFalse(np.any(repaired[:, 9:]))
+        np.testing.assert_array_equal(
+            inpainter.repair_inpaint_mask(repaired), repaired
+        )
+
+    def test_lama_large_fills_only_holes_within_the_configured_area(self) -> None:
+        params = copy.deepcopy(LamaLarge.params)
+        params['mask_closing_size']['value'] = 0
+        params['mask_hole_fill_area']['value'] = 4
+        inpainter = LamaLarge(**params)
+        mask = np.zeros((12, 16), dtype=np.uint8)
+        mask[2:10, 2:14] = 255
+        mask[4:6, 4:6] = 0
+        mask[4:7, 8:11] = 0
+
+        repaired = inpainter.repair_inpaint_mask(mask)
+
+        self.assertTrue(np.all(repaired[4:6, 4:6] == 255))
+        self.assertFalse(np.any(repaired[4:7, 8:11]))
 
 
 if __name__ == '__main__':

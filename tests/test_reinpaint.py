@@ -179,6 +179,47 @@ def test_reinpaint_applies_inpainter_mask_preparation_to_the_composite():
     assert project.saved_mask is None
 
 
+def test_reinpaint_saves_stable_mask_repairs_before_temporary_dilation():
+    mask = np.zeros((7, 7), dtype=np.uint8)
+    mask[2:5, 2:5] = 255
+    mask[3, 3] = 0
+    project = _Project(mask, np.full((7, 7, 3), 7, dtype=np.uint8))
+
+    class RepairingInpainter:
+        def __init__(self):
+            self.repair_calls = 0
+
+        def repair_inpaint_mask(self, source_mask):
+            self.repair_calls += 1
+            repaired = source_mask.copy()
+            repaired[3, 3] = 255
+            return repaired
+
+        def dilate_inpaint_mask(self, source_mask):
+            prepared = source_mask.copy()
+            prepared[1:6, 1:6] = 255
+            return prepared
+
+        def prepare_inpaint_mask(self, source_mask):
+            raise AssertionError(
+                'The repaired full-page mask must not be repaired twice.'
+            )
+
+        def inpaint(self, image, used_mask, blocks, *, mask_prepared=False):
+            assert mask_prepared
+            return np.full_like(image, 23)
+
+    inpainter = RepairingInpainter()
+    assert reinpaint_project_page(project, inpainter, '001.png')
+
+    saved_mask = project.saved_mask[1]
+    assert saved_mask[3, 3] == 255
+    assert saved_mask[1, 1] == 0
+    assert np.count_nonzero(np.all(project.saved[1] == 23, axis=2)) == 25
+    assert mask[3, 3] == 0
+    assert inpainter.repair_calls == 1
+
+
 def test_reinpaint_detects_residual_text_and_preserves_the_combined_mask():
     mask = np.zeros((4, 5), dtype=np.uint8)
     mask[0, 0] = 255

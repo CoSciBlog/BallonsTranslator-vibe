@@ -86,11 +86,17 @@ def _inpaint_complete_mask(
     image: np.ndarray,
     mask: np.ndarray,
     stop_requested: Optional[Callable[[], bool]],
+    *,
+    mask_repaired: bool = False,
 ) -> Optional[np.ndarray]:
     """Inpaint every mask pixel through local, resolution-preserving crops."""
 
     prepare_mask = getattr(inpainter, 'prepare_inpaint_mask', None)
-    effective_mask = prepare_mask(mask) if callable(prepare_mask) else mask
+    dilate_mask = getattr(inpainter, 'dilate_inpaint_mask', None)
+    if mask_repaired and callable(dilate_mask):
+        effective_mask = dilate_mask(mask)
+    else:
+        effective_mask = prepare_mask(mask) if callable(prepare_mask) else mask
     inpainted = image.copy()
     for (x1, y1, x2, y2), crop_mask in _mask_inpaint_regions(effective_mask):
         if stop_requested is not None and stop_requested():
@@ -148,8 +154,15 @@ def reinpaint_project_page(
     # outside their OCR-derived crops. Local crops retain every saved mask
     # pixel while avoiding a resolution-losing full-page model invocation.
     if has_mask:
+        repair_mask = getattr(inpainter, 'repair_inpaint_mask', None)
+        if callable(repair_mask):
+            mask = repair_mask(mask)
         inpainted = _inpaint_complete_mask(
-            inpainter, source_image, mask, stop_requested,
+            inpainter,
+            source_image,
+            mask,
+            stop_requested,
+            mask_repaired=callable(repair_mask),
         )
         if inpainted is None:
             return False
@@ -163,12 +176,19 @@ def reinpaint_project_page(
             return False
         residual = normalize_inpaint_mask(residual, source_image.shape, dilate)
         if residual is not None and np.any(residual):
+            repair_mask = getattr(inpainter, 'repair_inpaint_mask', None)
+            if callable(repair_mask):
+                residual = repair_mask(residual)
             mask = residual if mask is None else cv2.bitwise_or(mask, residual)
             # Repair the fresh result so text inside the original mask can
             # improve too, rather than repeating identical inference on source.
             # Keep the complete residual mask, including pixels outside OCR crops.
             repaired = _inpaint_complete_mask(
-                inpainter, inpainted, residual, stop_requested,
+                inpainter,
+                inpainted,
+                residual,
+                stop_requested,
+                mask_repaired=callable(repair_mask),
             )
             if repaired is None:
                 return False

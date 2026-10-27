@@ -21,7 +21,7 @@ def filter_mask_by_bboxes(mask: np.ndarray, textblock_list: List[TextBlock] = No
 
     Example:
         >>> mask = np.full((4, 5), 255, dtype=np.uint8)
-        >>> blk = TextBlock(xyxy=[1, 1, 3, 2])
+        >>> blk = TextBlock(xyxy=[1, 1, 3, 2], _bounding_rect=[1, 1, 2, 1])
         >>> filtered = filter_mask_by_bboxes(mask, [blk])
         >>> filtered.tolist()
         [[255, 255, 255, 255, 255], [255, 255, 255, 255, 255], [255, 255, 255, 255, 255], [255, 255, 255, 255, 255]]
@@ -94,19 +94,103 @@ class InpainterBase(BaseModule):
         kernel = str(self.get_param_value('mask_dilation_kernel'))
         return kernel if kernel in {'ellipse', 'rectangle', 'cross'} else 'ellipse'
 
+    def mask_closing_size(self) -> int:
+        if self.params is None or 'mask_closing_size' not in self.params:
+            return 0
+        return max(0, int(self.get_param_value('mask_closing_size')))
+
+    def mask_closing_iterations(self) -> int:
+        if self.params is None or 'mask_closing_iterations' not in self.params:
+            return 1
+        return max(
+            1,
+            min(5, int(self.get_param_value('mask_closing_iterations'))),
+        )
+
+    def mask_closing_kernel(self) -> str:
+        if self.params is None or 'mask_closing_kernel' not in self.params:
+            return 'ellipse'
+        kernel = str(self.get_param_value('mask_closing_kernel'))
+        return kernel if kernel in {'ellipse', 'rectangle', 'cross'} else 'ellipse'
+
+    def mask_hole_fill_area(self) -> int:
+        if self.params is None or 'mask_hole_fill_area' not in self.params:
+            return 0
+        return max(0, int(self.get_param_value('mask_hole_fill_area')))
+
     def inpaint_enlarge_ratio(self) -> float:
         if self.params is None or 'inpaint_enlarge_ratio' not in self.params:
             return 1.7
         return max(1.0, float(self.get_param_value('inpaint_enlarge_ratio')))
 
-    def prepare_inpaint_mask(
+    @staticmethod
+    def _kernel_shape(name: str) -> int:
+        return {
+            'ellipse': cv2.MORPH_ELLIPSE,
+            'rectangle': cv2.MORPH_RECT,
+            'cross': cv2.MORPH_CROSS,
+        }[name]
+
+    @staticmethod
+    def _fill_small_mask_holes(
+        mask: np.ndarray, max_area: int,
+    ) -> np.ndarray:
+        """Fill enclosed background components up to ``max_area`` pixels.
+
+        Exterior background always remains untouched, preventing a fragmented
+        text mask from expanding into unrelated artwork.
+
+        >>> ring = np.full((3, 3), 255, np.uint8)
+        >>> ring[1, 1] = 0
+        >>> int(InpainterBase._fill_small_mask_holes(ring, 1)[1, 1])
+        255
+        """
+        if max_area <= 0:
+            return mask
+        background = (mask == 0).astype(np.uint8)
+        count, labels, stats, _ = cv2.connectedComponentsWithStats(
+            background, connectivity=8,
+        )
+        border_labels = set(np.concatenate((
+            labels[0, :], labels[-1, :], labels[:, 0], labels[:, -1],
+        )).tolist())
+        repaired = mask.copy()
+        for label in range(1, count):
+            if (
+                label not in border_labels
+                and int(stats[label, cv2.CC_STAT_AREA]) <= max_area
+            ):
+                repaired[labels == label] = 255
+        return repaired
+
+    def repair_inpaint_mask(
         self, mask: Optional[np.ndarray],
     ) -> Optional[np.ndarray]:
-        """Apply the inpainter's optional mask-growth policy once.
+        """Close small gaps and fill bounded pinholes without outer dilation."""
+        if mask is None:
+            return mask
+        closing_size = self.mask_closing_size()
+        max_hole_area = self.mask_hole_fill_area()
+        if closing_size <= 0 and max_hole_area <= 0:
+            return mask
+        repaired = (mask > 0).astype(np.uint8) * 255
+        if closing_size > 0:
+            closing_size += 1 - closing_size % 2
+            kernel = cv2.getStructuringElement(
+                self._kernel_shape(self.mask_closing_kernel()),
+                (closing_size, closing_size),
+            )
+            repaired = cv2.morphologyEx(
+                repaired,
+                cv2.MORPH_CLOSE,
+                kernel,
+                iterations=self.mask_closing_iterations(),
+            )
+        return self._fill_small_mask_holes(repaired, max_hole_area)
 
-        >>> InpainterBase.prepare_inpaint_mask(InpainterBase(), np.zeros((2, 2), np.uint8)).shape
-        (2, 2)
-        """
+    def dilate_inpaint_mask(
+        self, mask: Optional[np.ndarray],
+    ) -> Optional[np.ndarray]:
         if mask is None:
             return mask
         size = self.mask_dilation_size()
@@ -114,15 +198,20 @@ class InpainterBase(BaseModule):
             return mask
         # OpenCV kernels are centered reliably at odd sizes.
         size += 1 - size % 2
-        shapes = {
-            'ellipse': cv2.MORPH_ELLIPSE,
-            'rectangle': cv2.MORPH_RECT,
-            'cross': cv2.MORPH_CROSS,
-        }
         kernel = cv2.getStructuringElement(
-            shapes[self.mask_dilation_kernel()], (size, size),
+            self._kernel_shape(self.mask_dilation_kernel()), (size, size),
         )
         return cv2.dilate(mask, kernel)
+
+    def prepare_inpaint_mask(
+        self, mask: Optional[np.ndarray],
+    ) -> Optional[np.ndarray]:
+        """Repair a mask and then apply its temporary outer expansion once.
+
+        >>> InpainterBase.prepare_inpaint_mask(InpainterBase(), np.zeros((2, 2), np.uint8)).shape
+        (2, 2)
+        """
+        return self.dilate_inpaint_mask(self.repair_inpaint_mask(mask))
     
     def memory_safe_inpaint(self, img: np.ndarray, mask: np.ndarray, textblock_list: List[TextBlock] = None, **kwargs: object) -> np.ndarray:
         '''
