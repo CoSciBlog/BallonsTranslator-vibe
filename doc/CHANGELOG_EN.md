@@ -1,5 +1,8 @@
 # Changelogs
 
+### 2026-11-02 — 1.5.19+vibe.66
+- LLM translation processes every non-empty text region on the current page together in one structured request. Added default-off **Use previous and next page as context** to each text profile; when enabled, the immediately adjacent pages' source text is sent as read-only story context to improve continuity and reference resolution. Neighboring text is never translated, written to the current page, or added to reusable history, and context recovery removes it before required current-page input.
+
 ### 2026-10-27 — 1.5.19+vibe.64
 - The pipeline progress display is now a separate native window with a draggable title bar. It remains protected from accidental closing while processing; use its Stop button to cancel safely.
 

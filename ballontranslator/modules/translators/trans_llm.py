@@ -52,6 +52,7 @@ from ..context.translation_context import (
     recover_context_length,
     recover_output_limit,
     saved_page_summary_text,
+    snapshot_adjacent_page_context,
     snapshot_page_summaries,
 )
 from ..llm_chat import (
@@ -444,6 +445,7 @@ class LLMTranslator(LLMChatRequester, BaseTranslator):
             f'summary_memory={summary_memory_enabled}, '
             f'overwrite_summary={overwrite_summary}, '
             f'review_translation={bool(profile.review_translation)}, '
+            f'adjacent_page_context={bool(profile.use_adjacent_page_context)}, '
             f'google_first_pass={bool(profile.google_first_pass)}, '
             f'{output_limit}'
             f'thinking_setting='
@@ -886,6 +888,11 @@ class LLMTranslator(LLMChatRequester, BaseTranslator):
             if memory_enabled and page_key is not None
             else ()
         )
+        adjacent_pages = (
+            snapshot_adjacent_page_context(project, str(page_key))
+            if profile.use_adjacent_page_context and page_key is not None
+            else ()
+        )
         if ignore_current_summary:
             saved_summaries = tuple(
                 summary
@@ -907,8 +914,9 @@ class LLMTranslator(LLMChatRequester, BaseTranslator):
             and not project_glossary
             and memory is None
             and not saved_summaries
+            and not adjacent_pages
         ):
-            # Preserve the legacy prompt shape when both optional features are off.
+            # Preserve the legacy prompt shape when all optional context is off.
             self._history_window = None
             disabled_diagnostic = ContextDiagnostic(
                 page_key=str(page_key or ''),
@@ -1239,6 +1247,7 @@ class LLMTranslator(LLMChatRequester, BaseTranslator):
             page_summaries=page_summaries,
             summary_token_count=summary_token_count,
             current_summary_token_count=current_summary_tokens,
+            adjacent_pages=adjacent_pages,
         )
 
     def _snapshot_history_page(

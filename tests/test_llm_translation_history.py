@@ -26,6 +26,7 @@ from ballontranslator.modules.context.token_usage import (
     messages_token_count,
 )
 from ballontranslator.modules.context.translation_context import (
+    AdjacentPageContext,
     MemoryCheckpoint,
     PageSummary,
     RequestContext,
@@ -135,12 +136,58 @@ class LLMTranslationHistoryTest(
             glossary=glossary,
             memory=MemoryCheckpoint('memory', ('001.png',), 3),
             page_summaries=(PageSummary('001.png', 'summary'),),
+            adjacent_pages=(
+                AdjacentPageContext('next', '002.png', ('future',)),
+            ),
         ))
 
         self.assertEqual(recovered.history, ())
         self.assertEqual(recovered.glossary, glossary)
         self.assertIsNone(recovered.memory)
         self.assertEqual(recovered.page_summaries, ())
+        self.assertEqual(recovered.adjacent_pages, ())
+
+    def test_profile_snapshots_only_immediately_adjacent_page_sources(self) -> None:
+        project = self._project(4)
+        project.pages['001.png'].append(_block(''))
+        project.pages['003.png'].append(_block('second source-3'))
+        self.profile.use_adjacent_page_context = True
+
+        context = self._snapshot_request_context(
+            project,
+            '002.png',
+            self.profile,
+        )
+
+        self.assertEqual(
+            context.adjacent_pages,
+            (
+                AdjacentPageContext('previous', '001.png', ('source-1',)),
+                AdjacentPageContext(
+                    'next',
+                    '003.png',
+                    ('source-3', 'second source-3'),
+                ),
+            ),
+        )
+
+    def test_context_length_recovery_drops_adjacent_pages_first(self) -> None:
+        page = RenderedHistoryPage(
+            HistoryPage('001.png', ('old',), ('translated',)), (), 4,
+        )
+        context = RequestContext(
+            history=(page,),
+            page_summaries=(PageSummary('001.png', 'summary'),),
+            adjacent_pages=(
+                AdjacentPageContext('next', '003.png', ('future',)),
+            ),
+        )
+
+        recovered = recover_context_length(context)
+
+        self.assertEqual(recovered.adjacent_pages, ())
+        self.assertEqual(recovered.history, context.history)
+        self.assertEqual(recovered.page_summaries, context.page_summaries)
 
     def test_reviewed_translation_owns_the_reusable_history_window(self) -> None:
         project = self._project(2)

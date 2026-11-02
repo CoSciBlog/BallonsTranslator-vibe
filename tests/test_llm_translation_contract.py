@@ -11,6 +11,7 @@ from ballontranslator.modules.context.glossary import (
 from ballontranslator.modules.context.history import HistoryPage
 from ballontranslator.modules.llm_chat import LLMChatResult
 from ballontranslator.modules.context.translation_context import (
+    AdjacentPageContext,
     MemoryCheckpoint,
     PageSummary,
     RequestContext,
@@ -205,6 +206,14 @@ class LLMTranslationContractTest(unittest.TestCase):
                 4,
             ),
             page_summaries=(PageSummary('003.png', 'Current clue.'),),
+            adjacent_pages=(
+                AdjacentPageContext(
+                    'previous', '002.png', ('What happened before?',),
+                ),
+                AdjacentPageContext(
+                    'next', '004.png', ('A consequence follows.',),
+                ),
+            ),
         )
         image_part = {
             'type': 'image_url',
@@ -231,6 +240,13 @@ class LLMTranslationContractTest(unittest.TestCase):
             'translations': {'1': 'old target'},
         })
         self.assertIn('Current clue.', prompt)
+        self.assertIn('ADJACENT PAGE CONTEXT', prompt)
+        self.assertIn('What happened before?', prompt)
+        self.assertIn('A consequence follows.', prompt)
+        current_input, _end = json.JSONDecoder().raw_decode(
+            prompt.split('INPUT:\n', 1)[1]
+        )
+        self.assertEqual(current_input, [{'id': 1, 'source': 'Hero speaks'}])
         self.assertIn('infer the natural comic reading order', prompt)
         self.assertIn('mapped to its original input ID', prompt)
         self.assertIsInstance(messages[-1]['content'], list)

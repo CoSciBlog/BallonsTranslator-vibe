@@ -6354,8 +6354,16 @@ Then restart Photoshop. Explorer will now open the source file and destination l
         <translation>Review and optimize translation with LLM</translation>
     </message>
     <message>
+        <source>Use previous and next page as context</source>
+        <translation>Use previous and next page as context</translation>
+    </message>
+    <message>
         <source>Runs an extra LLM review for natural wording, source accuracy, pronouns, speaker/addressee references, gendered wording, and formality. Adds LLM requests.</source>
         <translation>Runs an extra LLM review for natural wording, source accuracy, pronouns, speaker/addressee references, gendered wording, and formality. Adds LLM requests.</translation>
+    </message>
+    <message>
+        <source>Include source text from the immediately previous and next page as read-only context when translating the current page. This can improve continuity but uses more input tokens.</source>
+        <translation>Include source text from the immediately previous and next page as read-only context when translating the current page. This can improve continuity but uses more input tokens.</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="479"/>

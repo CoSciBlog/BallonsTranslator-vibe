@@ -6396,8 +6396,16 @@ Starten Sie dann Photoshop neu. Der Explorer öffnet nun die Quelldatei und den 
         <translation>Übersetzung mit LLM prüfen und optimieren</translation>
     </message>
     <message>
+        <source>Use previous and next page as context</source>
+        <translation>Vorherige und nächste Seite als Kontext verwenden</translation>
+    </message>
+    <message>
         <source>Runs an extra LLM review for natural wording, source accuracy, pronouns, speaker/addressee references, gendered wording, and formality. Adds LLM requests.</source>
         <translation>Führt eine zusätzliche LLM-Prüfung für natürliche Formulierungen, Genauigkeit gegenüber dem Original, Pronomen, Bezüge zwischen Sprecher und angesprochener Person, geschlechtsspezifische Formulierungen und Höflichkeitsstufen aus. Fügt LLM-Anfragen hinzu.</translation>
+    </message>
+    <message>
+        <source>Include source text from the immediately previous and next page as read-only context when translating the current page. This can improve continuity but uses more input tokens.</source>
+        <translation>Bezieht beim Übersetzen der aktuellen Seite den Quelltext der unmittelbar vorherigen und nächsten Seite als schreibgeschützten Kontext ein. Dies kann die Kontinuität verbessern, verbraucht aber mehr Eingabe-Token.</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/llm_profile_widgets.py" line="479"/>

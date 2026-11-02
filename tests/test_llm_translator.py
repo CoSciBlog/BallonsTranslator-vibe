@@ -253,6 +253,7 @@ class LLMTranslatorTest(unittest.TestCase):
                 profile.model_options = ['selected-model']
                 profile.max_tokens = 1234
                 profile.review_translation = True
+                profile.use_adjacent_page_context = True
                 with mock.patch.object(pcfg.module, 'llm_profiles', [profile]), \
                         mock.patch.object(pcfg.module, 'translator_llm_id', profile.id):
                     description = self.translator.translation_run_description()
@@ -262,6 +263,7 @@ class LLMTranslatorTest(unittest.TestCase):
                     self.assertIn('max_output_tokens=1234', description)
                 self.assertIn(f'model={profile.model!r}', description)
                 self.assertIn('review_translation=True', description)
+                self.assertIn('adjacent_page_context=True', description)
                 self.assertIn('thinking_setting=', description)
 
     def test_legacy_provider_keeps_page_id_schema_and_message_content(self):

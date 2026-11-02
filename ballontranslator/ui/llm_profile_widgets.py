@@ -84,6 +84,7 @@ PROFILE_COMMON_PARAM_DEFS = [
 PROFILE_MODALITY_PARAM_DEFS = {
     'text': [
         ('review_translation', 'checkbox'),
+        ('use_adjacent_page_context', 'checkbox'),
         ('google_first_pass', 'checkbox'),
         ('google_auto_detect_source', 'checkbox'),
         ('google_fallback_to_draft', 'checkbox'),
@@ -478,6 +479,7 @@ class ProfileCardWidget(QGroupBox):
             'low_vram_mode': self.tr('Low VRAM Mode'),
             'use_glossary': self.tr('Use Glossary for Translation'),
             'review_translation': self.tr('Review and optimize translation with LLM'),
+            'use_adjacent_page_context': self.tr('Use previous and next page as context'),
             'google_first_pass': self.tr('Translate with Google First'),
             'google_auto_detect_source': self.tr('Google Auto-Detect Source Language'),
             'google_fallback_to_draft': self.tr('Keep Google Draft If LLM Fails'),
@@ -515,6 +517,11 @@ class ProfileCardWidget(QGroupBox):
                 'Runs an extra LLM review for natural wording, source accuracy, '
                 'pronouns, speaker/addressee references, gendered wording, and '
                 'formality. Adds LLM requests.'
+            ),
+            'use_adjacent_page_context': self.tr(
+                'Include source text from the immediately previous and next page '
+                'as read-only context when translating the current page. This can '
+                'improve continuity but uses more input tokens.'
             ),
             'google_first_pass': self.tr(
                 'Translate every selected page completely with Google Translate '
@@ -906,6 +913,7 @@ class ProfileCardWidget(QGroupBox):
             glossary_checkbox.blockSignals(False)
         for key in (
             'review_translation',
+            'use_adjacent_page_context',
             'google_first_pass',
             'google_auto_detect_source',
             'google_fallback_to_draft',

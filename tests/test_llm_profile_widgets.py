@@ -99,6 +99,26 @@ class LLMProfileModelSelectorTest(unittest.TestCase):
         card.syncFromProfile()
         self.assertFalse(checkbox.isChecked())
 
+    def test_adjacent_page_context_checkbox_updates_profile_setting(self) -> None:
+        profile = LLMProfile(id='test', name='Test')
+        card = ProfileCardWidget(profile)
+        self.addCleanup(card.deleteLater)
+        checkbox = card.details.param_widgets['use_adjacent_page_context']
+        card.setExpanded(True)
+
+        self.assertFalse(checkbox.isChecked())
+        self.assertTrue(checkbox.isVisibleTo(card))
+        self.assertEqual(
+            card.profile_param_display_names['use_adjacent_page_context'],
+            'Use previous and next page as context',
+        )
+        checkbox.click()
+        self.assertTrue(profile.use_adjacent_page_context)
+
+        profile.use_adjacent_page_context = False
+        card.syncFromProfile()
+        self.assertFalse(checkbox.isChecked())
+
     def test_ollama_context_is_profile_scoped(self) -> None:
         profile = default_profile('Ollama')
         profile.model = 'qwen:27b-q3_k_s'

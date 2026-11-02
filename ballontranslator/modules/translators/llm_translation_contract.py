@@ -15,8 +15,10 @@ from ..context.glossary import (
 from ..context.history import HistoryPage, RenderedHistoryPage
 from ..context.token_usage import messages_token_count
 from ..context.translation_context import (
+    AdjacentPageContext,
     PageSummary,
     RequestContext,
+    adjacent_page_context_content,
     memory_message_content,
     page_summary_context_content,
 )
@@ -229,6 +231,7 @@ def render_user_prompt(
     target_language: str,
     glossary_entries: Tuple[GlossaryEntry, ...] = (),
     page_summaries: Tuple[PageSummary, ...] = (),
+    adjacent_pages: Tuple[AdjacentPageContext, ...] = (),
 ) -> str:
     """Render the volatile current-page translation prompt."""
     input_elements = [
@@ -241,6 +244,8 @@ def render_user_prompt(
         f"to {target_language}.\n\n"
         f"INPUT:\n{input_json}"
     )
+    if adjacent_pages:
+        prompt = f'{adjacent_page_context_content(adjacent_pages)}\n\n{prompt}'
     if page_summaries:
         prompt = (
             f'{page_summary_context_content(page_summaries)}\n\n'
@@ -380,6 +385,9 @@ def assemble_translation_request(
         prompt_spec.target_language,
         current_glossary,
         request_context.page_summaries
+        if request_context is not None
+        else (),
+        request_context.adjacent_pages
         if request_context is not None
         else (),
     )

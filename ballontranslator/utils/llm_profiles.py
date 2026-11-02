@@ -227,6 +227,7 @@ class LLMProfile(Config):
     presence_penalty: float = 0.0
     use_glossary: bool = True
     review_translation: bool = False
+    use_adjacent_page_context: bool = False
     json_schema_response_format: bool = False
     low_vram_mode: bool = False
     google_first_pass: bool = False
@@ -255,6 +256,12 @@ class LLMProfile(Config):
                 self.id or self.name,
             )
             self.review_translation = False
+        if not isinstance(self.use_adjacent_page_context, bool):
+            LOGGER.warning(
+                'Discard invalid LLM profile use_adjacent_page_context for %s.',
+                self.id or self.name,
+            )
+            self.use_adjacent_page_context = False
         for key, default in (
             ('google_first_pass', False),
             ('google_auto_detect_source', True),
