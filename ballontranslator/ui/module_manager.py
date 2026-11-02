@@ -2418,6 +2418,26 @@ class ModuleManager(QObject):
             lambda: create_info_dialog(self.tr('Selected modules are ready.')),
         )
 
+    def prepareTranslationBenchmark(
+        self,
+        on_success: Callable[[], None],
+        on_failure: Optional[Callable[[], None]] = None,
+    ) -> None:
+        """Prepare the shared detection/OCR stages for a benchmark worker."""
+
+        if self.pipelineBusy():
+            if on_failure is not None:
+                on_failure()
+            return
+        self._prepare_modules_then(
+            [
+                ('textdetector', cfg_module.textdetector),
+                ('ocr', cfg_module.ocr),
+            ],
+            on_success,
+            on_failure,
+        )
+
     def check_inpaint_th_finished(self):
         if self.inpaint_thread.isRunning():
             return

@@ -1,5 +1,8 @@
 # Changelogs
 
+### 2026-11-02 — 1.5.19+vibe.67
+- Added **Tools → Translation Benchmark...** (`Ctrl+Shift+K`). Text detection and OCR run once for the selected pages, then two or more text-capable LLM profiles translate isolated copies of the same frozen OCR result. The dialog compares results, timings, and per-profile errors side by side and exports JSON/CSV without API keys. Benchmarking never changes the open project's text, translations, glossary, or translation history; duplicate an LLM profile to reproducibly compare different models, prompts, sampling, review, and adjacent-page context settings.
+
 ### 2026-11-02 — 1.5.19+vibe.66
 - LLM translation processes every non-empty text region on the current page together in one structured request. Added default-off **Use previous and next page as context** to each text profile; when enabled, the immediately adjacent pages' source text is sent as read-only story context to improve continuity and reference resolution. Neighboring text is never translated, written to the current page, or added to reusable history, and context recovery removes it before required current-page input.
 

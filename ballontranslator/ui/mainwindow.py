@@ -81,6 +81,7 @@ from .font_refresh import FontRefreshController
 from .update_dialog import UpdateReleaseDialog
 from .run_pipeline_dialog import RunPipelineDialog
 from .batch_processing_dialog import BatchProcessingDialog
+from .translation_benchmark_dialog import TranslationBenchmarkDialog
 from .glossary_window import GlossaryWindow
 from .pipeline_history_window import PipelineHistoryWindow
 from .custom_widget import ScrollBar, Widget, ViewWidget
@@ -1390,6 +1391,9 @@ class MainWindow(mainwindow_cls):
         self.titleBar.batch_processing_trigger.connect(
             self.on_open_batch_processing
         )
+        self.titleBar.translation_benchmark_trigger.connect(
+            self.on_open_translation_benchmark
+        )
         self.titleBar.pipeline_history_trigger.connect(
             self.on_open_pipeline_history
         )
@@ -1764,6 +1768,23 @@ class MainWindow(mainwindow_cls):
                 dialog.options(),
                 dialog.project_directories,
             )
+        finally:
+            dialog.deleteLater()
+
+    def on_open_translation_benchmark(self) -> None:
+        if self._batch_options is not None or self.module_manager.pipelineBusy():
+            create_info_dialog(self.tr('A pipeline operation is already running.'))
+            return
+        if self.imgtrans_proj is None or self.imgtrans_proj.is_empty:
+            create_info_dialog(self.tr('Open a project before starting a benchmark.'))
+            return
+        dialog = TranslationBenchmarkDialog(
+            self.imgtrans_proj,
+            self.module_manager,
+            self,
+        )
+        try:
+            dialog.exec_()
         finally:
             dialog.deleteLater()
 

@@ -547,6 +547,13 @@ class TitleBar(Widget):
         batchProcessingAction.setShortcut(QKeySequence('Ctrl+Shift+B'))
         self.batch_processing_trigger = batchProcessingAction.triggered
 
+        translationBenchmarkAction = QAction(
+            self.tr('Translation Benchmark...'),
+            self,
+        )
+        translationBenchmarkAction.setShortcut(QKeySequence('Ctrl+Shift+K'))
+        self.translation_benchmark_trigger = translationBenchmarkAction.triggered
+
         historyAction = QAction(self.tr('Pipeline History'), self)
         historyAction.setShortcut(QKeySequence('Ctrl+Shift+H'))
         self.pipeline_history_trigger = historyAction.triggered
@@ -578,6 +585,7 @@ class TitleBar(Widget):
         toolsMenu.addAction(reinpaintAllAction)
         toolsMenu.addAction(upscaleProjectAction)
         toolsMenu.addAction(batchProcessingAction)
+        toolsMenu.addAction(translationBenchmarkAction)
         toolsMenu.addAction(historyAction)
         toolsMenu.addAction(glossaryAction)
         toolsMenu.addAction(applyTextStyleProjectAction)

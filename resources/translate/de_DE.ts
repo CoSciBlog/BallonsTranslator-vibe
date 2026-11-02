@@ -3544,6 +3544,11 @@ Once you provide the prompt, I will generate the image.  Then, when you want me 
         <translation>Es läuft bereits ein Pipeline-Vorgang.</translation>
     </message>
     <message>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="1778"/>
+        <source>Open a project before starting a benchmark.</source>
+        <translation>Öffnen Sie ein Projekt, bevor Sie einen Benchmark starten.</translation>
+    </message>
+    <message>
         <location filename="../../ballontranslator/ui/mainwindow.py" line="1698"/>
         <source>No batch tasks were created.</source>
         <translation>Es wurden keine Stapelaufgaben erstellt.</translation>
@@ -8658,6 +8663,11 @@ Starten Sie dann Photoshop neu. Der Explorer öffnet nun die Quelldatei und den 
         <translation>Stapelverarbeitung …</translation>
     </message>
     <message>
+        <location filename="../../ballontranslator/ui/mainwindowbars.py" line="559"/>
+        <source>Translation Benchmark...</source>
+        <translation>Übersetzungsbenchmark...</translation>
+    </message>
+    <message>
         <location filename="../../ballontranslator/ui/mainwindowbars.py" line="545"/>
         <source>Pipeline History</source>
         <translation>Pipeline-Verlauf</translation>
@@ -8793,6 +8803,257 @@ Starten Sie dann Photoshop neu. Der Explorer öffnet nun die Quelldatei und den 
         <location filename="../../ballontranslator/ui/module_manager.py" line="757"/>
         <source>{param} is required for {translator}</source>
         <translation>{param} ist erforderlich für {translator}</translation>
+    </message>
+</context>
+<context>
+    <name>TranslationBenchmarkDialog</name>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="259"/>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="524"/>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="656"/>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="664"/>
+        <source>Translation Benchmark</source>
+        <translation>Übersetzungsbenchmark</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="265"/>
+        <source>Text detection and OCR run once. Every selected LLM profile then translates an isolated copy of the same OCR result; the open project and its translation history are not changed.</source>
+        <translation>Texterkennung und OCR werden einmal ausgeführt. Anschließend übersetzt jedes ausgewählte LLM-Profil eine isolierte Kopie desselben OCR-Ergebnisses; das geöffnete Projekt und sein Übersetzungsverlauf bleiben unverändert.</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="273"/>
+        <source>Pages</source>
+        <translation>Seiten</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="275"/>
+        <source>Current page</source>
+        <translation>Aktuelle Seite</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="276"/>
+        <source>All non-ignored pages</source>
+        <translation>Alle nicht ignorierten Seiten</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="285"/>
+        <source>Use</source>
+        <translation>Verwenden</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="285"/>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="324"/>
+        <source>Profile</source>
+        <translation>Profil</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="285"/>
+        <source>Backend</source>
+        <translation>Backend</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="286"/>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="324"/>
+        <source>Model</source>
+        <translation>Modell</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="286"/>
+        <source>Key settings</source>
+        <translation>Wichtige Einstellungen</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="306"/>
+        <source>Duplicate an LLM profile in Settings to compare another model, prompt, sampling value, review mode, or adjacent-page context.</source>
+        <translation>Duplizieren Sie in den Einstellungen ein LLM-Profil, um ein anderes Modell, einen anderen Prompt, Sampling-Wert, Prüfmodus oder Kontext angrenzender Seiten zu vergleichen.</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="324"/>
+        <source>Status</source>
+        <translation>Status</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="325"/>
+        <source>Translation time</source>
+        <translation>Übersetzungszeit</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="325"/>
+        <source>Error</source>
+        <translation>Fehler</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="338"/>
+        <source>Summary</source>
+        <translation>Zusammenfassung</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="339"/>
+        <source>Block comparison</source>
+        <translation>Textblockvergleich</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="344"/>
+        <source>Start benchmark</source>
+        <translation>Benchmark starten</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="345"/>
+        <source>Stop</source>
+        <translation>Stopp</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="346"/>
+        <source>Export JSON...</source>
+        <translation>JSON exportieren...</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="347"/>
+        <source>Export CSV...</source>
+        <translation>CSV exportieren...</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="348"/>
+        <source>Close</source>
+        <translation>Schließen</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="382"/>
+        <source>Temp {temperature}, Top P {top_p}, Thinking {thinking}, Review {review}, Adjacent {adjacent}</source>
+        <translation>Temp. {temperature}, Top P {top_p}, Thinking {thinking}, Prüfung {review}, angrenzende Seiten {adjacent}</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="434"/>
+        <source>At least {count} LLM page request(s)</source>
+        <translation>Mindestens {count} LLM-Seitenanfrage(n)</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="450"/>
+        <source>Preparing text detector and OCR...</source>
+        <translation>Texterkennung und OCR werden vorbereitet...</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="488"/>
+        <source>Module preparation was cancelled or failed.</source>
+        <translation>Die Modulvorbereitung wurde abgebrochen oder ist fehlgeschlagen.</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="521"/>
+        <source>Benchmark failed.</source>
+        <translation>Benchmark fehlgeschlagen.</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="525"/>
+        <source>The benchmark could not be completed.
+
+{error}</source>
+        <translation>Der Benchmark konnte nicht abgeschlossen werden.
+
+{error}</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="531"/>
+        <source>Benchmark stopped.</source>
+        <translation>Benchmark gestoppt.</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="537"/>
+        <source>Benchmark stopped; partial results are shown.</source>
+        <translation>Benchmark gestoppt; Teilergebnisse werden angezeigt.</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="539"/>
+        <source>Benchmark completed.</source>
+        <translation>Benchmark abgeschlossen.</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="550"/>
+        <source>Shared detection + OCR</source>
+        <translation>Gemeinsame Texterkennung + OCR</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="552"/>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="607"/>
+        <source>Completed</source>
+        <translation>Abgeschlossen</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="575"/>
+        <source>Page</source>
+        <translation>Seite</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="575"/>
+        <source>Block</source>
+        <translation>Textblock</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="575"/>
+        <source>Source</source>
+        <translation>Quelle</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="608"/>
+        <source>Failed</source>
+        <translation>Fehlgeschlagen</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="609"/>
+        <source>Cancelled</source>
+        <translation>Abgebrochen</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="619"/>
+        <source>Stopping benchmark...</source>
+        <translation>Benchmark wird gestoppt...</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="628"/>
+        <source>Export benchmark JSON</source>
+        <translation>Benchmark als JSON exportieren</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="630"/>
+        <source>JSON files (*.json)</source>
+        <translation>JSON-Dateien (*.json)</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="643"/>
+        <source>Export benchmark CSV</source>
+        <translation>Benchmark als CSV exportieren</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="645"/>
+        <source>CSV files (*.csv)</source>
+        <translation>CSV-Dateien (*.csv)</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="657"/>
+        <source>The benchmark export could not be opened for writing.</source>
+        <translation>Der Benchmark-Export konnte nicht zum Schreiben geöffnet werden.</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="665"/>
+        <source>The benchmark export could not be saved.</source>
+        <translation>Der Benchmark-Export konnte nicht gespeichert werden.</translation>
+    </message>
+</context>
+<context>
+    <name>TranslationBenchmarkWorker</name>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="108"/>
+        <source>Text detection: {page}</source>
+        <translation>Texterkennung: {page}</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="130"/>
+        <source>OCR: {page}</source>
+        <translation>OCR: {page}</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="181"/>
+        <source>{variant}: {page}</source>
+        <translation>{variant}: {page}</translation>
     </message>
 </context>
 <context>

@@ -96,6 +96,7 @@ from ballontranslator.utils.logger import logger as LOGGER
 from ballontranslator.utils.llm_profiles import (
     LLMProfile,
     THINKING_AUTO,
+    profile_from_config,
     runtime_profile,
 )
 from ballontranslator.utils.proj_imgtrans import (
@@ -168,6 +169,24 @@ class LLMTranslator(LLMChatRequester, BaseTranslator):
         },
     }
 
+    def __init__(
+        self,
+        lang_source: str,
+        lang_target: str,
+        *,
+        profile_override: Optional[LLMProfile] = None,
+        **params,
+    ) -> None:
+        # Benchmarks must not mutate the globally selected profile while they
+        # compare several configurations in one worker. Keep a detached copy so
+        # later settings edits cannot alter an in-flight request.
+        self._profile_override = (
+            profile_from_config(profile_override)
+            if profile_override is not None
+            else None
+        )
+        super().__init__(lang_source, lang_target, **params)
+
     def _setup_translator(self):
         self.lang_map['Auto'] = 'the automatically detected source language'
         self.lang_map['简体中文'] = 'Simplified Chinese'
@@ -213,9 +232,13 @@ class LLMTranslator(LLMChatRequester, BaseTranslator):
 
     @property
     def profile(self) -> LLMProfile:
-        profile = runtime_profile(
-            pcfg.module.llm_profiles,
-            pcfg.module.translator_llm_id,
+        profile = (
+            profile_from_config(self._profile_override)
+            if self._profile_override is not None
+            else runtime_profile(
+                pcfg.module.llm_profiles,
+                pcfg.module.translator_llm_id,
+            )
         )
         if not profile.support_text:
             raise RuntimeError(f'LLM profile "{profile.name}" does not have text translation enabled.')
@@ -645,7 +668,7 @@ class LLMTranslator(LLMChatRequester, BaseTranslator):
         )
         if empty_page_summary and not request_summary:
             return []
-        if pcfg.module.translator_llm_id == 'codex':
+        if profile.backend == 'codex':
             from ..codex import account
             account.require_sign_in(self.stop_event)
         if not self.all_model_loaded():
