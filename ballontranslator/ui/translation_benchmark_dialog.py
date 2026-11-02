@@ -43,6 +43,7 @@ from ballontranslator.utils.translation_benchmark import (
     TranslationBenchmarkVariant,
     clone_project_for_benchmark,
     page_texts,
+    save_benchmark_report,
 )
 
 
@@ -535,11 +536,31 @@ class TranslationBenchmarkDialog(QDialog):
         self.report = self._pending_report
         self._render_report()
         self.progress_label.setVisible(True)
-        self.progress_label.setText(
+        status = (
             self.tr('Benchmark stopped; partial results are shown.')
             if self.report.cancelled
             else self.tr('Benchmark completed.')
         )
+        try:
+            saved_path = save_benchmark_report(self.project.directory, self.report)
+        except Exception as exc:
+            LOGGER.exception('Failed to save translation benchmark report')
+            self.progress_label.setText(status)
+            QMessageBox.warning(
+                self,
+                self.tr('Translation Benchmark'),
+                self.tr(
+                    'The benchmark results could not be saved automatically '
+                    'in the project folder.\n\n{error}'
+                ).format(error=exc),
+            )
+        else:
+            self.progress_label.setText(
+                f'{status}\n'
+                + self.tr('Saved automatically to:\n{path}').format(
+                    path=saved_path,
+                )
+            )
         self.export_json_button.setEnabled(True)
         self.export_csv_button.setEnabled(True)
 

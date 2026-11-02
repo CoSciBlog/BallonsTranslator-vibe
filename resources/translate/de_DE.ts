@@ -8967,6 +8967,22 @@ Starten Sie dann Photoshop neu. Der Explorer öffnet nun die Quelldatei und den 
         <translation>Benchmark abgeschlossen.</translation>
     </message>
     <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="553"/>
+        <source>The benchmark results could not be saved automatically in the project folder.
+
+{error}</source>
+        <translation>Die Benchmark-Ergebnisse konnten nicht automatisch im Projektordner gespeichert werden.
+
+{error}</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="560"/>
+        <source>Saved automatically to:
+{path}</source>
+        <translation>Automatisch gespeichert unter:
+{path}</translation>
+    </message>
+    <message>
         <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="550"/>
         <source>Shared detection + OCR</source>
         <translation>Gemeinsame Texterkennung + OCR</translation>

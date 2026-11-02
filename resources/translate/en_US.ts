@@ -8898,6 +8898,22 @@ Then restart Photoshop. Explorer will now open the source file and destination l
             <translation>Benchmark completed.</translation>
         </message>
         <message>
+            <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="553" />
+            <source>The benchmark results could not be saved automatically in the project folder.
+
+{error}</source>
+            <translation>The benchmark results could not be saved automatically in the project folder.
+
+{error}</translation>
+        </message>
+        <message>
+            <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="560" />
+            <source>Saved automatically to:
+{path}</source>
+            <translation>Saved automatically to:
+{path}</translation>
+        </message>
+        <message>
             <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="550" />
             <source>Shared detection + OCR</source>
             <translation>Shared detection + OCR</translation>

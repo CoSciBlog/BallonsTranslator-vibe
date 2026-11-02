@@ -3,6 +3,9 @@ from __future__ import annotations
 import copy
 import csv
 import io
+import json
+import os
+import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Dict, Iterable, List, Mapping, Optional, Sequence
@@ -138,6 +141,63 @@ class TranslationBenchmarkReport:
                     )
                 writer.writerow(row)
         return output.getvalue()
+
+
+def benchmark_report_filename(
+    report: TranslationBenchmarkReport,
+    sequence: int = 1,
+) -> str:
+    """Return a readable, collision-suffixable filename for one benchmark.
+
+    >>> report = TranslationBenchmarkReport([], {}, '', '', '', '', 0.0, [], created_at='2026-11-02T12:34:56.123456+00:00')
+    >>> benchmark_report_filename(report)
+    'translation-benchmark-20261102T123456123456Z.json'
+    >>> benchmark_report_filename(report, 2)
+    'translation-benchmark-20261102T123456123456Z-2.json'
+    """
+
+    created_at = datetime.fromisoformat(report.created_at.replace('Z', '+00:00'))
+    if created_at.tzinfo is None:
+        created_at = created_at.replace(tzinfo=timezone.utc)
+    timestamp = created_at.astimezone(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')
+    suffix = '' if sequence == 1 else f'-{sequence}'
+    return f'translation-benchmark-{timestamp}{suffix}.json'
+
+
+def save_benchmark_report(
+    project_directory: str,
+    report: TranslationBenchmarkReport,
+) -> str:
+    """Atomically save one report beside its project without overwriting runs."""
+
+    if not project_directory or not os.path.isdir(project_directory):
+        raise FileNotFoundError(project_directory)
+
+    sequence = 1
+    target = os.path.join(
+        project_directory,
+        benchmark_report_filename(report, sequence),
+    )
+    while os.path.exists(target):
+        sequence += 1
+        target = os.path.join(
+            project_directory,
+            benchmark_report_filename(report, sequence),
+        )
+
+    # Keep the temporary file on the same volume so os.replace remains atomic.
+    temporary = f'{target}.{uuid.uuid4().hex}.tmp'
+    try:
+        with open(temporary, 'x', encoding='utf-8', newline='\n') as stream:
+            json.dump(report.to_dict(), stream, ensure_ascii=False, indent=2)
+            stream.write('\n')
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, target)
+    finally:
+        if os.path.exists(temporary):
+            os.remove(temporary)
+    return target
 
 
 def clone_project_for_benchmark(

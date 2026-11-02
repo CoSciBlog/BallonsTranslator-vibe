@@ -1,3 +1,4 @@
+import json
 import os
 import tempfile
 import unittest
@@ -25,6 +26,7 @@ from ballontranslator.utils.translation_benchmark import (
     TranslationBenchmarkRun,
     TranslationBenchmarkVariant,
     clone_project_for_benchmark,
+    save_benchmark_report,
 )
 
 
@@ -195,6 +197,70 @@ class TranslationBenchmarkTest(unittest.TestCase):
         self.assertNotIn('api_key', str(serialized))
         self.assertNotIn('secret-one', str(serialized))
         self.assertIn('001.png,1,A,X', report.to_csv())
+
+    def test_report_is_saved_atomically_without_overwriting_previous_run(self) -> None:
+        variant = TranslationBenchmarkVariant.from_profile(_profile('one', 'm1'))
+        report = TranslationBenchmarkReport(
+            pages=['001.png'],
+            sources={'001.png': ['勇者']},
+            source_language='日本語',
+            target_language='English',
+            text_detector='detector',
+            ocr='ocr',
+            detection_ocr_seconds=1.0,
+            runs=[TranslationBenchmarkRun(
+                variant=variant,
+                translations={'001.png': ['Hero']},
+            )],
+            created_at='2026-11-02T12:34:56.123456+00:00',
+        )
+
+        first = save_benchmark_report(self.temp_directory.name, report)
+        second = save_benchmark_report(self.temp_directory.name, report)
+
+        self.assertEqual(
+            os.path.basename(first),
+            'translation-benchmark-20261102T123456123456Z.json',
+        )
+        self.assertEqual(
+            os.path.basename(second),
+            'translation-benchmark-20261102T123456123456Z-2.json',
+        )
+        with open(first, encoding='utf-8') as stream:
+            saved = json.load(stream)
+        self.assertEqual(saved['runs'][0]['translations']['001.png'], ['Hero'])
+        self.assertNotIn('secret-one', str(saved))
+        self.assertFalse(any(name.endswith('.tmp') for name in os.listdir(
+            self.temp_directory.name,
+        )))
+
+    def test_dialog_saves_completed_report_in_project_folder(self) -> None:
+        project = self._project(self.temp_directory.name, page_count=1)
+        profiles = [_profile('one', 'm1'), _profile('two', 'm2')]
+        report = TranslationBenchmarkReport(
+            pages=['001.png'],
+            sources={'001.png': ['A']},
+            source_language='日本語',
+            target_language='English',
+            text_detector='detector',
+            ocr='ocr',
+            detection_ocr_seconds=1.0,
+            runs=[],
+        )
+        saved_path = os.path.join(project.directory, 'saved.json')
+        with mock.patch.object(pcfg.module, 'llm_profiles', profiles), \
+                mock.patch(
+                    'ballontranslator.ui.translation_benchmark_dialog.'
+                    'save_benchmark_report',
+                    return_value=saved_path,
+                ) as save_report:
+            dialog = TranslationBenchmarkDialog(project, _ModuleManager())
+            dialog._pending_report = report
+            dialog._worker_finished()
+
+        save_report.assert_called_once_with(project.directory, report)
+        self.assertIn(saved_path, dialog.progress_label.text())
+        dialog.deleteLater()
 
     def test_project_glossary_is_snapshotted_in_memory(self) -> None:
         project = self._project(self.temp_directory.name, page_count=1)

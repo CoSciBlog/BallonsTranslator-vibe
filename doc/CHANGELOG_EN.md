@@ -1,5 +1,8 @@
 # Changelogs
 
+### 2026-11-02 — 1.5.19+vibe.68
+- Every completed or partially cancelled translation benchmark is now atomically saved as a separate timestamped JSON report in the project folder. Existing reports are never overwritten, and the results dialog shows the saved path while retaining manual JSON/CSV export.
+
 ### 2026-11-02 — 1.5.19+vibe.67
 - Added **Tools → Translation Benchmark...** (`Ctrl+Shift+K`). Text detection and OCR run once for the selected pages, then two or more text-capable LLM profiles translate isolated copies of the same frozen OCR result. The dialog compares results, timings, and per-profile errors side by side and exports JSON/CSV without API keys. Benchmarking never changes the open project's text, translations, glossary, or translation history; duplicate an LLM profile to reproducibly compare different models, prompts, sampling, review, and adjacent-page context settings.
 
