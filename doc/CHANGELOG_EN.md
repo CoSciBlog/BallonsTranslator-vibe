@@ -1,5 +1,9 @@
 # Changelogs
 
+### 2026-11-09 — 1.5.19+vibe.69
+- Translation Benchmark now exposes a read-only **Page preview** as soon as each profile finishes. Switch pages and LLM profiles for a visual comparison over the saved inpainted image when available, or the original page otherwise, without changing the open project, Undo history, glossary, or translation history.
+- Each benchmark is stored in its own timestamped folder: `benchmark.json` contains shared metadata, while every LLM profile receives a separate JSON file with its complete result and frozen text-block geometry. The complete folder is published in one operation, existing results are never overwritten, and combined manual JSON/CSV export remains available.
+
 ### 2026-11-02 — 1.5.19+vibe.68
 - Every completed or partially cancelled translation benchmark is now atomically saved as a separate timestamped JSON report in the project folder. Existing reports are never overwritten, and the results dialog shows the saved path while retaining manual JSON/CSV export.
 

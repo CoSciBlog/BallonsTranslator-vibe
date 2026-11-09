@@ -5,14 +5,17 @@ import csv
 import io
 import json
 import os
+import re
+import shutil
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Dict, Iterable, List, Mapping, Optional, Sequence
+from typing import Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
 
 from ballontranslator.glossary import GlossaryWorkspace
 from ballontranslator.utils.llm_profiles import LLMProfile, profile_from_config
-from ballontranslator.utils.proj_imgtrans import ProjImgTrans
+from ballontranslator.utils.proj_imgtrans import ProjImgTrans, TextBlkEncoder
+from ballontranslator.utils.textblock import TextBlock
 
 
 @dataclass(frozen=True)
@@ -79,6 +82,7 @@ class TranslationBenchmarkRun:
     status: str = 'completed'
     error: str = ''
     translations: Dict[str, List[str]] = field(default_factory=dict)
+    preview_pages: Dict[str, List[TextBlock]] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, object]:
         return {
@@ -89,6 +93,13 @@ class TranslationBenchmarkRun:
             'error': self.error,
             'translations': copy.deepcopy(self.translations),
         }
+
+    def summary_dict(self) -> Dict[str, object]:
+        """Return run metadata for a manifest without duplicating results."""
+
+        result = self.to_dict()
+        result.pop('translations')
+        return result
 
 
 @dataclass
@@ -106,7 +117,7 @@ class TranslationBenchmarkReport:
 
     def to_dict(self) -> Dict[str, object]:
         return {
-            'format': 'ballonstranslator-translation-benchmark-v1',
+            'format': 'ballonstranslator-translation-benchmark-v2',
             'created_at': self.created_at,
             'source_language': self.source_language,
             'target_language': self.target_language,
@@ -142,18 +153,62 @@ class TranslationBenchmarkReport:
                 writer.writerow(row)
         return output.getvalue()
 
+    def manifest_dict(
+        self,
+        result_files: Sequence[str],
+    ) -> Dict[str, object]:
+        """Return shared benchmark metadata and links to per-profile files."""
 
-def benchmark_report_filename(
+        result = self.to_dict()
+        result['format'] = 'ballonstranslator-translation-benchmark-manifest-v2'
+        result['runs'] = [
+            {
+                **run.summary_dict(),
+                'result_file': filename,
+            }
+            for run, filename in zip(self.runs, result_files)
+        ]
+        return result
+
+    def result_dict(self, run: TranslationBenchmarkRun) -> Dict[str, object]:
+        """Return one self-contained, credential-free profile result."""
+
+        return {
+            'format': 'ballonstranslator-translation-benchmark-result-v2',
+            'created_at': self.created_at,
+            'source_language': self.source_language,
+            'target_language': self.target_language,
+            'text_detector': self.text_detector,
+            'ocr': self.ocr,
+            'pages': list(self.pages),
+            'detection_ocr_seconds': self.detection_ocr_seconds,
+            'cancelled': self.cancelled,
+            'sources': copy.deepcopy(self.sources),
+            'run': run.to_dict(),
+            # Complete frozen blocks make each result independently inspectable
+            # and preserve the geometry used by the live page preview.
+            'page_results': copy.deepcopy(run.preview_pages),
+        }
+
+
+@dataclass(frozen=True)
+class TranslationBenchmarkSaveResult:
+    directory: str
+    manifest_path: str
+    result_paths: Tuple[str, ...]
+
+
+def benchmark_result_directory_name(
     report: TranslationBenchmarkReport,
     sequence: int = 1,
 ) -> str:
-    """Return a readable, collision-suffixable filename for one benchmark.
+    """Return a readable, collision-suffixable directory for one benchmark.
 
     >>> report = TranslationBenchmarkReport([], {}, '', '', '', '', 0.0, [], created_at='2026-11-02T12:34:56.123456+00:00')
-    >>> benchmark_report_filename(report)
-    'translation-benchmark-20261102T123456123456Z.json'
-    >>> benchmark_report_filename(report, 2)
-    'translation-benchmark-20261102T123456123456Z-2.json'
+    >>> benchmark_result_directory_name(report)
+    'translation-benchmark-20261102T123456123456Z'
+    >>> benchmark_result_directory_name(report, 2)
+    'translation-benchmark-20261102T123456123456Z-2'
     """
 
     created_at = datetime.fromisoformat(report.created_at.replace('Z', '+00:00'))
@@ -161,14 +216,40 @@ def benchmark_report_filename(
         created_at = created_at.replace(tzinfo=timezone.utc)
     timestamp = created_at.astimezone(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')
     suffix = '' if sequence == 1 else f'-{sequence}'
-    return f'translation-benchmark-{timestamp}{suffix}.json'
+    return f'translation-benchmark-{timestamp}{suffix}'
 
 
-def save_benchmark_report(
+def _result_filename(run: TranslationBenchmarkRun, index: int) -> str:
+    profile_name = run.variant.profile.name or run.variant.id or 'profile'
+    slug = re.sub(r'[^a-z0-9]+', '-', profile_name.lower()).strip('-')
+    if not slug:
+        slug = 'profile'
+    return f'{index:02d}-{slug}.json'
+
+
+def _write_json(path: str, payload: Mapping[str, object]) -> None:
+    with open(path, 'x', encoding='utf-8', newline='\n') as stream:
+        json.dump(
+            payload,
+            stream,
+            ensure_ascii=False,
+            indent=2,
+            cls=TextBlkEncoder,
+        )
+        stream.write('\n')
+        stream.flush()
+        os.fsync(stream.fileno())
+
+
+def save_benchmark_results(
     project_directory: str,
     report: TranslationBenchmarkReport,
-) -> str:
-    """Atomically save one report beside its project without overwriting runs."""
+) -> TranslationBenchmarkSaveResult:
+    """Save one manifest and one JSON file per profile in a unique folder.
+
+    The complete file set is assembled in a same-volume temporary directory and
+    published with one rename, so readers never observe a partial benchmark.
+    """
 
     if not project_directory or not os.path.isdir(project_directory):
         raise FileNotFoundError(project_directory)
@@ -176,28 +257,47 @@ def save_benchmark_report(
     sequence = 1
     target = os.path.join(
         project_directory,
-        benchmark_report_filename(report, sequence),
+        benchmark_result_directory_name(report, sequence),
     )
     while os.path.exists(target):
         sequence += 1
         target = os.path.join(
             project_directory,
-            benchmark_report_filename(report, sequence),
+            benchmark_result_directory_name(report, sequence),
         )
 
-    # Keep the temporary file on the same volume so os.replace remains atomic.
-    temporary = f'{target}.{uuid.uuid4().hex}.tmp'
+    # Keep the temporary directory on the same volume so os.replace remains
+    # atomic and the final directory appears only after every file is durable.
+    temporary = os.path.join(
+        project_directory,
+        f'.{os.path.basename(target)}.{uuid.uuid4().hex}.tmp',
+    )
+    os.mkdir(temporary)
     try:
-        with open(temporary, 'x', encoding='utf-8', newline='\n') as stream:
-            json.dump(report.to_dict(), stream, ensure_ascii=False, indent=2)
-            stream.write('\n')
-            stream.flush()
-            os.fsync(stream.fileno())
+        result_files = [
+            _result_filename(run, index)
+            for index, run in enumerate(report.runs, start=1)
+        ]
+        for run, filename in zip(report.runs, result_files):
+            _write_json(
+                os.path.join(temporary, filename),
+                report.result_dict(run),
+            )
+        _write_json(
+            os.path.join(temporary, 'benchmark.json'),
+            report.manifest_dict(result_files),
+        )
         os.replace(temporary, target)
     finally:
         if os.path.exists(temporary):
-            os.remove(temporary)
-    return target
+            shutil.rmtree(temporary)
+    return TranslationBenchmarkSaveResult(
+        directory=target,
+        manifest_path=os.path.join(target, 'benchmark.json'),
+        result_paths=tuple(
+            os.path.join(target, filename) for filename in result_files
+        ),
+    )
 
 
 def clone_project_for_benchmark(

@@ -8806,6 +8806,14 @@ Starten Sie dann Photoshop neu. Der Explorer öffnet nun die Quelldatei und den 
     </message>
 </context>
 <context>
+    <name>BenchmarkPagePreview</name>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="92"/>
+        <source>The page image could not be loaded.</source>
+        <translation>Das Seitenbild konnte nicht geladen werden.</translation>
+    </message>
+</context>
+<context>
     <name>TranslationBenchmarkDialog</name>
     <message>
         <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="259"/>
@@ -8893,6 +8901,26 @@ Starten Sie dann Photoshop neu. Der Explorer öffnet nun die Quelldatei und den 
         <translation>Textblockvergleich</translation>
     </message>
     <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="438"/>
+        <source>Result</source>
+        <translation>Ergebnis</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="443"/>
+        <source>Switch page or profile to compare results directly on the page. The saved inpainted image is used when available; otherwise the original image is shown. Scroll to zoom and drag to pan.</source>
+        <translation>Wechseln Sie Seite oder Profil, um die Ergebnisse direkt auf der Seite zu vergleichen. Wenn vorhanden, wird das gespeicherte reparierte Bild verwendet, andernfalls das Originalbild. Scrollen Sie zum Zoomen und ziehen Sie zum Verschieben.</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="463"/>
+        <source>Page preview</source>
+        <translation>Seitenvorschau</translation>
+    </message>
+    <message>
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="873"/>
+        <source>Loading page preview...</source>
+        <translation>Seitenvorschau wird geladen...</translation>
+    </message>
+    <message>
         <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="344"/>
         <source>Start benchmark</source>
         <translation>Benchmark starten</translation>
@@ -8976,10 +9004,10 @@ Starten Sie dann Photoshop neu. Der Explorer öffnet nun die Quelldatei und den 
 {error}</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="560"/>
-        <source>Saved automatically to:
+        <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="686"/>
+        <source>Saved {count} separate result file(s) to:
 {path}</source>
-        <translation>Automatisch gespeichert unter:
+        <translation>{count} separate Ergebnisdatei(en) gespeichert unter:
 {path}</translation>
     </message>
     <message>

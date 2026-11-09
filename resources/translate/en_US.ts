@@ -8737,6 +8737,14 @@ Then restart Photoshop. Explorer will now open the source file and destination l
     </message>
 </context>
 <context>
+        <name>BenchmarkPagePreview</name>
+        <message>
+            <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="92" />
+            <source>The page image could not be loaded.</source>
+            <translation>The page image could not be loaded.</translation>
+        </message>
+    </context>
+    <context>
         <name>TranslationBenchmarkDialog</name>
         <message>
             <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="259" />
@@ -8824,6 +8832,26 @@ Then restart Photoshop. Explorer will now open the source file and destination l
             <translation>Block comparison</translation>
         </message>
         <message>
+            <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="438" />
+            <source>Result</source>
+            <translation>Result</translation>
+        </message>
+        <message>
+            <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="443" />
+            <source>Switch page or profile to compare results directly on the page. The saved inpainted image is used when available; otherwise the original image is shown. Scroll to zoom and drag to pan.</source>
+            <translation>Switch page or profile to compare results directly on the page. The saved inpainted image is used when available; otherwise the original image is shown. Scroll to zoom and drag to pan.</translation>
+        </message>
+        <message>
+            <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="463" />
+            <source>Page preview</source>
+            <translation>Page preview</translation>
+        </message>
+        <message>
+            <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="873" />
+            <source>Loading page preview...</source>
+            <translation>Loading page preview...</translation>
+        </message>
+        <message>
             <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="344" />
             <source>Start benchmark</source>
             <translation>Start benchmark</translation>
@@ -8907,10 +8935,10 @@ Then restart Photoshop. Explorer will now open the source file and destination l
 {error}</translation>
         </message>
         <message>
-            <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="560" />
-            <source>Saved automatically to:
+            <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="686" />
+            <source>Saved {count} separate result file(s) to:
 {path}</source>
-            <translation>Saved automatically to:
+            <translation>Saved {count} separate result file(s) to:
 {path}</translation>
         </message>
         <message>

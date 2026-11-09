@@ -1,18 +1,42 @@
 from __future__ import annotations
 
+import copy
 import json
+import os
 import threading
 import time
 import traceback
-from typing import Dict, List, Optional, Sequence
+from typing import Dict, List, Optional, Sequence, Tuple
 
-from qtpy.QtCore import QIODevice, QSaveFile, QThread, Qt, Signal
-from qtpy.QtGui import QCloseEvent
+from qtpy.QtCore import (
+    QIODevice,
+    QObject,
+    QRectF,
+    QRunnable,
+    QSaveFile,
+    QThread,
+    QThreadPool,
+    Qt,
+    Signal,
+)
+from qtpy.QtGui import (
+    QCloseEvent,
+    QImage,
+    QImageReader,
+    QPainter,
+    QPixmap,
+    QResizeEvent,
+    QWheelEvent,
+)
 from qtpy.QtWidgets import (
     QAbstractItemView,
+    QApplication,
     QComboBox,
     QDialog,
     QFileDialog,
+    QGraphicsItem,
+    QGraphicsScene,
+    QGraphicsView,
     QHeaderView,
     QHBoxLayout,
     QLabel,
@@ -37,20 +61,191 @@ from ballontranslator.utils.llm_profiles import (
 )
 from ballontranslator.utils.logger import logger as LOGGER
 from ballontranslator.utils.proj_imgtrans import ProjImgTrans
+from ballontranslator.utils.textblock import TextBlock
 from ballontranslator.utils.translation_benchmark import (
     TranslationBenchmarkReport,
     TranslationBenchmarkRun,
     TranslationBenchmarkVariant,
     clone_project_for_benchmark,
     page_texts,
-    save_benchmark_report,
+    save_benchmark_results,
 )
+from ballontranslator.ui.text_engine.item import TextBlkItem
+
+
+class _BenchmarkPreviewImageSignals(QObject):
+    loaded = Signal(int, object, str)
+
+
+class _BenchmarkPreviewImageLoader(QRunnable):
+    """Decode one page image away from the Qt main thread."""
+
+    def __init__(
+        self,
+        generation: int,
+        image_path: str,
+        reference_path: str,
+    ) -> None:
+        super().__init__()
+        self.generation = generation
+        self.image_path = image_path
+        self.reference_path = reference_path
+        self.cancelled = threading.Event()
+        self.signals = _BenchmarkPreviewImageSignals()
+
+    def run(self) -> None:
+        if self.cancelled.is_set():
+            return
+        reader = QImageReader(self.image_path)
+        reader.setAutoTransform(True)
+        image = reader.read()
+        error = ''
+        if image.isNull():
+            error = reader.errorString()
+        elif self.image_path != self.reference_path:
+            reference_reader = QImageReader(self.reference_path)
+            reference_reader.setAutoTransform(True)
+            reference_size = reference_reader.size()
+            if reference_size.isValid() and image.size() != reference_size:
+                image = image.scaled(
+                    reference_size,
+                    Qt.AspectRatioMode.IgnoreAspectRatio,
+                    Qt.TransformationMode.SmoothTransformation,
+                )
+        if self.cancelled.is_set():
+            return
+        self.signals.loaded.emit(self.generation, image, error)
+
+
+class BenchmarkPagePreview(QGraphicsView):
+    """Read-only page rendering for transient benchmark block copies."""
+
+    load_finished = Signal(str)
+
+    def __init__(self, parent=None) -> None:
+        super().__init__(parent)
+        self._scene = QGraphicsScene(self)
+        self.setScene(self._scene)
+        self.setDragMode(QGraphicsView.DragMode.ScrollHandDrag)
+        self.setRenderHints(
+            QPainter.RenderHint.Antialiasing
+            | QPainter.RenderHint.TextAntialiasing
+            | QPainter.RenderHint.SmoothPixmapTransform
+        )
+        self.setTransformationAnchor(
+            QGraphicsView.ViewportAnchor.AnchorUnderMouse
+        )
+        self._fit_on_resize = True
+        self._load_generation = 0
+        self._pending_blocks: List[TextBlock] = []
+        self._image_loader: Optional[_BenchmarkPreviewImageLoader] = None
+        self.destroyed.connect(self._cancel_image_loading)
+
+    @staticmethod
+    def _image_pool() -> QThreadPool:
+        app = QApplication.instance()
+        if app is None:
+            raise RuntimeError('Benchmark page previews require a QApplication.')
+        pool = app.findChild(
+            QThreadPool,
+            'TranslationBenchmarkPreviewPool',
+            Qt.FindChildOption.FindDirectChildrenOnly,
+        )
+        if pool is None:
+            pool = QThreadPool(app)
+            pool.setObjectName('TranslationBenchmarkPreviewPool')
+            pool.setMaxThreadCount(1)
+        return pool
+
+    def _cancel_image_loading(self) -> None:
+        if self._image_loader is not None:
+            self._image_loader.cancelled.set()
+            self._image_loader = None
+
+    def clear_preview(self) -> None:
+        self._load_generation += 1
+        self._pending_blocks.clear()
+        self._cancel_image_loading()
+        self._scene.clear()
+        self.resetTransform()
+        self._fit_on_resize = True
+
+    def show_result(
+        self,
+        image_path: str,
+        reference_path: str,
+        blocks: Sequence[TextBlock],
+    ) -> None:
+        """Request one page without binding items to the live project canvas."""
+
+        self.clear_preview()
+        generation = self._load_generation
+        self._pending_blocks = copy.deepcopy(list(blocks))
+        loader = _BenchmarkPreviewImageLoader(
+            generation,
+            image_path,
+            reference_path,
+        )
+        self._image_loader = loader
+        loader.signals.loaded.connect(self._image_loaded)
+        self._image_pool().start(loader)
+
+    def _image_loaded(self, generation: int, image: QImage, error: str) -> None:
+        if generation != self._load_generation:
+            return
+        self._image_loader = None
+        if image.isNull():
+            self.load_finished.emit(
+                error or self.tr('The page image could not be loaded.')
+            )
+            return
+
+        pixmap = QPixmap.fromImage(image)
+        self._scene.addPixmap(pixmap)
+        self._scene.setSceneRect(QRectF(pixmap.rect()))
+        for index, block in enumerate(self._pending_blocks):
+            if not block.lines and block._bounding_rect is None:
+                x1, y1, x2, y2 = block.xyxy
+                block._bounding_rect = [x1, y1, x2 - x1, y2 - y1]
+            item = TextBlkItem(block, index, show_rect=False)
+            item.setFlags(QGraphicsItem.GraphicsItemFlag(0))
+            item.setAcceptedMouseButtons(Qt.MouseButton.NoButton)
+            item.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
+            item.setZValue(1.0)
+            self._scene.addItem(item)
+        self._fit_preview()
+        self.load_finished.emit('')
+
+    def _fit_preview(self) -> None:
+        if self._scene.sceneRect().isEmpty():
+            return
+        self.resetTransform()
+        self.fitInView(
+            self._scene.sceneRect(),
+            Qt.AspectRatioMode.KeepAspectRatio,
+        )
+        self._fit_on_resize = True
+
+    def resizeEvent(self, event: QResizeEvent) -> None:
+        super().resizeEvent(event)
+        if self._fit_on_resize:
+            self._fit_preview()
+
+    def wheelEvent(self, event: QWheelEvent) -> None:
+        if self._scene.sceneRect().isEmpty():
+            super().wheelEvent(event)
+            return
+        factor = 1.2 if event.angleDelta().y() > 0 else 1 / 1.2
+        self.scale(factor, factor)
+        self._fit_on_resize = False
+        event.accept()
 
 
 class TranslationBenchmarkWorker(QThread):
     """Run shared detection/OCR and isolated LLM translations off the UI thread."""
 
     progress_changed = Signal(int, int, str)
+    preview_ready = Signal(object)
     report_ready = Signal(object)
     benchmark_failed = Signal(str)
 
@@ -204,8 +399,13 @@ class TranslationBenchmarkWorker(QThread):
                     self.pages,
                     'translation',
                 )
+                run.preview_pages = {
+                    page: copy.deepcopy(variant_project.pages[page])
+                    for page in self.pages
+                }
                 run.duration_seconds = time.perf_counter() - variant_start
                 runs.append(run)
+                self.preview_ready.emit(run)
             if cancelled:
                 break
 
@@ -251,6 +451,7 @@ class TranslationBenchmarkDialog(QDialog):
         self._pending_report: Optional[TranslationBenchmarkReport] = None
         self._pending_error = ''
         self._preparing = False
+        self._preview_runs: List[TranslationBenchmarkRun] = []
         self._profiles: Dict[str, LLMProfile] = {
             profile.id: profile
             for profile in pcfg.module.llm_profiles
@@ -336,8 +537,39 @@ class TranslationBenchmarkDialog(QDialog):
             QAbstractItemView.EditTrigger.NoEditTriggers
         )
         self.details_table.setWordWrap(True)
+        self.preview_tab = QWidget(self.results)
+        preview_layout = QVBoxLayout(self.preview_tab)
+        preview_controls = QHBoxLayout()
+        preview_controls.addWidget(QLabel(self.tr('Page'), self.preview_tab))
+        self.preview_page_combo = QComboBox(self.preview_tab)
+        preview_controls.addWidget(self.preview_page_combo, 1)
+        preview_controls.addWidget(QLabel(self.tr('Result'), self.preview_tab))
+        self.preview_variant_combo = QComboBox(self.preview_tab)
+        preview_controls.addWidget(self.preview_variant_combo, 2)
+        preview_layout.addLayout(preview_controls)
+        self.preview_note = QLabel(self.tr(
+            'Switch page or profile to compare results directly on the page. '
+            'The saved inpainted image is used when available; otherwise the '
+            'original image is shown. Scroll to zoom and drag to pan.'
+        ), self.preview_tab)
+        self.preview_note.setWordWrap(True)
+        preview_layout.addWidget(self.preview_note)
+        self.preview_status = QLabel('', self.preview_tab)
+        self.preview_status.setWordWrap(True)
+        self.preview_status.hide()
+        preview_layout.addWidget(self.preview_status)
+        self.page_preview = BenchmarkPagePreview(self.preview_tab)
+        self.page_preview.load_finished.connect(self._preview_load_finished)
+        preview_layout.addWidget(self.page_preview, 1)
+        self.preview_page_combo.currentIndexChanged.connect(
+            self._update_page_preview
+        )
+        self.preview_variant_combo.currentIndexChanged.connect(
+            self._update_page_preview
+        )
         self.results.addTab(self.summary_table, self.tr('Summary'))
         self.results.addTab(self.details_table, self.tr('Block comparison'))
+        self.results.addTab(self.preview_tab, self.tr('Page preview'))
         self.results.hide()
         layout.addWidget(self.results, 2)
 
@@ -464,6 +696,7 @@ class TranslationBenchmarkDialog(QDialog):
         self.report = None
         self._pending_report = None
         self._pending_error = ''
+        self._reset_preview()
         self.results.hide()
         self.export_json_button.setEnabled(False)
         self.export_csv_button.setEnabled(False)
@@ -478,6 +711,7 @@ class TranslationBenchmarkDialog(QDialog):
             self,
         )
         self.worker.progress_changed.connect(self._update_progress)
+        self.worker.preview_ready.connect(self._preview_run_ready)
         self.worker.report_ready.connect(self._store_report)
         self.worker.benchmark_failed.connect(self._store_error)
         self.worker.finished.connect(self._worker_finished)
@@ -542,7 +776,7 @@ class TranslationBenchmarkDialog(QDialog):
             else self.tr('Benchmark completed.')
         )
         try:
-            saved_path = save_benchmark_report(self.project.directory, self.report)
+            saved = save_benchmark_results(self.project.directory, self.report)
         except Exception as exc:
             LOGGER.exception('Failed to save translation benchmark report')
             self.progress_label.setText(status)
@@ -557,8 +791,11 @@ class TranslationBenchmarkDialog(QDialog):
         else:
             self.progress_label.setText(
                 f'{status}\n'
-                + self.tr('Saved automatically to:\n{path}').format(
-                    path=saved_path,
+                + self.tr(
+                    'Saved {count} separate result file(s) to:\n{path}'
+                ).format(
+                    count=len(saved.result_paths),
+                    path=saved.directory,
                 )
             )
         self.export_json_button.setEnabled(True)
@@ -623,7 +860,83 @@ class TranslationBenchmarkDialog(QDialog):
         detail_header.setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
         detail_header.setStretchLastSection(True)
         self.details_table.resizeRowsToContents()
+        self._set_preview_runs(report.runs)
         self.results.show()
+
+    def _reset_preview(self) -> None:
+        self._preview_runs.clear()
+        self.preview_page_combo.clear()
+        self.preview_variant_combo.clear()
+        self.preview_status.hide()
+        self.preview_status.clear()
+        self.page_preview.clear_preview()
+
+    def _set_preview_runs(
+        self,
+        runs: Sequence[TranslationBenchmarkRun],
+    ) -> None:
+        selected_page = self.preview_page_combo.currentText()
+        selected_variant = self.preview_variant_combo.currentData()
+        self._preview_runs = list(runs)
+        self.preview_page_combo.blockSignals(True)
+        self.preview_variant_combo.blockSignals(True)
+        self.preview_page_combo.clear()
+        self.preview_variant_combo.clear()
+        pages = next(
+            (list(run.preview_pages) for run in runs if run.preview_pages),
+            [],
+        )
+        self.preview_page_combo.addItems(pages)
+        for index, run in enumerate(runs):
+            self.preview_variant_combo.addItem(run.variant.label, index)
+        if selected_page in pages:
+            self.preview_page_combo.setCurrentText(selected_page)
+        variant_index = self.preview_variant_combo.findData(selected_variant)
+        if variant_index >= 0:
+            self.preview_variant_combo.setCurrentIndex(variant_index)
+        self.preview_page_combo.blockSignals(False)
+        self.preview_variant_combo.blockSignals(False)
+        self._update_page_preview()
+
+    def _preview_run_ready(self, run: TranslationBenchmarkRun) -> None:
+        first_result = not self._preview_runs
+        self._set_preview_runs([*self._preview_runs, run])
+        self.results.show()
+        if first_result:
+            self.results.setCurrentWidget(self.preview_tab)
+
+    def _preview_image_paths(self, page: str) -> Tuple[str, str]:
+        original = os.path.join(self.project.directory, page)
+        inpainted = self.project.get_inpainted_path(
+            page,
+            get_last_modified=True,
+        )
+        if inpainted and os.path.isfile(inpainted):
+            return inpainted, original
+        return original, original
+
+    def _update_page_preview(self, *_args) -> None:
+        page = self.preview_page_combo.currentText()
+        run_index = self.preview_variant_combo.currentData()
+        if not page or not isinstance(run_index, int):
+            self.page_preview.clear_preview()
+            return
+        if not 0 <= run_index < len(self._preview_runs):
+            self.page_preview.clear_preview()
+            return
+        blocks = self._preview_runs[run_index].preview_pages.get(page, [])
+        self.preview_status.setText(self.tr('Loading page preview...'))
+        self.preview_status.show()
+        image_path, reference_path = self._preview_image_paths(page)
+        self.page_preview.show_result(
+            image_path,
+            reference_path,
+            blocks,
+        )
+
+    def _preview_load_finished(self, error: str) -> None:
+        self.preview_status.setText(error)
+        self.preview_status.setVisible(bool(error))
 
     def _status_label(self, status: str) -> str:
         return {
