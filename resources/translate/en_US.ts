@@ -9014,6 +9014,33 @@ Then restart Photoshop. Explorer will now open the source file and destination l
         </message>
     </context>
     <context>
+    <name>TranslationBenchmarkEditorPreviewBar</name>
+    <message>
+        <source>Benchmark preview</source>
+        <translation>Benchmark preview</translation>
+    </message>
+    <message>
+        <source>Select which benchmark translation is shown in the editor.</source>
+        <translation>Select which benchmark translation is shown in the editor.</translation>
+    </message>
+    <message>
+        <source>Close preview</source>
+        <translation>Close preview</translation>
+    </message>
+    <message>
+        <source>Return to the editable project translation.</source>
+        <translation>Return to the editable project translation.</translation>
+    </message>
+    <message>
+        <source>Previewing the current page.</source>
+        <translation>Previewing the current page.</translation>
+    </message>
+    <message>
+        <source>No result for this page</source>
+        <translation>No result for this page</translation>
+    </message>
+</context>
+<context>
         <name>TranslationBenchmarkWorker</name>
         <message>
             <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="108" />

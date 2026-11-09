@@ -71,6 +71,19 @@ QFrame#ConfigPanelSurface {
     border-radius: 12px;
 }
 
+QFrame#BenchmarkEditorPreviewBar {
+    background-color: @widgetBackgroundColor;
+    border: 1px solid @borderColor;
+    border-radius: 8px;
+}
+
+QFrame#BenchmarkEditorPreviewBar QComboBox#BenchmarkEditorPreviewSelector {
+    background-color: @transtexteditBackgroundColor;
+    border: 1px solid @borderColor;
+    border-radius: 5px;
+    padding: 3px 8px;
+}
+
 QWidget#ConfigPanel[nativeFrame="true"] QFrame#ConfigPanelSurface {
     border: none;
     border-radius: 0px;

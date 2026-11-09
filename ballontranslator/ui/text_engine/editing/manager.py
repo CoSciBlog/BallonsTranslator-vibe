@@ -4,7 +4,7 @@ from typing import List, Mapping, Optional, Sequence, Union, Tuple
 import numpy as np
 import copy
 
-from qtpy.QtWidgets import QApplication, QWidget
+from qtpy.QtWidgets import QApplication, QGraphicsItem, QWidget
 from qtpy.QtCore import QCoreApplication, QObject, QRectF, Qt, Signal, QPointF
 from qtpy.QtGui import QKeyEvent, QTextCursor, QFontMetricsF, QFont, QTextCharFormat, QClipboard
 try:
@@ -641,6 +641,8 @@ class SceneTextManager(QObject):
         self.imgtrans_proj = self.canvas.imgtrans_proj
         self.textblk_item_list: List[TextBlkItem] = []
         self.pairwidget_list: List[TransPairWidget] = self.textEditList.pairwidget_list
+        self._benchmark_preview_items: List[TextBlkItem] = []
+        self._benchmark_preview_text_layer_visible = True
 
         self.auto_textlayout_flag = False
         self.hovering_transwidget : TransTextEdit = None
@@ -726,6 +728,7 @@ class SceneTextManager(QObject):
         self,
         reason=SceneTextReplacementReason.CURRENT_PAGE_RELOAD,
     ) -> None:
+        self.clear_benchmark_preview()
         self.canvas.text_move_session.cancel()
         self.canvas.alpha_mask_edit_session.deactivate()
         self.canvas.cancel_path_reorder()
@@ -743,6 +746,68 @@ class SceneTextManager(QObject):
         for textwidget in self.pairwidget_list:
             self.textEditList.removeWidget(textwidget)
         self.pairwidget_list.clear()
+
+    @property
+    def benchmark_preview_active(self) -> bool:
+        """Return whether detached benchmark text is displayed on the canvas."""
+
+        return bool(self._benchmark_preview_items)
+
+    def show_benchmark_preview(self, blocks: Sequence[TextBlock]) -> None:
+        """Show detached, read-only text without replacing live page items.
+
+        The preview objects never enter ``textblk_item_list`` or the editor
+        widget list, so saving and undo history continue to address the live
+        project objects only.
+        """
+
+        self.clear_benchmark_preview()
+        if not blocks:
+            return
+
+        editing_item = self.editingTextItem()
+        if editing_item is not None:
+            editing_item.endEdit()
+        self.canvas.clearSelection()
+        self.canvas.set_primary_selected_text_item(None)
+        self.txtblkShapeControl.setBlkItem(None)
+        self.txtblkShapeControl.hide()
+
+        self._benchmark_preview_text_layer_visible = (
+            self.canvas.textLayer.isVisible()
+        )
+        self.canvas.textLayer.show()
+        for item in self.textblk_item_list:
+            item.set_order_badge_visible(False)
+            item.hide()
+
+        for index, source_block in enumerate(blocks):
+            block = copy.deepcopy(source_block)
+            if not block.lines and block._bounding_rect is None:
+                x1, y1, x2, y2 = block.xyxy
+                block._bounding_rect = [x1, y1, x2 - x1, y2 - y1]
+            item = TextBlkItem(block, index, show_rect=False)
+            item.setFlags(QGraphicsItem.GraphicsItemFlag(0))
+            item.setAcceptedMouseButtons(Qt.MouseButton.NoButton)
+            item.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
+            item.setParentItem(self.canvas.textLayer)
+            item.effect_renderer.project_assets_changed()
+            self._benchmark_preview_items.append(item)
+
+    def clear_benchmark_preview(self) -> None:
+        """Remove detached preview objects and reveal live editor objects."""
+
+        if not self._benchmark_preview_items:
+            return
+        for item in self._benchmark_preview_items:
+            item.geometry_controller.release_render_resources()
+            self.canvas.removeItem(item)
+        self._benchmark_preview_items.clear()
+        for item in self.textblk_item_list:
+            item.show()
+            item.set_order_badge_visible(self.canvas.order_badges_visible)
+        if not self._benchmark_preview_text_layer_visible:
+            self.canvas.textLayer.hide()
 
     def populateSceneTextitems(self):
         """Create scene items for the project's already-selected current page."""

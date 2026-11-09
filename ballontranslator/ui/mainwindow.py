@@ -41,6 +41,7 @@ from ballontranslator.utils.config import (
 from ballontranslator.utils.proj_imgtrans import ProjImgTrans
 from ballontranslator.utils.pipeline_history import PipelineHistoryStore
 from ballontranslator.utils.llm_profiles import is_llm_text_translator, profile_by_id
+from ballontranslator.utils.translation_benchmark import TranslationBenchmarkReport
 from ballontranslator.utils.batch_processing import (
     BatchResumeStore,
     BatchOptions,
@@ -81,7 +82,10 @@ from .font_refresh import FontRefreshController
 from .update_dialog import UpdateReleaseDialog
 from .run_pipeline_dialog import RunPipelineDialog
 from .batch_processing_dialog import BatchProcessingDialog
-from .translation_benchmark_dialog import TranslationBenchmarkDialog
+from .translation_benchmark_dialog import (
+    TranslationBenchmarkDialog,
+    TranslationBenchmarkEditorPreviewBar,
+)
 from .glossary_window import GlossaryWindow
 from .pipeline_history_window import PipelineHistoryWindow
 from .custom_widget import ScrollBar, Widget, ViewWidget
@@ -635,6 +639,20 @@ class MainWindow(mainwindow_cls):
         self.canvas.search_widget.textblk_item_list = self.st_manager.textblk_item_list
         self.canvas.search_widget.replace_one.connect(self.st_manager.on_page_replace_one)
         self.canvas.search_widget.replace_all.connect(self.st_manager.on_page_replace_all)
+        self._translation_benchmark_report: Optional[
+            TranslationBenchmarkReport
+        ] = None
+        self._benchmark_preview_view_interactive = True
+        self._benchmark_preview_panel_enabled = True
+        self.benchmark_preview_bar = TranslationBenchmarkEditorPreviewBar(
+            self.canvas.gv.viewport()
+        )
+        self.benchmark_preview_bar.preview_requested.connect(
+            self._apply_translation_benchmark_preview
+        )
+        self.benchmark_preview_bar.dismissed.connect(
+            self._dismiss_translation_benchmark_preview
+        )
 
         # comic trans pannel
         self.rightComicTransStackPanel = QStackedWidget(self)
@@ -1120,6 +1138,7 @@ class MainWindow(mainwindow_cls):
 
     def openDir(self, directory: str):
         try:
+            self._dismiss_translation_benchmark_preview()
             self.opening_dir = True
             # 在加载项目前检查并生成TIF文件的预览图
             self.generate_tif_thumbnails(directory)
@@ -1176,6 +1195,7 @@ class MainWindow(mainwindow_cls):
 
     def openJsonProj(self, json_path: str):
         try:
+            self._dismiss_translation_benchmark_preview()
             self.opening_dir = True
             self.imgtrans_proj.load_from_json(json_path)
             self.st_manager.clearSceneTextitems(
@@ -1344,6 +1364,8 @@ class MainWindow(mainwindow_cls):
         item = self.pageList.currentItem()
         self.page_changing = True
         if item is not None:
+            preview_visible = self.benchmark_preview_bar.isVisible()
+            self.st_manager.clear_benchmark_preview()
             if not self.opening_dir:
                 # Typed transform edits belong to the old page and must commit
                 # before its dirty check. Live drags are previews and cancel.
@@ -1359,6 +1381,10 @@ class MainWindow(mainwindow_cls):
             self.canvas.reset_auto_fit_zoom()
             self.canvas.updateCanvas()
             self.st_manager.populateSceneTextitems()
+            if preview_visible:
+                self._apply_translation_benchmark_preview(
+                    self.benchmark_preview_bar.selected_run_index()
+                )
             self._update_project_title()
             self.module_manager.handle_page_changed()
             self.drawingPanel.handle_page_changed()
@@ -1778,15 +1804,79 @@ class MainWindow(mainwindow_cls):
         if self.imgtrans_proj is None or self.imgtrans_proj.is_empty:
             create_info_dialog(self.tr('Open a project before starting a benchmark.'))
             return
+        self._dismiss_translation_benchmark_preview()
         dialog = TranslationBenchmarkDialog(
             self.imgtrans_proj,
             self.module_manager,
             self,
         )
+        report = None
+        selected_run_index = 0
         try:
             dialog.exec_()
+            report = dialog.report
+            selected_run_index = dialog.selected_preview_run_index()
         finally:
             dialog.deleteLater()
+        if report is not None:
+            self._show_translation_benchmark_preview(
+                report,
+                selected_run_index,
+            )
+
+    def _show_translation_benchmark_preview(
+        self,
+        report: TranslationBenchmarkReport,
+        selected_run_index: int,
+    ) -> None:
+        self._translation_benchmark_report = report
+        self._benchmark_preview_view_interactive = self.canvas.gv.isInteractive()
+        self._benchmark_preview_panel_enabled = (
+            self.rightComicTransStackPanel.isEnabled()
+        )
+        if not self.benchmark_preview_bar.set_report(
+            report,
+            selected_run_index,
+        ):
+            self._translation_benchmark_report = None
+            return
+        self.canvas.gv.setInteractive(False)
+        self.rightComicTransStackPanel.setEnabled(False)
+
+    def _apply_translation_benchmark_preview(self, run_index: int) -> None:
+        report = self._translation_benchmark_report
+        page = self.imgtrans_proj.current_img
+        if (
+            report is None
+            or page is None
+            or not 0 <= run_index < len(report.runs)
+        ):
+            self.st_manager.clear_benchmark_preview()
+            return
+        blocks = report.runs[run_index].preview_pages.get(page)
+        self.st_manager.clear_benchmark_preview()
+        if blocks:
+            self.st_manager.show_benchmark_preview(blocks)
+        self.benchmark_preview_bar.set_page_status(page, bool(blocks))
+
+    def _dismiss_translation_benchmark_preview(self) -> None:
+        was_active = (
+            self._translation_benchmark_report is not None
+            or self.benchmark_preview_bar.isVisible()
+            or self.st_manager.benchmark_preview_active
+        )
+        self.st_manager.clear_benchmark_preview()
+        self._translation_benchmark_report = None
+        if not was_active:
+            return
+        self.canvas.gv.setInteractive(
+            self._benchmark_preview_view_interactive
+        )
+        self.rightComicTransStackPanel.setEnabled(
+            self._benchmark_preview_panel_enabled
+        )
+        if self.benchmark_preview_bar.isVisible():
+            self.benchmark_preview_bar.hide()
 
     def start_batch_processing(
         self,
@@ -2892,6 +2982,9 @@ class MainWindow(mainwindow_cls):
         if not self.imgtrans_proj.img_valid:
             return
 
+        benchmark_preview_visible = self.benchmark_preview_bar.isVisible()
+        self.st_manager.clear_benchmark_preview()
+
         if update_scene_text or save_proj:
             # Resolve text-transform editor state before both the canonical
             # project snapshot and the result-image render consume it. The
@@ -2988,6 +3081,10 @@ class MainWindow(mainwindow_cls):
                 self.canvas.block_selection_signal = False
             if editing_textitem is not None:
                 editing_textitem.startEdit()
+        if benchmark_preview_visible:
+            self._apply_translation_benchmark_preview(
+                self.benchmark_preview_bar.selected_run_index()
+            )
         
     def to_trans_config(self) -> None:
         self.configPanel.showConfigDialog('translator')

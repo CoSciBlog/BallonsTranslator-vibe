@@ -9083,6 +9083,33 @@ Starten Sie dann Photoshop neu. Der Explorer öffnet nun die Quelldatei und den 
     </message>
 </context>
 <context>
+    <name>TranslationBenchmarkEditorPreviewBar</name>
+    <message>
+        <source>Benchmark preview</source>
+        <translation>Benchmark-Vorschau</translation>
+    </message>
+    <message>
+        <source>Select which benchmark translation is shown in the editor.</source>
+        <translation>Wählen Sie aus, welche Benchmark-Übersetzung im Editor angezeigt wird.</translation>
+    </message>
+    <message>
+        <source>Close preview</source>
+        <translation>Vorschau schließen</translation>
+    </message>
+    <message>
+        <source>Return to the editable project translation.</source>
+        <translation>Zur bearbeitbaren Projektübersetzung zurückkehren.</translation>
+    </message>
+    <message>
+        <source>Previewing the current page.</source>
+        <translation>Vorschau der aktuellen Seite.</translation>
+    </message>
+    <message>
+        <source>No result for this page</source>
+        <translation>Kein Ergebnis für diese Seite</translation>
+    </message>
+</context>
+<context>
     <name>TranslationBenchmarkWorker</name>
     <message>
         <location filename="../../ballontranslator/ui/translation_benchmark_dialog.py" line="108"/>

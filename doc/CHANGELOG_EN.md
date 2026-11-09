@@ -1,5 +1,8 @@
 # Changelogs
 
+### 2026-11-09 — 1.5.19+vibe.70
+- Completed benchmark results can now remain visible in the main editor through a compact profile selector. Switching profiles or project pages replaces only a detached, read-only text overlay; closing the preview restores the editable project translation without changing project data or Undo history.
+
 ### 2026-11-09 — 1.5.19+vibe.69
 - Translation Benchmark now exposes a read-only **Page preview** as soon as each profile finishes. Switch pages and LLM profiles for a visual comparison over the saved inpainted image when available, or the original page otherwise, without changing the open project, Undo history, glossary, or translation history.
 - Each benchmark is stored in its own timestamped folder: `benchmark.json` contains shared metadata, while every LLM profile receives a separate JSON file with its complete result and frozen text-block geometry. The complete folder is published in one operation, existing results are never overwritten, and combined manual JSON/CSV export remains available.
