@@ -9,7 +9,6 @@ import traceback
 from typing import Dict, List, Optional, Sequence, Tuple
 
 from qtpy.QtCore import (
-    QEvent,
     QIODevice,
     QObject,
     QRectF,
@@ -35,7 +34,6 @@ from qtpy.QtWidgets import (
     QComboBox,
     QDialog,
     QFileDialog,
-    QFrame,
     QGraphicsItem,
     QGraphicsScene,
     QGraphicsView,
@@ -77,127 +75,6 @@ from ballontranslator.ui.text_engine.item import TextBlkItem
 
 class _BenchmarkPreviewImageSignals(QObject):
     loaded = Signal(int, object, str)
-
-
-class TranslationBenchmarkEditorPreviewBar(QFrame):
-    """Compact selector for displaying a completed run in the main editor."""
-
-    preview_requested = Signal(int)
-    dismissed = Signal()
-
-    def __init__(self, parent: QWidget) -> None:
-        super().__init__(parent)
-        self.setObjectName('BenchmarkEditorPreviewBar')
-        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
-        self.setFrameShape(QFrame.Shape.StyledPanel)
-
-        self.title_label = QLabel(self.tr('Benchmark preview'), self)
-        self.variant_combo = QComboBox(self)
-        self.variant_combo.setObjectName('BenchmarkEditorPreviewSelector')
-        self.variant_combo.setMinimumContentsLength(24)
-        self.variant_combo.setToolTip(self.tr(
-            'Select which benchmark translation is shown in the editor.'
-        ))
-        self.status_label = QLabel(self)
-        self.close_button = QPushButton(self.tr('Close preview'), self)
-        self.close_button.setToolTip(self.tr(
-            'Return to the editable project translation.'
-        ))
-
-        layout = QHBoxLayout(self)
-        layout.setContentsMargins(10, 6, 10, 6)
-        layout.setSpacing(8)
-        layout.addWidget(self.title_label)
-        layout.addWidget(self.variant_combo, 1)
-        layout.addWidget(self.status_label)
-        layout.addWidget(self.close_button)
-
-        self.variant_combo.currentIndexChanged.connect(self._variant_changed)
-        self.close_button.clicked.connect(self.close_preview)
-        self.hide()
-
-    def set_report(
-        self,
-        report: TranslationBenchmarkReport,
-        selected_run_index: int = 0,
-    ) -> bool:
-        """Populate available page previews and select one original run index."""
-
-        self.variant_combo.blockSignals(True)
-        self.variant_combo.clear()
-        selected_combo_index = -1
-        for run_index, run in enumerate(report.runs):
-            if not run.preview_pages:
-                continue
-            combo_index = self.variant_combo.count()
-            self.variant_combo.addItem(run.variant.label, run_index)
-            if run_index == selected_run_index:
-                selected_combo_index = combo_index
-        if not self.variant_combo.count():
-            self.variant_combo.blockSignals(False)
-            self.hide()
-            return False
-        self.variant_combo.setCurrentIndex(
-            selected_combo_index if selected_combo_index >= 0 else 0
-        )
-        self.variant_combo.blockSignals(False)
-        self.show()
-        self.raise_()
-        self._position_on_viewport()
-        self.preview_requested.emit(self.selected_run_index())
-        return True
-
-    def selected_run_index(self) -> int:
-        run_index = self.variant_combo.currentData()
-        return run_index if isinstance(run_index, int) else -1
-
-    def set_page_status(self, page: str, available: bool) -> None:
-        if available:
-            self.status_label.setText(page)
-            self.status_label.setToolTip(self.tr('Previewing the current page.'))
-        else:
-            self.status_label.setText(self.tr('No result for this page'))
-            self.status_label.setToolTip(page)
-
-    def close_preview(self) -> None:
-        if not self.isVisible():
-            return
-        self.hide()
-        self.dismissed.emit()
-
-    def _variant_changed(self, _index: int) -> None:
-        run_index = self.selected_run_index()
-        if run_index >= 0:
-            self.preview_requested.emit(run_index)
-
-    def showEvent(self, event) -> None:
-        viewport = self.parentWidget()
-        if viewport is not None:
-            viewport.installEventFilter(self)
-        super().showEvent(event)
-        self._position_on_viewport()
-
-    def hideEvent(self, event) -> None:
-        viewport = self.parentWidget()
-        if viewport is not None:
-            viewport.removeEventFilter(self)
-        super().hideEvent(event)
-
-    def eventFilter(self, watched, event) -> bool:
-        if watched is not self.parentWidget():
-            return False
-        if event.type() == QEvent.Type.Resize:
-            self._position_on_viewport()
-        return False
-
-    def _position_on_viewport(self) -> None:
-        viewport = self.parentWidget()
-        if viewport is None:
-            return
-        hint = self.sizeHint()
-        width = min(max(hint.width(), 420), max(viewport.width() - 24, 120))
-        x = max((viewport.width() - width) // 2, 0)
-        self.setGeometry(x, 12, width, hint.height())
 
 
 class _BenchmarkPreviewImageLoader(QRunnable):

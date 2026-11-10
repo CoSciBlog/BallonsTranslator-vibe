@@ -117,6 +117,14 @@ class LeftBar(Widget):
         self.globalSearchChecker.setObjectName('GlobalSearchChecker')
         self.globalSearchChecker.setToolTip(self.tr('Global Search (Ctrl+G)'))
 
+        self.benchmarkResultsChecker = QCheckBox()
+        self.benchmarkResultsChecker.setObjectName('BenchmarkResultsChecker')
+        self.benchmarkResultsChecker.setToolTip(self.tr('Benchmark Results'))
+        self.benchmarkResultsChecker.setAccessibleName(
+            self.tr('Benchmark Results')
+        )
+        self.benchmarkResultsChecker.setEnabled(False)
+
         self.mergeTextboxesBtn = QToolButton(self)
         self.mergeTextboxesBtn.setObjectName('LeftBarMergeTextboxesButton')
         self.mergeTextboxesBtn.setIcon(
@@ -281,6 +289,7 @@ class LeftBar(Widget):
         vlayout.addWidget(self.openBtn)
         vlayout.addWidget(self.showPageListLabel)
         vlayout.addWidget(self.globalSearchChecker)
+        vlayout.addWidget(self.benchmarkResultsChecker)
         vlayout.addWidget(self.mergeTextboxesBtn)
         vlayout.addWidget(self.reinpaintCurrentPageBtn)
         vlayout.addWidget(self.glossaryBtn)

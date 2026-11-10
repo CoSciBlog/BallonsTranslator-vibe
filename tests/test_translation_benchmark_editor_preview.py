@@ -2,6 +2,7 @@ import copy
 import os
 import tempfile
 import unittest
+from types import SimpleNamespace
 from unittest.mock import patch
 
 os.environ.setdefault('QT_QPA_PLATFORM', 'offscreen')
@@ -13,11 +14,12 @@ from qtpy.QtWidgets import QApplication, QHBoxLayout, QStackedWidget, QWidget
 from ballontranslator.ui import shared_widget as SW
 from ballontranslator.ui.canvas import Canvas
 from ballontranslator.ui.mainwindow import MainWindow
+from ballontranslator.ui.mainwindowbars import LeftBar
 from ballontranslator.ui.misc import parse_stylesheet
 from ballontranslator.ui.text_engine.editing.manager import SceneTextManager, TextPanel
 from ballontranslator.ui.text_engine.item import TextBlkItem
-from ballontranslator.ui.translation_benchmark_dialog import (
-    TranslationBenchmarkEditorPreviewBar,
+from ballontranslator.ui.translation_benchmark_results import (
+    TranslationBenchmarkResultsWidget,
 )
 from ballontranslator.utils import config as C, shared
 from ballontranslator.utils.fontformat import FontFormat
@@ -32,7 +34,11 @@ from ballontranslator.utils.translation_benchmark import (
 
 
 def _run(profile_id: str, translation: str) -> TranslationBenchmarkRun:
-    profile = LLMProfile(id=profile_id, name=profile_id.upper(), model='model')
+    profile = LLMProfile(
+        id=profile_id,
+        name=profile_id.upper(),
+        model=f'{profile_id}-model',
+    )
     block = TextBlock(
         [0, 0, 300, 120],
         _bounding_rect=[0, 0, 300, 120],
@@ -61,6 +67,15 @@ def _report() -> TranslationBenchmarkReport:
 
 
 class _PreviewHost(QWidget):
+    _set_left_panel_content = MainWindow._set_left_panel_content
+    _sync_llm_context_editor_visibility = (
+        MainWindow._sync_llm_context_editor_visibility
+    )
+    pageLabelStateChanged = MainWindow.pageLabelStateChanged
+    on_set_gsearch_widget = MainWindow.on_set_gsearch_widget
+    on_set_benchmark_results_widget = (
+        MainWindow.on_set_benchmark_results_widget
+    )
     _show_translation_benchmark_preview = (
         MainWindow._show_translation_benchmark_preview
     )
@@ -69,6 +84,12 @@ class _PreviewHost(QWidget):
     )
     _dismiss_translation_benchmark_preview = (
         MainWindow._dismiss_translation_benchmark_preview
+    )
+    _set_benchmark_preview_editing_locked = (
+        MainWindow._set_benchmark_preview_editing_locked
+    )
+    _stop_translation_benchmark_preview = (
+        MainWindow._stop_translation_benchmark_preview
     )
 
 
@@ -128,7 +149,43 @@ class TranslationBenchmarkEditorPreviewTests(unittest.TestCase):
         self.manager.populateSceneTextitems()
         self.stack = QStackedWidget(self.host)
         self.stack.addWidget(self.panel)
+
+        self.host.pageList = QWidget(self.host)
+        self.host.global_search_widget = QWidget(self.host)
+        self.host.leftStackWidget = QStackedWidget(self.host)
+        self.host.leftStackWidget.addWidget(self.host.pageList)
+        self.host.leftStackWidget.addWidget(self.host.global_search_widget)
+        self.host.benchmark_results_widget = (
+            TranslationBenchmarkResultsWidget(self.host.leftStackWidget)
+        )
+        self.host.leftStackWidget.addWidget(
+            self.host.benchmark_results_widget
+        )
+        self.host.llmContextEditor = SimpleNamespace(
+            hide=lambda: None,
+            show=lambda: None,
+            set_context_visible=lambda _visible: None,
+        )
+        self.host.leftBar = LeftBar(self.host)
+        self.host.leftBar.showPageListLabel.clicked.connect(
+            self.host.pageLabelStateChanged
+        )
+        self.host.leftBar.globalSearchChecker.clicked.connect(
+            self.host.on_set_gsearch_widget
+        )
+        self.host.leftBar.benchmarkResultsChecker.clicked.connect(
+            self.host.on_set_benchmark_results_widget
+        )
+        self.host.benchmark_results_widget.preview_requested.connect(
+            self.host._apply_translation_benchmark_preview
+        )
+        self.host.benchmark_results_widget.project_translation_requested.connect(
+            self.host._stop_translation_benchmark_preview
+        )
+
         layout = QHBoxLayout(self.host)
+        layout.addWidget(self.host.leftBar)
+        layout.addWidget(self.host.leftStackWidget)
         layout.addWidget(self.canvas.gv)
         layout.addWidget(self.stack)
 
@@ -139,15 +196,8 @@ class TranslationBenchmarkEditorPreviewTests(unittest.TestCase):
         self.host._translation_benchmark_report = None
         self.host._benchmark_preview_view_interactive = True
         self.host._benchmark_preview_panel_enabled = True
-        self.host.benchmark_preview_bar = TranslationBenchmarkEditorPreviewBar(
-            self.canvas.gv.viewport()
-        )
-        self.host.benchmark_preview_bar.preview_requested.connect(
-            self.host._apply_translation_benchmark_preview
-        )
-        self.host.benchmark_preview_bar.dismissed.connect(
-            self.host._dismiss_translation_benchmark_preview
-        )
+        self.host.leftBar.showPageListLabel.setChecked(True)
+        self.host._set_left_panel_content(self.host.pageList)
         self.host.resize(900, 500)
         self.host.show()
         self.app.processEvents()
@@ -178,17 +228,29 @@ class TranslationBenchmarkEditorPreviewTests(unittest.TestCase):
         original_count = self.canvas.text_undo_stack.count()
         report = _report()
 
+        self.assertFalse(
+            self.host.leftBar.benchmarkResultsChecker.isEnabled()
+        )
         self.host._show_translation_benchmark_preview(report, 0)
         self.app.processEvents()
 
-        self.assertTrue(self.host.benchmark_preview_bar.isVisible())
+        self.assertTrue(
+            self.host.leftBar.benchmarkResultsChecker.isEnabled()
+        )
+        self.assertTrue(
+            self.host.leftBar.benchmarkResultsChecker.isChecked()
+        )
+        self.assertIs(
+            self.host.leftStackWidget.currentWidget(),
+            self.host.benchmark_results_widget,
+        )
         self.assertTrue(self.manager.benchmark_preview_active)
         self.assertFalse(original_item.isVisible())
         self.assertFalse(self.canvas.gv.isInteractive())
         self.assertFalse(self.stack.isEnabled())
         self.assertEqual(self._visible_preview_texts(), ['first result'])
 
-        self.host.benchmark_preview_bar.variant_combo.setCurrentIndex(1)
+        self.host.benchmark_results_widget.results_list.setCurrentRow(1)
         self.app.processEvents()
         self.assertEqual(self._visible_preview_texts(), ['second result'])
         self.manager.updateTextBlkList()
@@ -198,12 +260,19 @@ class TranslationBenchmarkEditorPreviewTests(unittest.TestCase):
         )
         self.assertEqual(self.canvas.text_undo_stack.count(), original_count)
 
-        self.host.benchmark_preview_bar.close_preview()
+        self.host.benchmark_results_widget.project_translation_button.click()
         self.app.processEvents()
         self.assertFalse(self.manager.benchmark_preview_active)
         self.assertTrue(original_item.isVisible())
         self.assertTrue(self.canvas.gv.isInteractive())
         self.assertTrue(self.stack.isEnabled())
+        self.assertTrue(
+            self.host.leftBar.benchmarkResultsChecker.isEnabled()
+        )
+        self.assertEqual(
+            self.host.benchmark_results_widget.selected_run_index(),
+            -1,
+        )
 
     def test_missing_page_keeps_live_text_visible(self) -> None:
         report = _report()
@@ -215,8 +284,8 @@ class TranslationBenchmarkEditorPreviewTests(unittest.TestCase):
         self.assertFalse(self.manager.benchmark_preview_active)
         self.assertTrue(self.manager.textblk_item_list[0].isVisible())
         self.assertEqual(
-            self.host.benchmark_preview_bar.status_label.text(),
-            'No result for this page',
+            self.host.benchmark_results_widget.page_status.text(),
+            'No benchmark result for 01.png',
         )
 
     def test_selected_result_reapplies_after_page_change(self) -> None:
@@ -246,7 +315,7 @@ class TranslationBenchmarkEditorPreviewTests(unittest.TestCase):
             'second page project translation',
         )
 
-    def test_preview_bar_renders_in_light_and_dark_themes(self) -> None:
+    def test_sidebar_switches_from_page_list_and_renders_in_both_themes(self) -> None:
         old_stylesheet = self.app.styleSheet()
         try:
             for theme in ('eva-light', 'eva-dark'):
@@ -254,13 +323,34 @@ class TranslationBenchmarkEditorPreviewTests(unittest.TestCase):
                 self.host._show_translation_benchmark_preview(_report(), 1)
                 self.app.processEvents()
                 self.assertEqual(
-                    self.host.benchmark_preview_bar.selected_run_index(),
+                    self.host.benchmark_results_widget.selected_run_index(),
                     1,
                 )
                 self.assertFalse(
-                    self.host.benchmark_preview_bar.grab().isNull()
+                    self.host.benchmark_results_widget.grab().isNull()
+                )
+                self.assertIn(
+                    'two-model',
+                    self.host.benchmark_results_widget.results_list.item(1).text(),
+                )
+                self.host.leftBar.showPageListLabel.click()
+                self.assertIs(
+                    self.host.leftStackWidget.currentWidget(),
+                    self.host.pageList,
+                )
+                self.assertFalse(
+                    self.host.leftBar.benchmarkResultsChecker.isChecked()
+                )
+                self.assertTrue(self.manager.benchmark_preview_active)
+                self.host.leftBar.benchmarkResultsChecker.click()
+                self.assertIs(
+                    self.host.leftStackWidget.currentWidget(),
+                    self.host.benchmark_results_widget,
                 )
                 self.host._dismiss_translation_benchmark_preview()
+                self.assertFalse(
+                    self.host.leftBar.benchmarkResultsChecker.isEnabled()
+                )
         finally:
             self.app.setStyleSheet(old_stylesheet)
 

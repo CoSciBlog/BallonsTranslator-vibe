@@ -1,5 +1,8 @@
 # Changelogs
 
+### 2026-11-10 — 1.5.19+vibe.71
+- Replaced the floating benchmark selector with a dedicated **Benchmark Results** button and left sidebar. The sidebar lists each completed LLM profile and model, switches the current page's read-only live translation on click, preserves the selected model across page changes, and can return to editable project text without discarding the benchmark report.
+
 ### 2026-11-09 — 1.5.19+vibe.70
 - Completed benchmark results can now remain visible in the main editor through a compact profile selector. Switching profiles or project pages replaces only a detached, read-only text overlay; closing the preview restores the editable project translation without changing project data or Undo history.
 

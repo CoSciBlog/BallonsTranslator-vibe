@@ -3328,6 +3328,10 @@
         <translation>Global Search (Ctrl+G)</translation>
     </message>
     <message>
+        <source>Benchmark Results</source>
+        <translation>Benchmark Results</translation>
+    </message>
+    <message>
         <location filename="../../ballontranslator/ui/mainwindowbars.py" line="127"/>
         <source>Merge Selected Text Boxes</source>
         <translation>Merge Selected Text Boxes</translation>
@@ -9014,30 +9018,54 @@ Then restart Photoshop. Explorer will now open the source file and destination l
         </message>
     </context>
     <context>
-    <name>TranslationBenchmarkEditorPreviewBar</name>
+    <name>TranslationBenchmarkResultsWidget</name>
     <message>
-        <source>Benchmark preview</source>
-        <translation>Benchmark preview</translation>
+        <source>Benchmark results</source>
+        <translation>Benchmark results</translation>
     </message>
     <message>
-        <source>Select which benchmark translation is shown in the editor.</source>
-        <translation>Select which benchmark translation is shown in the editor.</translation>
+        <source>Select an LLM model to preview its translation.</source>
+        <translation>Select an LLM model to preview its translation.</translation>
     </message>
     <message>
-        <source>Close preview</source>
-        <translation>Close preview</translation>
+        <source>Show project translation</source>
+        <translation>Show project translation</translation>
     </message>
     <message>
-        <source>Return to the editable project translation.</source>
-        <translation>Return to the editable project translation.</translation>
+        <source>Stop the benchmark preview and return to the editable translation.</source>
+        <translation>Stop the benchmark preview and return to the editable translation.</translation>
     </message>
     <message>
-        <source>Previewing the current page.</source>
-        <translation>Previewing the current page.</translation>
+        <source>LLM profile</source>
+        <translation>LLM profile</translation>
     </message>
     <message>
-        <source>No result for this page</source>
-        <translation>No result for this page</translation>
+        <source>Unknown model</source>
+        <translation>Unknown model</translation>
+    </message>
+    <message>
+        <source>Profile: {profile}
+Model: {model}
+Status: {status}</source>
+        <translation>Profile: {profile}
+Model: {model}
+Status: {status}</translation>
+    </message>
+    <message>
+        <source>No completed benchmark results.</source>
+        <translation>No completed benchmark results.</translation>
+    </message>
+    <message>
+        <source>Previewing {page}</source>
+        <translation>Previewing {page}</translation>
+    </message>
+    <message>
+        <source>No benchmark result for {page}</source>
+        <translation>No benchmark result for {page}</translation>
+    </message>
+    <message>
+        <source>Showing editable project translation for {page}</source>
+        <translation>Showing editable project translation for {page}</translation>
     </message>
 </context>
 <context>

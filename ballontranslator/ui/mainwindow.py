@@ -82,10 +82,8 @@ from .font_refresh import FontRefreshController
 from .update_dialog import UpdateReleaseDialog
 from .run_pipeline_dialog import RunPipelineDialog
 from .batch_processing_dialog import BatchProcessingDialog
-from .translation_benchmark_dialog import (
-    TranslationBenchmarkDialog,
-    TranslationBenchmarkEditorPreviewBar,
-)
+from .translation_benchmark_dialog import TranslationBenchmarkDialog
+from .translation_benchmark_results import TranslationBenchmarkResultsWidget
 from .glossary_window import GlossaryWindow
 from .pipeline_history_window import PipelineHistoryWindow
 from .custom_widget import ScrollBar, Widget, ViewWidget
@@ -524,6 +522,9 @@ class MainWindow(mainwindow_cls):
         self.leftBar.showPageListLabel.clicked.connect(self.pageLabelStateChanged)
         self.leftBar.configChecked.connect(self.setupConfigUI)
         self.leftBar.globalSearchChecker.clicked.connect(self.on_set_gsearch_widget)
+        self.leftBar.benchmarkResultsChecker.clicked.connect(
+            self.on_set_benchmark_results_widget
+        )
         self.leftBar.open_dir.connect(self.OpenProj)
         self.leftBar.open_json_proj.connect(self.openJsonProj)
         self.leftBar.save_proj.connect(self.manual_save)
@@ -565,6 +566,17 @@ class MainWindow(mainwindow_cls):
         self.imsave_thread.img_writed.connect(self.global_search_widget.on_img_writed)
         self.global_search_widget.search_tree.result_item_clicked.connect(self.on_search_result_item_clicked)
         self.leftStackWidget.addWidget(self.global_search_widget)
+
+        self.benchmark_results_widget = TranslationBenchmarkResultsWidget(
+            self.leftStackWidget
+        )
+        self.benchmark_results_widget.preview_requested.connect(
+            self._apply_translation_benchmark_preview
+        )
+        self.benchmark_results_widget.project_translation_requested.connect(
+            self._stop_translation_benchmark_preview
+        )
+        self.leftStackWidget.addWidget(self.benchmark_results_widget)
 
         self.llmContextEditor = LLMContextEditor(
             project=self.imgtrans_proj,
@@ -644,15 +656,6 @@ class MainWindow(mainwindow_cls):
         ] = None
         self._benchmark_preview_view_interactive = True
         self._benchmark_preview_panel_enabled = True
-        self.benchmark_preview_bar = TranslationBenchmarkEditorPreviewBar(
-            self.canvas.gv.viewport()
-        )
-        self.benchmark_preview_bar.preview_requested.connect(
-            self._apply_translation_benchmark_preview
-        )
-        self.benchmark_preview_bar.dismissed.connect(
-            self._dismiss_translation_benchmark_preview
-        )
 
         # comic trans pannel
         self.rightComicTransStackPanel = QStackedWidget(self)
@@ -1268,6 +1271,8 @@ class MainWindow(mainwindow_cls):
         if setup:
             if self.leftBar.globalSearchChecker.isChecked():
                 self.leftBar.globalSearchChecker.setChecked(False)
+            if self.leftBar.benchmarkResultsChecker.isChecked():
+                self.leftBar.benchmarkResultsChecker.setChecked(False)
             self._set_left_panel_content(self.pageList)
         else:
             self._set_left_panel_content(None)
@@ -1364,7 +1369,9 @@ class MainWindow(mainwindow_cls):
         item = self.pageList.currentItem()
         self.page_changing = True
         if item is not None:
-            preview_visible = self.benchmark_preview_bar.isVisible()
+            preview_run_index = (
+                self.benchmark_results_widget.selected_run_index()
+            )
             self.st_manager.clear_benchmark_preview()
             if not self.opening_dir:
                 # Typed transform edits belong to the old page and must commit
@@ -1381,9 +1388,9 @@ class MainWindow(mainwindow_cls):
             self.canvas.reset_auto_fit_zoom()
             self.canvas.updateCanvas()
             self.st_manager.populateSceneTextitems()
-            if preview_visible:
+            if preview_run_index >= 0:
                 self._apply_translation_benchmark_preview(
-                    self.benchmark_preview_bar.selected_run_index()
+                    preview_run_index
                 )
             self._update_project_title()
             self.module_manager.handle_page_changed()
@@ -1834,14 +1841,17 @@ class MainWindow(mainwindow_cls):
         self._benchmark_preview_panel_enabled = (
             self.rightComicTransStackPanel.isEnabled()
         )
-        if not self.benchmark_preview_bar.set_report(
+        if not self.benchmark_results_widget.set_report(
             report,
             selected_run_index,
         ):
             self._translation_benchmark_report = None
             return
-        self.canvas.gv.setInteractive(False)
-        self.rightComicTransStackPanel.setEnabled(False)
+        self.leftBar.benchmarkResultsChecker.setEnabled(True)
+        self.leftBar.benchmarkResultsChecker.setChecked(True)
+        self.leftBar.showPageListLabel.setChecked(False)
+        self.leftBar.globalSearchChecker.setChecked(False)
+        self._set_left_panel_content(self.benchmark_results_widget)
 
     def _apply_translation_benchmark_preview(self, run_index: int) -> None:
         report = self._translation_benchmark_report
@@ -1857,17 +1867,13 @@ class MainWindow(mainwindow_cls):
         self.st_manager.clear_benchmark_preview()
         if blocks:
             self.st_manager.show_benchmark_preview(blocks)
-        self.benchmark_preview_bar.set_page_status(page, bool(blocks))
+        self._set_benchmark_preview_editing_locked(bool(blocks))
+        self.benchmark_results_widget.set_page_status(page, bool(blocks))
 
-    def _dismiss_translation_benchmark_preview(self) -> None:
-        was_active = (
-            self._translation_benchmark_report is not None
-            or self.benchmark_preview_bar.isVisible()
-            or self.st_manager.benchmark_preview_active
-        )
-        self.st_manager.clear_benchmark_preview()
-        self._translation_benchmark_report = None
-        if not was_active:
+    def _set_benchmark_preview_editing_locked(self, locked: bool) -> None:
+        if locked:
+            self.canvas.gv.setInteractive(False)
+            self.rightComicTransStackPanel.setEnabled(False)
             return
         self.canvas.gv.setInteractive(
             self._benchmark_preview_view_interactive
@@ -1875,8 +1881,32 @@ class MainWindow(mainwindow_cls):
         self.rightComicTransStackPanel.setEnabled(
             self._benchmark_preview_panel_enabled
         )
-        if self.benchmark_preview_bar.isVisible():
-            self.benchmark_preview_bar.hide()
+
+    def _stop_translation_benchmark_preview(self) -> None:
+        self.st_manager.clear_benchmark_preview()
+        self.benchmark_results_widget.clear_preview_selection()
+        self._set_benchmark_preview_editing_locked(False)
+        page = self.imgtrans_proj.current_img
+        if page is not None:
+            self.benchmark_results_widget.set_project_translation_status(page)
+
+    def _dismiss_translation_benchmark_preview(self) -> None:
+        was_active = (
+            self._translation_benchmark_report is not None
+            or self.st_manager.benchmark_preview_active
+        )
+        self.st_manager.clear_benchmark_preview()
+        self._translation_benchmark_report = None
+        self.benchmark_results_widget.clear_report()
+        self.leftBar.benchmarkResultsChecker.setChecked(False)
+        self.leftBar.benchmarkResultsChecker.setEnabled(False)
+        if was_active:
+            self._set_benchmark_preview_editing_locked(False)
+        if self.leftStackWidget.currentWidget() is self.benchmark_results_widget:
+            self.leftBar.showPageListLabel.setChecked(pcfg.show_page_list)
+            self._set_left_panel_content(
+                self.pageList if pcfg.show_page_list else None
+            )
 
     def start_batch_processing(
         self,
@@ -2982,7 +3012,9 @@ class MainWindow(mainwindow_cls):
         if not self.imgtrans_proj.img_valid:
             return
 
-        benchmark_preview_visible = self.benchmark_preview_bar.isVisible()
+        benchmark_preview_run_index = (
+            self.benchmark_results_widget.selected_run_index()
+        )
         self.st_manager.clear_benchmark_preview()
 
         if update_scene_text or save_proj:
@@ -3081,9 +3113,9 @@ class MainWindow(mainwindow_cls):
                 self.canvas.block_selection_signal = False
             if editing_textitem is not None:
                 editing_textitem.startEdit()
-        if benchmark_preview_visible:
+        if benchmark_preview_run_index >= 0:
             self._apply_translation_benchmark_preview(
-                self.benchmark_preview_bar.selected_run_index()
+                benchmark_preview_run_index
             )
         
     def to_trans_config(self) -> None:
@@ -4136,7 +4168,17 @@ class MainWindow(mainwindow_cls):
         setup = self.leftBar.globalSearchChecker.isChecked()
         if setup:
             self.leftBar.showPageListLabel.setChecked(False)
+            self.leftBar.benchmarkResultsChecker.setChecked(False)
             self._set_left_panel_content(self.global_search_widget)
+        else:
+            self._set_left_panel_content(None)
+
+    def on_set_benchmark_results_widget(self) -> None:
+        setup = self.leftBar.benchmarkResultsChecker.isChecked()
+        if setup:
+            self.leftBar.showPageListLabel.setChecked(False)
+            self.leftBar.globalSearchChecker.setChecked(False)
+            self._set_left_panel_content(self.benchmark_results_widget)
         else:
             self._set_left_panel_content(None)
 

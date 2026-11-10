@@ -71,19 +71,6 @@ QFrame#ConfigPanelSurface {
     border-radius: 12px;
 }
 
-QFrame#BenchmarkEditorPreviewBar {
-    background-color: @widgetBackgroundColor;
-    border: 1px solid @borderColor;
-    border-radius: 8px;
-}
-
-QFrame#BenchmarkEditorPreviewBar QComboBox#BenchmarkEditorPreviewSelector {
-    background-color: @transtexteditBackgroundColor;
-    border: 1px solid @borderColor;
-    border-radius: 5px;
-    padding: 3px 8px;
-}
-
 QWidget#ConfigPanel[nativeFrame="true"] QFrame#ConfigPanelSurface {
     border: none;
     border-radius: 0px;
@@ -389,6 +376,7 @@ QCheckBox#TexteditChecker::indicator,
 QCheckBox#TextblockChecker::indicator,
 QCheckBox#ShowPageListChecker::indicator,
 QCheckBox#GlobalSearchChecker::indicator,
+QCheckBox#BenchmarkResultsChecker::indicator,
 QCheckBox#ConfigChecker::indicator,
 DrawToolCheckBox::indicator,
 QCheckBox#CaseSensitiveToggle::indicator,
@@ -2102,6 +2090,58 @@ QCheckBox#GlobalSearchChecker::indicator:hover
 QCheckBox#GlobalSearchChecker::indicator:checked
 {
     image: url(resources/icons/search_activate.svg);
+}
+
+QCheckBox#BenchmarkResultsChecker::indicator {
+    height: 28px;
+    width: 28px;
+    image: url(resources/icons/benchmark_results.svg);
+}
+
+QCheckBox#BenchmarkResultsChecker::indicator:hover,
+QCheckBox#BenchmarkResultsChecker::indicator:checked {
+    image: url(resources/icons/benchmark_results_activate.svg);
+}
+
+QCheckBox#BenchmarkResultsChecker::indicator:disabled {
+    image: url(resources/icons/benchmark_results.svg);
+}
+
+QWidget#BenchmarkResultsPanel {
+    background-color: @widgetBackgroundColor;
+}
+
+QLabel#BenchmarkResultsTitle {
+    color: @qwidgetForegroundColor;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+QLabel#BenchmarkResultsDescription,
+QLabel#BenchmarkResultsPageStatus {
+    color: @qwidgetForegroundColor;
+}
+
+QListWidget#BenchmarkResultsList {
+    border: none;
+    background-color: transparent;
+    outline: none;
+}
+
+QListWidget#BenchmarkResultsList::item {
+    border: 1px solid transparent;
+    border-radius: 6px;
+    padding: 8px;
+    margin: 2px 0px;
+}
+
+QListWidget#BenchmarkResultsList::item:hover {
+    background-color: rgba(30, 147, 229, 12%);
+}
+
+QListWidget#BenchmarkResultsList::item:selected {
+    border-color: rgb(30, 147, 229);
+    background-color: rgba(30, 147, 229, 20%);
 }
 
 QSplitter#LLMContextPanelSplitter {
