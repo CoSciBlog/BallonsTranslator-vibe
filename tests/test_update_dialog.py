@@ -4,7 +4,7 @@ from types import SimpleNamespace
 
 os.environ.setdefault('QT_QPA_PLATFORM', 'offscreen')
 
-from qtpy.QtCore import Qt, QTranslator
+from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QApplication, QFrame, QLabel, QPushButton, QTextBrowser
 
 from ballontranslator.ui.update_dialog import (
@@ -107,7 +107,7 @@ class UpdateReleaseDialogTests(unittest.TestCase):
         self.assertIsNone(dialog.findChild(QPushButton, 'UpdateDialogCancelButton'))
         dialog.close()
 
-    def test_sponsor_link_uses_compiled_chinese_translation(self):
+    def test_release_source_link_targets_the_vibe_fork(self):
         release_info = SimpleNamespace(
             tag_name='v1.5.6',
             name='v1.5.6',
@@ -120,18 +120,18 @@ class UpdateReleaseDialogTests(unittest.TestCase):
             latest_version='1.5.6',
             release_info=release_info,
         )
-        translator = QTranslator()
-        self.assertTrue(translator.load('zh_CN', 'resources/translate'))
-        self.app.installTranslator(translator)
-        try:
-            dialog = UpdateReleaseDialog(result, display_language='zh_CN')
-            message = dialog.findChild(
-                QLabel, 'UpdateReleaseSponsorMessage'
-            )
-            self.assertIn('>赞助</a>', message.text())
-            dialog.close()
-        finally:
-            self.app.removeTranslator(translator)
+        dialog = UpdateReleaseDialog(result, display_language='zh_CN')
+        message = dialog.findChild(QLabel, 'UpdateReleaseSourceMessage')
+
+        self.assertIsNotNone(message)
+        self.assertIn(
+            'https://github.com/CoSciBlog/BallonsTranslator-vibe/releases',
+            message.text(),
+        )
+        self.assertNotIn('dmMaze', message.text())
+        self.assertNotIn('patreon', message.text())
+        self.assertNotIn('afdian', message.text())
+        dialog.close()
 
 
 if __name__ == '__main__':

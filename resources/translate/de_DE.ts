@@ -3521,6 +3521,11 @@ Once you provide the prompt, I will generate the image.  Then, when you want me 
         <translation>Bereits auf dem neuesten Stand.</translation>
     </message>
     <message>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="1074"/>
+        <source>No BallonsTranslator-vibe releases have been published yet.</source>
+        <translation>Für BallonsTranslator-vibe wurden noch keine Versionen veröffentlicht.</translation>
+    </message>
+    <message>
         <location filename="../../ballontranslator/ui/mainwindow.py" line="973"/>
         <source>Failed to check for updates.</source>
         <translation>Fehler beim Überprüfen von Updates.</translation>
@@ -9302,14 +9307,14 @@ Status: {status}</translation>
 ```</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/update_dialog.py" line="213"/>
-        <source>sponsoring this project</source>
-        <translation>unterstützt dieses Projekt.</translation>
+        <location filename="../../ballontranslator/ui/update_dialog.py" line="209"/>
+        <source>BallonsTranslator-vibe releases</source>
+        <translation>BallonsTranslator-vibe-Veröffentlichungen</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/update_dialog.py" line="221"/>
-        <source>Consider %1 if it has been helpful to you.</source>
-        <translation>Wenn Ihnen dies geholfen hat, denken Sie über %1 nach.</translation>
+        <location filename="../../ballontranslator/ui/update_dialog.py" line="217"/>
+        <source>Updates and release notes are provided by %1.</source>
+        <translation>Updates und Versionshinweise stammen aus %1.</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/update_dialog.py" line="236"/>

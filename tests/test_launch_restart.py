@@ -107,6 +107,51 @@ class LaunchRestartTests(unittest.TestCase):
             program_config.pcfg.merge(original_config)
             program_config.config_created_on_load = original_created_on_load
 
+    def test_save_config_backs_up_removed_custom_llm_profiles(self):
+        try:
+            from ballontranslator.utils import config as program_config
+            from ballontranslator.utils import shared
+            from ballontranslator.utils.llm_profiles import (
+                copy_profile,
+                default_profile,
+            )
+        except ImportError as e:
+            self.skipTest(f'config dependencies unavailable: {e}')
+
+        original_path = shared.CONFIG_PATH
+        original_config = program_config.pcfg.copy()
+        try:
+            with tempfile.TemporaryDirectory() as tmpdir:
+                config_path = Path(tmpdir) / 'config.json'
+                custom = copy_profile(default_profile('Ollama'))
+                custom.id = 'custom-saved'
+                custom.name = 'Saved custom profile'
+                saved = program_config.ProgramConfig()
+                saved.module.llm_profiles.insert(0, custom)
+                config_path.write_text(
+                    program_config.json_dump_program_config(saved),
+                    encoding='utf8',
+                )
+
+                shared.CONFIG_PATH = str(config_path)
+                program_config.pcfg.merge(program_config.ProgramConfig())
+                self.assertTrue(program_config.save_config())
+
+                backups = list(
+                    (config_path.parent / 'llm_profile_backups').glob('config-*.json')
+                )
+                self.assertEqual(len(backups), 1)
+                backup = program_config.ProgramConfig.load(str(backups[0]))
+                self.assertTrue(
+                    any(
+                        profile.id == 'custom-saved'
+                        for profile in backup.module.llm_profiles
+                    )
+                )
+        finally:
+            shared.CONFIG_PATH = original_path
+            program_config.pcfg.merge(original_config)
+
     def test_bundled_windows_runtime_disables_user_site(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)

@@ -3492,6 +3492,11 @@
         <translation>Already up-to-date.</translation>
     </message>
     <message>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="1074"/>
+        <source>No BallonsTranslator-vibe releases have been published yet.</source>
+        <translation>No BallonsTranslator-vibe releases have been published yet.</translation>
+    </message>
+    <message>
         <location filename="../../ballontranslator/ui/mainwindow.py" line="973"/>
         <source>Failed to check for updates.</source>
         <translation>Failed to check for updates.</translation>
@@ -9232,14 +9237,14 @@ Status: {status}</translation>
         <translation>A new version is available</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/update_dialog.py" line="213"/>
-        <source>sponsoring this project</source>
-        <translation>sponsoring this project</translation>
+        <location filename="../../ballontranslator/ui/update_dialog.py" line="209"/>
+        <source>BallonsTranslator-vibe releases</source>
+        <translation>BallonsTranslator-vibe releases</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/update_dialog.py" line="221"/>
-        <source>Consider %1 if it has been helpful to you.</source>
-        <translation>Consider %1 if it has been helpful to you.</translation>
+        <location filename="../../ballontranslator/ui/update_dialog.py" line="217"/>
+        <source>Updates and release notes are provided by %1.</source>
+        <translation>Updates and release notes are provided by %1.</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/update_dialog.py" line="236"/>

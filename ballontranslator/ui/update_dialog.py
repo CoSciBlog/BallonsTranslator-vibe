@@ -15,6 +15,8 @@ from qtpy.QtWidgets import (
     QWidget,
 )
 
+from ballontranslator.utils.updater import RELEASES_URL
+
 HTML_IMAGE_PATTERN = re.compile(r'<img\b[^>]*/?>', re.IGNORECASE | re.DOTALL)
 MARKDOWN_IMAGE_PATTERN = re.compile(
     r'!\[[^\]]*\]\([^)]*\)',
@@ -204,30 +206,24 @@ class UpdateReleaseDialog(QDialog):
             metadata_label.setWordWrap(True)
             layout.addWidget(metadata_label)
 
-        normalized_language = (display_language or '').replace('_', '-').casefold()
-        sponsor_url = (
-            'https://afdian.com/a/dmMaze'
-            if normalized_language == 'zh-cn'
-            else 'https://patreon.com/dreMaze'
-        )
-        sponsor_link_text = self.tr('sponsoring this project')
-        sponsor_link = (
+        release_source_link_text = self.tr('BallonsTranslator-vibe releases')
+        release_source_link = (
             f'<a style="color: rgb(30, 147, 229); text-decoration: none;" '
-            f'href="{sponsor_url}">{sponsor_link_text}</a>'
+            f'href="{RELEASES_URL}">{release_source_link_text}</a>'
         )
-        sponsor_message = QLabel(surface)
-        sponsor_message.setObjectName('UpdateReleaseSponsorMessage')
-        sponsor_message.setText(
-            self.tr('Consider %1 if it has been helpful to you.').replace(
-                '%1', sponsor_link
+        release_source_message = QLabel(surface)
+        release_source_message.setObjectName('UpdateReleaseSourceMessage')
+        release_source_message.setText(
+            self.tr('Updates and release notes are provided by %1.').replace(
+                '%1', release_source_link
             )
         )
-        sponsor_message.setTextInteractionFlags(
+        release_source_message.setTextInteractionFlags(
             Qt.TextInteractionFlag.TextBrowserInteraction
         )
-        sponsor_message.setOpenExternalLinks(True)
-        sponsor_message.setWordWrap(True)
-        layout.addWidget(sponsor_message)
+        release_source_message.setOpenExternalLinks(True)
+        release_source_message.setWordWrap(True)
+        layout.addWidget(release_source_message)
 
         notes_section = QVBoxLayout()
         notes_section.setContentsMargins(0, 0, 0, 0)

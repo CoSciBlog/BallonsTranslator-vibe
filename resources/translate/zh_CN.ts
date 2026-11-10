@@ -2889,6 +2889,11 @@
         <translation>版本已是最新</translation>
     </message>
     <message>
+        <location filename="../../ballontranslator/ui/mainwindow.py" line="1074"/>
+        <source>No BallonsTranslator-vibe releases have been published yet.</source>
+        <translation>BallonsTranslator-vibe 尚未发布任何版本。</translation>
+    </message>
+    <message>
         <location filename="../../ballontranslator/ui/mainwindow.py" line="733"/>
         <source>Failed to check for updates.</source>
         <translation>更新检查失败</translation>
@@ -7503,14 +7508,14 @@ Then restart Photoshop. Explorer will now open the source file and destination l
         <translation>发现新版本</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/update_dialog.py" line="213"/>
-        <source>sponsoring this project</source>
-        <translation>赞助</translation>
+        <location filename="../../ballontranslator/ui/update_dialog.py" line="209"/>
+        <source>BallonsTranslator-vibe releases</source>
+        <translation>BallonsTranslator-vibe 发布页</translation>
     </message>
     <message>
-        <location filename="../../ballontranslator/ui/update_dialog.py" line="221"/>
-        <source>Consider %1 if it has been helpful to you.</source>
-        <translation>如果这个项目对你有所帮助，请考虑%1。</translation>
+        <location filename="../../ballontranslator/ui/update_dialog.py" line="217"/>
+        <source>Updates and release notes are provided by %1.</source>
+        <translation>更新和版本说明由 %1 提供。</translation>
     </message>
     <message>
         <location filename="../../ballontranslator/ui/update_dialog.py" line="236"/>

@@ -183,7 +183,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command "irm https://raw.githubus
 
 
 **Method B (Download Pre-configured Package)**:
-Download `Ballonstranslator_win_minium.zip` from [GitHub Releases](https://github.com/dmMaze/BallonsTranslator/releases), extract it, and double-click `launch_win.bat` to launch the application.
+Fork builds are published on the [BallonsTranslator-vibe GitHub Releases page](https://github.com/CoSciBlog/BallonsTranslator-vibe/releases) when available. Download `Ballonstranslator_win_minium.zip`, extract it, and double-click `launch_win.bat`; if the fork has not published a package yet, use Method A instead.
 
 When `launch_win.bat` is run from a source checkout, it bootstraps uv into `.runtime/uv`, lets uv install the pinned Python version from `.python-version` into `.runtime/python`, and creates an isolated `.venv`. The uv cache also stays under `.runtime`. Neither a global Python nor a global uv installation is used. Existing virtual environments are never deleted automatically; an incomplete or mismatched `.venv` is preserved and reported with repair instructions.
 

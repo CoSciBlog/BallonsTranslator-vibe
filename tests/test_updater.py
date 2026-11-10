@@ -27,6 +27,21 @@ def _write_update_dirs(root: Path, marker: str) -> None:
 
 class UpdaterTests(unittest.TestCase):
 
+    def test_update_feed_targets_the_vibe_fork(self):
+        self.assertEqual(
+            updater.UPDATE_REPOSITORY,
+            'CoSciBlog/BallonsTranslator-vibe',
+        )
+        self.assertEqual(
+            updater.RELEASES_URL,
+            'https://github.com/CoSciBlog/BallonsTranslator-vibe/releases',
+        )
+        self.assertIn(
+            '/repos/CoSciBlog/BallonsTranslator-vibe/releases/latest',
+            updater.LATEST_RELEASE_API_URL,
+        )
+        self.assertIn('ballonstranslator-vibe', updater.RELEASE_RESPONSE_CACHE_FILENAME)
+
     def test_managed_payload_includes_builtin_profiles_and_launchers(self):
         self.assertIn('config/llm_profile_builtin', updater.SOURCE_UPDATE_DIRS)
         self.assertIn('scripts', updater.SOURCE_UPDATE_DIRS)
@@ -91,11 +106,57 @@ class UpdaterTests(unittest.TestCase):
         self.assertEqual(result.current_version, '1.4.2')
         self.assertEqual(result.latest_version, '1.4.3')
 
+    def test_missing_fork_release_is_a_normal_update_result(self):
+        class UnpublishedUpdater(updater.BallonsTranslatorUpdater):
+            def query_latest_release(self):
+                raise updater.NoPublishedReleaseError('no releases')
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            (root / 'pyproject.toml').write_text(
+                '[project]\nversion = "1.5.19+vibe.71"\n',
+                encoding='utf8',
+            )
+            result = UnpublishedUpdater(
+                program_path=str(root),
+                cache_dir=str(root / '.btrans_cache'),
+            ).check_latest_release()
+
+        self.assertEqual(result.status, 'no_release')
+        self.assertEqual(result.current_version, '1.5.19+vibe.71')
+        self.assertEqual(result.latest_version, '')
+        self.assertEqual(result.release_url, updater.RELEASES_URL)
+
+    def test_github_404_means_the_fork_has_no_published_release(self):
+        error = updater.HTTPError(
+            updater.LATEST_RELEASE_API_URL,
+            404,
+            'Not Found',
+            {},
+            None,
+        )
+        with tempfile.TemporaryDirectory() as tmpdir, mock.patch(
+            'ballontranslator.utils.updater.urlopen',
+            side_effect=error,
+        ):
+            result = updater.BallonsTranslatorUpdater(
+                program_path=tmpdir,
+                cache_dir=str(Path(tmpdir) / '.btrans_cache'),
+            ).check_latest_release()
+
+        self.assertEqual(result.status, 'no_release')
+
     def test_cached_release_preview_does_not_query_github(self):
         payload = {
             'tag_name': 'v1.4.2',
-            'html_url': 'https://example.invalid/release',
-            'zipball_url': 'https://example.invalid/source.zip',
+            'html_url': (
+                'https://github.com/CoSciBlog/BallonsTranslator-vibe/'
+                'releases/tag/v1.4.2'
+            ),
+            'zipball_url': (
+                'https://api.github.com/repos/CoSciBlog/'
+                'BallonsTranslator-vibe/zipball/v1.4.2'
+            ),
             'body': 'Cached release notes',
         }
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -118,11 +179,38 @@ class UpdaterTests(unittest.TestCase):
         self.assertEqual(result.status, 'preview')
         self.assertEqual(result.release_info.body, 'Cached release notes')
 
+    def test_cached_upstream_release_is_rejected(self):
+        payload = {
+            'tag_name': 'v1.5.21',
+            'html_url': 'https://github.com/dmMaze/BallonsTranslator/releases/tag/v1.5.21',
+            'zipball_url': 'https://api.github.com/repos/dmMaze/BallonsTranslator/zipball/v1.5.21',
+        }
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            cache_dir = root / '.btrans_cache'
+            cache_dir.mkdir()
+            (cache_dir / updater.RELEASE_RESPONSE_CACHE_FILENAME).write_text(
+                json.dumps(payload),
+                encoding='utf8',
+            )
+
+            with self.assertRaisesRegex(RuntimeError, 'does not belong to'):
+                updater.BallonsTranslatorUpdater(
+                    program_path=str(root),
+                    cache_dir=str(cache_dir),
+                ).preview_cached_release()
+
     def test_successful_github_query_caches_raw_response(self):
         payload = {
             'tag_name': 'v1.4.3',
-            'html_url': 'https://example.invalid/release',
-            'zipball_url': 'https://example.invalid/source.zip',
+            'html_url': (
+                'https://github.com/CoSciBlog/BallonsTranslator-vibe/'
+                'releases/tag/v1.4.3'
+            ),
+            'zipball_url': (
+                'https://api.github.com/repos/CoSciBlog/'
+                'BallonsTranslator-vibe/zipball/v1.4.3'
+            ),
             'body': 'Fresh release notes',
         }
         response = mock.MagicMock()

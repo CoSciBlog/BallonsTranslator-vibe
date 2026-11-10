@@ -1,5 +1,9 @@
 # Changelogs
 
+### 2026-11-10 — 1.5.19+vibe.72
+- Update checks, release links, cached release metadata, source downloads, and the in-app release notice now target the `CoSciBlog/BallonsTranslator-vibe` fork instead of the upstream project. An unpublished fork release is handled as a normal “no release yet” state, and cached upstream metadata is rejected.
+- Before saving a configuration that contains fewer custom LLM profiles, the previous configuration is copied to `config/llm_profile_backups` so accidentally removed profiles remain recoverable.
+
 ### 2026-11-10 — 1.5.19+vibe.71
 - Replaced the floating benchmark selector with a dedicated **Benchmark Results** button and left sidebar. The sidebar lists each completed LLM profile and model, switches the current page's read-only live translation on click, preserves the selected model across page changes, and can return to editable project text without discarding the benchmark report.
 

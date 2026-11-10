@@ -1,7 +1,8 @@
-import json, os, re, string, traceback
+import json, os, re, shutil, string, traceback
 import os.path as osp
 import copy
 from dataclasses import fields
+from datetime import datetime
 from typing import Mapping, Optional
 
 from . import shared
@@ -897,8 +898,59 @@ def json_dump_program_config(obj, **kwargs):
     return json.dumps(obj, default=lambda o: _default(o), ensure_ascii=False, **kwargs)
 
 
+def _custom_llm_profile_count(config_payload) -> int:
+    """Return the number of user-owned LLM profiles in serialized config.
+
+    >>> _custom_llm_profile_count({'module': {'llm_profiles': [
+    ...     {'id': 'custom'}, {'id': 'openai', 'built_in': True},
+    ... ]}})
+    1
+    """
+
+    if not isinstance(config_payload, dict):
+        return 0
+    module = config_payload.get('module')
+    profiles = module.get('llm_profiles') if isinstance(module, dict) else None
+    if not isinstance(profiles, list):
+        return 0
+    return sum(
+        1
+        for profile in profiles
+        if isinstance(profile, dict) and not profile.get('built_in', False)
+    )
+
+
+def _backup_removed_custom_llm_profiles(new_config_payload: str) -> None:
+    """Preserve the previous config before a save removes custom profiles."""
+
+    if not osp.isfile(shared.CONFIG_PATH):
+        return
+    try:
+        with open(shared.CONFIG_PATH, 'r', encoding='utf8') as old_file:
+            old_payload = json.load(old_file)
+        new_payload = json.loads(new_config_payload)
+    except (OSError, ValueError, TypeError):
+        return
+    old_count = _custom_llm_profile_count(old_payload)
+    new_count = _custom_llm_profile_count(new_payload)
+    if old_count <= new_count:
+        return
+
+    config_dir = osp.dirname(shared.CONFIG_PATH) or '.'
+    backup_dir = osp.join(config_dir, 'llm_profile_backups')
+    os.makedirs(backup_dir, exist_ok=True)
+    timestamp = datetime.now().strftime('%Y%m%d-%H%M%S-%f')
+    backup_path = osp.join(backup_dir, f'config-{timestamp}.json')
+    shutil.copy2(shared.CONFIG_PATH, backup_path)
+    LOGGER.warning(
+        'Saved LLM profile recovery backup before custom profile count '
+        f'dropped from {old_count} to {new_count}: {backup_path}'
+    )
+
+
 def save_config():
     global pcfg
+    tmp_save_tgt = shared.CONFIG_PATH + '.tmp'
     try:
         pcfg.global_fontformat.text_effects = without_project_raster_effects(
             pcfg.global_fontformat.text_effects
@@ -906,9 +958,10 @@ def save_config():
         config_dir = osp.dirname(shared.CONFIG_PATH)
         if config_dir and not osp.exists(config_dir):
             os.makedirs(config_dir)
-        tmp_save_tgt = shared.CONFIG_PATH + '.tmp'
+        config_payload = json_dump_program_config(pcfg)
+        _backup_removed_custom_llm_profiles(config_payload)
         with open(tmp_save_tgt, 'w', encoding='utf8') as f:
-            f.write(json_dump_program_config(pcfg))
+            f.write(config_payload)
     except Exception as e:
         LOGGER.error(f'Failed save config to {tmp_save_tgt}: {e}')
         LOGGER.error(traceback.format_exc())

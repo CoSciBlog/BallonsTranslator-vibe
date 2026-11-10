@@ -6,7 +6,8 @@ import zipfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, Optional
-from urllib.error import URLError
+from urllib.error import HTTPError, URLError
+from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
 
 from . import shared
@@ -14,9 +15,15 @@ from .logger import logger as LOGGER
 from .version import get_current_version
 
 
-RELEASES_URL = 'https://github.com/dmMaze/BallonsTranslator/releases'
-LATEST_RELEASE_API_URL = 'https://api.github.com/repos/dmMaze/BallonsTranslator/releases/latest'
-RELEASE_RESPONSE_CACHE_FILENAME = 'github_release_response.json'
+UPDATE_REPOSITORY = 'CoSciBlog/BallonsTranslator-vibe'
+PROJECT_URL = f'https://github.com/{UPDATE_REPOSITORY}'
+RELEASES_URL = f'{PROJECT_URL}/releases'
+LATEST_RELEASE_API_URL = (
+    f'https://api.github.com/repos/{UPDATE_REPOSITORY}/releases/latest'
+)
+RELEASE_RESPONSE_CACHE_FILENAME = (
+    'github_release_response-cosciblog-ballonstranslator-vibe.json'
+)
 UPDATE_BRANCH = 'userspace_update'
 SOURCE_UPDATE_DIRS = ('ballontranslator', 'resources', 'config/llm_profile_builtin', 'scripts')
 SOURCE_UPDATE_FILES = (
@@ -47,6 +54,10 @@ class UpdateResult:
     release_url: str = ''
     zip_path: str = ''
     release_info: Optional[ReleaseInfo] = None
+
+
+class NoPublishedReleaseError(RuntimeError):
+    """Raised when the fork has not published any GitHub release yet."""
 
 
 def normalize_version_tag(version: str) -> str:
@@ -154,6 +165,35 @@ def release_info_from_api_payload(payload: dict) -> ReleaseInfo:
     )
 
 
+def validate_release_repository(payload: dict) -> None:
+    """Reject release metadata that does not belong to this fork.
+
+    >>> validate_release_repository({
+    ...     'html_url': 'https://github.com/CoSciBlog/BallonsTranslator-vibe/releases/tag/v1',
+    ...     'zipball_url': 'https://api.github.com/repos/CoSciBlog/BallonsTranslator-vibe/zipball/v1',
+    ... })
+    """
+
+    expected_web_path = f'/{UPDATE_REPOSITORY.casefold()}/releases/'
+    expected_api_path = f'/repos/{UPDATE_REPOSITORY.casefold()}/zipball/'
+    html_url = urlsplit(str(payload.get('html_url') or ''))
+    zip_url = urlsplit(str(payload.get('zipball_url') or ''))
+    valid_html = (
+        html_url.scheme == 'https'
+        and html_url.netloc.casefold() == 'github.com'
+        and html_url.path.casefold().startswith(expected_web_path)
+    )
+    valid_zip = (
+        zip_url.scheme == 'https'
+        and zip_url.netloc.casefold() == 'api.github.com'
+        and zip_url.path.casefold().startswith(expected_api_path)
+    )
+    if not valid_html or not valid_zip:
+        raise RuntimeError(
+            f'GitHub release metadata does not belong to {UPDATE_REPOSITORY}.'
+        )
+
+
 class BallonsTranslatorUpdater:
     """Check GitHub releases and replace the local application source.
 
@@ -187,7 +227,19 @@ class BallonsTranslatorUpdater:
         True
         """
 
-        return self._result_for_release(self.query_latest_release())
+        try:
+            return self._result_for_release(self.query_latest_release())
+        except NoPublishedReleaseError:
+            current_version = get_current_version(str(self.program_path))
+            LOGGER.info(
+                f'No {UPDATE_REPOSITORY} release has been published yet.'
+            )
+            return UpdateResult(
+                status='no_release',
+                current_version=current_version,
+                latest_version='',
+                release_url=RELEASES_URL,
+            )
 
     def preview_cached_release(self) -> UpdateResult:
         """Return cached release information without contacting GitHub.
@@ -244,14 +296,23 @@ class BallonsTranslatorUpdater:
             LATEST_RELEASE_API_URL,
             headers={
                 'Accept': 'application/vnd.github+json',
-                'User-Agent': 'BallonsTranslator-Updater',
+                'User-Agent': 'BallonsTranslator-vibe-Updater',
             },
         )
         try:
             with urlopen(request, timeout=20) as response:
                 payload = json.loads(response.read().decode('utf8'))
+        except HTTPError as e:
+            if e.code == 404:
+                raise NoPublishedReleaseError(
+                    f'No release is published at {RELEASES_URL}.'
+                ) from e
+            raise RuntimeError(
+                f'Failed to query GitHub releases at {RELEASES_URL}: {e}'
+            ) from e
         except (OSError, URLError, json.JSONDecodeError) as e:
             raise RuntimeError(f'Failed to query GitHub releases at {RELEASES_URL}: {e}') from e
+        validate_release_repository(payload)
         release_info = release_info_from_api_payload(payload)
         self._cache_release_response(payload)
         return release_info
@@ -264,7 +325,9 @@ class BallonsTranslatorUpdater:
         """
 
         self._notify('load_cached_release', 5, str(self.release_response_cache_path))
-        return release_info_from_api_payload(self._read_cached_release_response())
+        payload = self._read_cached_release_response()
+        validate_release_repository(payload)
+        return release_info_from_api_payload(payload)
 
     @property
     def release_response_cache_path(self) -> Path:
@@ -304,7 +367,7 @@ class BallonsTranslatorUpdater:
         from .download_util import download_url_to_file
 
         self.cache_dir.mkdir(parents=True, exist_ok=True)
-        zip_path = self.cache_dir / f'BallonsTranslator_{release_info.version}_source.zip'
+        zip_path = self.cache_dir / f'BallonsTranslator-vibe_{release_info.version}_source.zip'
         self._notify('download_start', 20, zip_path.name)
         download_url_to_file(
             release_info.zip_url,

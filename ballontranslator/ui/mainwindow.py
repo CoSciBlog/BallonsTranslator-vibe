@@ -1065,6 +1065,19 @@ class MainWindow(mainwindow_cls):
                 LOGGER.info(f'BallonsTranslator is already up-to-date: {result.current_version}')
             return
 
+        if result.status == 'no_release':
+            if self._manual_update_check:
+                create_info_dialog(
+                    self.tr(
+                        'No BallonsTranslator-vibe releases have been published yet.'
+                    )
+                )
+            else:
+                LOGGER.info(
+                    'No BallonsTranslator-vibe releases have been published yet.'
+                )
+            return
+
         if result.status == 'updated':
             # launch.restart() closes this window synchronously. closeEvent()
             # conditionally saves the project and waits for image IO before exec.
